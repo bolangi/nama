@@ -204,7 +204,7 @@ sub user_set_current_track {
 		
 }
 
-### allow commands to abbreviate Audio :: Nama :: Class as ::Class
+### allow commands to abbreviate Audio::Nama::Class as ::Class # SKIP_PREPROC
 
 { my @namespace_abbreviations = qw(
 	Assign 
@@ -218,6 +218,7 @@ sub user_set_current_track {
 	Fade                                                      
 	Edit
 	Text
+	Effect
 	EffectChain
 	ChainSetup
 );
