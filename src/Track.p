@@ -712,7 +712,12 @@ sub unmute {
 
 	$track->set(old_vol_level => undef);
 }
-
+sub apply_ops {
+	my $track = shift;
+	map{ $_->apply_op }	# add operator to the ecasound chain
+	map{ fxn($_) } 		# convert to objects
+	@{ $track->ops }  	# start with track ops list
+}
 sub import_audio  { 
 	my $track = shift;
 	my ($path, $frequency) = @_; 

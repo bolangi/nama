@@ -117,20 +117,19 @@ sub process_command {
 	# return true on complete success
 	# return false if any part of command fails
 	
-	my $was_error;
+	my $was_error = 0;
 	
 	try {
-	while (do { no warnings 'uninitialized'; $input =~ /\S/ }) { 
-		logpkg('debug',"input: $input");
-		$text->{parser}->meta(\$input) or do
-		{
-			throw("bad command: $input_was\n"); 
-			$was_error++;
-			system($config->{beep_command}) if $config->{beep_command};
-			last;
-		};
-			
-	}
+		while (do { no warnings 'uninitialized'; $input =~ /\S/ }) { 
+			logpkg('debug',"input: $input");
+			$text->{parser}->meta(\$input) or do
+			{
+				throw("bad command: $input_was\n"); 
+				$was_error++;
+				system($config->{beep_command}) if $config->{beep_command};
+				last;
+			};
+		}
 	}
 	catch { $was_error++; warn "caught error: $_" };
 		

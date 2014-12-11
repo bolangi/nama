@@ -396,6 +396,7 @@ sub position_effect {
 	@{$track->ops} = @new_op_list;
 	::request_setup();
 	$this_track = $track;
+	# this command generates spurious warnings during test
 	process_command('show_track');
 }
 
@@ -800,15 +801,11 @@ sub fx_defaults {
 
 sub apply_ops {  # in addition to operators in .ecs file
 	logsub("&apply_ops");
-	for my $n ( map{ $_->n } ::audio_tracks() ) {
-	logpkg('debug', "chain: $n, offset: $fx->{offset}->{$n}");
+	for my $track ( ::audio_tracks() ) {
+		my $n = $track->n;
  		next unless ::ChainSetup::is_ecasound_chain($n);
-
-		# controllers will follow ops, so safe to apply all in order
-		map{ $_->apply_op }	# add operator to the ecasound chain
-		grep{$_} 			# exclude any null values (needed?)
-		map{ fxn($_) } 		# convert to objects
-		@{ $ti{$n}->ops }; 	# start with track ops list
+		logpkg('debug', "chain: $n, offset: $fx->{offset}->{$n}");
+		$track->apply_ops;
 	}
 	ecasound_select_chain($this_track->n) if defined $this_track;
 }
