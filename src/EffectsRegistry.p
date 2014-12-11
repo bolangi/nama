@@ -374,7 +374,7 @@ sub read_in_effects_data {
 
 sub integrate_cop_hints {
 
-	my @cop_hints =  @{ yaml_in( get_data_section('chain_op_hints_yml')) };
+	my @cop_hints =  @{ yaml_in( get_data_section('ecasound_chain_operator_hints_yml')) };
 	for my $hashref ( @cop_hints ){
 		#print "cop hints ref type is: ",ref $hashref, $/;
 		my $code = $hashref->{code};
