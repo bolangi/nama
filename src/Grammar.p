@@ -90,14 +90,6 @@ sub process_line {
 		my $result = check_fx_consistency();
 		logpkg('logcluck',"Inconsistency found in effects data",
 			Dumper ($result)) if $result->{is_error};
-
-		my $current_count= 0;
-		map{ $current_count++ } keys %{$fx->{applied}};
-		if ($current_count < $total_effects_count){
-			pager("Total effects count: $current_count, change: ",
-				$current_count - $total_effects_count);
-			$total_effects_count = $current_count;
-		}
 	}
 	revise_prompt( $mode->{midish_terminal} and "Midish > " );
 	my $output = delete $text->{output_buffer};
