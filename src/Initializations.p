@@ -196,18 +196,8 @@ sub definitions {
  	sub buffersize {
 		package ::;
  		::ChainSetup::setup_requires_realtime()
- 			? ($config->{engine_buffersize}->{realtime}->{jack_period_multiple}
-				&& $jack->{jackd_running}
-				&& $config->{engine_buffersize}->{realtime}->{jack_period_multiple}
-					* $jack->{periodsize}
-				|| $config->{engine_buffersize}->{realtime}->{default}
- 			)
- 			: (	$config->{engine_buffersize}->{nonrealtime}->{jack_period_multiple}
-				&& $jack->{jackd_running}
-				&&  $config->{engine_buffersize}->{nonrealtime}->{jack_period_multiple}
-					* $jack->{periodsize}
-				|| $config->{engine_buffersize}->{nonrealtime}->{default}
- 			)
+			?  $config->{engine_buffersize}->{realtime}->{default}
+			:  $config->{engine_buffersize}->{nonrealtime}->{default}
  	}
 	sub globals_realtime {
 		::ChainSetup::setup_requires_realtime()

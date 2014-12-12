@@ -80,12 +80,11 @@ sample_rate: frequency
 
 realtime_profile: nonrealtime # other choices: realtime or auto
 
+# The buffer size settings below apply only when JACK is *not* used
 ecasound_buffersize:
   realtime:
-#   jack_period_multiple: 2 # uncomment to enable
     default: 256
   nonrealtime:
-#   jack_period_multiple: 8 # takes precedence when JACK is running
     default: 1024
 ecasound_globals:
   common: -z:mixmode,sum -G:jack,Nama,send
@@ -163,6 +162,4 @@ alias:
     djp: disable_jack_polling
   effect:
     reverb: gverb
-# end
-
 # end
