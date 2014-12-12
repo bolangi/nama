@@ -462,14 +462,14 @@ sub setup_requires_realtime {
 	if( $prof eq 'auto'){
 		grep{ ! $_->is_mix_track 
 				  and $_->is_user_track 
-				  and $_->rec_status eq REC 
+				  and $_->rec_status =~ /REC|MON/
 			} ::audio_tracks() 
 	} elsif ( $prof eq 'realtime') {
 		my @fields = qw(soundcard jack_client jack_manual jack_ports_list);
 		grep { has_vertex("$_\_in") } @fields 
 			or grep { has_vertex("$_\_out") } @fields
 	}
-	elsif ( $prof eq 'nonrealtime' or !$prof){ 0 }
+	elsif ( $prof eq 'nonrealtime' or !$prof){}
 }
 
 sub has_vertex { $g->has_vertex($_[0]) }
