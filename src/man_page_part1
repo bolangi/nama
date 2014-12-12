@@ -8,17 +8,17 @@ B<nama> [I<options>] [I<project_name>]
 
 =head1 DESCRIPTION
 
-B<Nama> is an application for multitrack recording,
-effects processing, editing, mixing, mastering, live performance
-and general-purpose audio processing using Ecasound,
-a realtime audio engine developed by Kai Vehmanen.
- 
+B<Nama> performs multitrack recording, effects processing,
+editing, mixing, mastering, live performance and
+general-purpose audio processing, using the Ecasound
+realtime audio engine.
+
 =head2 Audio Functionality
 
-Audio projects are developed using tracks, buses,
-effects, sends, inserts, marks, regions, fades and edits.
-Each track may contain one or more WAV files, which may be
-recorded or imported.
+Audio projects may be developed using tracks, buses,
+effects, sends, inserts, marks, regions, fades, sequences
+and edits.  Each track may contain one or more WAV files,
+which may be recorded or imported.
 
 Effects processing by LADSPA, LV2 and Ecasound
 plugins may be performed in realtime, or cached (e.g.
@@ -26,17 +26,19 @@ frozen) to a file. The user may toggle between cached and
 dynamic processing for a track. Audio regions may be
 altered, duplicated, time-shifted or replaced.  
 
+Nama supports MIDI functionality via midish. 
+
 =head2 Presets and templates
 
-To facilitate reuse, a track's plugins, inserts and/or 
-region settings can be stored as an "effect chain".
-Effect profiles and project templates provide templating 
-for groups of tracks and entire projects, respectively.
+To facilitate reuse, a track's plugins and inserts can be
+stored as an effect chain.  Effect profiles and project
+templates provide templating for groups of tracks and entire
+projects, respectively.
 
 =head2 Audio framework
 
-Audio IO is via JACK or ALSA. Soundcard IO is normally routed
-to JACK with transparent fallback to ALSA.
+Audio IO is via JACK or ALSA. Soundcard IO is normally
+routed to JACK with transparent fallback to ALSA.
 
 =head2 Persistence
 
@@ -62,10 +64,9 @@ covering Nama commands and effects.
 The hotkey mode provides a convenient way to select, view,
 and modify effect parameters.
 
-By default, Nama displays a simple graphic interface while
-the command processor runs in a terminal window. The B<-t>
-option provides only a terminal interface.
-
+By default, Nama displays a graphic user interface while
+the command processor runs in a terminal window.
+ 
 =head1 OPTIONS
 
 =over 12

@@ -42,10 +42,8 @@ file when you issue the C<save> command.
 
 =head1 BUGS AND LIMITATIONS
 
-No waveform or signal level displays are provided.  
-
 No latency compensation across signal paths is provided at
-present, although this feature is planned.
+present. This feature is under development.
 
 =head1 SECURITY CONCERNS
 
@@ -101,7 +99,19 @@ Joel Roth, E<lt>joelz@pobox.comE<gt>
 
 =head1 CONTRIBUTORS
 
-Julien Claassen, S.Massy and others.
+Alex Stone 
+Brett McCoy 
+Dubphil 
+F. Silvain ++
+Joy Bausch 
+Julien Claassen ++
+Kevin Utter 
+Lars Bjørndal
+Philippe Schelté
+Philipp Überbacher
+Raphaël Mouneyres ++
+Rusty Perez 
+S. Massy ++
 
 =head1 COPYRIGHT & LICENSE
 
