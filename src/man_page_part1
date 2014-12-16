@@ -240,8 +240,7 @@ C<nama sax ('h' for help)E<gt>>
 
 In this instance, 'sax' is the current track.
 
-When using sub-buses, the bus is indicated before
-the track:
+When using buses, the bus is indicated before the track:
 
 =over 12
 
@@ -433,18 +432,18 @@ All tracks with the corresponding I<setting> in the current bus
 
 =head3 Sub Buses
 
-B<Sub buses> enable multiple tracks to be routed through a
+B<Buses> enable multiple tracks to be routed through a
 single mix track before feeding the Main mixer bus (or
-possibly, another sub bus.) 
+possibly, another bus.) 
 
-The following commands create a sub bus and assign
+The following commands create a bus and assign
 three tracks to it. The mix track takes the name of
 the bus and is stereo by default.
 
-	# create a sub bus named Strings with a same-named mix track
+	# create a bus named Strings with a same-named mix track
 	add_bus Strings 
 
-	# create tracks for the sub bus
+	# create tracks for the bus
 	add_tracks violin cello bass
 
 	# move the tracks from the Main bus (default) to the Strings bus
