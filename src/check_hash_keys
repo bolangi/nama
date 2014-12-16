@@ -11,7 +11,7 @@ my %singleton_has_key;
 
 map{ 
 	my $target = $_;
-	my ($singleton, $key) = $target =~ /^(\$\w+)->{(\w+)}/;
+	my ($singleton, $key) = $target =~ /^(\$\w+)->\{(\w+)}/;
 	
 	{
 		#say "singleton: $singleton, key: $key";
@@ -31,7 +31,7 @@ print join " ", @files;
 =cut
 
 my $srevars = join '|', map{ s/\$//; $_ } keys %singletons;
-my $sre = qr/\$($srevars)->{(\w+)}/;
+my $sre = qr/\$($srevars)->\{(\w+)}/;
 
 map{ 
 	my $filename = $_;
