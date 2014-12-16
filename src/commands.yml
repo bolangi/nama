@@ -317,14 +317,12 @@ source:
     ! for more information).
     !
     source jack 
-    ! This leaves the track input exposed as a JACK ports
+    ! This leaves the track input exposed as JACK ports
     ! such as Nama:sax_in_1 for manual connection.
     !
     source kit.ports
-    ! If there exists a file, kit.ports, 
-    ! in the Nama project root directory, 
-    ! the JACK ports listed in that file
-    ! will be connected to that input.
+    ! The JACK ports listed in the file kit.ports (if it exists)
+    ! will be connected to the track input.
     !
     ! Ports are listed pairwise in the .ports files for stereo tracks.
     ! This is convenient for use with the Hydrogen drumkit, 
@@ -1044,9 +1042,9 @@ add_user:
 
 add_submix_raw:
   type: bus
-  what: Add a send bus that copies all user tracks' unprocessed inputs
-  short: asbr
-  parameters: <string:name> <destination>
+  what: Add a submix using tracks in Main bus (unprocessed signals, lower latency)
+  short: asr
+  parameters: <s tring:name> <destination>
   example: |
     asbr Reverb jconv # Add a raw send bus called Reverb, with its output
                       # going to the JACK client jconv .
