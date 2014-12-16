@@ -1035,13 +1035,13 @@ list_history:
 add_user:
   type: bus
   what: Create a custom mix including all tracks in bus "Main"
-  parameters: <string:name> <destination>
   short: au add_send_bus_cooked asbc 
   parameters: <string:name> <destination>
   example: |
     add_user front_of_house 7
     ! send a custom mix named "front_of_house"
     ! to soundcard channels 7/8
+
 add_send_bus_raw:
   type: bus
   what: Add a send bus that copies all user tracks' unprocessed inputs
@@ -1668,10 +1668,6 @@ nickname_effect:
     ifx reverb2 reverb # insert another reverb effect (reverb3) before reverb2
     rfx reverb3        # remove reverb3
     rfx reverb         # removes reverb2, as it is the sole remain reverb effect
-list_nickname_definitions:
-  type: effect
-  short: lnd
-  what: list effect nicknames
 delete_nickname_definition:
   type: effect
   short: dnd
@@ -1693,7 +1689,7 @@ remove_nickname:
     mfx reverb 1 3 # Error: effect named "reverb" not found on current track
 list_nickname_definitions:
   type: effect
-  what: list all defined nicknames
+  what: list defined nicknames
   short: lnd
   parameters: none
 set_effect_name:
