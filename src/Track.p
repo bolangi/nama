@@ -795,7 +795,7 @@ sub set_track_class {
 }
 sub busify {
 	my $track = shift;
-	::add_sub_bus($track->name) unless $track->is_system_track;
+	::add_bus($track->name) unless $track->is_system_track;
 }
 sub unbusify {
 	my $track = shift;

@@ -1012,11 +1012,11 @@ add_user: _add_user bus_name destination {
 	1;
 
 }
-add_send_bus_raw: _add_send_bus_raw bus_name destination {
+add_submix_raw: _add_submix_raw bus_name destination {
 	::add_send_bus( $item{bus_name}, $item{destination}, 'raw' );
 	1;
 }
-add_sub_bus: _add_sub_bus bus_name { ::add_sub_bus( $item{bus_name}); 1 }
+add_bus: _add_bus bus_name { ::add_bus( $item{bus_name}); 1 }
 
 existing_bus_name: bus_name {
 	if ( $::bn{$item{bus_name}} ){  $item{bus_name} }

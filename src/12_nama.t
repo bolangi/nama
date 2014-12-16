@@ -557,7 +557,7 @@ EXPECTED
 check_setup('Sub-bus - JACK');
 
 process_command('remove_bus Horns');
-process_command('add_send_bus_cooked Vo 5');
+process_command('add_submix_cooked Vo 5');
 $expected_setup_lines = <<EXPECTED;
 
 -a:1,4 -i:loop,sax_out
@@ -691,7 +691,7 @@ load_project(name => "$test_project-sendbus-cooked", create => 1);
 do_script(' add mic
             add guitar
             for 3 4; mon
-            add_send_bus_cooked ear 7
+            add_submix_cooked ear 7
 ');
 $expected_setup_lines = <<EXPECTED;
 # general
@@ -750,9 +750,9 @@ $expected_setup_lines = <<EXPECTED;
 -a:4 -o:loop,guitar_out
 -a:5,6 -o:jack_multi,system:playback_7,system:playback_8
 EXPECTED
-check_setup('Submix, AKA add_send_bus_cooked - JACK');
+check_setup('Submix, AKA add_submix_cooked - JACK');
 
-load_project(name => "add_send_bus_raw", create => 1);
+load_project(name => "add_submix_raw", create => 1);
 
 process_command("add_tracks mic guitar; for 3 4; mon;; 4 source 2; stereo; asbr raw-user 7");
 

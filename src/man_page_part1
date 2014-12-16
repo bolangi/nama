@@ -442,7 +442,7 @@ three tracks to it. The mix track takes the name of
 the bus and is stereo by default.
 
 	# create a sub bus named Strings with a same-named mix track
-	add_sub_bus Strings 
+	add_bus Strings 
 
 	# create tracks for the sub bus
 	add_tracks violin cello bass

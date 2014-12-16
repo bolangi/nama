@@ -19,7 +19,7 @@ add_bunch all Stereo L_front R_front Center Subwoofer L_inverted Right R-L L_rea
 Stereo stereo
 
 # create a bus for summing (inverted L) + R
-add_sub_bus R-L
+add_bus R-L
 
 # we'll do our own routing for these tracks
 

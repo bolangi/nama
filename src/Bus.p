@@ -288,7 +288,7 @@ sub select_bus {
 	$this_bus = $name;
 	$this_bus_o = $bus;
 }
-sub add_sub_bus {
+sub add_bus {
 	my ($name, @args) = @_; 
 	
 	::SubBus->new( 

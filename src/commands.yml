@@ -1035,14 +1035,14 @@ list_history:
 add_user:
   type: bus
   what: Create a custom mix including all tracks in bus "Main"
-  short: au add_send_bus_cooked asbc 
+  short: au add_submix_cooked asbc 
   parameters: <string:name> <destination>
   example: |
     add_user front_of_house 7
     ! send a custom mix named "front_of_house"
     ! to soundcard channels 7/8
 
-add_send_bus_raw:
+add_submix_raw:
   type: bus
   what: Add a send bus that copies all user tracks' unprocessed inputs
   short: asbr
@@ -1050,7 +1050,7 @@ add_send_bus_raw:
   example: |
     asbr Reverb jconv # Add a raw send bus called Reverb, with its output
                       # going to the JACK client jconv .
-add_sub_bus:
+add_bus:
   type: bus
   what: Add a sub bus. This is a bus, as known from other DAWs. The default output goes to a mix track and that is routed to the mixer (the Master track). All busses begin with a capital letter!
   short: asub
