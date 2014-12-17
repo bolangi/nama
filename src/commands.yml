@@ -1039,7 +1039,6 @@ add_user:
     add_user front_of_house 7
     ! send a custom mix named "front_of_house"
     ! to soundcard channels 7/8
-
 add_submix_raw:
   type: bus
   what: Add a submix using tracks in Main bus (unprocessed signals, lower latency)
