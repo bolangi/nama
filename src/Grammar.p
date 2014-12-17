@@ -361,8 +361,8 @@ sub show_status {
 		map{ $tn{$_} } $bn{Main}->tracks, q(Mixdown);
 
 	# We only check Main bus for playback. 
-	# sub-buses will route their playback signals through the 
-	# Main bus, however it may be that sub-bus mixdown
+	# buses will route their playback signals through the 
+	# Main bus, however it may be that other bus mixdown
 	# tracks are set to REC (with rec-to-file disabled)
 	
 	
