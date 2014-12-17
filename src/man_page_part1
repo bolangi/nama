@@ -350,8 +350,7 @@ setting. Setting the track version to zero restores control
 of the version number to the bus.
 
 The Main bus version setting does I<not> currently propagate to
-sub-buses. If you have sub-buses you must set bus version 
-numbers for each separately if desired.
+other buses. 
 
 =head2 Marks
 
@@ -802,7 +801,7 @@ I<end_edit_mode> will restore normal playback mode
 
 I<destroy_edit>
 Behind the scenes, the host track becomes the mix track to a
-sub-bus. Sources for the bus are the original audio track, and
+bus. Sources for the bus are the original audio track, and
 zero or more edits, each represented by one track object.
 
 =head1 REMOTE CONTROL
