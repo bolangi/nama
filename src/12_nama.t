@@ -754,8 +754,7 @@ check_setup('Submix, AKA add_submix_cooked - JACK');
 
 load_project(name => "add_submix_raw", create => 1);
 
-process_command("add_tracks mic guitar; for 3 4; mon;; 4 source 2; stereo; asbr raw-user 7");
-
+process_command("add_tracks mic guitar; for 3 4; mon;; 4 source 2; stereo; add_submix_raw raw-user 7"); 
 $expected_setup_lines = <<EXPECTED;
 
 
@@ -783,7 +782,7 @@ EXPECTED
 
 force_jack();
 process_command('gen');
-check_setup('Send Bus, Raw - JACK');
+check_setup('Submix, raw - JACK');
 
 force_alsa();
 process_command('gen');
