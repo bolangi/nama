@@ -310,7 +310,7 @@ sub add_bus {
 	
 }
 	
-sub add_send_bus {
+sub add_submix {
 
 	my ($name, $dest_id, $bus_type) = @_;
 	my $dest_type = dest_type( $dest_id );
@@ -348,9 +348,9 @@ sub add_send_bus {
 }
 
 	
-sub update_send_bus {
+sub update_submix {
 	my $name = shift;
-		add_send_bus( $name, 
+		add_submix( $name, 
 						 $bn{$name}->send_id),
 						 "dummy",
 }
