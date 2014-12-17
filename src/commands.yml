@@ -1030,13 +1030,13 @@ list_history:
   what: List the command history. Every project stores its own command history.
   short: lh
   parameters: none
-add_user:
+add_submix_cooked:
   type: bus
-  what: Create a custom mix including all tracks in bus "Main"
-  short: au add_submix_cooked asbc 
+  what: Create a submix using all tracks in bus "Main"
+  short: 
   parameters: <string:name> <destination>
   example: |
-    add_user front_of_house 7
+    add_submix_cooked front_of_house 7
     ! send a custom mix named "front_of_house"
     ! to soundcard channels 7/8
 add_submix_raw:
@@ -1056,13 +1056,13 @@ add_bus:
     asub Brass # Add a sub bus Brass, which is routed to tne mixer.
     asub special csound # Add a sub bus, which is routed to the JACK client
                         # csound.
-update_send_bus:
+update_submix:
   type: bus
   what: Include tracks added since the send bus was created.
-  short: usb
+  short: usm
   parameters: <string:name>
   example: |
-    update_send_bus Reverb # Include new tracks in the Reverb send bus.
+    update_submix Reverb # Include new tracks in the Reverb send bus.
 remove_bus:
   type: bus
   what: Remove a bus.
@@ -1632,18 +1632,18 @@ set_bus_engine_group:
   what: set the current bus's engine affiliation
   short: sbeg
   parameters: <string:engine_name>
-select_user:
+select_submix:
   type: bus
-  short: user
+  short: ssm
   what: Set the target for the trim command
-  parameters: <string:send_bus_name>
-trim_user:
+  parameters: <string:submix_name>
+trim_submix:
   type: bus
-  what: control a send-bus fader
-  short: trim
+  what: control a submix fader
+  short: trim tsm
   example: |
     ! reduce vol of current track in in_ear_monitor by 3dB
-    user in_ear_monitor1
+    select_submix in_ear_monitor
     trim vol - 3 
 nickname_effect:
   type: effect
