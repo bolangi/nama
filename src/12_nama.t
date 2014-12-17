@@ -540,7 +540,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:4 -o:loop,Master_in
 EXPECTED
 gen_alsa();
-check_setup('Sub-bus - ALSA');
+check_setup('Bus - ALSA');
 gen_jack();
 
 $expected_setup_lines = <<EXPECTED;
@@ -554,7 +554,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:3 -o:loop,sax_out
 -a:4 -o:loop,Master_in
 EXPECTED
-check_setup('Sub-bus - JACK');
+check_setup('Bus - JACK');
 
 process_command('remove_bus Horns');
 process_command('add_submix_cooked Vo 5');
@@ -570,7 +570,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:4 -o:jack_multi,system:playback_5,system:playback_6
 EXPECTED
 gen_jack();
-check_setup('Send bus - soundcard - JACK');
+check_setup('Create submix with output at soundcard - JACK');
 process_command('remove_bus Vo');
 process_command('sax mono');
 
