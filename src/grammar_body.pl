@@ -1007,13 +1007,13 @@ list_history: _list_history {
 	my %seen;
 	::pager( grep{ ! $seen{$_} and $seen{$_}++ } @history );
 }
-add_user: _add_user bus_name destination {
-	::add_send_bus( $item{bus_name}, $item{destination}, 'cooked' );
+add_submix_cooked: _add_submix_cooked bus_name destination {
+	::add_submix( $item{bus_name}, $item{destination}, 'cooked' );
 	1;
 
 }
 add_submix_raw: _add_submix_raw bus_name destination {
-	::add_send_bus( $item{bus_name}, $item{destination}, 'raw' );
+	::add_submix( $item{bus_name}, $item{destination}, 'raw' );
 	1;
 }
 add_bus: _add_bus bus_name { ::add_bus( $item{bus_name}); 1 }
@@ -1035,8 +1035,8 @@ destination: jack_port # include channel, loop,device, jack_port
 remove_bus: _remove_bus existing_bus_name { 
 	$::bn{$item{existing_bus_name}}->remove; 1; 
 }
-update_send_bus: _update_send_bus existing_bus_name {
- 	::update_send_bus( $item{existing_bus_name} );
+update_submix: _update_submix existing_bus_name {
+ 	::update_submix( $item{existing_bus_name} );
  	1;
 }
 set_bus: _set_bus key someval { $::bn{$::this_bus}->set($item{key} => $item{someval}); 1 }
@@ -1715,10 +1715,10 @@ set_bus_engine_group: _set_bus_engine_group ident {
 	$::bn{$::this_bus}->set(engine_group => $item{ident});
  	::pager("$::this_bus: bus engine group set to $item{ident}");
 }
-select_user: _select_user existing_bus_name { 
+select_submix: _select_submix existing_bus_name { 
 	$::this_user = $::bn{$item{existing_bus_name}}
 }
-trim_user: _trim_user effect parameter sign(?) value { 
+trim_submix: _trim_submix effect parameter sign(?) value { 
 	#my($nick, $real) = @{$item{fx_alias}};
 	my $real_track = join '_', $::this_user->name, $::this_track->name;
 	::pager("real track: $real_track\n");
