@@ -72,7 +72,7 @@ sub add_path_for_rec {
 
 		# special case, record 'cooked' signal
 
-		# generally a sub bus 
+		# generally a bus 
 
 		# - receives a stereo input
 		# - mix track width is set to stereo (default)
