@@ -521,7 +521,7 @@ check_setup('Mixdown in mastering mode - JACK');
 process_command('mixoff; master_off');
 process_command('for 4 5 6 7 8; remove_track quiet');
 process_command('Master; send 1');
-process_command('asub Horns; sax move_to_bus Horns; sax stereo');
+process_command('add_bus Horns; sax move_to_bus Horns; sax stereo');
 
 $expected_setup_lines = <<EXPECTED;
 
