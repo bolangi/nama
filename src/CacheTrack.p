@@ -25,7 +25,7 @@ sub cache_track { # launch subparts if conditions are met
 	
 	pagers($args->{track}->name, ": preparing to cache.");
 	
-	# abort if track is a mix track for a sub-bus and the bus is OFF 
+	# abort if track is a mix track for a bus and the bus is OFF 
 	if( my $bus = $bn{$args->{track}->name}
 		and $args->{track}->rec_status eq REC 
 	 ){ 
@@ -112,11 +112,11 @@ sub prepare_to_cache {
 		logpkg('debug', "The graph after setting input path:\n$g");
 	}
 
-	# Case 2: Caching a sub-bus mix track
+	# Case 2: Caching a bus mix track
 
 	elsif($args->{track}->rec_status eq REC){
 
-		# apply all sub-buses (unneeded ones will be pruned)
+		# apply all buses (unneeded ones will be pruned)
 		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
 	}
 
@@ -277,11 +277,11 @@ sub uncache_track {
 	#
 			$track->set(version => $ec->track_version_original);
 			pager($track->name, ": setting uncached version ", $track->version, $/);
-	# CASE 2: a sub-bus mix track, set to REC for caching operation.
+	# CASE 2: a bus mix track, set to REC for caching operation.
 
 	if( my $bus = $bn{$track->name}){
 			$track->set(rw => REC) ;
-			pagers($track->name, ": setting sub-bus mix track to REC");
+			pagers($track->name, ": setting bus mix track to REC");
 	}
 
 		$ec->add($track) if defined $ec;
