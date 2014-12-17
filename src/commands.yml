@@ -1043,7 +1043,7 @@ add_submix_raw:
   type: bus
   what: Add a submix using tracks in Main bus (unprocessed signals, lower latency)
   short: asr
-  parameters: <s tring:name> <destination>
+  parameters: <string:name> <destination>
   example: |
     asbr Reverb jconv # Add a raw send bus called Reverb, with its output
                       # going to the JACK client jconv .
