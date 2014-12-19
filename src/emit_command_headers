@@ -81,7 +81,7 @@ elsif ($output eq 'pod'){
 		$param = $ref->{$_}->{parameters} 
 			unless $ref->{$_}->{parameters} eq 'none';
 		print "=over 8\n\n";
-		print "C<$_> $param\n\n";
+		print "$_ $param\n\n";
 
 		if (my $example = $ref->{$_}->{example}){
 
@@ -89,7 +89,7 @@ elsif ($output eq 'pod'){
 			# add C<> tags to command text
 
 			$example = munge_help($example);
-			$example = "C<$example>";
+			#$example = "C<$example>";
 
 			print "$example\n\n";
 		}
