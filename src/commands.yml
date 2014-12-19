@@ -10,7 +10,7 @@ help:
     help mfx # display help on modify_effect - shortcut mfx
 help_effect:
   type: help
-  what: Display detailed help on a LADSPA or LV2 effect or ask a note to consult the Ecasound manpage for Ecasound's internal effects. For LADSPA and LV2 effects use either the analyseplugin oder analyselv2.
+  what: Display detailed help on LADSPA or LV2 effects.
   short: hfx he
   parameters: <string:label> | <integer:unique_id>
   example: |
