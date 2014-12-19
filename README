@@ -4,33 +4,34 @@ Nama - digital audio workstation
 
 =head1 DESCRIPTION
 
-B<Nama> is a lightweight object-oriented digital audio
-workstation that uses the Ecasound realtime audio engine.
+B<Nama> is a lightweight digital audio workstation based
+on Ecasound. It is suitable for multitrack recording, mixing,
+effects-processing and other audio processing tasks.
 
-New projects begin with a mixer, may include common audio
-objects including track, bus, effect, send, insert, mark,
-region, fade, edit and sequence. 
+New projects begin with a mixer, and may include tracks,
+buses, effects, sends, inserts, marks, regions, fades, edits
+and sequences. 
 
 =head2 Command language and help system
 
-Nama has its own command language. Commands have full names
-and shortcuts, and tab completion may be used. A "for" loop
-allows commands to be iterated over multiple tracks. Tracks
-may be designated as a list, by the name of their bus, or by
-the name of a user-defined group. Effect chains provide for
-adding and removing effects as a group.
+Nama provides a command interpreter with help system and
+GUI.  Commands have full names and shortcuts (e.g.
+"add-effect" and "afx"). Commands may to be iterated over
+multiple tracks. 
 
-Nama has the concept of a currently selected object.  At any
+Nama has the concept of a currently selected object. At any
 time, there is usually a current bus, current track and
-current effect. Track commands will act on the current
-track, bus commands will act on the currently selected bus.
+current effect and current parameter. Track commands will
+act on the current track, bus commands on the currently
+selected bus, effect commands on the currently selected
+effect/parameter.
 
 The help system provides searchable access to documentation
 for all Nama commands and shortcuts, and for LADSPA, LV2 and
 Ecasound effects.
 
 In addition to executing its own commands, Nama will pass
-commands to Ecasound, Midish, the Perl interpreter and the
+commands to Ecasound, Midish, the perl interpreter and the
 shell. 
 
 =head2 Backend
@@ -54,9 +55,9 @@ Audacity or MHWaveedit to view/edit selected waveforms.
 
 =head2 Project management
 
-Project state is serialized as JSON files and managed by
-Git. Projects can be branched, and easily restored to earlier
-states.  Nama uses Git to manage 
+Project state is serialized as JSON files and the entire
+project history is managed by Git. Projects can be branched,
+and easily restored to earlier states. 
 
 =head2 Project reuse
 
