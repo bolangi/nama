@@ -156,7 +156,11 @@ float: /\d+\.\d+/   # used in: shift_track (start_position)
 					# decimal point
 					# digit{1,}
 
-op_id: /[A-Z]+/		# capital letters {1,}
+op_id: /[A-Z]+/		# capital letters {1,} 
+existing_op_id: op_id
+{
+	my $FX; $FX = ::fxn($item[-1]) and $FX->id 
+}
 parameter: /\d+/	# digits {1,}
 dd: /\d+/			# digits {1,}
 shellish: /"(.+)"/ { $1 }
@@ -925,7 +929,8 @@ fx_alias3: ident {
 	map{ $_->id } 
 	grep { $_->surname eq $item{ident} } $::this_track->fancy_ops_o;
 }
-remove_target: op_id | fx_pos | fx_surname | fx_name
+remove_target: existing_op_id | fx_pos | fx_surname | fx_name
+	{ $item[-1] or print("no effect object found\n"), return 0}
 fx_alias: fx_alias2 | fx_alias1
 fx_nick: ident { $::fx->{alias}->{$item{ident}} }
 fx_alias1: op_id
