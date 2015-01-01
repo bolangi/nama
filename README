@@ -4,51 +4,36 @@ Nama - digital audio workstation
 
 =head1 DESCRIPTION
 
-B<Nama> is a lightweight digital audio workstation based
-on Ecasound. It is suitable for multitrack recording, mixing,
-effects-processing and other audio processing tasks.
+Nama is a digital audio workstation. It is suitable for
+multitrack recording, effects-processing, editing, mixing,
+and other audio tasks. Nama uses Ecasound, developed by Kai
+Vehmanen, for audio processing. Nama hosts LADSPA and LV2
+plugins, Ecasound effects and controllers. It works well
+under JACK and ALSA.
 
-New projects begin with a mixer, and may include tracks,
-buses, effects, sends, inserts, marks, regions, fades, edits
-and sequences. 
+New projects begin with a mixer, and may include tracks
+(multiple takes), buses, effects, sends, inserts,
+marks, regions, fades, edits, sequences and submixes, with
+mixdown to wav, ogg, mp3, etc.
 
-=head2 Command language and help system
-
-Nama provides a command interpreter with help system and
-GUI.  Commands have full names and shortcuts (e.g.
-"add-effect" and "afx"). Commands may to be iterated over
-multiple tracks. 
-
-Nama has the concept of a currently selected object. At any
-time, there is usually a current bus, current track and
-current effect and current parameter. Track commands will
-act on the current track, bus commands on the currently
-selected bus, effect commands on the currently selected
-effect/parameter.
+Nama has a full-featured command interpreter with TAB
+completion, keyword help and command history; a hotkey mode
+for tweaking effect parameters, a Tk-based GUI, and project
+management (history, branching, tags) based on git.  Users
+can define command aliases, custom commands, and key
+bindings for the hotkey mode. 
 
 The help system provides searchable access to documentation
 for all Nama commands and shortcuts, and for LADSPA, LV2 and
-Ecasound effects.
+Ecasound effects. In addition to executing its own commands,
+Nama will pass commands to Ecasound, Midish, the perl
+interpreter and the shell. 
 
-In addition to executing its own commands, Nama will pass
-commands to Ecasound, Midish, the perl interpreter and the
-shell. 
-
-=head2 Backend
-
-Nama creates signal processing graphs for the Ecasound
-engine; applies fades, effects and edits to the audio
-streams; and manages successive configure-run cycles. If
-jackd is running, Nama will automatically map soundcard IO
-via JACK. 
-
-When a user command requires it, Nama automatically
-reconfigures the Ecasound engine. While the engine is
-running Nama accepts parameter control inputs from GUI
-sliders, hotkeys, text commands, MIDI devices, OSC packets,
-and preprogrammed envelopes.
-
-=head2 GUI
+Nama has several templating options for project reuse:
+Effect chains are presets for one or more effects. Effect
+profiles (used to create Nama's mastering network) are
+templates for placing effects on multiple tracks. User
+scripting provides another way to reuse functionality.
 
 Nama's GUI will display if Tk is available.  Nama can spawn
 Audacity or MHWaveedit to view/edit selected waveforms. 
@@ -57,7 +42,7 @@ Audacity or MHWaveedit to view/edit selected waveforms.
 
 Project state is serialized as JSON files and the entire
 project history is managed by Git. Projects can be branched,
-and easily restored to earlier states. 
+tagged, and easily restored to earlier states. 
 
 =head2 Project reuse
 
@@ -66,7 +51,8 @@ components: effect chains, effect profiles, and project
 templates. An effect chain is a series of effects with
 parameters.  An effect profile includes one or more tracks
 with their effects and inserts. Nama's mastering network is
-stored as an effect profile.
+stored as an effect profile.  Project templates duplicate an
+entire project without audio files. 
 
 =head1 INSTALLATION
 
