@@ -201,7 +201,6 @@ end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 help_effect: _help_effect effect { ::help_effect($item{effect}) ; 1}
 find_effect: _find_effect anytag(s) { 
 	::find_effect(@{$item{"anytag(s)"}}); 1}
-help: _help 'yml' { ::pager($::text->{commands_yml}); 1}
 help: _help anytag  { ::help($item{anytag}) ; 1}
 help: _help { ::pager( $::help->{screen} ); 1}
 project_name: _project_name { 

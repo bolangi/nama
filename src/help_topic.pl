@@ -13,7 +13,6 @@
 					edits
 					fades
 					command_line_options
-					man_page
                 ) ;
 
 %{$help->{topic}} = (
@@ -24,7 +23,6 @@ help => <<HELP,
    help <ladspa_id>        - invoke analyseplugin for info on a LADSPA id
    help <topic_number>     - list commands under <topic_number> 
    help <topic_name>       - list commands under <topic_name> (lower case)
-   help yml                - browse command source file
 HELP
 
 project => <<PROJECT,
@@ -458,6 +456,5 @@ help is available for the following topics:
 12 Edits
 13 Fades
 14 Command line options
-15 Man page
 
 HELP
