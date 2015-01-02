@@ -1734,3 +1734,5 @@ set_effect_name: _set_effect_name ident { ::this_op_o->set_name($item{ident}); 1
 remove_effect_name: _remove_effect_name { ::this_op_o->set_name(); 1 			  }
 set_effect_surname: _set_effect_surname ident { ::this_op_o->set_surname($item{ident}); 1}
 remove_effect_surname: _remove_effect_surname { ::this_op_o()->set_surname(); 1} 
+
+select_track: _select_track track_spec

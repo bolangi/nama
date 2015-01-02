@@ -1707,4 +1707,10 @@ remove_effect_surname:
   type: effect
   what: remove current effect surname
   short: res
+select_track:
+  type: track
+  what: |
+    set a particular track as the current, or default track
+    against which track-related commands are executed.
+  parameters: <string:track-name> | <integer:track-number>
 ...
