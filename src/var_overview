@@ -1,16 +1,13 @@
-#### Top-level module
-
-Globals.pm      Module for exporting Nama globals, merges 
-                contents of several of the following:
-
-#### Nama variables are declared in one of the following files
+Globals.pm      Module for exporting Nama global variables.
+				It is built from the following files: 
 
 var_pronouns    Pronouns (e.g. $this_track) and 
-                indices (e.g. %tn, %ti: get track by name, index)
+                indices (e.g. %tn, %ti to get track by name, index)
 
-var_serialize   Marshalling variables for serializing/deserializing
+var_serialize   Marshalling variables for saving and restoring project state
 
-var_singletons  Simple hashes (such as $config) or 
+var_singletons  Objects and simple hashes that contain
+				(such as $config) or 
                 objects such as $file. Hash access to
                 underlying fields is expected, and 
                 is necessary for Tk slider widgets.
