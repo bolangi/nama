@@ -188,31 +188,35 @@ sub update_cache_map {
 		# include all ops, include vol/pan operators 
 		# which serve as placeholders, won't overwrite
 		# the track's current vol/pan operators
+
+		my $track = $args->{track};
 		 
-		my @ops_list = @{$args->{track}->ops};
-		my @ops_remove_list = $args->{track}->fancy_ops;
+		my @ops_list = @{$track->ops};
+		my @ops_remove_list = $track->fancy_ops;
 		
-		if ( @inserts_list or @ops_list or $args->{track}->is_region)
+		if ( @inserts_list or @ops_list or $track->is_region)
 		{
 			my %args = 
 			(
 				track_cache => 1,
-				track_name	=> $args->{track}->name,
+				track_name	=> $track->name,
 				track_version_original => $args->{orig_version},
-				track_version_result => $args->{track}->last,
+				track_version_result => $track->last,
 				project => 1,
 				system => 1,
 				ops_list => \@ops_list,
 				inserts_data => \@inserts_list,
 			);
-			$args{region} = [ $args->{track}->region_start, $args->{track}->region_end ] 
-				if $args->{track}->is_region;
+			$args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
+			$args{track_target} = $track->target if $track->target; 
 			my $ec = ::EffectChain->new( %args );
+
+			# update track settings
 			map{ remove_effect($_) } @ops_remove_list;
 			map{ $_->remove        } @inserts_list;
-			$args->{track}->set(region_start => undef, region_end => undef);
+			map{ delete $track->{$_} } qw( region_start region_end target );
 
-		pagers(qq(Saving effects for cached track "), $args->{track}->name, '".');
+		pagers(qq(Saving effects for cached track "), $track->name, '".');
 		pagers(qq('uncache' will restore effects and set version $args->{orig_version}\n));
 		}
 }
@@ -274,9 +278,13 @@ sub uncache_track {
 	#
 	# * toggle to the old version
 	# * load the effect chain 
-	#
+	
 			$track->set(version => $ec->track_version_original);
+			$track->set(target => $ec->track_target) if $ec->track_target;
+			$track->set(region_start => $ec->{region}->[0]);
+			$track->set(region_end => $ec->{region}->[1]);
 			pager($track->name, ": setting uncached version ", $track->version, $/);
+
 	# CASE 2: a bus mix track, set to REC for caching operation.
 
 	if( my $bus = $bn{$track->name}){

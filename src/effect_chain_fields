@@ -54,3 +54,5 @@
 # 		insert				# true value identifies belonging to an insert
 # 		
 # 		track_cache			# true value identifies belonging to track caching
+#
+# 		track_target		# WAV files were from this track

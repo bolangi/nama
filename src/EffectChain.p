@@ -40,6 +40,7 @@ use ::Object qw(
 			track_version_original
 			insert				
 			track_cache	
+			track_target
 	) ;
 
 %is_attribute = map{ $_ => 1 } @attributes;
