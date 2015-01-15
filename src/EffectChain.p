@@ -301,6 +301,7 @@ sub add_inserts {
 }
 sub add_region {
 	my ($self, $track) = @_;
+	# there is also a check in uncache track
 	::throw($track->name.": track already has region definition\n",
 		"failed to apply region @$self->{region}\n"), return
 		if $track->is_region;

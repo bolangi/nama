@@ -261,40 +261,36 @@ sub stop_polling_cache_progress {
 sub uncache_track { 
 	my $track = shift;
 	local $this_track;
-	# skip unless PLAY;
-	throw($track->name, ": cannot uncache unless track is set to PLAY"), return
-		unless $track->rec_status eq PLAY;
+	$track->rec_status eq PLAY or 
+		throw($track->name, ": cannot uncache unless track is set to PLAY"), return;
 	my $version = $track->monitor_version;
 	my ($ec) = is_cached($track, $version);
-	defined $ec or throw($track->name, ": version $version is not cached"),
-		return;
-	if ($track->fancy_ops){
-		pager($track->name, ": cannot cache while user effects are present\n",
-			"Delete them or stash them and try again.");
-		return
-	}
+	defined $ec or throw($track->name, ": version $version is not cached"), return;
+	$track->fancy_ops and 
+		throw($track->name, ": cannot uncache while user effects are present\n",
+			"You must delete them before you can uncache this WAV version."), return;
+	$track->is_region and 
+		throw($track->name, ": cannot uncache while region is set for this track\n",
+			"Remove it and try again."), return;
+# 	$ec->inserts and $track->inserts and throw($track->name,
+# 	": cannot uncache inserts because an insert is already set for this track\n",
+# 	"Remove it and try again."), return;
 
-	# CASE 1: an ordinary track, 
-	#
-	# * toggle to the old version
-	# * load the effect chain 
-	
-			$track->set(version => $ec->track_version_original);
-			$track->set(target => $ec->track_target) if $ec->track_target;
-			$track->set(region_start => $ec->{region}->[0]);
-			$track->set(region_end => $ec->{region}->[1]);
-			pager($track->name, ": setting uncached version ", $track->version, $/);
+	$ec->add($track);
+	# replace track's effect list with ours
+	$track->{ops} = dclone($ec->ops_list);
+	# applying the the effect chain doesn't set the version or target
+	$track->set(version => $ec->track_version_original);
+    $track->set(target => $ec->track_target) if $ec->track_target;
 
-	# CASE 2: a bus mix track, set to REC for caching operation.
+	pager($track->name, ": setting uncached version ", $track->version, $/);
+	pager($track->name, ": setting original region bounded by marks ", 
+		$track->region_start, " and ", $track->region_end, $/)
+		if $track->is_region;
 
-	if( my $bus = $bn{$track->name}){
-			$track->set(rw => REC) ;
-			pagers($track->name, ": setting bus mix track to REC");
-	}
-
-		$ec->add($track) if defined $ec;
-		# replace track's effect list with ours
-		$track->{ops} = dclone($ec->ops_list); # copy
+	my $bus = $bn{$track->name};
+	$track->set(rw => REC), pagers($track->name, ": setting mix track to REC")
+		if defined $bus;
 }
 sub is_cached {
 	my ($track, $version) = @_;
