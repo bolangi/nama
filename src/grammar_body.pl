@@ -580,7 +580,10 @@ play: 'dummy'
 command: mono
 command: rw
 
-rw_setting: 'rec'|'play'|'mon'|'off' { $return = $item[1] }
+rw_setting:   'REC ' | 'rec' 
+			| 'PLAY' | 'play'
+			| 'MON'  | 'mon'
+			| 'OFF'  | 'off' { $return = $item[1] }
 rw: rw_setting {
 	$::this_track->is_system_track 
 		# for system tracks, just set track 'rw' field
