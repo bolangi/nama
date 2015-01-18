@@ -194,24 +194,25 @@ sub update_cache_map {
 		my @ops_list = @{$track->ops};
 		my @ops_remove_list = $track->fancy_ops;
 		
-		if ( @inserts_list or @ops_list or $track->is_region)
+		if ( @inserts_list or @ops_remove_list or $track->is_region)
 		{
 			my %args = 
 			(
 				track_cache => 1,
 				track_name	=> $track->name,
 				track_version_original => $args->{orig_version},
-				track_version_result => $track->last,
 				project => 1,
 				system => 1,
 				ops_list => \@ops_list,
 				inserts_data => \@inserts_list,
 			);
 			$args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
-			$args{track_target} = $track->target if $track->target; 
-			my $ec = ::EffectChain->new( %args );
-
+			$args{track_target_original} = $track->target if $track->target; 
+			# late, because this changes after removing target field
+			map{ delete $track->{$_} } qw(target);
+			$args{track_version_result} = $track->last,
 			# update track settings
+			my $ec = ::EffectChain->new( %args );
 			map{ remove_effect($_) } @ops_remove_list;
 			map{ $_->remove        } @inserts_list;
 			map{ delete $track->{$_} } qw( region_start region_end target );
@@ -280,8 +281,9 @@ sub uncache_track {
 	# replace track's effect list with ours
 	$track->{ops} = dclone($ec->ops_list);
 	# applying the the effect chain doesn't set the version or target
+	# so we do it here
 	$track->set(version => $ec->track_version_original);
-    $track->set(target => $ec->track_target) if $ec->track_target;
+    $track->set(target => $ec->track_target_original) if $ec->track_target_original;
 
 	pager($track->name, ": setting uncached version ", $track->version, $/);
 	pager($track->name, ": setting original region bounded by marks ", 
