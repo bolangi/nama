@@ -24,7 +24,7 @@ no warnings qw(uninitialized);
 our @ISA;
 our ($n, %by_index, @attributes, %is_attribute);
 use ::Object qw( 
-[% qx(./strip_comments ./effect_chain_fields) %]
+[% qx(./strip_all ./effect_chain_fields) %]
 		);
 @attributes = qw(
 			name
@@ -38,10 +38,41 @@ use ::Object qw(
 			track_name
 			track_version_result 
 			track_version_original
+			track_target_original
 			insert				
 			track_cache	
 			track_target
 	) ;
+
+### 	attributes for searching, sorting, used by external functions
+# 		name				# for user-defined effect chains
+# 
+# 		bypass				# used for identifying effect bypass (obsolete)
+# 		id					# effect id, for storing single effect with controllers
+# 							# for bypass (probably obsolete)	
+# 
+# 		project				# true value identifies project-specific effect chain
+# 
+# 		global				# true value identified global effect chain,
+# 							# not project specific, usually user-defined
+# 
+# 		profile				# name of associated effect profile
+# 
+# 		user				# true value identifies user created effect chain
+# 
+# 		system				# true value identifies system generated effect chain
+# 
+# 		track_name			# applies to a track of this name
+# 
+# 		track_version_result 	# WAV version of track after caching
+# 
+# 		track_version_original 	# WAV version of track before caching 
+# 
+# 		insert				# true value identifies belonging to an insert
+# 		
+# 		track_cache			# true value identifies belonging to track caching
+#
+# 		track_target_original #	WAV files were from this track
 
 %is_attribute = map{ $_ => 1 } @attributes;
 initialize();
