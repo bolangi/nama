@@ -304,7 +304,7 @@ sub is_cached {
 	);
 	scalar @results > 1 
 		and warn ("more than one EffectChain matching query!, found", 
-			map{ json_out($_) } @results);
+			map{ json_out($_->as_hash) } @results);
 	$results[-1]
 }
 1;

@@ -241,7 +241,9 @@ sub show_versions {
 		no warnings 'uninitialized';
 		if (@{$this_track->versions} ){
 			"All versions: ". join(" ", 
-				map { $_ . ( is_cached($this_track, $_)  and 'c') } @{$this_track->versions}
+				map { 
+					my $cached = is_cached($this_track, $_) ? 'c' : '';
+					$_ . $cached } @{$this_track->versions}
 			). $/
 		} else {}
 }
