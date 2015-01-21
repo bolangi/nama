@@ -31,8 +31,6 @@ sub cache_track { # launch subparts if conditions are met
 	 ){ 
 		$bus->rw eq OFF and pagers(
 			$bus->name, ": status is OFF. Aborting."), return;
-
-	# check conditions for normal track
 	} else { 
 		$args->{track}->rec_status eq PLAY or pagers(
 			$args->{track}->name, ": track caching requires PLAY status. Aborting."), return;
@@ -40,6 +38,7 @@ sub cache_track { # launch subparts if conditions are met
 	pagers($args->{track}->name, ": no effects to cache!  Skipping."), return 
 		unless 	$args->{track}->fancy_ops 
 				or $args->{track}->has_insert
+				or $args->{track}->is_region
 				or $bn{$args->{track}->name};
 
 	if ( prepare_to_cache($args) )
@@ -72,6 +71,7 @@ sub prepare_to_cache {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
 	$args->{orig_version} = $args->{track}->monitor_version;
+
 
 	#   We route the signal thusly:
 	#
