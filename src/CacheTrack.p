@@ -20,26 +20,28 @@ sub cache_track { # launch subparts if conditions are met
 
 	local $this_track;
 	my $args = {}; # initialize args
-	($args->{track}, $args->{additional_time}) = @_;
+	my $track;
+	($track, $args->{additional_time}) = @_;
+	$args->{track} = $track;
 	$args->{additional_time} //= 0;
 	
-	pagers($args->{track}->name, ": preparing to cache.");
+	pagers($track->name, ": preparing to cache.");
 	
 	# abort if track is a mix track for a bus and the bus is OFF 
-	if( my $bus = $bn{$args->{track}->name}
-		and $args->{track}->rec_status eq REC 
+	if( my $bus = $bn{$track->name}
+		and $track->rec_status eq REC 
 	 ){ 
 		$bus->rw eq OFF and pagers(
 			$bus->name, ": status is OFF. Aborting."), return;
 	} else { 
-		$args->{track}->rec_status eq PLAY or pagers(
-			$args->{track}->name, ": track caching requires PLAY status. Aborting."), return;
+		$track->rec_status eq PLAY or pagers(
+			$track->name, ": track caching requires PLAY status. Aborting."), return;
 	}
-	pagers($args->{track}->name, ": no effects to cache!  Skipping."), return 
-		unless 	$args->{track}->fancy_ops 
-				or $args->{track}->has_insert
-				or $args->{track}->is_region
-				or $bn{$args->{track}->name};
+	pagers($track->name, ": nothing to cache!  Skipping."), return 
+		unless 	$track->fancy_ops 
+				or $track->has_insert
+				or $track->is_region
+				or $bn{$track->name};
 
 	if ( prepare_to_cache($args) )
 	{ 
