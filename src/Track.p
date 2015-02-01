@@ -19,7 +19,6 @@ our $VERSION = 1.0;
 use ::Util qw(freq input_node dest_type dest_string join_path);
 use ::Assign qw(json_out);
 use vars qw($n %by_name @by_index %track_names %by_index);
-our @ISA = '::Wav';
 use ::Object qw(
 [% qx(./strip_all ./track_fields) %]
 );
@@ -181,6 +180,18 @@ sub maybe_monitor { # ordinary sub, not object method
 	return OFF;
 }
 
+sub targets { # WAV file targets, distinct from 'target' attribute
+	my $self = shift;
+	::Wav::targets(dir => $self->dir, name => $self->basename)
+}
+sub versions {
+	my $self = shift;
+	::Wav::versions(dir => $self->dir, name => $self->basename) 
+}
+sub last { 
+	my $self = shift;
+	::Wav::last(dir => $self->dir, name => $self->basename) || 0 
+}
 # if you belong to a bus with an opinion, go that way
 sub engine_group {
 	my $track = shift;

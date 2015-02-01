@@ -1,21 +1,19 @@
 package ::Wav;
 our $VERSION = 1.0;
-our @ISA; 
-use ::Object qw(name version dir);
-use warnings;
 use ::Assign qw(:all);
 use ::Util qw(join_path);
 use ::Log qw(logsub logpkg);
 use Memoize qw(memoize unmemoize); # called by code in ::Memoize.pm
+use warnings;
 no warnings qw(uninitialized);
 use Carp;
 
 sub get_versions {
-	my $self = shift;
-	my ($sep, $ext) = qw( _ wav );
-	my ($dir, $basename) = ($self->dir, $self->basename);
-#	print "dir: ", $self->dir(), $/;
-	#print "basename: ", $self->basename(), $/;
+	my %args = @_;
+	$args{sep} //= '_';
+	$args{ext} //= 'wav';
+	my ($sep, $ext) = ($args{sep}, $args{ext});
+	my ($dir, $basename) = ($args{dir}, $args{name});
 	logpkg('debug',"getver: dir $dir basename $basename sep $sep ext $ext");
 	my %versions = ();
 	for my $candidate ( candidates($dir) ) {
@@ -46,11 +44,11 @@ sub candidates {
 
 sub targets {
 	
-	my $self = shift; 
+	my %args = @_;
 
 #	$::debug2 and print "&targets\n";
 	
-		my %versions =  $self->get_versions;
+		my %versions =  get_versions(%args);
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
 			delete $versions{bare};
 		}
@@ -61,12 +59,12 @@ sub targets {
 	
 sub versions {  
 #	$::debug2 and print "&versions\n";
-	my $self = shift;
-	[ sort { $a <=> $b } keys %{ $self->targets} ]  
+	my %args = @_;
+	[ sort { $a <=> $b } keys %{ targets(%args)} ]  
 }
-
 sub last { 
-	my $self = shift;
-	pop @{ $self->versions} }
+	%args = @_;
+	pop @{ versions(%args) } 
+}
 
 1;
