@@ -101,6 +101,9 @@ sub prepare_to_cache {
 	$g->set_vertex_attributes(
 		$cooked->name, 
 		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
+			version => (1 + ::Wav::last(name => $args->{track}->name,  
+										dir  => this_wav_dir())
+						)
 		}
 	); 
 	$args->{complete_caching_ref} = \&update_cache_map;
