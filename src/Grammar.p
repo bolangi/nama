@@ -243,12 +243,21 @@ sub show_versions {
 			"All versions: ". join(" ", 
 				map { 
 					my $cached = is_cached($this_track, $_) ? 'c' : '';
+					$cached .= 'C' if $this_track->is_version_comment($_);
 					$_ . $cached } @{$this_track->versions}
 			). $/
 		} else {}
 }
-
-
+sub show_track_comment {
+	my $track = shift;
+	my $text = $track->is_comment;
+	$text and "Track comment: $text\n";
+}
+sub show_version_comment {
+	my ($track, $version) = @_;
+	my $text = $track->is_version_comment($version);
+	$text and "Version comment: $text\n";
+}
 sub show_send { "Send: ". $this_track->send_id. $/ 
 					if $this_track->rec_status ne OFF
 						and $this_track->send_id
@@ -413,6 +422,7 @@ sub show_tracks_section {
 			placeholder($_->destination),
 			placeholder($_->vol_level),
 			placeholder($_->pan_level),
+			($_->is_comment ? 'C' : undef)
         } @tracks;
         
 	my $output = $^A;

@@ -1002,7 +1002,18 @@ Mid High Boost );
 sub is_user_track { ! $system_track{$_[0]->name} }
 sub is_system_track { $system_track{$_[0]->name} } 
 }
+sub is_comment {
+	my $self = shift;
+	$::project->{track_comments}->{$self->name}	
+}
+sub is_version_comment {
+	my $self = shift;
+	my $version = shift;
+	my $comments = $project->{track_version_comments}->{$self->name}->{$version};
+	$comments and $comments->{user}
+}
 } # end package
+
 
 # subclasses
 
