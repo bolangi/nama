@@ -155,6 +155,12 @@ sub new {
 # TODO: get rid of this entirely
 sub fx	 		{ my $self = shift; $self }	
 
+# provide object
+sub parent {
+	my $self = shift;
+	fxn($self->{parent});
+}
+
 sub is_read_only {
     my ($self, $param) = @_;
 	no warnings 'uninitialized';
@@ -246,8 +252,8 @@ sub offset {
 }
 sub root_parent { 
 	my $self = shift;
-	return $self if ! $self->parent;
-	$self->parent->root_parent
+	my $parent = $self->parent;
+	$parent and $parent->parent or $parent or $self
 }
 sub about {
 	my $self = shift;
@@ -409,7 +415,7 @@ sub apply_op {
 	logpkg('logcluck', "$id: expected effect entry not found!"), return
 		if effect_entry_is_bad($id);
 	my $code = $self->type;
-	my $dad = fxn($self->parent);
+	my $dad = $self->parent;
 	my $chain = $self->chain; 
 	logpkg('debug', "chain: $chain, type: $code");
 	#  if code contains colon, then follow with comma (preset, LADSPA)
@@ -850,7 +856,7 @@ sub remove_op {
 
 		my $ctrl_index = $self->ecasound_controller_index;
 		logpkg('debug', ::eval_iam("cs"));
-		::eval_iam("cop-select ".  $self->root_parent->ecasound_effect_index);
+		::eval_iam("cop-select ".  $self->root_parent->ecasound_controller_index);
 		logpkg('debug', "selected operator: ". ::eval_iam("cop-selected"));
 		::eval_iam("ctrl-select $ctrl_index");
 		::eval_iam("ctrl-remove");
