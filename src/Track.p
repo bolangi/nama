@@ -1326,7 +1326,7 @@ sub add_track_alias {
 	my $target; 
 	if 		( $tn{$track} ){ $target = $track }
 	elsif	( $ti{$track} ){ $target = $ti{$track}->name }
-	add_track(  $name, target => $target );
+	add_track(  $name, target => $target, width => $tn{$target}->width);
 }
 # create read-only track pointing at WAV files of specified
 # track name in a different project
@@ -1338,7 +1338,11 @@ sub add_track_alias_project {
 	if ( -d $dir ){
 		if ( glob "$dir/$track*.wav"){
 			::pager("Found target WAV files.\n");
-			my @params = (target => $track, project => $project_name);
+			my @params = (
+				target => $track, 
+				project => $project_name,
+				width => $tn{$track}->width,	
+			);
 			add_track( $name, @params );
 		} else { ::throw("$project_name:$track - No WAV files found.  Skipping.\n"), return; }
 	} else { 
