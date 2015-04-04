@@ -756,6 +756,18 @@ add_controller: _add_controller parent effect value(s?) {
 	}
 	1;
 }
+add_controller: _add_controller effect value(s?) {
+	::throw("current effect is undefined, skipping\n"), return 1 if ! ::this_op();
+	my $code = $item{effect};
+	my $parent = ::this_op();
+	my $values = $item{"value(s?)"};
+	my $cmd = "add_controller $parent $code @$values";
+	print "command: $cmd\n";
+	::process_command($cmd);
+	1
+}
+
+
 # an existing user-defined effect chain 
 existing_effect_chain: ident { $item{ident} if ::is_effect_chain($item{ident}) }
 
