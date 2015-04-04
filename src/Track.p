@@ -1341,7 +1341,6 @@ sub add_track_alias_project {
 			my @params = (
 				target => $track, 
 				project => $project_name,
-				width => $tn{$track}->width,	
 			);
 			add_track( $name, @params );
 		} else { ::throw("$project_name:$track - No WAV files found.  Skipping.\n"), return; }
