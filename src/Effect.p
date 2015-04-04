@@ -409,7 +409,7 @@ sub apply_op {
 	logpkg('logcluck', "$id: expected effect entry not found!"), return
 		if effect_entry_is_bad($id);
 	my $code = $self->type;
-	my $dad = $self->parent;
+	my $dad = fxn($self->parent);
 	my $chain = $self->chain; 
 	logpkg('debug', "chain: $chain, type: $code");
 	#  if code contains colon, then follow with comma (preset, LADSPA)
