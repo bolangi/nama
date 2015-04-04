@@ -84,7 +84,7 @@ sub is_controller {
 	my ($self, $id) = @_;
 	$self->{ops_data}->{$id}->{belongs_to}
 }
-sub parent : lvalue {
+sub parent_id : lvalue {
 	my ($self, $id) = @_;
 	$self->{ops_data}->{$id}->{belongs_to}
 }
@@ -280,7 +280,7 @@ sub add_ops {
 			chain  		=> $track->n,
 			type   		=> $self->type($_),
 			params 		=> $self->params($_),
-			parent		=> $self->parent($_),
+			parent		=> $self->parent_id($_),
 		};
 
 		
@@ -305,7 +305,7 @@ sub add_ops {
 		if ( $new_id ne $orig_id)
 		# re-write all controllers to belong to new id
 		{
-			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
+			map{ $self->parent_id($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
 		
 	} @ops_list;
