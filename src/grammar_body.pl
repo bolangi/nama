@@ -736,42 +736,23 @@ remove_effect: _remove_effect remove_target(s) {
 add_controller: _add_controller parent effect value(s?) {
 	my $code = $item{effect};
 	my $parent = $item{parent};
+	my $parent_o = ::fxn($parent);
+	print "parent: ", $parent_o, " chain: ", $parent_o->chain;
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
 	my $id = ::add_effect({
 		parent	=> $parent, 
+		chain	=> $parent_o->chain,
 		type 	=> $code, 
 		params	=> $values,
 	});
 	if($id)
 	{
 		my $iname = ::fxn($id)->fxname;
-		my $pname = ::fxn($id)->fxname;
+		my $pname = ::fxn($parent)->fxname;
 
 		::pager("\nAdded $id, $iname to $parent, $pname\n\n");
-	}
-	1;
-}
-add_controller: _add_controller effect value(s?) {
-	::throw("current effect is undefined, skipping\n"), return 1 if ! ::this_op();
-	my $code = $item{effect};
-	my $parent = ::this_op();
-	my $values = $item{"value(s?)"};
-	#print "values: " , ref $values, $/;
-	#print join ", ", @{$values} if $values;
-	my $id = ::add_effect({
-		parent	=> $parent, 
-		type	=> $code, 
-		params 	=> $values,
-	});
-	if($id)
-	{
-		my $iname = ::fxn($id)->fxname;
-		my $pname = ::fxn($id)->fxname;
-
-		::pager("\nAdded $id, $iname to $parent, $pname\n\n");
-
 	}
 	1;
 }
