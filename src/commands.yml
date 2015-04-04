@@ -792,7 +792,7 @@ noloop:
   parameters: none
 add_controller:
   type: effect
-  what: Add a controller to an effect (current effect, by default). Controllers can be modified by using mfx and remove using rfx.
+  what: Add a controller to an effect (current effect, by default). Controllers can be modified by using mfx and removed using rfx.
   short: acl
   parameters: [ <string:operator_id> ] <string:effect_code> [ <float:param1> <float:param2> ] ...
   example: |
