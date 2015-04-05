@@ -1,4 +1,9 @@
 #!/bin/sh
+# if the executable contains 'src', then we assume top-level
+IS_TOP_LEVEL=`echo $0 | grep src`;
+if [ $IS_TOP_LEVEL ]; then
+	cd src
+fi
 ./myproc
 cd ..
 perl Makefile.PL
@@ -7,3 +12,6 @@ echo "\tmake; make test"
 echo "If you're happy with the result you can do:"
 echo "\tmake install"
 echo "****************************************"
+if [ ! $IS_TOP_LEVEL ]; then
+	cd src 
+fi
