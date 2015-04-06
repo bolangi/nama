@@ -497,6 +497,10 @@ sub set_source {
 	$track->set_io('source',$source, $type);
 	my $new_source = $track->input_object_text;;
 	my $object = $new_source;
+	if (transition_to_null($old_source, $new_source))
+	{
+		$track->set(rw => MON) if $track->rw eq REC;		
+	}
 	if ( $old_source  eq $new_source ){
 		::pager($track->name, ": input unchanged, $object");
 	} else {
