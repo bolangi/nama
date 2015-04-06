@@ -250,7 +250,7 @@ sub rec_status {
 		elsif ($source_type eq 'bus')	{ return REC } # maybe $track->rw ??
 		else { return OFF }
 	}
-	elsif( $track->rw eq MON){ 'MON' }
+	elsif( $track->rw eq MON){ MON }
 
 	# set PLAY status if possible
 	
@@ -1027,14 +1027,14 @@ no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub rec_status {
 	my $track = shift;
- 	$track->rw ne OFF ? 'MON' : 'OFF' 
+ 	$track->rw ne OFF ? MON : OFF 
 }
 sub destination {
 	my $track = shift; 
-	return 'Mixdown' if $tn{Mixdown}->rec_status eq 'REC';
+	return 'Mixdown' if $tn{Mixdown}->rec_status eq REC;
 	return $track->SUPER() if $track->rec_status ne OFF
 }
-#sub rec_status_display { $_[0]->rw ne OFF ? 'PLAY' : 'OFF' }
+#sub rec_status_display { $_[0]->rw ne OFF ? PLAY : OFF }
 sub busify {}
 sub unbusify {}
 }
@@ -1048,7 +1048,7 @@ our @ISA = '::SimpleTrack';
 sub rec_status{
 	my $track = shift;
  	return OFF if $track->engine_group ne $this_engine->name;
-	$mode->{mastering} ? MON :  'OFF';
+	$mode->{mastering} ? MON :  OFF;
 }
 sub source_status {}
 sub group_last {0}
@@ -1096,7 +1096,7 @@ no warnings qw(uninitialized redefine);
 our @ISA = '::SlaveTrack';
 sub rec_status{
 	my $track = shift;
-	$mode->{mastering} ? MON :  'OFF';
+	$mode->{mastering} ? MON :  OFF;
 }
 }
 {
@@ -1145,7 +1145,7 @@ sub destination {
 }
 sub rec_status {
 	my $track = shift;
-	return REC if $track->rw eq 'REC';
+	return REC if $track->rw eq REC;
 	::Track::rec_status($track);
 }
 sub forbid_user_ops { 1 }
