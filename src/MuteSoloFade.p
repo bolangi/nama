@@ -29,10 +29,7 @@ sub solo {
 	# get list of already muted tracks if I haven't done so already
 	
 	if ( ! @{$fx->{muted}} ){
-		@{$fx->{muted}} = map{ $_->name } grep{ defined $_->old_vol_level} 
-                         map{ $tn{$_} } 
-						 ::Track::user();
-	}
+		@{$fx->{muted}} = map{ $_->name } grep{ defined $_->old_vol_level} user_tracks() }
 
 	logpkg('debug', join " ", "already muted:", sub{map{$_->name} @{$fx->{muted}}});
 
@@ -85,7 +82,7 @@ sub nosolo {
 	# unmute all except in @{$fx->{muted}} list
 
 	# unmute all tracks
-	do_many_tracks( { tracks => [ ::Track::user() ], method => 'unmute' } );
+	do_many_tracks( { tracks => [ map{$_->name} user_tracks() ], method => 'unmute' } );
 
 	# re-mute previously muted tracks
 	if (@{$fx->{muted}}){
@@ -109,7 +106,7 @@ sub all {
 }
 
 sub do_many_tracks {
-	# args: { tracks => [ name list ], method => method_name }
+	# args: { tracks => [ track objects ], method => method_name }
 	my $args = shift;
 	my $method = $args->{method};
 	my $delay = $args->{delay} || $config->{engine_muting_time};
