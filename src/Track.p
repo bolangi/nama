@@ -711,7 +711,7 @@ sub mute {
 	$track->set(old_vol_level => $vol->params->[0]);
 	
 	$nofade 
-		? $vol->_modify_effect(1, $track->mute_level)
+		? $vol->_modify_effect(1, $vol->mute_level)
 		: $vol->fadeout
 }
 sub unmute {
