@@ -199,7 +199,7 @@ __DATA__
 [% qx(./emit_command_headers headers) %]
 @@ hotkey_grammar
 [% qx(./strip_all  ./hotkey_grammar.pl) %]
-@@ chain_op_hints_yml
+@@ ecasound_chain_operator_hints_yml
 [% qx(cat ./ecasound_chain_operator_hints.yml) %];
 @@ default_namarc
 [% qx(cat ./namarc) %]
