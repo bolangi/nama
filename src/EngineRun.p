@@ -201,7 +201,6 @@ sub disable_length_timer {
 	undef $setup->{runtime_limit};
 }
 sub wraparound {
-	package ::;
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
 	$project->{events}->{wraparound} = undef;
