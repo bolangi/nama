@@ -109,7 +109,7 @@ sub eval_iam {
 	my $buf;
 	# get socket reply, restart ecasound on error
 	my $result = $this_engine->{socket}->recv($buf, $config->{engine_command_output_buffer_size});
-	defined $result or restart_ecasound(), return;
+	defined $result or ::restart_ecasound(), return;
 
 	my ($return_value, $setup_length, $type, $reply) =
 		$buf =~ /(\d+)# digits
@@ -166,7 +166,7 @@ sub eval_iam {
 		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
 	my $errmsg = $this_engine->{ecasound}->errmsg();
 	if( $errmsg ){
-		restart_ecasound() if $errmsg =~ /in engine-status/;
+		::restart_ecasound() if $errmsg =~ /in engine-status/;
 		$this_engine->{ecasound}->errmsg(''); 
 		# Audio::Ecasound already prints error
 	}
