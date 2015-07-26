@@ -156,9 +156,12 @@ sub new {
 sub fx	 		{ my $self = shift; $self }	
 
 # provide object
+{
+no warnings 'redefine';
 sub parent {
 	my $self = shift;
 	fxn($self->{parent});
+}
 }
 
 sub is_read_only {
