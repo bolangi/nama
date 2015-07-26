@@ -217,14 +217,8 @@ sub read_in_effects_data {
 										# get_data_section('fake_lv2_register');
 	logpkg('debug',"lv2-register output:\n",$lv2);
 
-	# join wrapped lines
-	$lv2 =~ s/\n  			# newline
-						\.{3}		# three dots '...'
-						\x20		# a space
-						//gx;      # delete, multiple times, expanded regex
-
 	# join pairs of lines
-	$lv2 =~ s/\n\s*(-elv2)/ $1/g;
+	$lv2 =~ s/\s+(?=-elv2)/ /g;
 
 	# now we can handle similar to LADSPA	
 	
