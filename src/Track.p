@@ -735,6 +735,8 @@ sub apply_ops {
 }
 sub import_audio  { 
 	my $track = shift;
+	::throw($track->name.": Cannot import audio to system track"), 
+		return if ! $track->is_user_track;
 	my ($path, $frequency) = @_; 
 	$path = ::expand_tilde($path);
 	my $version  = $track->last + 1;
