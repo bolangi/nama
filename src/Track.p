@@ -1093,7 +1093,12 @@ sub send_id { $tn{$_[0]->target}->send_id}
 sub dir { $tn{$_[0]->target}->dir }
 }
 {
-package ::BoostTrack; # for instrument monitor bus
+package ::BoostTrack; 
+#
+# this subclass, intended for the single track "Boost",
+# disables routing of the mastering network
+# when the mastering mode is disabled.
+
 use ::Globals qw(:all);
 use Modern::Perl; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
