@@ -24,14 +24,6 @@ use ::Object qw(
 				 );
 initialize();
 
-# example
-#
-# if fade time is 10 for a fade out
-# and fade start time is 0:
-#
-# from 0 to 9, fade from 0 (100%) to -64db
-# from 9 to 10, fade from -64db to -256db
-
 sub initialize { 
 	%by_index = (); 
 	@fade_data = (); # for save/restore
@@ -58,13 +50,13 @@ sub new {
 
 	logpkg('debug',"object class: $class, object type: ", ref $object);
 
-	my $id = add_fader($object->track);	# only when necessary
+	my $id = add_fader($object->track);
 	
 	my $track = $tn{$object->track};
 
 	# add linear envelope controller -klg if needed
 	
-	refresh_fade_controller($track);
+	#refresh_fade_controller($track);
 	$object
 	
 }
@@ -73,35 +65,28 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
+	my @pairs = fader_envelope_pairs($track);
+	add_fader($track->name);	
 	my $operator  = ::fxn($track->fader)->type;
 	my $off_level = $config->{mute_level}->{$operator};
 	my $on_level  = $config->{unity_level}->{$operator};
-	my @controllers = @{::fxn($track->fader)->owns} if $track->fader;
-	my $controller;
-	for $controller (@controllers)
+	my @controllers = @{::fxn($track->fader)->owns};
+	logpkg('debug',$track->name, ": existing controllers: @controllers");
+	for my $controller (@controllers)
 	{
-		logpkg('debug',$track->name, ": existing controller: $controller");
-		logpkg('debug',"removing fade controller");
+		logpkg('debug',"removing fade controller $controller");
 		remove_effect($controller);
 	}
 
-	return unless
-		my @pairs = fader_envelope_pairs($track); 
-
-	# add fader if it is missing
-
-	add_fader($track->name);	
-
 	# add controller
+	my $reuseid = pop @controllers; # we expect only one
 	logpkg('debug',"applying fade controller");
-
-	# we try to re-use the controller ID
 	add_effect({
 		track		=> $track,
-		id			=> $controller,
+		id			=> $reuseid,
 		parent	 	=> $track->fader,
 		type		=> 'klg',	  		 # Ecasound controller
-		params => [	1,				 # Ecasound parameter 1
+		params => [	1,				 # modify first parameter of fader op 
 					 		$off_level,
 					 		$on_level,
 					 		@pairs,
@@ -112,7 +97,6 @@ sub refresh_fade_controller {
 	# 	first fade is type 'in'  : 0
 	# 	first fade is type 'out' : 100%
 	
-	 
 	update_effect($track->fader,0, initial_level($track->name) * 100)
 }
 
@@ -163,6 +147,8 @@ sub fades {
 
 sub initial_level {
 	# return 0, 1 or undef
+	# 0: track starts silent
+	# 1: track starts at full volume
 	my $track_name = shift;
 	my @fades = fades($track_name) or return undef;
 	# if we fade in we'll hold level zero from beginning
@@ -236,7 +222,7 @@ sub fader_envelope_pairs {
 
 
 	# prepend number of pairs;
-	unshift @pairs, (scalar @pairs / 2);
+	unshift @pairs, (scalar @pairs / 2) if @pairs;
 	@pairs;
 }
 		
@@ -314,6 +300,8 @@ sub remove {
 	else { refresh_fade_controller($track) }
 }
 sub add_fader {
+	# if it is missing
+
 	my $name = shift;
 	my $track = $tn{$name};
 
@@ -322,13 +310,13 @@ sub add_fader {
 	# create a fader if necessary, place before first effect
 	# if it exists
 	
-	if (! $id){	
+	if (! $id or ! ::fxn($id)){	
 		my $first_effect = $track->ops->[0];
 		$id = add_effect({
 				before 	=> $first_effect, 
 				track	=> $track,
 				type	=> $config->{fader_op}, 
-				params 	=> [0], # HARDCODED
+				params 	=> [0], # XX hardcoded for -ea chain operator
 		});
 		$track->set(fader => $id);
 	}
