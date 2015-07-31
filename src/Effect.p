@@ -66,28 +66,25 @@ sub new {
 
 	my $id = $args{id};
 
-	# return existing object if effect already exists
-	if ($self = fxn($id)){
-		logpkg('debug',"$id: returning existing object"); 
+	# return an existing object that has this ID
+	# Why do this instead of throw an exception?
+	if ($id and $self = fxn($id)){
+		logpkg('debug',"$id: returning existing object, constructor arguments ignored"); 
 		return $self
 	}
 
-	# allocate effect ID
-	my	$how_allocated = "recycled";
-	if ( ! $id ){ 
-		$id = new_effect_id();
-		$how_allocated = "issued";
-	}
-	logpkg('debug',"$id: effect id $how_allocated");
-
 	my $i = effect_index($args{type});
-	defined $i or confess "$args{type}: effect index not found.";
+	defined $i or confess "$args{type}: plugin not found.";
 
-	logpkg('debug',"$id: Issuing effect id for track $args{chain}");
+	# allocate effect ID if we don't have one yet
+	#
+	my	$how_allocated = $id ? 'recycled' : 'issued';
+	$id //= new_effect_id();
+	logpkg('debug',"$id: effect ID $how_allocated for track $args{chain}");
 	
 	$args{id}		= $id;
-	$args{display} 	= $fx_cache->{registry}->[$i]->{display};
-	$args{owns}		= [];
+	$args{display} 	//= $fx_cache->{registry}->[$i]->{display};
+	$args{owns}		//= [];
 
 	my $track = $ti{$args{chain}};
 
@@ -131,11 +128,9 @@ sub new {
 		logpkg('debug',"parent owns @$owns");
 
 		# register effect_id with parent unless it is already there
-		if (! grep { $id eq $_ } @$owns) {
-			push @$owns, $id;
-			logpkg('debug',sub{join " ", "my attributes:", json_out($self->as_hash)});
-		}
-		logpkg('debug',sub{join " ", "my attributes again:", json_out($self->as_hash)});
+		push @$owns, $id unless grep { $id eq $_ } @$owns;
+
+		logpkg('debug',sub{join " ", "my attributes:", json_out($self->as_hash)});
 		# find position of parent id in the track ops array 
  		# and insert child id immediately afterwards
  		# unless already present
