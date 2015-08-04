@@ -54,9 +54,7 @@ sub new {
 	
 	my $track = $tn{$object->track};
 
-	# add linear envelope controller -klg if needed
-	
-	#refresh_fade_controller($track);
+	::request_setup(); # runs apply_fades and reconfigures engine
 	$object
 	
 }
