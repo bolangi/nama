@@ -270,6 +270,7 @@ sub file_pager {
 		return;
     }
 	my $pager = $ENV{PAGER} || "/usr/bin/less";
+	$pager =~ /less/ and $pager .= qq( -M -i -PM"q=quit pager, /=search, PgUp/PgDown=scroll (line %lt/%L)");
 	my $cmd = qq($pager $fname); 
 	system $cmd;
 }
