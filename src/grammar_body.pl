@@ -1574,6 +1574,7 @@ fader_role: 'vol'|'pan'|'fader'
 hotkeys: _hotkeys { ::setup_hotkeys()}
 hotkeys_always: _hotkeys_always { $::config->{hotkeys_always}++; ::setup_hotkeys(); }
 hotkeys_off: _hotkeys_off { undef $::config->{hotkeys_always}; 1 }
+hotkeys_list: _hotkeys_list { ::list_hotkeys() ; 1 } 
 
 select_sequence: _select_sequence existing_sequence_name { 
 	$::this_sequence = $::bn{$item{existing_sequence_name}}

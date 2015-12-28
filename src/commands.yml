@@ -887,8 +887,10 @@ list_effects:
   parameters: none
 hotkeys:
   type: general
-  what: Enable hotkeys. Hit Escape key to return to command mode.
-  short: hk #
+  what: |
+    Use this command to set the hotkey mode. (You may also use the hash symbol '#'.)
+    Hit the Escape key to return to command mode.
+  short: hk 
   parameters: none
 hotkeys_always:
   type: general 
@@ -899,6 +901,11 @@ hotkeys_off:
   type: general
   what: disable hotkeys always mode
   short: hko
+  parameters: none
+hotkeys_list:
+  type: general
+  what: list hotkey bindings
+  short: hkl
   parameters: none
 add_insert:
   type: effect 

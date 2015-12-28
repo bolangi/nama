@@ -44,6 +44,8 @@ sub setup_hotkeys {
 	setup_termkey(); 
 	1
 }
+sub list_hotkeys { pager(json_out($config->{hotkeys})) }
+
 sub setup_termkey {
 	$project->{events}->{termkey} = AnyEvent::TermKey->new(
 		term => \*STDIN,
