@@ -905,7 +905,7 @@ hotkeys_off:
 hotkeys_list:
   type: general
   what: list hotkey bindings
-  short: hkl
+  short: hkl lhk
   parameters: none
 add_insert:
   type: effect 
