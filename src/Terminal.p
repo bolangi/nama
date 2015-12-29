@@ -6,6 +6,7 @@ no warnings 'uninitialized';
 use Carp;
 use ::Globals qw(:singletons $this_bus $this_track);
 use ::Log qw(logpkg logsub);
+use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
 
 sub initialize_prompt {
@@ -44,7 +45,7 @@ sub setup_hotkeys {
 	setup_termkey(); 
 	1
 }
-sub list_hotkeys { pager(json_out($config->{hotkeys})) }
+sub list_hotkeys { pager("Hotkeys\n",Dumper($config->{hotkeys})) }
 
 sub setup_termkey {
 	$project->{events}->{termkey} = AnyEvent::TermKey->new(
