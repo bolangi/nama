@@ -48,7 +48,6 @@ sub setup_hotkeys {
 sub list_hotkeys { 
 	my $hots 		= dclone($config->{hotkeys});
 	my %hots = %$hots;
-	#say Dumper \%hots; exit;
 	$hots{'='} 		= 'Enter numeric value';
 	$hots{ 'mN' } 	= 'Change step size to 10 raised to the Nth power';
 	$hots{ '#' }	= 'Engage hotkey mode (must be typed in column 1)';
