@@ -455,7 +455,7 @@ pan:
   example: |
     pan 75 # Pan the track to a position between centre and hard right
     p 50   # Move the current track to the centre.
-    pan    # Show the current position of teh track in the stereo panorama.
+    pan    # Show the current position of the track in the stereo panorama.
 pan_right:
   type: track
   what: |
@@ -715,7 +715,7 @@ new_project:
     # Now you can start adding your tracks, editing them and mixing them.
 load_project:
   type: project
-  what: Load an existing project. This will load the project from the default project state file. If you wish to load a project state saved to a user specific file, load teh project and then use get_state.
+  what: Load an existing project. This will load the project from the default project state file. If you wish to load a project state saved to a user specific file, load the project and then use get_state.
   short: load
   parameters: <string:existing_project_name>
   example: load my_old_song # Will load my_old_song just as you left it.
