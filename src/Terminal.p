@@ -45,7 +45,16 @@ sub setup_hotkeys {
 	setup_termkey(); 
 	1
 }
-sub list_hotkeys { pager("Hotkeys\n",Dumper($config->{hotkeys})) }
+sub list_hotkeys { 
+	my $hots 		= dclone($config->{hotkeys});
+	my %hots = %$hots;
+	#say Dumper \%hots; exit;
+	$hots{'='} 		= 'Enter numeric value';
+	$hots{ 'mN' } 	= 'Change step size to 10 raised to the Nth power';
+	$hots{ '#' }	= 'Engage hotkey mode (must be typed in column 1)';
+	pager("Hotkeys\n",Dumper \%hots)
+}
+
 
 sub setup_termkey {
 	$project->{events}->{termkey} = AnyEvent::TermKey->new(
