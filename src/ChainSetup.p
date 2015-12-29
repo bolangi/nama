@@ -476,7 +476,9 @@ sub has_vertex { $g->has_vertex($_[0]) }
 
 1;
 
-=head1 ::ChainSetup - routines for generating Ecasound chain setup
+=head1 NAME
+
+::ChainSetup - routines for generating Ecasound chain setup
 
 =head2 Overview
 
