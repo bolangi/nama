@@ -240,8 +240,6 @@ sub initialize_interfaces {
 	can_load( modules => {jacks => undef})
 		and $jack->{use_jacks}++;
 	choose_sleep_routine();
-	initialize_terminal() unless $config->{opts}->{T};
-
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
 	$project->{name} = shift @ARGV;
@@ -344,6 +342,8 @@ exit;
 	}
 		
 	start_midish() if $config->{use_midish};
+
+	initialize_terminal() unless $config->{opts}->{T};
 
 	# set default project to "untitled"
 	
