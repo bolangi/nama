@@ -1,5 +1,7 @@
 Changes to Audio::Nama
 
+1.205 Dec 31, 2015
+
 1.110 Jan 1, 2014
     * basic implementation of sequences/clips
     * use git is now default: retain project history,
