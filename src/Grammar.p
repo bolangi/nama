@@ -400,14 +400,14 @@ sub show_inserts {
 }
 
 $text->{format_top} = <<TOP;
- No. Name              Status      Source            Destination   Vol   Pan
-============================================================================
+ No. Name       Requested  Status  Source                Destination   Vol   Pan
+================================================================================
 TOP
 
 $text->{format_divider} = '-' x 77 . "\n";
 
 my $format_picture = <<PICTURE;
-@>>  @<<<<<<<<<<<<<< @>>>>>>>>>    @<<<<<<<<<<<<<<<< @<<<<<<<<<<< @>>>  @>>>
+@>>  @<<<<<<<<<<<<<< @>>>  @<<<<<< @<<<<<<<<<<<<<<<<<<<< @<<<<<<<<<<< @>>>  @>>>
 PICTURE
 
 sub show_tracks_section {
@@ -417,6 +417,7 @@ sub show_tracks_section {
     map {   formline $format_picture, 
             $_->n,
             $_->name,
+            $_->rw eq $_->rec_status ? undef : $_->rw,
             $_->rec_status_display,
 			placeholder($_->source_status),
 			placeholder($_->destination),
