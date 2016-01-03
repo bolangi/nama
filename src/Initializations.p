@@ -251,12 +251,6 @@ sub initialize_interfaces {
 
 	read_config(global_config());  # from .namarc if we have one
 
-	# overwrite default hotkey bindings by those in .namarc 
-	$config->{hotkeys} = {
-		%{json_in(get_data_section 'hotkey_bindings') },
-		%{$config->{hotkeys} } 
-	};
-	
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 	
 	select_ecasound_interface();
