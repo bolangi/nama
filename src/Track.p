@@ -262,11 +262,10 @@ sub rec_status_display {
 	my $track = shift;
 	my $rs = $track->rec_status;
 	my $rw = $track->rw;
-	my $status = $rs ne $rw 
-				?  lc($rw) . "->$rs"
-				:  " " x 6 . $rs;
-	$status .= " v".$track->current_version if $rs eq REC;
-	$status
+	my $status;
+	$status .= 'v'.$track->current_version.' ' if $rs eq REC;
+	$status .= lc($rw) . "->"  if $rs ne $rw; 
+	$status .= $rs
 }
 # these settings will only affect WAV playback
 
