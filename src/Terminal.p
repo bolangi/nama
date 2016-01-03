@@ -108,7 +108,9 @@ sub setup_termkey {
 	);
 }
 sub hotkey_status_bar {
-	join " ", "[".$this_track->name."]", 
+	my $name = "[".$this_track->name."]"; 
+	return "$name has no selected effect" unless $this_track->op;
+	join " ", $name,
 				"Stepsize: ",$this_track->stepsize,
 				fxn($this_track->op)->fxname,
 				parameter_info($this_track->op, $this_track->param - 1);
