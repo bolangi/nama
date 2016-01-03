@@ -264,7 +264,7 @@ sub rec_status_display {
 	my $rw = $track->rw;
 	my $status;
 	$status .= 'v'.$track->current_version.' ' if $rs eq REC;
-	$status .= lc($rw) . "->"  if $rs ne $rw; 
+	$status .= lc($rw) . " but is "  if $rs ne $rw; 
 	$status .= $rs
 }
 # these settings will only affect WAV playback
