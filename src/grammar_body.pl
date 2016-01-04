@@ -953,10 +953,12 @@ op_to_move: op_id
 new_following_op: op_id
 	
 show_effect: _show_effect fx_alias(s) {
+	my @fx = @{ $item{'fx_alias(s)'}};
+	@fx = ::Effect::expanded_ops_list(@fx);
 	my @lines = 
 		map{ ::show_effect($_, "with track affiliation") } 
 		grep{ ::fxn($_) }
-		@{ $item{'fx_alias(s)'}};
+		@fx;
 	::set_current_op($item{'fx_alias(s)'}->[-1]);
 	::pager(@lines); 1
 }
