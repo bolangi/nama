@@ -461,6 +461,8 @@ sub track_gui {
 	logsub("&track_gui");
 	my $ui = shift;
 	my $n = shift;
+	pager("track_gui already generated"), return
+		if defined $gui->{tracks}->{$n} ;
 	return if $ti{$n}->hide;
 	
 	logpkg('debug', "found index: $n");
