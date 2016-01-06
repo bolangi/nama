@@ -146,6 +146,7 @@ use ::Log qw(logit loggit logpkg logsub initialize_logger);
 sub main { 
 	say eval join(get_data_section('banner'), qw(" "));
 	bootstrap_environment() ;
+	load_project();
 	process_command($config->{execute_on_project_load});
 	reconfigure_engine();
 	process_command($config->{opts}->{X});
@@ -160,7 +161,6 @@ sub bootstrap_environment {
 	setup_hotkey_grammar();
 	initialize_interfaces();
 }
-
 sub cleanup_exit {
 	logsub("&cleanup_exit");
  	remove_riff_header_stubs();

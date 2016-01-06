@@ -111,28 +111,21 @@ sub initialize_project_data {
 	reset_command_buffer();
 
 }
+
 sub load_project {
 	logsub("&load_project");
 	my %args = @_;
 	logpkg('debug', sub{json_out \%args});
-	throw("no project name.. doing nothing."),return 
-		unless $args{name} or $project->{name};
-
 	$project->{name} = $args{name} if $args{name};
-
+	$config->{opts}->{c} and $args{create}++;
+	if (! $project->{name} or $project->{name} and ! -d project_dir() and ! $args{create})
+	{
+		::pager_newline(qq(Project "$project->{name}" not found. Loading project "untitled".)); 
+		$project->{name} = "untitled", $args{create}++,
+	}
 	if ( ! -d project_dir() )
-	{ 	
-		if ( $args{create} )
-		{ 
-			map{create_dir($_)} project_dir(), this_wav_dir() ;
-		}
-		else 
-		{ ::pager_newline(
-			qq(Project "$project->{name}" does not exist.\n Loading project "untitled".)
-			);
-			load_project( qw{name untitled create 1} );
-			return;
-		}	
+	{
+		map{create_dir($_)} project_dir(), this_wav_dir() if $args{create};
 	}
 
 	# we used to check each project dir for customized .namarc
@@ -144,21 +137,7 @@ sub load_project {
 	remove_riff_header_stubs(); 
 	cache_wav_info();
 	restart_wav_memoize();
-	
-
-	if( $config->{use_git} and not is_test_script()){
-		my $initializing_repo;
-		Git::Repository->run( init => project_dir()), $initializing_repo++
-			unless -d join_path( project_dir().  '.git');
-		$project->{repo} = Git::Repository->new( work_tree => project_dir() );
-		write_file($file->git_state_store, "{}\n"), $initializing_repo++
-			if ! -e $file->git_state_store and ! $project->{repo}->run( 'branch' );
-
-		if ($initializing_repo){
-			$project->{repo}->run( add => $file->git_state_store );
-		}
-	}
-
+	initialize_project_git_repository();
 	restore_state($args{settings}) unless $config->{opts}->{M} ;
 
 	if (! $tn{Master}){ # new project
