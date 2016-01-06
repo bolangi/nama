@@ -339,17 +339,6 @@ exit;
 
 	initialize_terminal() unless $config->{opts}->{T};
 
-	# set default project to "untitled"
-	
-	#convert_project_format(); # mark with .conversion_completed file in ~/nama
-	
-	if (! $project->{name} ){
-		$project->{name} = "untitled";
-		$config->{opts}->{c}++; 
-	}
-	pager("\nproject_name: $project->{name}\n");
-	
-	load_project( name => $project->{name}, create => $config->{opts}->{c}) ;
 	1;	
 }
 { my $is_connected_remote;

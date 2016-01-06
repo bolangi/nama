@@ -8,6 +8,17 @@ You may want to set use_git: 1 in .namarc"), return;
 	logpkg('debug',"VCS command: git @_"); 
 	$project->{repo}->run(@_) 
 }
+sub initialize_project_git_repository {
+	confess("no project dir") if ! project_dir();
+	return unless $config->{use_git} and not is_test_script();
+	pager("creating project dir ", join_path( project_dir(),  '.git' ))
+		if ! -d join_path( project_dir(),  '.git' );
+	Git::Repository->run( init => project_dir());
+	$project->{repo} = Git::Repository->new( work_tree => project_dir() );
+	write_file($file->git_state_store, "{}\n") if ! -e $file->git_state_store;
+	git_commit("initialize new project");
+}
+
 sub git_tag_exists {
 	my $tag = shift;
 	grep { $tag eq $_ } git( 'tag','--list');
