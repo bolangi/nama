@@ -56,8 +56,6 @@ while( my($dest,$type) = splice @id_to_type, 0,2){
 }
 
 
-is( ref $bn{Main}, q(Audio::Nama::SubBus), 'Bus initializtion');
-
 # SKIP: { 
 # my $cs_got = eval_iam('cs');
 # my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
@@ -75,6 +73,9 @@ $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("project project wav dir: ".this_wav_dir
 #diag(map{ $_->dump} values %::Track::by_index );
 
 is( project_dir(), "$test_dir/$test_project", "establish project directory");
+
+is( ref $bn{Main}, q(Audio::Nama::SubBus), 'Bus initializtion');
+
 
 force_jack();
 
