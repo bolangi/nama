@@ -461,10 +461,10 @@ sub set_io {
 			my $name = $track->name;
 			my $width = scalar @{ ::jack_client_array($id, $client_direction) };
 			$width or ::pager(
-				qq($name: $direction port for JACK client "$id" not found.));
+				qq(Track $name: $direction port for JACK client "$id" not found.));
 			$width or return;
 			$width ne $track->width and ::pager(
-				$track->name, ": track set to ", ::width($track->width),
+				"Track $name set to ", ::width($track->width),
 				qq(, but JACK source "$id" is ), ::width($width), '.');
 		}
 		elsif( $type eq 'jack_ports_list' ){
@@ -653,7 +653,7 @@ sub set_rw {
 	#my $already = $track->rw eq $setting ? " already" : "";
 	$track->set(rw => $setting);
 	my $status = $track->rec_status();
-	::pager($track->name, " set to $setting", 
+	::pager("Track ",$track->name, " set to $setting", 
 		($status ne $setting ? ", but current status is $status" : ""));
 
 }
