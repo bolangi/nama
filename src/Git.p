@@ -11,7 +11,7 @@ You may want to set use_git: 1 in .namarc"), return;
 sub initialize_project_git_repository {
 	confess("no project dir") if ! project_dir();
 	return unless $config->{use_git} and not is_test_script();
-	pager("creating project dir ", join_path( project_dir(),  '.git' ))
+	pager("Creating git repository in ", join_path( project_dir(),  '.git' ))
 		if ! -d join_path( project_dir(),  '.git' );
 	Git::Repository->run( init => project_dir());
 	$project->{repo} = Git::Repository->new( work_tree => project_dir() );
