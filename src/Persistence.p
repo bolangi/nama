@@ -380,6 +380,7 @@ sub restore_state_from_file {
 		$::Insert::by_index{$_->{n}} = $_;
 	} @inserts_data;
 
+	# Restore GUI for user tracks
 	map{ 
 		my $n = $_->{n};
 
@@ -388,8 +389,6 @@ sub restore_state_from_file {
 
 	} @tracks_data;
 
-	$ui->create_master_and_mix_tracks();
-	
 	$this_track = $tn{$this_track_name}, set_current_bus() if $this_track_name;
 	
 	#print "\n---\n", $main->dump;  

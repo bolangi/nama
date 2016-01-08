@@ -139,32 +139,7 @@ sub load_project {
 	restart_wav_memoize();
 	initialize_project_git_repository();
 	restore_state($args{settings}) unless $config->{opts}->{M} ;
-
-	if (! $tn{Master}){ # new project
-
-		::SimpleTrack->new( 
-			group => 'Master', 
-			name => 'Master',
-			send_type => 'soundcard',
-			send_id => 1,
-			width => 2,
-			rw => MON,
-			source_type => undef,
-			source_id => undef); 
-
-		my $mixdown = ::MixDownTrack->new( 
-			group => 'Mixdown', 
-			name => 'Mixdown', 
-			width => 2,
-			rw => OFF,
-			source_type => undef,
-			source_id => undef); 
-
-
-		#remove_effect($mixdown->vol);
-		#remove_effect($mixdown->pan);
-	}
-
+	initialize_mixer() if not $tn{Master};
 
 	$config->{opts}->{M} = 0; # enable 
 	
@@ -218,7 +193,7 @@ sub dig_ruins { # only if there are no tracks
 
 	logpkg('debug', "tracks found: @wavs");
  
-	$ui->create_master_and_mix_tracks();
+	initialize_mixer();
 
 	map{add_track($_)}@wavs;
 

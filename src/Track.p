@@ -1286,8 +1286,6 @@ our @ISA = '::SlaveTrack';
 package ::;
 use Modern::Perl;
 
-# usual track
-
 sub add_track {
 
 	logsub("&add_track");
