@@ -173,8 +173,11 @@ sub extract_effects_data {
 			$trimmed =~ s/,/, /g;
 			$trimmed = "LV2 $trimmed";
  			$fx_cache->{partial_label_to_full}->{"lv2-$suffix"} = $id;
-			push @{$fx_cache->{user_help}}, $trimmed;  # store help
+			$line = $trimmed;
  		}
+		# remove Ecasound registry index No., if present
+		$line =~ s/^\d+\.\s*//;
+		push @{$fx_cache->{user_help}}, $line;
 
 		# abbreviate index takes full names as well
 		$fx_cache->{partial_label_to_full}->{$id} = $id;

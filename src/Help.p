@@ -136,12 +136,13 @@ sub help_effect {
 	# convert preset_name  to pn:preset_name
 	
 	if ($fx_cache->{full_label_to_index}->{$id}){} # we are ready
+
 	elsif ( $fx_cache->{partial_label_to_full}->{$id} ) { $id = $fx_cache->{partial_label_to_full}->{$id} }
 	else { $no_match++ }
 
-	# one-line help for Ecasound presets
+	# one-line help for Ecasound and chain operators, controllers and presets
 	
-	if ($id =~ /pn:/) {
+	if ($id !~ /^(lv2|el):/) {
 		push @output, grep{ /$id/  } @{$fx_cache->{user_help}};
 	}
 
@@ -149,10 +150,6 @@ sub help_effect {
 	
 	elsif ( $id =~ /el:/  ) { @output = $fx_cache->{ladspa_help}->{$id} }
 	elsif ( $id =~ /elv2:/) { @output = $fx_cache->{lv2_help}->{$id}    }
-	else { 
-		@output = qq("$id" is an Ecasound chain operator.
-Type 'man ecasound' at a shell prompt for details.);
-	}
 
 	if( $no_match ){ throw("No effects were found matching: $input\n\n"); }
 	else { ::pager(@output) }
