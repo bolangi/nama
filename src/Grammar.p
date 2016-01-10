@@ -480,27 +480,30 @@ sub t_load_project {
 	package ::;
 	return if engine_running() and ::ChainSetup::really_recording();
 	my $name = shift;
+	my %args = @_;
 	pager("input name: $name\n");
-	my $newname = remove_spaces($name);
-	$newname =~ s(/$)(); # remove trailing slash
-	throw("Project $newname does not exist\n"), return
-		unless -d join_path(project_root(), $newname);
-	stop_transport();
+	$name = sanitize($name);
+	throw("Project $name does not exist\n"), return
+		unless -d join_path(project_root(), $name) or $args{create};
+	stop_transport() if engine_running(); 
 	save_state();
-	load_project( name => $newname );
-	pager("loaded project: $project->{name}\n");
+	load_project( name => $name, %args );
+	pager("loaded project: $project->{name}\n") unless $args{create};
 	{no warnings 'uninitialized';
 	logpkg('debug',"load hook: $config->{execute_on_project_load}");
 	}
 	::process_command($config->{execute_on_project_load});
 }
+sub sanitize {
+	my $name = shift;
+	my $newname = remove_spaces($name);
+	$newname =~ s(/$)(); # remove trailing slash
+	$newname;
+}
 sub t_create_project {
 	package ::;
 	my $name = shift;
-	load_project( 
-		name => remove_spaces($name),
-		create => 1,
-	);
+	t_load_project($name, create => 1);
 	pager("created project: $project->{name}\n");
 
 }
