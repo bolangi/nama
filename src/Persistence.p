@@ -35,8 +35,7 @@ sub save_state {
 
 	# do nothing more if only Master and Mixdown
 	
-
-	user_tracks_present() or throw("No user tracks, skipping..."), return;
+	#user_tracks_present() or throw("No user tracks, skipping..."), return;
 	
 	logpkg('debug',"Saving state as ", $path);
 	save_system_state($path);
