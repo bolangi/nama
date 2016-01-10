@@ -9,6 +9,7 @@ You may want to set use_git: 1 in .namarc"), return;
 	$project->{repo}->run(@_) 
 }
 sub initialize_project_git_repository {
+	logsub('&initialize_project_git_repository');
 	confess("no project dir") if ! project_dir();
 	return unless $config->{use_git} and not is_test_script();
 	pager("Creating git repository in ", join_path( project_dir(),  '.git' ))
@@ -16,10 +17,12 @@ sub initialize_project_git_repository {
 	Git::Repository->run( init => project_dir());
 	$project->{repo} = Git::Repository->new( work_tree => project_dir() );
 	write_file($file->git_state_store, "{}\n") if ! -e $file->git_state_store;
-	git_commit("initialize new project");
+	git( add => $file->git_state_store );
+	git( commit => '--quiet', '--message', "initialize project");
 }
 
 sub git_tag_exists {
+	logsub('&git_tag_exists');
 	my $tag = shift;
 	grep { $tag eq $_ } git( 'tag','--list');
 }
