@@ -66,8 +66,10 @@ keys %EXPORT_TAGS;
 1;
 __END__
 
-=head1 Nama Variables
-
+=head1 NAME
+ 
+Audio::Nama::Globals - Nama global variables
+ 
 Variables are listed in multiple files in the source.
 
 =head2 Exported
