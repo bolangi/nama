@@ -64,7 +64,7 @@ use ::Graphical;
 # They are descendents of a base class we define in the root namespace
 
 our @ISA; # no ancestors
-use ::Object qw(mode); # based on Object::Tiny
+use ::Object qw(); # based on Object::Tiny
 
 sub hello {"superclass hello"}
 
