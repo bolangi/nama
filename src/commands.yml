@@ -1296,7 +1296,7 @@ midish_command:
   example: m tracknew my_midi_track # create a new MIDI track in midish.
 midish_mode_on:
   type: midi
-  what: all users commands sent to midish, until
+  what: all users commands sent to midish, until midish-mode-off
   short: mmo
 midish_mode_off:
   what: exit midish mode, restore default Nama command mode, no midish sync
