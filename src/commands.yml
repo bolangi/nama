@@ -626,8 +626,7 @@ bus_mon:
 bus_off:
   type: bus
   what: |
-    Set current bus mixtrack to OFF. Can be reversed
-    with bus_rec or bus_mon.
+    Set current bus mixtrack to OFF. Can be reversed with bus_mon.
   short: boff
   parameters: none
 bus_version:
