@@ -64,7 +64,7 @@ sub new {
 
 	# prepare top-level bus and mix track
 	
-	$host->busify;     # i.e. sax (bus/track)
+	$host->activate_bus;     # i.e. sax (bus/track)
 	
 	# create the version-level bus and mix track
 	# i.e. sax-v5 (bus/track)
@@ -74,14 +74,14 @@ sub new {
 	my $version_mix = ::Track->new(
 
 		name 		=> $self->edit_root_name, # i.e. sax-v5
-	#	rw			=> REC,                 # set by ->busify
+	#	rw			=> REC,                 # set by ->activate_bus
 		source_type => 'bus',
 		source_id 	=> 'bus',
 		width		=> 2,                     # default to stereo 
 		group   	=> $self->host_track,     # i.e. sax
 		hide		=> 1,
 	); 
-	$version_mix->busify;
+	$version_mix->activate_bus;
 
 	# create host track alias if necessary
 
@@ -703,7 +703,7 @@ sub explode_track {
 	::throw($track->name,": Only one version. Skipping."), return
 		if scalar @versions == 1;
 
-	$track->busify;
+	$track->activate_bus;
 
 	my $host = $track->name;
 	my @names = map{ "$host-v$_"} @versions;
@@ -753,7 +753,7 @@ Set the correct version and try again."), return
 	
 	$edit->host_bus->set(rw => REC);
 
-	$edit->host->busify;
+	$edit->host->activate_bus;
 
 	# turn off all version level buses/mix_tracks
 	
@@ -765,7 +765,7 @@ Set the correct version and try again."), return
 	
 	$edit->version_bus->set(rw => REC);
 
-	$edit->version_mix->busify;
+	$edit->version_mix->activate_bus;
 
 	$edit->host_alias_track->set(rw => PLAY);
 
@@ -785,7 +785,7 @@ sub disable_edits {
 
 	# reset host track
 	
-	$edit->host->unbusify;
+	$edit->host->deactivate_bus;
 	
 }
 sub merge_edits {

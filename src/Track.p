@@ -810,11 +810,11 @@ sub set_track_class {
 	bless $track, $class;
 	$track->set(class => $class);
 }
-sub busify {
+sub activate_bus {
 	my $track = shift;
 	::add_bus($track->name) unless $track->is_system_track;
 }
-sub unbusify {
+sub deactivate_bus {
 	my $track = shift;
 	return if $track->is_system_track;
 	$track->set( rw => PLAY);
@@ -1041,8 +1041,8 @@ sub destination {
 	return $track->SUPER() if $track->rec_status ne OFF
 }
 #sub rec_status_display { $_[0]->rw ne OFF ? PLAY : OFF }
-sub busify {}
-sub unbusify {}
+sub activate_bus {}
+sub deactivate_bus {}
 }
 {
 package ::MasteringTrack; # used for mastering chains 

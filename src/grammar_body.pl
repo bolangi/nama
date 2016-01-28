@@ -509,7 +509,7 @@ bus_mon: _bus_mon {
 	my $bus = $::bn{$::this_bus}; 
 	$bus->set(rw => 'MON');
 	# set up mix track
-	$::tn{$bus->send_id}->busify
+	$::tn{$bus->send_id}->activate_bus
 		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
 	::pager( "Setting MON mode for $::this_bus bus.");
 	1; }

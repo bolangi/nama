@@ -109,7 +109,7 @@ my %bus_logic = (
 			$track->set_rec() or return;
 
 			$bus->set(rw => MON);
-			$tn{$bus->send_id}->busify 
+			$tn{$bus->send_id}->activate_bus 
 				if $bus->send_type eq 'track' and $tn{$bus->send_id};
 			
 		},
