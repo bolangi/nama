@@ -50,6 +50,16 @@ sub init_gui {
 	$gui->{ew}->bind('<Control-Key- >' => \&toggle_transport); 
 	$gui->{ww}->bind('<Control-Key- >' => \&toggle_transport); 
 	
+	$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
+	$gui->{wwcanvas}->configure(
+		scrollregion =>[2,2,10000,10000],
+		-width => 1200,
+		-height => 700,	
+		);
+	$gui->{wwframe} = $gui->{wwcanvas}->Frame;
+	my $id0 = $gui->{wwcanvas}->createWindow(30,30, -window => $gui->{wwframe},
+											-anchor => 'nw');
+
 	$gui->{canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
 	$gui->{canvas}->configure(
 		scrollregion =>[2,2,10000,10000],
