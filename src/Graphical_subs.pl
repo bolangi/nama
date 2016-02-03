@@ -30,15 +30,25 @@ sub init_gui {
 	$gui->{ew}->deiconify; 
 #	$gui->{ew}->withdraw;
 
+
+	### init waveform window
+
+	$gui->{ww} = $gui->{mw}->Toplevel;
+	$gui->{ww}->title("Effect Window");
+	$gui->{ww}->deiconify; 
+	
+
 	### Exit via Ctrl-C 
 
 	$gui->{mw}->bind('<Control-Key-c>' => sub { exit } ); 
 	$gui->{ew}->bind('<Control-Key-c>' => sub { exit } );
+	$gui->{ww}->bind('<Control-Key-c>' => sub { exit } );
 
     ## Press SPACE to start/stop transport
 
 	$gui->{mw}->bind('<Control-Key- >' => \&toggle_transport); 
 	$gui->{ew}->bind('<Control-Key- >' => \&toggle_transport); 
+	$gui->{ww}->bind('<Control-Key- >' => \&toggle_transport); 
 	
 	$gui->{canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
 	$gui->{canvas}->configure(
