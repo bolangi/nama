@@ -782,7 +782,7 @@ loop:
   parameters: <string:start_mark_name> | <integer:start_mark_index> | <float:start_time_in_secs> <string:end_mark_name> | <integer:end_mark_index> | <float:end_time_in_secs>
   example: |
     loop 1.5 10.0 # Loop between 1.5 and 10.0 seconds.
-    loop 1 5 # Loop between marks with indeices 1 and 5, see list_marks.
+    loop 1 5 # Loop between marks with indices 1 and 5, see list_marks.
     loop sax_start 12.6 # Loop between mark sax_start and 12.6 seconds.
 noloop:
   type: setup
@@ -1410,7 +1410,9 @@ set_rec_end_mark:
   parameters: none
 disable_edits:
   type: edit
-  what: Turn off the edits for the current track and playback the original. This will exclude the edit sub bus.
+  what: |
+    Turn off the edits for the current track and playback 
+    the original WAV file. This will remove the edit bus.
   short: ded
   parameters: none
 merge_edits:
