@@ -60,6 +60,11 @@ sub init_gui {
 	my $id0 = $gui->{wwcanvas}->createWindow(30,30, -window => $gui->{wwframe},
 											-anchor => 'nw');
 
+	my $wavform = $gui->{ww}->Photo(-format => 'png', -file => join_path(project_dir(),"tmh-2400x480.png"));
+	$gui->{wwcanvas}->createImage(100,100, -image => $wavform);
+
+
+
 	$gui->{canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
 	$gui->{canvas}->configure(
 		scrollregion =>[2,2,10000,10000],
