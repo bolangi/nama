@@ -52,7 +52,7 @@ sub init_gui {
 	
 	$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
 	$gui->{wwcanvas}->configure(
-		scrollregion =>[2,2,2402,482],
+		scrollregion =>[0,0,2400,480],
 		-width => 2400,
 		-height => 480	
 		);
