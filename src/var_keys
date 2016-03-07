@@ -214,6 +214,11 @@ $gui->{engine_start}			# start button
 $gui->{engine_stop}				# stop button
 $gui->{_old_bg}					# default background color
 $gui->{_old_abg}				# default active background color
+$gui->{ww}						# main window for waveform test
+$gui->{wwframe}					# waveform frame
+$gui->{wwcanvas}				# waveform canvas
+
+
 $config->{soundcard_loopback_delay}
 $jack->{connections}
 $jack->{is_own_port}
