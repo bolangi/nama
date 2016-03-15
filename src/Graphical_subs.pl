@@ -57,11 +57,8 @@ sub init_gui {
 		-height => 480	
 		);
 	$gui->{wwframe} = $gui->{wwcanvas}->Frame;
-#	my $id0 = $gui->{wwcanvas}->createWindow(3,3, -window => $gui->{wwframe},
-#											-anchor => 'nw');
-
 	my $wavform = $gui->{ww}->Photo(-format => 'png', -file => join_path(project_dir(),"tmh-2400x480.png"));
-	$gui->{wwcanvas}->createImage(1200,240, -image => $wavform);
+	$gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $wavform);
 
 
 
