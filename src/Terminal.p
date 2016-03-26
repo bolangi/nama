@@ -198,16 +198,31 @@ sub detect_spacebar {
 	
 	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub {
 		&{$text->{term_attribs}->{'callback_read_char'}}();
+		my $buffer = $text->{term_attribs}->{line_buffer};
+		my $trigger = ' ';
+		my $midi_sync_trigger = '@';
 		if ( $config->{press_space_to_start} and 
-			$text->{term_attribs}->{line_buffer} eq " " 
+			($buffer eq $trigger or $buffer eq $midi_sync_trigger)
 				and ! ($mode->song or $mode->live) )
 		{ 	
+			
+			# set midi-sync if necessary and then restore previous state
+			
+			my $old_mode = $mode->{midish_transport_sync};
+			# set to play, but don't clobber existing record setting
+			$mode->{midish_transport_sync} //= PLAY if $buffer eq $midi_sync_trigger; 
 			toggle_transport();	
+			$mode->{midish_transport_sync} = $old_mode;
+
+			# reset command line, read next char
+			
 			$text->{term_attribs}->{line_buffer} = q();
 			$text->{term_attribs}->{point} 		= 0;
 			$text->{term_attribs}->{end}   		= 0;
 			$text->{term}->stuff_char(10);
 			&{$text->{term_attribs}->{'callback_read_char'}}();
+
+			
 		}
 		elsif (  $text->{term_attribs}->{line_buffer} eq "#" ){
 			setup_hotkeys();
