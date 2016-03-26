@@ -26,8 +26,8 @@ sub start_midish {
 sub start_midish_transport {
 	my $sync = $mode->{midish_transport_sync};
 	my $start_command;
-	$start_command = 'p' if $sync eq 'play';
-	$start_command = 'r' if $sync eq 'record';
+	$start_command = 'p' if $sync eq PLAY;
+	$start_command = 'r' if $sync eq REC;
 	defined $start_command 
 		or die "$mode->{midish_transport_sync}: illegal midish_transport_sync mode";
 	midish_command($start_command);

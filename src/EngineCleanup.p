@@ -138,8 +138,8 @@ sub post_rec_configure {
 		
 		undef $mode->{offset_run} if ! defined $this_edit;
 		no warnings 'uninitialized';
-		$mode->{midish_transport_sync} = 'play' 
-			if $mode->{midish_transport_sync} eq 'record';
+		$mode->{midish_transport_sync} = PLAY
+			if $mode->{midish_transport_sync} eq REC;
 
 		$ui->refresh();
 		request_setup();

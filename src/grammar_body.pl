@@ -1402,14 +1402,14 @@ midish_mode_off_ready_to_play: _midish_mode_off_ready_to_play {
 	::pager("Releasing midish terminal mode.
 Will sync playback with Ecasound."); 
 	undef $::mode->{midish_terminal} ;
-	$::mode->{midish_transport_sync} = 'play';
+	$::mode->{midish_transport_sync} = ::PLAY;
 	1;
 }
 midish_mode_off_ready_to_record: _midish_mode_off_ready_to_record { 
 	::pager("Releasing midish terminal mode. 
 Will sync record with Ecasound.");
 	undef $::mode->{midish_terminal} ;
-	$::mode->{midish_transport_sync} = 'record';
+	$::mode->{midish_transport_sync} = ::REC;
 	1;
 }
 
