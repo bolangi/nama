@@ -138,17 +138,9 @@ sub _targets {
 	\%versions;
 }
 
-	
 sub _versions {  
 #	$::debug2 and print "&versions\n";
 	my %args = @_;
 	[ sort { $a <=> $b } keys %{ _targets(%args)} ]  
 }
-sub _last { 
-	my %args = @_;
-	pop @{ _versions(%args) } 
-}
-
-1;
-
 1;

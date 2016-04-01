@@ -9,7 +9,6 @@ my @wav_functions = qw(
 	candidates 
 	_targets 
 	_versions 
-	_last 
 );
 my @track_functions = qw(
 	dir 
