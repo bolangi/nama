@@ -7,9 +7,9 @@ BEGIN { # OPTMIZATION
 my @wav_functions = qw(
 	get_versions 
 	candidates 
-	targets 
-	versions 
-	last 
+	_targets 
+	_versions 
+	_last 
 );
 my @track_functions = qw(
 	dir 

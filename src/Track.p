@@ -3,6 +3,8 @@
 package ::;
 {
 package ::Track;
+use Role::Tiny::With;
+with '::Wav';
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
 use ::Effect  qw(fxn);
@@ -111,87 +113,9 @@ sub new {
 
 # TODO these conditional clauses should be separated
 # into classes 
-sub dir {
-	my $self = shift;
-	 $self->project  
-		? join_path(::project_root(), $self->project, '.wav')
-		: ::this_wav_dir();
-}
 
-sub basename {
-	my $self = shift;
-	$self->target || $self->name
-}
 
-sub full_path { my $track = shift; join_path($track->dir, $track->current_wav) }
 
-sub group_last {
-	my $track = shift;
-	my $bus = $bn{$track->group}; 
-	$bus->last;
-}
-
-sub last { $_[0]->versions->[-1] || 0 }
-
-sub current_wav {
-	my $track = shift;
-	my $last = $track->current_version;
-	if 	($track->rec_status eq REC){ 
-		$track->name . '_' . $last . '.wav'
-	} elsif ( $track->rec_status eq PLAY){ 
-		my $filename = $track->targets->{ $track->monitor_version } ;
-		$filename
-	} else {
-		logpkg('debug', "track ", $track->name, ": no current version") ;
-		undef; 
-	}
-}
-
-sub current_version {	
-	my $track = shift;
-	my $status = $track->rec_status;
-	#logpkg('debug', "last: $last status: $status");
-
-	# two possible version numbers, depending on REC/PLAY status
-	
-	if 	($status eq REC)
-	{ 
-		my $last = $config->{use_group_numbering} 
-					? ::Bus::overall_last()
-					: $track->last;
-		return ++$last
-	}
-	elsif ( $status eq PLAY){ return $track->monitor_version } 
-	else { return 0 }
-}
-
-sub monitor_version {
-	my $track = shift;
-
-	my $bus = $bn{$track->group};
-	return $track->version if $track->version 
-				and grep {$track->version  == $_ } @{$track->versions} ;
-	$track->last;
-}
-
-sub maybe_monitor { # ordinary sub, not object method
-	my $monitor_version = shift;
-	return PLAY if $monitor_version and ! $mode->doodle;
-	return OFF;
-}
-
-sub targets { # WAV file targets, distinct from 'target' attribute
-	my $self = shift;
-	::Wav::targets(dir => $self->dir, name => $self->basename)
-}
-sub versions {
-	my $self = shift;
-	::Wav::versions(dir => $self->dir, name => $self->basename) 
-}
-sub last { 
-	my $self = shift;
-	::Wav::last(dir => $self->dir, name => $self->basename) || 0 
-}
 # if you belong to a bus with an opinion, go that way
 sub engine_group {
 	my $track = shift;

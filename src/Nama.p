@@ -94,13 +94,16 @@ use ::Bus;
 use ::Sequence;
 use ::Mark;
 use ::IO;
-use ::Wav;
 use ::Insert;
 use ::Fade;
 use ::Edit;
 use ::EffectChain;
 use ::Lat;
 use ::Engine;
+
+####### Nama Roles - loaded by another class
+
+# use ::Wav;
 
 ####### Nama subroutines ######
 #
