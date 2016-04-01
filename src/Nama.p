@@ -145,6 +145,7 @@ use ::Wavinfo ();
 use ::Midi ();
 use ::Latency ();
 use ::Log qw(logit loggit logpkg logsub initialize_logger);
+use ::TrackUtils ();
 
 sub main { 
 	say eval join(get_data_section('banner'), qw(" "));
