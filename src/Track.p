@@ -41,8 +41,6 @@ initialize();
 
 ### class subroutines
 
-
-
 sub initialize {
 	$n = 0; 	# incrementing numeric key
 	%by_index = ();	# return ref to Track by numeric key
