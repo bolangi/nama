@@ -307,13 +307,6 @@ sub jack_manual_port {
 	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
 }
 
-sub bus_tree { # for solo function to work in sub buses
-	my $track = shift;
-	my $mix = $track->group;
-	return if $mix eq 'Main';
-	($mix, $tn{$mix}->bus_tree);
-}
-
 sub version_has_edits { 
 	my ($track) = @_;
 	grep
@@ -321,6 +314,13 @@ sub version_has_edits {
      		and $_->host_version == $track->monitor_version
 		} values %::Edit::by_name;
 }	
+sub bus_tree { # for solo function to work in sub buses
+	my $track = shift;
+	my $mix = $track->group;
+	return if $mix eq 'Main';
+	($mix, $tn{$mix}->bus_tree);
+}
+
 sub activate_bus {
 	my $track = shift;
 	::add_bus($track->name) unless $track->is_system_track;
