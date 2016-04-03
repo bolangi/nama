@@ -321,20 +321,6 @@ sub version_has_edits {
      		and $_->host_version == $track->monitor_version
 		} values %::Edit::by_name;
 }	
-# current operator and current parameter for the track
-sub op { $project->{current_op}->{$_[0]->name} //= $_[0]->{ops}->[-1] }
-
-sub param { $project->{current_param}->{$_[0]->op} //= 1 }
-
-sub stepsize {
-	$project->{current_stepsize}->{$_[0]->op}->[$_[0]->param] //= 0.01 
-	# TODO use hint if available
-}
-sub pos {
-	my $track = shift;
-	first_index{$_ eq $track->op} @{$track->ops};
-}
-
 sub set_track_class {
 	my ($track, $class) = @_;
 	bless $track, $class;
