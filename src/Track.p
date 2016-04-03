@@ -9,6 +9,7 @@ with '::WavModify';
 with '::TrackRegion';
 with '::TrackSetIO';
 with '::TrackComment';
+with '::TrackEffect';
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
 use ::Effect  qw(fxn);
@@ -194,25 +195,6 @@ sub rec_status_display {
 	$status .= ' v'.$track->current_version if $rs eq REC;
 	$status
 }
-sub user_ops { # returns list 
-	my $track = shift;
-	my @skip = 	grep {::fxn($_)}  # must exist
-				map { $track->{$_} } qw(vol pan fader latency_op );
-
-	# make a dictionary of ops to exclude
-	# that includes utility ops and their controllers
-	
-	my %skip;
-
-	map{ $skip{$_}++ } @skip, ::expanded_ops_list(@skip);
-
-	grep{ ! $skip{$_} } @{ $track->{ops} || [] };
-}
-sub user_ops_o {
-	my $track = shift;
-	map{ ::fxn($_) } $track->user_ops();
-}
-		
 sub snapshot {
 	my $track = shift;
 	my $fields = shift;
@@ -321,12 +303,6 @@ sub unmute {
 		: $track->vol_o->fadein($track->old_vol_level);
 
 	$track->set(old_vol_level => undef);
-}
-sub apply_ops {
-	my $track = shift;
-	map{ $_->apply_op }	# add operator to the ecasound chain
-	map{ fxn($_) } 		# convert to objects
-	@{ $track->ops }  	# start with track ops list
 }
 sub import_audio  { 
 	my $track = shift;
@@ -493,77 +469,12 @@ sub rec_cleanup_script {
 sub is_region { defined $_[0]->{region_start} }
 
 sub current_edit { $_[0]->{current_edit}//={} }
-
-sub first_effect_of_type {
-	my $track = shift;
-	my $type = shift;
-	for my $op ( @{$track->ops} ){
-		my $FX = ::fxn($op);
-		return $FX if $FX->type =~ /$type/ # Plate matches el:Plate
-	}
-}
 sub is_mix_track {
 	my $track = shift;
 	($bn{$track->name} or $track->name eq 'Master') and $track->rw eq MON
 }
 sub bus { $bn{$_[0]->group} }
 
-sub effect_id_by_name {
-	my $track = shift;
-	my $ident = shift;
-	for my $FX ($track->user_ops_o)
-	{ return $FX->id if $FX->name eq $ident }
-}
-sub effect_nickname_count {
-	my ($track, $nick) = @_;
-	my $count = 0;
-	for my $FX ($track->user_ops_o){ $count++ if $FX->name =~ /^$nick\d*$/ }
-	$count
-}
-sub unique_surname {
-	my ($track, $surname) = @_;
-	# increment supplied surname to be unique to the track if necessary 
-	# return arguments:
-	# $surname, $previous_surnames
-	my $max = undef;
-	my %found;
-	for my $FX ($track->user_ops_o)
-	{ 
-		if( $FX->surname =~ /^$surname(\d*)$/)
-		{
-			$found{$FX->surname}++;
-			no warnings qw(uninitialized numeric);
-			$max = $1 if $1 > $max;
-		}
-	}
-	if (%found){ $surname.++$max, join ' ',sort keys %found } else { $surname }
-}
-sub unique_nickname {
-	my ($track, $nickname) = @_;
-	my $i = 0;
-	my @found;
-	for my $FX ($track->user_ops_o)
-	{ 
-		if( $FX->name =~ /^$nickname(\d*)$/)
-		{
-			push @found, $FX->name; 
-			$i = $1 if $1 and $1 > $i
-		}
-	}
-	$nickname. (@found ? ++$i : ""), "@found"
-}
-# return effect IDs matching a surname
-sub with_surname {
-	my ($track, $surname) = @_;
-	my @found;
-	for my $FX ($track->user_ops_o)
-	{ push @found, $FX->id if $FX->surname eq $surname }
-	@found ? "@found" : undef
-}
-sub vol_level { my $self = shift; try { $self->vol_o->params->[0] } }
-sub pan_level { my $self = shift; try { $self->pan_o->params->[0] } }
-sub vol_o { my $self = shift; fxn($self->vol) }
-sub pan_o { my $self = shift; fxn($self->pan) }
 { my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low
 Mid High Boost );
 sub is_user_track { ! $system_track{$_[0]->name} }
