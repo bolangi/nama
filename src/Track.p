@@ -342,8 +342,6 @@ sub rec_cleanup_script {
 	my $track = shift;
 	join_path(::project_dir(), $track->name."-rec-cleanup.sh")
 }
-sub is_region { defined $_[0]->{region_start} }
-
 sub current_edit { $_[0]->{current_edit}//={} }
 sub is_mix_track {
 	my $track = shift;
