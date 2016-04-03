@@ -261,17 +261,6 @@ sub remove {
 sub soundcard_channel { $_[0] // 1 }
 
 
-# Operations performed by track objects
-sub wav_length {
-	my $track = shift;
-	::wav_length($track->full_path)
-}
-sub wav_format{
-	my $track = shift;
-	::wav_format($track->full_path)
-}
-
-	
 sub mute {
 	
 	my $track = shift;

@@ -11,6 +11,17 @@ no warnings qw(uninitialized);
 use Carp;
 
 use Role::Tiny;
+
+sub wav_length {
+	my $track = shift;
+	::wav_length($track->full_path)
+}
+sub wav_format{
+	my $track = shift;
+	::wav_format($track->full_path)
+}
+
+	
 sub dir {
 	my $self = shift;
 	 $self->project  
