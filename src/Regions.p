@@ -1,4 +1,4 @@
-# ------------ Region routines ----------
+# ------------ Set region for current track ----------
 
 package ::;
 use Modern::Perl; use Carp;
