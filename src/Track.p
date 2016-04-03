@@ -76,6 +76,7 @@ sub new {
     croak "undeclared field: @undeclared" if @undeclared;
 	
 	# silently return if track already exists
+	# why not return track? TODO
 	
 	return if $by_name{$vals{name}};
 
