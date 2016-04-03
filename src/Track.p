@@ -331,18 +331,6 @@ sub deactivate_bus {
 	$track->set( rw => PLAY);
 }
 
-sub shifted_length {
-	my $track = shift;
-	my $setup_length;
-	if ($track->region_start){
-		$setup_length = 	$track->shifted_region_end_time
-				  - $track->shifted_region_start_time
-	} else {
-		$setup_length = 	$track->wav_length;
-	}
-	$setup_length += $track->shifted_playat_time;
-}
-
 # Modified from Object.p to save class
 # should this be used in other classes?
 sub as_hash {
