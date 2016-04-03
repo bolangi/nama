@@ -10,6 +10,7 @@ with '::TrackRegion';
 with '::TrackSetIO';
 with '::TrackComment';
 with '::TrackEffect';
+with '::TrackLatency';
 with '::EffectNickname';
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
@@ -372,14 +373,6 @@ sub as_hash {
 	bless $self, $class; # restore
 	return \%guts;
 }
-sub latency_offset {
-	my $track = shift;
-	no warnings 'uninitialized';
-	$setup->{latency}->{sibling}->{$track->name} 
-		- $setup->{latency}->{track}->{$track->name}->{total};
-}
-
-
 sub input_object {
 	my $track = shift;
 	$::IO::by_name{$track->name}->{input}
@@ -388,25 +381,6 @@ sub output_object {
 	my $track = shift;
 	$::IO::by_name{$track->name}->{output}
 }
-sub capture_latency {
-	my $track = shift;
-	my $io = $track->input_object;
-	return $io->capture_latency if ref $io;
-}
-sub playback_latency {
-	my $track = shift;
-	my $io = $track->input_object;
-	return $io->playback_latency if ref $io;
-}
-sub sibling_latency {
-	my $track = shift;
-	$setup->{latency}->{sibling}->{$track->name}
-}
-sub sibling_count {
-	my $track = shift;
-	$setup->{latency}->{sibling_count}->{$track->name}
-}
-
 sub rec_setup_script { 
 	my $track = shift;
 	join_path(::project_dir(), $track->name."-rec-setup.sh")
