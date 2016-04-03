@@ -95,7 +95,7 @@ sub latency_of {
 sub track_ops_latency {
 	my $track = shift;
 	my $total = 0;;
-	map { $total += op_latency($_) } $track->fancy_ops;
+	map { $total += op_latency($_) } $track->user_ops;
 	::Lat->new($total,$total);
 }
 sub op_latency {

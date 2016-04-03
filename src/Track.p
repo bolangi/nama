@@ -194,7 +194,7 @@ sub rec_status_display {
 	$status .= ' v'.$track->current_version if $rs eq REC;
 	$status
 }
-sub fancy_ops { # returns list 
+sub user_ops { # returns list 
 	my $track = shift;
 	my @skip = 	grep {::fxn($_)}  # must exist
 				map { $track->{$_} } qw(vol pan fader latency_op );
@@ -208,9 +208,9 @@ sub fancy_ops { # returns list
 
 	grep{ ! $skip{$_} } @{ $track->{ops} || [] };
 }
-sub fancy_ops_o {
+sub user_ops_o {
 	my $track = shift;
-	map{ ::fxn($_) } $track->fancy_ops();
+	map{ ::fxn($_) } $track->user_ops();
 }
 		
 sub snapshot {
@@ -511,13 +511,13 @@ sub bus { $bn{$_[0]->group} }
 sub effect_id_by_name {
 	my $track = shift;
 	my $ident = shift;
-	for my $FX ($track->fancy_ops_o)
+	for my $FX ($track->user_ops_o)
 	{ return $FX->id if $FX->name eq $ident }
 }
 sub effect_nickname_count {
 	my ($track, $nick) = @_;
 	my $count = 0;
-	for my $FX ($track->fancy_ops_o){ $count++ if $FX->name =~ /^$nick\d*$/ }
+	for my $FX ($track->user_ops_o){ $count++ if $FX->name =~ /^$nick\d*$/ }
 	$count
 }
 sub unique_surname {
@@ -527,7 +527,7 @@ sub unique_surname {
 	# $surname, $previous_surnames
 	my $max = undef;
 	my %found;
-	for my $FX ($track->fancy_ops_o)
+	for my $FX ($track->user_ops_o)
 	{ 
 		if( $FX->surname =~ /^$surname(\d*)$/)
 		{
@@ -542,7 +542,7 @@ sub unique_nickname {
 	my ($track, $nickname) = @_;
 	my $i = 0;
 	my @found;
-	for my $FX ($track->fancy_ops_o)
+	for my $FX ($track->user_ops_o)
 	{ 
 		if( $FX->name =~ /^$nickname(\d*)$/)
 		{
@@ -556,7 +556,7 @@ sub unique_nickname {
 sub with_surname {
 	my ($track, $surname) = @_;
 	my @found;
-	for my $FX ($track->fancy_ops_o)
+	for my $FX ($track->user_ops_o)
 	{ push @found, $FX->id if $FX->surname eq $surname }
 	@found ? "@found" : undef
 }

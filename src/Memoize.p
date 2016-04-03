@@ -24,7 +24,7 @@ my @track_functions = qw(
 	region_start_time 
 	region_end_time 
 	playat_time 
-	fancy_ops 
+	user_ops 
 	input_path 
 );
 sub track_memoize { # before generate_setup
