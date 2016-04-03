@@ -2,6 +2,17 @@ package ::TrackComment;
 use Role::Tiny;
 use Modern::Perl;
 use ::Globals qw($project);
+
+sub is_comment {
+	my $self = shift;
+	$::project->{track_comments}->{$self->name}	
+}
+sub is_version_comment {
+	my $self = shift;
+	my $version = shift;
+	my $comments = $project->{track_version_comments}->{$self->name}->{$version};
+	$comments and $comments->{user}
+}
 sub set_comment {
 	my ($track, $comment) = @_;
 	$project->{track_comments}->{$track->name} = $comment
