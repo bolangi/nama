@@ -131,6 +131,8 @@ sub snapshot {
 
 # create an edge representing sound source
 
+# blows up when I move it to TrackIO
+
 sub input_path { 
 
 	my $track = shift;
@@ -153,17 +155,6 @@ sub input_path {
 	elsif($track->rec_status eq PLAY and ! $mode->doodle){
 		('wav_in', $track->name) 
 	}
-}
-
-
-sub has_insert  { $_[0]->prefader_insert or $_[0]->postfader_insert }
-
-sub prefader_insert { ::Insert::get_id($_[0],'pre') }
-sub postfader_insert { ::Insert::get_id($_[0],'post') }
-sub inserts {  [  # return array ref
-					map{ $::Insert::by_index{$_} }grep{$_} 
-					map{ ::Insert::get_id($_[0],$_)} qw(pre post) 
-				]
 }
 
 # remove track object and all effects
