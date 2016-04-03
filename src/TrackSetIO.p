@@ -5,6 +5,70 @@ use ::Globals qw(:all);
 use ::Util qw(dest_string dest_type);
 use ::Log qw(logpkg logsub);
 
+sub rec_status {
+#	logsub("&rec_status");
+	my $track = shift;
+	
+	#my $source_id = $track->source_id;
+	my $monitor_version = $track->monitor_version;
+
+	my $bus = $bn{$track->group};
+	#logpkg('debug', join " ", "bus:",$bus->name, $bus->rw);
+	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, monitor version: $monitor_version");
+	#logpkg('debug', "track: ", $track->name, ", source: ",
+	#	$track->source_id, ", monitor version: $monitor_version");
+
+	# first, check for conditions resulting in status OFF
+
+	if ( $bus->rw eq OFF
+		or $track->rw eq OFF
+		or $mode->doodle and ! $mode->eager and $track->rw eq REC and 
+			$setup->{tracks_with_duplicate_inputs}->{$track->name}
+		or $track->engine_group ne $::this_engine->name
+	){ 	return			  OFF }
+
+	# having reached here, we know $bus->rw and $track->rw are REC or PLAY
+	# so the result will be REC or PLAY if conditions are met
+
+	# second, set REC status if possible
+	
+	if( $track->rw eq REC){
+
+		my $source_type = $track->source_type;
+		if ($source_type eq 'track' or $source_type eq 'loop'){ return REC }
+		elsif ($source_type eq 'jack_client'){
+
+				# we expect an existing JACK client that
+				# *outputs* a signal for our track input
+				
+				::jack_client_array($track->source_id,'output')
+					?  return REC
+					:  return OFF
+			}
+		elsif ($source_type eq 'jack_manual'){ return REC }
+		elsif ($source_type eq 'jack_ports_list'){ return REC }
+		elsif ($source_type eq 'null')	{ return REC }
+		elsif ($source_type eq 'rtnull')	{ return REC }
+		elsif ($source_type eq 'soundcard'){ return REC }
+		elsif ($source_type eq 'bus')	{ return REC } # maybe $track->rw ??
+		else { return OFF }
+	}
+	elsif( $track->rw eq MON){ MON }
+
+	# set PLAY status if possible
+	
+	else { 			maybe_monitor($monitor_version)
+
+	}
+}
+sub rec_status_display {
+	my $track = shift;
+	my $rs = $track->rec_status;
+	my $status;
+	$status .= $rs;
+	$status .= ' v'.$track->current_version if $rs eq REC;
+	$status
+}
 ### object methods for text-based commands 
 
 # Reasonable behavior whether 'source' and 'send' commands 
