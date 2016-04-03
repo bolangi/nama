@@ -321,11 +321,6 @@ sub version_has_edits {
      		and $_->host_version == $track->monitor_version
 		} values %::Edit::by_name;
 }	
-sub set_track_class {
-	my ($track, $class) = @_;
-	bless $track, $class;
-	$track->set(class => $class);
-}
 sub activate_bus {
 	my $track = shift;
 	::add_bus($track->name) unless $track->is_system_track;
