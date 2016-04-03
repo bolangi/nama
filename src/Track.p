@@ -118,21 +118,6 @@ sub new {
 
 ### object methods
 
-# TODO these conditional clauses should be separated
-# into classes 
-
-
-
-# if you belong to a bus with an opinion, go that way
-sub engine_group {
-	my $track = shift;
-	my $bus = $bn{$track->group};
-	$bus->engine_group || $track->{engine_group} || 'Nama'
-}
-sub engine {
-	my $track = shift;
-	$en{$track->engine_group}
-}
 sub rec_status {
 #	logsub("&rec_status");
 	my $track = shift;
@@ -371,6 +356,16 @@ sub bus { $bn{$_[0]->group} }
 Mid High Boost );
 sub is_user_track { ! $system_track{$_[0]->name} }
 sub is_system_track { $system_track{$_[0]->name} } 
+}
+
+sub engine_group {
+	my $track = shift;
+	my $bus = $bn{$track->group};
+	$bus->engine_group || $track->{engine_group} || 'Nama'
+}
+sub engine {
+	my $track = shift;
+	$en{$track->engine_group}
 }
 } # end package
 
