@@ -7,7 +7,7 @@ use Role::Tiny::With;
 with '::Wav';
 with '::WavModify';
 with '::TrackRegion';
-with '::TrackSetIO';
+with '::TrackIO';
 with '::TrackComment';
 with '::TrackEffect';
 with '::TrackLatency';

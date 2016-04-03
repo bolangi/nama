@@ -1,4 +1,4 @@
-package ::TrackSetIO;
+package ::TrackIO;
 use Role::Tiny;
 use Modern::Perl;
 use ::Globals qw(:all);
