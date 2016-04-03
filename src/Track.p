@@ -8,6 +8,7 @@ with '::Wav';
 with '::WavModify';
 with '::TrackRegion';
 with '::TrackSetIO';
+with '::TrackComment';
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
 use ::Effect  qw(fxn);
@@ -481,40 +482,6 @@ sub sibling_count {
 	$setup->{latency}->{sibling_count}->{$track->name}
 }
 
-sub set_comment {
-	my ($track, $comment) = @_;
-	$project->{track_comments}->{$track->name} = $comment
-}
-sub comment { $project->{track_comments}->{$_[0]->name} }
-
-sub show_version_comments {
-	my ($t, @v) = @_;
-	return unless @v;
-	::pager(map{ $t->version_comment($_) } @v);
-}
-sub add_version_comment {
-	my ($t,$v,$text) = @_;
-	$t->targets->{$v} or ::throw("$v: no such version"), return;	
-	$project->{track_version_comments}->{$t->name}{$v}{user} = $text;
-	$t->version_comment($v);
-}
-sub add_system_version_comment {
-	my ($t,$v,$text) = @_;
-	$t->targets->{$v} or ::throw("$v: no such version"), return;	
-	$project->{track_version_comments}{$t->name}{$v}{system} = $text;
-	$t->version_comment($v);
-}
-sub remove_version_comment {
-	my ($t,$v) = @_;
-	$t->targets->{$v} or ::throw("$v: no such version"), return;	
-	delete $project->{track_version_comments}{$t->name}{$v}{user};
-	$t->version_comment($v) || "$v: [comment deleted]\n";
-}
-sub remove_system_version_comment {
-	my ($t,$v) = @_;
-	delete $project->{track_version_comments}{$t->name}{$v}{system} if
-		$project->{track_version_comments}{$t->name}{$v}
-}
 sub rec_setup_script { 
 	my $track = shift;
 	join_path(::project_dir(), $track->name."-rec-setup.sh")
