@@ -334,6 +334,52 @@ sub inserts {  [  # return array ref
 					map{ ::Insert::get_id($_[0],$_)} qw(pre post) 
 				]
 }
+sub soundcard_channel { $_[0] // 1 }
+
+
+sub import_audio  { 
+	my $track = shift;
+	::throw($track->name.": Cannot import audio to system track"), 
+		return if ! $track->is_user_track;
+	my ($path, $frequency) = @_; 
+	$path = ::expand_tilde($path);
+	my $version  = $track->last + 1;
+	if ( ! -r $path ){
+		::throw("$path: non-existent or unreadable file. No action.\n");
+		return;
+	}
+	my ($depth,$width,$freq) = split ',', ::wav_format($path);
+	::pager_newline("format: ", ::wav_format($path));
+	$frequency ||= $freq;
+	if ( ! $frequency ){
+		::throw("Cannot detect sample rate of $path. Skipping.",
+		"Maybe 'import_audio <path> <frequency>' will help.");
+		return 
+	}
+	my $desired_frequency = freq( $config->{raw_to_disk_format} );
+	my $destination = join_path(::this_wav_dir(),$track->name."_$version.wav");
+	if ( $frequency == $desired_frequency and $path =~ /.wav$/i){
+		::pager_newline("copying $path to $destination");
+		copy($path, $destination) or die "copy failed: $!";
+	} else {	
+		my $format = ::signal_format($config->{raw_to_disk_format}, $width);
+		::pager_newline("importing $path as $destination, converting to $format");
+		::teardown_engine();
+		my $ecs = qq(-f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
+		my $path = join_path(::project_dir()."convert.ecs");
+		write_file($path, $ecs);
+		::load_ecs($path) or ::throw("$path: load failed, aborting"), return;
+		::eval_iam('start');
+		::sleeper(0.2); sleep 1 while ::engine_running();
+	} 
+	::restart_wav_memoize() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
+}
+
+sub port_name { $_[0]->target || $_[0]->name } 
+sub jack_manual_port {
+	my ($track, $direction) = @_;
+	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
+}
 
 1;
 	
