@@ -8,6 +8,15 @@ sub set_comment {
 }
 sub comment { $project->{track_comments}->{$_[0]->name} }
 
+sub version_comment {
+	my ($track, $v) = @_;
+	return unless $project->{track_version_comments}->{$track->name}{$v};
+	my $text   = $project->{track_version_comments}->{$track->name}{$v}{user};
+	$text .= " " if $text;
+	my $system = $project->{track_version_comments}->{$track->name}{$v}{system};
+	$text .= "* $system" if $system;
+	"$v: $text\n" if $text;
+}
 sub show_version_comments {
 	my ($t, @v) = @_;
 	return unless @v;

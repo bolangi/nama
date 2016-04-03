@@ -403,15 +403,6 @@ sub shifted_length {
 	$setup_length += $track->shifted_playat_time;
 }
 
-sub version_comment {
-	my ($track, $v) = @_;
-	return unless $project->{track_version_comments}->{$track->name}{$v};
-	my $text   = $project->{track_version_comments}->{$track->name}{$v}{user};
-	$text .= " " if $text;
-	my $system = $project->{track_version_comments}->{$track->name}{$v}{system};
-	$text .= "* $system" if $system;
-	"$v: $text\n" if $text;
-}
 # Modified from Object.p to save class
 # should this be used in other classes?
 sub as_hash {
