@@ -44,54 +44,40 @@ sub effect_id_by_name {
 	for my $FX ($track->user_ops_o)
 	{ return $FX->id if $FX->name eq $ident }
 }
-sub effect_nickname_count {
-	my ($track, $nick) = @_;
-	my $count = 0;
-	for my $FX ($track->user_ops_o){ $count++ if $FX->name =~ /^$nick\d*$/ }
-	$count
-}
-sub unique_surname {
-	my ($track, $surname) = @_;
-	# increment supplied surname to be unique to the track if necessary 
-	# return arguments:
-	# $surname, $previous_surnames
-	my $max = undef;
-	my %found;
-	for my $FX ($track->user_ops_o)
-	{ 
-		if( $FX->surname =~ /^$surname(\d*)$/)
-		{
-			$found{$FX->surname}++;
-			no warnings qw(uninitialized numeric);
-			$max = $1 if $1 > $max;
-		}
-	}
-	if (%found){ $surname.++$max, join ' ',sort keys %found } else { $surname }
-}
-sub unique_nickname {
-	my ($track, $nickname) = @_;
-	my $i = 0;
-	my @found;
-	for my $FX ($track->user_ops_o)
-	{ 
-		if( $FX->name =~ /^$nickname(\d*)$/)
-		{
-			push @found, $FX->name; 
-			$i = $1 if $1 and $1 > $i
-		}
-	}
-	$nickname. (@found ? ++$i : ""), "@found"
-}
-# return effect IDs matching a surname
-sub with_surname {
-	my ($track, $surname) = @_;
-	my @found;
-	for my $FX ($track->user_ops_o)
-	{ push @found, $FX->id if $FX->surname eq $surname }
-	@found ? "@found" : undef
-}
 sub vol_level { my $self = shift; try { $self->vol_o->params->[0] } }
 sub pan_level { my $self = shift; try { $self->pan_o->params->[0] } }
 sub vol_o { my $self = shift; fxn($self->vol) }
 sub pan_o { my $self = shift; fxn($self->pan) }
+sub mute {
+	
+	my $track = shift;
+	my $nofade = shift;
+
+	# do nothing if track is already muted
+	return if defined $track->old_vol_level();
+
+	# do nothing if track has no volume operator
+	my $vol = $track->vol_o;
+	return unless $vol;
+
+	# store vol level for unmute
+	$track->set(old_vol_level => $vol->params->[0]);
+	
+	$nofade 
+		? $vol->_modify_effect(1, $vol->mute_level)
+		: $vol->fadeout
+}
+sub unmute {
+	my $track = shift;
+	my $nofade = shift;
+
+	# do nothing if we are not muted
+	return if ! defined $track->old_vol_level;
+
+	$nofade
+		? $track->vol_o->_modify_effect(1, $track->old_vol_level)
+		: $track->vol_o->fadein($track->old_vol_level);
+
+	$track->set(old_vol_level => undef);
+}
 1;

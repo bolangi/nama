@@ -10,6 +10,7 @@ with '::TrackRegion';
 with '::TrackSetIO';
 with '::TrackComment';
 with '::TrackEffect';
+with '::EffectNickname';
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
 use ::Effect  qw(fxn);
@@ -261,38 +262,6 @@ sub remove {
 sub soundcard_channel { $_[0] // 1 }
 
 
-sub mute {
-	
-	my $track = shift;
-	my $nofade = shift;
-
-	# do nothing if track is already muted
-	return if defined $track->old_vol_level();
-
-	# do nothing if track has no volume operator
-	my $vol = $track->vol_o;
-	return unless $vol;
-
-	# store vol level for unmute
-	$track->set(old_vol_level => $vol->params->[0]);
-	
-	$nofade 
-		? $vol->_modify_effect(1, $vol->mute_level)
-		: $vol->fadeout
-}
-sub unmute {
-	my $track = shift;
-	my $nofade = shift;
-
-	# do nothing if we are not muted
-	return if ! defined $track->old_vol_level;
-
-	$nofade
-		? $track->vol_o->_modify_effect(1, $track->old_vol_level)
-		: $track->vol_o->fadein($track->old_vol_level);
-
-	$track->set(old_vol_level => undef);
-}
 sub import_audio  { 
 	my $track = shift;
 	::throw($track->name.": Cannot import audio to system track"), 
