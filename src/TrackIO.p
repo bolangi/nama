@@ -61,6 +61,13 @@ sub rec_status {
 
 	}
 }
+
+sub maybe_monitor { # ordinary sub, not object method
+	my $monitor_version = shift;
+	return PLAY if $monitor_version and ! $mode->doodle;
+	return OFF;
+}
+
 sub rec_status_display {
 	my $track = shift;
 	my $rs = $track->rec_status;

@@ -83,13 +83,6 @@ sub monitor_version {
 				and grep {$track->version  == $_ } @{$track->versions} ;
 	$track->last;
 }
-
-sub maybe_monitor { # ordinary sub, not object method
-	my $monitor_version = shift;
-	return PLAY if $monitor_version and ! $mode->doodle;
-	return OFF;
-}
-
 sub targets { # WAV file targets, distinct from 'target' attribute
 	my $self = shift;
 	_targets(dir => $self->dir, name => $self->basename)
