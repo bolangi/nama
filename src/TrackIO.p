@@ -14,7 +14,10 @@ sub rec_status {
 
 	my $bus = $bn{$track->group};
 	#logpkg('debug', join " ", "bus:",$bus->name, $bus->rw);
+	{
+	no warnings 'uninitialized';
 	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, monitor version: $monitor_version");
+	}
 	#logpkg('debug', "track: ", $track->name, ", source: ",
 	#	$track->source_id, ", monitor version: $monitor_version");
 
@@ -243,9 +246,12 @@ sub object_as_text {
 	my ($track, $direction) = @_; # $direction: source | send
 	my $type_field = $direction."_type";
 	my $id_field   = $direction."_id";
+	{
+	no warnings 'uninitialized';
 	my $text = $object_to_text{$track->$type_field};
 	$text .= ' ';
 	$text .= $track->$id_field
+	}
 }
 }
 

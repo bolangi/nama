@@ -10,8 +10,11 @@ sub is_comment {
 sub is_version_comment {
 	my $self = shift;
 	my $version = shift;
+	{
+	no warnings 'uninitialized';
 	my $comments = $project->{track_version_comments}->{$self->name}->{$version};
 	$comments and $comments->{user}
+	}
 }
 sub set_comment {
 	my ($track, $comment) = @_;
