@@ -4,15 +4,15 @@ package ::;
 {
 package ::Track;
 use Role::Tiny::With;
-with '::Wav';
-with '::WavModify';
-with '::TrackRegion';
-with '::TrackIO';
-with '::TrackComment';
-with '::TrackEffect';
-with '::TrackLatency';
-with '::EffectNickname';
-with '::BusUtil';
+with '::Wav',
+	 '::WavModify',
+	 '::TrackRegion',
+	 '::TrackIO',
+	 '::TrackComment',
+	 '::TrackEffect',
+	 '::TrackLatency',
+	 '::EffectNickname',
+	 '::BusUtil';
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
 use ::Effect  qw(fxn);
