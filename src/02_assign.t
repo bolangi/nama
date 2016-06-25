@@ -1,7 +1,5 @@
-use Test::More tests => 18;
+use Test2::Bundle::More;
 use strict;
-
-BEGIN { use_ok('::Assign') };
 
 use ::Assign qw(:all);
 use ::Log;
@@ -72,5 +70,5 @@ WANT
 	is( scalar %dict, 0, "Null hash assignment");
 	
 
-1;
+done_testing();
 __END__
