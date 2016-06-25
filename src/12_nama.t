@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 126;
+use Test2::Bundle::More;
 use File::Path qw(make_path remove_tree);
 use File::Slurp;
 use Cwd;
@@ -101,9 +101,9 @@ my $yaml = q(---
   args:
     playat_output: playat,5
     select_output: select,1,4
-    modifiers: []
+    modifiers:
     full_path: test_dir/sax_1.wav
-  ecs_string: /-i:playat,5,select,1,4,.+sax_\d+.wav/
+  ecs_string: -i:playat,5,select,1,4,test_dir/sax_1.wav
 -
   class: from_loop
   args:
@@ -186,11 +186,7 @@ for (@test) {
 	my $class = "Audio::Nama::IO::$t{class}";
 	my $io = $class->new(%{$t{args}});
 	my @keys = sort grep{ $_ ne 'class'} keys %t;
-	if( $t{ecs_string} =~ m(^/)){
-		like( $io->ecs_string, $t{ecs_string}, "$t{class} ecs_string");
-	}else{
-		is(   $io->ecs_string, $t{ecs_string}, "$t{class} ecs_string");
-	}
+	is( $io->ecs_string, $t{ecs_string}, "$t{class} ecs_string");
 }
 	
 
@@ -997,5 +993,5 @@ sub check_setup {
 
 
 cleanup_dirs();
-1;
+done_testing();
 __END__
