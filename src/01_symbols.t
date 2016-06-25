@@ -2,6 +2,8 @@ use Test2::Bundle::More;
 use strict;
 
 use ::Globals qw($ui);
+use ::Log;
+::Log::initialize_logger();
 
 is($ui, 'bullwinkle', 'global variable import');
 
