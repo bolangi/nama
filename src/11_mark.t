@@ -1,24 +1,11 @@
-use Test::More tests => 2;
+use Test2::Bundle::More;
 use strict;
-
-BEGIN { 
-	use_ok('::Mark') ;
-}
+use ::Mark;
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
 my $mark  = ::Mark->new( name => 'thebeginning');
 
 is(  ref $mark , '::Mark', "Object creation");
 
-1;
+done_testing();
 __END__
-
-diag("Serializing, storing$ENV{NAMA_VERBOSE_TEST_OUTPUT} recalling data");
-is( $foo, 2, "Scalar number assignment");
-is( $name, 'John', "Scalar string assignment");
-my $sum;
-map{ $sum += $_ } @face;
-is ($sum, 25, "Array assignment");
-is( $dict{fruit}, 'melon', "Hash assignment");
-is ($serialized, $expected, "Serialization round trip");
-
 

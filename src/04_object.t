@@ -1,10 +1,6 @@
-use Test::More tests => 4;
+use Test2::Bundle::More;
 use strict;
 
-
-BEGIN { 
-	use_ok('::Object') ;
-}
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "testing trivial class Apple";
 package Apple;
@@ -27,6 +23,6 @@ is( $apple->color, 'red', "mutator" );
 
 #is( $apple->color, 'blue', "lvalue" ); 
 
-1;
+done_testing()
 
 __END__

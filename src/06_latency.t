@@ -1,7 +1,5 @@
-use Test::More tests => 6;
+use Test2::Bundle::More;
 use strict;
-use Data::Dumper::Concise;
-
 use ::Lat;
 
 my $lat = ::Lat->new(4,8);
@@ -14,4 +12,5 @@ is_deeply( $lat->add_latency($lat2), ::Lat->new(20,40), "Latency addition");
 is_deeply( ::Lat->new(20,40), ($lat + $lat2), "Latency addition, overloading '+' operator");
 is(do{ eval {::Lat->new(1,0)}; defined $@}, 1, "Exception on Max greater than Min");
 
-1;
+done_testing();
+__END__
