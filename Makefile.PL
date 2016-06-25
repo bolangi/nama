@@ -46,6 +46,7 @@ use inc::Module::Install;
 			Role::Tiny 0
 			SUPER 0
 			Term::ReadLine::Gnu  0
+			Test2::Bundle::More 0
 			Text::Diff  0
 			Text::Format  0
 			Text::Template 0
