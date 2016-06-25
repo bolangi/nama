@@ -73,7 +73,6 @@ t/04_object.t
 t/06_latency.t
 t/11_mark.t
 t/12_nama.t
-t/13_io.t
 t/data/fake_effects_cache.json
 lib/Audio/Nama/Assign.pm
 lib/Audio/Nama/Bus.pm
