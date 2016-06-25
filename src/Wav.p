@@ -1,5 +1,7 @@
 package ::Wav;
-our $VERSION = 1.0;
+our $VERSION = 1.001;
+use ::Globals qw(:all);
+use ::Util qw(:all);
 use ::Assign qw(:all);
 use ::Util qw(join_path);
 use ::Log qw(logsub logpkg);
@@ -8,6 +10,90 @@ use warnings;
 no warnings qw(uninitialized);
 use Carp;
 
+use Role::Tiny;
+
+sub wav_length {
+	my $track = shift;
+	::wav_length($track->full_path)
+}
+sub wav_format{
+	my $track = shift;
+	::wav_format($track->full_path)
+}
+
+	
+sub dir {
+	my $self = shift;
+	 $self->project  
+		? join_path(::project_root(), $self->project, '.wav')
+		: ::this_wav_dir();
+}
+
+sub basename {
+	my $self = shift;
+	$self->target || $self->name
+}
+
+sub full_path { my $track = shift; join_path($track->dir, $track->current_wav) }
+
+sub group_last {
+	my $track = shift;
+	my $bus = $bn{$track->group}; 
+	$bus->last;
+}
+
+sub last { $_[0]->versions->[-1] || 0 }
+sub current_wav {
+	my $track = shift;
+	my $last = $track->current_version;
+	if 	($track->rec_status eq REC){ 
+		$track->name . '_' . $last . '.wav'
+	} elsif ( $track->rec_status eq PLAY){ 
+		my $filename = $track->targets->{ $track->monitor_version } ;
+		$filename
+	} else {
+		logpkg('debug', "track ", $track->name, ": no current version") ;
+		undef; 
+	}
+}
+
+sub current_version {	
+	my $track = shift;
+	my $status = $track->rec_status;
+	#logpkg('debug', "last: $last status: $status");
+
+	# two possible version numbers, depending on REC/PLAY status
+	
+	if 	($status eq REC)
+	{ 
+		my $last = $config->{use_group_numbering} 
+					? ::Bus::overall_last()
+					: $track->last;
+		return ++$last
+	}
+	elsif ( $status eq PLAY){ return $track->monitor_version } 
+	else { return 0 }
+}
+
+sub monitor_version {
+	my $track = shift;
+
+	my $bus = $bn{$track->group};
+	return $track->version if $track->version 
+				and grep {$track->version  == $_ } @{$track->versions} ;
+	$track->last;
+}
+sub targets { # WAV file targets, distinct from 'target' attribute
+	my $self = shift;
+	_targets(dir => $self->dir, name => $self->basename)
+}
+sub versions {
+	my $self = shift;
+	_versions(dir => $self->dir, name => $self->basename) 
+}
+
+
+## oiriginally from Wav.pm ##
 sub get_versions {
 	my %args = @_;
 	$args{sep} //= '_';
@@ -42,7 +128,7 @@ sub candidates {
 	@candidates;
 }
 
-sub targets {
+sub _targets {
 	
 	my %args = @_;
 
@@ -56,15 +142,9 @@ sub targets {
 	\%versions;
 }
 
-	
-sub versions {  
+sub _versions {  
 #	$::debug2 and print "&versions\n";
 	my %args = @_;
-	[ sort { $a <=> $b } keys %{ targets(%args)} ]  
+	[ sort { $a <=> $b } keys %{ _targets(%args)} ]  
 }
-sub last { 
-	%args = @_;
-	pop @{ versions(%args) } 
-}
-
 1;

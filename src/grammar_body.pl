@@ -924,7 +924,7 @@ modify_effect: _modify_effect parameter(s /,/) sign value {
 fx_alias3: ident { 
 	join " ", 
 	map{ $_->id } 
-	grep { $_->surname eq $item{ident} } $::this_track->fancy_ops_o;
+	grep { $_->surname eq $item{ident} } $::this_track->user_ops_o;
 }
 remove_target: existing_op_id | fx_pos | fx_surname | fx_name
 	{ $item[-1] or print("no effect object found\n"), return 0}
@@ -1114,7 +1114,7 @@ Use a different name, or use "overwrite_effect_chain"/) && return;
 
 	my $ops = scalar @{$item{'op_id(s?)'}}
 				?  $item{'op_id(s?)'} 
-				: [ $::this_track->fancy_ops ];
+				: [ $::this_track->user_ops ];
 	my @options;
 	::EffectChain->new(
 		user   => 1,
@@ -1167,8 +1167,8 @@ bypass_effects:   _bypass_effects op_id(s) {
 #
 bypass_effects: _bypass_effects 'all' { 
 	::pager( "track ",$::this_track->name,", bypassing all effects (except vol/pan)");
-	::bypass_effects($::this_track, $::this_track->fancy_ops)
-		if $::this_track->fancy_ops;
+	::bypass_effects($::this_track, $::this_track->user_ops)
+		if $::this_track->user_ops;
 	1; 
 }
 #
@@ -1200,7 +1200,7 @@ bring_back_effects:   _bring_back_effects op_id(s) {
 }
 bring_back_effects:   _bring_back_effects 'all' { 
 	::pager( "restoring all effects");
-	::restore_effects( $::this_track, $::this_track->fancy_ops);
+	::restore_effects( $::this_track, $::this_track->user_ops);
 }
 # effect_on_current_track: op_id { 
 # 	my $id = $item{op_id};

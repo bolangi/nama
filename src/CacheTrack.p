@@ -38,7 +38,7 @@ sub cache_track { # launch subparts if conditions are met
 			$track->name, ": track caching requires PLAY status. Aborting."), return;
 	}
 	pagers($track->name, ": nothing to cache!  Skipping."), return 
-		unless 	$track->fancy_ops 
+		unless 	$track->user_ops 
 				or $track->has_insert
 				or $track->is_region
 				or $bn{$track->name};
@@ -101,9 +101,7 @@ sub prepare_to_cache {
 	$g->set_vertex_attributes(
 		$cooked->name, 
 		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
-			version => (1 + ::Wav::last(name => $args->{track}->name,  
-										dir  => this_wav_dir())
-						)
+			version => (1 + $this_track->last),
 		}
 	); 
 	$args->{complete_caching_ref} = \&update_cache_map;
@@ -197,7 +195,7 @@ sub update_cache_map {
 		my $track = $args->{track};
 		 
 		my @ops_list = @{$track->ops};
-		my @ops_remove_list = $track->fancy_ops;
+		my @ops_remove_list = $track->user_ops;
 		
 		if ( @inserts_list or @ops_remove_list or $track->is_region)
 		{
@@ -272,7 +270,7 @@ sub uncache_track {
 	my $version = $track->monitor_version;
 	my ($ec) = is_cached($track, $version);
 	defined $ec or throw($track->name, ": version $version is not cached"), return;
-	$track->fancy_ops and 
+	$track->user_ops and 
 		throw($track->name, ": cannot uncache while user effects are present\n",
 			"You must delete them before you can uncache this WAV version."), return;
 	$track->is_region and 

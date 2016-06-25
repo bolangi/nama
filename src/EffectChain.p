@@ -454,7 +454,7 @@ sub new_effect_profile {
 			user		=> 1,
 			global		=> 1,
 			track_name	=> $_,
-			ops_list	=> [ $tn{$_}->fancy_ops ],
+			ops_list	=> [ $tn{$_}->user_ops ],
 			inserts_data => $tn{$_}->inserts,
 		);
 	} @tracks;

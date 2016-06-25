@@ -94,13 +94,16 @@ use ::Bus;
 use ::Sequence;
 use ::Mark;
 use ::IO;
-use ::Wav;
 use ::Insert;
 use ::Fade;
 use ::Edit;
 use ::EffectChain;
 use ::Lat;
 use ::Engine;
+
+####### Nama Roles - loaded by another class
+
+# use ::Wav;
 
 ####### Nama subroutines ######
 #
@@ -142,6 +145,7 @@ use ::Wavinfo ();
 use ::Midi ();
 use ::Latency ();
 use ::Log qw(logit loggit logpkg logsub initialize_logger);
+use ::TrackUtils ();
 
 sub main { 
 	say eval join(get_data_section('banner'), qw(" "));

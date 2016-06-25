@@ -36,12 +36,6 @@ sub project_dir {
 	$config->{opts}->{p} and return $config->{root_dir}; # cwd
 	$project->{name} and join_path( project_root(), $project->{name}) 
 }
-sub this_op { $this_track and $this_track->op }
-sub this_op_o { $this_track and $this_track->op and fxn($this_track->op) }
-sub this_param { $this_track ? $this_track->param : ""}
-sub this_stepsize { $this_track ? $this_track->stepsize : ""}
-sub this_track_name { $this_track ? $this_track->name : "" }
-
 # we prepend a slash 
 sub bus_track_display { 
 	my ($busname, $trackname) = ($this_bus, $this_track && $this_track->name || '');

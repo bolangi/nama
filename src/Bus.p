@@ -1,5 +1,5 @@
 # ------------  Bus --------------------
-
+{
 package ::Bus;
 use Modern::Perl; use Carp; 
 use ::Log qw(logsub logpkg);
@@ -372,6 +372,7 @@ sub remove_submix_helper_tracks {
 }
 sub submixes { grep { (ref $_) =~ /SendBusCooked/ } values %::Bus::by_name }
 
+}
 }
 1;
 __END__
