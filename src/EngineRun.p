@@ -59,7 +59,10 @@ sub start_transport {
 	schedule_wraparound();
 	mute();
 	start_midish_transport() 
-		if $config->{use_midish} and $mode->{midish_transport_sync};
+		if $config->{use_midish} 
+			and $mode->{midish_transport_sync} 
+			or $config->{midish_transport_sync};
+
 	eval_iam('start');
 
 	# limit engine run time if we are in mixdown or edit mode, 
