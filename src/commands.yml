@@ -1287,25 +1287,25 @@ set_system_version_comment:
   what: Set a system version comment. Useful for testing and diagnostics.
   short: ssvc
   parameters: <string:comment>
-midish_command:
+midi_command:
   type: midi
   what: Send the command text to the midish MIDI sequencer. Midish must be installed and enabled in namarc. See the midish manpage and fullonline documentation for more.
   short: m
   parameters: <string:command_text>
   example: m tracknew my_midi_track # create a new MIDI track in midish.
-midish_mode_on:
+midi_mode_on:
   type: midi
   what: all users commands sent to midish, until midish-mode-off
   short: mmo
-midish_mode_off:
+midi_mode_off:
   what: exit midish mode, restore default Nama command mode, no midish sync
   type: midi
   short: mmx
-midish_mode_off_ready_to_play:
+midi_mode_off_ready_to_play:
   what: exit midish mode, sync midish start (p) with Ecasound
   type: midi
   short: mmxrp
-midish_mode_off_ready_to_record:
+midi_mode_off_ready_to_record:
   what: exit midish mode, sync midish start (r) with Ecasound
   type: midi
   short: mmxrr

@@ -58,10 +58,10 @@ sub start_transport {
 	pager("\n\nStarting at ", current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
-	start_midish_transport() 
+	start_midi_transport() 
 		if $config->{use_midish} 
-			and $mode->{midish_transport_sync} 
-			or $config->{midish_transport_sync};
+			and $mode->{midi_transport_sync} 
+			or $config->{midi_transport_sync};
 
 	eval_iam('start');
 
@@ -95,8 +95,8 @@ sub stop_transport {
 		and ! ::ChainSetup::really_recording();
 	mute();
 	stop_command();
-	stop_midish_transport() 
-		if $config->{use_midish} and $mode->{midish_transport_sync};
+	stop_midi_transport() 
+		if $config->{use_midish} and $mode->{midi_transport_sync};
 	disable_length_timer();
 	if ( ! $quiet ){
 		sleeper(0.5);

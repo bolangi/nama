@@ -208,11 +208,11 @@ sub detect_spacebar {
 			
 			# set midi-sync if necessary and then restore previous state
 			
-			my $old_mode = $mode->{midish_transport_sync};
+			my $old_mode = $mode->{midi_transport_sync};
 			# set to play, but don't clobber existing record setting
-			$mode->{midish_transport_sync} //= PLAY if $buffer eq $midi_sync_trigger; 
+			$mode->{midi_transport_sync} //= PLAY if $buffer eq $midi_sync_trigger; 
 			toggle_transport();	
-			$mode->{midish_transport_sync} = $old_mode;
+			$mode->{midi_transport_sync} = $old_mode;
 
 			# reset command line, read next char
 			

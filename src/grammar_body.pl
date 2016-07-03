@@ -8,12 +8,12 @@ _a_test: /something_else\b/ | /a-test\b/
 
 # CASE 0: Midish command 
 
-meta: midish_cmd 
+meta: midi_cmd 
 
-midish_cmd: /[a-z]+/ predicate { 
+midi_cmd: /[a-z]+/ predicate { 
 	return unless $::midi->{keywords}->{$item[1]};
 	my $line = "$item[1] $item{predicate}";
-	::midish_command($line);
+	::midi_command($line);
 	1;
 }
 
@@ -1384,32 +1384,32 @@ show_version_comments_all: _show_version_comments_all {
 set_system_version_comment: _set_system_version_comment dd text {
 	::pager( ::set_system_version_comment($::this_track,@item{qw(dd text)}));1;
 }
-midish_command: _midish_command text {
-	::midish_command( $item{text} ); 1
+midi_command: _midi_command text {
+	::midi_command( $item{text} ); 1
 }
-midish_mode_on: _midish_mode_on { 
-	::pager("Setting midish terminal mode!! Return with 'midish_mode_off'.");
-	$::mode->{midish_terminal}++;
+midi_mode_on: _midi_mode_on { 
+	::pager("Setting midish terminal mode!! Return with 'midi_mode_off'.");
+	$::mode->{midi_terminal}++;
 }
  
-midish_mode_off: _midish_mode_off { 
+midi_mode_off: _midi_mode_off { 
 	::pager("Releasing midish terminal mode. Sync is not enabled.");
-	undef $::mode->{midish_terminal};
-	undef $::mode->{midish_transport_sync};
+	undef $::mode->{midi_terminal};
+	undef $::mode->{midi_transport_sync};
 	1;
 }
-midish_mode_off_ready_to_play: _midish_mode_off_ready_to_play { 
+midi_mode_off_ready_to_play: _midi_mode_off_ready_to_play { 
 	::pager("Releasing midish terminal mode.
 Will sync playback with Ecasound."); 
-	undef $::mode->{midish_terminal} ;
-	$::mode->{midish_transport_sync} = ::PLAY;
+	undef $::mode->{midi_terminal} ;
+	$::mode->{midi_transport_sync} = ::PLAY;
 	1;
 }
-midish_mode_off_ready_to_record: _midish_mode_off_ready_to_record { 
+midi_mode_off_ready_to_record: _midi_mode_off_ready_to_record { 
 	::pager("Releasing midish terminal mode. 
 Will sync record with Ecasound.");
-	undef $::mode->{midish_terminal} ;
-	$::mode->{midish_transport_sync} = ::REC;
+	undef $::mode->{midi_terminal} ;
+	$::mode->{midi_transport_sync} = ::REC;
 	1;
 }
 
