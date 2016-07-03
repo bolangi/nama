@@ -306,8 +306,8 @@ sub transport_status {
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
 	#print "start: $start, end: $end, loop_enable: $mode->{loop_enable}\n";
-	if (ref $setup->{cooked_record_pending} and %{$setup->{cooked_record_pending}}){
-		pager(join(" ", keys %{$setup->{cooked_record_pending}}), ": ready for caching");
+	if (ref $setup->{record_midi} and %{$setup->{record_midi}}){
+		pager(join(" ", keys %{$setup->{record_midi}}), ": ready for caching");
 	}
 	if ($mode->{loop_enable} and $start and $end){
 		#if (! $end){  $end = $start; $start = 0}

@@ -29,7 +29,7 @@ $setup->{_old_snapshot}			# for checking if engine needs reconfigured
 $setup->{_old_rec_status}		# for checking rec status change hooks
 $setup->{inputs_used}			# we warn if tracks share same input channel
 $setup->{tracks_with_duplicate_inputs}
-$setup->{cooked_record_pending}
+$setup->{record_midi}
 $setup->{changed}
 $setup->{wav_info}				# length and format of each WAV file 
 $setup->{runtime_limit}
