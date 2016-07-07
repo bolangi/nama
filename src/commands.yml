@@ -213,6 +213,13 @@ add_track:
     add_track clarinet 
     ! create a mono track called clarinet with input 
     ! from soundcard channel 1.
+add_midi_track:
+  type: track
+  what: Create a new midi track.
+  short: amt
+  parameters: <string:name>
+  example: |
+    add_midi_track clarinet 
 add_tracks:
   type: track
   what: Create one or more new tracks in one go.
