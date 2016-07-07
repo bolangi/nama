@@ -93,7 +93,6 @@ sub versions {
 }
 
 
-## oiriginally from Wav.pm ##
 sub get_versions {
 	my %args = @_;
 	$args{sep} //= '_';
