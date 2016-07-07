@@ -90,7 +90,6 @@ sub new { my $class = shift; return bless {@_}, $class }
 ######## Nama classes ########
 
 use ::Track;
-use ::MidiTrack;
 use ::Bus;    
 use ::Sequence;
 use ::Mark;
