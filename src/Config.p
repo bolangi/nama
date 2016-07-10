@@ -65,6 +65,7 @@ sub read_config {
 	my $yml = $config_file // get_data_section("default_namarc");
 	strip_all( $yml );
 	my %cfg = %{  yaml_in($yml) };
+	logpkg('debug', "config file:", Dumper \%cfg);
 	*subst = \%{$cfg{abbreviations}}; # alias
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
