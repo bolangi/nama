@@ -249,6 +249,11 @@ sub create_system_buses {
 		name 		=> 'null', 
 		send_type => 'null',
 	);
+	::MidiBus->new(
+		name 		=> 'Midi', 
+		send_type => 'null',
+		send_id	  => 'null',
+	);
 }
 
 

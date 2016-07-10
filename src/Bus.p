@@ -250,6 +250,27 @@ sub apply {
 }
 
 }
+{
+package ::MidiBus;
+use Modern::Perl; use Carp; our @ISA = '::Bus';
+use ::Log qw(logsub logpkg);
+use ::Util qw(input_node);
+use ::Globals qw(:trackrw);
+
+sub output_is_connectable {
+ 	my $bus = shift;
+	undef	
+
+}
+
+sub apply {
+	my ($bus)  = @_;
+	logpkg('debug', "bus ". $bus->name. ": applying routes");
+	logpkg('debug', "Bus destination is type: $bus->{send_type}, id: $bus->{send_id}");
+	map{$_ } grep {$_->rec_status ne OFF} $bus->track_o;
+}
+sub remove { }  # We never remove the Midi bus
+}
 
 # ---------- Bus routines --------
 {
