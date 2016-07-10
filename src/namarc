@@ -93,6 +93,8 @@ ecasound_globals:
 
 # ecasound_tcp_port: 2868  
 
+use_midi: 1
+
 # WAVs recorded at the same time get the same numeric suffix
 
 use_group_numbering: 1
@@ -162,4 +164,5 @@ alias:
     djp: disable_jack_polling
   effect:
     reverb: gverb
+
 # end

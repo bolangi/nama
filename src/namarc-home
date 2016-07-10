@@ -2,7 +2,7 @@
 
 project_root: ~/nama
 
-midi_enable: 1
+use_midi: 1
 
 # define abbreviations
 

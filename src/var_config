@@ -43,9 +43,7 @@
 	$press_space_to_start_transport $config->{press_space_to_start}
 	$execute_on_project_load 		$config->{execute_on_project_load}
 	$initial_mode 					$config->{initial_mode}
-	$enable_midish 					$config->{use_midish}
-	$midi_enable 					$config->{use_midish}
-	$sync_midi_start 				$config->{midi_transport_sync}
+	$use_midi 						$config->{use_midi}
 	$quietly_remove_tracks 			$config->{quietly_remove_tracks}
 	$use_jack_plumbing 				$config->{use_jack_plumbing}
 	$jack_seek_delay    			$config->{engine_base_jack_seek_delay}

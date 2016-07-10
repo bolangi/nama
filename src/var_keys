@@ -19,6 +19,7 @@ $config->{latency_op_set}		# subroutine for setting latency compensation
 $config->{_is_system_bus}		# a hash
 $config->{osc_listener_port}
 $config->{remote_control_port}
+$config->{use_midi}
 
 $jack->{seek_delay}				# extra time for stop-seek-start process
 $jack->{jackd_running}			# jackd status, but this should be a subroutine
@@ -67,7 +68,7 @@ $mode->{offset_run}				# record starting other than at the beginning
 $mode->{soloing}				# boolean
 $mode->{loop_enable}			# boolean
 $mode->{mastering}				# boolean
-$mode->{midi_terminal}		# unused?
+$mode->{midi_terminal}			# 
 $mode->{midi_transport_sync}  # sync Ecasound start/stop with midish
 $project->{events}				# timers used during engine run
 $this_engine->{socket}			# socket for Ecasound command I/O (Net-ECI)

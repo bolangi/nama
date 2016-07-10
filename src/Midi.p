@@ -37,7 +37,7 @@ sub stop_midi_transport { midi_command('s') }
 sub midi_command {
 	my $query = shift;
 	print "\n";
-	#$config->{use_midish} or say( qq($query: cannot execute Midish command 
+	#$config->{use_midi} or say( qq($query: cannot execute Midish command 
 #unless you set "midi_enable: 1" in .namarc)), return;
 	#$query eq 'exit' and say("Will exit Midish on closing Nama."), return;
 

@@ -59,7 +59,7 @@ sub start_transport {
 	schedule_wraparound();
 	mute();
 	start_midi_transport() 
-		if $config->{use_midish} 
+		if $config->{use_midi} 
 			and $mode->{midi_transport_sync} 
 			or $config->{midi_transport_sync};
 
@@ -96,7 +96,7 @@ sub stop_transport {
 	mute();
 	stop_command();
 	stop_midi_transport() 
-		if $config->{use_midish} and $mode->{midi_transport_sync};
+		if $config->{use_midi} and $mode->{midi_transport_sync};
 	disable_length_timer();
 	if ( ! $quiet ){
 		sleeper(0.5);

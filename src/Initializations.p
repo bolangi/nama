@@ -335,7 +335,7 @@ exit;
 		else { pager_newline("Stopped.") }
 	}
 		
-	start_midish() if $config->{use_midish};
+	start_midish() if $config->{use_midi};
 
 	initialize_terminal() unless $config->{opts}->{T};
 
