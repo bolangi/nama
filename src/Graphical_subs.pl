@@ -30,16 +30,38 @@ sub init_gui {
 	$gui->{ew}->deiconify; 
 #	$gui->{ew}->withdraw;
 
+
+	### init waveform window
+
+	$gui->{ww} = $gui->{mw}->Toplevel;
+	$gui->{ww}->title("Effect Window");
+	$gui->{ww}->deiconify; 
+	
+
 	### Exit via Ctrl-C 
 
 	$gui->{mw}->bind('<Control-Key-c>' => sub { exit } ); 
 	$gui->{ew}->bind('<Control-Key-c>' => sub { exit } );
+	$gui->{ww}->bind('<Control-Key-c>' => sub { exit } );
 
     ## Press SPACE to start/stop transport
 
 	$gui->{mw}->bind('<Control-Key- >' => \&toggle_transport); 
 	$gui->{ew}->bind('<Control-Key- >' => \&toggle_transport); 
+	$gui->{ww}->bind('<Control-Key- >' => \&toggle_transport); 
 	
+	$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
+	$gui->{wwcanvas}->configure(
+		scrollregion =>[0,0,2400,480],
+		-width => 2400,
+		-height => 480	
+		);
+	$gui->{wwframe} = $gui->{wwcanvas}->Frame;
+	my $wavform = $gui->{ww}->Photo(-format => 'png', -file => join_path(project_dir(),"tmh-2400x480.png"));
+	$gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $wavform);
+
+
+
 	$gui->{canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
 	$gui->{canvas}->configure(
 		scrollregion =>[2,2,10000,10000],

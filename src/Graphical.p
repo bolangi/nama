@@ -26,7 +26,10 @@ sub loop {
   	}
 }
 
-sub initialize_tk { can_load( modules => { Tk => undef } ) }
+sub initialize_tk { 
+	can_load( modules => { Tk => undef } ) ;
+	can_load( modules => { 'Tk::PNG' => undef } );
+}
 
 # the following graphical methods are placed in the root namespace
 # allowing access to root namespace variables 
