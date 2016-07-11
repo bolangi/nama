@@ -1,0 +1,103 @@
+=comment
+# track guitar.wav version 2
+# screen width e.g. 800
+# try for 2 hours max on screen
+# 800 dots / 125 minutes =  6.4 dots/min
+# 2400 dots / 120 minute = 20 dots/ min
+# 1600 dots / 120 minute = 13.3 dots/min
+ or 1 dot / 33 million samples
+
+# 
+
+scale down factor | resolution
+1 					48000 dots per second
+10 					4800  dots / sec
+100  				480 dots / sec
+1_000 				48 dots / sec
+10_000 				4.8 dots/sec
+100_000  			288 dots/min
+1_000_000 			28.8 dots/min
+10_000_000 			2.9 dots/min
+
+
+
+
+my %dispatch = (
+	1 => 
+	2 =>
+	3 =>
+	4 =>
+	5 =>
+	6 =>
+	7 =>
+	8 =>
+);
+=cut
+package ::;
+
+sub time_series_file_name {
+	my ($trackname, $version, $power) = @_;
+	! $power and "${trackname}_$version.dat";
+	"${trackname}_$version#$power.dat";
+}
+	
+sub generate_waveforms {
+	my ($track, $version) = @_;
+	my $source = $track->targets->{$version};
+	my $datafile = time_series_file_name $track->name, $version;
+	generate_initial_time_series($source, $datafile);
+	my $p1 = time_series_file_name $track->name, $version, 1;
+	generate_first_series($datafile, $p1);
+	my $previous_file = $p1;
+	for my $power (2..8)
+	{
+		my $datafile = time_series_file_name $track->name, $version, $power;
+		my $factor = 10; 
+		my $unit = 'seconds';
+		generate_rms_series($previous_file, $datafile, $factor, $unit);
+		$previous_file = $datafile;
+	}
+}
+
+sub generate_initial_time_series {
+	my ($from, $to) = @_;
+	my @cmd = 'tsriff', $from, $to;
+	system @cmd;
+ 	#guitar_2.wav guitar_2.dat 
+}
+	
+sub generate_first_series {
+	my ($from, $to, $sample_rate) = @_;
+	open my $rh, '<', $from;
+	open my $wh, '>', $to;
+	while (my $line = <$rh>)
+	{
+		/(\d+)/ and say $wh ++$i/$sample_rate, " $1";
+		# take first channel, throw away the rest
+		# output:  seconds   level 
+	}
+}
+1
+__END__
+
+sub generate_rms_series
+	my($infile, $outfile, $factor, $unit) = @_;
+	open infile
+	rms for $factor values
+    write outfile (time (s/min), rms )
+
+    
+                     guitar_2#1.dat  
+                     guitar_2#2.dat  
+                     guitar_2#3.dat  
+                     guitar_2#4.dat  
+                     guitar_2#5.dat  
+                     guitar_2#6.dat  
+                     guitar_2#7.dat  
+
+sub generate_plot
+	my ($file, %params) = @_
+	outfile guitar_2#2.png
+	gnuplot(@params)
+ 
+
