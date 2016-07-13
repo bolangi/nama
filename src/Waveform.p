@@ -32,41 +32,52 @@ my %dispatch = (
 	7 =>
 	8 =>
 );
+
+    
+                     guitar_2.dat   # initial_time_series
+                     guitar_2#1.dat  # first_series
+                     guitar_2#2.dat # rms_series
+                     guitar_2#3.dat  
+                     guitar_2#4.dat  
+                     guitar_2#5.dat  
+                     guitar_2#6.dat  
+                     guitar_2#7.dat  
 =cut
 package ::;
 
-sub time_series_file_name {
+sub time_series_filename {
 	my ($trackname, $version, $power) = @_;
-	! $power and "${trackname}_$version.dat";
-	"${trackname}_$version#$power.dat";
+	! $power 
+		? "${trackname}_$version.dat"
+		: "${trackname}_$version#$power.dat";
 }
 	
 sub generate_waveforms {
 	my ($track, $version) = @_;
 	my $source = $track->targets->{$version};
-	my $datafile = time_series_file_name $track->name, $version;
-	generate_initial_time_series($source, $datafile);
-	my $p1 = time_series_file_name $track->name, $version, 1;
-	generate_first_series($datafile, $p1);
+	my $datafile = time_series_filename $track->name, $version;
+	initial_time_series($source, $datafile);
+	my $p1 = time_series_filename $track->name, $version, 1;
+	first_series($datafile, $p1);
 	my $previous_file = $p1;
 	for my $power (2..8)
 	{
-		my $datafile = time_series_file_name $track->name, $version, $power;
+		my $datafile = time_series_filename $track->name, $version, $power;
 		my $factor = 10; 
 		my $unit = 'seconds';
-		generate_rms_series($previous_file, $datafile, $factor, $unit);
+		rms_series($previous_file, $datafile, $factor, $unit);
 		$previous_file = $datafile;
 	}
 }
 
-sub generate_initial_time_series {
+sub initial_time_series {
 	my ($from, $to) = @_;
 	my @cmd = 'tsriff', $from, $to;
 	system @cmd;
  	#guitar_2.wav guitar_2.dat 
 }
 	
-sub generate_first_series {
+sub first_series {
 	my ($from, $to, $sample_rate) = @_;
 	open my $rh, '<', $from;
 	open my $wh, '>', $to;
@@ -80,20 +91,11 @@ sub generate_first_series {
 1
 __END__
 
-sub generate_rms_series
+sub rms_series
 	my($infile, $outfile, $factor, $unit) = @_;
 	open infile
 	rms for $factor values
     write outfile (time (s/min), rms )
-
-    
-                     guitar_2#1.dat  
-                     guitar_2#2.dat  
-                     guitar_2#3.dat  
-                     guitar_2#4.dat  
-                     guitar_2#5.dat  
-                     guitar_2#6.dat  
-                     guitar_2#7.dat  
 
 sub generate_plot
 	my ($file, %params) = @_
