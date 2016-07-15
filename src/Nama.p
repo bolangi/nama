@@ -119,7 +119,6 @@ use ::Custom ();
 use ::Terminal ();
 use ::Grammar ();
 use ::Help ();
-use ::Waveform ();
 
 use ::Project ();
 use ::Persistence ();
