@@ -1,3 +1,69 @@
+{package ::Waveform;
+use Role::Tiny;
+use Modern::Perl;
+use ::Globals qw(:all);
+
+sub generate_waveforms {
+	my ($track, $version) = @_;
+	my $source = $track->targets->{$version};
+	my $datafile = time_series_filename($track->name, $version);
+	initial_time_series($source, $datafile);
+	my $p1 = time_series_filename($track->name, $version, 1);
+	first_series($datafile, $p1);
+	my $previous_file = $p1;
+	for my $power (2..8)
+	{
+		my $datafile = time_series_filename($track->name, $version, $power);
+		my $factor = 10; 
+		my $unit = 'seconds';
+		rms_series($previous_file, $datafile, $factor, $unit);
+		$previous_file = $datafile;
+	}
+}
+
+sub time_series_filename {
+	my ($trackname, $version, $power) = @_;
+	! $power 
+		? "${trackname}_$version.dat"
+		: "${trackname}_$version#$power.dat";
+}
+	
+sub initial_time_series {
+	my ($from, $to) = @_;
+	my @cmd = ('tsriff', $from, $to);
+	system @cmd;
+ 	#guitar_2.wav guitar_2.dat 
+}
+	
+sub first_series {
+	my ($from, $to, $sample_rate) = @_;
+	open my $rh, '<', $from;
+	open my $wh, '>', $to;
+	my $i = 0;
+	while (my $line = <$rh>)
+	{
+		/(\d+)/ and say $wh ++$i/$sample_rate, " $1";
+		# take first channel, throw away the rest
+		# output:  seconds   level 
+	}
+}
+sub rms_series {
+	my($infile, $outfile, $factor, $unit) = @_;
+# 	open infile
+# 	rms for $factor values
+#     write outfile (time (s/min), rms )
+}
+sub generate_plot {
+# 	my ($file, %params) = @_
+# 	outfile guitar_2#2.png
+# 	gnuplot(@params)
+} 
+
+}
+1
+__END__
+
+
 =comment
 # track guitar.wav version 2
 # screen width e.g. 800
@@ -43,63 +109,3 @@ my %dispatch = (
                      guitar_2#6.dat  
                      guitar_2#7.dat  
 =cut
-package ::;
-
-sub time_series_filename {
-	my ($trackname, $version, $power) = @_;
-	! $power 
-		? "${trackname}_$version.dat"
-		: "${trackname}_$version#$power.dat";
-}
-	
-sub generate_waveforms {
-	my ($track, $version) = @_;
-	my $source = $track->targets->{$version};
-	my $datafile = time_series_filename $track->name, $version;
-	initial_time_series($source, $datafile);
-	my $p1 = time_series_filename $track->name, $version, 1;
-	first_series($datafile, $p1);
-	my $previous_file = $p1;
-	for my $power (2..8)
-	{
-		my $datafile = time_series_filename $track->name, $version, $power;
-		my $factor = 10; 
-		my $unit = 'seconds';
-		rms_series($previous_file, $datafile, $factor, $unit);
-		$previous_file = $datafile;
-	}
-}
-
-sub initial_time_series {
-	my ($from, $to) = @_;
-	my @cmd = 'tsriff', $from, $to;
-	system @cmd;
- 	#guitar_2.wav guitar_2.dat 
-}
-	
-sub first_series {
-	my ($from, $to, $sample_rate) = @_;
-	open my $rh, '<', $from;
-	open my $wh, '>', $to;
-	while (my $line = <$rh>)
-	{
-		/(\d+)/ and say $wh ++$i/$sample_rate, " $1";
-		# take first channel, throw away the rest
-		# output:  seconds   level 
-	}
-}
-1
-__END__
-
-sub rms_series
-	my($infile, $outfile, $factor, $unit) = @_;
-	open infile
-	rms for $factor values
-    write outfile (time (s/min), rms )
-
-sub generate_plot
-	my ($file, %params) = @_
-	outfile guitar_2#2.png
-	gnuplot(@params)
- 
-
