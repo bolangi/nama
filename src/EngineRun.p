@@ -60,8 +60,7 @@ sub start_transport {
 	mute();
 	start_midi_transport() 
 		if $config->{use_midi} 
-			and $mode->{midi_transport_sync} 
-			or $config->{midi_transport_sync};
+			and $mode->{midi_transport_sync};
 
 	eval_iam('start');
 
