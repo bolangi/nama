@@ -9,6 +9,7 @@ sub generate_waveforms {
 	my $datafile = time_series_filename($track->name, $version);
 	initial_time_series($source, $datafile);
 	my $p1 = time_series_filename($track->name, $version, 1);
+	say "p1: $p1";
 	first_series($datafile, $p1);
 	my $previous_file = $p1;
 	for my $power (2..8)
@@ -23,9 +24,10 @@ sub generate_waveforms {
 
 sub time_series_filename {
 	my ($trackname, $version, $power) = @_;
-	! $power 
+	my $filename = ! $power 
 		? "${trackname}_$version.dat"
 		: "${trackname}_$version#$power.dat";
+	::join_path(::waveform_dir(),$filename)
 }
 	
 sub initial_time_series {
