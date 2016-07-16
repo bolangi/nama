@@ -51,7 +51,7 @@ sub rms_series {
 	my($infile, $outfile, $factor, $unit) = @_;
 	open my $ih, '<', $infile;
 	open my $oh, '>', $outfile;
-	my ($pos, $oldpos, $acc, $count, $level);
+	my ($pos, $acc, $count, $level);
 	while (! eof $ih)
 	{
 		for (1..$factor)
