@@ -31,7 +31,7 @@ sub this_wav_dir {
 	);
 }
 }
-
+sub waveform_dir { join_path(project_dir(), q(.dat) ) }
 sub project_dir {
 	$config->{opts}->{p} and return $config->{root_dir}; # cwd
 	$project->{name} and join_path( project_root(), $project->{name}) 
