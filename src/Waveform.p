@@ -31,7 +31,7 @@ sub time_series_filename {
 sub initial_time_series {
 	my ($from, $to) = @_;
 	my @cmd = ('tsriff', $from, $to);
-	system @cmd;
+	system @cmd == 0 or die "system @cmd failed: $?";
  	#guitar_2.wav guitar_2.dat 
 }
 	
@@ -49,10 +49,25 @@ sub first_series {
 }
 sub rms_series {
 	my($infile, $outfile, $factor, $unit) = @_;
-# 	open infile
+	open my $ih, '<', $infile;
+	open my $oh, '>', $outfile;
+	my ($pos, $oldpos, $acc, $count, $level);
+	while (! eof $ih)
+	{
+		for (1..$factor)
+		{	$count = $acc = 0; 
+			my $in = <$ih>;
+			defined $in or last;
+			($pos, undef, $level) = split ' ', $in;
+			$count++;
+			$acc += $level**2;
+		}
+		my $rms = sqrt($acc/$count);
+		say $oh "$pos -$rms $rms";
+	}
+}
 # 	rms for $factor values
 #     write outfile (time (s/min), rms )
-}
 sub generate_plot {
 # 	my ($file, %params) = @_
 # 	outfile guitar_2#2.png
