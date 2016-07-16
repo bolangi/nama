@@ -55,6 +55,7 @@ sub initialize_project_data {
 	logsub("&initialize_project_data");
 
 	return if transport_running();
+	-d ::waveform_dir() or mkdir ::waveform_dir();
 	$ui->destroy_widgets();
 	$ui->project_label_configure(
 		-text => uc $project->{name}, 
@@ -119,7 +120,7 @@ sub load_project {
 	}
 	if ( ! -d project_dir() )
 	{
-		map{create_dir($_)} project_dir(), this_wav_dir() if $args{create};
+		map{create_dir($_)} project_dir(), this_wav_dir(), waveform_dir() if $args{create};
 	}
 
 	# we used to check each project dir for customized .namarc
