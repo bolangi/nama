@@ -64,7 +64,8 @@ sub midi_command {
 }
 
 sub close_midish {
-	my $save_file = join_path(project_dir(), "$project->{name}.msh");
+	my $save_file = $file->midi_store;
+	$save_file = qq("$save_file");
 	say "\nsaving midish as $save_file";
 	midi_command("save $save_file");
 	sleeper(0.1);
