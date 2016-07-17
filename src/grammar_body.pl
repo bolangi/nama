@@ -1390,31 +1390,13 @@ show_version_comments_all: _show_version_comments_all {
 set_system_version_comment: _set_system_version_comment dd text {
 	::pager( ::set_system_version_comment($::this_track,@item{qw(dd text)}));1;
 }
-midi_command: _midi_command text {
-	::midi_command( $item{text} ); 1
-}
-midi_mode_on: _midi_mode_on { 
-	::pager("Setting midish terminal mode!! Return with 'midi_mode_off'.");
-	$::mode->{midi_terminal}++;
-}
- 
-midi_mode_off: _midi_mode_off { 
-	::pager("Releasing midish terminal mode. Sync is not enabled.");
-	undef $::mode->{midi_terminal};
-	undef $::mode->{midi_transport_sync};
-	1;
-}
-midi_mode_off_ready_to_play: _midi_mode_off_ready_to_play { 
-	::pager("Releasing midish terminal mode.
-Will sync playback with Ecasound."); 
-	undef $::mode->{midi_terminal} ;
+play_midi: _play_midi { 
+	::pager("Will sync playback with Ecasound."); 
 	$::mode->{midi_transport_sync} = ::PLAY;
 	1;
 }
-midi_mode_off_ready_to_record: _midi_mode_off_ready_to_record { 
-	::pager("Releasing midish terminal mode. 
-Will sync record with Ecasound.");
-	undef $::mode->{midi_terminal} ;
+record_midi: _record_midi { 
+	::pager("Will sync record/playback with Ecasound."); 
 	$::mode->{midi_transport_sync} = ::REC;
 	1;
 }
