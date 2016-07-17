@@ -204,6 +204,8 @@ sub is_mix_track {
 	my $track = shift;
 	($bn{$track->name} or $track->name eq 'Master') and $track->rw eq MON
 }
+sub is_midi_track { $_[0]->group eq 'Midi' }
+ 
 sub bus { $bn{$_[0]->group} }
 
 { my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low
