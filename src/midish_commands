@@ -17,7 +17,6 @@ getq
 setq
 ev
 gett
-ct
 getf
 cf
 getx
@@ -54,9 +53,11 @@ ctlinfo
 m
 metrocf
 tlist
-tnew
-tdel
-tren
+# Nama handles these
+# ct
+# tnew
+# tdel
+# tren
 texists
 taddev
 tsetf
