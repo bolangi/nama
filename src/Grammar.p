@@ -35,7 +35,7 @@ sub setup_grammar {
 
 	# Midish command keywords
 	
-	$midi->{keywords} = 
+	$text->{midi_cmd} = 
 	{
 			map{ $_, 1} split " ", get_data_section("midi_commands")
 	};

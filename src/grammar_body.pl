@@ -11,7 +11,7 @@ _a_test: /something_else\b/ | /a-test\b/
 meta: midi_cmd 
 
 midi_cmd: /[a-z]+/ predicate { 
-	return unless $::midi->{keywords}->{$item[1]};
+	return unless $::text->{midi_cmd}->{$item[1]};
 	my $line = "$item[1] $item{predicate}";
 	::midi_command($line);
 	1;
