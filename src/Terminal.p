@@ -336,7 +336,7 @@ sub load_keywords {
 	push @keywords, grep{$_} map{split " ", $text->{commands}->{$_}->{short}} @keywords;
 	push @keywords, keys %{$text->{iam}};
 	push @keywords, keys %{$fx_cache->{partial_label_to_full}};
-	push @keywords, keys %{$midi->{keywords}} if $config->{use_midi};
+	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
 	push @keywords, "Audio::Nama::";
 	@{$text->{keywords}} = @keywords
 }
