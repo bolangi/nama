@@ -223,6 +223,10 @@ sub engine {
 	my $track = shift;
 	$en{$track->engine_group}
 }
+sub select_track {
+		my $track = shift;
+		::ecasound_select_chain( $track->n );
+}
 } # end package
 
 
@@ -491,6 +495,11 @@ package ::MidiTrack;
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
 our @ISA = qw(::Track);
+sub select_track {
+		my $track = shift;
+		::midi_command("ct ".$track->name);
+}
+		
 }
 
 1;
