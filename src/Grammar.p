@@ -180,9 +180,7 @@ sub set_current_track {
 	my $cmd = shift;
 	if( my $track = $tn{$cmd} || $ti{$cmd} ){
 		logpkg('debug',"Selecting track ",$track->name);
-		$this_track = $track;
 		$track->select_track;
-		set_current_bus();
 		1
 	}
 }

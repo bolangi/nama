@@ -225,7 +225,9 @@ sub engine {
 }
 sub select_track {
 		my $track = shift;
+		$::this_track = $track;
 		::ecasound_select_chain( $track->n );
+		::set_current_bus();
 }
 } # end package
 
@@ -497,7 +499,9 @@ use ::Log qw(logpkg);
 our @ISA = qw(::Track);
 sub select_track {
 		my $track = shift;
+		$::this_track = $track;
 		::midi_command("ct ".$track->name);
+		::set_current_bus();
 }
 		
 }
