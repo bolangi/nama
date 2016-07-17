@@ -52,7 +52,7 @@ meta: for bunch_spec ';' namacode stopper {
  	::logit('Grammar','debug',"namacode: $item{namacode}");
  	my @tracks = ::bunch_tracks($item{bunch_spec});
  	for my $t(@tracks) {
- 		::user_set_current_track($t);
+ 		::set_current_track($t);
 		$::text->{parser}->meta($item{namacode});
  		#::pager(("$t); $item{namacode}");
 	}
@@ -87,8 +87,8 @@ do_part: track_spec end
 predicate: nonsemi end { $item{nonsemi}}
 predicate: /$/
 iam_cmd: ident { $item{ident} if $::text->{iam}->{$item{ident}} }
-#track_spec: existing_track_name { ::user_set_current_track($item{existing_track_name}) }
-track_spec: ident { ::user_set_current_track($item{ident}) }
+#track_spec: existing_track_name { ::set_current_track($item{existing_track_name}) }
+track_spec: ident { ::set_current_track($item{ident}) }
 bang: '!'
 eval: 'eval'
 for: 'for'

@@ -176,17 +176,17 @@ sub dump_all {
 }
 
 
-sub user_set_current_track {
+sub set_current_track {
 	my $cmd = shift;
 	if( my $track = $tn{$cmd} || $ti{$cmd} ){
 		logpkg('debug',"Selecting track ",$track->name);
 		$this_track = $track;
+		$track->select_track;
 		set_current_bus();
-		ecasound_select_chain( $this_track->n );
-		1;
+		1
 	}
-		
 }
+
 
 ### allow commands to abbreviate Audio::Nama::Class as ::Class # SKIP_PREPROC
 
