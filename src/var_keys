@@ -1,4 +1,3 @@
-$midi->{keywords} 				# list of Midish commands for the parser to recognize
 $config->{memoize} 				# method caching
 $config->{hires_timer}			# indicates if we are capable
 $config->{opts}					# command line arguments
@@ -117,6 +116,7 @@ $text->{hotkey_playback_jumpsize}
 $text->{hyphenated_commands}	# remove-track => remove_track
 $text->{eval_result}			# buffer for result of eval_perl() 
 $text->{output_buffer}			# buffer for output of OSC commands
+$text->{midi_cmd} 				# list of Midish commands for the parser to recognize
 
 $project->{name}				# project name
 $project->{bunch}				# track bunches lists

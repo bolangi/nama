@@ -35,7 +35,7 @@ sub setup_grammar {
 
 	# Midish command keywords
 	
-	$midi->{keywords} = 
+	$text->{midi_cmd} = 
 	{
 			map{ $_, 1} split " ", get_data_section("midi_commands")
 	};
@@ -54,12 +54,6 @@ sub process_line {
 		$text->{term}->addhistory($user_input) 
 			unless $user_input eq $text->{previous_cmd} or ! $text->{term};
 		$text->{previous_cmd} = $user_input;
-		if ($mode->{midi_terminal}){
-				$user_input =~ /^\s*(midi_mode_off|mmx)/ 
-					?  process_command($user_input)
-					:  midi_command($user_input);	
-		}
-		else {
 			my $context = context();
 			my $success = process_command( $user_input );
 			my $command_stamp = { context => $context, 
@@ -78,7 +72,6 @@ sub process_line {
 				reconfigure_engine(); # quietly, avoiding noisy reconfig below
 			}
 			reconfigure_engine();
-		}
 		# reset current track to Master if it is
 		# undefined, or the track has been removed
 		# from the index
@@ -91,7 +84,6 @@ sub process_line {
 		logpkg('logcluck',"Inconsistency found in effects data",
 			Dumper ($result)) if $result->{is_error};
 	}
-	revise_prompt( $mode->{midi_terminal} and "Midish > " );
 	my $output = delete $text->{output_buffer};
 }
 sub context {
