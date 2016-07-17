@@ -2,12 +2,14 @@
 use Role::Tiny;
 use Modern::Perl;
 use ::Globals qw(:all);
+use ::Util qw(join_path);
+use autodie qw(:all);
 
 sub generate_waveforms {
 	my ($track, $version) = @_;
-	my $source = $track->targets->{$version};
+	my $sourcefile = join_path(::this_wav_dir(), $track->targets->{$version});
 	my $datafile = time_series_filename($track->name, $version);
-	initial_time_series($source, $datafile);
+	initial_time_series($sourcefile, $datafile);
 	my $p1 = time_series_filename($track->name, $version, 1);
 	say "p1: $p1";
 	first_series($datafile, $p1);
@@ -27,13 +29,15 @@ sub time_series_filename {
 	my $filename = ! $power 
 		? "${trackname}_$version.dat"
 		: "${trackname}_$version#$power.dat";
-	::join_path(::waveform_dir(),$filename)
+	join_path(::waveform_dir(),$filename)
 }
 	
 sub initial_time_series {
 	my ($from, $to) = @_;
 	my @cmd = ('tsriff', $from, $to);
-	system @cmd == 0 or die "system @cmd failed: $?";
+	my $cmd = join " ", @cmd;
+	say "ts-command: $cmd";
+	system(@cmd) == 0 or die "system @cmd failed: $?";
  	#guitar_2.wav guitar_2.dat 
 }
 	
@@ -50,9 +54,9 @@ sub first_series {
 	}
 }
 sub rms_series {
-	my($infile, $outfile, $factor, $unit) = @_;
-	open my $ih, '<', $infile;
-	open my $oh, '>', $outfile;
+	my($from, $to, $factor, $unit) = @_;
+	open my $ih, '<', $from;
+	open my $oh, '>', $to;
 	my ($pos, $acc, $count, $level);
 	while (! eof $ih)
 	{
