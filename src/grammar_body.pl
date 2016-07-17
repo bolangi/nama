@@ -332,7 +332,7 @@ add_midi_track: _add_midi_track new_track_name {
 		novol => 1,
 		nopan => 1,
 	);
-	::midi_command("tnew $new_track_name");
+	::midi_command qq(tnew "$item{new_track_name}");
 	::pager_newline(qq(creating MIDI track "$item{new_track_name}"));
 	1
 }
