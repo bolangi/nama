@@ -670,7 +670,7 @@ add_to_bunch:
 commit:
   type: project
   what: commit Nama's current state
-  short: ci
+  short: cm
   parameters: <string:message>
 tag:
   type: project
