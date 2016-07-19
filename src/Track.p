@@ -503,6 +503,9 @@ sub select_track {
 		::midi_command("ct ".$track->name);
 		::set_current_bus();
 }
+sub mute { ::midi_command('mute') }
+sub unmute { ::midi_command('unmute') }
+1;
 		
 }
 
