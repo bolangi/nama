@@ -501,11 +501,11 @@ our @ISA = qw(::Track);
 sub select_track {
 		my $track = shift;
 		$::this_track = $track;
-		::midi_command("ct ".$track->name);
+		::midish("ct ".$track->name);
 		::set_current_bus();
 }
-sub mute { ::midi_command('mute') }
-sub unmute { ::midi_command('unmute') }
+sub mute { ::midish('mute') }
+sub unmute { ::midish('unmute') }
 sub rec_status { 
 		my $self = shift;
 		if	 ( $self->rw eq REC and	$self->is_selected )							{ REC  } 

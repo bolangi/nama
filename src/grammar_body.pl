@@ -13,7 +13,7 @@ meta: midi_cmd
 midi_cmd: /[a-z]+/ predicate { 
 	return unless $::this_track->is_midi_track and $::text->{midi_cmd}->{$item[1]};
 	my $line = "$item[1] $item{predicate}";
-	::midi_command($line);
+	::midish($line);
 	1;
 }
 
@@ -332,7 +332,7 @@ add_midi_track: _add_midi_track new_track_name {
 		novol => 1,
 		nopan => 1,
 	);
-	::midi_command qq(tnew "$item{new_track_name}");
+	::midish qq(tnew "$item{new_track_name}");
 	::pager_newline(qq(creating MIDI track "$item{new_track_name}"));
 	1
 }
@@ -1014,7 +1014,7 @@ import_audio: _import_audio path frequency {
 import_midi: _import_midi path { 
 	my $fname = $item{path};
 	$fname = qq("$fname") unless $fname =~ /"/; # should be a subroutine quote_name
-	::midi_command("import $fname"); 1
+	::midish("import $fname"); 1
 }
 import_audio: _import_audio path {
 	::import_audio($::this_track, $item{path}); 1;
@@ -1733,4 +1733,4 @@ remove_effect_surname: _remove_effect_surname { ::this_op_o()->set_surname(); 1}
 
 select_track: _select_track track_spec
 
-set_tempo: _set_tempo dd {::midi_command("t $item{dd}")}
+set_tempo: _set_tempo dd {::midish("t $item{dd}")}

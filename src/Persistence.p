@@ -43,7 +43,7 @@ sub save_state {
 
 	# save midi data
 	my $fname = $file->midi_store;
-	midi_command( qq<save "$fname">);
+	midish( qq<save "$fname">);
 
 	# store alsa settings
 
@@ -448,7 +448,7 @@ sub restore_state_from_file {
 		(@project_effect_chain_data, @global_effect_chain_data);
 
 	my $fname = $file->midi_store;
-	midi_command(qq<load "$fname">);
+	midish(qq<load "$fname">);
 	
 } 
 sub convert_rw {

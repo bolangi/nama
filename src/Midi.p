@@ -21,21 +21,21 @@ sub start_midish {
 	$sel = IO::Select->new();
 	$sel->add($fh_midi_read);
 	$sel->add($fh_midi_error);
-	midi_command( qq(print "Midish is ready.") );
+	midish( qq(print "Midish is ready.") );
 }
 sub start_midi_transport {
 	# assuming that we have midi tracks, either REC or PLAY
 	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
-	midi_command($start_command);
+	midish($start_command);
 }
-sub stop_midi_transport { midi_command('s') }
+sub stop_midi_transport { midish('s') }
 
-sub midi_command {
-	my $query = shift;
+sub midish {
+	my $command = shift;
 	
 	print "\n";
-	print "midi command: $query\n";
-	print $fh_midi_write "$query\n";
+	print "midi command: $command\n";
+	print $fh_midi_write "$command\n";
 
 	my $length = 2**16;
 	sleeper(0.05);
@@ -60,7 +60,7 @@ sub close_midish {
 	my $save_file = $file->midi_store;
 	$save_file = qq("$save_file");
 	say "\nsaving midish as $save_file";
-	midi_command("save $save_file");
+	midish("save $save_file");
 	sleeper(0.1);
 	say "killing midish";
 	kill 15, $pid;
