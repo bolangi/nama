@@ -41,6 +41,10 @@ sub save_state {
 	save_system_state($path);
 	save_global_effect_chains();
 
+	# save midi data
+	my $fname = $file->midi_store;
+	midi_command( qq<save "$fname">);
+
 	# store alsa settings
 
 	if ( $config->{opts}->{a} ) {
@@ -441,7 +445,11 @@ sub restore_state_from_file {
 	%::EffectChain::by_index = ();
 	#say "Project Effect Chain Data\n", json_out( \@project_effect_chain_data);
  	map { my $fx_chain = ::EffectChain->new(%$_) } 
-		(@project_effect_chain_data, @global_effect_chain_data)
+		(@project_effect_chain_data, @global_effect_chain_data);
+
+	my $fname = $file->midi_store;
+	midi_command(qq<load "$fname">);
+	
 } 
 sub convert_rw {
 	my $h = shift;
