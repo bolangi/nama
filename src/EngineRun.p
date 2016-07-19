@@ -42,7 +42,9 @@ sub mixing_only {
 	
 sub start_transport { 
 
-	# set up looping event if needed
+	# use gradual unmuting to avoid pop on start
+	# 
+	#
 	# mute unless recording
 	# start
 	# wait 0.5s
@@ -59,8 +61,7 @@ sub start_transport {
 	schedule_wraparound();
 	mute();
 	start_midi_transport() 
-		if $config->{use_midi} 
-			and $mode->{midi_transport_sync};
+		if $bn{Midi}->is_active and $config->{use_midi};
 
 	eval_iam('start');
 

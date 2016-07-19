@@ -24,12 +24,8 @@ sub start_midish {
 	midi_command( qq(print "Midish is ready.") );
 }
 sub start_midi_transport {
-	my $sync = $mode->{midi_transport_sync};
-	my $start_command;
-	$start_command = 'p' if $sync eq PLAY;
-	$start_command = 'r' if $sync eq REC;
-	defined $start_command 
-		or die "$mode->{midi_transport_sync}: illegal midi_transport_sync mode";
+	# assuming that we have midi tracks, either REC or PLAY
+	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
 	midi_command($start_command);
 }
 sub stop_midi_transport { midi_command('s') }
