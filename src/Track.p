@@ -229,6 +229,7 @@ sub select_track {
 		::ecasound_select_chain( $track->n );
 		::set_current_bus();
 }
+sub is_selected { $::this_track->name eq $_[0]->name }
 } # end package
 
 
