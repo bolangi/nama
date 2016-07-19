@@ -1709,4 +1709,9 @@ select_track:
     set a particular track as the current, or default track
     against which track-related commands are executed.
   parameters: <string:track-name> | <integer:track-number>
+set_tempo:
+  short: tempo tp
+  type: midi
+  what: set MIDI tempo (bpm)
+  parameters: <integer:tempo-setting>
 ...

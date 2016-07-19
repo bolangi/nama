@@ -1727,3 +1727,5 @@ set_effect_surname: _set_effect_surname ident { ::this_op_o->set_surname($item{i
 remove_effect_surname: _remove_effect_surname { ::this_op_o()->set_surname(); 1} 
 
 select_track: _select_track track_spec
+
+set_tempo: _set_tempo dd {::midi_command("t $item{dd}")}
