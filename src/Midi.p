@@ -2,10 +2,10 @@
 
 package ::;
 use Modern::Perl;
+#use ::Log qw(logpkg);
 use Carp;
 
 {
-
 my($error,$answer)=('','');
 my ($pid, $sel);
 my @handles = my ($fh_midi_write, $fh_midi_read, $fh_midi_error) = map{ IO::Handle->new() } 1..3;
@@ -36,12 +36,9 @@ sub stop_midi_transport { midi_command('s') }
 
 sub midi_command {
 	my $query = shift;
+	
 	print "\n";
-	#$config->{use_midi} or say( qq($query: cannot execute Midish command 
-#unless you set "midi_enable: 1" in .namarc)), return;
-	#$query eq 'exit' and say("Will exit Midish on closing Nama."), return;
-
-	#send query to midish
+	print "midi command: $query\n";
 	print $fh_midi_write "$query\n";
 
 	my $length = 2**16;
