@@ -1011,6 +1011,11 @@ import_audio: _import_audio path frequency {
 
 	::import_audio($::this_track, $item{path}, $item{frequency}); 1;
 }
+import_midi: _import_midi path { 
+	my $fname = $item{path};
+	$fname = qq("$fname") unless $fname =~ /"/; # should be a subroutine quote_name
+	::midi_command("import $fname"); 1
+}
 import_audio: _import_audio path {
 	::import_audio($::this_track, $item{path}); 1;
 }

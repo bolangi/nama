@@ -253,6 +253,11 @@ import_audio:
     ! import the file bells.flac to the current track
     import /home/music/song.mp3 44100 
     ! import song.mp3, specifying the frequency
+import_midi:
+  type: midi
+  what: Import a MIDI song file (MIDI tracks only)
+  short: im
+  parameters: <string:full_path_to_file>
 set_track:
   type: track
   what: Directly set current track parameters (use with care!).
