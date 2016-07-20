@@ -151,15 +151,15 @@ sub main {
 	say eval join(get_data_section('banner'), qw(" "));
 	bootstrap_environment() ;
 	load_project();
-	process_command($config->{execute_on_project_load});
+	nama_command($config->{execute_on_project_load});
 	reconfigure_engine();
-	process_command($config->{opts}->{X});
+	nama_command($config->{opts}->{X});
 	$ui->loop();
 }
 
 sub bootstrap_environment {
 	definitions();
-	process_command_line_options();
+	nama_command_line_options();
 	start_logging();
 	setup_grammar();
 	setup_hotkey_grammar();

@@ -23,7 +23,7 @@ sub rec_cleanup {
 }
 sub mixdown_postprocessing {
 	logsub("&mixdown_postprocessing");
-	process_command('mixplay');
+	nama_command('mixplay');
 	my ($oldfile) = $tn{Mixdown}->full_path =~ m{([^/]+)$};
 	$oldfile = join_path('.wav',$oldfile);
 	my $tag_name = join '-', $project->{name}, current_branch();

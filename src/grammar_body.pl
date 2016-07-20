@@ -532,13 +532,13 @@ bus_off: _bus_off {
 }
 bus_version: _bus_version dd { 
 	my $n = $item{dd};
-	::process_command("for $::this_bus; version $n");
+	::nama_command("for $::this_bus; version $n");
 }
 mixdown: _mixdown { ::mixdown(); 1}
 mixplay: _mixplay { ::mixplay(); 1}
 mixoff:  _mixoff  { ::mixoff(); 1}
 automix: _automix { ::automix(); 1 }
-autofix_tracks: _autofix_tracks { ::process_command("for mon; fixdc; normalize"); 1 }
+autofix_tracks: _autofix_tracks { ::nama_command("for mon; fixdc; normalize"); 1 }
 master_on: _master_on { ::master_on(); 1 }
 
 master_off: _master_off { ::master_off(); 1 }
@@ -772,7 +772,7 @@ add_controller: _add_controller effect value(s?) {
 	my $values = $item{"value(s?)"};
 	my $cmd = "add_controller $parent $code @$values";
 	print "command: $cmd\n";
-	::process_command($cmd);
+	::nama_command($cmd);
 	1
 }
 
@@ -858,7 +858,7 @@ add_effect: _add_effect ('first'  | 'f')  add_target value(s?) {
 		@{$item{'value(s?)'}},
 		$::this_track->{ops}->[0];
 		#print "command is $command\n";
-	::process_command($command)
+	::nama_command($command)
 }
 add_effect: _add_effect ('last'   | 'l')  add_target value(s?) { 
 	my $command = join " ", 
@@ -867,7 +867,7 @@ add_effect: _add_effect ('last'   | 'l')  add_target value(s?) {
 		@{$item{'value(s?)'}},
 		qw(ZZZ);
 		#print "command is $command\n";
-	::process_command($command)
+	::nama_command($command)
 }
 add_effect: _add_effect ('before' | 'b')  before add_target value(s?) {
 	my $command = join " ", 
@@ -876,7 +876,7 @@ add_effect: _add_effect ('before' | 'b')  before add_target value(s?) {
 		@{$item{'value(s?)'}},
 		$item{before};
 		#print "command is $command\n";
-	::process_command($command)
+	::nama_command($command)
 }
 add_effect_first: _add_effect_first add_target value(s?) {
 	my $command = join " ", 
@@ -885,7 +885,7 @@ add_effect_first: _add_effect_first add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}};
 		#print "command is $command\n";
-	::process_command($command)
+	::nama_command($command)
 }
 add_effect_last: _add_effect_last add_target value(s?) {
 	my $command = join " ", 
@@ -894,7 +894,7 @@ add_effect_last: _add_effect_last add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}};
 		#print "command is $command\n";
-	::process_command($command)
+	::nama_command($command)
 }
 add_effect_before: _add_effect_before before add_target value(s?) {
 	my $command = join " ", 
@@ -904,7 +904,7 @@ add_effect_before: _add_effect_before before add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}};
 		#print "command is $command\n";
-	::process_command($command)
+	::nama_command($command)
 }
 
 parent: op_id
@@ -1121,7 +1121,7 @@ new_effect_chain: (_new_effect_chain | _overwrite_effect_chain ) ident op_id(s?)
 	my @existing = ::EffectChain::find(user => 1, name => $name);
 	if ( scalar @existing ){
 		$item[1] eq 'overwrite_effect_chain'
- 			? ::process_command("delete_effect_chain $name")
+ 			? ::nama_command("delete_effect_chain $name")
  			: ::throw(qq/$name: effect chain with this name is already defined. 
 Use a different name, or use "overwrite_effect_chain"/) && return;
 	}
@@ -1583,7 +1583,7 @@ existing_sequence_name: ident {
 }
 convert_to_sequence: _convert_to_sequence {
 	my $sequence_name = $::this_track->name;
-	::process_command("nsq $sequence_name");
+	::nama_command("nsq $sequence_name");
 	$::this_sequence->new_clip($::this_track);
 	1
 }

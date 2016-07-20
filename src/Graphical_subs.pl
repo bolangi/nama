@@ -178,7 +178,7 @@ sub init_gui {
 				#$text->{term}->tkRunning(0);
 				#$gui->{ew}->destroy;
 				#$gui->{mw}->destroy;
-				#::process_command('quit');
+				#::nama_command('quit');
 				exit;
 				 });
 	$gui->{palette}->configure(
@@ -210,7 +210,7 @@ $gui->{palette}->AddItems( @color_items);
 			-command => sub { 
 								return if $gui->{_track_name} =~ /^\s*$/;	
 								add_track(remove_spaces($gui->{_track_name}));
-								process_command('stereo');
+								nama_command('stereo');
 	});
 
 	my @labels = 
@@ -596,7 +596,7 @@ sub track_gui {
 							return if ::eval_iam("engine-status") eq 'running';
 							local $this_track = $ti{$n};
 							if( $v eq 'off' )
-								 { process_command('nosend') }
+								 { nama_command('nosend') }
 							else { $this_track->set_send($v) }
 							$ui->refresh_track($n);
 							::reconfigure_engine();

@@ -396,7 +396,7 @@ sub position_effect {
 	::request_setup();
 	$this_track = $track;
 	# this command generates spurious warnings during test
-	process_command('show_track');
+	nama_command('show_track');
 }
 
 sub apply_op {
@@ -449,7 +449,7 @@ sub import_engine_subs {
 	*eval_iam			= \&::eval_iam;
 	*ecasound_select_chain = \&::ecasound_select_chain;
 	*sleeper			= \&::sleeper;
-	*process_command    = \&::process_command;
+	*nama_command    = \&::nama_command;
 	*pager				= \&::pager;
 	*this_op			= \&::this_op;
 	*this_param			= \&::this_param;

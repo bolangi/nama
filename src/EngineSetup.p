@@ -89,7 +89,7 @@ sub reconfigure_engine {
 
 	$old_offset_run_status = $mode->{offset_run};
 
-	process_command('show_tracks');
+	nama_command('show_tracks');
 
 	{ local $quiet = 1; stop_transport() }
 
