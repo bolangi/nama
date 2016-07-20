@@ -66,13 +66,13 @@ sub ecasound_get_info {
 
 	$path = qq("$path");
 	teardown_engine();
-	eval_iam('cs-add gl');
-	eval_iam('c-add g');
-	eval_iam('ai-add ' . $path);
-	eval_iam('ao-add null');
-	eval_iam('cs-connect');
-	eval_iam('ai-select '. $path);
-	my $result = eval_iam($command);
+	ecasound('cs-add gl');
+	ecasound('c-add g');
+	ecasound('ai-add ' . $path);
+	ecasound('ao-add null');
+	ecasound('cs-connect');
+	ecasound('ai-select '. $path);
+	my $result = ecasound($command);
 	teardown_engine();
 	$result;
 }

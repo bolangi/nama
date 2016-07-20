@@ -155,9 +155,9 @@ sub cache_engine_run {
 	revise_prompt(" "); 
 
 	# we try to set processing time this way
-	eval_iam("cs-set-length $args->{processing_time}"); 
+	ecasound("cs-set-length $args->{processing_time}"); 
 
-	eval_iam("start");
+	ecasound("start");
 
 	# ensure that engine stops at completion time
 	$setup->{cache_track_args} = $args;
@@ -239,8 +239,8 @@ sub post_cache_processing {
 sub poll_cache_progress {
 	my $args = $setup->{cache_track_args};
 	print ".";
-	my $status = eval_iam('engine-status'); 
-	my $here   = eval_iam("getpos");
+	my $status = ecasound('engine-status'); 
+	my $here   = ecasound("getpos");
 	update_clock_display();
 	logpkg('debug', "engine time:   ". d2($here));
 	logpkg('debug', "engine status:  $status");

@@ -178,7 +178,7 @@ sub init_gui {
 				#$text->{term}->tkRunning(0);
 				#$gui->{ew}->destroy;
 				#$gui->{mw}->destroy;
-				#::nama_command('quit');
+				#::nama('quit');
 				exit;
 				 });
 	$gui->{palette}->configure(
@@ -210,7 +210,7 @@ $gui->{palette}->AddItems( @color_items);
 			-command => sub { 
 								return if $gui->{_track_name} =~ /^\s*$/;	
 								add_track(remove_spaces($gui->{_track_name}));
-								nama_command('stereo');
+								nama('stereo');
 	});
 
 	my @labels = 
@@ -415,7 +415,7 @@ sub group_gui {
 			'command' => MON,
 			-background => $gui->{_old_bg},
 			-command => sub { 
-				return if ::eval_iam("engine-status") eq 'running';
+				return if ::ecasound("engine-status") eq 'running';
 				$group->set(rw => MON);
 				$gui->{group_rw}->configure(-text => MON);
 				refresh();
@@ -425,7 +425,7 @@ sub group_gui {
 			'command' => OFF,
 			-background => $gui->{_old_bg},
 			-command => sub { 
-				return if ::eval_iam("engine-status") eq 'running';
+				return if ::ecasound("engine-status") eq 'running';
 				$group->set(rw => OFF);
 				$gui->{group_rw}->configure(-text => OFF);
 				refresh();
@@ -493,7 +493,7 @@ sub track_gui {
 			[ 'command' => "REC",
 				-foreground => 'red',
 				-command  => sub { 
-					return if ::eval_iam("engine-status") eq 'running';
+					return if ::ecasound("engine-status") eq 'running';
 					$ti{$n}->set(rw => "REC");
 					
 					$ui->refresh_track($n);
@@ -502,7 +502,7 @@ sub track_gui {
 			}],
 			[ 'command' => "PLAY",
 				-command  => sub { 
-					return if ::eval_iam("engine-status") eq 'running';
+					return if ::ecasound("engine-status") eq 'running';
 					$ti{$n}->set(rw => "PLAY");
 					$ui->refresh_track($n);
 					#refresh_group();
@@ -511,7 +511,7 @@ sub track_gui {
 			[ 'command' => "MON",
 				-foreground => 'red',
 				-command  => sub { 
-					return if ::eval_iam("engine-status") eq 'running';
+					return if ::ecasound("engine-status") eq 'running';
 					$ti{$n}->set(rw => "MON");
 					
 					$ui->refresh_track($n);
@@ -520,7 +520,7 @@ sub track_gui {
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
-					return if ::eval_iam("engine-status") eq 'running';
+					return if ::ecasound("engine-status") eq 'running';
 					$ti{$n}->set(rw => "OFF");
 					$ui->refresh_track($n);
 					#refresh_group();
@@ -573,7 +573,7 @@ sub track_gui {
 			-label => $v,
 			-value => $v,
 			-command => sub { 
-				return if ::eval_iam("engine-status") eq 'running';
+				return if ::ecasound("engine-status") eq 'running';
 			#	$ti{$n}->set(rw => REC);
 				$ti{$n}->source($v);
 				$ui->refresh_track($n) }
@@ -593,10 +593,10 @@ sub track_gui {
 						-label => $v,
 						-value => $v,
 						-command => sub { 
-							return if ::eval_iam("engine-status") eq 'running';
+							return if ::ecasound("engine-status") eq 'running';
 							local $this_track = $ti{$n};
 							if( $v eq 'off' )
-								 { nama_command('nosend') }
+								 { nama('nosend') }
 							else { $this_track->set_send($v) }
 							$ui->refresh_track($n);
 							::reconfigure_engine();
@@ -795,13 +795,13 @@ sub create_master_and_mix_tracks {
 	my @rw_items = (
 			[ 'command' => "MON",
 				-command  => sub { 
-						return if ::eval_iam("engine-status") eq 'running';
+						return if ::ecasound("engine-status") eq 'running';
 						$tn{Master}->set(rw => "MON");
 						$ui->refresh_track($tn{Master}->n);
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
-						return if ::eval_iam("engine-status") eq 'running';
+						return if ::ecasound("engine-status") eq 'running';
 						$tn{Master}->set(rw => "OFF");
 						$ui->refresh_track($tn{Master}->n);
 			}],

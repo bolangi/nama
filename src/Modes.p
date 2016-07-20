@@ -111,37 +111,37 @@ sub add_mastering_effects {
 	
 	$this_track = $tn{Eq};
 
-	nama_command("add_effect $mastering->{fx_eq}");
+	nama("add_effect $mastering->{fx_eq}");
 
 	$this_track = $tn{Low};
 
-	nama_command("add_effect $mastering->{fx_low_pass}");
-	nama_command("add_effect $mastering->{fx_compressor}");
-	nama_command("add_effect $mastering->{fx_spatialiser}");
+	nama("add_effect $mastering->{fx_low_pass}");
+	nama("add_effect $mastering->{fx_compressor}");
+	nama("add_effect $mastering->{fx_spatialiser}");
 
 	$this_track = $tn{Mid};
 
-	nama_command("add_effect $mastering->{fx_mid_pass}");
-	nama_command("add_effect $mastering->{fx_compressor}");
-	nama_command("add_effect $mastering->{fx_spatialiser}");
+	nama("add_effect $mastering->{fx_mid_pass}");
+	nama("add_effect $mastering->{fx_compressor}");
+	nama("add_effect $mastering->{fx_spatialiser}");
 
 	$this_track = $tn{High};
 
-	nama_command("add_effect $mastering->{fx_high_pass}");
-	nama_command("add_effect $mastering->{fx_compressor}");
-	nama_command("add_effect $mastering->{fx_spatialiser}");
+	nama("add_effect $mastering->{fx_high_pass}");
+	nama("add_effect $mastering->{fx_compressor}");
+	nama("add_effect $mastering->{fx_spatialiser}");
 
 	$this_track = $tn{Boost};
 	
-	nama_command("add_effect $mastering->{fx_limiter}"); # insert after vol
+	nama("add_effect $mastering->{fx_limiter}"); # insert after vol
 }
 
 sub unhide_mastering_tracks {
-	nama_command("for Mastering; set_track hide 0 rw MON");
+	nama("for Mastering; set_track hide 0 rw MON");
 }
 
 sub hide_mastering_tracks {
-	nama_command("for Mastering; set_track hide 1 rw OFF");
+	nama("for Mastering; set_track hide 1 rw OFF");
  }
 }
 		

@@ -202,7 +202,7 @@ sub read_in_effects_data {
 
 	#### LADSPA
 
-	my $lr = eval_iam("ladspa-register");
+	my $lr = ecasound("ladspa-register");
 	logpkg('debug',"ladpsa-register output:\n",$lr);
 
 	#print $lr; 
@@ -216,7 +216,7 @@ sub read_in_effects_data {
 
 	#### LV2
 
-	my $lv2 = eval_iam('lv2-register'); # TODO test fake lv2-register
+	my $lv2 = ecasound('lv2-register'); # TODO test fake lv2-register
 										# get_data_section('fake_lv2_register');
 	logpkg('debug',"lv2-register output:\n",$lv2);
 
@@ -232,15 +232,15 @@ sub read_in_effects_data {
 
 	logpkg('trace',sub{ json_out(\@lv2) });
 
-	my $preset = eval_iam("preset-register");
+	my $preset = ecasound("preset-register");
 	my @preset = grep {! /^\s*$/ } split "\n", $preset;
 	logpkg('debug',"preset-register output:\n",$preset);
 
-	my $ctrl = 	eval_iam("ctrl-register");
+	my $ctrl = 	ecasound("ctrl-register");
 	my @ctrl  = grep {! /^\s*$/ } split "\n", $ctrl;
 	logpkg('debug',"ctrl-register output:\n",$ctrl);
 
-	my $cop = eval_iam("cop-register");
+	my $cop = ecasound("cop-register");
 	my @cop = grep {! /^\s*$/ } split "\n", $cop;
 	logpkg('debug',"cop-register output:\n",$cop);
 
@@ -564,7 +564,7 @@ sub prepare_effects_help {
 					s/,/, /g;				# to help line breaks
 					push @{$fx_cache->{user_help}},    $_;  #store help
 
-				}  split "\n",eval_iam("preset-register");
+				}  split "\n",ecasound("preset-register");
 
 	# LADSPA
 	my $label;
@@ -588,7 +588,7 @@ sub prepare_effects_help {
 				
 		}
 
-	} reverse split "\n",eval_iam("ladspa-register");
+	} reverse split "\n",ecasound("ladspa-register");
 
 }
 

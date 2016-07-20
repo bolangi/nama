@@ -375,7 +375,7 @@ sub process_remote_command {
     };
     $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), revise_prompt(), return;
     logpkg('debug',"Got remote control socketput: $input");
-	nama_command($input);
+	nama($input);
 	my $out;
 	{ no warnings 'uninitialized';
 		$out = $text->{eval_result} . "\n";
@@ -418,11 +418,11 @@ sub process_osc_command {
 	$path =~ s(^/)();
 	$path =~ s(/$)();
 	my ($trackname, $fx, $param) = split '/', $path;
-	nama_command($trackname);
-	nama_command("$command @vals") if $command;
-	nama_command("show_effect $fx") if $fx; # select
-	nama_command("show_track") if $trackname and not $fx;
-	nama_command("show_tracks") if ! $trackname;
+	nama($trackname);
+	nama("$command @vals") if $command;
+	nama("show_effect $fx") if $fx; # select
+	nama("show_track") if $trackname and not $fx;
+	nama("show_tracks") if ! $trackname;
 	say "got OSC: ", Dumper $p;
 	say "got args: @args";
  	my $osc_out = IO::Socket::INET->new(
@@ -513,7 +513,7 @@ sub munge_category {
 sub start_logging { 
 	$config->{want_logging} = initialize_logger($config->{opts}->{L})
 }
-sub eval_iam { $this_engine and $this_engine->eval_iam(@_) }
+sub ecasound { $this_engine and $this_engine->ecasound(@_) }
 
 sub initialize_mixer {
 		::SimpleTrack->new( 

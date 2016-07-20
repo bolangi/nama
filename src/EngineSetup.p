@@ -19,7 +19,7 @@ sub generate_setup {
 
 	# prevent engine from starting an old setup
 	
-	eval_iam('cs-disconnect') if eval_iam('cs-connected');
+	ecasound('cs-disconnect') if ecasound('cs-connected');
 
 	::ChainSetup::initialize();
 
@@ -89,7 +89,7 @@ sub reconfigure_engine {
 
 	$old_offset_run_status = $mode->{offset_run};
 
-	nama_command('show_tracks');
+	nama('show_tracks');
 
 	{ local $quiet = 1; stop_transport() }
 
@@ -202,14 +202,14 @@ sub load_ecs {
 	return unless -e $setup;
 	#say "passed conditional";
 	teardown_engine();
-	eval_iam("cs-load $setup");
-	eval_iam("cs-select $setup"); # needed by Audio::Ecasound, but not Net-ECI !!
-	logpkg('debug',sub{map{eval_iam($_)} qw(cs es fs st ctrl-status)});
+	ecasound("cs-load $setup");
+	ecasound("cs-select $setup"); # needed by Audio::Ecasound, but not Net-ECI !!
+	logpkg('debug',sub{map{ecasound($_)} qw(cs es fs st ctrl-status)});
 	1;
 }
 sub teardown_engine {
-	eval_iam("cs-disconnect") if eval_iam("cs-connected");
-	eval_iam("cs-remove") if eval_iam("cs-selected");
+	ecasound("cs-disconnect") if ecasound("cs-connected");
+	ecasound("cs-remove") if ecasound("cs-selected");
 }
 
 sub arm {
@@ -255,26 +255,26 @@ sub connect_transport {
 	valid_engine_setup()
 		or throw("Invalid chain setup, engine not ready."),return;
 	find_op_offsets(); 
-	eval_iam('cs-connect');
+	ecasound('cs-connect');
 		#or throw("Failed to connect setup, engine not ready"),return;
 	apply_ops();
 	apply_fades();
-	my $status = eval_iam("engine-status");
+	my $status = ecasound("engine-status");
 	if ($status ne 'not started'){
 		throw("Invalid chain setup, cannot connect engine.\n");
 		return;
 	}
-	eval_iam('engine-launch');
-	$status = eval_iam("engine-status");
+	ecasound('engine-launch');
+	$status = ecasound("engine-status");
 	if ($status ne 'stopped'){
 		throw("Failed to launch engine. Engine status: $status\n");
 		return;
 	}
-	$setup->{audio_length} = eval_iam('cs-get-length'); # returns zero if unknown
+	$setup->{audio_length} = ecasound('cs-get-length'); # returns zero if unknown
 	sync_effect_parameters();
 	register_own_ports(); # as distinct from other Nama instances
 	$ui->length_display(-text => colonize($setup->{audio_length}));
-	eval_iam("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->rec and $setup->{audio_length};
+	ecasound("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->rec and $setup->{audio_length};
 	$ui->clock_config(-text => colonize(0));
 	sleeper(0.2); # time for ecasound engine to launch
 
@@ -289,7 +289,7 @@ sub connect_transport {
 	connect_jack_ports_list();
 	transport_status() unless $quiet;
 	$ui->flash_ready();
-	#print eval_iam("fs");
+	#print ecasound("fs");
 	1;
 	
 }

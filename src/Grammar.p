@@ -55,7 +55,7 @@ sub process_line {
 			unless $user_input eq $text->{previous_cmd} or ! $text->{term};
 		$text->{previous_cmd} = $user_input;
 			my $context = context();
-			my $success = nama_command( $user_input );
+			my $success = nama( $user_input );
 			my $command_stamp = { context => $context, 
 								  command => $user_input };
 			push(@{$project->{command_buffer}}, $command_stamp);
@@ -94,7 +94,7 @@ sub context {
 	$context->{op}    = $this_track->op;
 	$context
 }
-sub nama_command {
+sub nama {
 	my $input = shift;
 	my $input_was = $input;
 
@@ -128,8 +128,8 @@ sub nama_command {
 	if ($this_track){
 		my $FX = fxn($this_track->op);
 		if ($FX and $this_track->n eq $FX->chain){
-			eval_iam("c-select ".$this_track->n);
-			eval_iam("cop-select ".  $FX->ecasound_effect_index);
+			ecasound("c-select ".$this_track->n);
+			ecasound("cop-select ".  $FX->ecasound_effect_index);
 		}
 	}
 
@@ -484,7 +484,7 @@ sub t_load_project {
 	{no warnings 'uninitialized';
 	logpkg('debug',"load hook: $config->{execute_on_project_load}");
 	}
-	::nama_command($config->{execute_on_project_load});
+	::nama($config->{execute_on_project_load});
 }
 sub sanitize {
 	my $name = shift;

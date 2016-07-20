@@ -53,7 +53,7 @@ sub new {
 
 	my $name = $self->host_track;
 	my $host = $::tn{$name};
-	confess( ::project_dir().": missing host_track".  $::this_track->dump. $self->dump. ::nama_command("dumpa")) if !$host;
+	confess( ::project_dir().": missing host_track".  $::this_track->dump. $self->dump. ::nama("dumpa")) if !$host;
 
 # Routing:
 #
@@ -289,7 +289,7 @@ sub initialize_edit_points {
 sub abort_set_edit_points {
 	::throw("...Aborting!");
 	reset_input_line();
-	eval_iam('stop');
+	ecasound('stop');
 	initialize_edit_points();
 	detect_spacebar();
 }
@@ -297,7 +297,7 @@ sub abort_set_edit_points {
 sub get_edit_mark {
 	$p++;
 	if($p <= 3){  # record mark
-		my $pos = eval_iam('getpos');
+		my $pos = ecasound('getpos');
 		push @_edit_points, $pos;
 		::pager(" got $names[$p] position ".d1($pos));
 		reset_input_line();
@@ -310,7 +310,7 @@ sub get_edit_mark {
 }
 sub complete_edit_points {
 	@{$setup->{edit_points}} = @_edit_points; # save to global
-	eval_iam('stop');
+	ecasound('stop');
 	::pager("\nEngine is stopped\n");
 	detect_spacebar();
 	print prompt(), " ";
@@ -337,7 +337,7 @@ Engine will start in 2 seconds.));
 	sub {
 		reset_input_line();
 		detect_keystroke_p();
-		eval_iam('start');
+		ecasound('start');
 		::pager("\n\nEngine is running\n");
 		print prompt();
 	});
@@ -875,7 +875,7 @@ sub select_edit_track {
 	::throw("You need to select an edit first (list_edits, select_edit)\n"),
 		return unless defined $this_edit;
 	$this_track = $this_edit->$track_selector_method; 
-	nama_command('show_track');
+	nama('show_track');
 }
 
 } # end package

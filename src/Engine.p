@@ -47,7 +47,7 @@ sub initialize_ecasound {
 	];
 }
 sub launch_ecasound_server {}
-sub eval_iam {}
+sub ecasound {}
 }
 {
 package ::NetEngine;
@@ -96,7 +96,7 @@ sub launch_ecasound_server {
 	sleep 1;
 	$self->init_ecasound_socket();
 }
-sub eval_iam {
+sub ecasound {
 	my $self = shift;
 	my $cmd = shift;
 	#my $category = ::munge_category(shift());
@@ -153,8 +153,8 @@ sub launch_ecasound_server {
 	::pager_newline("Using Ecasound via Audio::Ecasound (libecasoundc)");
 	$self->{ecasound} = Audio::Ecasound->new();
 }
-sub eval_iam {
-	#logsub("&eval_iam");
+sub ecasound {
+	#logsub("&ecasound");
 	my $self = shift;
 	my $cmd = shift;
 	my $category = ::munge_category(shift());
