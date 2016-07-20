@@ -170,6 +170,23 @@ sub find_effect {
 	} else { throw(join " ", "No effects were found matching:",@keys,"\n\n") }
 }
 
+sub parse_midi_help {
+	my $help = get_data_section("midi_help");
+	my @lines = split $/, $help;
+	my $j;
+	my $cmd;
+	my %acc;
+	for (@lines)
+	{
+	 /(^\w+)/ 
+		? ($cmd = $1, $acc{$cmd} = [], say($1), $j++)
+		: (push $acc{$cmd}, $_ );
+	}
+	$help->{midish} = \%acc;
+}
+
+## Initialization
+
 
 @{$help->{arr_topic}} = qw( all
                     project
@@ -189,4 +206,5 @@ sub find_effect {
                 ) ;
 
 [% qx(cat ./help_topic.pl) %]
+
 1;

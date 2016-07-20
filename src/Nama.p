@@ -221,3 +221,5 @@ __DATA__
 [% qx(cat ./palette.json) %]
 @@ banner
 [% qx(cat ./banner) %]
+@@ midi_help
+[% qx(cat ./midi_help) %]
