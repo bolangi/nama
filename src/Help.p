@@ -171,18 +171,19 @@ sub find_effect {
 }
 
 sub parse_midi_help {
-	my $help = get_data_section("midi_help");
-	my @lines = split $/, $help;
+	my $h = get_data_section("midi_help");
+	my @lines = split $/, $h;
 	my $j;
 	my $cmd;
 	my %acc;
 	for (@lines)
 	{
 	 /(^\w+)/ 
-		? ($cmd = $1, $acc{$cmd} = [], say($1), $j++)
-		: (push $acc{$cmd}, $_ );
+		? ($cmd = $1, $acc{$cmd} = [], $j++)
+		: (push @{$acc{$cmd}}, $_ );
 	}
 	$help->{midish} = \%acc;
+	return
 }
 
 ## Initialization
