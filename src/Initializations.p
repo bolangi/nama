@@ -277,7 +277,7 @@ sub initialize_interfaces {
 
 	get_ecasound_iam_keywords();
 	load_keywords(); # for autocompletion
-	#parse_midi_help();
+	parse_midi_help();
 
 	chdir $config->{root_dir} # for filename autocompletion
 		or warn "$config->{root_dir}: chdir failed: $!\n";
