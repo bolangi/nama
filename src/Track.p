@@ -509,8 +509,8 @@ sub unmute { ::midish('unmute') }
 sub rec_status { 
 		my $self = shift;
 		if	 ( $self->rw eq REC and	$self->is_selected )							{ REC  } 
-		elsif( $self->rw eq REC and	! $self->is_selected and $self->monitor_version){ PLAY } 
-		elsif( $self->rw eq PLAY and $self->monitor_version)						{ PLAY }
+		elsif( $self->rw eq REC and	! $self->is_selected )							{ PLAY } 
+		elsif( $self->rw eq PLAY )													{ PLAY }
 		else																		{ OFF  }
 }
 sub monitor_version { 1 }
