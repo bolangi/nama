@@ -24,9 +24,9 @@ sub start_midish {
 	midish( qq(print "Midish is ready.") );
 }
 sub start_midi_transport {
-	# assuming that we have midi tracks, either REC or PLAY
+	return unless $bn{Midi}->is_active and $config->{use_midi};
 	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
-	midish($start_command);
+	midish($start_command) 
 }
 sub stop_midi_transport { midish('s') }
 

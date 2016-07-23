@@ -60,8 +60,7 @@ sub start_transport {
 	pager("\n\nStarting at ", current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
-	start_midi_transport() 
-		if $bn{Midi}->is_active and $config->{use_midi};
+	start_midi_transport(); 
 
 	ecasound('start');
 

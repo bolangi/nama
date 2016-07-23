@@ -200,19 +200,11 @@ sub detect_spacebar {
 		&{$text->{term_attribs}->{'callback_read_char'}}();
 		my $buffer = $text->{term_attribs}->{line_buffer};
 		my $trigger = ' ';
-		my $midi_sync_trigger = '@';
-		if ( $config->{press_space_to_start} and 
-			($buffer eq $trigger or $buffer eq $midi_sync_trigger)
+		if ( $config->{press_space_to_start} 
+				and ($buffer eq $trigger)
 				and ! ($mode->song or $mode->live) )
 		{ 	
-			
-			# set midi-sync if necessary and then restore previous state
-			
-			my $old_mode = $mode->{midi_transport_sync};
-			# set to play, but don't clobber existing record setting
-			$mode->{midi_transport_sync} //= PLAY if $buffer eq $midi_sync_trigger; 
 			toggle_transport();	
-			$mode->{midi_transport_sync} = $old_mode;
 
 			# reset command line, read next char
 			

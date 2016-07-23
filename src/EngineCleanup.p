@@ -137,10 +137,6 @@ sub post_rec_configure {
 		map{ $_->set(rw => PLAY) } @{$setup->{_last_rec_tracks}};
 		
 		undef $mode->{offset_run} if ! defined $this_edit;
-		no warnings 'uninitialized';
-		$mode->{midi_transport_sync} = PLAY
-			if $mode->{midi_transport_sync} eq REC;
-
 		$ui->refresh();
 		request_setup();
 		reconfigure_engine();
