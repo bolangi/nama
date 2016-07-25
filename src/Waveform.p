@@ -12,7 +12,7 @@ sub generate_waveforms {
 	initial_time_series($sourcefile, $datafile);
 	my $p1 = time_series_filename($track->name, $version, 1);
 	say "p1: $p1";
-	first_series($datafile, $p1);
+	first_series($datafile, $p1, $config->{sample_rate});
 	my $previous_file = $p1;
 	for my $power (2..8)
 	{
@@ -48,7 +48,7 @@ sub first_series {
 	my $i = 0;
 	while (my $line = <$rh>)
 	{
-		/(\d+)/ and say $wh ++$i/$sample_rate, " $1";
+		$line =~ /(\d+)/ and say $wh ++$i/$sample_rate, " $1";
 		# take first channel, throw away the rest
 		# output:  seconds   level 
 	}
