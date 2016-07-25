@@ -48,7 +48,7 @@ sub first_series {
 	my $i = 0;
 	while (my $line = <$rh>)
 	{
-		$line =~ /(\d+)/ and say $wh ++$i/$sample_rate, " $1";
+		$line =~ /(\d+)/ and say $wh sprintf("%.2f",++$i/$sample_rate), " $1";
 		# take first channel, throw away the rest
 		# output:  seconds   level 
 	}
@@ -68,8 +68,10 @@ sub rms_series {
 			$count++;
 			$acc += $level**2;
 		}
-		my $rms = sqrt($acc/$count);
-		say $out_h "$pos -$rms $rms";
+		if ($count) {
+			my $rms = sqrt($acc/$count);
+			say $out_h "$pos -$rms $rms";
+		}
 	}
 }
 # 	rms for $factor values
