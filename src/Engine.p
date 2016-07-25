@@ -47,7 +47,6 @@ sub initialize_ecasound {
 	];
 }
 sub launch_ecasound_server {}
-sub ecasound {}
 }
 {
 package ::NetEngine;
