@@ -55,21 +55,21 @@ sub first_series {
 }
 sub rms_series {
 	my($from, $to, $factor, $unit) = @_;
-	open my $ih, '<', $from;
-	open my $oh, '>', $to;
+	open my $in_h, '<', $from;
+	open my $out_h, '>', $to;
 	my ($pos, $acc, $count, $level);
-	while (! eof $ih)
+	while (! eof $in_h)
 	{
 		for (1..$factor)
 		{	$count = $acc = 0; 
-			my $in = <$ih>;
-			defined $in or last;
-			($pos, undef, $level) = split ' ', $in;
+			my $entry = <$in_h>;
+			defined $entry or last;
+			($pos, $level, undef) = split ' ', $entry;
 			$count++;
 			$acc += $level**2;
 		}
 		my $rms = sqrt($acc/$count);
-		say $oh "$pos -$rms $rms";
+		say $out_h "$pos -$rms $rms";
 	}
 }
 # 	rms for $factor values
