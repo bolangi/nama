@@ -344,7 +344,6 @@ sub dumper {
 	#or (ref $_) =~ /HASH|ARRAY/ and ::json_out($_)
 	or ref $_ and Dumper($_)
 }
-sub quote { qq<"$_[0]"> }
 
 1;
 __END__
