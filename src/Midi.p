@@ -56,11 +56,14 @@ sub midish {
 	print "\n";
 }
 
+sub save_midish {
+	my $fname = $file->midi_store;
+	midish( qq<save "$fname">);
+	say "\nsaving midish as $fname";
+}
+
 sub close_midish {
-	my $save_file = $file->midi_store;
-	$save_file = qq("$save_file");
-	say "\nsaving midish as $save_file";
-	midish("save $save_file");
+	save_midish();
 	sleeper(0.1);
 	say "killing midish";
 	kill 15, $pid;

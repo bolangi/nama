@@ -41,9 +41,7 @@ sub save_state {
 	save_system_state($path);
 	save_global_effect_chains();
 
-	# save midi data
-	my $fname = $file->midi_store;
-	midish( qq<save "$fname">);
+	save_midish();
 
 	# store alsa settings
 
