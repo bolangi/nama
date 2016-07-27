@@ -64,11 +64,8 @@ sub save_midish {
 
 sub close_midish {
 	save_midish();
-	sleeper(0.1);
-	say "killing midish";
-	kill 15, $pid;
-	sleeper(0.1);
-	kill 9, $pid;
+	say "reaping midish";
+	waitpid $pid, 0;
 }	
 }
 1;
