@@ -589,7 +589,7 @@ play: 'dummy'
 
 # some ordering fixes
 command: mono
-command: rw
+command: rw # this implements rec/mon/play/off commands
 
 rw_setting:   'REC ' | 'rec' 
 			| 'PLAY' | 'play'
