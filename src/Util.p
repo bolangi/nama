@@ -45,7 +45,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	remove_spaces
 	expand_tilde
 	resolve_path
-	quote
 	dumper
 
 ) ] );
