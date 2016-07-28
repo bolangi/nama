@@ -514,6 +514,7 @@ sub rec_status {
 		else																		{ OFF  }
 }
 sub monitor_version { 1 }
+sub versions { $_[0]->{versions} }
 }
 
 1;
