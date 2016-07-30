@@ -333,7 +333,6 @@ add_midi_track: _add_midi_track new_track_name {
 		novol => 1,
 		nopan => 1,
 	);
-	::midish( qq(tnew "$item{new_track_name}") );
 	::pager_newline(qq(creating MIDI track "$item{new_track_name}"));
 	1
 }
