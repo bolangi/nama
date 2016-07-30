@@ -6,7 +6,7 @@
 
 					rw				# REC/MON/OFF setting
 					version         # version setting
-					versions		# used for Midi
+					midi_versions
 					width			# channel count
 
 					ops 			# effect operators list
