@@ -338,6 +338,10 @@ sub restore_state_from_file {
 	{
 		map{ $_->{owns} ||= [] } @effects_data;
 	}
+	if ( $project->{save_file_version_number} <= 1.208 )
+	{
+		map{ $_->{versions} ||= [] } @tracks_data;
+	}
 
 
 	# restore effects, no change to track objects needed

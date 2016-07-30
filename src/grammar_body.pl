@@ -329,6 +329,7 @@ add_midi_track: _add_midi_track new_track_name {
 		group => 'Midi', 
 		source_id => 'midi', 
 		source_type => 'midi',
+		versions => [],
 		novol => 1,
 		nopan => 1,
 	);
