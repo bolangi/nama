@@ -602,7 +602,7 @@ rw: rw_setting {
 		? $::this_track->set(rw => uc $item{rw_setting}) 
 
 		# that make sure bus settings are cooperative
-		: ::rw_set($::Bus::by_name{$::this_bus},$::this_track,$item{rw_setting}); 
+		: $::this_track->rw_set($::Bus::by_name{$::this_bus},$item{rw_setting}); 
 	1
 }
 

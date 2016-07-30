@@ -399,5 +399,110 @@ sub jack_manual_port {
 	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
 }
 
+## rw_set() for managing bus-level REC/MON/PLAY/OFF settings
+## in response to user commands rec/mon/play/off affecting
+## the current track.
+
+{
+my %bus_logic = ( 
+	mix_track =>
+	{
+
+	# setting mix track to REC
+	
+		REC => sub
+		{
+			my ($bus, $track) = @_;
+			$track->set_rec;
+		},
+
+	# setting a mix track to PLAY
+	
+		PLAY => sub
+		{
+			my ($bus, $track) = @_;
+			$track->set_play;
+		},
+
+	# setting a mix track to MON
+	
+		MON => sub
+		{
+			my ($bus, $track) = @_;
+			$track->set_mon;
+		},
+
+	# setting mix track to OFF
+	
+		OFF => sub
+		{
+			my ($bus, $track) = @_;
+
+			$track->set_off;
+
+			# with the mix track off, 
+			# the member tracks get pruned 
+			# from the graph 
+		}
+	},
+	member_track =>
+	{
+
+	# setting member track to REC
+	
+		REC => sub 
+		{ 
+			my ($bus, $track) = @_;
+
+			$track->set_rec() or return;
+
+			$bus->set(rw => MON);
+			$tn{$bus->send_id}->activate_bus 
+				if $bus->send_type eq 'track' and $tn{$bus->send_id};
+			
+		},
+
+	# setting member track to MON 
+	
+		MON => sub
+		{ 
+			my ($bus, $track) = @_;
+			$bus->set(rw => MON) if $bus->rw eq 'OFF';
+			$track->set_mon;
+		},
+
+	# setting member track to PLAY
+	
+		PLAY => sub
+		{ 
+			my ($bus, $track) = @_;
+			$bus->set(rw => MON) if $bus->rw eq 'OFF';
+			$track->set_play;
+
+		},
+	# setting member track to OFF 
+
+		OFF => sub
+		{
+			my ($bus, $track) = @_;
+			$track->set_off;
+		},
+	},
+);
+# for track commands 'rec', 'mon','off' we 
+# may toggle rw state of the bus as well
+#
+
+sub rw_set {
+	my $track = shift;
+	logsub("&rw_set");
+	my ($bus, $rw) = @_;
+	my $type = $track->is_mix_track
+		? 'mix_track'
+		: 'member_track';
+	$bus_logic{$type}{uc $rw}->($bus,$track);
+}
+}
+
 1;
 	
