@@ -60,8 +60,9 @@ sub start_transport {
 	pager("\n\nStarting at ", current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
-	start_midi_transport(); 
-
+	start_midi_transport() if midi_run_ready();
+	if( audio_run_ready() )
+	{
 	ecasound('start');
 
 	# limit engine run time if we are in mixdown or edit mode, 
@@ -80,6 +81,7 @@ sub start_transport {
 	$ui->set_engine_mode_color_display();
 	start_heartbeat();
 	engine_status() unless $quiet;
+	}
 }
 sub stop_transport { 
 
