@@ -496,16 +496,33 @@ our @ISA = '::SlaveTrack';
 {
 package ::MidiTrack; 
 use ::Globals qw(:all);
+use SUPER;
 use ::Log qw(logpkg);
 our @ISA = qw(::Track);
-sub select_track {
-		my $track = shift;
-		$::this_track = $track;
-		::midish("ct ".$track->name);
-		::set_current_bus();
+sub new {
+	my ($class, %args) = @_;
+	my $restore = delete $args{restore};
+	my $self = super();
+	$restore and 
+	::midish( qq(tnew "$item{new_track_name}_1") );
+	# if no existing tracks 
+	# we need to create the firsst
+		if ( ! scalar @{ $self->{midi_versions} } )
+		{
+				
+			
+
+		}
 }
-sub mute { ::midish('mute') }
-sub unmute { ::midish('unmute') }
+
+sub mute {   ::midish( 'mute '  . $_[0]->current_midi ) }
+sub unmute { ::midish( 'unmute '. $_[0]->current_midi ) }
+sub rw_set {
+	my $track = shift;
+	my ($bus, $setting) = @_;
+	$track->{rw} = $setting;
+	$track->rec_status eq OFF ? $track->mute : $track->unmute
+}
 sub rec_status { 
 		my $self = shift;
 		if	 ( $self->rw eq REC and	$self->is_selected )							{ REC  } 
@@ -514,6 +531,28 @@ sub rec_status {
 		else																		{ OFF  }
 }
 sub versions { $_[0]->{midi_versions} }
+
+
+sub midi_name { join '_', @_ }
+
+sub select_track {
+		my $track = shift;
+		$::this_track = $track;
+		map{ ::midish( 'mute '. midi_name($track->name, $_) ) }
+		grep{ $_ != $track->version } @{$track->versions};
+		::midish('ct '. $track->current_midi);
+		$track->unmute;
+		::set_current_bus();
+}
+sub current_midi {
+	# current MIDI track
+	# example: synth_2
+	# analagous to current_wav() which would be synth_2.wav
+	my $track = shift;
+	my $result = $track->current_wav;
+	$result =~ s/.wav$//;
+	$result
+}
 }
 
 1;
