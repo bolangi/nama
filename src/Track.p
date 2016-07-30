@@ -513,7 +513,6 @@ sub rec_status {
 		elsif( $self->rw eq PLAY )													{ PLAY }
 		else																		{ OFF  }
 }
-sub monitor_version { 1 }
 sub versions { $_[0]->{versions} }
 }
 
