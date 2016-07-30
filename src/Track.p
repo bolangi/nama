@@ -513,7 +513,7 @@ sub rec_status {
 		elsif( $self->rw eq PLAY )													{ PLAY }
 		else																		{ OFF  }
 }
-sub versions { $_[0]->{versions} }
+sub versions { $_[0]->{midi_versions} }
 }
 
 1;

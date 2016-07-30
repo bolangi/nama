@@ -340,7 +340,7 @@ sub restore_state_from_file {
 	}
 	if ( $project->{save_file_version_number} <= 1.208 )
 	{
-		map{ $_->{versions} ||= [] } @tracks_data;
+		map{ $_->{midi_versions} ||= [] } @tracks_data;
 	}
 
 
