@@ -24,7 +24,6 @@ sub start_midish {
 	midish( qq(print "Midish is ready.") );
 }
 sub start_midi_transport {
-	return unless $bn{Midi}->is_active and $config->{use_midi};
 	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
 	midish($start_command) 
 }

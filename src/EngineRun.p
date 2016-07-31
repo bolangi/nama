@@ -41,7 +41,17 @@ sub mixing_only {
 }
 	
 sub start_transport { 
+	logsub("&start_transport");
+	something_to_run() or throw("nothing to run"), return;
 
+	audio_run_ready() 
+		and ecasound("cs-connected") 
+		or throw("\nAudio engine is not configured. Cannot start.\n"),return;
+
+	start_midi_transport() if midi_run_ready();
+
+	if (audio_run_ready())
+	{
 	# use gradual unmuting to avoid pop on start
 	# 
 	#
@@ -52,17 +62,11 @@ sub start_transport {
 	# start heartbeat
 	# report engine status
 	# sleep 1s
-
-	logsub("&start_transport");
-	throw("\nCannot start. Engine is not configured.\n"),return 
-		unless ecasound("cs-connected");
+	#
 
 	pager("\n\nStarting at ", current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
-	start_midi_transport() if midi_run_ready();
-	if( audio_run_ready() )
-	{
 	ecasound('start');
 
 	# limit engine run time if we are in mixdown or edit mode, 

@@ -247,7 +247,7 @@ arm();
 }
 sub something_to_run { audio_run_ready() or midi_run_ready()  }
 sub audio_run_ready { $setup->{audio_run_ready} }
-sub midi_run_ready { $bn{Midi}->is_active }
+sub midi_run_ready { $bn{Midi}->is_active and $config->{use_midi} }
 
 sub connect_transport {
 	logsub("&connect_transport");
