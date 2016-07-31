@@ -30,7 +30,7 @@ sub add_track {
 
 	# normal tracks default to MON
 	# track aliases default to PLAY
-	$track->set(rw => $track->target
+	$track->set(rw => $track->{target}
 					?  PLAY
 					:  $config->{new_track_rw} || MON );
 	$gui->{_track_name} = $gui->{_chm} = $gui->{_chr} = undef;
