@@ -256,42 +256,42 @@ sub connect_transport {
 	load_ecs($file->chain_setup) and $setup->{audio_run_ready}++;
 	if (audio_run_ready())
 	{
-	valid_engine_setup()
-		or throw("Invalid chain setup, engine not ready."),return;
-	find_op_offsets(); 
-	ecasound('cs-connect');
-		#or throw("Failed to connect setup, engine not ready"),return;
-	apply_ops();
-	apply_fades();
-	my $status = ecasound("engine-status");
-	if ($status ne 'not started'){
-		throw("Invalid chain setup, cannot connect engine.\n");
-		return;
-	}
-	ecasound('engine-launch');
-	$status = ecasound("engine-status");
-	if ($status ne 'stopped'){
-		throw("Failed to launch engine. Engine status: $status\n");
-		return;
-	}
-	$setup->{audio_length} = ecasound('cs-get-length'); # returns zero if unknown
-	sync_effect_parameters();
-	register_own_ports(); # as distinct from other Nama instances
-	$ui->length_display(-text => colonize($setup->{audio_length}));
-	ecasound("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->rec and $setup->{audio_length};
-	$ui->clock_config(-text => colonize(0));
-	sleeper(0.2); # time for ecasound engine to launch
+		valid_engine_setup()
+			or throw("Invalid chain setup, engine not ready."),return;
+		find_op_offsets(); 
+		ecasound('cs-connect');
+			#or throw("Failed to connect setup, engine not ready"),return;
+		apply_ops();
+		apply_fades();
+		my $status = ecasound("engine-status");
+		if ($status ne 'not started'){
+			throw("Invalid chain setup, cannot connect engine.\n");
+			return;
+		}
+		ecasound('engine-launch');
+		$status = ecasound("engine-status");
+		if ($status ne 'stopped'){
+			throw("Failed to launch engine. Engine status: $status\n");
+			return;
+		}
+		$setup->{audio_length} = ecasound('cs-get-length'); # returns zero if unknown
+		sync_effect_parameters();
+		register_own_ports(); # as distinct from other Nama instances
+		$ui->length_display(-text => colonize($setup->{audio_length}));
+		ecasound("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->rec_status eq REC and $setup->{audio_length};
+		$ui->clock_config(-text => colonize(0));
+		sleeper(0.2); # time for ecasound engine to launch
 
-	# set delay for seeking under JACK
-	# we use a heuristic based on the number of tracks
-	# but it should be based on the number of PLAY tracks
-	
-	my $track_count; map{ $track_count++ } ::ChainSetup::engine_tracks();
-	$jack->{seek_delay} = $jack->{jackd_running}
-		?  $config->{engine_base_jack_seek_delay} * ( 1 + $track_count / 20 )
-		:  0;
-	connect_jack_ports_list();
-	transport_status() unless $quiet;
+		# set delay for seeking under JACK
+		# we use a heuristic based on the number of tracks
+		# but it should be based on the number of PLAY tracks
+		
+		my $track_count; map{ $track_count++ } ::ChainSetup::engine_tracks();
+		$jack->{seek_delay} = $jack->{jackd_running}
+			?  $config->{engine_base_jack_seek_delay} * ( 1 + $track_count / 20 )
+			:  0;
+		connect_jack_ports_list();
+		transport_status() unless $quiet;
 	}
 	something_to_run() or throw("Neither audio nor MIDI tracks active. Nothing to run."), return; 
 	$ui->flash_ready();
