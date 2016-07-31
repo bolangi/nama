@@ -39,6 +39,7 @@ sub midish {
 
 	my $length = 2**16;
 	sleeper(0.05);
+	my @result;
 	foreach my $h ($sel->can_read) 
 	{
 		my $buf = '';
@@ -50,10 +51,10 @@ sub midish {
 		else
 		{
 			sysread($fh_midi_read,$buf,$length);
-			if($buf){map{say} grep{ !/\+ready/ } split "\n", $buf}
+			if($buf){push @result, grep{ !/\+ready/ } split "\n", $buf}
 		}
 	}
-	print "\n";
+	join "\n", @result;
 }
 
 sub save_midish {
