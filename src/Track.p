@@ -522,7 +522,9 @@ sub rw_set {
 }
 sub exists_midi {
 	my $track = shift;
-	grep{$_ eq $track->current_midi} split " ", ::midish('print [tlist]');
+	my $tlist = ::midish('print [tlist]');
+	$tlist =~ s/[{}]//g;
+	grep{$_ eq $track->current_midi} split " ", $list;
 }
 sub rec_status { 
 		my $self = shift;
