@@ -254,7 +254,7 @@ sub connect_transport {
 	remove_riff_header_stubs();
 	register_other_ports(); # that don't belong to my upcoming instance
 	load_ecs($file->chain_setup) and $setup->{audio_run_ready}++;
-	if (something_to_run())
+	if (audio_run_ready())
 	{
 	valid_engine_setup()
 		or throw("Invalid chain setup, engine not ready."),return;
