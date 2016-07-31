@@ -496,6 +496,7 @@ our @ISA = '::SlaveTrack';
 {
 package ::MidiTrack; 
 use ::Globals qw(:all);
+use Modern::Perl;
 use SUPER;
 use ::Log qw(logpkg);
 our @ISA = qw(::Track);
@@ -512,7 +513,8 @@ sub rw_set {
 	$track->{rw} = uc $setting;
 	# create midish track if we ask to record
 	# and track does not exist
-	::midish( 'tnew '. join $track->current_midi, qw(" ")) 
+	my $cmd = 'tnew '. $track->current_midi;
+	::midish($cmd ) 
 		if $setting eq REC 
 		and not $track->exists_midi;
 		::midish('ct '. $track->current_midi);
@@ -520,9 +522,9 @@ sub rw_set {
 }
 sub exists_midi {
 	my $track = shift;
-	my $tlist = ::midish('print [tlist]');
-	$tlist =~ s/[{}]//g;
-	grep{$_ eq $track->current_midi} split " ", $list;
+	my ($tlist) = ::midish('print [tlist]');
+	$tlist =~ s/[}{]//g;
+	my ($match) = grep{$_ eq $track->current_midi} split " ", $tlist;
 }
 sub rec_status { 
 		my $self = shift;
