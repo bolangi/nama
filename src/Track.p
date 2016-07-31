@@ -502,16 +502,14 @@ our @ISA = qw(::Track);
 sub new {
 	my ($class, %args) = @_;
 	my $self = super();
-	$self->select_track;
 	$self
 }
-
 sub mute {   ::midish( 'mute '  . $_[0]->current_midi ) }
 sub unmute { ::midish( 'unmute '. $_[0]->current_midi ) }
 sub rw_set {
 	my $track = shift;
 	my ($bus, $setting) = @_;
-	$track->{rw} = $setting;
+	$track->{rw} = uc $setting;
 	# create midish track if we ask to record
 	# and track does not exist
 	::midish( 'tnew '. join $track->current_midi, qw(" ")) 
@@ -558,7 +556,7 @@ sub current_midi {
 	# example: synth_2
 	# analagous to current_wav() which would be synth_2.wav
 	my $track = shift;
-	my $last = $track_current_version;
+	my $last = $track->current_version;
 	if 	($track->rec_status eq REC)
 	{ 
 		midi_name($track->name, $last)
