@@ -25,7 +25,8 @@ sub start_midish {
 }
 sub start_midi_transport {
 	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
-	midish($start_command) 
+	midish($start_command);
+	$setup->{midish_running}++;
 }
 sub stop_midi_transport { midish('s') }
 

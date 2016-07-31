@@ -87,10 +87,22 @@ sub start_transport {
 	engine_status() unless $quiet;
 	}
 }
+sub midish_running { $setup->{midish_running} }
+
+sub midish_cleanup { }
+
 sub stop_transport { 
 
 	logsub("&stop_transport"); 
 
+	if (midish_running())
+	{
+		midish('s'); 
+		delete $setup->{midish_running};
+		midish cleanup();
+	}
+	if (engine_running())
+	{
 	# Since the playback position advances slightly during
 	# the fade, we restore the position to exactly where the
 	# stop command was issued.
@@ -100,8 +112,6 @@ sub stop_transport {
 		and ! ::ChainSetup::really_recording();
 	mute();
 	stop_command();
-	stop_midi_transport() 
-		if $config->{use_midi} and $mode->{midi_transport_sync};
 	disable_length_timer();
 	if ( ! $quiet ){
 		sleeper(0.5);
@@ -114,6 +124,7 @@ sub stop_transport {
 	# restore exact position transport stop command was issued
 	
 	set_position($pos) if $pos
+	}
 }
 sub toggle_transport {
 	if (engine_running()){ stop_transport() } 
