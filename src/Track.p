@@ -501,18 +501,9 @@ use ::Log qw(logpkg);
 our @ISA = qw(::Track);
 sub new {
 	my ($class, %args) = @_;
-	my $restore = delete $args{restore};
 	my $self = super();
-	$restore and 
-	::midish( qq(tnew "$item{new_track_name}_1") );
-	# if no existing tracks 
-	# we need to create the firsst
-		if ( ! scalar @{ $self->{midi_versions} } )
-		{
-				
-			
-
-		}
+	$self->select_track;
+	$self
 }
 
 sub mute {   ::midish( 'mute '  . $_[0]->current_midi ) }
@@ -521,6 +512,10 @@ sub rw_set {
 	my $track = shift;
 	my ($bus, $setting) = @_;
 	$track->{rw} = $setting;
+	# create empty midi track version if we ask to record
+	::midish( 'tnew '. join $track->current_midi, qw(" ")) 
+		if $setting eq REC;
+		::midish('ct '. $track->current_midi);
 	$track->rec_status eq OFF ? $track->mute : $track->unmute
 }
 sub rec_status { 
@@ -533,14 +528,20 @@ sub rec_status {
 sub versions { $_[0]->{midi_versions} }
 
 
-sub midi_name { join '_', @_ }
-
+sub midi_name { 
+	my ($name, $index) = @_;
+	return undef unless defined $name and defined $index;
+	join '_', @_ 
+}
 sub select_track {
 		my $track = shift;
 		$::this_track = $track;
+
+		# mute unselected versions
 		map{ ::midish( 'mute '. midi_name($track->name, $_) ) }
 		grep{ $_ != $track->version } @{$track->versions};
-		::midish('ct '. $track->current_midi);
+
+
 		$track->unmute;
 		::set_current_bus();
 }
@@ -549,10 +550,22 @@ sub current_midi {
 	# example: synth_2
 	# analagous to current_wav() which would be synth_2.wav
 	my $track = shift;
-	my $result = $track->current_wav;
-	$result =~ s/.wav$//;
-	$result
+	my $last = $track_current_version;
+	if 	($track->rec_status eq REC)
+	{ 
+		midi_name($track->name, $last)
+	} 
+	elsif ( $track->rec_status eq PLAY)
+	{ 
+		midi_name($track->name, $track->monitor_version)
+	} 
+	else 
+	{ 
+		logpkg('debug', "track ", $track->name, ": no current version") ;
+		undef; 
+	}
 }
+
 }
 
 1;
