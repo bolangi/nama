@@ -105,7 +105,7 @@ beep_command: beep -f 350 -l 700
 
 hotkey_beep: beep -f 250 -l 200
 
-new_track_rw: REC
+new_track_rw: MON
 
 alias:
   command:
