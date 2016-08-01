@@ -28,8 +28,6 @@ sub midish {
 	my $command = shift;
 	return unless $config->{use_midi};
 	
-	print "\n";
-	print "midi command: $command\n";
 	print $fh_midi_write "$command\n";
 
 	my $length = 2**16;
@@ -55,7 +53,6 @@ sub midish {
 sub save_midish {
 	my $fname = $file->midi_store;
 	midish( qq<save "$fname">);
-	say "\nsaving midish as $fname";
 }
 
 sub close_midish {
