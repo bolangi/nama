@@ -89,8 +89,6 @@ sub start_transport {
 }
 sub midish_running { $setup->{midish_running} }
 
-sub midish_cleanup { }
-
 sub stop_transport { 
 
 	logsub("&stop_transport"); 
@@ -99,7 +97,13 @@ sub stop_transport {
 	{
 		midish('s'); 
 		delete $setup->{midish_running};
-		midish cleanup();
+		# TODO set position at ecasound stop position
+		return unless $bn{Midi}->midi_rec_tracks;
+		# midish_cleanup
+		# TODO check if we got some MIDI stuff, maybe length
+		# When we record MIDI, the recording target track  is selected 
+		push @{$this_track->{midi_versions}}, $this_track->current_version;
+		$this_track->{rw} = PLAY;
 	}
 	if (engine_running())
 	{
