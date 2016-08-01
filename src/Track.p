@@ -558,10 +558,10 @@ sub current_midi {
 	# example: synth_2
 	# analagous to current_wav() which would be synth_2.wav
 	my $track = shift;
-	my $last = $track->current_version;
+	
 	if 	($track->rec_status eq REC)
 	{ 
-		midi_name($track->name, $last)
+		midi_name($track->name, $track->current_version)
 	} 
 	elsif ( $track->rec_status eq PLAY)
 	{ 
