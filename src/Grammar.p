@@ -69,7 +69,7 @@ sub process_line {
 				local $quiet = 1;
 				::ChainSetup::remove_temporary_tracks();
 				autosave() unless $config->{opts}->{R};
-				reconfigure_engine(); # quietly, avoiding noisy reconfig below
+				reconfigure_engine();
 			}
 			reconfigure_engine();
 		# reset current track to Master if it is
