@@ -12,6 +12,7 @@ my @handles = my ($fh_midi_write, $fh_midi_read, $fh_midi_error) = map{ IO::Hand
 map{ $_->autoflush(1) } @handles;
 
 sub start_midish {
+	logsub('&start_midish');
 	my $executable = qx(which midish);
 	chomp $executable;
 	$executable or say("Midish not found!"), return;
