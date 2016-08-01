@@ -25,6 +25,7 @@ sub start_midish {
 }
 sub midish {
 	my $command = shift;
+	return unless $config->{use_midi};
 	
 	print "\n";
 	print "midi command: $command\n";

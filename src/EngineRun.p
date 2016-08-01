@@ -105,11 +105,17 @@ sub stop_transport {
 		delete $setup->{midish_running};
 		# TODO set position at ecasound stop position
 		return unless $bn{Midi}->midi_rec_tracks;
-		# midish_cleanup
-		# TODO check if we got some MIDI stuff, maybe length
-		# When we record MIDI, the recording target track  is selected 
-		push @{$this_track->{midi_versions}}, $this_track->current_version;
-		$this_track->{rw} = PLAY;
+		
+		if ( midish("print [mend]") > 0 )
+		{
+			$this_track->{rw} = PLAY;
+			push @{$this_track->{midi_versions}}, $this_track->current_version;
+		# TODO copy to parent track
+		}
+		else 
+		{
+		
+		}
 	}
 	if (engine_running())
 	{
