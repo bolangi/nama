@@ -13,7 +13,7 @@ meta: midi_cmd
 midi_cmd: /[a-z]+/ predicate { 
 	return unless $::this_track->is_midi_track and $::text->{midi_cmd}->{$item[1]};
 	my $line = "$item[1] $item{predicate}";
-	::midish($line);
+	::pager(::midish($line));
 	1;
 }
 
