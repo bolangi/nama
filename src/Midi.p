@@ -23,13 +23,6 @@ sub start_midish {
 	$sel->add($fh_midi_error);
 	midish( qq(print "Midish is ready.") );
 }
-sub start_midi_transport {
-	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
-	midish($start_command);
-	$setup->{midish_running}++;
-}
-sub stop_midi_transport { midish('s') }
-
 sub midish {
 	my $command = shift;
 	

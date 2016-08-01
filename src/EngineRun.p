@@ -39,6 +39,12 @@ sub mixing_only {
 	}
 	$i == 1 and $am_mixing
 }
+
+sub start_midi_transport {
+	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
+	midish($start_command);
+	$setup->{midish_running}++;
+}
 	
 sub start_transport { 
 	logsub("&start_transport");
