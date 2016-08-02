@@ -573,6 +573,21 @@ sub current_midi {
 		undef; 
 	}
 }
+sub set_io {
+	my $track = shift;
+	my ($direction, $id) = @_;
+	my $type = 'midi';
+	
+	my $type_field = $direction."_type";
+	my $id_field   = $direction."_id";
+
+	# respond to query
+	if ( ! $id ){ return $track->$type_field ? $track->$id_field : undef }
+
+	# set values, returning new setting
+	$track->set($type_field => $type);
+	$track->set($id_field => $id);
+} 
 
 }
 
