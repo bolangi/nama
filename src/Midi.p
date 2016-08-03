@@ -81,12 +81,13 @@ sub stop_midi_transport {
 		{
 			$track->set(rw => PLAY);
 			push @{$track->{midi_versions}}, $track->current_version;
+			# save project
 			my $cmd = join ' ', "chdup record_buffer", $track->source_id, $track->current_midi;
 			say "cmd: $cmd";
 			midish($cmd);
-			# TODO save project
 			my $length = midish('print [mend]');
 			midish("clr record_buffer $length");
+			# save project
 		}
 		
 =comment
