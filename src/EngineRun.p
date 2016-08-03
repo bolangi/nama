@@ -45,6 +45,26 @@ sub start_midi_transport {
 	midish($start_command);
 	$setup->{midish_running}++;
 }
+sub sync_transport_position { }
+
+sub stop_midi_transport {
+	if (midish_running())
+	{
+		midish('s'); 
+		delete $setup->{midish_running};
+		# TODO set position at ecasound stop position
+		sync_transport_position(); # TODO move after ecasound stops
+		return unless $bn{Midi}->midi_rec_tracks
+		 	and midish("print [mend]") > 0;
+		$this_track->set(rw => PLAY);
+		push @{$this_track->{midi_versions}}, $this_track->current_version;
+		# TODO copy to parent track
+		}
+		else 
+		{
+		
+		}
+	}
 	
 sub start_transport { 
 	logsub("&start_transport");
@@ -98,25 +118,8 @@ sub midish_running { $setup->{midish_running} }
 sub stop_transport { 
 
 	logsub("&stop_transport"); 
+	stop_midish();
 
-	if (midish_running())
-	{
-		midish('s'); 
-		delete $setup->{midish_running};
-		# TODO set position at ecasound stop position
-		return unless $bn{Midi}->midi_rec_tracks;
-		
-		if ( midish("print [mend]") > 0 )
-		{
-			$this_track->{rw} = PLAY;
-			push @{$this_track->{midi_versions}}, $this_track->current_version;
-		# TODO copy to parent track
-		}
-		else 
-		{
-		
-		}
-	}
 	if (engine_running())
 	{
 	# Since the playback position advances slightly during
