@@ -40,31 +40,8 @@ sub mixing_only {
 	$i == 1 and $am_mixing
 }
 
-sub start_midi_transport {
-	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
-	midish($start_command);
-	$setup->{midish_running}++;
-}
 sub sync_transport_position { }
 
-sub stop_midi_transport {
-	if (midish_running())
-	{
-		midish('s'); 
-		delete $setup->{midish_running};
-		# TODO set position at ecasound stop position
-		sync_transport_position(); # TODO move after ecasound stops
-		return unless $bn{Midi}->midi_rec_tracks
-		 	and midish("print [mend]") > 0;
-		$this_track->set(rw => PLAY);
-		push @{$this_track->{midi_versions}}, $this_track->current_version;
-		# TODO copy to parent track
-		}
-		else 
-		{
-		
-		}
-	}
 	
 sub start_transport { 
 	logsub("&start_transport");

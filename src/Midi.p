@@ -63,6 +63,56 @@ sub close_midish {
 	kill 9, $pid;
 	waitpid $pid, 0;
 }	
+sub start_midi_transport {
+	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
+	midish($start_command);
+	$setup->{midish_running}++;
+}
+sub stop_midi_transport {
+	if (midish_running())
+	{
+		midish('s'); 
+		delete $setup->{midish_running};
+		# TODO set position at ecasound stop position
+		sync_transport_position(); # TODO move after ecasound stops
+		return unless $bn{Midi}->midi_rec_tracks
+		 	and midish("print [mend]") > 0;
+		for my $track ($bn{Midi}->midi_rec_tracks)
+		{
+			$track->set(rw => PLAY);
+			push @{$track->{midi_versions}}, $track->current_version;
+			my $cmd = join ' ', "chdup record_buffer", $track->source_id, $track->current_midi;
+			say "cmd: $cmd";
+			midish($cmd);
+			# TODO save project
+			my $length = midish('print [mend]');
+			midish("clr record_buffer $length");
+		}
+		
+=comment
+chdup aux_recorder dx7 piano 
+		
+tnew synth                                                                                               
+rnew nord nord # play the nord keyboard sound with the nord keyboard                                     
+tnew piano                                                                                               
+rnew tr dx7 # route the tr keyboard to the dx7 synth sound engine                                        
+tnew aux_recorder                                                                                        
+rnew nord nord                                                                                           
+radd tr dx7 # not sure if this works, must recheck my code                                               
+r                                                                                                        
+s                                                                                                        
+
+let complete_length = [mend];                                                                            
+2. clear the auxiliary track                                                                             
+clr aux_recorder $complete_length  
+=cut
+		# TODO copy to parent track
+		}
+		else 
+		{
+		
+		}
+	}
 }
 1;
 __END__
