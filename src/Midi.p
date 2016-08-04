@@ -50,11 +50,6 @@ sub midish {
 	join "\n", @result;
 }
 
-sub save_midish {
-	my $fname = $file->midi_store;
-	midish( qq<save "$fname">);
-}
-
 sub close_midish {
 	save_midish();
 	say "reaping midish";
@@ -63,6 +58,12 @@ sub close_midish {
 	kill 9, $pid;
 	waitpid $pid, 0;
 }	
+}
+sub save_midish {
+	my $fname = $file->midi_store;
+	midish( qq<save "$fname">);
+}
+
 sub reconfigure_midi {
 	# mute all tracks
 	# unmute tracks for MON and PLAY.
@@ -77,28 +78,28 @@ sub start_midi_transport {
 	$setup->{midish_running}++;
 }
 sub stop_midi_transport {
-	if (midish_running())
+	return unless midish_running();
+	midish('s'); 
+	delete $setup->{midish_running};
+	my $current_track = $this_track;
+	# TODO set position at ecasound stop position
+	my $length = midish('print [mend]');
+	sync_transport_position(); # TODO move after ecasound stops
+	return unless $bn{Midi}->midi_rec_tracks and $length > 0; 
+	for my $track ($bn{Midi}->midi_rec_tracks)
 	{
-		midish('s'); 
-		delete $setup->{midish_running};
-		my $current_track = $this_track;
-		my $length = midish('print [mend]');
-		# TODO set position at ecasound stop position
-		sync_transport_position(); # TODO move after ecasound stops
-		return unless $bn{Midi}->midi_rec_tracks and $length > 0; 
-		for my $track ($bn{Midi}->midi_rec_tracks)
-		{
-			$track->select;
-			$track->set(rw => PLAY);
-			push @{$track->{midi_versions}}, $track->current_version;
-			# save project
-			my $cmd = join ' ', "chdup midi_record_buffer", $track->source_id, $track->current_midi;
-			say "cmd: $cmd";
-			midish($cmd);
-			midish("clr midi_record_buffer $length");
-			# save project
-		}
-		
+		$track->select;
+		$track->set(rw => PLAY);
+		push @{$track->{midi_versions}}, $track->current_version;
+		# save project
+		my $cmd = join ' ', "chdup midi_record_buffer", $track->source_id, $track->current_midi;
+		say "cmd: $cmd";
+		midish($cmd);
+		midish("clr midi_record_buffer $length");
+		# save project
+	}
+}
+	
 =comment
 chdup aux_recorder dx7 piano 
 		
@@ -116,13 +117,5 @@ let complete_length = [mend];
 2. clear the auxiliary track                                                                             
 clr aux_recorder $complete_length  
 =cut
-		# TODO copy to parent track
-		}
-		else 
-		{
-		
-		}
-	}
-}
 1;
 __END__
