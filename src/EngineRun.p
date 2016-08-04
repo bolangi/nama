@@ -95,7 +95,7 @@ sub midish_running { $setup->{midish_running} }
 sub stop_transport { 
 
 	logsub("&stop_transport"); 
-	stop_midish();
+	stop_midi_transport();
 
 	if (engine_running())
 	{

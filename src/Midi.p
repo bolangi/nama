@@ -63,6 +63,14 @@ sub close_midish {
 	kill 9, $pid;
 	waitpid $pid, 0;
 }	
+sub reconfigure_midi {
+	# mute all tracks
+	# unmute tracks for MON and PLAY.
+	# unmute midi_record_buffer
+	# unset filters
+	# set filters for REC tracks in midi_record_buffer
+	# set filters for PLAY and MON tracks
+}
 sub start_midi_transport {
 	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
 	midish($start_command);
@@ -73,20 +81,21 @@ sub stop_midi_transport {
 	{
 		midish('s'); 
 		delete $setup->{midish_running};
+		my $current_track = $this_track;
+		my $length = midish('print [mend]');
 		# TODO set position at ecasound stop position
 		sync_transport_position(); # TODO move after ecasound stops
-		return unless $bn{Midi}->midi_rec_tracks
-		 	and midish("print [mend]") > 0;
+		return unless $bn{Midi}->midi_rec_tracks and $length > 0; 
 		for my $track ($bn{Midi}->midi_rec_tracks)
 		{
+			$track->select;
 			$track->set(rw => PLAY);
 			push @{$track->{midi_versions}}, $track->current_version;
 			# save project
-			my $cmd = join ' ', "chdup record_buffer", $track->source_id, $track->current_midi;
+			my $cmd = join ' ', "chdup midi_record_buffer", $track->source_id, $track->current_midi;
 			say "cmd: $cmd";
 			midish($cmd);
-			my $length = midish('print [mend]');
-			midish("clr record_buffer $length");
+			midish("clr midi_record_buffer $length");
 			# save project
 		}
 		
