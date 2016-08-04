@@ -6,7 +6,6 @@ use Modern::Perl;
 use Carp;
 
 {
-my($error,$answer)=('','');
 my ($pid, $sel);
 my @handles = my ($fh_midi_write, $fh_midi_read, $fh_midi_error) = map{ IO::Handle->new() } 1..3;
 map{ $_->autoflush(1) } @handles;
