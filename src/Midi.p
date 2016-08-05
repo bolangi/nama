@@ -64,12 +64,28 @@ sub save_midish {
 }
 
 sub reconfigure_midi {
-	# mute all tracks
-	# unmute tracks for MON and PLAY.
-	# unmute midi_record_buffer
+	my $midi_rec = $tn{midi_record_buffer};
+	my @all = $bn{Midi}->track_o;
+	map{ $_->mute } @all;
+	my @audible = grep{ $_->rec_status eq MON or $_->rec_status eq PLAY } @all;
+	map{ $_->unmute } @audible;
 	# unset filters
-	# set filters for REC tracks in midi_record_buffer
+	map{ $_->select; midish("fdel $_->name") } @all;
 	# set filters for PLAY and MON tracks
+	map{ $_->select; midish(join ' ', 'rnew', $_->source_id, $_->send_id) } @audible;
+	my @rec = $bn{Midi}->midi_rec_tracks;
+	return unless @rec;
+	$midi_rec->select;
+	$midi_rec->set(rw => REC);
+	my $i;
+	for (@rec)
+	{
+		# run rnew for first time
+		my $cmd = $i ? 'radd' : 'rnew';
+		my $line = join ' ', $cmd, $_->source_id, $_->send_id;
+		midish($line);
+		$i++;
+	}
 }
 sub start_midi_transport {
 	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
