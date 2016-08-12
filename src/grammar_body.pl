@@ -1734,3 +1734,9 @@ remove_effect_surname: _remove_effect_surname { ::this_op_o()->set_surname(); 1}
 select_track: _select_track track_spec
 
 set_tempo: _set_tempo dd {::midish("t $item{dd}")}
+
+route_track: _route_track source_id send_id { 
+	::nama("source $item{source_id}");
+	::nama("send $item{send_id}");
+	1
+}

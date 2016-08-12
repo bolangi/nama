@@ -258,6 +258,11 @@ import_midi:
   what: Import a MIDI song file (MIDI tracks only)
   short: im
   parameters: <string:full_path_to_file>
+route_track:
+  type: track
+  short: route rt
+  what: set source and send for a track (see 'source' and 'send' commands)
+  parameters: <string:source_id> <string:send_id>
 set_track:
   type: track
   what: Directly set current track parameters (use with care!).
