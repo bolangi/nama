@@ -1,0 +1,1438 @@
+# This is a Midish configuration file written by F. Silvain.
+# Get Midish from:
+# http://www.midish.org/
+# This file is GPL version 3 or later.
+# These commands should help you in your sequencing and editing workflow.
+#---------------------------------------
+
+# If appropriate commands return a positive number on success and 0 or nil
+# otherwise. In case of errors commands will also print an error message.
+# To get the most out of these commands define name input and output channels
+# for your devices.
+
+# List of Midish commands:
+# fw measures
+# 	Forward measures from curent position.
+# rw measures
+# 	Rewind measures from current position or if new position would be less than
+# 	0, go to 0.
+# show
+# 	Display all tracks with additional information.
+# sh
+# 	Display information about the current track.
+# cclrm start_position clear_measures
+# 	Remove clear_measure from the current track, starting at start_position.
+# cclr start_position end_position
+# 	Remove everything between start_position and end_position from current track.
+# clrm track start_position clear_measures
+# 	Remove clear_measures from track, starting at start_position.
+# clr track start_position end_position
+# 	Remove everything from track starting at start_position and ending at
+# 	end_position.
+# cmute
+#  Mute the current track
+# cunmute
+#  Unmute the current track.
+# csolo
+# 	Mute all but the current track.
+# solo track
+# 	Mute all tracks, with the exception of track.
+# nosolo
+# 	Unmute all tracks.
+# cquantm start_position quantise_measures quantise_note precision
+# 	Quantise the current track.
+# cquant start_position end_position quantise_note precision
+# 	Quantise the current track.
+# quantm track start_position quantise_measures quantise_note precision
+# 	Quantise another track.
+# quant track start_position end_position quantise_note precision
+# 	Quantise another track.
+# ccopym start_position copy_measures dest_track dest_position
+# 	copy copy_measures from current track at start_position to dest_track
+# 	at dest_position.
+# icopym start_position copy_measures dest_position
+#  Copy copy_measures from current track at start_position to dest_position
+#  on the current track. No overlap between copy intervals is allowed.
+# ccopy start_position end_position dest_track dest_position
+# 	Copy from current track between start_position and end_position to
+# 	dest_track at dest_position.
+# icopy start_position end_position dest_position
+#  Copy from current track between start_position and end_position to
+#  dest_position on the current track. No overlaps of copy intervals is allowed.
+# copym src-track start_position copy_measures dest_track dest_position
+# 	Copy copy_measures from src_track starting at start_position to dest_track
+# 	at dest_position.
+# copy src_track start_position end_position dest_track dest_position
+# 	Copy from src_track between start_position and end_position to dest_track
+# 	at dest_position.
+# chmap source_track start_position end_position dest_track
+#  map/copy all events from source track default channel, from start_position
+#  to end_position, to dest_track on its default channel.
+# chmapm source_track start_position copy_measures dest_track
+#  (see chmap and copy commands above)
+# cchmap start_position end_position dest_track
+#  (see chmap and copy commands above)
+# cchmapm start_position copy_measures dest_track
+#  (see chmap and copy commands above)
+# rnew intputchannel outputchannel
+# 	Route inputchannel to outputchannel for the current track and create
+# 	a filter of the same name as the current track.
+# radd intput output
+# 	Add a routing from intput to output on the current track.
+# rsplit input left right splitpoint
+# 	Create a split for the current track, splitting input to left and right
+# 	with splitpoint the highest note of left region.
+# cchdup source_channel dest_track
+# 	Copy everything recorded on current track on source_channel to dest_track.
+# chdup source_track source_channel dest_track
+# 	Copy everything from source_track on source_channel to dest_track
+# gnew
+#  print the command to create a group
+# gshow group
+# 	Display all tracks from group with additional information.
+# gmute group
+# 	Mute all tracks in group.
+# gunmute group
+# 	Unmute all tracks in group.
+# gsolo group
+# 	Mute all tracks, with the exception of those in group.
+# gclrm group start_position clear_measures
+# 	Remove clear_measures, starting at start_position from all tracks in group.
+# gclr group start_position end_position
+# 	Remove everything from start_position to end_position in all tracks
+# 	from group.
+# gquantm group start_position quantise_measures quantise_note precision
+# 	Quantise all tracks in a group.
+# gquant group start_position end_position quantise_note precision
+# 	Quantise all tracks in a group.
+# gcopym group start_position copy_measures dest_position
+#  copy everything starting at start_position for copy_measures measures
+#  from every group track to every group track at dest_position.
+# gcopy group start_position end_position dest_position
+#  copy everything from start_position to end_position from every group track
+#  to every group track at dest_position
+# pgrid denomination
+#  Set the step size of the pattern/step sequencing grid
+# plen note_length
+#  set note length for the pattern/step sequencing commands (legato).
+# ppenv bar step denomination note velocity
+#  add MIDI note "note" to the current track on the current output channel
+#  at bar, at step on a grid of denomination notes with velocity.
+# ppen bar step denomination note
+#  add MIDI note "note" to the current track on teh current output channel
+#  at step position on a grid of denomination notes at full velocity (127).
+# pstepv bar step note velocity
+#  add MIDI-note note to bar at grid position step with velocity.
+# pstep bar step note
+#  add MIDI-note note to bar at grid position step.
+# prepeatv bar step note velocity repeat_count note_length
+#  Add repeat_count MIDI-notes "note" at velocity and note_length to bar at
+#  grid position step.
+# prepeatv bar step note velocity repeat_count note_length
+#  Add repeat_count MIDI-notes "note" of note_length to bar at grid position
+#  step at velocity.
+# prepeat bar step note repeat_count note_length
+#  add repeat_count MIDI-notes "note" to bar at grid position step and of length
+#  note_length.
+# snew synth name
+# 	Add new softsynth with portname synth and midish name name.
+# sdel my_name
+# 	Delete softsynth with midish name name.
+# hnew synth name
+# 	Add new hardware synth with portname synth and midish name name.
+# hdel name
+# 	Delete hardware synth with midish name name.
+# ionew name new_name channelnumber
+# 	Add new input and output channels for synth with midish name name and
+# 	channel number channelnumber. The new channels will be called new_name.
+
+#---------------------------------------
+## Auxiliary procedures
+
+# subscription operator, indexing starts at 0
+proc lsub my_list my_index {
+	let tmp_ind = 0;
+	for i in $my_list {
+		if $tmp_ind != $my_index {
+			let tmp_ind = $tmp_ind + 1;
+		} else {
+			return $i;
+		}
+	}
+	print {"The list doesn't have" ($my_index+1) "elements."};
+	return nil;
+}
+
+# Count the number of elements in a list.
+proc lcount my_list {
+	let cur_count = 0;
+	for i in $my_list {
+		let cur_count = $cur_count + 1;
+	}
+	return $cur_count;
+}
+
+# Test if input channel exists and print an error message otherwise.
+proc eval_inc my_name {
+	if ![iexists $my_name] {
+		print {"Input channel" $my_name "des not exists. Check your spelling."};
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+# Test if output channel exists, print an error message otherwise.
+proc eval_outc my_name {
+	if ![oexists $my_name] {
+		print {"Output channel" $my_name "does exists. Check your spelling."};
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+# Evaluate the mute status of the current track
+proc eval_mute_status {
+	if [gett] != nil {
+		let mute_status = "Play";
+		if [getmute [gett]] {
+			let mute_status = "Off";
+		}
+		return $mute_status;
+	} else {
+		return nil;
+	}
+}
+
+# Print the header for the show procedures
+proc show_header {
+	print "Trackname Mute-status Filter Channels";
+}
+
+# Print the show output for one track
+proc tshow my_track {
+	if [texists $my_track] {
+		ct $my_track;
+		let mute_status = [eval_mute_status];
+		print {[gett] $mute_status [tgetf] [tclist]};
+	}
+}
+
+# Evaluate position from keyword or number
+proc eval_pos my_pos {
+	if $my_pos == start {
+		return 0;
+	}
+	if $my_pos == end {
+		return [mend];
+	}
+	if $my_pos == now {
+		return [getpos];
+	}
+	return $my_pos;
+}
+
+# Evaluate if second argument is greater than first argument
+# (for position ranges)
+proc eval_positive my_start my_end {
+	if $my_start >= $my_end {
+		print "Start must be less or equal to end.";
+		print {"start is:" $my_start};
+		print {"End is:" $my_end};
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+# Check if a track is currently selected and return it.
+# If no track is selected return nil and print an error message.
+proc eval_cur_track {
+	if [gett] {
+		return 1;
+	} else {
+		print "No track selected."
+		return 0;
+	}
+}
+
+# Check if a trackname corresponds to a valid track.
+proc eval_track my_track {
+	if ![texists $my_track] {
+		print {$my_track "is not a track. Check your spelling."};
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+# Call ct with check to prevent error messages.
+proc sec_ct my_track {
+	if $my_track != nil {
+		ct $my_track;
+		return 1;
+	} else {
+		print "A trackname must be specified for this command.";
+		return 0;
+	}
+}
+
+# Check if track exists and create it, if it doesn't.
+proc eval_dest_track my_track {
+	if ![texists $my_track] {
+		let cur_track = [gett];
+		tnew $my_track;
+		ct $cur_track;
+	}
+}
+
+#---------------------------------------
+# User commands
+#---------------------------------------
+## Transport functions
+
+# Forward forward_measures from the current position
+# Example:
+# 	fw 8
+proc fw forward_measures {
+	let new_pos = [getpos] + $forward_measures;
+	g $new_pos;
+}
+
+# Rewind rewind_measures from current position or go to 0 if resulting
+# position would be below 0.
+# Example:
+# 	g 8
+# 	rw 3 # now position 5
+# 	rw 8 # now position 0, because 5 - 8 = -3
+proc rw rewind_measures {
+	let new_pos = [getpos] - $rewind_measures;
+	if $new_pos < 0 {
+		let new_pos = 0;
+		print {"Unable to rewind" $rewind_measures "from" [getpos] "going to 0."};
+		return 0;
+	}
+	g $new_pos;
+	return 1;
+}
+
+#---------------------------------------
+## Track commands
+
+# Print a list of all tracks with additional information
+proc show {
+	let cur_track = [gett];
+	show_header;
+	for i in [tlist] {
+		tshow $i;
+	}
+	sec_ct $cur_track;
+}
+
+# Print information about the current track
+proc sh {
+	if [eval_cur_track] {
+		let mute_status = [eval_mute_status];
+		print {"Current track:" [gett]};
+		print {"Used channels:" [tclist]};
+		print {"Used filter:" [tgetf]};
+		print {"Play status:" $mute_status};
+		return 1;
+	} else {
+		print "No track selected.";
+		return 0;
+	}
+}
+
+# Clear clear_measures of  current track starting at start_position
+# Example:
+# 	cclr 2 8 # clear 8 measures starting at measure 2
+proc cclrm start_position clear_measures {
+	if [eval_cur_track] {
+		let cur_pos = [getpos];
+		let start_pos = [eval_pos $start_position];
+		g $start_pos;
+		sel $clear_measures;
+		tclr;
+		g $cur_pos;
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+# Clear clear_measures from the track starting at start_position.
+# Exampe:
+# 	clr piano now 8 # remove 8 measures starting at current position
+proc clrm my_track start_position clear_measures {
+	if [eval_track $my_track] {
+		let cur_track = [gett];
+		ct $my_track;
+		cclrm $start_position $clear_measures;
+		sec_ct $cur_track;
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+# Clear current track starting at start_position upto end_position
+# Example:
+# 	cclr 6 end # clear from measure 6 to the end of the song
+proc cclr start_position end_position {
+	let start_pos = [eval_pos $start_position];
+	let end_pos = [eval_pos $end_position];
+	if [eval_positive $start_pos $end_pos] {
+		let clear_measures = $end_pos - $start_pos;
+		return [cclrm $start_pos $clear_measures];
+	} else {
+		return 0;
+	}
+}
+
+# Clear a track starting at start_position upto end_position.
+# Example:
+# 	clr piano 0 end 16 100
+proc clr my_track start_position end_position {
+	if [eval_track $my_track] {
+		let cur_track = [gett];
+		ct $my_track;
+		return [cclr $start_position $end_position];
+		sec_ct $cur_track;
+	} else {
+		return 0;
+	}
+}
+
+# Mute the current track
+proc cmute {
+	if [eval_cur_track] {
+		mute [gett];
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+# Unmute the current track
+proc cunmute {
+	if [eval_cur_track] {
+		unmute [gett];
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+# Mute all tracks but the current.
+proc csolo {
+	if [eval_cur_track] {
+		let cur_track = [gett];
+		for i in [tlist] {
+			mute $i;
+		}
+		unmute $cur_track;
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+# Mute all tracks, except the given one.
+proc solo my_track {
+	if [eval_track $my_track] {
+		let cur_track = [gett];
+		ct $my_track;
+		let cur_return_value = [csolo];
+		sec_ct $cur_track;
+		return $cur_return_value;
+	} else {
+		return 0;
+	}
+}
+
+# Unmute all tracks
+proc nosolo {
+	for i in [tlist] {
+		unmute $i;
+	}
+}
+
+# Quantise current track to the nearest quantise_note denomination with a
+# precision of precision percent starting at start_position for
+# quantise_measures measures.
+# Example:
+# 	cquantm now 12 16 100 # quantise the next 8 measures to 16th notes with
+# 	                     # 100% precision
+proc cquantm start_position quantise_measures quantise_note precision {
+	if [eval_cur_track] {
+		let cur_pos = [getpos];
+		let start_pos = [eval_pos $start_position];
+		g $start_pos;
+		if [getq] {
+			let cur_quant = [getq];
+		} else {
+			let cur_quant = 8;
+		}
+		setq $quantise_note;
+		sel $quantise_measures;
+		tquant $precision;
+		g $cur_pos;
+		setq $cur_quant;
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+# Quantise a track to the nearest quantise_note denomination with a
+# precision of precision percent starting at start_position for
+# quantise_measures measures.
+# Example:
+# 	quantm piano 0 10 8 75 # quantise piano from beginning to 10 measures
+# 	                      # to 8th notes with 75% precision
+proc quantm my_track start_position quantise_measures quantise_note precision {
+	if [eval_track $my_track] {
+		let cur_track = [gett];
+		ct $my_track;
+		let cur_return_value = [cquant $start_position $quantise_measures $quantise_note $precision];
+		sec_ct $cur_track;
+		return $cur_return_value;
+	} else {
+		return 0;
+	}
+}
+
+# Quantise the current track to the nearest quantise_note with a
+# precision of precision percent starting at start_position upto
+# end_position.
+# Example:
+# cquant 0 end 16 95
+proc cquant start_position end_position quantise_note precision {
+	let start_pos = [eval_pos $start_position];
+	let end_pos = [eval_pos $end_position];
+	if [eval_positive $start_pos $end_pos] {
+		let quantise_measures = $end_pos - $start_pos;
+		return [cquantm $start_pos $quantise_measures $quantise_note $precision];
+	} else {
+		return 0;
+	}
+}
+
+# Quantise the track to the nearest quantise_note denomination with a
+# precision of precision percent starting at start_position upto
+# end_position.
+# Example:
+# 	quant piano 2 end 16 100
+proc quant my_track start_position end_position quantise_note precision {
+	let start_pos = [eval_pos $start_position];
+	let end_pos = [eval_pos $end_position];
+	if [eval_positive $start_pos $end_pos] {
+		let quantise_measures = $end_pos - $start_pos;
+		return [quantm $my_track $start_pos $quantise_measures $quantise_note $precision];
+	} else {
+		return 0;
+	}
+}
+
+# Copy copy_measures from current track starting at start_position to
+# dest_track at dest_position
+# example:
+# 	ccopym now 8 piano 16 # copy 8 measures starting now to piano at
+# 	                      # measure 16
+proc ccopym start_position copy_measures dest_track dest_position {
+	if [eval_cur_track] {
+		eval_dest_track $dest_track;
+		let cur_track = [gett];
+		let cur_pos = [getpos];
+		let start_pos = [eval_pos $start_position];
+		g $start_pos
+		sel $copy_measures;
+		tcopy;
+		ct $dest_track;
+		g $dest_position;
+		tpaste;
+		ct $cur_track;
+		g $cur_pos;
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+# Copy copy_measures from start_position on the current track to dest_position
+# on the current track.
+# No action is taken if the two areas overlap.
+# example:
+#  icopym now 8 52 # copy 16 measures from current position to measure 52
+proc icopym start_position copy_measures dest_position {
+	if [eval_cur_track] {
+		let cur_track = [gett];
+		let start_pos = [eval_pos $start_position];
+		let end_pos = $start_pos + $copy_measures;
+		if [eval_positive $end_pos $dest_position] {
+			return [ccopym $start_position $copy_measures $cur_track $dest_position];
+		} else {
+			print "Copy interval will overlap.";
+			print "Too many measures to copy or destination position too early.";
+			return 0;
+		}
+	} else {
+		return 0;
+	}
+}
+
+# Copy everything between start_position and end_position from current track
+# to dest_track at measure dest_position.
+# Example:
+# 	ccopy 2 end piano 17 # copy from measure 2 to end of song to piano
+# 	                     # at measure 17
+proc ccopy start_position end_position dest_track dest_position {
+	let start_pos = [eval_pos $start_position];
+	let end_pos = [eval_pos $end_position];
+	if [eval_positive $start_pos $end_pos] {
+		let copy_measures = $end_pos - $start_pos;
+		return [ccopym $start_pos $copy_measures $dest_track $dest_position];
+	} else {
+		return 0;
+	}
+}
+
+# Copy everything from start_position to end_position on the current track to
+# destination position on the current track.
+# If the intervals overlap, nothing will happen.
+# example:
+# 	icopy 2 10 24 # copy measures 2 to 10 to measure 24 on the current track
+proc icopy start_position end_position dest_position {
+	if [eval_cur_track] {
+		let cur_track = [gett];
+		let end_pos = [eval_pos $end_position];
+		if [eval_positive $end_position $dest_position] {
+			return [ccopy $start_position $end_position $cur_track $dest_position];
+		} else {
+			print "Copy intervals overlap.";
+			print "Copy interval is too long or";
+			print "destination position is too early.";
+			return 0;
+		}
+	} else {
+		return 0;
+	}
+}
+# Copy copy_measures from src_track starting at start_position to
+# dest_track at dest_position.
+# Example:
+# 	copym piano now 8 clav 16
+proc copym src_track start_position copy_measures dest_track dest_position {
+	if [eval_track $src_track] {
+		let cur_track = [gett];
+		ct $src_track;
+		let cur_return_value = [ccopym $start_position $copy_measures $dest_track $dest_position];
+		sec_ct $cur_track;
+		return $cur_return_value;
+	} else {
+		return 0;
+	}
+}
+
+# Copy everything between start_position and end_position from src_track to
+# dest_track at dest_position.
+# Example:
+# 	copy piano 6 end clav now
+proc copy src_track start_position end_position dest_track dest_position {
+	if [eval_track $src_track] {
+		let cur_track = [gett];
+		ct $src_track;
+		let cur_return_value = [ccopy $start_position $end_position $dest_track $dest_position];
+		sec_ct $cur_track;
+		return $cur_return_value;
+	} else {
+		return 0;
+	}
+}
+
+# Copy everything recorded on the current track on channel channelnumber to
+# dest_track
+# Example:
+# 	tnew manual
+# 	tnew pedals
+# 	tnew organ
+# 	r # record on organ
+# 	s
+# 	cchdup 0 manual
+# 	cchdup 1 pedals
+proc cchdup channelnumber dest_track {
+	if [eval_cur_track] {
+		eval_dest_track $dest_track;
+		let cur_track = [gett];
+		let cur_pos = [getpos];
+		g 0;
+		ev {any $channelnumber};
+		sel [mend];
+		tcopy;
+		ct $dest_track;
+		tpaste;
+		ct $cur_track;
+		g $cur_pos;
+		ev {any};
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+# Copy everything recorded on track on channel channelnumber to dest_track.
+# Example:
+# 	chdup organ 2 pedals
+proc chdup my_track channelnumber dest_track {
+	if [eval_track $my_track] {
+		if [eval_cur_track] {
+			let cur_track = [gett];
+		} else {
+			let cur_track = $my_track;
+		}
+		ct $my_track;
+		let cur_return_value = [cchdup $channelnumber $dest_track];
+		ct $cur_track;
+		return $cur_return_value;
+	} else {
+		return 0;
+	}
+}
+
+# Copy all events from measure start_position to endPosition from source_track
+# and its default output channel to the same start_position on dest_track
+# and its default output channel.
+# example:
+#  chmap synth1 0 8 synth2 # copy all events from track synth1 and its
+#                          # output channel to the track synth2 and
+#                          # its output channel, from measure 0 to 8.
+proc chmap source_track start_position end_position dest_track {
+	if [eval_track $source_track] {
+		let src_track = $source_track;
+	} else {
+		print {"The source track" $source_track "does not exist."};
+		return 0;
+	}
+	if [eval_track $dest_track] {
+		let d_track = $dest_track;
+	} else {
+		print {"The destination track" $dest_track "does not exist."};
+		return 0;
+	}
+	if [eval_cur_track] {
+		let cur_track = [gett];
+	} else {
+		let cur_track = $src_track;
+	}
+	ct $src_track;
+	let ichan = [tclist];
+	let ichan_count = [lcount $ichan];
+	ct $dest_track;
+	let ochan = [tclist];
+	let ochan_count = [lcount $ochan];
+	if $ichan_count > 1 {
+		print "Too many source channels.";
+		print "Will only copy tracks with one channel.";
+		return 0;
+	}
+	if $ochan_count > 1 {
+		print "Too many destination channels.";
+		print "Will only copy to tracks with one channel.";
+		return 0;
+	}
+	let start_pos = [eval_pos $start_position];
+	let end_pos = [eval_pos $end_position];
+	let cur_return = [copy $src_track $start_position $end_position $dest_track $start_position];
+	if $cur_return == 0 {
+		return 0;
+	}
+	ct $dest_track;
+	let cur_pos = [getpos];
+	let cur_ochan = [lsub $ochan 0];
+	let cur_ichan = [lsub $ichan 0];
+	let map_measures = $end_pos - $start_pos;
+	g $start_pos;
+	sel $map_measures;
+	tevmap {any $cur_ichan} {any $cur_ochan}; ct $cur_track;
+	g $cur_pos;
+	ct $cur_track;
+	return $cur_return;
+}
+
+# Copy all events from source track starting at measure start_position for
+# copy_measures and the default output channel to dest_track at the same
+# start_position and its default output channel.
+# example:
+#  chmapm piano 2 8 bass # Copy 8 measures from track piano, starting at
+#                        # measure 2, on the default output channel to
+#                        # track bass at measure 2 and its default output
+#                        # channel.
+proc chmapm source_track start_position copy_measures dest_track {
+	let start_pos = [eval_pos $start_position];
+	let end_pos = $start_pos + $copy_measures;
+	return [chmap $source_track $start_pos $end_pos $dest_track];
+}
+
+# Copy all events between start_position and end_position from the current
+# track and its default output channel to dest_track and on its default
+# output channel at the same start_position.
+# example:
+#  ct piano
+#  cchamp now end bass # copy everything from the current track's output
+#                      # channel, between now and the end to the track
+#                      # bass on its default output channel.
+proc cchmap start_position end_position  dest_track {
+	if [eval_cur_track] {
+		let src_track = [gett];
+		return [chmap $src_track $start_position $end_position $dest_track];
+	} else {
+		return 0;
+	}
+}
+
+# Copy all events, starting at measure start_position for copy_measures
+# measures from the current track and its default output channel to dest_track
+# on its default output channel.
+# example:
+#  ct piano
+#  cchmapm 7 12 bass # Copy 12 measures, starting at measure 7 from the
+#                    # current track - piano - and its default output
+#                    # channel to track bass at measure 7 on its default
+#                    # output channel
+proc cchmapm start_position copy_measures dest_track {
+	if [eval_cur_track] {
+		let src_track = [gett];
+		return [chmapm $src_track $start_position $copy_measures $dest_track];
+	} else {
+		return 0;
+	}
+}
+
+# Set input and output channel for the current track.
+# Example:
+# 	rnew keyboard module # accept input from keyboard and pass to module
+proc rnew inputchannel outputchannel {
+	if [eval_cur_track] {
+		let cur_track = [gett];
+		if [eval_inc $inputchannel] {
+			if [eval_outc $outputchannel] {
+				let fname = [gett];
+				if [fexists $fname] {
+					print "A routing filter of that name already exists, stopping...";
+					return 0;
+				} else {
+					fnew $fname;
+					fmap {any $inputchannel} {any $outputchannel};
+					taddev 0 0 0 {kat $outputchannel 0 0};
+					tsetf $fname;
+				}
+			} else {
+				return 0;
+			}
+		} else {
+			return 0;
+		}
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+# Add more channel routing to a track
+# Examle:
+# 	radd keyboard module2
+proc radd inputchannel outputchannel {
+	if [eval_cur_track] {
+		let fname = [gett];
+		if [fexists $fname] {
+			if [eval_inc $inputchannel] {
+				if [eval_outc $outputchannel] {
+					cf $fname;
+					fmap {any $inputchannel} {any $outputchannel};
+				} else {
+					return 0;
+				}
+			} else {
+				return 0;
+			}
+		} else {
+			print "Routing filter doesn't exist. Use rnew. Stopping...";
+			return 0;
+		}
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+# Create a split on the current track.
+# Example:
+# 	rsplit keyboard bass_module lead_synth 60 # split keyboard into two
+# 	   # regions, note 0-60 for the bass module and 61-127 for the lead synth.
+proc rsplit inputchannel leftout rightout splitpoint {
+	if [eval_cur_track] {
+		let fname = [gett];
+		if [fexists $fname] {
+			fmap {any $inputchannel} {any $leftout};
+			fmap {any $inputchannel} {any $rightout};
+			fmap {note $inputchannel 0..$splitpoint} {note $leftout 0..$splitpoint};
+			fmap {note $inputchannel ($splitpoint+1)..127} {note $rightout ($splitpoint+1)..127};
+		} else {
+			print "The current track has no filter yet. Use rnew to create one, stopping...";
+			return 0;
+		}
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
+#---------------------------------------
+## Group commands
+
+# Explain how to create a group
+proc gnew {
+	print "A group is simply a list of tracks. Create it like this:";
+	print "tnew cello";
+	print "tnew violin";
+	print "tnew viola";
+	print "let strings = {violin cello viola}";
+}
+
+# Mute a group of tracks
+# Example:
+#	tnew piano
+#	tnew bass
+#	let band = {piano bass}
+#		gmute $band
+proc gmute my_group {
+	for i in $my_group {
+		mute $i;
+	}
+	return 1;
+}
+
+# Unmute a group of tracks
+# Example:
+# 	tnew piano
+# 	tnew bass
+# 	let band = {piano bass}
+# 	gunmute $band
+proc gunmute my_group {
+	for i in $my_group {
+		unmute $i;
+	}
+	return 1;
+}
+
+# Solo a group of tracks (mute everything but the group)
+# Example:
+# 	tnew piano
+# 	tnew bass
+# 	let band = {piano bass}
+# 	gsolo $band
+proc gsolo my_group {
+	for i in [tlist] {
+		mute $i;
+	}
+	for i in $my_group {
+		unmute $i;
+	}
+	return 1;
+}
+
+# Show list of tracks in my_group with additional information
+# Example:
+# 	tnew piano
+# 	tnew bass
+# 	let band = {piano bass}
+# 	gshow $band
+proc gshow my_group {
+	let cur_track = [gett];
+	show_header;
+	for i in $my_group {
+		tshow $i;
+	}
+	sec_ct $cur_track;
+}
+
+# Clear clear_measures from all tracks in the group starting at start_position
+# Example:
+# 	tnew piano
+# 	tnew bass
+# 	let band = {piano bass}
+# 	gclrm $band now 8 # clear 8 measures, starting at measure 6
+proc gclrm my_group start_position clear_measures {
+	let cur_return_value = 1;
+	for i in $my_group {
+		let tmp_return_value = [clrm $i];
+		if ($tmp_return_value == 0) {
+			let cur_return_value = 0;
+		}
+	}
+	return $cur_return_value;
+}
+
+# Clear all tracks in the group starting at start_position to end_position
+# Example:
+# 	tnew piano
+# 	tnew bass
+# 	let band = {piano bass}
+# 	gclr $band 2 end
+proc gclr my_group start_position end_position {
+	let start_pos = [eval_pos $start_position];
+	let end_pos = [eval_pos $end_position];
+	if [eval_positive $start_pos $end_pos] {
+		let cur_return_value = 1;
+		let clear_measures = $end_pos - $start_pos;
+		for i in $my_group {
+			let tmp_return_value = [clrm $i $start_pos $clear_measures];
+			if ($tmp_return_value == 0) {
+				let cur_return_value = 0;
+			}
+		}
+		return $cur_return_value;
+	} else {
+		return 0;
+	}
+}
+
+# Quantise all track in the group to the nearest quantise_notes with a
+# precision of precision percent, starting at start_position for
+# quantise_measures measures.
+# example:
+# 	tnew piano
+# 	tnew bass
+# 	let band = {piano bass}
+# 	gquantm $band now 10 16 100
+proc gquantm my_group start_position quantise_measures quantise_note precision {
+	let cur_return_value = 1;
+	for i in $my_group {
+		let tmp_return_value = [quantm $i $start_position $quantise_measures $quantise_note $precision];
+		if ($tmp_return_value == 0) {
+			let cur_return_value = 0;
+		}
+	}
+	return $cur_return_value;
+}
+
+# Quantise all tracks in the group to the nearest quantise_note with a
+# precision of precision percent starting at start_position upto
+# end_position.
+# Example:
+# 	tnew piano
+# 	tnew bass
+# 	let band = {piano bass}
+# 	gquant $band 0 now 8 75 # quantise from start to current position to 8th
+# 	                        # with 100% precision
+proc gquant my_group start_position end_position quantise_note precision {
+	let start_pos = [eval_pos $start_position];
+	let end_pos = [eval_pos $end_position];
+	if [eval_positive $start_pos $end_pos] {
+		let quantise_measures = $end_pos - $start_pos;
+		return [gquantm $my_group $start_pos $quantise_measures $quantise_note $precision];
+	} else {
+		return 0;
+	}
+}
+
+# Copy each track from the group to itself starting at start_position for
+# copy_measure measures and put it all at dest_position.
+proc gcopym my_group start_position copy_measures dest_position {
+	let my_return_value = 1;
+	for i in $my_group {
+		let cur_return_value = [copym $i $start_position $copy_measures $i $dest_position];
+		if ($cur_return_value == 0) {
+			let my_return_value = 0;
+		}
+	}
+	return $my_return_value;
+}
+
+# Copy the contents of each track in the group from start_position to
+# end_position to itself at dest_position
+# Example:
+# 	gcopy $mystrings 2 9 10 # copy the group mystrings from measure 2 to measure
+# 	                        # to measure 9 to measure 10
+proc gcopy my_group start_position end_position dest_position {
+	let start_pos = [eval_pos $start_position];
+	let end_pos = [eval_pos $end_position];
+	if [eval_positive $start_pos $end_pos] {
+		let copy_measures = $end_pos - $start_pos;
+		return [gcopym $my_group $start_pos $copy_measures $dest_position];
+	} else {
+		return 0;
+	}
+}
+
+#---------------------------------------
+## Device commands
+# Add new synthesizers to your Midish setup
+
+# Create new soft synthesizer with portname my_synth and midish name my_name
+# Example:
+# 	snew "LinuxSampler" ls
+proc snew my_synth my_name {
+	if ![oexists $my_name] {
+		let cur_ochan = [geto];
+		let index = 0
+		for i in [dlist] {
+			let index=$index+1;
+		}
+		if ($index == 6) {
+			let index=$index+1;
+		}
+		dnew $index $my_synth wo
+		onew $my_name {$index 0}
+		dclktx [dlist]
+		co $cur_ochan;
+		return $index;
+	} else {
+		print {$my_name "is already the name of an output channel."};
+		return nil;
+	}
+}
+
+# Delete soft synthesizer my_name from midish
+# Example:
+# 	sdel ls # remove ls with its channel and midish device.
+proc sdel my_name {
+	if [eval_outc $my_name] {
+		let cur_ochan = [geto];
+		co $my_name;
+		let devnum = [ogetd $my_name];
+		odel;
+		ddel $devnum;
+		dclktx [dlist];
+		co $cur_ochan;
+		return $devnum;
+	} else {
+		return nil;
+	}
+}
+
+# Create a hardware syntheiszer with portname my_synth and midish name my_name
+# Example:
+# 	hnew "MIDI Cable" xv50
+proc hnew my_synth my_name {
+	if ![iexists $my_name] {
+		let cur_ichan = [geti];
+		let devnum = [snew $my_synth $my_name];
+		if $devnum != nil {
+			inew $my_name {$devnum 0};
+			ci $cur_ichan;
+			return 1;
+		} else {
+			print "The device number must be between 0 and 15.";
+			return 0;
+		}
+	} else {
+		print {$my_name "is already the name of an input channel."};
+		return 0;
+	}
+}
+
+# Delete a hardware synth with its name and channel
+# Example:
+# 	hdel ls
+proc hdel my_name {
+	if [eval_inc $my_name] {
+		let devnum = [sdel $my_name];
+		if $devnum != nil {
+			let cur_ichan = [geti];
+			ci $my_name;
+			iddel;
+			ci $cur_i_chan;
+			return 1;
+		} else {
+			print "The device number must be between 0 and 15.";
+			return 0;
+		}
+	} else {
+		return 0;
+	}
+}
+
+# Add new i/o channel channelnumber for synth with midish name my_name and call
+# them new_name.
+# Example:
+# 	hnew "MIDI Cable" roland_xv
+# 	ionew roland_xv xv_drums 10
+proc ionew my_name new_name channelnumber {
+	if [eval_inc $my_name] {
+		if ![iexists $new_name] && ![oexists $new_name] {
+			let cur_ichan = [geti];
+			let cur_ochan = [geto];
+			ci $my_name;
+			let devnum = [igetd];
+			inew $new_name {$devnum $channelnumber };
+			onew $new_name {$devnum $channelnumber };
+			ci $cur_ichan;
+			co $cur_ochan;
+			return 1;
+		} else {
+			print {$new_name "is already used for an input or output channel."};
+			return 0;
+		}
+	} else {
+		return 0;
+	}
+}
+
+#---------------------------------------
+## Pattern/Step sequencer commands.
+
+# Pattern note length (how much legato/staccato)
+let pattern_note_length = 16;
+# Patter grid, the length of a step
+let pattern_grid = 16;
+
+# Set pattern note length
+# Example:
+# plen 16 # set pattern note length to 16th.
+proc plen my_note_length {
+	if ([eval_denom $my_note_length] && $my_note_length >=2) {
+		let pattern_note_length = $my_note_length;
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+# Set pattern grid, the length of a step
+# Example:
+# pgrid 8 # set the grid to 8th notes
+proc pgrid my_grid {
+	if [eval_denom $my_grid] {
+		let pattern_grid = $my_grid;
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+# Check if the denomination for the pattern/step sequencer is valid.
+proc eval_denom my_denom {
+	if ($my_denom == 0) {
+		print "The note denomination may not be 0...";
+		return 0;
+	} else {
+		if ([getunit] % $my_denom) {
+			print "The note denomination must be compatible to the ticks per bar.";
+			return 0;
+		} else {
+			return 1;
+		}
+	}
+}
+
+# Get basic info for the pattern/step sequencer commands. Return a list of
+# beats per bar, denomination of beats, ticks per bar and ticks per beat.
+proc get_step_info {
+	let cur_beats = ([lsub [msig] 0]);
+	let cur_denom = ([lsub [msig] 1]);
+	let cur_ticks_per_bar = ([getunit] * $cur_beats / $cur_denom);
+	let cur_ticks_per_beat = $cur_ticks_per_bar / $cur_denom;
+	return {$cur_beats $cur_denom $cur_ticks_per_bar $cur_ticks_per_beat};
+}
+
+# Check if a step position is inside the current bar.
+proc eval_step_in_bar my_step my_denom my_ticks_per_bar {
+	if ([getunit] * $my_step / $my_denom) > $my_ticks_per_bar {
+		print "The position you have specified is outside this bar.";
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+# Convert a step position to start and stop position in taddev format.
+proc step_to_addev my_bar my_step my_denom my_step_info {
+	let cur_beats = [lsub $my_step_info 0];
+	let cur_denom = [lsub $my_step_info 1];
+	let cur_ticks_per_bar = [lsub $my_step_info 2];
+	let cur_ticks_per_beat = [lsub $my_step_info 3];
+	let my_beat = (([getunit] * $my_step / $my_denom) / $cur_ticks_per_beat);
+	let my_tick = (([getunit] * $my_step / $my_denom) % $cur_ticks_per_beat);
+	let my_length = ([step_to_ticks 1 $pattern_note_length] -1);
+	let my_stop = [add_note_position_addev $my_bar $my_step $my_denom $my_length 96];
+	return {$my_beat $my_tick [lsub $my_stop 0] [lsub $my_stop 1] [lsub $my_stop 2]};
+}
+
+# Convert a note length and position to ticks.
+proc step_to_ticks my_step my_denom {
+	return ([getunit] * $my_step / $my_denom);
+}
+
+# Convert ticks to bar_shift step denomination.
+proc ticks_to_step my_bar my_ticks my_step_info {
+	let cur_beats = [lsub $my_step_info 0];
+	let cur_denom = [lsub $my_step_info 1];
+	let cur_ticks_per_bar = [lsub $my_step_info 2];
+	let cur_ticks_per_beat = [lsub $my_step_info 3];
+	let out_bar = $my_bar;
+	if ($my_ticks > $cur_ticks_per_bar) {
+		let my_ticks = $my_ticks - $cur_ticks_per_bar;
+		let out_bar = $out_bar + 1;
+		let cur_pos = [getpos];
+		g $out_bar;
+		let new_step_info = [get_step_info];
+		g $cur_pos;
+		return [ticks_to_step $out_bar $my_ticks $new_step_info];
+	} else {
+		return {$out_bar $my_ticks 96};
+	}
+}
+
+# Convert ticks to a position in taddev format.
+proc ticks_to_addev my_bar my_ticks my_step_info {
+	let cur_beats = [lsub $my_step_info 0];
+	let cur_denom = [lsub $my_step_info 1];
+	let cur_ticks_per_bar = [lsub $my_step_info 2];
+	let cur_ticks_per_beat = [lsub $my_step_info 3];
+	let out_bar = $my_bar;
+	if ($my_ticks > $cur_ticks_per_bar) {
+		let my_ticks = $my_ticks - $cur_ticks_per_bar;
+		let out_bar = $out_bar + 1;
+		let cur_pos = [getpos];
+		g $out_bar;
+		let new_step_info = [get_step_info];
+		g $cur_pos;
+		return [ticks_to_step $out_bar $my_ticks $new_step_info];
+	} else {
+		let out_beat = ($my_ticks / $cur_ticks_per_beat);
+		let out_tick = ($my_ticks % $cur_ticks_per_beat);
+		return {$out_bar $out_beat $out_tick};
+	}
+}
+
+# Add a note value to a position in format bar step denom and
+# return a position in bar step denom format.
+proc add_note_position my_lhs_bar my_lhs_step my_lhs_denom my_rhs_step my_rhs_denom {
+	let full_ticks = [step_to_ticks $my_lhs_step $my_lhs_denom] + [step_to_ticks $my_rhs_step $my_rhs_denom];
+	let cur_pos = [getpos];
+	g $my_lhs_bar;
+	let my_step_info = [get_step_info];
+	g $cur_pos;
+	return [ticks_to_step $my_lhs_bar $full_ticks $my_step_info];
+}
+
+# Add a note value to a position in format bar step denom and return a position
+# in format bar beat ticks
+proc add_note_position_addev my_lhs_bar my_lhs_step my_lhs_denom my_rhs_step my_rhs_denom {
+	let full_ticks = [step_to_ticks $my_lhs_step $my_lhs_denom] + [step_to_ticks $my_rhs_step $my_rhs_denom];
+	let cur_pos = [getpos];
+	g $my_lhs_bar;
+	let my_step_info = [get_step_info];
+	g $cur_pos;
+	return [ticks_to_addev $my_lhs_bar $full_ticks $my_step_info];
+}
+
+# Add MIDI-note "note" to the current track, on the current output channel, at
+# measure my_bar and position my_step on a grid of my_denom notes, with
+# my_velocity.
+# Example:
+# ppenv 1 3 8 60 100 # add MIDI-note 60 at velocity 100 to bar 1 (second bar),
+#                     # on the fourth eighth note (we count from 0)!
+proc ppenv my_bar my_step my_denom my_note my_velocity {
+	if [eval_cur_track] {
+		if [eval_denom $my_denom] {
+			if ([eval_denom $pattern_note_length]) {
+				let cur_pos = [getpos];
+				g $my_bar;
+				let my_step_info = [get_step_info];
+				let cur_beats = [lsub $my_step_info 0];
+				let cur_denom = [lsub $my_step_info 1];
+				let cur_ticks_per_bar = [lsub $my_step_info 2];
+				let cur_ticks_per_beat = [lsub $my_step_info 3];
+				if [eval_step_in_bar $my_step $my_denom $cur_ticks_per_bar] {
+					let my_notes = [step_to_addev $my_bar $my_step $my_denom $my_step_info];
+					for i in [tclist] {
+						taddev $my_bar [lsub $my_notes 0] [lsub $my_notes 1] {non $i $my_note $my_velocity};
+						taddev [lsub $my_notes 2] [lsub $my_notes 3] [lsub $my_notes 4] {noff $i $my_note $my_velocity};
+					}
+					g $cur_pos;;
+					return 1;
+				} else {
+					g $cur_pos;
+					return 0;
+				}
+			} else {
+				g $cur_pos;
+				return 0;
+			}
+		} else {
+			return 0;
+		}
+	} else {
+		return 0;
+	}
+}
+
+# Add MIDI-note "note" to the current track, on the current output channel, at
+# measure my_bar and position my_step on a grid of my_denomination notes.
+# Velocity is fixed to 127.
+proc ppen my_bar my_step my_denom my_note {
+	return [ppenv $my_bar $my_step $my_denom $my_note 127];
+}
+
+# Add MIDI-note "note" to the bar my_bar at grid position my_step with velocity
+# my_velocity.
+# Example:
+# pstepv 1 5 60 100 # add MIDI-note 60 at velocity 100 to bar 1 (second bar)
+#                   # at step 5 (6th step) on the current grid
+proc pstepv my_bar my_step my_note my_velocity {
+	return [ppenv $my_bar $my_step $pattern_grid $my_note $my_velocity];
+}
+
+# Add MIDI-note "note" at full velocity (127) to my_bar at grid position my_step
+proc pstep my_bar my_step my_note {
+	return [ppenv $my_bar $my_step $pattern_grid $my_note 127];
+}
+
+# Add MIDI-note note at velocity my_velocity to bar my_bar starting at position
+# my_step on the grid repeated my_repeat times as my_denom note values.
+# Example:
+# prepeat 2 6 60 100 8 16 # repeat MIDI-note 60 at velocity 100 8 times as
+#                         # 16th notes to bar 2 step 6 on the grid
+proc prepeatv my_bar my_step my_note my_velocity my_repeat my_denom {
+	# Notes must be at least 48th or they will have 0 length
+	if ($my_denom >=2) {
+		let cur_note_length = $pattern_note_length;
+		if ($pattern_note_length < $my_denom) {
+			plen $my_denom;
+		}
+		let cur_count = $my_repeat;
+		let cur_note = {$my_bar $my_step $my_denom};
+		for i in [builtinlist] {
+			ppenv [lsub $cur_note 0] [lsub $cur_note 1] [lsub $cur_note 2] $my_note $my_velocity;
+			let cur_note = [add_note_position [lsub $cur_note 0] [lsub $cur_note 1] [lsub $cur_note 2] 1 $my_denom];
+			let cur_count = $cur_count -1;
+			if !($cur_count) {
+				plen $cur_note_length;
+				return 1;
+			}
+		}
+	} else {
+		print "Notes must be at least 48th notes.";
+		return 0;
+	}
+	print "You wanted too many repetitions.";
+	return 0;
+}
+
+# Add MIDI-note note at velocity 127 to bar my_bar starting on position my_step
+# on the grid, repeated my_repeat times as my_denom note length.
+# Example:
+# prepeat 1 2 60 12 6 # put in 6 12th MIDI-notes 60 starting on bar 1 at
+#                     # position 2 on the grid.
+proc prepeat my_bar my_step my_note my_repeat my_denom {
+	return [prepeatv $my_bar $my_step $my_note 127 $my_repeat $my_denom];
+}
+
+print "FS Midish Extram Commands, version 1.5";
+print "For patterns to work correctly use the rnew function for your tracks";
+print {"The current pattern grid size is" $pattern_grid};
+print {"The current note length (denomination) for pattern commands is" $pattern_note_length};
