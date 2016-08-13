@@ -22,6 +22,7 @@ sub start_midish {
 	$sel->add($fh_midi_read);
 	$sel->add($fh_midi_error);
 	midish( qq(print "Midish is ready.") );
+	midish( q(exec ").$file->aux_midi_commands.q(") );
 }
 sub midish {
 	my $command = shift;
