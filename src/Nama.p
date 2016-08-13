@@ -224,4 +224,4 @@ __DATA__
 @@ midi_help
 [% qx(cat ./midi_help) %]
 @@ aux_midi_commands
-[% qx(cat ./fs_midish_extra-1.5) %]
+[% qx(cat ./fs_midish) %]

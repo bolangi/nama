@@ -62,6 +62,7 @@ $help->{screen}					# top-level help output
 $help->{arr_topic}				# sequential array of help pages 
 $help->{topic}					# access help page by name
 $help->{usage}					# usage output
+$help->{midish}
 
 $mode->{preview}				#
 $mode->{doodle}					#
