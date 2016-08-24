@@ -6,6 +6,7 @@ use Modern::Perl;
 use Carp;
 
 {
+my $midi_rec_buf = 'midi_record_buffer'; # a midish track that is the target for all recording
 my ($pid, $sel);
 my @handles = my ($fh_midi_write, $fh_midi_read, $fh_midi_error) = map{ IO::Handle->new() } 1..3;
 map{ $_->autoflush(1) } @handles;
@@ -58,14 +59,13 @@ sub close_midish {
 	kill 9, $pid;
 	waitpid $pid, 0;
 }	
-}
 sub save_midish {
 	my $fname = $file->midi_store;
 	midish( qq<save "$fname">);
 }
 
 sub reconfigure_midi {
-	my $midi_rec = $tn{midi_record_buffer};
+	my $midi_rec = $tn{$midi_rec_buf};
 	my @all = $bn{Midi}->track_o;
 	map{ $_->mute } @all;
 	my @audible = grep{ $_->rec_status eq MON or $_->rec_status eq PLAY } @all;
@@ -83,8 +83,8 @@ sub reconfigure_midi {
 	{
 		# run rnew for first time
 		my $cmd = $i ? 'radd' : 'rnew';
-		my $line = join ' ', $cmd, $_->source_id, $_->send_id;
-		midish($line);
+		$cmd = join ' ', $cmd, $_->source_id, $_->send_id;
+		midish($cmd);
 		$i++;
 	}
 }
@@ -108,12 +108,13 @@ sub stop_midi_transport {
 		$track->set(rw => PLAY);
 		push @{$track->{midi_versions}}, $track->current_version;
 		# save project
-		my $cmd = join ' ', "chdup midi_record_buffer", $track->source_id, $track->current_midi;
+		my $cmd = join ' ', 'chdup', $midi_rec_buf, $track->source_id, $track->current_midi;
 		say "cmd: $cmd";
 		midish($cmd);
-		midish("clr midi_record_buffer $length");
+		midish("clr $midi_rec_buf $length");
 		# save project
 	}
+}
 }
 	
 =comment
