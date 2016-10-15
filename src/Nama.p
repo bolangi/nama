@@ -165,6 +165,17 @@ sub bootstrap_environment {
 	setup_hotkey_grammar();
 	initialize_interfaces();
 }
+sub kill_and_reap {
+	my @pids = @_;
+	map{ my $pid = $_; 
+		 map{ my $signal = $_; 
+			  kill $signal, $pid; 
+			  sleeper(0.2);
+			} (15,9);
+		 waitpid $pid, 1;
+	} @pids;
+}
+	
 sub cleanup_exit {
 	logsub("&cleanup_exit");
  	remove_riff_header_stubs();
@@ -179,15 +190,7 @@ sub cleanup_exit {
 	close_midish() if $config->{use_midi};
 	my @engines = values %::Engine::by_name;
 	for (@engines){
-		if( @{$_->{pids}}){
-			map{ my $pid = $_; 
-				 map{ my $signal = $_; 
-					  kill $signal, $pid; 
-					  sleeper(0.2);
-					} (15,9);
-				 waitpid $pid, 1;
-			} @{$_->{pids}};
-		}
+		kill_and_reap( @{$_->{pids}} );
 	}
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
 	exit;
