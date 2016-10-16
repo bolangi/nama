@@ -1,4 +1,5 @@
 {package ::Waveform;
+use IPC::System::Simple;
 use Role::Tiny;
 use Modern::Perl;
 use ::Globals qw(:all);
