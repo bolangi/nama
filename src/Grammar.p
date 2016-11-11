@@ -85,6 +85,7 @@ sub process_line {
 			Dumper ($result)) if $result->{is_error};
 	}
 	my $output = delete $text->{output_buffer};
+	revise_prompt();
 }
 sub context {
 	my $context = {};
