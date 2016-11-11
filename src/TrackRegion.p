@@ -19,6 +19,7 @@ sub region_end_time {
 	my $track = shift;
 	#return if $track->rec_status ne PLAY;
 	carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
+	no warnings 'uninitialized'; 
 	if ( $track->region_end eq 'END' ){
 		return $track->wav_length;
 	} else {
