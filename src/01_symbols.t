@@ -18,7 +18,7 @@ package main;
 use ::Assign qw(:all);
 # `make test'. After `make install' it should work as `perl 1.t'
 
-diag ("TESTING $0\n");
+#diag ("TESTING $0\n");
 
 my @test_classes = qw( :: main:: main); # SKIP_PREPROC
 use vars qw( $foo  @face $name %dict);
@@ -36,7 +36,7 @@ my $struct = {
 	dict => {fruit => 'melon'}
 };	
 for my $c (@test_classes) {
-	diag ("testing for class $c");
+	#diag ("testing for class $c");
 
 	assign (data => $struct, class => $c, vars => \@var_list);
 		my $serialized = serialize( class => $c, vars => \@var_list);  
@@ -72,7 +72,7 @@ WANT
 		face => [],
 		dict => {},
 	};	
-	diag("scalar array: ",scalar @face, " scalar hash: ", scalar %dict); 
+	#diag("scalar array: ",scalar @face, " scalar hash: ", scalar %dict); 
 	assign (data => $nulls, class => 'main', vars => \@var_list);
 	is( scalar @face, 0, "Null array assignment");
 	is( scalar %dict, 0, "Null hash assignment");
