@@ -11,10 +11,12 @@ sub set_preview_mode {
 
 	# do nothing if already in 'preview' mode
 	
-	return if $mode->{preview};
-
+	return if $mode->preview;
 	disable_preview_modes();
+	{
+	no warnings 'uninitialized';
 	$mode->{preview}++;
+	}
 
 	pager( <<'MSG');
 Setting preview mode. Recording of audio files is disabled.
@@ -28,7 +30,10 @@ sub set_doodle_mode {
 	logsub("&doodle");
 	return if engine_running() and ::ChainSetup::really_recording();
 	disable_preview_modes();
+	{
+	no warnings 'uninitialized';
 	$mode->{doodle}++;
+	}
 
 	$tn{Mixdown}->set(rw => OFF);
 	

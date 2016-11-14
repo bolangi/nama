@@ -65,11 +65,8 @@ sub definitions {
 		sub mastering 	{ $::tn{Eq} and ! $::tn{Eq}->{hide} } 
 		no warnings 'uninitialized';
 		sub eager 		{ $::mode->{eager} 					}
-		sub doodle 		{ 
-			#my $set = shift;
-			#if (defined $set){ $::mode->{preview} = $set ? 'doodle' : 0 }
-			$::mode->{preview} eq 'doodle' 	}
-		sub preview 	{ $::mode->{preview} eq 'preview' 	}
+		sub doodle 		{ $::mode->{doodle} 				}
+		sub preview 	{ $::mode->{preview}				}
 		sub song 		{ $::mode->eager and $::mode->preview }
 		sub live		{ $::mode->eager and $::mode->doodle  }
 	}

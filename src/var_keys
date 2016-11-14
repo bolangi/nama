@@ -61,7 +61,8 @@ $help->{arr_topic}				# sequential array of help pages
 $help->{topic}					# access help page by name
 $help->{usage}					# usage output
 
-$mode->{preview}				# preview or doodle
+$mode->{preview}				#
+$mode->{doodle}					#
 $mode->{eager}					# dismantled
 $mode->{offset_run}				# record starting other than at the beginning
 $mode->{soloing}				# boolean

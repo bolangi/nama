@@ -355,6 +355,7 @@ sub show_status {
 	my @output;
 	my @modes;
 	push @modes, $mode->{preview} if $mode->{preview};
+	push @modes, $mode->{doodle} if $mode->{doodle};
 	push @modes, "master" if $mode->mastering;
 	push @modes, "edit"   if ::edit_mode();
 	push @modes, "offset run" if ::is_offset_run_mode();

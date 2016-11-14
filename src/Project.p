@@ -99,7 +99,11 @@ sub initialize_project_data {
 	$mode->{offset_run} = 0;
 	$this_edit = undef;
 	
-	$mode->{preview} = $config->{initial_mode};
+	{
+	no warnings 'uninitialized';
+	$mode->{preview}++ if $config->{initial_mode} eq 'preview';
+	$mode->{doodle}++  if $config->{initial_mode} eq 'doodle';
+	}
 
 	::ChainSetup::initialize();
 	reset_hotkey_buffers();
