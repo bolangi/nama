@@ -129,7 +129,7 @@ preview:
     preview # Enter the preview mode.
     start   # Playback begins. You can play live, adjust effects, 
     !       # forward, rewind, etc.
-    stop    # Stop the engine/transport.
+    stop    # Stop processing audio.
     arm     # Restore to normal recording/playback mode.
 doodle:
   type: transport
@@ -141,10 +141,10 @@ doodle:
   parameters: none
   example: |
     doodle # Switch into doodle mode.
-    start  # start the engine/transport running.
+    start  # start the audio engine.
     (fool around)
-    stop   # Stop the engine.
-    arm    # Return to normal mode, allowing play and record to disk
+    stop   # Stop processing audio.
+    arm    # Return to normal mode, allowing playback and record to disk
 mixdown:
   type: mix
   what: |

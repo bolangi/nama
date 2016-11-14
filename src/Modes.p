@@ -16,9 +16,7 @@ sub set_preview_mode {
 	$mode->{preview} = "preview";
 
 	pager( <<'MSG');
-Setting preview mode.
-Using both REC and PLAY inputs.
-WAV recording is DISABLED.
+Setting preview mode. Recording of audio files is disabled.
 
 Type 'arm' to enable recording.
 MSG
@@ -35,11 +33,11 @@ sub set_doodle_mode {
 	# reconfigure_engine will generate setup and start transport
 	
 pager( <<'MSG' );
-Setting doodle mode.
-Using live inputs only, no duplicate inputs
+Setting doodle mode. Using live inputs only. Duplicate
+inputs are excluded. Recording of audio files is disabled.
+
 Exit using 'preview' or 'arm' commands
 MSG
-
 }
 sub exit_preview_mode { # exit preview and doodle modes
 
