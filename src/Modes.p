@@ -11,9 +11,10 @@ sub set_preview_mode {
 
 	# do nothing if already in 'preview' mode
 	
-	return if $mode->preview;
+	return if $mode->{preview};
 
-	$mode->{preview} = "preview";
+	disable_preview_modes();
+	$mode->{preview}++;
 
 	pager( <<'MSG');
 Setting preview mode. Recording of audio files is disabled.
@@ -26,7 +27,8 @@ sub set_doodle_mode {
 
 	logsub("&doodle");
 	return if engine_running() and ::ChainSetup::really_recording();
-	$mode->{preview} = "doodle";
+	disable_preview_modes();
+	$mode->{doodle}++;
 
 	$tn{Mixdown}->set(rw => OFF);
 	
@@ -39,14 +41,16 @@ inputs are excluded. Recording of audio files is disabled.
 Exit using 'preview' or 'arm' commands
 MSG
 }
-sub exit_preview_mode { # exit preview and doodle modes
-
-		logsub("&exit_preview_mode");
-		return unless $mode->{preview};
+sub exit_preview_modes {
+		logsub("&exit_preview_modes");
+		return unless $mode->{preview} or $mode->{doodle};
+		disable_preview_modes();
 		stop_transport() if engine_running();
 		pager("Exiting preview/doodle mode");
-		$mode->{preview} = 0;
-
+}
+sub disable_preview_modes {
+	undef $mode->{preview};
+	undef $mode->{doodle}; 
 }
 
 sub master_on {

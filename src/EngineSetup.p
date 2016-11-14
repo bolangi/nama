@@ -213,7 +213,7 @@ sub teardown_engine {
 
 sub arm {
 	logsub("&arm");
-	exit_preview_mode();
+	exit_preview_modes();
 	reconfigure_engine('force');
 }
 
