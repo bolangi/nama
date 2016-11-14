@@ -167,6 +167,7 @@ sub status_snapshot {
 	my %snapshot = ( project 		=> 	$project->{name},
 					 mastering_mode => $mode->mastering,
 					 preview        => $mode->{preview},
+					 doodle			=> $mode->{doodle},
 					 jack_running	=> $jack->{jackd_running},
 					 tracks			=> [], );
 	map { push @{$snapshot{tracks}}, $_->snapshot(\@relevant_track_fields) }
