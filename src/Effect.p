@@ -145,11 +145,6 @@ sub new {
 	} 
 	$self
 }
-
-# fx method delivers hash, previously via $fx->{ applied}->{$id}
-# TODO: get rid of this entirely
-sub fx	 		{ my $self = shift; $self }	
-
 # provide object
 {
 no warnings 'redefine';
