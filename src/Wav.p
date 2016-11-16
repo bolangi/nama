@@ -59,26 +59,22 @@ sub current_wav {
 
 sub current_version {	
 	my $track = shift;
-	my $status = $track->rec_status;
-	#logpkg('debug', "last: $last status: $status");
 
 	# two possible version numbers, depending on REC/PLAY status
 	
-	if 	($status eq REC)
+	if 	($track->rec)
 	{ 
 		my $last = $config->{use_group_numbering} 
 					? ::Bus::overall_last()
 					: $track->last;
 		return ++$last
 	}
-	elsif ( $status eq PLAY){ return $track->monitor_version } 
+	elsif ($track->play){ return $track->monitor_version } 
 	else { return 0 }
 }
 
 sub monitor_version {
 	my $track = shift;
-
-	my $bus = $bn{$track->group};
 	return $track->version if $track->version 
 				and grep {$track->version  == $_ } @{$track->versions} ;
 	$track->last;

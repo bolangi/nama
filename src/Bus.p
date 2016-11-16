@@ -145,7 +145,7 @@ sub output_is_connectable {
 	
 	or $bus->send_type eq 'track' 
 				and $bus->send_id eq 'Master' 
-				and $::tn{Mixdown}->rec_status eq 'REC'
+				and $::tn{Mixdown}->rec
 	
 	# or we are connecting directly to a loop device
 	or $bus->send_type eq 'loop' and $bus->send_id =~ /^\w+_(in|out)$/;

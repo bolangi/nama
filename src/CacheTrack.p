@@ -230,7 +230,7 @@ sub post_cache_processing {
 		# only set to PLAY tracks that would otherwise remain
 		# in a REC status
 
-		$args->{track}->set(rw => PLAY) if $args->{track}->rec_status eq 'REC';
+		$args->{track}->set(rw => PLAY) if $args->{track}->rec;
 
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();

@@ -252,7 +252,7 @@ sub show_version_comment {
 	$text and "Version comment: $text\n";
 }
 sub show_send { "Send: ". $this_track->send_id. $/ 
-					if $this_track->rec_status ne OFF
+					if ! $this_track->off
 						and $this_track->send_id
 }
 

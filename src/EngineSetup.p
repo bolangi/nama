@@ -341,7 +341,7 @@ sub trigger_rec_setup_hooks {
  sub trigger_rec_cleanup_hooks {
  	map { system($_->rec_cleanup_script) } 
 	grep
-	{ 	$_->rec_status ne REC 
+	{ 	! $_->rec
 		and $setup->{_old_rec_status}->{$_->name} eq REC
 		and -e $_->rec_cleanup_script
 	}
