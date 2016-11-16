@@ -65,6 +65,11 @@ sub rec_status {
 	}
 }
 
+sub rec  { $_[0]->rec_status eq REC }
+sub mon  { $_[0]->rec_status eq MON }
+sub play { $_[0]->rec_status eq PLAY}
+sub off  { $_[0]->rec_status eq OFF }
+
 sub maybe_monitor { # ordinary sub, not object method
 	my $monitor_version = shift;
 	return PLAY if $monitor_version and ! $mode->doodle;
