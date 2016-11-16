@@ -26,10 +26,6 @@ sub add_track {
 #		$track->send($gui->{_chm}) if $gui->{_chm};
 
 	my $bus = $bn{$track->group}; 
-	process_command('for mon; mon') if $mode->{preview} and $bus->rw eq MON;
-	# XXX 
-	# Why should this be part of add_track???
-	# TODO ???
 	$bus->set(rw => MON) unless $track->target; # not if is alias
 
 	# normal tracks default to MON
