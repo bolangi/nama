@@ -179,10 +179,8 @@ sub remove {
 sub as_hash {
 	my $self = shift;
 	my $class = ref $self;
-	bless $self, 'HASH'; # easy magic
 	my %guts = %{ $self };
 	$guts{class} = $class; # make sure we save the correct class name
-	bless $self, $class; # restore
 	return \%guts;
 }
 sub input_object {
