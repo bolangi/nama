@@ -155,7 +155,7 @@ sub input_path {
 		(input_node($track->source_type), $track->name) } 
 
 	elsif($track->rec_status eq PLAY and ! $mode->doodle){
-		('wav_in', $track->name) 
+		(input_node('wav'), $track->name) 
 	}
 }
 
