@@ -140,8 +140,8 @@ sub input_path {
 	my $track = shift;
 
 	# the corresponding bus handles input routing for mix tracks
+	# so they don't need to be connected here
 	
-	# bus mix tracks don't usually need to be connected
 	return() if $track->is_mix_track and $track->rec_status ne PLAY;
 
 	# the track may route to:
