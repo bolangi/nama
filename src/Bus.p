@@ -323,7 +323,7 @@ sub add_bus {
 		@args
 	);
 
-	$tn{$name} and ::pager_newline( qq($name: setting as mix track for bus "$name"));
+	$tn{$name} and pager_newline( qq($name: setting as mix track for bus "$name"));
 
 	my $track = $tn{$name}// add_track($name, width => 2);
 
