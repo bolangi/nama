@@ -46,9 +46,9 @@ sub last { $_[0]->versions->[-1] || 0 }
 sub current_wav {
 	my $track = shift;
 	my $last = $track->current_version;
-	if 	($track->rec_status eq REC){ 
+	if 	($track->rec){ 
 		$track->name . '_' . $last . '.wav'
-	} elsif ( $track->rec_status eq PLAY){ 
+	} elsif ( $track->play){ 
 		my $filename = $track->targets->{ $track->monitor_version } ;
 		$filename
 	} else {

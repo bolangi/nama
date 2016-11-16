@@ -22,13 +22,13 @@ sub refresh_group {
 	
 	
 		my $status;
-		if ( 	grep{ $_->rec_status eq REC} 
+		if ( 	grep{ $_->rec} 
 				map{ $tn{$_} }
 				$bn{Main}->tracks ){
 
 			$status = REC
 
-		}elsif(	grep{ $_->rec_status eq PLAY} 
+		}elsif(	grep{ $_->play} 
 				map{ $tn{$_} }
 				$bn{Main}->tracks ){
 
@@ -82,7 +82,7 @@ sub refresh_track {
  								: OFF);
 	
 	set_widget_color( $gui->{tracks}->{$n}->{ch_m},
-							$rec_status eq OFF 
+							$rec_status eq OFF
 								? OFF
 								: $ti{$n}->send 
 									? MON

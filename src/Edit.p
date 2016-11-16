@@ -398,8 +398,8 @@ sub new_edit {
 		return if $name =~ /-v\d+-edit\d+/;
 	::throw("$name: must be in PLAY mode.
 Edits will be applied against current version"), 
-		return unless $this_track->rec_status eq PLAY 
-			or $this_track->rec_status eq REC and
+		return unless $this_track->play 
+			or $this_track->rec and
 			grep{ /$editre/ } keys %::Track::by_name;
 
 	# create edit
@@ -484,7 +484,7 @@ sub edit_mode		{ $mode->{offset_run} and defined $this_edit}
 sub edit_mode_conditions {        
 	defined $this_edit or ::throw('No edit is defined'), return;
 	defined $this_edit->play_start_time or ::throw('No edit points defined'), return;
-	$this_edit->host_alias_track->rec_status eq PLAY
+	$this_edit->host_alias_track->play
 		or ::throw('host alias track : ',$this_edit->host_alias,
 				" status must be PLAY"), return;
 
@@ -793,7 +793,7 @@ sub merge_edits {
 	::throw("Please select an edit and try again."), return
 		unless defined $edit;
 	::throw($edit->host_alias, ": track must be PLAY status.  Aborting."), return
-		unless $edit->host_alias_track->rec_status eq PLAY;
+		unless $edit->host_alias_track->play;
 	::throw("Use exit_edit_mode and try again."), return if edit_mode();
 
 	# create merge message
@@ -802,7 +802,7 @@ sub merge_edits {
 		map{ my ($edit) = $tn{$_}->name =~ /edit(\d+)$/;
 			 my $ver  = $tn{$_}->monitor_version;
 			 $edit => $ver
-		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->rec_status eq PLAY} 
+		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->play} 
 		$edit->version_bus->tracks; 
 	my $msg = "merges ".$edit->host_track."_$v.wav w/edits ".
 		join " ",map{$_."v$edits{$_}"} sort{$a<=>$b} keys %edits;
@@ -839,7 +839,7 @@ sub merge_edits {
 sub setup_length {
 	my $setup_length;
 	map{  my $l = $_->shifted_length; $setup_length = $l if $l > $setup_length }
-	grep{ $_-> rec_status eq PLAY }
+	grep{ $_-> play }
 	::ChainSetup::engine_tracks();
 	$setup_length
 }

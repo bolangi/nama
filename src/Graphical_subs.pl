@@ -554,7 +554,7 @@ sub track_gui {
 						-command => 
 		sub { 
 			$ti{$n}->set( version => $v );
-			return if $ti{$n}->rec_status eq "REC";
+			return if $ti{$n}->rec;
 			$version->configure( -text=> $ti{$n}->current_version );
 			::reconfigure_engine();
 			}
@@ -824,7 +824,7 @@ sub update_version_button {
 						-value => $v,
 						-command => 
 		sub { $gui->{tracks}->{$n}->{version}->configure(-text=>$v) 
-				unless $ti{$n}->rec_status eq "REC" }
+				unless $ti{$n}->rec }
 					);
 }
 

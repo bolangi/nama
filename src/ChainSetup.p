@@ -83,7 +83,7 @@ sub is_engine_track {
 	$::ti{$n} if $is_ecasound_chain{$n}
 }
 sub engine_wav_out_tracks {
-	grep{$_->rec_status eq REC} engine_tracks();
+	grep{$_->rec} engine_tracks();
 }
 # return file output entries, including Mixdown 
 sub really_recording { 
@@ -191,7 +191,7 @@ sub add_paths_from_Master {
 sub add_paths_for_mixdown_handling {
 	logsub("&add_paths_for_mixdown_handling");
 
-	if ($tn{Mixdown}->rec_status eq REC){
+	if ($tn{Mixdown}->rec){
 		# don't monitor via soundcard
 		$g->delete_edge('Master','soundcard_out');
 		my @p = (($mode->mastering ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
@@ -204,7 +204,7 @@ sub add_paths_for_mixdown_handling {
 												 
 	# Mixdown handling - playback
 	
-	} elsif ($tn{Mixdown}->rec_status eq PLAY){ 
+	} elsif ($tn{Mixdown}->play){ 
 			my @e = ('wav_in','Mixdown',output_node($tn{Master}->send_type));
 			$g->add_path(@e);
 			$g->set_vertex_attributes('Mixdown', {

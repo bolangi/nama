@@ -154,7 +154,7 @@ sub input_path {
 	elsif($track->rec_status =~ /REC|MON/){ 
 		(input_node($track->source_type), $track->name) } 
 
-	elsif($track->rec_status eq PLAY and ! $mode->doodle){
+	elsif($track->play and ! $mode->doodle){
 		(input_node('wav'), $track->name) 
 	}
 }
@@ -240,7 +240,7 @@ sub rec_status {
 }
 sub destination {
 	my $track = shift; 
-	return 'Mixdown' if $tn{Mixdown}->rec_status eq REC;
+	return 'Mixdown' if $tn{Mixdown}->rec;
 	return $track->SUPER() if $track->rec_status ne OFF
 }
 #sub rec_status_display { $_[0]->rw ne OFF ? PLAY : OFF }
@@ -322,8 +322,8 @@ sub current_version {
 	my $track = shift;
 	my $target = $tn{$track->target};
 		$target->last + 1
-# 	if ($target->rec_status eq PLAY
-# 		or $target->rec_status eq REC and $bn{$track->target}){
+# 	if ($target->play
+# 		or $target->rec and $bn{$track->target}){
 # 	}
 }
 sub current_wav {
@@ -349,13 +349,13 @@ sub current_version {
 }
 sub source_status { 
 	my $track = shift; 
-	return 'Master' if $track->rec_status eq REC;
+	return 'Master' if $track->rec;
 	my $super = $track->super('source_status');
 	$super->($track)
 }
 sub destination {
 	my $track = shift; 
-	$tn{Master}->destination if $track->rec_status eq PLAY
+	$tn{Master}->destination if $track->play
 }
 sub rec_status {
 	my $track = shift;

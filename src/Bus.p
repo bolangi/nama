@@ -175,7 +175,7 @@ sub apply {
 		# add paths for recording
 		
 		::Graph::add_path_for_rec($g,$_) 
-			if $_->rec_status eq REC
+			if $_->rec
 				and ! $::mode->preview and ! $::mode->doodle;
 
 	} grep {$_->rec_status ne OFF} $bus->track_o;

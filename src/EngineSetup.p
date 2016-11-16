@@ -274,7 +274,7 @@ sub connect_transport {
 	sync_effect_parameters();
 	register_own_ports(); # as distinct from other Nama instances
 	$ui->length_display(-text => colonize($setup->{audio_length}));
-	eval_iam("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->rec_status eq REC and $setup->{audio_length};
+	eval_iam("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->rec and $setup->{audio_length};
 	$ui->clock_config(-text => colonize(0));
 	sleeper(0.2); # time for ecasound engine to launch
 
@@ -299,7 +299,7 @@ sub transport_status {
 		pager("Warning: $_: input ",$tn{$_}->source,
 		" is already used by track ",$setup->{inputs_used}->{$tn{$_}->source},".")
 		if $setup->{tracks_with_duplicate_inputs}->{$_};
-	} grep { $tn{$_}->rec_status eq REC } $bn{Main}->tracks;
+	} grep { $tn{$_}->rec } $bn{Main}->tracks;
 
 
 	# assume transport is stopped
@@ -332,7 +332,7 @@ sub trigger_rec_setup_hooks {
 			"old rec status: ".$setup->{_old_rec_status}->{$_->name},
 			"script was ". (-e $_->rec_setup_script ) ? "found" : "not found"
 		);
-		$_->rec_status eq REC 
+		$_->rec 
 		and $setup->{_old_rec_status}->{$_->name} ne REC
 		and -e $_->rec_setup_script
 	} 

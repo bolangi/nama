@@ -29,12 +29,12 @@ sub cache_track { # launch subparts if conditions are met
 	
 	# abort if track is a mix track for a bus and the bus is OFF 
 	if( my $bus = $bn{$track->name}
-		and $track->rec_status eq REC 
+		and $track->rec 
 	 ){ 
 		$bus->rw eq OFF and pagers(
 			$bus->name, ": status is OFF. Aborting."), return;
 	} else { 
-		$track->rec_status eq PLAY or pagers(
+		$track->play or pagers(
 			$track->name, ": track caching requires PLAY status. Aborting."), return;
 	}
 	pagers($track->name, ": nothing to cache!  Skipping."), return 
@@ -108,7 +108,7 @@ sub prepare_to_cache {
 
 	# Case 1: Caching a standard track
 	
-	if($args->{track}->rec_status eq PLAY)
+	if($args->{track}->play)
 	{
 		# set the input path
 		$g->add_path('wav_in',$args->{track}->name);
@@ -117,7 +117,7 @@ sub prepare_to_cache {
 
 	# Case 2: Caching a bus mix track
 
-	elsif($args->{track}->rec_status eq REC){
+	elsif($args->{track}->rec){
 
 		# apply all buses (unneeded ones will be pruned)
 		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
@@ -265,7 +265,7 @@ sub stop_polling_cache_progress {
 sub uncache_track { 
 	my $track = shift;
 	local $this_track;
-	$track->rec_status eq PLAY or 
+	$track->play or 
 		throw($track->name, ": cannot uncache unless track is set to PLAY"), return;
 	my $version = $track->monitor_version;
 	my ($ec) = is_cached($track, $version);
