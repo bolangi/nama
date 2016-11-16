@@ -35,10 +35,18 @@ sub setup_grammar {
 
 	# Midish command keywords
 	
+	# prepend 'm' to all midish commands
+	# suppress midi record, play, stop commands - Nama will handle them
+	# also suppress ct tnew tdel tren
+	my %skip = map{$_, 1} qw(r p s ct tnew tdel tren);
+
 	$text->{midi_cmd} = 
 	{
-			map{ $_, 1} split " ", get_data_section("midi_commands")
+		map{ 'm'.$_, 1} grep{ !$skip{$_} } split " ", get_data_section("midi_commands")
 	};
+	for (keys %{$text->{midi_cmd}}){
+		say "$_: midi command same as Nama command" if $text->{commands}->{$_}
+	}
 
 }
 sub process_line {
