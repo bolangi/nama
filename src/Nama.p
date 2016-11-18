@@ -226,5 +226,3 @@ __DATA__
 [% qx(cat ./banner) %]
 @@ midi_help
 [% qx(cat ./midi_help) %]
-@@ aux_midi_commands
-[% qx(cat ./fs_midish) %]
