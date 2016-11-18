@@ -108,7 +108,6 @@ sub definitions {
 		old_effect_chains  		=> ['effect_chains', 		\&project_root],
 		_logfile				=> ['nama.log',				\&project_root],
 		midi_store				=> ['midi.msh',				\&project_dir ],
-		aux_midi_commands		=> ['aux_midi_commands', 	\&project_root],
 
 
 	}, '::File';
