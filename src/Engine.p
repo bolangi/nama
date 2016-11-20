@@ -108,7 +108,7 @@ sub ecasound {
 	my $buf;
 	# get socket reply, restart ecasound on error
 	my $result = $this_engine->{socket}->recv($buf, $config->{engine_command_output_buffer_size});
-	defined $result or ::restart_ecasound(), return;
+	defined $result or ::throw("Ecasound failed to respond"), return;
 
 	my ($return_value, $setup_length, $type, $reply) =
 		$buf =~ /(\d+)# digits
@@ -122,7 +122,6 @@ sub ecasound {
 
 if(	! $return_value == 256 ){
 	logit($category,'error',"Net-ECI bad return value: $return_value (expected 256)");
-	# restart_ecasound(); # TODO
 
 }
 	no warnings 'uninitialized';
@@ -131,7 +130,6 @@ if(	! $return_value == 256 ){
 	if( $type eq 'e')
 	{
 		logit($category,'error',"ECI error! Command: $cmd. Reply: $reply");
-		#restart_ecasound() if $reply =~ /in engine-status/;
 	}
 	else
 	{ 	logit($category,'debug',"Net-ECI  got: $reply");
@@ -165,9 +163,8 @@ sub ecasound {
 		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
 	my $errmsg = $this_engine->{ecasound}->errmsg();
 	if( $errmsg ){
-		::restart_ecasound() if $errmsg =~ /in engine-status/;
+		::throw("Ecasound error: $errmsg") if $errmsg =~ /in engine-status/;
 		$this_engine->{ecasound}->errmsg(''); 
-		# Audio::Ecasound already prints error
 	}
 	"@result";
 }
