@@ -51,7 +51,6 @@ sub start_transport {
 		and ecasound("cs-connected") 
 		or throw("\nAudio engine is not configured. Cannot start.\n"),return;
 
-	start_midi_transport() if midi_run_ready();
 
 	if (audio_run_ready())
 	{
@@ -71,6 +70,7 @@ sub start_transport {
 	schedule_wraparound();
 	mute();
 	ecasound('start');
+	start_midi_transport() if midi_run_ready();
 
 	# limit engine run time if we are in mixdown or edit mode, 
 	# or if requested by user, set timer to specified time
