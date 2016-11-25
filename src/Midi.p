@@ -65,7 +65,7 @@ sub reconfigure_midi {
 	my $midi_rec = $tn{$midi_rec_buf};
 	my @all = $bn{Midi}->track_o;
 	map{ $_->mute } @all;
-	my @audible = grep{ $_->rec_status eq MON or $_->rec_status eq PLAY } @all;
+	my @audible = grep{ $_->mon or $_->play } @all;
 	map{ $_->unmute } @audible;
 	# unset filters
 	map{ $_->select; midish("fdel $_->name") } @all;
