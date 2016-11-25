@@ -73,9 +73,14 @@ sub reconfigure_midi {
 	map{ $_->select; midish(join ' ', 'rnew', $_->source_id, $_->send_id) } @audible;
 	my @rec = $bn{Midi}->midi_rec_tracks;
 	return unless @rec;
+ 	throw("more than one midi REC track ", join " ", map{$_->name} @rec),
+		return if @rec > 1;
+	$rec[0]->mute; 	
 	$midi_rec->select;
 	$midi_rec->set(rw => REC);
+	midish("fdel ".$midi_rec->name);
 	my $i;
+	# use routing of target track on $midi_rec track
 	for (@rec)
 	{
 		# run rnew for first time
