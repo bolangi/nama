@@ -279,6 +279,7 @@ sub bus_name {
 }
 sub source_status {
 	my $track = shift;
+	no warnings 'uninitialized';
 	return $track->current_wav if $track->play ;
 	#return $track->name eq 'Master' ? $track->bus_name : '' if $track->is_mix_track;
 	return $track->bus_name . " bus" if $track->is_mix_track;

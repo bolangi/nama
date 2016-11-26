@@ -119,6 +119,7 @@ sub load_project {
 	$config->{opts}->{c} and $args{create}++;
 	if (! $project->{name} or $project->{name} and ! -d project_dir() and ! $args{create})
 	{
+		no warnings 'uninitialized';
 		::pager_newline(qq(Project "$project->{name}" not found. Loading project "untitled".)); 
 		$project->{name} = "untitled", $args{create}++,
 	}
