@@ -11,8 +11,8 @@ my ($pid, $sel);
 my @handles = my ($fh_midi_write, $fh_midi_read, $fh_midi_error) = map{ IO::Handle->new() } 1..3;
 map{ $_->autoflush(1) } @handles;
 
-sub start_midish {
-	logsub('&start_midish');
+sub start_midish_process {
+	logsub('&start_midish_process');
 	my $executable = qx(which midish);
 	chomp $executable;
 	$executable or say("Midish not found!"), return;
