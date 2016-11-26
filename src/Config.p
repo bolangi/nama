@@ -190,8 +190,6 @@ PROJECT_ROOT
 		$config->{root_dir} = $default_project_root; 
 		# needed for $file->user_customization() to resolve in next line
 		write_file($file->user_customization(), get_data_section('custom_pl'));
-		write_file($file->aux_midish_commands,  get_data_section('aux_midish_commands'));
-		
 	} else {
 		print <<OTHER;
 Please make sure to set the project_root directory in
@@ -208,6 +206,5 @@ OTHER
 	exit;	
 	}
 }
-
 1;
 __END__

@@ -23,6 +23,7 @@ sub start_midish {
 	$sel->add($fh_midi_read);
 	$sel->add($fh_midi_error);
 	midish( qq(print "Midish is ready.") );
+	write_aux_midi_commands();
 	midish( q(exec ").$file->aux_midi_commands.q(") );
 }
 sub midish {
@@ -117,6 +118,10 @@ sub stop_midi_transport {
 		# save project
 	}
 }
+}
+sub write_aux_midi_commands {
+	write_file($file->aux_midi_commands,  get_data_section('aux_midi_commands'))
+		unless -e $file->aux_midi_commands
 }
 	
 =comment
