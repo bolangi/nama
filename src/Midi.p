@@ -63,24 +63,44 @@ sub save_midish {
 }
 
 sub reconfigure_midi {
+	# Make sure we have recording track
+	
 	$tn{$midi_rec_buf} or add_midi_track($midi_rec_buf);
 	my $midi_rec = $tn{$midi_rec_buf};
+
+	# mute all
+
 	my @all = $bn{Midi}->track_o;
 	map{ $_->mute } @all;
+
+	# unmute audible
+
 	my @audible = grep{ $_->mon or $_->play } @all;
 	map{ $_->unmute } @audible;
+
 	# unset filters
+
 	map{ $_->select; midish("fdel $_->name") } @all;
+
 	# set filters for PLAY and MON tracks
+
 	map{ $_->select; midish(join ' ', 'rnew', $_->source_id, $_->send_id) } @audible;
+
 	my ($rec) = my @rec = $bn{Midi}->midi_rec_tracks;
+
+	# maybe we're done?
+	
 	return unless @rec;
  	throw("more than one midi REC track ", join " ", map{$_->name} @rec),
 		return if @rec > 1;
+
+	# mute the actual track since we'll record using the special-purpose track
+	
 	$rec->mute; 	
 	$midi_rec->select;
 
 	# use routing of target track on $midi_rec track
+
 	my $cmd = 'rnew';
 	$cmd = join ' ', $cmd, $rec->source_id, $rec->send_id;
 	midish($cmd);
