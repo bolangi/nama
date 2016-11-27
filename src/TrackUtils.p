@@ -71,6 +71,19 @@ sub add_track_alias_project {
 		return;
 	}
 }
+sub add_midi_track {
+	my $name = shift;
+	::add_track( 
+		$name, 
+		class => '::MidiTrack',
+		group => 'Midi', 
+		source_id => 'midi', 
+		source_type => 'midi',
+		midi_versions => [],
+		novol => 1,
+		nopan => 1,
+	);
+}
 
 # vol/pan requirements of mastering and mixdown tracks
 

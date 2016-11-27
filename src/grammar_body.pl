@@ -325,16 +325,7 @@ add_track: _add_track new_track_name {
     1
 }
 add_midi_track: _add_midi_track new_track_name {
-	::add_track( 
-		$item{new_track_name}, 
-		class => '::MidiTrack',
-		group => 'Midi', 
-		source_id => 'midi', 
-		source_type => 'midi',
-		midi_versions => [],
-		novol => 1,
-		nopan => 1,
-	);
+	::add_midi_track($item{new_track_name});
 	::pager_newline(qq(creating MIDI track "$item{new_track_name}"));
 	1
 }
