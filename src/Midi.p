@@ -63,6 +63,7 @@ sub save_midish {
 }
 
 sub reconfigure_midi {
+	$tn{$midi_rec_buf} or add_midi_track($midi_rec_buf);
 	my $midi_rec = $tn{$midi_rec_buf};
 	my @all = $bn{Midi}->track_o;
 	map{ $_->mute } @all;
@@ -78,18 +79,11 @@ sub reconfigure_midi {
 		return if @rec > 1;
 	$rec->mute; 	
 	$midi_rec->select;
-	$midi_rec->set(rw => REC);
-	midish("fdel ".$midi_rec->name);
-	my $i;
+
 	# use routing of target track on $midi_rec track
-	for (@rec)
-	{
-		# run rnew for first time
-		my $cmd = $i ? 'radd' : 'rnew';
-		$cmd = join ' ', $cmd, $_->source_id, $_->send_id;
-		midish($cmd);
-		$i++;
-	}
+	my $cmd = 'rnew';
+	$cmd = join ' ', $cmd, $rec->source_id, $rec->send_id;
+	midish($cmd);
 }
 sub start_midi_transport {
 	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
