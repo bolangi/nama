@@ -48,7 +48,6 @@ sub generate_setup {
 	$success;
 }
 
-{ my $old_offset_run_status;
 sub reconfigure_engine {
 
 	logsub("&reconfigure_engine");
@@ -87,8 +86,6 @@ sub reconfigure_engine {
 	}
 	$setup->{changed} = 0 ; # reset for next time
 
-	$old_offset_run_status = $mode->{offset_run};
-
 	nama('show_tracks');
 
 	{ local $quiet = 1; stop_transport() }
@@ -122,7 +119,6 @@ sub reconfigure_engine {
 		$ui->flash_ready;
 		1
 	}
-}
 }
 sub request_setup { 
 	my ($package, $filename, $line) = caller();
