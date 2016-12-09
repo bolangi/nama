@@ -151,7 +151,6 @@ sub definitions {
 		engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
 		engine_base_jack_seek_delay 	=> 0.1, # seconds
 		engine_command_output_buffer_size => 2**22, # 4 MB
-		ecasound_jackclient_name		=> 'NamaEcasound',
 		edit_playback_end_margin 		=> 3,
 		edit_crossfade_time 			=> 0.03,
 		fade_down_fraction 				=> 0.75,
@@ -253,8 +252,8 @@ sub initialize_interfaces {
 
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 	
-	select_ecasound_interface(); # and create engine
-	::MidiEngine->new() if $config->{use_midi};
+	select_ecasound_interface();
+		
 	start_osc_listener($config->{osc_listener_port}) 
 		if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
@@ -336,6 +335,8 @@ exit;
 		else { pager_newline("Stopped.") }
 	}
 		
+	start_midish_process() if $config->{use_midi};
+
 	initialize_terminal() unless $config->{opts}->{T};
 
 	1;	
@@ -449,7 +450,7 @@ sub select_ecasound_interface {
 	{
 		pager_newline("Starting dummy engine only"); 
 		%args = (
-			name => $config->{ecasound_jackclient_name},
+			name => 'Nama', 
 			jack_transport_mode => 'send',
 		);
 		$class = '::Engine';
@@ -460,14 +461,14 @@ sub select_ecasound_interface {
 		and say("loaded Audio::Ecasound")
 	){  
 		%args = (
-			name => $config->{ecasound_jackclient_name},
+			name => 'Nama', 
 			jack_transport_mode => 'send',
 		);
 		$class = '::LibEngine';
 	}
 	else { 
 		%args = (
-			name => $config->{ecasound_jackclient_name}, 
+			name => 'Nama', 
 			port => $config->{engine_tcp_port},
 			jack_transport_mode => 'send',
 		);
