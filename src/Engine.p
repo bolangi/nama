@@ -47,6 +47,10 @@ sub initialize_ecasound {
 	];
 }
 sub launch_ecasound_server {}
+
+### class methods
+
+sub engines { values %by_name }
 }
 {
 package ::NetEngine;
@@ -137,6 +141,72 @@ if(	! $return_value == 256 ){
 	}
 	
 }
+sub configure {
+	package ::;
+	my $self = shift;
+	my $force = shift;
+
+	# don't disturb recording/mixing
+	
+	return if ::ChainSetup::really_recording() and engine_running();
+	
+	# store a lists of wav-recording tracks for the rerecord
+	# function
+	
+	restart_wav_memoize(); # check if someone has snuck in some files
+	
+	find_duplicate_inputs(); # we will warn the user later
+
+	if( $force or $setup->{changed} ){ 
+		logpkg('debug',"reconfigure requested");
+		$setup->{_old_snapshot} = status_snapshot_string();
+} 
+	else {
+		my $old = $setup->{_old_snapshot};
+		my $current = $setup->{_old_snapshot} = status_snapshot_string();	
+		if ( $current eq $old){
+				logpkg('debug',"no change in setup");
+				return;
+		}
+		logpkg('debug',"detected configuration change");
+		logpkg('debug', diff(\$old, \$current));
+	}
+	$setup->{changed} = 0 ; # reset for next time
+
+	nama('show_tracks');
+
+	{ local $quiet = 1; stop_transport() }
+
+	trigger_rec_cleanup_hooks();
+	trigger_rec_setup_hooks();
+	$setup->{_old_rec_status} = { 
+		map{$_->name => $_->rec_status } rec_hookable_tracks()
+	};
+	if ( generate_setup() ){
+	
+		reset_latency_compensation() if $config->{opts}->{Q};
+		
+		logpkg('debug',"I generated a new setup");
+		
+		{ local $quiet = 1; connect_transport() }
+		propagate_latency() if $config->{opts}->{Q} and $jack->{jackd_running};
+		show_status();
+
+		if ( ::ChainSetup::really_recording() )
+		{
+			$project->{playback_position} = 0
+		}
+		else 
+		{ 
+			set_position($project->{playback_position}) if $project->{playback_position} 
+		}
+		start_transport('quiet') if $mode->eager 
+								and ($mode->doodle or $mode->preview);
+		transport_status();
+		$ui->flash_ready;
+		1
+	}
+}
 } # end package
 {
 package ::LibEngine;
@@ -169,6 +239,8 @@ sub ecasound {
 	"@result";
 }
 }
+{ package ::MidishEngine;
+} # end package 
 1
 
 __END__
