@@ -256,7 +256,20 @@ sub ecasound {
 	"@result";
 }
 }
-{ package ::MidishEngine;
+{ 
+package ::MidiEngine;
+use Modern::Perl;
+use SUPER;
+our @ISA = '::Engine';
+
+sub new {
+	my $self = super(); 
+	$self->{pids} = [ ::start_midish_process() ];
+	$self
+}
+sub setup {}
+sub configure {}
+		
 } # end package 
 1
 
