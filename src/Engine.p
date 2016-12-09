@@ -51,10 +51,11 @@ sub launch_ecasound_server {}
 ### class methods
 
 sub engines { values %by_name }
-}
+
 sub sync_action {
 	my ($method, @args) = @_;
 	$_->$method(@args) for engines()
+}
 }
 
 {
