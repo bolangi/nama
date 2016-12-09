@@ -25,6 +25,7 @@ sub start_midish_process {
 	midish( qq(print "Midish is ready.") );
 	write_aux_midi_commands();
 	midish( q(exec ").$file->aux_midi_commands.q(") );
+	$pid
 }
 sub midish {
 	my $command = shift;
