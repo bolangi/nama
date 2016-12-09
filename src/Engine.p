@@ -53,8 +53,8 @@ sub launch_ecasound_server {}
 sub engines { values %by_name }
 }
 sub sync_action {
-	my $method = shift;
-	$_->$method for engines()
+	my ($method, @args) = @_;
+	$_->$method(@args) for engines()
 }
 
 {
