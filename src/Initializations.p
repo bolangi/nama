@@ -252,6 +252,7 @@ sub initialize_interfaces {
 
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 	
+	::MidiEngine->new(name => 'Midish');
 	select_ecasound_interface();
 		
 	start_osc_listener($config->{osc_listener_port}) 
@@ -335,8 +336,6 @@ exit;
 		else { pager_newline("Stopped.") }
 	}
 		
-	start_midish_process() if $config->{use_midi};
-
 	initialize_terminal() unless $config->{opts}->{T};
 
 	1;	
