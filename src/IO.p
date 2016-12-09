@@ -72,12 +72,12 @@ our %io_class = qw(
 #
 # which receives input from JACK node: 
 #
-#  + Nama:piano_in,
+#  + NamaEcasound:piano_in,
 # 
 # If piano is stereo, the actual ports will be:
 #
-#  + Nama:piano_in_1
-#  + Nama:piano_in_2
+#  + NamaEcasound:piano_in_1
+#  + NamaEcasound:piano_in_2
 
 # (CLASS ::IO::to_jack_port is similar)
 
@@ -451,7 +451,7 @@ package ::IO::to_jack_port;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub format_template { $config->{devices}->{jack}->{signal_format} }
 sub device_id { 'jack,,'.$_[0]->port_name.'_out' }
-sub ports { "Nama:".$_[0]->port_name. '_out_1' } # at least this one port
+sub ports { "$config->{ecasound_jackclient_name}:".$_[0]->port_name. '_out_1' } # at least this one port
 	# HARDCODED port name
 }
 
