@@ -187,6 +187,9 @@ sub cleanup_exit {
 	# - allow time to close down
 	# - SIGKILL
 	delete $project->{events};
+
+	# TODO simplify below to ::Engine::sync_action('kill_and_reap');
+	
 	close_midish() if $config->{use_midi};
 	my @engines = values %::Engine::by_name;
 	for (@engines){
