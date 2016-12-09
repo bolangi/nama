@@ -187,14 +187,7 @@ sub cleanup_exit {
 	# - allow time to close down
 	# - SIGKILL
 	delete $project->{events};
-
-	# TODO simplify below to ::Engine::sync_action('kill_and_reap');
-	
-	close_midish() if $config->{use_midi};
-	my @engines = values %::Engine::by_name;
-	for (@engines){
-		kill_and_reap( @{$_->{pids}} );
-	}
+	::Engine::sync_action('kill_and_reap');
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
 	exit;
 }

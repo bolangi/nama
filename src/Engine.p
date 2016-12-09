@@ -48,6 +48,11 @@ sub initialize_ecasound {
 }
 sub launch_ecasound_server {}
 
+sub kill_and_reap {
+		my $self = shift;
+		::kill_and_reap( @{$self->{pids}} );
+}
+
 ### class methods
 
 sub engines { values %by_name }

@@ -58,7 +58,7 @@ sub reconfigure_engine {
 	
 	return if ($config->{opts}->{R} or $config->{disable_auto_reconfigure})
 		and not $force;
-	sync_action('configure',$force);
+	::Engine::sync_action('configure',$force);
 }
 
 sub request_setup { 
