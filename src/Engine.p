@@ -11,6 +11,8 @@ our %port = (
 	bus => 57202,
 );
 use ::Globals qw(:all);
+use Role::Tiny::With;
+with '::EcasoundSetup';
 use ::Object qw( 
 				name
 				port
@@ -21,8 +23,7 @@ use ::Object qw(
 				pids
 				ecasound
 				buffersize
-				on_reconfigure
-    			on_exit
+				ready
 				 );
 
 sub new {
@@ -152,6 +153,8 @@ if(	! $return_value == 256 ){
 	}
 	
 }
+sub set_ready { $_[0]->{ready}++ }
+sub clear_ready { delete $_[0]->{ready} }
 sub configure {
 	package ::;
 	my $self = shift;
@@ -161,6 +164,8 @@ sub configure {
 	
 	return if ::ChainSetup::really_recording() and engine_running();
 	
+	$self->clear_ready();
+
 	# store a lists of wav-recording tracks for the rerecord
 	# function
 	
@@ -193,7 +198,7 @@ sub configure {
 	$setup->{_old_rec_status} = { 
 		map{$_->name => $_->rec_status } rec_hookable_tracks()
 	};
-	if ( generate_setup() ){
+	if ( $self->setup() ){
 	
 		reset_latency_compensation() if $config->{opts}->{Q};
 		
@@ -213,6 +218,7 @@ sub configure {
 		}
 		start_transport('quiet') if $mode->eager 
 								and ($mode->doodle or $mode->preview);
+		$self->set_ready();
 		transport_status();
 		$ui->flash_ready;
 		1

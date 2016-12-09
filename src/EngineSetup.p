@@ -2,51 +2,7 @@
 
 package ::;
 use Modern::Perl;
-use ::Log qw(logpkg);
 no warnings 'uninitialized';
-
-sub generate_setup { 
-
-	# return 1 if successful
-	# catch errors from generate_setup_try() and cleanup
-	logsub("&generate_setup");
-
-	# extra argument (setup code) will be passed to generate_setup_try()
-	# my ($extra_setup_code) = @_;
-
-	# save current track
-	local $this_track;
-
-	# prevent engine from starting an old setup
-	
-	ecasound('cs-disconnect') if ecasound('cs-connected');
-
-	::ChainSetup::initialize();
-
-	
-	# this is our chance to save state without the noise
-	# of temporary tracks, avoiding the issue of getting diffs 
-	# in the project data from each new chain setup.
-	autosave() if $config->{autosave} eq 'setup'
-					and $project->{name}
-					and $config->{use_git} 
-					and $project->{repo};
-	
-	# TODO: use try/catch
-	# catch errors unless testing (no-terminal option)
-	local $@ unless $config->{opts}->{T}; 
-	track_memoize(); 			# freeze track state 
-	my $success = $config->{opts}->{T}      # don't catch errors during testing 
-		?  ::ChainSetup::generate_setup_try(@_)
-		:  eval { ::ChainSetup::generate_setup_try(@_) }; 
-	track_unmemoize(); 			# unfreeze track state
-	if ($@){
-		throw("error caught while generating setup: $@");
-		::ChainSetup::initialize();
-		return
-	}
-	$success;
-}
 
 sub reconfigure_engine {
 
@@ -67,6 +23,7 @@ sub request_setup {
 	$setup->{changed}++
 } 
 
+sub generate_setup {::Engine::sync_action('setup') }
 
 #### status_snapshot() 
 	#
