@@ -72,6 +72,9 @@ use ::Log qw(logpkg);
 use ::Globals qw(:all);
 use ::Log qw(logit);
 use Carp qw(carp);
+use Role::Tiny::With;
+with '::EcasoundRun';
+
 our @ISA = '::Engine';
 
 sub init_ecasound_socket {
@@ -216,7 +219,7 @@ sub configure {
 		{ 
 			set_position($project->{playback_position}) if $project->{playback_position} 
 		}
-		start_transport('quiet') if $mode->eager 
+		$self->start_transport('quiet') if $mode->eager 
 								and ($mode->doodle or $mode->preview);
 		$self->set_ready();
 		transport_status();
@@ -232,6 +235,9 @@ use Modern::Perl;
 use ::Globals qw(:all);
 use ::Log qw(logit);
 our @ISA = '::Engine';
+use Role::Tiny::With;
+with '::EcasoundRun';
+
 sub launch_ecasound_server {
 	my $self = shift;
 	::pager_newline("Using Ecasound via Audio::Ecasound (libecasoundc)");
