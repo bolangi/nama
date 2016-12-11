@@ -276,6 +276,7 @@ sub new {
 }
 sub setup {}
 sub configure {}
+sub stop {}
 		
 } # end package 
 1

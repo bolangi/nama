@@ -6,7 +6,6 @@ sub cleanup {
 	my $self = shift;
 	::rec_cleanup();
 }
-sub stop {}
 
 
 package ::;
