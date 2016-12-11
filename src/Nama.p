@@ -130,6 +130,7 @@ use ::Modes ();
 use ::Mix ();
 use ::Memoize ();
 
+use ::StatusSnapshot ();
 use ::EngineSetup ();
 use ::EngineRun ();
 use ::EngineCleanup ();
