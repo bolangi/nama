@@ -1,4 +1,5 @@
 package ::StatusSnapshot;
+
 use Role::Tiny;
 use Modern::Perl;
 {
@@ -23,6 +24,17 @@ package ::;
 		current_version
  );
 sub status_snapshot {
+
+	#
+	# hashref output for detecting if we need to reconfigure engine
+	# compared as YAML strings
+
+
+	# %status_snaphot indicates Nama's internal
+	# state. It consists of 
+	# - the values of selected global variables
+	# - selected field values of each track
+	
 	my %snapshot = ( project 		=> 	$project->{name},
 					 mastering_mode => $mode->mastering,
 					 preview        => $mode->{preview},

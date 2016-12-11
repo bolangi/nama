@@ -25,16 +25,6 @@ sub request_setup {
 
 sub generate_setup {::Engine::sync_action('setup') }
 
-#### status_snapshot() 
-	#
-	# hashref output for detecting if we need to reconfigure engine
-	# compared as YAML strings
-
-
-	# %status_snaphot indicates Nama's internal
-	# state. It consists of 
-	# - the values of selected global variables
-	# - selected field values of each track
 1
 	
 
