@@ -1,4 +1,4 @@
-# ----------- Engine cleanup (post-recording) -----------
+# ----------- Ecasound cleanup (post-recording) -----------
 package ::;
 use Modern::Perl;
 use Cwd;

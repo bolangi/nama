@@ -133,7 +133,7 @@ use ::Memoize ();
 use ::StatusSnapshot ();
 use ::EngineSetup ();
 use ::EngineRun ();
-use ::EngineCleanup ();
+use ::EcasoundCleanup ();
 use ::EffectsRegistry ();
 use ::Effect q(:all);
 use ::MuteSoloFade ();
