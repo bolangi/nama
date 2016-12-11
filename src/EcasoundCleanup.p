@@ -1,4 +1,14 @@
 # ----------- Ecasound cleanup (post-recording) -----------
+package ::EcasoundCleanup;
+use Role::Tiny;
+use Modern::Perl;
+sub cleanup {
+	my $self = shift;
+	::rec_cleanup();
+}
+sub stop {}
+
+
 package ::;
 use Modern::Perl;
 use Cwd;

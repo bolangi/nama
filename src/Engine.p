@@ -74,6 +74,7 @@ use ::Log qw(logit);
 use Carp qw(carp);
 use Role::Tiny::With;
 with '::EcasoundRun';
+with '::EcasoundCleanup';
 
 our @ISA = '::Engine';
 
