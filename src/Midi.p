@@ -81,11 +81,11 @@ sub reconfigure_midi {
 
 	# unset filters
 
-	map{ $_->select; midish("fdel $_->name") } @all;
+	map{ $_->select_track; midish("fdel $_->name") } @all;
 
 	# set filters for PLAY and MON tracks
 
-	map{ $_->select; midish(join ' ', 'rnew', $_->source_id, $_->send_id) } @audible;
+	map{ $_->select_track; midish(join ' ', 'rnew', $_->source_id, $_->send_id) } @audible;
 
 	my ($rec) = my @rec = $bn{Midi}->midi_rec_tracks;
 
@@ -98,7 +98,7 @@ sub reconfigure_midi {
 	# mute the actual track since we'll record using the special-purpose track
 	
 	$rec->mute; 	
-	$midi_rec->select;
+	$midi_rec->select_track;
 
 	# use routing of target track on $midi_rec track
 
@@ -122,7 +122,7 @@ sub stop_midi_transport {
 	return unless $bn{Midi}->midi_rec_tracks and $length > 0; 
 	for my $track ($bn{Midi}->midi_rec_tracks)
 	{
-		$track->select;
+		$track->select_track;
 		$track->set(rw => PLAY);
 		push @{$track->{midi_versions}}, $track->current_version;
 		# save project
