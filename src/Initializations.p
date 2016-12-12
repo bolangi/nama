@@ -513,7 +513,7 @@ sub munge_category {
 sub start_logging { 
 	$config->{want_logging} = initialize_logger($config->{opts}->{L})
 }
-sub ecasound { $this_engine and $this_engine->ecasound(@_) }
+sub ecasound { ::Engine::ecasound_engine() and ::Engine::ecasound_engine()->ecasound(@_) }
 
 sub initialize_mixer {
 		::SimpleTrack->new( 

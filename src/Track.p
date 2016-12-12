@@ -265,7 +265,7 @@ our @ISA = '::SimpleTrack';
 
 sub rec_status{
 	my $track = shift;
- 	return OFF if $track->engine_group ne $this_engine->name;
+ 	return OFF if $track->engine_group ne ::Engine::ecasound_engine()->name;
 	$mode->{mastering} ? MON :  OFF;
 }
 sub source_status {}

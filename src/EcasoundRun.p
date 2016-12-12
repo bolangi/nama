@@ -256,7 +256,7 @@ sub _stop_do_start {
 		$result
 }
 sub restart_ecasound {
-	pager_newline("killing ecasound processes @{$this_engine->{pids}}");
+	pager_newline("killing ecasound processes @{::Engine::ecasound_engine()->{pids}}");
 	kill_my_ecasound_processes();
 	pager_newline(q(restarting Ecasound engine - your may need to use the "arm" command));	
 	select_ecasound_interface();
@@ -264,7 +264,7 @@ sub restart_ecasound {
 }
 sub kill_my_ecasound_processes {
 	my @signals = (15, 9);
-	map{ kill $_, @{$this_engine->{pids}}; sleeper(1)} @signals;
+	map{ kill $_, @{::Engine::ecasound_engine()->{pids}}; sleeper(1)} @signals;
 }
 
 

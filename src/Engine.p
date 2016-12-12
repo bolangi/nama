@@ -55,6 +55,7 @@ sub kill_and_reap {
 }
 
 ### class methods
+sub ecasound_engine { $by_name{Nama} }
 
 sub engines { values %by_name }
 
@@ -124,10 +125,10 @@ sub ecasound {
 	logit($category, 'debug', "Net-ECI sent: $cmd");
 
 	$cmd =~ s/\s*$//s; # remove trailing white space
-	$this_engine->{socket}->send("$cmd\r\n");
+	::Engine::ecasound_engine()->{socket}->send("$cmd\r\n");
 	my $buf;
 	# get socket reply, restart ecasound on error
-	my $result = $this_engine->{socket}->recv($buf, $config->{engine_command_output_buffer_size});
+	my $result = ::Engine::ecasound_engine()->{socket}->recv($buf, $config->{engine_command_output_buffer_size});
 	defined $result or ::throw("Ecasound failed to respond"), return;
 
 	my ($return_value, $setup_length, $type, $reply) =
@@ -252,13 +253,13 @@ sub ecasound {
 	
 	logit($category,'debug',"ECI sent: $cmd");
 
-	my (@result) = $this_engine->{ecasound}->eci($cmd);
+	my (@result) = ::Engine::ecasound_engine()->{ecasound}->eci($cmd);
 	logit($category, 'debug',"ECI  got: @result") 
 		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
-	my $errmsg = $this_engine->{ecasound}->errmsg();
+	my $errmsg = ::Engine::ecasound_engine()->{ecasound}->errmsg();
 	if( $errmsg ){
 		::throw("Ecasound error: $errmsg") if $errmsg =~ /in engine-status/;
-		$this_engine->{ecasound}->errmsg(''); 
+		::Engine::ecasound_engine()->{ecasound}->errmsg(''); 
 	}
 	"@result";
 }
@@ -276,7 +277,7 @@ sub new {
 }
 sub setup {::reconfigure_midi() }
 sub configure { ::reconfigure_midi() }
-sub stop { ::stop_midi_transport }
+sub stop { ::stop_midi_transport() }
 sub start { } # started by Ecasound engine
 		
 } # end package 
