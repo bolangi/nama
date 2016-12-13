@@ -25,6 +25,9 @@
 	$ecasound_globals				$config->{engine_globals}
 	$ecasound_buffersize 			$config->{engine_buffersize} 
 	$realtime_profile 				$config->{realtime_profile}
+	$jack_seek_delay    			$config->{engine_base_jack_seek_delay}
+	$ecasound_jack_client_name 		$config->{ecasound_jack_client_name}
+	$ecasound_engine_name 			$config->{ecasound_engine_name}
 
 #	[mastering]
 
@@ -46,8 +49,6 @@
 	$use_midi 						$config->{use_midi}
 	$quietly_remove_tracks 			$config->{quietly_remove_tracks}
 	$use_jack_plumbing 				$config->{use_jack_plumbing}
-	$jack_seek_delay    			$config->{engine_base_jack_seek_delay}
-	$ecasound_jack_client_name 		$config->{ecasound_jack_client_name}
 	$use_monitor_version_for_mixdown $config->{sync_mixdown_and_monitor_version_numbers} 
 	$mixdown_encodings 				$config->{mixdown_encodings}
 	$volume_control_operator 		$config->{volume_control_operator}

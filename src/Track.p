@@ -217,7 +217,7 @@ sub is_system_track { $system_track{$_[0]->name} }
 sub engine_group {
 	my $track = shift;
 	my $bus = $bn{$track->group};
-	$bus->engine_group || $track->{engine_group} || 'Nama'
+	$bus->engine_group || $track->{engine_group} || $config->{ecasound_engine_name}
 }
 sub engine {
 	my $track = shift;

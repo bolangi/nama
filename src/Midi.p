@@ -123,13 +123,13 @@ sub midi_rec_cleanup {
 	my ($track) = $bn{Midi}->midi_rec_tracks; # first and only
 		$track->select_track;
 		$track->set(rw => PLAY);
-		push @{$track->{midi_versions}}, $track->current_version;
-		# save project
+		push @{$track->{versions}}, $track->current_version;
+		$track->{version} = $track->current_version;
 		my $cmd = join ' ', 'chdup', $midi_rec_buf, $track->source_id, $track->current_midi;
 		say "cmd: $cmd";
 		midish($cmd);
 		midish("clr $midi_rec_buf $length");
-		# save project
+		save_midish();
 }
 }
 sub write_aux_midi_commands {
