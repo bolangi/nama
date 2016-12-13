@@ -209,7 +209,7 @@ sub is_midi_track { $_[0]->group eq 'Midi' }
 sub bus { $bn{$_[0]->group} }
 
 { my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low
-Mid High Boost );
+Mid High Boost midi_record_buffer);
 sub is_user_track { ! $system_track{$_[0]->name} }
 sub is_system_track { $system_track{$_[0]->name} } 
 }

@@ -67,7 +67,10 @@ sub reconfigure_midi {
 	# Make sure we have recording track
 	
 	# TODO XXX this conditional will cause future tests for MIDI-related code to break 
-	add_midi_track($midi_rec_buf) if not $tn{$midi_rec_buf} and not $config->{opts}->{T};  
+	add_midi_track($midi_rec_buf, hide => 1) 
+		if not $tn{$midi_rec_buf} 
+		and not $config->{opts}->{T};  
+
 	my $midi_rec = $tn{$midi_rec_buf};
 
 	# mute all

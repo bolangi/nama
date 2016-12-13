@@ -72,7 +72,7 @@ sub add_track_alias_project {
 	}
 }
 sub add_midi_track {
-	my $name = shift;
+	my ($name, @args) = @_;
 	::add_track( 
 		$name, 
 		class => '::MidiTrack',
@@ -82,6 +82,7 @@ sub add_midi_track {
 		midi_versions => [],
 		novol => 1,
 		nopan => 1,
+		@args,
 	);
 }
 
