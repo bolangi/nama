@@ -116,13 +116,11 @@ sub stop_midi_transport {
 	return unless midish_running();
 	midish('s'); 
 	delete $setup->{midish_running};
-	my $current_track = $this_track;
-	# TODO set position at ecasound stop position
+}
+sub midi_rec_cleanup {
 	my $length = midish('print [mend]');
-	sync_transport_position(); # TODO move after ecasound stops
 	return unless $bn{Midi}->midi_rec_tracks and $length > 0; 
-	for my $track ($bn{Midi}->midi_rec_tracks)
-	{
+	my ($track) = $bn{Midi}->midi_rec_tracks; # first and only
 		$track->select_track;
 		$track->set(rw => PLAY);
 		push @{$track->{midi_versions}}, $track->current_version;
@@ -132,7 +130,6 @@ sub stop_midi_transport {
 		midish($cmd);
 		midish("clr $midi_rec_buf $length");
 		# save project
-	}
 }
 }
 sub write_aux_midi_commands {

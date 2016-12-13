@@ -277,7 +277,8 @@ sub new {
 sub setup {::reconfigure_midi() }
 sub configure { ::reconfigure_midi() }
 sub stop { ::stop_midi_transport() }
-sub start { } # started by Ecasound engine
+sub cleanup { ::midi_rec_cleanup() }
+sub start { } # started by Ecasound engine for closest proximity in time
 		
 } # end package 
 1
