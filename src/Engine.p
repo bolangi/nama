@@ -274,8 +274,8 @@ sub new {
 	$self->{pids} = [ ::start_midish_process() ];
 	$self
 }
-sub setup {::reconfigure_midi() }
-sub configure { }
+sub setup { }
+sub configure {::reconfigure_midi() }
 sub stop { ::stop_midi_transport() }
 sub cleanup { ::midi_rec_cleanup() }
 sub start { } # started by Ecasound engine for closest proximity in time
