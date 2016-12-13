@@ -1299,14 +1299,6 @@ set_system_version_comment:
   what: Set a system version comment. Useful for testing and diagnostics.
   short: ssvc
   parameters: <string:comment>
-play_midi:
-  what: sync MIDI start play with Ecasound
-  type: midi
-  short: pmd
-record_midi:
-  what: sync MIDI start record with Ecasound
-  type: midi
-  short: rmd
 new_edit:
   type: edit
   what: Create an edit for the current track and version.

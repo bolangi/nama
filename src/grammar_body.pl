@@ -1391,17 +1391,6 @@ show_version_comments_all: _show_version_comments_all {
 set_system_version_comment: _set_system_version_comment dd text {
 	::pager( ::set_system_version_comment($::this_track,@item{qw(dd text)}));1;
 }
-play_midi: _play_midi { 
-	::pager("Will sync playback with Ecasound."); 
-	$::mode->{midi_transport_sync} = ::PLAY;
-	1;
-}
-record_midi: _record_midi { 
-	::pager("Will sync record/playback with Ecasound."); 
-	$::mode->{midi_transport_sync} = ::REC;
-	1;
-}
-
 new_edit: _new_edit {
 	::new_edit();
 	1;
