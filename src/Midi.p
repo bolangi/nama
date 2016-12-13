@@ -68,7 +68,8 @@ sub reconfigure_midi {
 	
 	# TODO XXX this conditional will cause future tests for MIDI-related code to break 
 	add_midi_track($midi_rec_buf, hide => 1) 
-		if not $tn{$midi_rec_buf} 
+		if midi_tracks()
+		and not $tn{$midi_rec_buf} 
 		and not $config->{opts}->{T};  
 
 	my $midi_rec = $tn{$midi_rec_buf};
@@ -126,8 +127,9 @@ sub midi_rec_cleanup {
 	my ($track) = $bn{Midi}->midi_rec_tracks; # first and only
 		$track->select_track;
 		$track->set(rw => PLAY);
-		push @{$track->{versions}}, $track->current_version;
-		$track->{version} = $track->current_version;
+		my $version = $track->current_version;
+		push @{$track->{midi_versions}}, $version;
+		$track->set_version($version);
 		my $cmd = join ' ', 'chdup', $midi_rec_buf, $track->source_id, $track->current_midi;
 		say "cmd: $cmd";
 		midish($cmd);
