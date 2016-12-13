@@ -505,8 +505,13 @@ sub new {
 	my $self = super();
 	$self
 }
-sub mute {   ::midish( 'mute '  . $_[0]->current_midi ) }
-sub unmute { ::midish( 'unmute '. $_[0]->current_midi ) }
+# TODO enable
+sub mute {   
+	# ::midish( 'mute '  . $_[0]->current_midi ) 
+}
+sub unmute { 
+	# ::midish( 'unmute '. $_[0]->current_midi ) 
+}
 sub rw_set {
 	my $track = shift;
 	my ($bus, $setting) = @_;
