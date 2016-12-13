@@ -693,7 +693,7 @@ do_script(' add mic
 $expected_setup_lines = <<EXPECTED;
 # general
 
--z:mixmode,sum -G:jack,NamaEcasound,send -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf
+-z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf
 
 # audio inputs
 
@@ -727,7 +727,7 @@ nama('gen');
 $expected_setup_lines = <<EXPECTED;
 # general
 
--z:mixmode,sum -G:jack,NamaEcasound,send -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+-z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
 
 # audio inputs
 
@@ -757,7 +757,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # general
 
--z:mixmode,sum -G:jack,NamaEcasound,send -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+-z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
 
 # audio inputs
 
@@ -817,7 +817,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # general
 
--z:mixmode,sum -G:jack,NamaEcasound,send -G:jack,NamaEcasound,send -b 8192 -z:nodb -z:intbuf -f:f32_le,2,44100
+-z:mixmode,sum -G:jack,NamaEcasound,send -b 8192 -z:nodb -z:intbuf -f:f32_le,2,44100
 
 # audio inputs
 
@@ -846,7 +846,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # general
 
--z:mixmode,sum -G:jack,NamaEcasound,send -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+-z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
 
 # audio inputs
 
@@ -892,7 +892,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # general
 
--z:mixmode,sum -G:jack,NamaEcasound,send -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf
+-z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf
 
 # audio inputs
 
@@ -923,7 +923,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # general
 
--z:mixmode,sum -G:jack,NamaEcasound,send -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf
+-z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf
 
 # audio inputs
 
@@ -952,7 +952,7 @@ gen_jack();
 $expected_setup_lines = <<EXPECTED;
 # general
 
--z:mixmode,sum -G:jack,NamaEcasound,send -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+-z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
 
 # audio inputs
 
