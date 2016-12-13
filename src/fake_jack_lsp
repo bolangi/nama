@@ -72,9 +72,9 @@ fluidsynth:left
 	properties: output,
 fluidsynth:right
 	properties: output,
-ecasound:out_1
+NamaEcasound:out_1
 	properties: output,
-ecasound:out_2
+NamaEcasound:out_2
 	properties: output,
 jconvolver:out_1
 	properties: output,

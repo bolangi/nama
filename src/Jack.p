@@ -123,7 +123,7 @@ sub parse_port_connections {
 }
 sub jack_port_to_nama {
 	my $jack_port = shift;
-	grep{ /Nama/ and $jack->{is_own_port}->{$_} } @{ $jack->{connections}->{$jack_port} };
+	grep{ /$config->{ecasound_jack_client_name}/ and $jack->{is_own_port}->{$_} } @{ $jack->{connections}->{$jack_port} };
 }
 	
 sub parse_port_latency {
@@ -335,7 +335,7 @@ sub make_connections {
 	map{  
 		my $track = $_; 
  		my $name = $track->name;
- 		my $ecasound_port = "Nama:$name\_$direction\_";
+ 		my $ecasound_port = $config->{ecasound_jack_client_name}.":$name\_$direction\_";
 		my $file = join_path(project_root(), $track->$ports_list);
 		throw($track->name, 
 			": JACK ports file $file not found. No sources connected."), 
@@ -407,7 +407,7 @@ sub register_own_ports { # distinct from other Nama instances
 	{ 
 		map{chomp; $_ => 1}
 		grep{ ! $jack->{is_other_port}->{$_} }
-		grep{ /^Nama/ } 
+		grep{ /^$config->{ecasound_jack_client_name}/ } 
 		qx(jack_lsp)
 	} 
 }
