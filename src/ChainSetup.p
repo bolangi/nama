@@ -1,7 +1,7 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($file $config $jack $setup $this_engine %tn %bn $mode :trackrw);
+use ::Globals qw($file $config $jack $setup %tn %bn %en $mode :trackrw);
 use ::Log qw(logsub logpkg);
 use Modern::Perl;
 use Data::Dumper::Concise;
@@ -428,7 +428,7 @@ sub write_chains {
 	## write general options
 	
 	my $globals .= join " ", $config->{engine_globals}->{common},
-							join(',', '-G:jack',::Engine::ecasound_engine()->name,::Engine::ecasound_engine()->jack_transport_mode),
+							join(',', '-G:jack',$en{Nama}->name,$en{Nama}->jack_transport_mode),
 							"-b",$config->buffersize,
 							$config->globals_realtime;
 	
