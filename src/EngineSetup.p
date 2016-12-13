@@ -1,8 +1,7 @@
 # ----------- Engine Setup and Teardown -----------
 
 package ::;
-use Modern::Perl;
-no warnings 'uninitialized';
+use Modern::Perl; use Carp;
 
 sub reconfigure_engine {
 
@@ -25,7 +24,17 @@ sub request_setup {
 
 sub generate_setup {::Engine::sync_action('setup') }
 
-1
-	
+sub start_transport { 
+	logsub("&start_transport");
+	::Engine::sync_action('start');
 
+}
+
+sub stop_transport { 
+
+	logsub("&stop_transport"); 
+	::Engine::sync_action('stop');
+}
+	
+1;
 __END__

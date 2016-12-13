@@ -132,7 +132,6 @@ use ::Memoize ();
 
 use ::StatusSnapshot ();
 use ::EngineSetup ();
-use ::EngineRun ();
 use ::EcasoundCleanup ();
 use ::EffectsRegistry ();
 use ::Effect q(:all);
