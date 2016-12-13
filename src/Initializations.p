@@ -150,6 +150,7 @@ sub definitions {
 		engine_fade_length_on_start_stop => 0.18,# when starting/stopping transport
 		engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
 		engine_base_jack_seek_delay 	=> 0.1, # seconds
+		jack_tranport_mode				=> 'send',
 		ecasound_jack_client_name		=> 'NamaEcasound',
 		ecasound_engine_name			=> 'ecasound',
 		engine_command_output_buffer_size => 2**22, # 4 MB
@@ -451,8 +452,7 @@ sub select_ecasound_interface {
 	{
 		pager_newline("Starting dummy engine only"); 
 		%args = (
-			name => 'Nama', 
-			jack_transport_mode => 'send',
+			name => $config->{ecasound_engine_name}
 		);
 		$class = '::Engine';
 	}
@@ -463,7 +463,6 @@ sub select_ecasound_interface {
 	){  
 		%args = (
 			name => $config->{ecasound_engine_name}, 
-			jack_transport_mode => 'send',
 		);
 		$class = '::LibEngine';
 	}
@@ -471,7 +470,6 @@ sub select_ecasound_interface {
 		%args = (
 			name => $config->{ecasound_engine_name}, 
 			port => $config->{engine_tcp_port},
-			jack_transport_mode => 'send',
 		);
 		$class = '::NetEngine';
 	}
@@ -515,7 +513,7 @@ sub munge_category {
 sub start_logging { 
 	$config->{want_logging} = initialize_logger($config->{opts}->{L})
 }
-sub ecasound { $en{Nama} and $en{Nama}->ecasound(@_) }
+sub ecasound { $en{ecasound} and $en{ecasound}->ecasound(@_) }
 
 sub initialize_mixer {
 		::SimpleTrack->new( 

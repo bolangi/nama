@@ -428,7 +428,10 @@ sub write_chains {
 	## write general options
 	
 	my $globals .= join " ", $config->{engine_globals}->{common},
-							join(',', '-G:jack',$en{Nama}->name,$en{Nama}->jack_transport_mode),
+							join(',', 	'-G:jack',
+										$config->{ecasound_jack_client_name},
+										$config->{jack_transport_mode}
+							),
 							"-b",$config->buffersize,
 							$config->globals_realtime;
 	

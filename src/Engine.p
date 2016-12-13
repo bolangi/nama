@@ -124,10 +124,10 @@ sub ecasound {
 	logit($category, 'debug', "Net-ECI sent: $cmd");
 
 	$cmd =~ s/\s*$//s; # remove trailing white space
-	$en{Nama}->{socket}->send("$cmd\r\n");
+	$en{ecasound}->{socket}->send("$cmd\r\n");
 	my $buf;
 	# get socket reply, restart ecasound on error
-	my $result = $en{Nama}->{socket}->recv($buf, $config->{engine_command_output_buffer_size});
+	my $result = $en{ecasound}->{socket}->recv($buf, $config->{engine_command_output_buffer_size});
 	defined $result or ::throw("Ecasound failed to respond"), return;
 
 	my ($return_value, $setup_length, $type, $reply) =
@@ -252,13 +252,13 @@ sub ecasound {
 	
 	logit($category,'debug',"ECI sent: $cmd");
 
-	my (@result) = $en{Nama}->{ecasound}->eci($cmd);
+	my (@result) = $en{ecasound}->{ecasound}->eci($cmd);
 	logit($category, 'debug',"ECI  got: @result") 
 		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
-	my $errmsg = $en{Nama}->{ecasound}->errmsg();
+	my $errmsg = $en{ecasound}->{ecasound}->errmsg();
 	if( $errmsg ){
 		::throw("Ecasound error: $errmsg") if $errmsg =~ /in engine-status/;
-		$en{Nama}->{ecasound}->errmsg(''); 
+		$en{ecasound}->{ecasound}->errmsg(''); 
 	}
 	"@result";
 }

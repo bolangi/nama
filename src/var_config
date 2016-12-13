@@ -26,6 +26,7 @@
 	$ecasound_buffersize 			$config->{engine_buffersize} 
 	$realtime_profile 				$config->{realtime_profile}
 	$jack_seek_delay    			$config->{engine_base_jack_seek_delay}
+	$jack_transport_mode 			$config->{jack_transport_mode}
 	$ecasound_jack_client_name 		$config->{ecasound_jack_client_name}
 	$ecasound_engine_name 			$config->{ecasound_engine_name}
 
