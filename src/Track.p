@@ -593,6 +593,25 @@ sub set_io {
 	$track->set($type_field => $type);
 	$track->set($id_field => $id);
 } 
+sub midi_track {
+	my ($name, $version) = @_;
+	join '-',$name,$version
+}
+sub set_version {
+	my ($track, $n) = @_;
+	my $name = $track->name;
+	if ($n == 0){
+		::pager("$name: version set to zero, following bus default\n");
+		$track->set(version => $n)
+	} elsif ( grep{ $n == $_ } @{$track->versions} ){
+		::pager("$name: anchoring version $n\n");
+		my $old_version = $track->version;
+		$track->set(version => $n);
+		$track->select_track();
+	} else { 
+		::throw("$name: version $n does not exist, skipping.\n")
+	}
+}
 
 }
 
