@@ -66,7 +66,8 @@ sub save_midish {
 sub reconfigure_midi {
 	# Make sure we have recording track
 	
-	$tn{$midi_rec_buf} or add_midi_track($midi_rec_buf);
+	# TODO XXX this conditional will cause future tests for MIDI-related code to break 
+	add_midi_track($midi_rec_buf) if not $tn{$midi_rec_buf} and not $config->{opts}->{T};  
 	my $midi_rec = $tn{$midi_rec_buf};
 
 	# mute all
