@@ -87,8 +87,8 @@ ecasound_buffersize:
   nonrealtime:
     default: 1024
 ecasound_globals:
-  common: -z:mixmode,sum -G:jack,Nama,send
-  realtime: -z:db,100000 -z:nointbuf 
+  common: -z:mixmode,sum
+  realtime: -z:db,100000 -z:nointbuf
   nonrealtime: -z:nodb -z:intbuf
 
 # ecasound_tcp_port: 2868  
