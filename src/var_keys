@@ -74,10 +74,10 @@ $mode->{mastering}				# boolean
 $mode->{midi_terminal}			# 
 $mode->{midi_transport_sync}  # sync Ecasound start/stop with midish
 $project->{events}				# timers used during engine run
-$this_engine->{socket}			# socket for Ecasound command I/O (Net-ECI)
-$this_engine->{pids}			# Ecasound process PIDs
-$this_engine->{ecasound}		# Audio::Ecasound object (libecasoundc)
-$this_engine->{buffersize}		# engine buffersize
+# $en{ecasound}->{socket}			# socket for Ecasound command I/O (Net-ECI)
+# $en{ecasound}->{pids}			# Ecasound process PIDs
+# $en{ecasound}->{ecasound}		# Audio::Ecasound object (libecasoundc)
+# $en{ecasound}->{buffersize}		# engine buffersize
 
 $fx->{ecasound_effect_hints}	# hints for ecasound effects
 $fx->{offset}					# offset to locate first user-addressable 
@@ -140,6 +140,7 @@ $project->{redo}				# last commit removed by undo
 $project->{osc_socket}			# OSC listener socket
 $project->{osc}					# Protocol::OSC object
 $project->{remote_control_socket} # text command listener socket
+$project->{midi_history}		# all text commands sent to midish
 
 $file->{effects_cache}			# Name of effects discovery cache
 $file->{global_effect_chains}	# Name of global effect chains file
