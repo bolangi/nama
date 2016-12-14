@@ -29,9 +29,13 @@ sub start_midish_process {
 }
 sub midish {
 	my $command = shift;
+	logsub('&midish');
 	return unless $config->{use_midi};
 	
 	print $fh_midi_write "$command\n";
+	logpkg('debug',"applied midish command: $command");
+	$project->{midi_history} //=[];
+	push  @{ $project->{midi_history} },$command;
 
 	my $length = 2**16;
 	sleeper(0.05);
