@@ -33,7 +33,7 @@ sub midish {
 	return unless $config->{use_midi};
 	
 	print $fh_midi_write "$command\n";
-	logpkg('debug',"applied midish command: $command");
+	say "applied midish command: $command";
 	$project->{midi_history} //=[];
 	push  @{ $project->{midi_history} },$command;
 
