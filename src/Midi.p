@@ -90,7 +90,7 @@ sub reconfigure_midi {
 
 	# unset filters
 
-	map{ $_->select_track; midish("fdel $_->name") } @all;
+	map{ $_->select_track; midish("fdel ".$_->name) } @all;
 
 	# set filters for PLAY and MON tracks
 
