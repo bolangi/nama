@@ -255,8 +255,8 @@ sub initialize_interfaces {
 
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 	
-	::MidiEngine->new(name => 'Midish');
-	select_ecasound_interface();
+	::MidiEngine->new(name => 'midish');
+	initialize_ecasound_engine();
 		
 	start_osc_listener($config->{osc_listener_port}) 
 		if $config->{osc_listener_port} 
@@ -445,7 +445,7 @@ sub sanitize_remote_input {
 	throw($error_msg) if $error_msg;
 	$input
 }
-sub select_ecasound_interface {
+sub initialize_ecasound_engine {
 	my %args;
 	my $class;
 	if ($config->{opts}->{A} or $config->{opts}->{E})

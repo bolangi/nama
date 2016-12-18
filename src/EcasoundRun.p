@@ -259,7 +259,7 @@ sub restart_ecasound {
 	pager_newline("killing ecasound processes @{$en{ecasound}->{pids}}");
 	kill_my_ecasound_processes();
 	pager_newline(q(restarting Ecasound engine - your may need to use the "arm" command));	
-	select_ecasound_interface();
+	initialize_ecasound_engine();
 	reconfigure_engine('force');
 }
 sub kill_my_ecasound_processes {
