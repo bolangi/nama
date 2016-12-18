@@ -153,6 +153,7 @@ sub definitions {
 		jack_tranport_mode				=> 'send',
 		ecasound_jack_client_name		=> 'NamaEcasound',
 		ecasound_engine_name			=> 'ecasound',
+		midi_engine_name				=> 'midish',
 		engine_command_output_buffer_size => 2**22, # 4 MB
 		edit_playback_end_margin 		=> 3,
 		edit_crossfade_time 			=> 0.03,
@@ -255,7 +256,7 @@ sub initialize_interfaces {
 
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 	
-	::MidiEngine->new(name => 'midish');
+	::MidiEngine->new(name => $config->{midi_engine_name});
 	initialize_ecasound_engine();
 		
 	start_osc_listener($config->{osc_listener_port}) 

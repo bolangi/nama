@@ -81,6 +81,7 @@ sub add_midi_track {
 		source_type => 'midi',
 		midi_versions => [],
 		novol => 1,
+		engine_group => $config->{midi_engine_name},
 		nopan => 1,
 		@args,
 	);
