@@ -145,6 +145,23 @@ sub write_aux_midi_commands {
 	write_file($file->aux_midi_commands,  get_data_section('aux_midi_commands'))
 		unless -e $file->aux_midi_commands
 }
+sub add_midi_track {
+	my ($name, @args) = @_;
+	::add_track( 
+		$name, 
+		class => '::MidiTrack',
+		group => 'Midi', 
+		source_id => 'midi', 
+		source_type => 'midi',
+		midi_versions => [],
+		novol => 1,
+		engine_group => $config->{midi_engine_name},
+		nopan => 1,
+		@args,
+	);
+}
+sub midi_tracks { grep { $_->class =~ /Midi/ } all_tracks() }
+
 	
 =comment
 chdup aux_recorder dx7 piano 
