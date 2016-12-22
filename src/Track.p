@@ -597,6 +597,11 @@ sub midi_track {
 	my ($name, $version) = @_;
 	join '-',$name,$version
 }
+sub create_midi_version {
+	my $track = shift;
+	my $n = shift;
+	::add_midi_track($track->name . "_$n", hide => 1);
+}
 sub set_version {
 	my ($track, $n) = @_;
 	my $name = $track->name;
