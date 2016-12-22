@@ -147,7 +147,7 @@ sub write_aux_midi_commands {
 }
 sub add_midi_track {
 	my ($name, @args) = @_;
-	::add_track( 
+	my $track = ::add_track( 
 		$name, 
 		class => '::MidiTrack',
 		group => 'Midi', 
