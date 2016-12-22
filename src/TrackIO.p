@@ -458,6 +458,10 @@ my %bus_logic = (
 			$track->set_rec() or return;
 
 			$bus->set(rw => MON);
+			
+			# we assume the bus is connected to a track,
+			# so it's send_id field is the track name.
+			
 			$tn{$bus->send_id}->activate_bus 
 				if $bus->send_type eq 'track' and $tn{$bus->send_id};
 			
