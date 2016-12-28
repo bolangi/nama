@@ -524,6 +524,7 @@ sub rw_set {
 		and not $track->exists_midi;
 		::midish('ct '. $track->current_midi);
 	$track->rec_status eq OFF ? $track->mute : $track->unmute
+	
 }
 sub exists_midi {
 	my $track = shift;
@@ -593,6 +594,15 @@ sub set_io {
 	$track->set($type_field => $type);
 	$track->set($id_field => $id);
 } 
+sub set_rw {
+	my $track = shift;
+	my ($bus, $setting) = @_;
+	::throw("can't set MIDI track to MON. Setting is unchanged"), return if $setting eq MON;
+	$track->{rw} = $setting;
+	# mute all versions
+	#$logic{$setting}->($bus, $setting);
+}
+sub rec_status { $_[0]->{rw} }
 sub midi_track {
 	my ($name, $version) = @_;
 	join '-',$name,$version
