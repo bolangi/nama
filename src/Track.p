@@ -230,6 +230,12 @@ sub select_track {
 		::set_current_bus();
 }
 sub is_selected { $::this_track->name eq $_[0]->name }
+
+sub rec  { $_[0]->rec_status eq REC }
+sub mon  { $_[0]->rec_status eq MON }
+sub play { $_[0]->rec_status eq PLAY}
+sub off  { $_[0]->rec_status eq OFF }
+
 } # end package
 
 
