@@ -68,13 +68,13 @@ sub save_midish {
 }
 
 sub reconfigure_midi {
-	# Make sure we have recording track
+
+	 	
 	
-	# TODO XXX this conditional will cause future tests for MIDI-related code to break 
 	add_midi_track($midi_rec_buf, hide => 1) 
-		if midi_tracks()
+		if user_midi_tracks()
 		and not $tn{$midi_rec_buf} 
-		and not $config->{opts}->{T};  
+		and not $config->{opts}->{T};  # TODO XXX this conditional will cause future tests for MIDI-related code to break 
 
 	my $midi_rec = $tn{$midi_rec_buf};
 
@@ -96,7 +96,7 @@ sub reconfigure_midi {
 
 	do { $_->select_track; midish(join ' ', 'rnew', $_->source_id, $_->send_id) } for @audible;
 
-	my ($rec) = my @rec = $bn{Midi}->midi_rec_tracks;
+	my ($rec) = my @rec = $en{midish}->rec_tracks;
 
 	# maybe we're done?
 	
@@ -106,7 +106,7 @@ sub reconfigure_midi {
 
 	# mute the actual track since we'll record using the special-purpose track
 	
-	$rec->mute; 	
+	$rec->mute;
 	$midi_rec->select_track;
 
 	# use routing of target track on $midi_rec track
@@ -116,7 +116,7 @@ sub reconfigure_midi {
 	midish($cmd);
 }
 sub start_midi_transport {
-	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
+	my $start_command = $en{midish}->rec_tracks ? 'r' : 'p';
 	midish($start_command);
 	$setup->{midish_running}++;
 }
@@ -127,16 +127,17 @@ sub stop_midi_transport {
 }
 sub midi_rec_cleanup {
 	my $length = midish('print [mend]');
-	return unless $bn{Midi}->midi_rec_tracks and $length > 0; 
-	my ($track) = $bn{Midi}->midi_rec_tracks; # first and only
-		$track->select_track;
-		$track->set(rw => PLAY);
-		my $version = $track->current_version;
+	return unless $en{midish}->rec_tracks and $length > 0; 
+	my ($track) = $en{midish}->rec_tracks; # first and only
+
+	my $version = $track->current_version;
 		push @{$track->{midi_versions}}, $version;
 		$track->set_version($version);
+		$track->set(rw => PLAY);
 		my $cmd = join ' ', 'chdup', $midi_rec_buf, $track->source_id, $track->current_midi;
 		say "cmd: $cmd";
 		midish($cmd);
+		$track->unmute();
 		midish("clr $midi_rec_buf $length");
 		save_midish();
 }
@@ -160,7 +161,7 @@ sub add_midi_track {
 		@args,
 	);
 }
-sub midi_tracks { grep { $_->class =~ /Midi/ } all_tracks() }
+sub user_midi_tracks { grep { $_->class =~ /Midi/ } grep { !  $_->hide } all_tracks()  }
 
 	
 =comment

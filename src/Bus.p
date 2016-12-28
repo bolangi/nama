@@ -269,16 +269,6 @@ sub apply {
 	logpkg('debug', "Bus destination is type: $bus->{send_type}, id: $bus->{send_id}");
 	# 
 }
-sub midi_rec_tracks { 
-	my $bus = shift;
-	grep { $_->rec_status eq REC } $bus->track_o
-}
-sub midi_play_tracks { 
-	my $bus = shift;
-	grep { $_->rec_status eq PLAY } $bus->track_o
-}
-sub is_active { $_[0]->midi_rec_tracks or $_[0]->midi_play_tracks }
-
 sub remove { }  # We never remove the Midi bus
 }
 
