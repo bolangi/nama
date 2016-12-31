@@ -204,8 +204,6 @@ sub is_mix_track {
 	my $track = shift;
 	($bn{$track->name} or $track->name eq 'Master') and $track->rw eq MON
 }
-sub is_midi_track { $_[0]->group eq 'Midi' }
- 
 sub bus { $bn{$_[0]->group} }
 
 { my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low
@@ -216,8 +214,7 @@ sub is_system_track { $system_track{$_[0]->name} }
 
 sub engine_group {
 	my $track = shift;
-	my $bus = $bn{$track->group};
-	$bus->engine_group || $track->{engine_group} || $config->{ecasound_engine_name}
+	$track->{engine_group} || $config->{ecasound_engine_name}
 }
 sub engine {
 	my $track = shift;
@@ -513,10 +510,22 @@ sub new {
 }
 # TODO enable
 sub mute {   
-	# ::midish( 'mute '  . $_[0]->current_midi ) 
+	my $track = shift;
+	if ( $track->exists_midi )
+	{
+		::midish( 'mute '  . $_[0]->current_midi ) 
+	}
 }
 sub unmute { 
-	# ::midish( 'unmute '. $_[0]->current_midi ) 
+	my $track = shift;
+	if ( $track->exists_midi )
+	{
+		# mute unselected versions
+		map{ ::midish( 'mute '. midi_name($track->name, $_) ) }
+		grep{ $_ != $track->version } @{$track->versions};
+
+		::midish( 'unmute '  . $_[0]->current_midi ) 
+	}
 }
 sub rw_set {
 	my $track = shift;
@@ -548,20 +557,9 @@ sub rec_status {
 sub versions { $_[0]->{midi_versions} }
 
 
-sub midi_name { 
-	my ($name, $index) = @_;
-	return undef unless defined $name and defined $index;
-	join '_', @_ 
-}
 sub select_track {
 		my $track = shift;
 		$::this_track = $track;
-
-		# mute unselected versions
-		map{ ::midish( 'mute '. midi_name($track->name, $_) ) }
-		grep{ $_ != $track->version } @{$track->versions};
-
-
 		$track->unmute;
 		::set_current_bus();
 }
@@ -608,11 +606,6 @@ sub set_rw {
 	# mute all versions
 	#$logic{$setting}->($bus, $setting);
 }
-sub rec_status { $_[0]->{rw} }
-sub midi_track {
-	my ($name, $version) = @_;
-	join '-',$name,$version
-}
 sub create_midi_version {
 	my $track = shift;
 	my $n = shift;
@@ -632,6 +625,11 @@ sub set_version {
 	} else { 
 		::throw("$name: version $n does not exist, skipping.\n")
 	}
+}
+# utility routine
+sub midi_track {
+	my ($name, $version) = @_;
+	join '_',$name,$version
 }
 
 }
