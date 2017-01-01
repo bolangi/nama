@@ -521,7 +521,7 @@ sub unmute {
 	if ( $track->exists_midi )
 	{
 		# mute unselected versions
-		map{ ::midish( 'mute '. midi_name($track->name, $_) ) }
+		map{ ::midish( 'mute '. midi_version_name($track->name, $_) ) }
 		grep{ $_ != $track->version } @{$track->versions};
 
 		::midish( 'unmute '  . $_[0]->current_midi ) 
@@ -571,11 +571,11 @@ sub current_midi {
 	
 	if 	($track->rec_status eq REC)
 	{ 
-		midi_name($track->name, $track->current_version)
+		midi_version_name($track->name, $track->current_version)
 	} 
 	elsif ( $track->rec_status eq PLAY)
 	{ 
-		midi_name($track->name, $track->monitor_version)
+		midi_version_name($track->name, $track->monitor_version)
 	} 
 	else 
 	{ 
@@ -609,7 +609,7 @@ sub set_rw {
 sub create_midi_version {
 	my $track = shift;
 	my $n = shift;
-	::add_midi_track($track->name . "_$n", hide => 1);
+	::add_midi_track(midi_version_name($track->name, $n), hide => 1);
 }
 sub set_version {
 	my ($track, $n) = @_;
@@ -627,7 +627,7 @@ sub set_version {
 	}
 }
 # utility routine
-sub midi_track {
+sub midi_version_name {
 	my ($name, $version) = @_;
 	join '_',$name,$version
 }
