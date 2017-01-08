@@ -619,9 +619,7 @@ sub set_version {
 		$track->set(version => $n)
 	} elsif ( grep{ $n == $_ } @{$track->versions} ){
 		::pager("$name: anchoring version $n\n");
-		my $old_version = $track->version;
 		$track->set(version => $n);
-		$track->select_track();
 	} else { 
 		::throw("$name: version $n does not exist, skipping.\n")
 	}
