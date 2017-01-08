@@ -126,12 +126,14 @@ sub stop_midi_transport {
 	delete $setup->{midish_running};
 }
 sub midi_rec_cleanup {
+	my ($track) = $en{midish}->rec_tracks; 
+	# midish allows one recording track 
+	defined $track or return;
 	my $length = midish('print [mend]');
-	return unless $en{midish}->rec_tracks and $length > 0; 
-	my ($track) = $en{midish}->rec_tracks; # first and only
+	$length > 0 or return;
 
 	my $version = $track->current_version;
-		push @{$track->{midi_versions}}, $version;
+		push @{$track->midi_versions}, $version;
 		$track->set_version($version);
 		$track->set(rw => PLAY);
 		my $cmd = join ' ', 'chdup', $midi_rec_buf, $track->source_id, $track->current_midi;
