@@ -133,14 +133,15 @@ sub midi_rec_cleanup {
 	$length > 0 or return;
 
 	my $version = $track->current_version;
+	my $version_name = midi_version_name($track->name, $version);
 		push @{$track->midi_versions}, $version;
 		$track->set_version($version);
 		$track->set(rw => PLAY);
-		my $cmd = join ' ', 'chdup', $midi_rec_buf, $track->source_id, $track->current_midi;
+		my $cmd = join ' ', 'chdup', $midi_rec_buf, $track->source_id, $version_name;
 		say "cmd: $cmd";
 		midish($cmd);
-		$track->unmute();
 		midish("clr $midi_rec_buf $length");
+		$track->unmute();
 		save_midish();
 }
 }
