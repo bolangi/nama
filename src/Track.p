@@ -624,10 +624,9 @@ sub set_version {
 		::throw("$name: version $n does not exist, skipping.\n")
 	}
 }
-# utility routine
-sub midi_version_name {
-	my ($name, $version) = @_;
-	join '_',$name,$version
+sub midi_version {
+	my $track = shift;
+	join '_', $track->name, $track->version if $track->version
 }
 
 }
