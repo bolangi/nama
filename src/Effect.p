@@ -442,10 +442,13 @@ sub apply_op {
 
 #### Effect related routines, some exported, non-OO
 
+# main namespace imports from us, we'll import manually
+# to work around dependence issues
+
 sub import_engine_subs {
 
 	*valid_engine_setup = \&::valid_engine_setup;
-	*engine_running		= \&::engine_running;
+	*ecasound_engine_running		= \&::ecasound_engine_running;
 	*ecasound			= \&::ecasound;
 	*ecasound_select_chain = \&::ecasound_select_chain;
 	*sleeper			= \&::sleeper;
@@ -632,7 +635,7 @@ sub append_effect {
 	}
 	if( ::valid_engine_setup() )
 	{
-		if (::engine_running())
+		if (::ecasound_engine_running())
 		{ 
 			$track->mute;
 			my $result = ::stop_do_start($add_effects_sub, 0.05);
@@ -654,7 +657,7 @@ sub insert_effect {
 	my %args = %$p;
 	local $config->{category} = 'ECI_FX';
 	return(append_effect(\%args)) if $args{before} eq 'ZZZ';
-	my $running = ::engine_running();
+	my $running = ::ecasound_engine_running();
 	pager("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
 	pager("Cannot insert effect before controller.\n"), return 
@@ -1195,7 +1198,7 @@ sub fade {
 	my $id = $self->id;
 	# no fade without Timer::HiRes
 	# no fade unless engine is running
-	if ( engine_running() and $config->{hires_timer} )
+	if ( ecasound_engine_running() and $config->{hires_timer} )
 	{
 		my $steps = $seconds * $config->{fade_resolution};
 		my $wink  = 1/$config->{fade_resolution};

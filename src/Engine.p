@@ -170,7 +170,7 @@ sub configure {
 
 	# don't disturb recording/mixing
 	
-	return if ::ChainSetup::really_recording() and engine_running();
+	return if ::ChainSetup::really_recording() and ecasound_engine_running();
 	
 	$self->clear_ready();
 

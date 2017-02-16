@@ -72,7 +72,7 @@ sub process_line {
 					and $config->{use_git} 
 					and $project->{name}
 					and $project->{repo}
-					and ! engine_running() 
+					and ! ecasound_engine_running() 
 			){
 				local $quiet = 1;
 				::ChainSetup::remove_temporary_tracks();
@@ -87,7 +87,7 @@ sub process_line {
 			(ref $this_track and ! $tn{$this_track->name});
 		setup_hotkeys() if $config->{hotkeys_always};
 	}
-	if (! engine_running() ){
+	if (! ecasound_engine_running() ){
 		my $result = check_fx_consistency();
 		logpkg('logcluck',"Inconsistency found in effects data",
 			Dumper ($result)) if $result->{is_error};
@@ -478,14 +478,14 @@ sub showlist {
 
 sub t_load_project {
 	package ::;
-	return if engine_running() and ::ChainSetup::really_recording();
+	return if ecasound_engine_running() and ::ChainSetup::really_recording();
 	my $name = shift;
 	my %args = @_;
 	pager("input name: $name\n");
 	$name = sanitize($name);
 	throw("Project $name does not exist\n"), return
 		unless -d join_path(project_root(), $name) or $args{create};
-	stop_transport() if engine_running(); 
+	stop_transport() if ecasound_engine_running(); 
 	save_state();
 	load_project( name => $name, %args );
 	pager("loaded project: $project->{name}\n") unless $args{create};

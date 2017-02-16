@@ -52,7 +52,7 @@ sub start {
 }
 sub stop {
 	package ::;
-	if (engine_running())
+	if (ecasound_engine_running())
 	{
 	# Since the playback position advances slightly during
 	# the fade, we restore the position to exactly where the
@@ -85,7 +85,7 @@ no warnings 'uninitialized';
 use ::Util qw(process_is_running);
 
 sub stop_command {
-	return unless engine_running();
+	return unless ecasound_engine_running();
 	ecasound('stop-sync')
 }
 
@@ -93,7 +93,7 @@ sub stop_command {
 sub valid_engine_setup {
 	ecasound("cs-selected") and ecasound("cs-is-valid");
 }
-sub engine_running {
+sub ecasound_engine_running {
 	ecasound("engine-status") eq "running"
 };
 
@@ -114,7 +114,7 @@ sub midish_running { $setup->{midish_running} }
 	
 
 sub toggle_transport {
-	if (engine_running()){ stop_transport() } 
+	if (ecasound_engine_running()){ stop_transport() } 
 	else { start_transport() }
 }
 
@@ -234,7 +234,7 @@ sub ecasound_select_chain {
 }
 sub stop_do_start {
 	my ($coderef, $delay) = @_;
-	engine_running() ?  _stop_do_start( $coderef, $delay)
+	ecasound_engine_running() ?  _stop_do_start( $coderef, $delay)
 					 : $coderef->()
 
 }
