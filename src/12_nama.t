@@ -970,6 +970,9 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 check_setup('Hardware insert via soundcard, prefader  - JACK');
 
+load_project(name => "midi", create => 1);
+add_midi_track('synth');
+
 sub gen_alsa { force_alsa(); nama('gen')}
 sub gen_jack { force_jack(); nama('gen')}
 sub force_alsa { $config->{opts}->{A} = 1; $config->{opts}->{J} = 0; $jack->{jackd_running} = 0; }
