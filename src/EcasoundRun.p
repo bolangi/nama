@@ -84,18 +84,9 @@ use Modern::Perl; use Carp;
 no warnings 'uninitialized';
 use ::Util qw(process_is_running);
 
-# support both 'stop' and 'stop-sync' commands
-
-{ my $stop_command = undef;
 sub stop_command {
 	return unless engine_running();
-	return ecasound($stop_command) if $stop_command;
-	$stop_command = 'stop-sync';
-	ecasound($stop_command);
-	return unless engine_running();
-	$stop_command = 'stop';
-	ecasound($stop_command);
-}
+	ecasound('stop-sync')
 }
 
 
