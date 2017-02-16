@@ -282,7 +282,7 @@ sub configure { }
 sub setup { ::reconfigure_midi() }
 sub stop { ::stop_midi_transport() }
 sub cleanup { ::midi_rec_cleanup() }
-sub start { } # started by Ecasound engine for closest proximity in time
+sub start { ::start_midi_transport() }
 sub rec_tracks { grep {$_->rec} $_[0]->user_tracks }
 sub system_tracks { $::tn{midi_record_buffer} } # XXX hardcoded
 sub user_tracks { grep { $_->[0]->name ne 'midi_record_buffer' } $_[0]->tracks } # XXX hardcoded
