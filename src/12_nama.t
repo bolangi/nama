@@ -57,7 +57,7 @@ while( my($dest,$type) = splice @id_to_type, 0,2){
 
 
 # SKIP: { 
-# my $cs_got = ecasound('cs');
+# my $cs_got = ecasound_iam('cs');
 # my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
 # Chain "default" [selected] );
 # is( $cs_got, $cs_want, "Evaluate Ecasound 'cs' command");

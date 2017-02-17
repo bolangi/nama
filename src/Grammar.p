@@ -136,8 +136,8 @@ sub nama {
 	if ($this_track){
 		my $FX = fxn($this_track->op);
 		if ($FX and $this_track->n eq $FX->chain){
-			ecasound("c-select ".$this_track->n);
-			ecasound("cop-select ".  $FX->ecasound_effect_index);
+			ecasound_iam("c-select ".$this_track->n);
+			ecasound_iam("cop-select ".  $FX->ecasound_effect_index);
 		}
 	}
 

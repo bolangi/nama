@@ -19,7 +19,7 @@ sub setup {
 
 	# prevent engine from starting an old setup
 	
-	ecasound('cs-disconnect') if ecasound('cs-connected');
+	ecasound_iam('cs-disconnect') if ecasound_iam('cs-connected');
 
 	::ChainSetup::initialize();
 
@@ -72,14 +72,14 @@ sub load_ecs {
 	return unless -e $setup;
 	#say "passed conditional";
 	teardown_engine();
-	ecasound("cs-load $setup");
-	ecasound("cs-select $setup"); # needed by Audio::Ecasound, but not Net-ECI !!
-	logpkg('debug',sub{map{ecasound($_)} qw(cs es fs st ctrl-status)});
+	ecasound_iam("cs-load $setup");
+	ecasound_iam("cs-select $setup"); # needed by Audio::Ecasound, but not Net-ECI !!
+	logpkg('debug',sub{map{ecasound_iam($_)} qw(cs es fs st ctrl-status)});
 	1;
 }
 sub teardown_engine {
-	ecasound("cs-disconnect") if ecasound("cs-connected");
-	ecasound("cs-remove") if ecasound("cs-selected");
+	ecasound_iam("cs-disconnect") if ecasound_iam("cs-connected");
+	ecasound_iam("cs-remove") if ecasound_iam("cs-selected");
 }
 
 sub arm {
@@ -129,26 +129,26 @@ sub connect_transport {
 		valid_engine_setup()
 			or throw("Invalid chain setup, engine not ready."),return;
 		find_op_offsets(); 
-		ecasound('cs-connect');
+		ecasound_iam('cs-connect');
 			#or throw("Failed to connect setup, engine not ready"),return;
 		apply_ops();
 		apply_fades();
-		my $status = ecasound("engine-status");
+		my $status = ecasound_iam("engine-status");
 		if ($status ne 'not started'){
 			throw("Invalid chain setup, cannot connect engine.\n");
 			return;
 		}
-		ecasound('engine-launch');
-		$status = ecasound("engine-status");
+		ecasound_iam('engine-launch');
+		$status = ecasound_iam("engine-status");
 		if ($status ne 'stopped'){
 			throw("Failed to launch engine. Engine status: $status\n");
 			return;
 		}
-		$setup->{audio_length} = ecasound('cs-get-length'); # returns zero if unknown
+		$setup->{audio_length} = ecasound_iam('cs-get-length'); # returns zero if unknown
 		sync_effect_parameters();
 		register_own_ports(); # as distinct from other Nama instances
 		$ui->length_display(-text => colonize($setup->{audio_length}));
-		ecasound("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->rec_status eq REC and $setup->{audio_length};
+		ecasound_iam("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->rec_status eq REC and $setup->{audio_length};
 		$ui->clock_config(-text => colonize(0));
 		sleeper(0.2); # time for ecasound engine to launch
 
@@ -165,7 +165,7 @@ sub connect_transport {
 	}
 	something_to_run() or throw("Neither audio nor MIDI tracks active. Nothing to run."), return; 
 	$ui->flash_ready();
-	#print ecasound("fs");
+	#print ecasound_iam("fs");
 	1;
 	
 }

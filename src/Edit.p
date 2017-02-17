@@ -289,7 +289,7 @@ sub initialize_edit_points {
 sub abort_set_edit_points {
 	::throw("...Aborting!");
 	reset_input_line();
-	ecasound('stop');
+	ecasound_iam('stop');
 	initialize_edit_points();
 	detect_spacebar();
 }
@@ -297,7 +297,7 @@ sub abort_set_edit_points {
 sub get_edit_mark {
 	$p++;
 	if($p <= 3){  # record mark
-		my $pos = ecasound('getpos');
+		my $pos = ecasound_iam('getpos');
 		push @_edit_points, $pos;
 		::pager(" got $names[$p] position ".d1($pos));
 		reset_input_line();
@@ -310,7 +310,7 @@ sub get_edit_mark {
 }
 sub complete_edit_points {
 	@{$setup->{edit_points}} = @_edit_points; # save to global
-	ecasound('stop');
+	ecasound_iam('stop');
 	::pager("\nEngine is stopped\n");
 	detect_spacebar();
 	print prompt(), " ";
@@ -337,7 +337,7 @@ Engine will start in 2 seconds.));
 	sub {
 		reset_input_line();
 		detect_keystroke_p();
-		ecasound('start');
+		ecasound_iam('start');
 		::pager("\n\nEngine is running\n");
 		print prompt();
 	});

@@ -20,13 +20,13 @@ sub check_level {
 		or throw("check_level: generate_setup failed!"), return;
 	connect_transport();
 	
-	ecasound('start'); # don't use heartbeat
+	ecasound_iam('start'); # don't use heartbeat
 	sleep 2; # time for engine to stabilize
-	while( ecasound('engine-status') ne 'finished'){ 
+	while( ecasound_iam('engine-status') ne 'finished'){ 
 		print q(.); sleep 1; update_clock_display()}; 
 	print " Done\n";
 
-	my $cs = ecasound('cop-status');
+	my $cs = ecasound_iam('cop-status');
 
 	my ($level_output) = $cs =~ /Status info:\s*?\n(.+)\z/s;
 	::mandatory_pager($level_output);
@@ -92,14 +92,14 @@ sub automix {
 	
 	# start_transport() does a rec_cleanup() on transport stop
 	
-	ecasound('start'); # don't use heartbeat
+	ecasound_iam('start'); # don't use heartbeat
 	sleep 2; # time for engine to stabilize
-	while( ecasound('engine-status') ne 'finished'){ 
+	while( ecasound_iam('engine-status') ne 'finished'){ 
 		print q(.); sleep 1; update_clock_display()}; 
 	print " Done\n";
 
 	# parse cop status
-	my $cs = ecasound('cop-status');
+	my $cs = ecasound_iam('cop-status');
 	### cs: $cs
 	my $cs_re = qr/Chain "1".+?result-max-multiplier ([\.\d]+)/s;
 	my ($multiplier) = $cs =~ /$cs_re/;

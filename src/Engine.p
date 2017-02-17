@@ -119,7 +119,7 @@ sub launch_ecasound_server {
 	sleep 1;
 	$self->init_ecasound_socket();
 }
-sub ecasound {
+sub ecasound_iam{
 	my $self = shift;
 	my $cmd = shift;
 	#my $category = ::munge_category(shift());
@@ -248,7 +248,7 @@ sub launch_ecasound_server {
 	::pager_newline("Using Ecasound via Audio::Ecasound (libecasoundc)");
 	$self->{ecasound} = Audio::Ecasound->new();
 }
-sub ecasound {
+sub ecasound_iam{
 	#logsub("&ecasound");
 	my $self = shift;
 	my $cmd = shift;
@@ -256,13 +256,13 @@ sub ecasound {
 	
 	logit($category,'debug',"ECI sent: $cmd");
 
-	my (@result) = $en{ecasound}->{ecasound}->eci($cmd);
+	my (@result) = $en{ecasound}->{audio_ecasound}->eci($cmd);
 	logit($category, 'debug',"ECI  got: @result") 
 		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
-	my $errmsg = $en{ecasound}->{ecasound}->errmsg();
+	my $errmsg = $en{ecasound}->{audio_ecasound}->errmsg();
 	if( $errmsg ){
 		::throw("Ecasound error: $errmsg") if $errmsg =~ /in engine-status/;
-		$en{ecasound}->{ecasound}->errmsg(''); 
+		$en{ecasound}->{audio_ecasound}->errmsg(''); 
 	}
 	"@result";
 }

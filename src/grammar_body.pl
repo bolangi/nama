@@ -108,7 +108,7 @@ semistop: /;|$/
 command: iam_cmd predicate { 
 	my $user_input = "$item{iam_cmd} $item{predicate}"; 
 	::logit('::Grammar','debug',"Found Ecasound IAM command: $user_input");
-	my $result = ::ecasound($user_input);
+	my $result = ::ecasound_iam($user_input);
 	::pager( $result );  
 	1 }
 
@@ -453,8 +453,8 @@ disconnect: _disconnect { ::disconnect_transport(); 1}
 engine_status: _engine_status { ::pager(::ecasound q(engine-status)); 1}
 start: _start { ::start_transport(); 1}
 stop: _stop { ::stop_transport(); 1}
-ecasound_start: _ecasound_start { ::ecasound('start'); 1}
-ecasound_stop: _ecasound_stop  { ::ecasound('stop'); 1}
+ecasound_start: _ecasound_start { ::ecasound_iam('start'); 1}
+ecasound_stop: _ecasound_stop  { ::ecasound_iam('stop'); 1}
 restart_ecasound: _restart_ecasound { ::restart_ecasound(); 1 }
 show_tracks: _show_tracks { 	
 	::pager( ::show_tracks(::showlist()));
@@ -980,11 +980,11 @@ add_to_bunch: _add_to_bunch ident(s) { ::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions { 
 	::pager( join " ", @{$::this_track->versions}); 1}
 ladspa_register: _ladspa_register { 
-	::pager( ::ecasound("ladspa-register")); 1}
+	::pager( ::ecasound_iam("ladspa-register")); 1}
 preset_register: _preset_register { 
-	::pager( ::ecasound("preset-register")); 1}
+	::pager( ::ecasound_iam("preset-register")); 1}
 ctrl_register: _ctrl_register { 
-	::pager( ::ecasound("ctrl-register")); 1}
+	::pager( ::ecasound_iam("ctrl-register")); 1}
 preview: _preview { ::set_preview_mode(); 1}
 doodle: _doodle { ::set_doodle_mode(); 1 }
 normalize: _normalize { $::this_track->normalize; 1}
@@ -1429,11 +1429,11 @@ rec_end_mark: _rec_end_mark {
 	$::this_edit->rec_end_mark->jump_here; 1;
 }
 set_play_start_mark: _set_play_start_mark {
-	$::setup->{edit_points}->[0] = ::ecasound('getpos'); 1}
+	$::setup->{edit_points}->[0] = ::ecasound_iam('getpos'); 1}
 set_rec_start_mark: _set_rec_start_mark {
-	$::setup->{edit_points}->[1] = ::ecasound('getpos'); 1}
+	$::setup->{edit_points}->[1] = ::ecasound_iam('getpos'); 1}
 set_rec_end_mark: _set_rec_end_mark {
-	$::setup->{edit_points}->[2] = ::ecasound('getpos'); 1}
+	$::setup->{edit_points}->[2] = ::ecasound_iam('getpos'); 1}
 end_edit_mode: _end_edit_mode { ::end_edit_mode(); 1;}
 
 disable_edits: _disable_edits { ::disable_edits();1 }

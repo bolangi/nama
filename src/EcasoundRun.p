@@ -8,7 +8,7 @@ sub start {
 	package ::;
 
 	audio_run_ready() 
-		and ecasound("cs-connected") 
+		and ecasound_iam("cs-connected") 
 		or throw("\nAudio engine is not configured. Cannot start.\n"),return;
 
 
@@ -29,7 +29,7 @@ sub start {
 	pager("\n\nStarting at ", current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
-	ecasound('start');
+	ecasound_iam('start');
 	start_midi_transport() if midi_run_ready();
 
 	# limit engine run time if we are in mixdown or edit mode, 
@@ -59,7 +59,7 @@ sub stop {
 	# stop command was issued.
 	
 	my $pos;
-	$pos = ecasound('getpos') if ecasound('cs-connected')
+	$pos = ecasound_iam('getpos') if ecasound_iam('cs-connected')
 		and ! ::ChainSetup::really_recording();
 	mute();
 	stop_command();
@@ -86,15 +86,15 @@ use ::Util qw(process_is_running);
 
 sub stop_command {
 	return unless ecasound_engine_running();
-	ecasound('stop-sync')
+	ecasound_iam('stop-sync')
 }
 
 
 sub valid_engine_setup {
-	ecasound("cs-selected") and ecasound("cs-is-valid");
+	ecasound_iam("cs-selected") and ecasound_iam("cs-is-valid");
 }
 sub ecasound_engine_running {
-	ecasound("engine-status") eq "running"
+	ecasound_iam("engine-status") eq "running"
 };
 
 
@@ -118,7 +118,7 @@ sub toggle_transport {
 	else { start_transport() }
 }
 
-sub transport_running { ecasound('engine-status') eq 'running'  }
+sub transport_running { ecasound_iam('engine-status') eq 'running'  }
 
 sub disconnect_transport {
 	return if transport_running();
@@ -126,14 +126,14 @@ sub disconnect_transport {
 }
 sub engine_is {
 	my $pos = shift;
-	"Engine is ". ecasound("engine-status"). ( $pos ? " at $pos" : "" )
+	"Engine is ". ecasound_iam("engine-status"). ( $pos ? " at $pos" : "" )
 }
 sub engine_status { 
 	my ($pos, $before_newlines, $after_newlines) = @_;
 	pager("\n" x $before_newlines, engine_is($pos), "\n" x $after_newlines);
 }
 sub current_position { 
-	my $pos = ecasound("getpos"); 
+	my $pos = ecasound_iam("getpos"); 
 	colonize(int($pos || 0)) 
 }
 sub start_heartbeat {
@@ -152,8 +152,8 @@ sub heartbeat {
 
 	#	print "heartbeat fired\n";
 
-	my $here   = ecasound("getpos");
-	my $status = ecasound('engine-status');
+	my $here   = ecasound_iam("getpos");
+	my $status = ecasound_iam('engine-status');
 	if( $status =~ /finished|error/ ){
 		engine_status(current_position(),2,1);
 		revise_prompt();
@@ -182,7 +182,7 @@ sub update_clock_display {
 sub schedule_wraparound {
 
 	return unless $mode->{loop_enable};
-	my $here   = ecasound("getpos");
+	my $here   = ecasound_iam("getpos");
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
 	my $diff = $end - $here;
@@ -221,9 +221,9 @@ sub ecasound_select_chain {
 		::ChainSetup::is_ecasound_chain($n)
 
 		# engine is configured
-		and ecasound( 'cs-connected' ) =~ /$file->{chain_setup}->[0]/
+		and ecasound_iam( 'cs-connected' ) =~ /$file->{chain_setup}->[0]/
 
-	){ 	ecasound($cmd); 
+	){ 	ecasound_iam($cmd); 
 		return 1 
 
 	} else { 
@@ -243,7 +243,7 @@ sub _stop_do_start {
 		stop_command();
 		my $result = $coderef->();
 		sleeper($delay) if $delay;
-		ecasound('start');
+		ecasound_iam('start');
 		$result
 }
 sub restart_ecasound {

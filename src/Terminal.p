@@ -317,7 +317,7 @@ sub get_ecasound_iam_keywords {
 									?	);
 	
 	%{$text->{iam}} = map{$_,1 } 
-				grep{ ! $reserved{$_} } split /[\s,]/, ecasound('int-cmd-list');
+				grep{ ! $reserved{$_} } split /[\s,]/, ecasound_iam('int-cmd-list');
 }
 sub load_keywords {
 	my @keywords = keys %{$text->{commands}};
