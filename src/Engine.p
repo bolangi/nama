@@ -57,6 +57,7 @@ sub tracks {
 	my $self = shift;
 	my @tracks = grep { $self->name eq $_->engine_group } ::all_tracks();
 }
+sub ecasound_iam {}
 
 ### class methods
 
