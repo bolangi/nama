@@ -102,7 +102,6 @@ sub context {
 	$context->{op}    = $this_track->op;
 	$context
 }
-sub nama { confess("nama() called!!") }
 sub nama_cmd {
 	my $input = shift;
 	my $input_was = $input;
