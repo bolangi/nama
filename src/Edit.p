@@ -53,7 +53,7 @@ sub new {
 
 	my $name = $self->host_track;
 	my $host = $::tn{$name};
-	confess( ::project_dir().": missing host_track".  $::this_track->dump. $self->dump. ::nama("dumpa")) if !$host;
+	confess( ::project_dir().": missing host_track".  $::this_track->dump. $self->dump. ::nama_cmd("dumpa")) if !$host;
 
 # Routing:
 #
@@ -875,7 +875,7 @@ sub select_edit_track {
 	::throw("You need to select an edit first (list_edits, select_edit)\n"),
 		return unless defined $this_edit;
 	$this_track = $this_edit->$track_selector_method; 
-	nama('show_track');
+	nama_cmd('show_track');
 }
 
 } # end package

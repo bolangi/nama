@@ -198,7 +198,7 @@ sub configure {
 	}
 	$setup->{changed} = 0 ; # reset for next time
 
-	nama('show_tracks');
+	nama_cmd('show_tracks');
 
 	{ local $quiet = 1; stop_transport() }
 

@@ -63,7 +63,7 @@ sub process_line {
 			unless $user_input eq $text->{previous_cmd} or ! $text->{term};
 		$text->{previous_cmd} = $user_input;
 			my $context = context();
-			my $success = nama( $user_input );
+			my $success = nama_cmd( $user_input );
 			my $command_stamp = { context => $context, 
 								  command => $user_input };
 			push(@{$project->{command_buffer}}, $command_stamp);
@@ -102,7 +102,8 @@ sub context {
 	$context->{op}    = $this_track->op;
 	$context
 }
-sub nama {
+sub nama { confess("nama() called!!") }
+sub nama_cmd {
 	my $input = shift;
 	my $input_was = $input;
 
@@ -492,7 +493,7 @@ sub t_load_project {
 	{no warnings 'uninitialized';
 	logpkg('debug',"load hook: $config->{execute_on_project_load}");
 	}
-	::nama($config->{execute_on_project_load});
+	::nama_cmd($config->{execute_on_project_load});
 }
 sub sanitize {
 	my $name = shift;

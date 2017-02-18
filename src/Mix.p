@@ -68,7 +68,7 @@ sub automix {
 
 	### Status before mixdown:
 
-	nama('show');
+	nama_cmd('show');
 
 	
 	### reduce track volume levels  to 10%
@@ -82,9 +82,9 @@ sub automix {
 
 	### reduce vol command: $reduce_vol_command
 
-	for (@tracks){ nama("$_  $reduce_vol_command") }
+	for (@tracks){ nama_cmd("$_  $reduce_vol_command") }
 
-	nama('show');
+	nama_cmd('show');
 
 	generate_setup('automix') # pass a bit of magic
 		or throw("automix: generate_setup failed!"), return;
@@ -113,17 +113,17 @@ sub automix {
 	if ( $multiplier < 0.00001 ){
 
 		throw("Signal appears to be silence. Skipping.");
-		for (@tracks){ nama("$_  $restore_vol_command") }
+		for (@tracks){ nama_cmd("$_  $restore_vol_command") }
 		$tn{Master}->set(rw => MON);
 		return;
 	}
 
 	### apply multiplier to individual tracks
 
-	for (@tracks){ nama( "$_ vol*$multiplier" ) }
+	for (@tracks){ nama_cmd( "$_ vol*$multiplier" ) }
 
 	### mixdown
-	nama('mixdown; arm; start');
+	nama_cmd('mixdown; arm; start');
 
 	### restore audio output
 

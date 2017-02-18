@@ -178,7 +178,7 @@ sub init_gui {
 				#$text->{term}->tkRunning(0);
 				#$gui->{ew}->destroy;
 				#$gui->{mw}->destroy;
-				#::nama('quit');
+				#::nama_cmd('quit');
 				exit;
 				 });
 	$gui->{palette}->configure(
@@ -210,7 +210,7 @@ $gui->{palette}->AddItems( @color_items);
 			-command => sub { 
 								return if $gui->{_track_name} =~ /^\s*$/;	
 								add_track(remove_spaces($gui->{_track_name}));
-								nama('stereo');
+								nama_cmd('stereo');
 	});
 
 	my @labels = 
@@ -596,7 +596,7 @@ sub track_gui {
 							return if ::ecasound_engine_running();
 							local $this_track = $ti{$n};
 							if( $v eq 'off' )
-								 { nama('nosend') }
+								 { nama_cmd('nosend') }
 							else { $this_track->set_send($v) }
 							$ui->refresh_track($n);
 							::reconfigure_engine();

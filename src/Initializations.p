@@ -379,7 +379,7 @@ sub process_remote_command {
     };
     $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), revise_prompt(), return;
     logpkg('debug',"Got remote control socketput: $input");
-	nama($input);
+	nama_cmd($input);
 	my $out;
 	{ no warnings 'uninitialized';
 		$out = $text->{eval_result} . "\n";
@@ -422,11 +422,11 @@ sub process_osc_command {
 	$path =~ s(^/)();
 	$path =~ s(/$)();
 	my ($trackname, $fx, $param) = split '/', $path;
-	nama($trackname);
-	nama("$command @vals") if $command;
-	nama("show_effect $fx") if $fx; # select
-	nama("show_track") if $trackname and not $fx;
-	nama("show_tracks") if ! $trackname;
+	nama_cmd($trackname);
+	nama_cmd("$command @vals") if $command;
+	nama_cmd("show_effect $fx") if $fx; # select
+	nama_cmd("show_track") if $trackname and not $fx;
+	nama_cmd("show_tracks") if ! $trackname;
 	say "got OSC: ", Dumper $p;
 	say "got args: @args";
  	my $osc_out = IO::Socket::INET->new(
