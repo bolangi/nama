@@ -450,7 +450,6 @@ sub import_engine_subs {
 	*valid_engine_setup = \&::valid_engine_setup;
 	*ecasound_engine_running		= \&::ecasound_engine_running;
 	*ecasound_iam			= \&::ecasound_iam;
-	*ecasound			= \&::ecasound;
 	*ecasound_select_chain = \&::ecasound_select_chain;
 	*sleeper			= \&::sleeper;
 	*nama    = \&::nama;
