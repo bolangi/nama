@@ -683,7 +683,7 @@ list_marks: _list_marks {
 		  #sort { $a->time <=> $b->time } 
 		  @::Mark::all;
 	my $start = my $end = "undefined";
-	push @lines, "now at ". sprintf("%.1f", ::ecasound "getpos"). "\n";
+	push @lines, "now at ". sprintf("%.1f\n", ::ecasound_iam("getpos"));
 	::pager(@lines);
 	1;}
 to_mark: _to_mark dd {
