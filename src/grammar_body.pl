@@ -301,7 +301,7 @@ get_state: _get_state save_target {
 # get_state: _get_state {
 #  	::load_project( name => $::project->{name},) ; 1}
 getpos: _getpos {  
-	::pager( ::d1( ::ecasound q(getpos) )); 1}
+	::pager( ::d1( ::ecasound_iam('getpos'))); 1}
 setpos: _setpos timevalue {
 	::set_position($item{timevalue}); 1}
 forward: _forward timevalue {
@@ -450,7 +450,7 @@ arm: _arm { ::arm(); 1}
 arm_start: _arm_start { ::arm(); ::start_transport(); 1 }
 connect: _connect { ::connect_transport(); 1}
 disconnect: _disconnect { ::disconnect_transport(); 1}
-engine_status: _engine_status { ::pager(::ecasound q(engine-status)); 1}
+engine_status: _engine_status { ::pager(::ecasound_iam('engine-status')); 1}
 start: _start { ::start_transport(); 1}
 stop: _stop { ::stop_transport(); 1}
 ecasound_start: _ecasound_start { ::ecasound_iam('start'); 1}
