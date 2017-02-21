@@ -49,7 +49,7 @@ sub current_wav {
 	if 	($track->rec){ 
 		$track->name . '_' . $last . '.wav'
 	} elsif ( $track->play){ 
-		my $filename = $track->targets->{ $track->monitor_version } ;
+		my $filename = $track->targets->{ $track->playback_version } ;
 		$filename
 	} else {
 		logpkg('debug', "track ", $track->name, ": no current version") ;
@@ -69,11 +69,11 @@ sub current_version {
 					: $track->last;
 		return ++$last
 	}
-	elsif ($track->play){ return $track->monitor_version } 
+	elsif ($track->play){ return $track->playback_version } 
 	else { return 0 }
 }
 
-sub monitor_version {
+sub playback_version {
 	my $track = shift;
 	return $track->version if $track->version 
 				and grep {$track->version  == $_ } @{$track->versions} ;

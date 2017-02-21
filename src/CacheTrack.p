@@ -72,7 +72,7 @@ sub reactivate_vol_pan {
 sub prepare_to_cache {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
-	$args->{orig_version} = $args->{track}->monitor_version;
+	$args->{orig_version} = $args->{track}->playback_version;
 
 
 	#   We route the signal thusly:
@@ -267,7 +267,7 @@ sub uncache_track {
 	local $this_track;
 	$track->play or 
 		throw($track->name, ": cannot uncache unless track is set to PLAY"), return;
-	my $version = $track->monitor_version;
+	my $version = $track->playback_version;
 	my ($ec) = is_cached($track, $version);
 	defined $ec or throw($track->name, ": version $version is not cached"), return;
 	$track->user_ops and 

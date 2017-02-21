@@ -94,7 +94,7 @@ sub new {
 	my $host_track_alias = $::tn{$self->host_alias} // 
 		::VersionTrack->new(
 			name 	=> $self->host_alias,
-			version => $host->monitor_version, # static
+			version => $host->playback_version, # static
 			target  => $host->name,
 			rw		=> PLAY,                  # do not REC
 			group   => $self->edit_root_name,  # i.e. sax-v5
@@ -404,7 +404,7 @@ Edits will be applied against current version"),
 
 	# create edit
 	
-	my $v = $this_track->monitor_version;
+	my $v = $this_track->playback_version;
 	::pager("$name: creating new edit against version $v");
 	my $edit = ::Edit->new(
 		host_track 		=> $this_track->name,
@@ -490,7 +490,7 @@ sub edit_mode_conditions {
 
 	# the following conditions should never be triggered 
 	
-	$this_edit->host_alias_track->monitor_version == $this_edit->host_version
+	$this_edit->host_alias_track->playback_version == $this_edit->host_version
 		or die('host alias track: ',$this_edit->host_alias,
 				" must be set to version ",$this_edit->host_version), return
 	1;
@@ -741,9 +741,9 @@ sub select_edit {
  	::throw( qq(Edit $n applies to track "), $edit->host_track, 
  		 qq(" version ), $edit->host_version, ".
 This does does not match the current monitor version (",
-$edit->host->monitor_version,"). 
+$edit->host->playback_version,"). 
 Set the correct version and try again."), return
-	if $edit->host->monitor_version != $edit->host_version;
+	if $edit->host->playback_version != $edit->host_version;
 
 	# select edit
 	
@@ -800,7 +800,7 @@ sub merge_edits {
 	my $v = $edit->host_version;
 	my %edits = 
 		map{ my ($edit) = $tn{$_}->name =~ /edit(\d+)$/;
-			 my $ver  = $tn{$_}->monitor_version;
+			 my $ver  = $tn{$_}->playback_version;
 			 $edit => $ver
 		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->play} 
 		$edit->version_bus->tracks; 

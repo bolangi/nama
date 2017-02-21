@@ -36,7 +36,7 @@ sub mixdown_postprocessing {
 	my ($oldfile) = $tn{Mixdown}->full_path =~ m{([^/]+)$};
 	$oldfile = join_path('.wav',$oldfile);
 	my $tag_name = join '-', $project->{name}, current_branch();
-	my $version = $tn{Mixdown}->monitor_version;
+	my $version = $tn{Mixdown}->playback_version;
 
 	# simplify the tagname basename 
 	# 

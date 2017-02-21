@@ -30,7 +30,7 @@ commands =>
 		disable_jack_polling => sub{ $project->{events}->{poll_jack} = undef },
 
 		promote_current_version => sub {
-				my $v = $this_track->monitor_version;
+				my $v = $this_track->playback_version;
 				promote_version_to_track($this_track, $v);
 		},
 

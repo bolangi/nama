@@ -51,7 +51,7 @@
 	$use_midi 						$config->{use_midi}
 	$quietly_remove_tracks 			$config->{quietly_remove_tracks}
 	$use_jack_plumbing 				$config->{use_jack_plumbing}
-	$use_monitor_version_for_mixdown $config->{sync_mixdown_and_monitor_version_numbers} 
+	$use_playback_version_for_mixdown $config->{sync_mixdown_and_playback_version_numbers} 
 	$mixdown_encodings 				$config->{mixdown_encodings}
 	$volume_control_operator 		$config->{volume_control_operator}
 	$serialize_formats  	        $config->{serialize_formats}

@@ -1368,7 +1368,7 @@ show_comments: _show_comments {
 }
 add_version_comment: _add_version_comment dd(?) text {
 	my $t = $::this_track;
-	my $v = $item{'dd(?)'}->[0] // $t->monitor_version // return 1;
+	my $v = $item{'dd(?)'}->[0] // $t->playback_version // return 1;
 	::pager( $t->add_version_comment($v,$item{text})); 
 }	
 remove_version_comment: _remove_version_comment dd {
@@ -1378,7 +1378,7 @@ remove_version_comment: _remove_version_comment dd {
 show_version_comment: _show_version_comment dd(s?) {
 	my $t = $::this_track;
 	my @v = @{$item{'dd(s?)'}};
-	if(!@v){ @v = $t->monitor_version}
+	if(!@v){ @v = $t->playback_version}
 	@v or return 1;
 	$t->show_version_comments(@v);
 	 1;

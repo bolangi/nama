@@ -301,7 +301,7 @@ our @ISA = '::Track';
 sub width { $tn{$_[0]->target}->width }
 sub rec_status { $tn{$_[0]->target}->rec_status }
 sub full_path { $tn{$_[0]->target}->full_path} 
-sub monitor_version { $tn{$_[0]->target}->monitor_version} 
+sub playback_version { $tn{$_[0]->target}->playback_version} 
 sub source_type { $tn{$_[0]->target}->source_type}
 sub source_id { $tn{$_[0]->target}->source_id}
 sub source_status { $tn{$_[0]->target}->source_status }
@@ -356,7 +356,7 @@ sub current_version {
 	my $status = $track->rec_status;
 	#logpkg('debug', "last: $last status: $status");
 	if 	($status eq REC){ return ++$last}
-	elsif ( $status eq PLAY){ return $track->monitor_version } 
+	elsif ( $status eq PLAY){ return $track->playback_version } 
 	else { return 0 }
 }
 sub source_status { 
@@ -396,7 +396,7 @@ sub current_version {
 	my $status = $track->rec_status;
 	#logpkg('debug', "last: $last status: $status");
 	if 	($status eq REC){ return ++$last}
-	elsif ( $status eq PLAY){ return $track->monitor_version } 
+	elsif ( $status eq PLAY){ return $track->playback_version } 
 	else { return 0 }
 }
 sub playat_time {
@@ -568,7 +568,7 @@ sub current_midi {
 	} 
 	elsif ( $track->rec_status eq PLAY)
 	{ 
-		midi_version_name($track->name, $track->monitor_version)
+		midi_version_name($track->name, $track->playback_version)
 	} 
 	else 
 	{ 

@@ -10,16 +10,16 @@ sub rec_status {
 	my $track = shift;
 	
 	#my $source_id = $track->source_id;
-	my $monitor_version = $track->monitor_version;
+	my $playback_version = $track->playback_version;
 
 	my $bus = $bn{$track->group};
 	#logpkg('debug', join " ", "bus:",$bus->name, $bus->rw);
 	{
 	no warnings 'uninitialized';
-	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, monitor version: $monitor_version");
+	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, monitor version: $playback_version");
 	}
 	#logpkg('debug', "track: ", $track->name, ", source: ",
-	#	$track->source_id, ", monitor version: $monitor_version");
+	#	$track->source_id, ", monitor version: $playback_version");
 
 	# first, check for conditions resulting in status OFF
 
@@ -60,14 +60,14 @@ sub rec_status {
 
 	# set PLAY status if possible
 	
-	else { 			maybe_monitor($monitor_version)
+	else { 			maybe_monitor($playback_version)
 
 	}
 }
 
 sub maybe_monitor { # ordinary sub, not object method
-	my $monitor_version = shift;
-	return PLAY if $monitor_version and ! $mode->doodle;
+	my $playback_version = shift;
+	return PLAY if $playback_version and ! $mode->doodle;
 	return OFF;
 }
 

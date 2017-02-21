@@ -8,7 +8,7 @@ sub version_has_edits {
 	my ($track) = @_;
 	grep
 		{ 		$_->host_track eq $track->name
-     		and $_->host_version == $track->monitor_version
+     		and $_->host_version == $track->playback_version
 		} values %::Edit::by_name;
 }	
 sub bus_tree { # for solo function to work in sub buses

@@ -145,7 +145,7 @@ sub definitions {
 		use_git							=> 1,
 		autosave						=> 'undo',
 		volume_control_operator 		=> 'ea', # default to linear scale
-		sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
+		sync_mixdown_and_playback_version_numbers => 1, # not implemented yet
 		engine_tcp_port					=> 2868, # 'default' engine
 		engine_fade_length_on_start_stop => 0.18,# when starting/stopping transport
 		engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
