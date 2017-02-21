@@ -556,8 +556,10 @@ sub select_track {
 }
 sub current_midi {
 	# current MIDI track
-	# example: synth_2
-	# analagous to current_wav() which would be synth_2.wav
+	# provides the name of the midish track corresponding to the selected version
+	# example: synth_2, for track synth, version 2
+	# analagous to current_wav() for audio track which would output synth_2.wav
+	 
 	my $track = shift;
 	
 	if 	($track->rec_status eq REC)
