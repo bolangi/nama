@@ -68,13 +68,9 @@ sub save_midish {
 }
 
 sub reconfigure_midi {
-
-	 	
-	
-	add_midi_track($midi_rec_buf, hide => 1) 
+	add_midi_track($midi_rec_buf, n => 999, hide => 1) 
 		if user_midi_tracks()
-		and not $tn{$midi_rec_buf} 
-		and not $config->{opts}->{T};  # TODO XXX this conditional will cause future tests for MIDI-related code to break 
+		and not $tn{$midi_rec_buf} ;
 
 	my $midi_rec = $tn{$midi_rec_buf};
 
