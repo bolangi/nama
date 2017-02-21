@@ -531,15 +531,6 @@ sub rw_set {
 	my $track = shift;
 	my ($bus, $setting) = @_;
 	$track->{rw} = uc $setting;
-	# create midish track if we ask to record
-	# and track does not exist
-	my $cmd = 'tnew '. $track->current_midi;
-	::midish($cmd ) 
-		if $setting eq REC 
-		and not $track->exists_midi;
-		::midish('ct '. $track->current_midi);
-	$track->rec_status eq OFF ? $track->mute : $track->unmute
-	
 }
 sub exists_midi {
 	my $track = shift;
