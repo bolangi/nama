@@ -69,19 +69,21 @@ sub save_midish {
 
 sub reconfigure_midi {
 	add_midi_track($midi_rec_buf, n => 999, hide => 1) 
-		if user_midi_tracks()
-		and not $tn{$midi_rec_buf} ;
+		if not $tn{$midi_rec_buf}
+		and $this_track->current_midi
+		and $this_track->rec;
 
 	my $midi_rec = $tn{$midi_rec_buf};
 
 	# mute all
 
 	my @all = $bn{Midi}->track_o;
-	$_->mute for @all;
+
+	$_->mute for @all; # same as setting OFF for MidiTracks
 
 	# unmute audible
 
-	my @audible = grep{ $_->mon or $_->play } @all;
+	my @audible = grep{ $_->play } @all;
 	$_->unmute for @audible;
 
 	# unset filters
