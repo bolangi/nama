@@ -25,19 +25,19 @@ sub cache_track { # launch subparts if conditions are met
 	$args->{track} = $track;
 	$args->{additional_time} //= 0;
 	
-	pagers($track->name, ": preparing to cache.");
+	pagers($track->name. ": preparing to cache.");
 	
 	# abort if track is a mix track for a bus and the bus is OFF 
 	if( my $bus = $bn{$track->name}
 		and $track->rec 
 	 ){ 
 		$bus->rw eq OFF and pagers(
-			$bus->name, ": status is OFF. Aborting."), return;
+			$bus->name. ": status is OFF. Aborting."), return;
 	} else { 
 		$track->play or pagers(
-			$track->name, ": track caching requires PLAY status. Aborting."), return;
+			$track->name. ": track caching requires PLAY status. Aborting."), return;
 	}
-	pagers($track->name, ": nothing to cache!  Skipping."), return 
+	pagers($track->name. ": nothing to cache!  Skipping."), return 
 		unless 	$track->user_ops 
 				or $track->has_insert
 				or $track->is_region
@@ -149,7 +149,7 @@ sub cache_engine_run {
 
 	$args->{processing_time} = $setup->{audio_length} + $args->{additional_time};
 
-	pagers($args->{track}->name,": processing time: ". d2($args->{processing_time}). " seconds");
+	pagers($args->{track}->name.": processing time: ". d2($args->{processing_time}). " seconds");
 	pagers("Starting cache operation. Please wait.");
 	
 	revise_prompt(" "); 
@@ -220,7 +220,7 @@ sub update_cache_map {
 			map{ $_->remove        } @inserts_list;
 			map{ delete $track->{$_} } qw( region_start region_end target );
 
-		pagers(qq(Saving effects for cached track "), $track->name, '".');
+		pagers(qq(Saving effects for cached track "). $track->name. '".');
 		pagers(qq('uncache' will restore effects and set version $args->{orig_version}\n));
 		}
 }
@@ -294,7 +294,7 @@ sub uncache_track {
 		if $track->is_region;
 
 	my $bus = $bn{$track->name};
-	$track->set(rw => REC), pagers($track->name, ": setting mix track to REC")
+	$track->set(rw => REC), pagers($track->name. ": setting mix track to REC")
 		if defined $bus;
 }
 sub is_cached {
