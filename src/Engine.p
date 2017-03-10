@@ -67,6 +67,7 @@ sub sync_action {
 	my ($method, @args) = @_;
 	$_->$method(@args) for engines()
 }
+*configure = \&::NetEngine::configure;
 }
 
 {
@@ -162,8 +163,6 @@ if(	! $return_value == 256 ){
 	}
 	
 }
-sub set_ready { $_[0]->{ready}++ }
-sub clear_ready { delete $_[0]->{ready} }
 sub configure {
 	package ::;
 	my $self = shift;
@@ -173,8 +172,6 @@ sub configure {
 	
 	return if ::ChainSetup::really_recording() and ecasound_engine_running();
 	
-	$self->clear_ready();
-
 	# store a lists of wav-recording tracks for the rerecord
 	# function
 	
@@ -227,7 +224,6 @@ sub configure {
 		}
 		$self->start_transport('quiet') if $mode->eager 
 								and ($mode->doodle or $mode->preview);
-		$self->set_ready();
 		transport_status();
 		$ui->flash_ready;
 		1
