@@ -28,7 +28,7 @@ MSG
 sub set_doodle_mode {
 
 	logsub("&doodle");
-	return if engine_running() and ::ChainSetup::really_recording();
+	return if ecasound_engine_running() and ::ChainSetup::really_recording();
 	disable_preview_modes();
 	{
 	no warnings 'uninitialized';
@@ -50,7 +50,7 @@ sub exit_preview_modes {
 		logsub("&exit_preview_modes");
 		return unless $mode->{preview} or $mode->{doodle};
 		disable_preview_modes();
-		stop_transport() if engine_running();
+		stop_transport() if ecasound_engine_running();
 		pager("Exiting preview/doodle mode");
 }
 sub disable_preview_modes {
@@ -111,37 +111,37 @@ sub add_mastering_effects {
 	
 	$this_track = $tn{Eq};
 
-	nama("add_effect $mastering->{fx_eq}");
+	nama_cmd("add_effect $mastering->{fx_eq}");
 
 	$this_track = $tn{Low};
 
-	nama("add_effect $mastering->{fx_low_pass}");
-	nama("add_effect $mastering->{fx_compressor}");
-	nama("add_effect $mastering->{fx_spatialiser}");
+	nama_cmd("add_effect $mastering->{fx_low_pass}");
+	nama_cmd("add_effect $mastering->{fx_compressor}");
+	nama_cmd("add_effect $mastering->{fx_spatialiser}");
 
 	$this_track = $tn{Mid};
 
-	nama("add_effect $mastering->{fx_mid_pass}");
-	nama("add_effect $mastering->{fx_compressor}");
-	nama("add_effect $mastering->{fx_spatialiser}");
+	nama_cmd("add_effect $mastering->{fx_mid_pass}");
+	nama_cmd("add_effect $mastering->{fx_compressor}");
+	nama_cmd("add_effect $mastering->{fx_spatialiser}");
 
 	$this_track = $tn{High};
 
-	nama("add_effect $mastering->{fx_high_pass}");
-	nama("add_effect $mastering->{fx_compressor}");
-	nama("add_effect $mastering->{fx_spatialiser}");
+	nama_cmd("add_effect $mastering->{fx_high_pass}");
+	nama_cmd("add_effect $mastering->{fx_compressor}");
+	nama_cmd("add_effect $mastering->{fx_spatialiser}");
 
 	$this_track = $tn{Boost};
 	
-	nama("add_effect $mastering->{fx_limiter}"); # insert after vol
+	nama_cmd("add_effect $mastering->{fx_limiter}"); # insert after vol
 }
 
 sub unhide_mastering_tracks {
-	nama("for Mastering; set_track hide 0 rw MON");
+	nama_cmd("for Mastering; set_track hide 0 rw MON");
 }
 
 sub hide_mastering_tracks {
-	nama("for Mastering; set_track hide 1 rw OFF");
+	nama_cmd("for Mastering; set_track hide 1 rw OFF");
  }
 }
 		

@@ -71,21 +71,6 @@ sub add_track_alias_project {
 		return;
 	}
 }
-sub add_midi_track {
-	my ($name, @args) = @_;
-	::add_track( 
-		$name, 
-		class => '::MidiTrack',
-		group => 'Midi', 
-		source_id => 'midi', 
-		source_type => 'midi',
-		midi_versions => [],
-		novol => 1,
-		nopan => 1,
-		@args,
-	);
-}
-
 # vol/pan requirements of mastering and mixdown tracks
 
 # called from Track_subs, Graphical_subs
@@ -211,7 +196,6 @@ sub user_tracks_present {
 }
 sub all_tracks { sort{$a->n <=> $b->n } values %::Track::by_name }
 sub audio_tracks { grep { $_->class !~ /Midi/ } all_tracks() }
-sub midi_tracks { grep { $_->class =~ /Midi/ } all_tracks() }
 sub rec_hookable_tracks { 
 	grep{ $_->group ne 'Temp' and $_->group ne 'Insert' } all_tracks() 
 }

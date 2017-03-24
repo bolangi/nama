@@ -113,10 +113,10 @@ sub new_clip {
 	);
 	my $clip = ::Clip->new(
 		target => $track->basename,
-		name => $self->unique_clip_name($track->name, $track->monitor_version),
+		name => $self->unique_clip_name($track->name, $track->playback_version),
 		rw => PLAY,
 		group => $self->name,
-		version => $track->monitor_version,
+		version => $track->playback_version,
 		hide => 1,
 		%region_args,
 		%args

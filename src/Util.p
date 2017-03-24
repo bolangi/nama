@@ -19,7 +19,6 @@ our @ISA = qw(Exporter);
 
 our %EXPORT_TAGS = ( 'all' => [ qw(
 
-	rw_set
 	freq
 	channels
 	input_node

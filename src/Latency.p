@@ -373,10 +373,10 @@ sub get_live_param { # for effect, not controller
 	my $FX = fxn($op);
 	my $n = $FX->chain;
 	my $i = $FX->ecasound_effect_index;
-	ecasound("c-select $n");
-	ecasound("cop-select $i");
-	ecasound("copp-select $param");
-	ecasound("copp-get")
+	ecasound_iam("c-select $n");
+	ecasound_iam("cop-select $i");
+	ecasound_iam("copp-select $param");
+	ecasound_iam("copp-get")
 }
 
 sub frames_to_secs { # One time conversion for delay op

@@ -25,19 +25,19 @@ sub cache_track { # launch subparts if conditions are met
 	$args->{track} = $track;
 	$args->{additional_time} //= 0;
 	
-	pagers($track->name, ": preparing to cache.");
+	pagers($track->name. ": preparing to cache.");
 	
 	# abort if track is a mix track for a bus and the bus is OFF 
 	if( my $bus = $bn{$track->name}
 		and $track->rec 
 	 ){ 
 		$bus->rw eq OFF and pagers(
-			$bus->name, ": status is OFF. Aborting."), return;
+			$bus->name. ": status is OFF. Aborting."), return;
 	} else { 
 		$track->play or pagers(
-			$track->name, ": track caching requires PLAY status. Aborting."), return;
+			$track->name. ": track caching requires PLAY status. Aborting."), return;
 	}
-	pagers($track->name, ": nothing to cache!  Skipping."), return 
+	pagers($track->name. ": nothing to cache!  Skipping."), return 
 		unless 	$track->user_ops 
 				or $track->has_insert
 				or $track->is_region
@@ -72,7 +72,7 @@ sub reactivate_vol_pan {
 sub prepare_to_cache {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
-	$args->{orig_version} = $args->{track}->monitor_version;
+	$args->{orig_version} = $args->{track}->playback_version;
 
 
 	#   We route the signal thusly:
@@ -149,15 +149,15 @@ sub cache_engine_run {
 
 	$args->{processing_time} = $setup->{audio_length} + $args->{additional_time};
 
-	pagers($args->{track}->name,": processing time: ". d2($args->{processing_time}). " seconds");
+	pagers($args->{track}->name.": processing time: ". d2($args->{processing_time}). " seconds");
 	pagers("Starting cache operation. Please wait.");
 	
 	revise_prompt(" "); 
 
 	# we try to set processing time this way
-	ecasound("cs-set-length $args->{processing_time}"); 
+	ecasound_iam("cs-set-length $args->{processing_time}"); 
 
-	ecasound("start");
+	ecasound_iam("start");
 
 	# ensure that engine stops at completion time
 	$setup->{cache_track_args} = $args;
@@ -220,7 +220,7 @@ sub update_cache_map {
 			map{ $_->remove        } @inserts_list;
 			map{ delete $track->{$_} } qw( region_start region_end target );
 
-		pagers(qq(Saving effects for cached track "), $track->name, '".');
+		pagers(qq(Saving effects for cached track "). $track->name. '".');
 		pagers(qq('uncache' will restore effects and set version $args->{orig_version}\n));
 		}
 }
@@ -239,8 +239,8 @@ sub post_cache_processing {
 sub poll_cache_progress {
 	my $args = $setup->{cache_track_args};
 	print ".";
-	my $status = ecasound('engine-status'); 
-	my $here   = ecasound("getpos");
+	my $status = ecasound_iam('engine-status'); 
+	my $here   = ecasound_iam("getpos");
 	update_clock_display();
 	logpkg('debug', "engine time:   ". d2($here));
 	logpkg('debug', "engine status:  $status");
@@ -267,7 +267,7 @@ sub uncache_track {
 	local $this_track;
 	$track->play or 
 		throw($track->name, ": cannot uncache unless track is set to PLAY"), return;
-	my $version = $track->monitor_version;
+	my $version = $track->playback_version;
 	my ($ec) = is_cached($track, $version);
 	defined $ec or throw($track->name, ": version $version is not cached"), return;
 	$track->user_ops and 
@@ -294,7 +294,7 @@ sub uncache_track {
 		if $track->is_region;
 
 	my $bus = $bn{$track->name};
-	$track->set(rw => REC), pagers($track->name, ": setting mix track to REC")
+	$track->set(rw => REC), pagers($track->name. ": setting mix track to REC")
 		if defined $bus;
 }
 sub is_cached {

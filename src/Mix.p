@@ -20,16 +20,16 @@ sub check_level {
 		or throw("check_level: generate_setup failed!"), return;
 	connect_transport();
 	
-	ecasound('start'); # don't use heartbeat
+	ecasound_iam('start'); # don't use heartbeat
 	sleep 2; # time for engine to stabilize
-	while( ecasound('engine-status') ne 'finished'){ 
+	while( ecasound_iam('engine-status') ne 'finished'){ 
 		print q(.); sleep 1; update_clock_display()}; 
 	print " Done\n";
 
-	my $cs = ecasound('cop-status');
+	my $cs = ecasound_iam('cop-status');
 
 	my ($level_output) = $cs =~ /Status info:\s*?\n(.+)\z/s;
-	::mandatory_pager($level_output);
+	pager($level_output);
 
 	# restore previous state
 	
@@ -68,7 +68,7 @@ sub automix {
 
 	### Status before mixdown:
 
-	nama('show');
+	nama_cmd('show');
 
 	
 	### reduce track volume levels  to 10%
@@ -82,9 +82,9 @@ sub automix {
 
 	### reduce vol command: $reduce_vol_command
 
-	for (@tracks){ nama("$_  $reduce_vol_command") }
+	for (@tracks){ nama_cmd("$_  $reduce_vol_command") }
 
-	nama('show');
+	nama_cmd('show');
 
 	generate_setup('automix') # pass a bit of magic
 		or throw("automix: generate_setup failed!"), return;
@@ -92,14 +92,14 @@ sub automix {
 	
 	# start_transport() does a rec_cleanup() on transport stop
 	
-	ecasound('start'); # don't use heartbeat
+	ecasound_iam('start'); # don't use heartbeat
 	sleep 2; # time for engine to stabilize
-	while( ecasound('engine-status') ne 'finished'){ 
+	while( ecasound_iam('engine-status') ne 'finished'){ 
 		print q(.); sleep 1; update_clock_display()}; 
 	print " Done\n";
 
 	# parse cop status
-	my $cs = ecasound('cop-status');
+	my $cs = ecasound_iam('cop-status');
 	### cs: $cs
 	my $cs_re = qr/Chain "1".+?result-max-multiplier ([\.\d]+)/s;
 	my ($multiplier) = $cs =~ /$cs_re/;
@@ -113,17 +113,17 @@ sub automix {
 	if ( $multiplier < 0.00001 ){
 
 		throw("Signal appears to be silence. Skipping.");
-		for (@tracks){ nama("$_  $restore_vol_command") }
+		for (@tracks){ nama_cmd("$_  $restore_vol_command") }
 		$tn{Master}->set(rw => MON);
 		return;
 	}
 
 	### apply multiplier to individual tracks
 
-	for (@tracks){ nama( "$_ vol*$multiplier" ) }
+	for (@tracks){ nama_cmd( "$_ vol*$multiplier" ) }
 
 	### mixdown
-	nama('mixdown; arm; start');
+	nama_cmd('mixdown; arm; start');
 
 	### restore audio output
 

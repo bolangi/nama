@@ -53,6 +53,11 @@ sub kill_and_reap {
 		my $self = shift;
 		::kill_and_reap( @{$self->{pids}} );
 }
+sub tracks {
+	my $self = shift;
+	my @tracks = grep { $self->name eq $_->engine_group } ::all_tracks();
+}
+sub ecasound_iam {}
 
 ### class methods
 
@@ -62,6 +67,7 @@ sub sync_action {
 	my ($method, @args) = @_;
 	$_->$method(@args) for engines()
 }
+*configure = \&::NetEngine::configure;
 }
 
 {
@@ -115,7 +121,7 @@ sub launch_ecasound_server {
 	sleep 1;
 	$self->init_ecasound_socket();
 }
-sub ecasound {
+sub ecasound_iam{
 	my $self = shift;
 	my $cmd = shift;
 	#my $category = ::munge_category(shift());
@@ -157,8 +163,6 @@ if(	! $return_value == 256 ){
 	}
 	
 }
-sub set_ready { $_[0]->{ready}++ }
-sub clear_ready { delete $_[0]->{ready} }
 sub configure {
 	package ::;
 	my $self = shift;
@@ -166,10 +170,8 @@ sub configure {
 
 	# don't disturb recording/mixing
 	
-	return if ::ChainSetup::really_recording() and engine_running();
+	return if ::ChainSetup::really_recording() and ecasound_engine_running();
 	
-	$self->clear_ready();
-
 	# store a lists of wav-recording tracks for the rerecord
 	# function
 	
@@ -193,7 +195,7 @@ sub configure {
 	}
 	$setup->{changed} = 0 ; # reset for next time
 
-	nama('show_tracks');
+	nama_cmd('show_tracks');
 
 	{ local $quiet = 1; stop_transport() }
 
@@ -222,7 +224,6 @@ sub configure {
 		}
 		$self->start_transport('quiet') if $mode->eager 
 								and ($mode->doodle or $mode->preview);
-		$self->set_ready();
 		transport_status();
 		$ui->flash_ready;
 		1
@@ -242,23 +243,23 @@ with '::EcasoundRun';
 sub launch_ecasound_server {
 	my $self = shift;
 	::pager_newline("Using Ecasound via Audio::Ecasound (libecasoundc)");
-	$self->{ecasound} = Audio::Ecasound->new();
+	$self->{audio_ecasound} = Audio::Ecasound->new();
 }
-sub ecasound {
-	#logsub("&ecasound");
+sub ecasound_iam{
+	#logsub("&ecasound_iam");
 	my $self = shift;
 	my $cmd = shift;
 	my $category = ::munge_category(shift());
 	
 	logit($category,'debug',"ECI sent: $cmd");
 
-	my (@result) = $en{ecasound}->{ecasound}->eci($cmd);
+	my (@result) = $self->{audio_ecasound}->eci($cmd);
 	logit($category, 'debug',"ECI  got: @result") 
 		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
-	my $errmsg = $en{ecasound}->{ecasound}->errmsg();
+	my $errmsg = $self->{audio_ecasound}->errmsg();
 	if( $errmsg ){
 		::throw("Ecasound error: $errmsg") if $errmsg =~ /in engine-status/;
-		$en{ecasound}->{ecasound}->errmsg(''); 
+		$self->{audio_ecasound}->errmsg(''); 
 	}
 	"@result";
 }
@@ -274,11 +275,16 @@ sub new {
 	$self->{pids} = [ ::start_midish_process() ];
 	$self
 }
-sub setup {::reconfigure_midi() }
 sub configure { }
+sub setup { ::reconfigure_midi() }
 sub stop { ::stop_midi_transport() }
 sub cleanup { ::midi_rec_cleanup() }
-sub start { } # started by Ecasound engine for closest proximity in time
+sub start { ::start_midi_transport() }
+sub rec_tracks { grep {$_->rec} $_[0]->user_tracks }
+sub system_tracks { $::tn{midi_record_buffer} } # XXX hardcoded
+sub user_tracks { grep { $_->[0]->name ne 'midi_record_buffer' } $_[0]->tracks } # XXX hardcoded
+sub play_tracks { grep {$_->play} $_[0]->user_tracks }
+sub is_active { $_[0]->rec_tracks or $_[0]->play_tracks }
 		
 } # end package 
 1

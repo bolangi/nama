@@ -15,7 +15,7 @@ sub unmute {
 }
 sub fade_around {
 	my ($coderef, @args) = @_;
-	if( engine_running() )
+	if( ecasound_engine_running() )
 	{
 		mute();
 		$coderef->(@args);

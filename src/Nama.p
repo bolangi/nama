@@ -150,9 +150,9 @@ sub main {
 	say eval join(get_data_section('banner'), qw(" "));
 	bootstrap_environment() ;
 	load_project();
-	nama($config->{execute_on_project_load});
+	nama_cmd($config->{execute_on_project_load});
 	reconfigure_engine();
-	nama($config->{opts}->{X});
+	nama_cmd($config->{opts}->{X});
 	$ui->loop();
 }
 

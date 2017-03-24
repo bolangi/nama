@@ -11,7 +11,7 @@ _a_test: /something_else\b/ | /a-test\b/
 meta: midi_cmd 
 
 midi_cmd: /[a-z]+/ predicate { 
-	return unless $::this_track->is_midi_track and $::text->{midi_cmd}->{$item[1]};
+	return unless $::this_track->engine_group =~ /midi/  and $::text->{midi_cmd}->{$item[1]};
 	my $line = "$item[1] $item{predicate}";
 	# remove 'm' prepended to all midi commands
 	$line =~ s/^m//; 
@@ -108,7 +108,7 @@ semistop: /;|$/
 command: iam_cmd predicate { 
 	my $user_input = "$item{iam_cmd} $item{predicate}"; 
 	::logit('::Grammar','debug',"Found Ecasound IAM command: $user_input");
-	my $result = ::ecasound($user_input);
+	my $result = ::ecasound_iam($user_input);
 	::pager( $result );  
 	1 }
 
@@ -301,7 +301,7 @@ get_state: _get_state save_target {
 # get_state: _get_state {
 #  	::load_project( name => $::project->{name},) ; 1}
 getpos: _getpos {  
-	::pager( ::d1( ::ecasound q(getpos) )); 1}
+	::pager( ::d1( ::ecasound_iam('getpos'))); 1}
 setpos: _setpos timevalue {
 	::set_position($item{timevalue}); 1}
 forward: _forward timevalue {
@@ -450,11 +450,11 @@ arm: _arm { ::arm(); 1}
 arm_start: _arm_start { ::arm(); ::start_transport(); 1 }
 connect: _connect { ::connect_transport(); 1}
 disconnect: _disconnect { ::disconnect_transport(); 1}
-engine_status: _engine_status { ::pager(::ecasound q(engine-status)); 1}
+engine_status: _engine_status { ::pager(::ecasound_iam('engine-status')); 1}
 start: _start { ::start_transport(); 1}
 stop: _stop { ::stop_transport(); 1}
-ecasound_start: _ecasound_start { ::ecasound('start'); 1}
-ecasound_stop: _ecasound_stop  { ::ecasound('stop'); 1}
+ecasound_start: _ecasound_start { ::ecasound_iam('start'); 1}
+ecasound_stop: _ecasound_stop  { ::ecasound_iam('stop'); 1}
 restart_ecasound: _restart_ecasound { ::restart_ecasound(); 1 }
 show_tracks: _show_tracks { 	
 	::pager( ::show_tracks(::showlist()));
@@ -525,13 +525,13 @@ bus_off: _bus_off {
 }
 bus_version: _bus_version dd { 
 	my $n = $item{dd};
-	::nama("for $::this_bus; version $n");
+	::nama_cmd("for $::this_bus; version $n");
 }
 mixdown: _mixdown { ::mixdown(); 1}
 mixplay: _mixplay { ::mixplay(); 1}
 mixoff:  _mixoff  { ::mixoff(); 1}
 automix: _automix { ::automix(); 1 }
-autofix_tracks: _autofix_tracks { ::nama("for mon; fixdc; normalize"); 1 }
+autofix_tracks: _autofix_tracks { ::nama_cmd("for mon; fixdc; normalize"); 1 }
 master_on: _master_on { ::master_on(); 1 }
 
 master_off: _master_off { ::master_off(); 1 }
@@ -683,7 +683,7 @@ list_marks: _list_marks {
 		  #sort { $a->time <=> $b->time } 
 		  @::Mark::all;
 	my $start = my $end = "undefined";
-	push @lines, "now at ". sprintf("%.1f", ::ecasound "getpos"). "\n";
+	push @lines, "now at ". sprintf("%.1f\n", ::ecasound_iam("getpos"));
 	::pager(@lines);
 	1;}
 to_mark: _to_mark dd {
@@ -765,7 +765,7 @@ add_controller: _add_controller effect value(s?) {
 	my $values = $item{"value(s?)"};
 	my $cmd = "add_controller $parent $code @$values";
 	print "command: $cmd\n";
-	::nama($cmd);
+	::nama_cmd($cmd);
 	1
 }
 
@@ -851,7 +851,7 @@ add_effect: _add_effect ('first'  | 'f')  add_target value(s?) {
 		@{$item{'value(s?)'}},
 		$::this_track->{ops}->[0];
 		#print "command is $command\n";
-	::nama($command)
+	::nama_cmd($command)
 }
 add_effect: _add_effect ('last'   | 'l')  add_target value(s?) { 
 	my $command = join " ", 
@@ -860,7 +860,7 @@ add_effect: _add_effect ('last'   | 'l')  add_target value(s?) {
 		@{$item{'value(s?)'}},
 		qw(ZZZ);
 		#print "command is $command\n";
-	::nama($command)
+	::nama_cmd($command)
 }
 add_effect: _add_effect ('before' | 'b')  before add_target value(s?) {
 	my $command = join " ", 
@@ -869,7 +869,7 @@ add_effect: _add_effect ('before' | 'b')  before add_target value(s?) {
 		@{$item{'value(s?)'}},
 		$item{before};
 		#print "command is $command\n";
-	::nama($command)
+	::nama_cmd($command)
 }
 add_effect_first: _add_effect_first add_target value(s?) {
 	my $command = join " ", 
@@ -878,7 +878,7 @@ add_effect_first: _add_effect_first add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}};
 		#print "command is $command\n";
-	::nama($command)
+	::nama_cmd($command)
 }
 add_effect_last: _add_effect_last add_target value(s?) {
 	my $command = join " ", 
@@ -887,7 +887,7 @@ add_effect_last: _add_effect_last add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}};
 		#print "command is $command\n";
-	::nama($command)
+	::nama_cmd($command)
 }
 add_effect_before: _add_effect_before before add_target value(s?) {
 	my $command = join " ", 
@@ -897,7 +897,7 @@ add_effect_before: _add_effect_before before add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}};
 		#print "command is $command\n";
-	::nama($command)
+	::nama_cmd($command)
 }
 
 parent: op_id
@@ -980,11 +980,11 @@ add_to_bunch: _add_to_bunch ident(s) { ::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions { 
 	::pager( join " ", @{$::this_track->versions}); 1}
 ladspa_register: _ladspa_register { 
-	::pager( ::ecasound("ladspa-register")); 1}
+	::pager( ::ecasound_iam("ladspa-register")); 1}
 preset_register: _preset_register { 
-	::pager( ::ecasound("preset-register")); 1}
+	::pager( ::ecasound_iam("preset-register")); 1}
 ctrl_register: _ctrl_register { 
-	::pager( ::ecasound("ctrl-register")); 1}
+	::pager( ::ecasound_iam("ctrl-register")); 1}
 preview: _preview { ::set_preview_mode(); 1}
 doodle: _doodle { ::set_doodle_mode(); 1 }
 normalize: _normalize { $::this_track->normalize; 1}
@@ -1114,7 +1114,7 @@ new_effect_chain: (_new_effect_chain | _overwrite_effect_chain ) ident op_id(s?)
 	my @existing = ::EffectChain::find(user => 1, name => $name);
 	if ( scalar @existing ){
 		$item[1] eq 'overwrite_effect_chain'
- 			? ::nama("delete_effect_chain $name")
+ 			? ::nama_cmd("delete_effect_chain $name")
  			: ::throw(qq/$name: effect chain with this name is already defined. 
 Use a different name, or use "overwrite_effect_chain"/) && return;
 	}
@@ -1368,7 +1368,7 @@ show_comments: _show_comments {
 }
 add_version_comment: _add_version_comment dd(?) text {
 	my $t = $::this_track;
-	my $v = $item{'dd(?)'}->[0] // $t->monitor_version // return 1;
+	my $v = $item{'dd(?)'}->[0] // $t->playback_version // return 1;
 	::pager( $t->add_version_comment($v,$item{text})); 
 }	
 remove_version_comment: _remove_version_comment dd {
@@ -1378,7 +1378,7 @@ remove_version_comment: _remove_version_comment dd {
 show_version_comment: _show_version_comment dd(s?) {
 	my $t = $::this_track;
 	my @v = @{$item{'dd(s?)'}};
-	if(!@v){ @v = $t->monitor_version}
+	if(!@v){ @v = $t->playback_version}
 	@v or return 1;
 	$t->show_version_comments(@v);
 	 1;
@@ -1429,11 +1429,11 @@ rec_end_mark: _rec_end_mark {
 	$::this_edit->rec_end_mark->jump_here; 1;
 }
 set_play_start_mark: _set_play_start_mark {
-	$::setup->{edit_points}->[0] = ::ecasound('getpos'); 1}
+	$::setup->{edit_points}->[0] = ::ecasound_iam('getpos'); 1}
 set_rec_start_mark: _set_rec_start_mark {
-	$::setup->{edit_points}->[1] = ::ecasound('getpos'); 1}
+	$::setup->{edit_points}->[1] = ::ecasound_iam('getpos'); 1}
 set_rec_end_mark: _set_rec_end_mark {
-	$::setup->{edit_points}->[2] = ::ecasound('getpos'); 1}
+	$::setup->{edit_points}->[2] = ::ecasound_iam('getpos'); 1}
 end_edit_mode: _end_edit_mode { ::end_edit_mode(); 1;}
 
 disable_edits: _disable_edits { ::disable_edits();1 }
@@ -1565,7 +1565,7 @@ existing_sequence_name: ident {
 }
 convert_to_sequence: _convert_to_sequence {
 	my $sequence_name = $::this_track->name;
-	::nama("nsq $sequence_name");
+	::nama_cmd("nsq $sequence_name");
 	$::this_sequence->new_clip($::this_track);
 	1
 }
@@ -1718,7 +1718,7 @@ select_track: _select_track track_spec
 set_tempo: _set_tempo dd {::midish("t $item{dd}")}
 
 route_track: _route_track source_id send_id { 
-	::nama("source $item{source_id}");
-	::nama("send $item{send_id}");
+	::nama_cmd("source $item{source_id}");
+	::nama_cmd("send $item{send_id}");
 	1
 }

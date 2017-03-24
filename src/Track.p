@@ -204,8 +204,6 @@ sub is_mix_track {
 	my $track = shift;
 	($bn{$track->name} or $track->name eq 'Master') and $track->rw eq MON
 }
-sub is_midi_track { $_[0]->group eq 'Midi' }
- 
 sub bus { $bn{$_[0]->group} }
 
 { my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low
@@ -216,8 +214,7 @@ sub is_system_track { $system_track{$_[0]->name} }
 
 sub engine_group {
 	my $track = shift;
-	my $bus = $bn{$track->group};
-	$bus->engine_group || $track->{engine_group} || $config->{ecasound_engine_name}
+	$track->{engine_group} || $config->{ecasound_engine_name}
 }
 sub engine {
 	my $track = shift;
@@ -230,6 +227,14 @@ sub select_track {
 		::set_current_bus();
 }
 sub is_selected { $::this_track->name eq $_[0]->name }
+
+sub rec  { $_[0]->rec_status eq REC }
+sub mon  { $_[0]->rec_status eq MON }
+sub play { $_[0]->rec_status eq PLAY}
+sub off  { $_[0]->rec_status eq OFF }
+
+sub current_midi {}
+
 } # end package
 
 
@@ -298,7 +303,7 @@ our @ISA = '::Track';
 sub width { $tn{$_[0]->target}->width }
 sub rec_status { $tn{$_[0]->target}->rec_status }
 sub full_path { $tn{$_[0]->target}->full_path} 
-sub monitor_version { $tn{$_[0]->target}->monitor_version} 
+sub playback_version { $tn{$_[0]->target}->playback_version} 
 sub source_type { $tn{$_[0]->target}->source_type}
 sub source_id { $tn{$_[0]->target}->source_id}
 sub source_status { $tn{$_[0]->target}->source_status }
@@ -353,7 +358,7 @@ sub current_version {
 	my $status = $track->rec_status;
 	#logpkg('debug', "last: $last status: $status");
 	if 	($status eq REC){ return ++$last}
-	elsif ( $status eq PLAY){ return $track->monitor_version } 
+	elsif ( $status eq PLAY){ return $track->playback_version } 
 	else { return 0 }
 }
 sub source_status { 
@@ -393,7 +398,7 @@ sub current_version {
 	my $status = $track->rec_status;
 	#logpkg('debug', "last: $last status: $status");
 	if 	($status eq REC){ return ++$last}
-	elsif ( $status eq PLAY){ return $track->monitor_version } 
+	elsif ( $status eq PLAY){ return $track->playback_version } 
 	else { return 0 }
 }
 sub playat_time {
@@ -507,23 +512,27 @@ sub new {
 }
 # TODO enable
 sub mute {   
-	# ::midish( 'mute '  . $_[0]->current_midi ) 
+	my $track = shift;
+	if ( $track->exists_midi )
+	{
+		::midish( 'mute '  . $_[0]->current_midi ) 
+	}
 }
 sub unmute { 
-	# ::midish( 'unmute '. $_[0]->current_midi ) 
+	my $track = shift;
+	if ( $track->exists_midi )
+	{
+		# mute unselected versions
+		map{ ::midish( 'mute '. midi_version_name($track->name, $_) ) }
+		grep{ $_ != $track->version } @{$track->versions};
+
+		::midish( 'unmute '  . $_[0]->current_midi ) 
+	}
 }
 sub rw_set {
 	my $track = shift;
 	my ($bus, $setting) = @_;
 	$track->{rw} = uc $setting;
-	# create midish track if we ask to record
-	# and track does not exist
-	my $cmd = 'tnew '. $track->current_midi;
-	::midish($cmd ) 
-		if $setting eq REC 
-		and not $track->exists_midi;
-		::midish('ct '. $track->current_midi);
-	$track->rec_status eq OFF ? $track->mute : $track->unmute
 }
 sub exists_midi {
 	my $track = shift;
@@ -541,36 +550,27 @@ sub rec_status {
 sub versions { $_[0]->{midi_versions} }
 
 
-sub midi_name { 
-	my ($name, $index) = @_;
-	return undef unless defined $name and defined $index;
-	join '_', @_ 
-}
 sub select_track {
 		my $track = shift;
 		$::this_track = $track;
-
-		# mute unselected versions
-		map{ ::midish( 'mute '. midi_name($track->name, $_) ) }
-		grep{ $_ != $track->version } @{$track->versions};
-
-
 		$track->unmute;
 		::set_current_bus();
 }
 sub current_midi {
 	# current MIDI track
-	# example: synth_2
-	# analagous to current_wav() which would be synth_2.wav
+	# provides the name of the midish track corresponding to the selected version
+	# example: synth_2, for track synth, version 2
+	# analagous to current_wav() for audio track which would output synth_2.wav
+	 
 	my $track = shift;
 	
 	if 	($track->rec_status eq REC)
 	{ 
-		midi_name($track->name, $track->current_version)
+		midi_version_name($track->name, $track->current_version)
 	} 
 	elsif ( $track->rec_status eq PLAY)
 	{ 
-		midi_name($track->name, $track->monitor_version)
+		midi_version_name($track->name, $track->playback_version)
 	} 
 	else 
 	{ 
@@ -593,6 +593,36 @@ sub set_io {
 	$track->set($type_field => $type);
 	$track->set($id_field => $id);
 } 
+sub set_rw {
+	my $track = shift;
+	my ($bus, $setting) = @_;
+	::throw("can't set MIDI track to MON. Setting is unchanged"), return if $setting eq MON;
+	$track->{rw} = $setting;
+	# mute all versions
+	#$logic{$setting}->($bus, $setting);
+}
+sub create_midi_version {
+	my $track = shift;
+	my $n = shift;
+	::add_midi_track(midi_version_name($track->name, $n), hide => 1);
+}
+sub set_version {
+	my ($track, $n) = @_;
+	my $name = $track->name;
+	if ($n == 0){
+		::pager("$name: version set to zero, following bus default\n");
+		$track->set(version => $n)
+	} elsif ( grep{ $n == $_ } @{$track->versions} ){
+		::pager("$name: anchoring version $n\n");
+		$track->set(version => $n);
+	} else { 
+		::throw("$name: version $n does not exist, skipping.\n")
+	}
+}
+sub midi_version {
+	my $track = shift;
+	join '_', $track->name, $track->version if $track->version
+}
 
 }
 

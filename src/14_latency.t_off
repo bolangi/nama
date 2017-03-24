@@ -62,18 +62,18 @@ cmd("setpos 1.5");
 cmd("new_mark in2");
 cmd("setpos 2.0");
 cmd("new_mark out2");
-is($this_track->monitor_version, 1, 'Find WAV file to play, normal track');
+is($this_track->playback_version, 1, 'Find WAV file to play, normal track');
 cmd("sine off");
 cmd("link_track sinuous Mixdown");
 cmd("sinuous");
-is($this_track->monitor_version, 1, 'Find WAV file to play, link track');
+is($this_track->playback_version, 1, 'Find WAV file to play, link track');
 cmd("arm");
 
 symlink($wav, join_path(this_wav_dir(),'sinister.wav'));
 cmd("scan");
 cmd("add_track sinister; mon");
 reconfigure_engine();
-is($this_track->monitor_version, 1, 'Find WAV file to play, unnumbered WAV file');
+is($this_track->playback_version, 1, 'Find WAV file to play, unnumbered WAV file');
 
 sub gen_alsa { force_alsa(); command_process('gen')}
 sub gen_jack { force_jack(); command_process('gen')}

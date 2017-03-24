@@ -168,7 +168,7 @@ use ::Globals qw(:all);
 sub drop_mark {
 	logsub("&drop_mark");
 	my $name = shift;
-	my $here = ecasound("getpos");
+	my $here = ecasound_iam("getpos");
 
 	if( my $mark = $::Mark::by_name{$name}){
 		pager("$name: a mark with this name exists already at: ", 
@@ -204,7 +204,7 @@ sub next_mark {
 	logsub("&next_mark");
 	my $jumps = shift || 0;
 	$jumps and $jumps--;
-	my $here = ecasound("cs-get-position");
+	my $here = ecasound_iam("cs-get-position");
 	my @marks = ::Mark::all();
 	for my $i ( 0..$#marks ){
 		if ($marks[$i]->time - $here > 0.001 ){
@@ -219,7 +219,7 @@ sub previous_mark {
 	logsub("&previous_mark");
 	my $jumps = shift || 0;
 	$jumps and $jumps--;
-	my $here = ecasound("getpos");
+	my $here = ecasound_iam("getpos");
 	my @marks = ::Mark::all();
 	for my $i ( reverse 0..$#marks ){
 		if ($marks[$i]->time < $here ){
@@ -242,14 +242,14 @@ sub to_end {
 	logsub("&to_end");
 	# ten seconds shy of end
 	return if ::ChainSetup::really_recording();
-	my $end = ecasound('cs-get-length') - 10 ;  
+	my $end = ecasound_iam('cs-get-length') - 10 ;  
 	set_position( $end);
 } 
 sub jump {
 	return if ::ChainSetup::really_recording();
 	my $delta = shift;
 	logsub("&jump");
-	my $here = ecasound('getpos');
+	my $here = ecasound_iam('getpos');
 	logpkg('debug', "delta: $delta, here: $here, unit: $gui->{_seek_unit}");
 	my $new_pos = $here + $delta * $gui->{_seek_unit};
 	if ( $setup->{audio_length} )
@@ -268,7 +268,7 @@ sub _set_position {
     return if ::ChainSetup::really_recording(); # don't allow seek while recording
 
     my $seconds = shift;
-    my $coderef = sub{ ecasound("setpos $seconds") };
+    my $coderef = sub{ ecasound_iam("setpos $seconds") };
 
 	$jack->{jackd_running} 
 		?  ::stop_do_start( $coderef, $jack->{seek_delay} )
@@ -279,7 +279,7 @@ sub _set_position {
 
 sub forward {
 	my $delta = shift;
-	my $here = ecasound('getpos');
+	my $here = ecasound_iam('getpos');
 	my $new = $here + $delta;
 	set_position( $new );
 }
@@ -300,7 +300,7 @@ sub jump_backward { jump_forward( - shift()) }
 our @ISA = '::Mark';
 our $last_time;
 sub name { 'Here' }
-sub time { ::ecasound('cs-connected') ? ($last_time = ::ecasound('getpos')) : $last_time } 
+sub time { ::ecasound_iam('cs-connected') ? ($last_time = ::ecasound_iam('getpos')) : $last_time } 
 }
 
 { package ::ClipMark;

@@ -53,7 +53,7 @@ sub new {
 
 	my $name = $self->host_track;
 	my $host = $::tn{$name};
-	confess( ::project_dir().": missing host_track".  $::this_track->dump. $self->dump. ::nama("dumpa")) if !$host;
+	confess( ::project_dir().": missing host_track".  $::this_track->dump. $self->dump. ::nama_cmd("dumpa")) if !$host;
 
 # Routing:
 #
@@ -94,7 +94,7 @@ sub new {
 	my $host_track_alias = $::tn{$self->host_alias} // 
 		::VersionTrack->new(
 			name 	=> $self->host_alias,
-			version => $host->monitor_version, # static
+			version => $host->playback_version, # static
 			target  => $host->name,
 			rw		=> PLAY,                  # do not REC
 			group   => $self->edit_root_name,  # i.e. sax-v5
@@ -289,7 +289,7 @@ sub initialize_edit_points {
 sub abort_set_edit_points {
 	::throw("...Aborting!");
 	reset_input_line();
-	ecasound('stop');
+	ecasound_iam('stop');
 	initialize_edit_points();
 	detect_spacebar();
 }
@@ -297,7 +297,7 @@ sub abort_set_edit_points {
 sub get_edit_mark {
 	$p++;
 	if($p <= 3){  # record mark
-		my $pos = ecasound('getpos');
+		my $pos = ecasound_iam('getpos');
 		push @_edit_points, $pos;
 		::pager(" got $names[$p] position ".d1($pos));
 		reset_input_line();
@@ -310,7 +310,7 @@ sub get_edit_mark {
 }
 sub complete_edit_points {
 	@{$setup->{edit_points}} = @_edit_points; # save to global
-	ecasound('stop');
+	ecasound_iam('stop');
 	::pager("\nEngine is stopped\n");
 	detect_spacebar();
 	print prompt(), " ";
@@ -321,7 +321,7 @@ sub set_edit_points {
 	::throw("You must use a playback-only mode to setup edit marks. Aborting"), 
 		return 1 if ::ChainSetup::really_recording();
 	::throw("You need stop the engine first. Aborting"), 
-		return 1 if engine_running();
+		return 1 if ecasound_engine_running();
 	::pager("Ready to set edit points!");
 	sleeper(0.2);
 	::pager(q(Press the "P" key three times to mark positions for:
@@ -337,7 +337,7 @@ Engine will start in 2 seconds.));
 	sub {
 		reset_input_line();
 		detect_keystroke_p();
-		ecasound('start');
+		ecasound_iam('start');
 		::pager("\n\nEngine is running\n");
 		print prompt();
 	});
@@ -404,7 +404,7 @@ Edits will be applied against current version"),
 
 	# create edit
 	
-	my $v = $this_track->monitor_version;
+	my $v = $this_track->playback_version;
 	::pager("$name: creating new edit against version $v");
 	my $edit = ::Edit->new(
 		host_track 		=> $this_track->name,
@@ -490,7 +490,7 @@ sub edit_mode_conditions {
 
 	# the following conditions should never be triggered 
 	
-	$this_edit->host_alias_track->monitor_version == $this_edit->host_version
+	$this_edit->host_alias_track->playback_version == $this_edit->host_version
 		or die('host alias track: ',$this_edit->host_alias,
 				" must be set to version ",$this_edit->host_version), return
 	1;
@@ -741,9 +741,9 @@ sub select_edit {
  	::throw( qq(Edit $n applies to track "), $edit->host_track, 
  		 qq(" version ), $edit->host_version, ".
 This does does not match the current monitor version (",
-$edit->host->monitor_version,"). 
+$edit->host->playback_version,"). 
 Set the correct version and try again."), return
-	if $edit->host->monitor_version != $edit->host_version;
+	if $edit->host->playback_version != $edit->host_version;
 
 	# select edit
 	
@@ -800,7 +800,7 @@ sub merge_edits {
 	my $v = $edit->host_version;
 	my %edits = 
 		map{ my ($edit) = $tn{$_}->name =~ /edit(\d+)$/;
-			 my $ver  = $tn{$_}->monitor_version;
+			 my $ver  = $tn{$_}->playback_version;
 			 $edit => $ver
 		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->play} 
 		$edit->version_bus->tracks; 
@@ -875,7 +875,7 @@ sub select_edit_track {
 	::throw("You need to select an edit first (list_edits, select_edit)\n"),
 		return unless defined $this_edit;
 	$this_track = $this_edit->$track_selector_method; 
-	nama('show_track');
+	nama_cmd('show_track');
 }
 
 } # end package

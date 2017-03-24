@@ -225,64 +225,69 @@ sub throw {
 	logsub("&throw");
 	pager_newline(@_)
 }
-sub pagers {
-	logsub("&pagers");
-	my $output = join "", @_; 
-	chomp $output;
-	pager($output, $/)
-}
+sub pagers { &pager_newline } # pass arguments along
+
 sub pager_newline { 
-	my @lines = map { my $s = $_; chomp $s; $s .="\n"; $s } @_;
+
+	# Add a newline if necessary to each line
+	# push them onto the output buffer
+	# print them to the screen
+	
+	my @lines = @_;
+	for (@lines){ $_ .= "\n" if  ! /\n$/ }
 	push @{$text->{output_buffer}}, @lines;
 	print @lines;
 }
-sub pager {
-	logsub("&pager");
-	my @output = @_;
 
-	# this buffer is used to return results of OSC commands 
-	# the OSC client clears it after sending
-	
-	$text->{output_buffer} //= [];
-	push @{$text->{output_buffer}}, @output, "\n\n";
+sub paging_allowed {
 
-	my $line_count = 0;
-	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
-	if 
-	( 
-		(ref $ui) =~ /Text/  # pager interferes with GUI
+		# The pager interferes with GUI and testing
+		# so do not use the pager in these conditions
+		# or if use_pager config variable is not set.
+		
+		(ref $ui) =~ /Text/
 		and $config->{use_pager} 
 		and ! $config->{opts}->{T}
-		and $line_count > $text->{screen_lines} - 2
-	) { 
-		my $fh = File::Temp->new();
-		my $fname = $fh->filename;
-		print $fh @output;
-		file_pager($fname);
-	} else {
-		print @output;
-	}
-	print "\n\n";
+}
+sub pager {
+
+	# push array onto output buffer, add two newlines
+	# and print on terminal or view in pager
+	# as appropriate
+	
+	logsub("&pager");
+	my @output = @_;
+	push @{$text->{output_buffer}}, @output, "\n\n";
+	page_or_print(@output);
 }
 
-sub mandatory_pager {
-	logsub("&mandatory_pager");
+sub init_output_buffer { $text->{output_buffer} //= [] };
+
+sub linecount {
 	my @output = @_;
-	if 
-	( 
-		(ref $ui) =~ /Text/  # pager interferes with GUI
-		and $config->{use_pager} 
-	) { 
-		my $fh = File::Temp->new();
-		my $fname = $fh->filename;
-		print $fh @output;
-		file_pager($fname);
-	} else {
-		print @output;
-	}
-	print "\n\n";
-} 
+	my $linecount = 0;
+	for (@output){ $linecount += $_ =~ tr(\n)(\n) }
+	$linecount
+}
+
+sub page_or_print {
+	my (@output) = @_;
+	return unless paging_allowed();
+	linecount(@output) > $text->{screen_lines} - 2
+		? write_to_temp_file_and_view(@output)
+		: print @output;
+}
+sub write_to_temp_file_and_view {
+	my @output = @_;
+	my $fh = File::Temp->new();
+	my $fname = $fh->filename;
+	print $fh @output;
+	file_pager($fname);
+}
 sub file_pager {
+
+	# given a filename, run the pager on it
+	
 	logsub("&file_pager");
 	my $fname = shift;
 	if (! -e $fname or ! -r $fname ){
@@ -317,7 +322,7 @@ sub get_ecasound_iam_keywords {
 									?	);
 	
 	%{$text->{iam}} = map{$_,1 } 
-				grep{ ! $reserved{$_} } split /[\s,]/, ecasound('int-cmd-list');
+				grep{ ! $reserved{$_} } split /[\s,]/, ecasound_iam('int-cmd-list');
 }
 sub load_keywords {
 	my @keywords = keys %{$text->{commands}};

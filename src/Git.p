@@ -183,7 +183,7 @@ sub list_branches {
 
 sub autosave {
 		logsub("&autosave");
-		engine_running() ? return : git_snapshot();
+		ecasound_engine_running() ? return : git_snapshot();
 }
 sub redo {
 	if ($project->{redo}){

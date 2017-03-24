@@ -18,7 +18,7 @@ my @track_functions = qw(
 	last 
 	current_wav 
 	current_version 
-	monitor_version 
+	playback_version 
 	maybe_monitor 
 	rec_status 
 	region_start_time 

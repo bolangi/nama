@@ -145,7 +145,7 @@ sub definitions {
 		use_git							=> 1,
 		autosave						=> 'undo',
 		volume_control_operator 		=> 'ea', # default to linear scale
-		sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
+		sync_mixdown_and_playback_version_numbers => 1, # not implemented yet
 		engine_tcp_port					=> 2868, # 'default' engine
 		engine_fade_length_on_start_stop => 0.18,# when starting/stopping transport
 		engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
@@ -153,6 +153,7 @@ sub definitions {
 		jack_tranport_mode				=> 'send',
 		ecasound_jack_client_name		=> 'NamaEcasound',
 		ecasound_engine_name			=> 'ecasound',
+		midi_engine_name				=> 'midish',
 		engine_command_output_buffer_size => 2**22, # 4 MB
 		edit_playback_end_margin 		=> 3,
 		edit_crossfade_time 			=> 0.03,
@@ -255,8 +256,8 @@ sub initialize_interfaces {
 
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 	
-	::MidiEngine->new(name => 'Midish');
-	select_ecasound_interface();
+	::MidiEngine->new(name => $config->{midi_engine_name});
+	initialize_ecasound_engine();
 		
 	start_osc_listener($config->{osc_listener_port}) 
 		if $config->{osc_listener_port} 
@@ -378,7 +379,7 @@ sub process_remote_command {
     };
     $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), revise_prompt(), return;
     logpkg('debug',"Got remote control socketput: $input");
-	nama($input);
+	nama_cmd($input);
 	my $out;
 	{ no warnings 'uninitialized';
 		$out = $text->{eval_result} . "\n";
@@ -421,11 +422,11 @@ sub process_osc_command {
 	$path =~ s(^/)();
 	$path =~ s(/$)();
 	my ($trackname, $fx, $param) = split '/', $path;
-	nama($trackname);
-	nama("$command @vals") if $command;
-	nama("show_effect $fx") if $fx; # select
-	nama("show_track") if $trackname and not $fx;
-	nama("show_tracks") if ! $trackname;
+	nama_cmd($trackname);
+	nama_cmd("$command @vals") if $command;
+	nama_cmd("show_effect $fx") if $fx; # select
+	nama_cmd("show_track") if $trackname and not $fx;
+	nama_cmd("show_tracks") if ! $trackname;
 	say "got OSC: ", Dumper $p;
 	say "got args: @args";
  	my $osc_out = IO::Socket::INET->new(
@@ -445,7 +446,7 @@ sub sanitize_remote_input {
 	throw($error_msg) if $error_msg;
 	$input
 }
-sub select_ecasound_interface {
+sub initialize_ecasound_engine {
 	my %args;
 	my $class;
 	if ($config->{opts}->{A} or $config->{opts}->{E})
@@ -513,7 +514,7 @@ sub munge_category {
 sub start_logging { 
 	$config->{want_logging} = initialize_logger($config->{opts}->{L})
 }
-sub ecasound { $en{ecasound} and $en{ecasound}->ecasound(@_) }
+sub ecasound_iam{ $en{ecasound} and $en{ecasound}->ecasound_iam(@_) }
 
 sub initialize_mixer {
 		::SimpleTrack->new( 

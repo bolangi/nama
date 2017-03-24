@@ -29,9 +29,13 @@ sub start_midish_process {
 }
 sub midish {
 	my $command = shift;
+	logsub('&midish');
 	return unless $config->{use_midi};
 	
 	print $fh_midi_write "$command\n";
+	say "applied midish command: $command";
+	$project->{midi_history} //=[];
+	push  @{ $project->{midi_history} },$command;
 
 	my $length = 2**16;
 	sleeper(0.05);
@@ -64,34 +68,33 @@ sub save_midish {
 }
 
 sub reconfigure_midi {
-	# Make sure we have recording track
-	
-	# TODO XXX this conditional will cause future tests for MIDI-related code to break 
-	add_midi_track($midi_rec_buf, hide => 1) 
-		if not $tn{$midi_rec_buf} 
-		and not $config->{opts}->{T};  
+	add_midi_track($midi_rec_buf, n => 999, hide => 1) 
+		if not $tn{$midi_rec_buf}
+		and $this_track->current_midi
+		and $this_track->rec;
 
 	my $midi_rec = $tn{$midi_rec_buf};
 
 	# mute all
 
 	my @all = $bn{Midi}->track_o;
-	map{ $_->mute } @all;
+
+	$_->mute for @all; # same as setting OFF for MidiTracks
 
 	# unmute audible
 
-	my @audible = grep{ $_->mon or $_->play } @all;
-	map{ $_->unmute } @audible;
+	my @audible = grep{ $_->play } @all;
+	$_->unmute for @audible;
 
 	# unset filters
 
-	map{ $_->select_track; midish("fdel $_->name") } @all;
+	do { $_->select_track; midish("fdel ".$_->name) } for @all;
 
 	# set filters for PLAY and MON tracks
 
-	map{ $_->select_track; midish(join ' ', 'rnew', $_->source_id, $_->send_id) } @audible;
+	do { $_->select_track; midish(join ' ', 'rnew', $_->source_id, $_->send_id) } for @audible;
 
-	my ($rec) = my @rec = $bn{Midi}->midi_rec_tracks;
+	my ($rec) = my @rec = $en{midish}->rec_tracks;
 
 	# maybe we're done?
 	
@@ -101,7 +104,7 @@ sub reconfigure_midi {
 
 	# mute the actual track since we'll record using the special-purpose track
 	
-	$rec->mute; 	
+	$rec->mute;
 	$midi_rec->select_track;
 
 	# use routing of target track on $midi_rec track
@@ -111,7 +114,7 @@ sub reconfigure_midi {
 	midish($cmd);
 }
 sub start_midi_transport {
-	my $start_command = $bn{Midi}->midi_rec_tracks ? 'r' : 'p';
+	my $start_command = $en{midish}->rec_tracks ? 'r' : 'p';
 	midish($start_command);
 	$setup->{midish_running}++;
 }
@@ -121,17 +124,21 @@ sub stop_midi_transport {
 	delete $setup->{midish_running};
 }
 sub midi_rec_cleanup {
+	my ($track) = $en{midish}->rec_tracks; 
+	# midish allows one recording track 
+	defined $track or return;
 	my $length = midish('print [mend]');
-	return unless $bn{Midi}->midi_rec_tracks and $length > 0; 
-	my ($track) = $bn{Midi}->midi_rec_tracks; # first and only
-		$track->select_track;
+	$length > 0 or return;
+
+	my $version = $track->current_version;
+	$track->set_version($version);
+		push @{$track->midi_versions}, $version;
 		$track->set(rw => PLAY);
-		push @{$track->{versions}}, $track->current_version;
-		$track->{version} = $track->current_version;
-		my $cmd = join ' ', 'chdup', $midi_rec_buf, $track->source_id, $track->current_midi;
+		my $cmd = join ' ', 'chdup', $midi_rec_buf, $track->source_id, $track->midi_version;
 		say "cmd: $cmd";
 		midish($cmd);
 		midish("clr $midi_rec_buf $length");
+		$track->unmute();
 		save_midish();
 }
 }
@@ -139,6 +146,23 @@ sub write_aux_midi_commands {
 	write_file($file->aux_midi_commands,  get_data_section('aux_midi_commands'))
 		unless -e $file->aux_midi_commands
 }
+sub add_midi_track {
+	my ($name, @args) = @_;
+	my $track = ::add_track( 
+		$name, 
+		class => '::MidiTrack',
+		group => 'Midi', 
+		source_id => 'midi', 
+		source_type => 'midi',
+		midi_versions => [],
+		novol => 1,
+		engine_group => $config->{midi_engine_name},
+		nopan => 1,
+		@args,
+	);
+}
+sub user_midi_tracks { grep { $_->class =~ /Midi/ } grep { !  $_->hide } all_tracks()  }
+
 	
 =comment
 chdup aux_recorder dx7 piano 
