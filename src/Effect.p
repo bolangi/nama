@@ -343,14 +343,8 @@ sub _remove_effect {
 	
 	if( my $track = $ti{$n} ){
 		my @ops_list = @{$track->ops};
-		#say "ops_list: @ops_list";
-		my $perl_version = $^V;
-		my ($minor_version) = $perl_version =~ /^v5\.(\d+)/;
 		my @new_list = grep  { $_ ne $id  } @ops_list;
-		#say "new_list: @new_list";
-		if ($minor_version <= 14) 
-		     {    $track->{ops}   = [ @new_list  ] }
-		else { @{ $track->{ops} } =   @new_list    }
+		$track->{ops} =   [ @new_list ];
 	}
 	#set_current_op($this_track->ops->[0]);
 	#set_current_param(1);
