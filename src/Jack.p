@@ -240,10 +240,10 @@ sub parse_ports_list {
 	split "\n",$j;
 }
 
-# connect jack ports via jack.plumbing or jack_connect
+# connect jack ports via jack-plumbing or jack_connect
 
 sub jack_plumbing_conf {
-	join_path( $ENV{HOME} , '.jack.plumbing' )
+	join_path( $ENV{HOME} , '.jack-plumbing' )
 }
 
 { 
@@ -314,9 +314,9 @@ sub connect_jack_ports_list {
 		make_connections($jack_plumbing_code, \@send_tracks,   'out');
 		close $fh; 
 
-		# run jack.plumbing
+		# run jack-plumbing
 		start_jack_plumbing();
-		sleeper(3); # time for jack.plumbing to launch and poll
+		sleeper(3); # time for jack-plumbing to launch and poll
 		kill_jack_plumbing();
 		initialize_jack_plumbing_conf();
 	}
@@ -372,7 +372,7 @@ sub make_connections {
  	 } @$tracks
 }
 sub kill_jack_plumbing {
-	qx(killall jack.plumbing >/dev/null 2>&1)
+	qx(killall jack-plumbing >/dev/null 2>&1)
 	unless $config->{opts}->{A} or $config->{opts}->{J};
 }
 sub start_jack_plumbing {
@@ -380,8 +380,8 @@ sub start_jack_plumbing {
 	if ( 	$config->{use_jack_plumbing}				# not disabled in namarc
 			and ! ($config->{opts}->{J} or $config->{opts}->{A})	# we are not testing   
 
-	){ system('jack.plumbing >/dev/null 2>&1 &') == 0 
-			or die "can't run jack.plumbing: $?"
+	){ system('jack-plumbing >/dev/null 2>&1 &') == 0 
+			or die "can't run jack-plumbing: $?"
 	}
 }
 sub jack_client : lvalue {
