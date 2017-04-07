@@ -305,40 +305,6 @@ sub initialize_interfaces {
 	poll_jack() unless $config->{opts}->{J} or $config->{opts}->{A};
 
 	sleeper(0.2); # allow time for first polling
-
-	# we will start jack-plumbing only when we need it
-	
-	if(		$config->{use_jack_plumbing} 
-	and $jack->{jackd_running} 
-	and process_is_running('jack-plumbing')
-	){
-
-		pager_newline(<<PLUMB);
-Jack.plumbing daemon detected!
-
-Attempting to stop it...  
-
-(This may break other software that depends in jack-plumbing.)
-
-Nama will restart it as needed for Nama's use only.
-PLUMB
-
-		kill_jack_plumbing();
-		sleeper(0.2);
-		if( process_is_running('jack-plumbing') )
-		{
-		throw(q(Unable to stop jack-plumbing daemon.
-
-Please do one of the following, then restart Nama:
-
- - kill the jack-plumbing daemon ("killall jack-plumbing")
- - set "use_jack_plumbing: 0" in .namarc
-
-....Exiting.) );
-exit;
-		}
-		else { pager_newline("Stopped.") }
-	}
 		
 	initialize_terminal() unless $config->{opts}->{T};
 
