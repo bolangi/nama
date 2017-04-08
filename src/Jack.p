@@ -246,25 +246,9 @@ sub jack_plumbing_conf {
 	join_path( $ENV{HOME} , '.jack-plumbing' )
 }
 
-{ 
-  my $fh;
-  my $plumbing_tag = q(BEGIN NAMA CONNECTIONS LIST);
-  my $plumbing_header = qq(;### $plumbing_tag
-;## The following lines are automatically generated.
-;## DO NOT place any connection data below this line!!
-;
-); 
-sub initialize_jack_plumbing_conf {  # remove nama lines
+sub initialize_jack_plumbing_conf {  }
 
-		return unless -f -r jack_plumbing_conf();
-
-		my $user_plumbing = read_file(jack_plumbing_conf());
-
-		# keep user data, deleting below tag
-		$user_plumbing =~ s/;[# ]*$plumbing_tag.*//gs;
-
-		write_file(jack_plumbing_conf(), $user_plumbing);
-}
+{ my $fh;
 
 my $jack_plumbing_code = sub 
 	{
@@ -305,11 +289,8 @@ sub connect_jack_ports_list {
 	if( $config->{use_jack_plumbing} )
 	{
 
-		# write config file
-		initialize_jack_plumbing_conf();
-		open($fh, ">>", jack_plumbing_conf())
-			or die("can't open ".jack_plumbing_conf()." for append: $!");
-		print $fh $plumbing_header;
+		open($fh, ">", jack_plumbing_conf())
+			or die("can't open ".jack_plumbing_conf()." for write: $!");
 		make_connections($jack_plumbing_code, \@source_tracks, 'in' );
 		make_connections($jack_plumbing_code, \@send_tracks,   'out');
 		close $fh; 
@@ -318,7 +299,6 @@ sub connect_jack_ports_list {
 		start_jack_plumbing();
 		sleeper(3); # time for jack-plumbing to launch and poll
 		kill_jack_plumbing();
-		initialize_jack_plumbing_conf();
 	}
 	else 
 	{
