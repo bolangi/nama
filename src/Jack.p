@@ -240,9 +240,93 @@ sub parse_ports_list {
 	split "\n",$j;
 }
 
-# connect jack ports via jack_connect
+# connect jack ports via jack-plumbing or jack_connect
 
+sub jack_plumbing_conf {
+	join_path( $ENV{HOME} , '.jack-plumbing' )
+}
 
+{ 
+  my $fh;
+  my $plumbing_tag = q(BEGIN NAMA CONNECTIONS LIST);
+  my $plumbing_header = qq(;### $plumbing_tag
+;## The following lines are automatically generated.
+;## DO NOT place any connection data below this line!!
+;
+); 
+sub initialize_jack_plumbing_conf {  # remove nama lines
+
+		return unless -f -r jack_plumbing_conf();
+
+		my $user_plumbing = read_file(jack_plumbing_conf());
+
+		# keep user data, deleting below tag
+		$user_plumbing =~ s/;[# ]*$plumbing_tag.*//gs;
+
+		write_file(jack_plumbing_conf(), $user_plumbing);
+}
+
+my $jack_plumbing_code = sub 
+	{
+		my ($port1, $port2) = @_;
+		my $debug++;
+		my $config_line = qq{(connect $port1 $port2)};
+		say $fh $config_line; # $fh in lexical scope
+		logpkg('debug', $config_line);
+	};
+my $jack_connect_code = sub
+	{
+		my ($port1, $port2) = @_;
+		my $debug++;
+		my $cmd = qq(jack_connect $port1 $port2);
+		logpkg('debug', $cmd);
+		system($cmd) == 0
+		   or die "system $cmd failed: $?";
+
+	};
+sub connect_jack_ports_list {
+
+	my @source_tracks = 
+		grep{ 	$_->source_type eq 'jack_ports_list' and
+	  	  		$_->rec
+			} ::ChainSetup::engine_tracks();
+
+	my @send_tracks = 
+		grep{ $_->send_type eq 'jack_ports_list' } ::ChainSetup::engine_tracks();
+
+	# we need JACK
+	return if ! $jack->{jackd_running};
+
+	# We need tracks to configure
+	return if ! @source_tracks and ! @send_tracks;
+
+	sleeper(0.3); # extra time for ecasound engine to register JACK ports
+
+	if( $config->{use_jack_plumbing} )
+	{
+
+		# write config file
+		initialize_jack_plumbing_conf();
+		open($fh, ">>", jack_plumbing_conf())
+			or die("can't open ".jack_plumbing_conf()." for append: $!");
+		print $fh $plumbing_header;
+		make_connections($jack_plumbing_code, \@source_tracks, 'in' );
+		make_connections($jack_plumbing_code, \@send_tracks,   'out');
+		close $fh; 
+
+		# run jack-plumbing
+		start_jack_plumbing();
+		sleeper(3); # time for jack-plumbing to launch and poll
+		kill_jack_plumbing();
+		initialize_jack_plumbing_conf();
+	}
+	else 
+	{
+		make_connections($jack_connect_code, \@source_tracks, 'in' );
+		make_connections($jack_connect_code, \@send_tracks,   'out');
+	}
+}
+}
 sub quote { $_[0] =~ /^"/ ? $_[0] : qq("$_[0]")}
 
 sub make_connections {
@@ -286,6 +370,19 @@ sub make_connections {
 			$line_number++;
 		};
  	 } @$tracks
+}
+sub kill_jack_plumbing {
+	qx(killall jack-plumbing >/dev/null 2>&1)
+	unless $config->{opts}->{A} or $config->{opts}->{J};
+}
+sub start_jack_plumbing {
+	
+	if ( 	$config->{use_jack_plumbing}				# not disabled in namarc
+			and ! ($config->{opts}->{J} or $config->{opts}->{A})	# we are not testing   
+
+	){ system('jack-plumbing >/dev/null 2>&1 &') == 0 
+			or die "can't run jack-plumbing: $?"
+	}
 }
 sub jack_client : lvalue {
 	my $name = shift;
