@@ -1,6 +1,6 @@
 =head1 NAME
 
-B<Nama> - digital audio workstation
+B<Nama> - multitrack recorder and digital audio workstation
 
 =head1 SYNOPSIS
 
@@ -8,44 +8,45 @@ B<nama> [I<options>] [I<project_name>]
 
 =head1 DESCRIPTION
 
-B<Nama> performs multitrack recording, effects processing,
-editing, mixing, mastering, live performance and
-general-purpose audio processing, using the Ecasound
-realtime audio engine.
+<Nama> is an multitrack audio application
+that can handles recording, effects processing, editing, mixing,
+mastering, and live performance.  It can also perform
+general-purpose audio processing, such as a 5.1 to stereo
+converter. Nama uses the Ecasound audio engine for audio
+processing.
 
-=head2 Audio Functionality
+=head2 Audio projects
 
-Audio projects may be developed using tracks, buses,
-effects, sends, inserts, marks, regions, fades, sequences
-and edits.  Each track may contain one or more WAV files,
-which may be recorded or imported.
+Projects in Nama are audio networks consisting of tracks
+and buses and sequences. 
 
-Effects processing by LADSPA, LV2 and Ecasound
-plugins may be performed in realtime, or cached (e.g.
-frozen) to a file. The user may toggle between cached and
-dynamic processing for a track. Audio regions may be
-altered, duplicated, time-shifted or replaced.  
+Tracks may contain one or more .wav (RIFF) audio files, as
+well as effects, sends, inserts, marks, regions, fades, and
+edits.  Tracks can host LADSPA, LV2 and Ecasound plugins.
+Audio regions may be altered, duplicated, time-shifted or
+replaced.  
 
-Nama supports MIDI functionality via midish. 
+These changes can be rendered in realtime whenever the track is
+played, or rendered to a new audio file ("version.")
+
+Project data is serialized as JSON and the complete history
+is tracked by version control. This allows projects to be
+managed using branches and tags.  Version control does not
+include audio files, which are treated as immutable.
+
+Nama supports some MIDI functionality via midish. 
 
 =head2 Presets and templates
 
 To facilitate reuse, a track's plugins and inserts can be
-stored as an effect chain.  Effect profiles and project
-templates provide templating for groups of tracks and entire
-projects, respectively.
+stored as an I<effect chain>. I<Effect profiles> apply effect
+chains to groups of tracks.  I<Project templates> are for
+duplicating an entire project sans audio files.
 
-=head2 Audio framework
+=head2 Audio device
 
-Audio IO is via JACK or ALSA. Soundcard IO is normally
+Nama performs Audio IO via JACK or ALSA. Soundcard IO is normally
 routed to JACK with transparent fallback to ALSA.
-
-=head2 Persistence
-
-Project data parameters related to audio configuration are
-serialized as JSON and tracked using Git when available. The
-entire project history is retained and may be managed using
-branches and tags.
 
 Nama supports Ladish Level 1 session handling.
 
@@ -54,14 +55,20 @@ Nama supports Ladish Level 1 session handling.
 Nama has fully featured terminal command prompt, a Tk
 GUI, and experimental OSC and remote-command modes.
  
-The command prompt accepts Nama commands, Ecasound
-interactive-mode commands, shell commands and perl code.
+The command prompt can run Nama commands, Ecasound
+interactive-mode commands, commands for the midish MIDI
+recorder/player, shell commands and perl code.
+Commands and filenames can be autocompleted using the TAB
+key.
 
-It has command history and autocompletion.  The help
-system provides documentation and keyword search 
-covering Nama commands and effects.
+The terminal interface stores command history, available to
+browse with the up and down arrows. 
 
-The hotkey mode provides a convenient way to select, view,
+The help system provides documentation and keyword search
+covering Nama commands and effects-processing
+plugins.
+
+A hotkey mode provides a convenient way to select, view,
 and modify effect parameters.
 
 By default, Nama displays a graphic user interface while
@@ -155,10 +162,11 @@ Supply a command to execute
 
 =back
 
+
 =head1 CONTROLLING NAMA/ECASOUND
 
 The Ecasound audio engine is configured through use of
-I<chain setups> that specify the signal processing network.
+I<chain setups> that define the signal processing network.
 
 Nama serves as an intermediary, taking high-level commands
 from the user, generating appropriate chain setups for user
@@ -181,7 +189,7 @@ the engine and displaying the updated track status. See 'man
 Once a chain setup is loaded and the engine is launched,
 commands can be issued to control the realtime behavior of
 the audio processing engine. These commands include
-transport C<start> and C<stop>, playback repositioning
+transport C<start> and C<stop>, playback head repositioning
 commands such C<forward>, C<rewind> and C<setpos>. Effects
 may be added, modified or removed while the engine is
 running.
@@ -189,9 +197,9 @@ running.
 =head2 Configuration
 
 General configuration of sound devices and program options
-is performed by editing the F<.namarc> file. On Nama's first
-run, a default version of F<.namarc> is usually placed in
-the user's home directory. 
+is performed by editing the F<.namarc> file, which is
+formatted as YAML. On Nama's first run, a default version of
+F<.namarc> is usually placed in the user's home directory.
 
 =head1 Tk GRAPHICAL UI 
 
@@ -262,13 +270,13 @@ You can access command history using up-arrow/down-arrow.
 
 Type C<help> for general help, C<help command> for help with
 C<command>, C<help foo> for help with commands containing
-the string C<foo>. C<help_effect foo bar> lists all 
+the string C<foo>. C<help-effect foo bar> lists all 
 plugins/presets/controller containing both I<foo> and
 I<bar>. Tab-completion is provided for Nama commands, Ecasound-iam
 commands, plugin/preset/controller names, and project names.
 
-Many effects have abbreviations, such as 'afx' for
-'add_effect'. 
+Many commands have abbreviations, such as 'afx' for
+'add-effect'. 
 
 =head1 TRACKS
 
@@ -300,44 +308,45 @@ interleaved WAV file.
 
 =head2 REC/PLAY/MON/OFF
 
-Each track, including Master and Mixdown, has its own
-REC/MON/PLAY/OFF setting.
+Basic signal routing for each track is controlled by its
+setting to REC, MON, PLAY or OFF. 
+
+The I<MON> setting prepares to connect the live track source. 
+
+The I<REC> setting prepares to connect the live track source and
+record it as a .wav (RIFF) audio file.
+
+The I<PLAY> setting enqueues an audio file for playback from
+disk as the track source.
  
-The I<MON> setting means that the track source is connected to
-the track input, and the track output is supplied for
-monitoring by the Main bus and other submixes if any.
+The I<OFF> setting tells Nama to remove the track from the
+audio network. I<OFF> status may result for a track when the
+audio source is not available. For example, a track with no
+recorded audio files will show OFF status when set to PLAY.
 
-The I<REC> setting prepares the track is ready to record a
-WAV file.
+=head2 Track output
 
-The I<PLAY> setting enqueues an audio file for playback
-from disk as the track source.
- 
-I<REC> and I<PLAY> settings also create the monitoring
-routes associated with I<MON> status.
+By default a track belongs to the Main bus and is routed to
+Master, which has a final fader before the signal goes via 
+ALSA or JACK to the audio device.
 
-I<OFF> setting tells Nama to remove the track from the audio
-network. I<OFF> status also results when no audio source is
-available. A track with no recorded WAV files
-will show OFF status, even if set to PLAY.
-
-=head3 Bus setting
+=head2 Bus setting
 
 Buses can force the status of their member tracks to OFF.
 Nama provides MON and OFF settings for buses.
-OFF (set by C<bus_off>) removes all member tracks from the chain
-setup, MON (set by C<bus_mon> restores them.
+OFF (set by C<bus-off>) removes all member tracks from the chain
+setup, MON (set by C<bus-mon> restores them.
 
 The B<mixplay> command sets the Mixdown track to PLAY and the
 Main bus to OFF.
 
 =head2 Version Numbers
 
-Multiple WAV files ("takes") can be recorded for each track. These are
+Multiple .wav files ("takes") can be recorded for each track. These are
 distinguished by a version number that increments with each
 recording run, i.e. F<sax_1.wav>, F<sax_2.wav>, etc.  All
-WAV files recorded in the same run have the same version
-numbers.
+.wav files recorded in the same run have the same version
+number.
 
 The version numbers of files for playback can be selected at
 the bus or track level. By setting the bus version
@@ -349,7 +358,7 @@ The track version setting, if present, overrides the bus
 setting. Setting the track version to zero restores control
 of the version number to the bus.
 
-The Main bus version setting does I<not> currently propagate to
+The Main bus version setting does I<not> propagate to
 other buses. 
 
 =head2 Marks
@@ -364,19 +373,19 @@ I<after> defining the region.
 =head2 Regions
 
 The C<region> command allows you to define endpoints for a
-portion of an audio file. You can then use the C<shift>
+portion of an audio file.  You can then use the C<shift>
 command to move the region to the desired time position.
 
+If you use named marks as endpoints, the region will change
+if the mark's position is adjusted.
+
 Each track can have one region definition. To create
-multiple regions, the C<new_region> command takes a pair of
+multiple regions, the C<new-region> command takes a pair of
 marks to create a read-only copy of the current track with
 the specified region definition. 
 
 You can control this region as you would any other other
-track, applying effects, adjusting volume, etc.
-
-Currently, regions are not clipped out of their host track.
-This feature may be implemented in future.
+track, shifting the start time, applying effects, adjusting volume, etc.
 
 =head3 Using Tracks from Other Projects
 
