@@ -174,18 +174,18 @@ Log these (comma separated) categories
 The Ecasound audio engine is configured through use of
 I<chain setups> that define the signal processing network.
 
-Nama serves as an intermediary, taking high-level commands
-from the user, generating appropriate chain setups for user
-tasks such as recording, playback, mixing, etc., and running
-the audio engine.
+Nama serves as an intermediary, taking high-level user
+commands, generating chain setups for user tasks such as
+recording, playback, mixing, etc., and running the audio
+engine.
 
 =head2 Configuration Commands
 
 Configuration commands affect I<future> runs of the audio
 engine.  For example, B<rec, play, mon> and B<off> determine
 whether the current track will get its audio stream from an
-external (e.g. live) source, whether an existing WAV file
-will be played back, and whether a new WAV file will be
+external (e.g. live) source, whether an existing audio file
+will be played back, and whether a new audio file will be
 recorded. Nama responds to these commands by reconfiguring
 the engine and displaying the updated track status. See 'man
 ::ChainSetup' for details on how the chain setup created.
@@ -281,8 +281,8 @@ plugins/presets/controller containing both I<foo> and
 I<bar>. Tab-completion is provided for Nama commands, Ecasound-iam
 commands, plugin/preset/controller names, and project names.
 
-Many commands have abbreviations, such as 'afx' for
-'add-effect'. 
+Most commands have abbreviations, such as 'afx' for
+'add-effect'. These are shown in the help listings.
 
 =head1 TRACKS
 
@@ -320,7 +320,7 @@ setting to REC, MON, PLAY or OFF.
 The I<MON> setting prepares to connect the live track source. 
 
 The I<REC> setting prepares to connect the live track source and
-record it as a .wav (RIFF) audio file.
+record it to an audio file.
 
 The I<PLAY> setting enqueues an audio file for playback from
 disk as the track source.
@@ -348,21 +348,21 @@ Main bus to OFF.
 
 =head2 Version Numbers
 
-Multiple .wav files ("takes") can be recorded for each track. These are
+Multiple audio files ("takes") can be recorded for each track. These are
 distinguished by a version number that increments with each
 recording run, i.e. F<sax_1.wav>, F<sax_2.wav>, etc.  All
-.wav files recorded in the same run have the same version
+audio files recorded in the same run have the same version
 number.
 
-The version numbers of files for playback can be selected at
+The version numbers for track playback can be selected at
 the bus or track level. By setting the bus version
 to 5, you can play back version 5 of several tracks
 at once. Version 5 could signify the fifth take of a song, or
 the fifth song of a live recording session. 
 
 The track version setting, if present, overrides the bus
-setting. Setting the track version to zero restores control
-of the version number to the bus.
+version setting. Setting the track version to zero restores
+control of the version number to the bus.
 
 The Main bus version setting does I<not> propagate to
 other buses. 
@@ -407,7 +407,7 @@ choose using C<insert_effect> or C<position_effect>.
 
 =head3 Fades
 
-Nama allows you to place fades on any track. Fades are
+Fades can be placed on any track. They
 defined by mark position and duration. An additional volume
 operator, -eadb, is applied to each track to host the
 envelope controller that implements fades.
@@ -419,7 +419,7 @@ to a soundcard channel or JACK client in addition to the
 normal mixer input. Nama currently allows one aux send per
 track.
 
-The C<add_insert> command configures a pre- or post-fader
+The C<add-insert> command configures a pre- or post-fader
 send-and-return to soundcard channels or JACK clients.
 Wet and dry signal paths are provided, with a default
 setting of 100% wet.
@@ -430,7 +430,7 @@ Each track can have one pre-fader and one post-fader insert.
 
 A bunch is just a list of track names. Bunch names are used
 with the keyword C<for> to apply one or more commands to several
-tracks at once. A bunch can be created with the C<new_bunch>
+tracks at once. A bunch can be created with the C<new-bunch>
 command. Any bus name can also be treated as a bunch.
 Finally, several system defined bunches are available:
 
@@ -477,21 +477,17 @@ to an external program such as jconverter.
 =head2 General Notes
 
 While Nama can address tracks by either name and track number,
-the chain setups use the track number exclusively.
+Ecasound chain setups use the track number exclusively.
 
-The Master track (mixer output control) is always
+The Master track (mixer output) is always
 chain 1, the Mixdown track is always chain 2.
 
-In single-engine mode, Nama uses Ecasound loop devices where
+Nama uses Ecasound loop devices where
 necessary to connect two tracks, or to allow one track to
 have multiple inputs or outputs. Each loop device adds one
-buffer, which increases latency.  In dual-engine mode, JACK
-ports are used for interconnections instead of loop devices. 
+buffer, which increases latency. 
 
 =head2 Flow Diagrams
-
-The following diagrams apply to Nama's single-engine, mode.
-(The same topology is used in dual-engine mode.)
 
 Let's examine the signal flow from track 3, the first 
 available user track. Assume track 3 is named "sax".
@@ -511,9 +507,9 @@ Master_in, a loop device at the mixer input.
 REC status indicates that the source of the signal is the
 soundcard or JACK client. The input signal will be written
 directly to a file except in the special preview and doodle
-modes, or if C<rec_disable> is issued.
+modes.
 
-=head3 Track, MON status
+=head3 Track, PLAY status
 
     sax_1.wav ------(3)----> Master_in
 
@@ -530,8 +526,8 @@ provides final control before audio output or mixdown.
 
 =head3 Mastering Mode
 
-In mastering mode (invoked by C<master_on> and released
-C<master_off>) the following network, receives the Master
+In mastering mode (invoked by C<master-on> and released
+C<master-off>) the following network, receives the Master
 track signal as input and provides an output to the
 soundcard or WAV file.
 
@@ -568,7 +564,7 @@ instead.)  Corresponding encoded files are created if the
 space-separated list. The default is "mixdown_encodings: ogg
 mp3".
 
-=head2 The Preview and Doodle Modes, and the Eager Setting
+=head2 Preview, Doodle and Eager Modes
 
 These non-recording modes, invoked by C<preview> and
 C<doodle> commands tweak the routing rules for special
@@ -581,26 +577,26 @@ doodle modes.
 The eager setting causes the engine to start immediately
 following a reconfiguration.
 
-These modes are unnecessary in Nama's dual-engine mode.
-
 =head2 Saving Projects
 
-The C<save> command is the usual way to
-preserve your work.
+If git is available, projects are saved automatically after
+each command and it is not necessary to explicitly save
+your work.
 
 When you type C<save>, Settings related to the state of the
-project are saved in the file F<State.json> in the current
+project are saved in the file F<State.json> in the 
 project directory. F<State.json> is tracked by git.
 
 C<save> updates several other data files as well:
 
-F<Aux.json>, in the current project directory, contains
+F<Aux.json>, also in the project directory, contains
 data that is part of the project (such as command history,
 track comments, and current operating modes) but with no direct 
 effect on the project audio.  
 
-F<global_effect_chains.json>, in the project root directory,
-contains system and user defined effect chains.
+F<global_effect_chains.json>, in the project root directory
+(usually F<~/nama>) contains system and user defined effect
+chains.
 
 =head3 Save without Git
 
@@ -611,14 +607,8 @@ corresponding file. The F<.json> suffix may be omitted if
 
 =head3 Save with Git
 
-When git is installed, Nama uses it to store snapshots of
+If git is available, Nama uses it to store snapshots of
 every step in the history of your project.
-
-While you can continue using the same C<save> and C<get> 
-with snapshots, the underlying version control gives
-them huge advantages over files: (1) they can sprout
-branches, (2) they retain their history and (3) they are
-never overwritten. 
 
 When you type C<save initial-mix>, the latest snapshot is
 tagged with the name "initial-mix", which you can recall
@@ -633,7 +623,7 @@ Nama lets you create new branches, starting at any snapshot.
 To start a new branch called I<compressed-mix> starting at a
 snapshot called I<initial-mix> you would say:
 
-C<new_branch compressed-mix initial-mix>
+C<new-branch compressed-mix initial-mix>
 
 If you want to go back to working on the master branch, use
 C<branch master>.
@@ -698,8 +688,7 @@ from there:
                   \
                    g (c-branch)
     
-While the merging of branches may be possible, 
-the function has not been tested.
+Merging of branches is not supported.
 
 =head2 Exiting
 
@@ -721,16 +710,18 @@ connected to left and right channels.
 
 An edit consists of audio clips and data structures
 associated with a particular track and version. The edit
-replaces part of the original WAV file, allowing you to fix
+replaces part of the original audio file, allowing you to fix
 wrong notes, or substitute one phrase for another.
+Behind the scenes, the host track becomes the mix track to a
+bus. Sources for the bus are the original audio track, and
+zero or more edits, each represented by a hidden track.
 
 Each track can host multiple edits. Edits are
 non-destructive; they are achieved by using Ecasound's
 ability to crossfade and sequence.
 
-Select the track to be edited and the correct version.
-
-Before creating the edit, you will now need to create three
+Before creating the edit, select the track and version to be edited.
+You will now need to create three
 marks:
 
 =over 4
@@ -746,83 +737,70 @@ rec end points.
 
 There are two ways to set these points.
 
-=head3 set_edit_points command
+=head3 set-edit-points command
 
 Position the playback head a few seconds before the edit.
-Enter the I<set_edit_points> command. This will start the
+Enter the I<set-edit-points> command. This will start the
 engine. Hit the B<P> key three times to designate the
 playback start, punch-in and punch-out positions.
 
 =head3 Specify points individually
 
 Position the playback head at the position you want playback
-for the edit to start. Enter the I<set_play_start_mark>
+for the edit to start. Enter the I<set-play-start-mark>
 command.
 
 Use the same procedure to set the rec start and rec end
-positions using the I<set_rec_start_mark>
-and I<set_rec_end_mark> commands.
-
-=head3 Provide marks as arguments to I<new_edit> (not implemented)
-
-Type I<new_edit play_start_mark rec_start_mark rec_end_mark>.)
+positions using the I<set-rec-start-mark>
+and I<set-rec-end-mark> commands.
 
 =head3 Create the edit 
 
-Enter the I<new_edit> command to create the necessary 
+Enter the I<new-edit> command to create the necessary 
 tracks and data structures.
 
-Use I<preview_edit> to confirm the edit positions.  The
+Use I<preview-edit> to confirm the edit positions.  The
 engine will run and you will hear the host track with the
 target region removed. Playback will be restricted to the
 edit region. You may use I<preview_out> to hear the clip to
 be removed.
 
-Use I<list_marks> to see the edit marks and I<modify_mark> 
+Use I<list-marks> to see the edit marks and I<modify-mark> 
 to nudge them into perfect position.
 
 Once you are satisfied with the mark positions, you are
 ready to record your edit.
 
-Enter I<start_edit>. Playback will begin at first mark. The
+Enter I<start-edit>. Playback will begin at first mark. The
 replacement clip will be recorded from the source specified
 in the original track.
 
-Each I<start_edit> command will record an additional version
-on the edit track. I<redo_edit> will delete (destructively)
+Each I<start-edit> command will record an additional version
+on the edit track. I<redo-edit> will delete (destructively)
 the most recent audio clip and begin recording anew.
 
-You may specify another range for editing and use
-the editing procedure again as many times as 
-you like. Edits may not overlap.
+I<destroy-edit> deletes (destructively) the current edit.
+
+You may specify another range for editing and use the
+editing procedure again as many times as you like. Edits on
+one track may not overlap.
 
 =head3 Merging edits
 
-I<merge_edits> will recursively merge all edits applied to
-the current track and version, creating a new version.
+I<merge-edits> will recursively merge all edits applied to
+the current track and version, creating a new version for
+the track.  This will freeze your edits against an
+accidental change in mark, region or version settings. 
 
-I recommend that you merge edits when you are satisfied,
-with the results to protect your edits against an accidental
-change in mark, region or version settings. 
+I<list-edits> will label the edits by index and time.
 
-I<restore_edits> acts on a merged version of the current
-track, selecting the prior unmerged version with all edits
-and region definitions in "live" form.  You may continue to
-create new edits. B<TO BE IMPLEMENTED>
+I<end-edit-mode> will restore normal playback mode
 
-I<list_edits> will label the edits by index and time.
-
-I<end_edit_mode> will restore normal playback mode
-
-I<destroy_edit>
-Behind the scenes, the host track becomes the mix track to a
-bus. Sources for the bus are the original audio track, and
-zero or more edits, each represented by one track object.
 
 =head1 REMOTE CONTROL
 
-You can send now send commands from a remote process, and
-also get information back. Understand that this code opens a
+You can send commands to Nama from a remote process, and
+retrieve the result. Understand that this code opens a
 remote execution hole.
 
 In F<.namarc> you need something like:
@@ -838,14 +816,14 @@ code, the return value will be the result of the perl code
 executed with a newline appended. If the result is a list,
 the items will be joined by spaces into a single string.
 
-If the result is an object or data structure, it will be
-returned in a serialized form. 
-
 For example, if you send this string:
 
       eval $this_track->name
 
 The return value will be the name of the current track.
+
+If the result is an object or data structure, it will be
+returned in a serialized form. 
 
 =head1 TEXT COMMANDS
 
