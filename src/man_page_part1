@@ -8,31 +8,28 @@ B<nama> [I<options>] [I<project_name>]
 
 =head1 DESCRIPTION
 
-<Nama> is an multitrack audio application
-that can handles recording, effects processing, editing, mixing,
-mastering, and live performance.  It can also perform
-general-purpose audio processing, such as a 5.1 to stereo
-converter. Nama uses the Ecasound audio engine for audio
-processing.
+This multitrack audio application can be used for recording, effects
+processing, editing, mixing, and mastering, and live
+performance. It can also perform general-purpose audio
+processing, such as a 5.1 to stereo converter. Nama uses the
+Ecasound audio engine for audio processing.
 
 =head2 Audio projects
 
-Projects in Nama are audio networks consisting of tracks
-and buses and sequences. 
+Projects in Nama are audio networks of tracks and buses.
+Tracks may contain one or more RIFF files, as well as
+multiple effects, sends, inserts, marks, regions, fades,
+edits and sequences.  Tracks can host LADSPA, LV2 and
+Ecasound plugins.  Audio regions may be altered, duplicated,
+time-shifted or replaced.  
 
-Tracks may contain one or more .wav (RIFF) audio files, as
-well as effects, sends, inserts, marks, regions, fades, and
-edits.  Tracks can host LADSPA, LV2 and Ecasound plugins.
-Audio regions may be altered, duplicated, time-shifted or
-replaced.  
-
-These changes can be rendered in realtime whenever the track is
-played, or rendered to a new audio file ("version.")
+Audio processing is performed in realtime when the track is
+played and may be cached (frozen) to a new audio file.
 
 Project data is serialized as JSON and the complete history
-is tracked by version control. This allows projects to be
-managed using branches and tags.  Version control does not
-include audio files, which are treated as immutable.
+is tracked by the git version control system.  As a result,
+projects can be managed using branches and tags, and provide
+undo/redo.
 
 Nama supports some MIDI functionality via midish. 
 
@@ -45,8 +42,8 @@ duplicating an entire project sans audio files.
 
 =head2 Audio device
 
-Nama performs Audio IO via JACK or ALSA. Soundcard IO is normally
-routed to JACK with transparent fallback to ALSA.
+Nama performs Audio IO via JACK or ALSA. Soundcard IO goes
+via JACK, if running, with transparent fallback to ALSA.
 
 Nama supports Ladish Level 1 session handling.
 
@@ -57,12 +54,9 @@ GUI, and experimental OSC and remote-command modes.
  
 The command prompt can run Nama commands, Ecasound
 interactive-mode commands, commands for the midish MIDI
-recorder/player, shell commands and perl code.
-Commands and filenames can be autocompleted using the TAB
-key.
-
-The terminal interface stores command history, available to
-browse with the up and down arrows. 
+recorder/player, shell commands and perl code.  Commands and
+filenames can be autocompleted using the TAB key. Command
+history is available to browse with up and down arrows. 
 
 The help system provides documentation and keyword search
 covering Nama commands and effects-processing
@@ -94,6 +88,10 @@ Specify configuration file (default: ~/.namarc)
 
 Specify project root directory
 
+=item B<--use-pwd, -p>
+
+Use current dir for all WAV and project files
+
 =item B<--create-project, -c>
 
 Create project if it doesn't exist
@@ -114,35 +112,31 @@ Save/restore alsa state with project data
 
 This help display
 
+=item B<--regenerate-effects-cache, -r>
+
+Regenerate the effects data cache
+
 =back
 
 Debugging options:
 
 =over 12
 
-=item B<--no-static-effects-data, -s>
-
-Don't load effects data
-
-=item B<--no-state, -m>
+=item B<--no-state, -M>
 
 Don't load project state
 
-=item B<--no-static-effects-cache, -e>
+=item B<--no-static-effects-data, -S>
 
-Bypass effects data cache
+Don't load effects data
 
-=item B<--regenerate-effects-cache, -r>
+=item B<--no-static-effects-cache, -C>
 
-Regenerate the effects data cache
+Don't load the effects data cache
 
 =item B<--no-reconfigure-engine, -R>
 
-Don't automatically configure engine
-
-=item B<--debugging-output, -D>
-
-Emit debugging information
+Don't autosave, autoreconfigure or git snapshot
 
 =item B<--fake-jack, -J>
 
@@ -159,6 +153,18 @@ Don't spawn Ecasound process
 =item B<--execute-command, -X>
 
 Supply a command to execute
+
+=item B<--no-terminal, -T>
+
+Don't initialize terminal
+
+=item B<--no-fades, -F>
+
+No fades on transport start/stop
+
+=item B<--log, -L>
+
+Log these (comma separated) categories
 
 =back
 

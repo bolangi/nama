@@ -71,7 +71,7 @@ Debugging options:
 
 --no-state, -M                   Don't load project state
 --no-static-effects-data, -S     Don't load effects data
---no-static-effects-cache, -C    Bypass effects data cache
+--no-static-effects-cache, -C    Don't load effects data cache
 --no-reconfigure-engine, -R      Don't autosave, autoreconfigure or git snapshot
 --fake-jack, -J                  Simulate JACK environment
 --fake-alsa, -A                  Simulate ALSA environment
