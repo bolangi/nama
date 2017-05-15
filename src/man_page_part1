@@ -8,25 +8,25 @@ B<nama> [I<options>] [I<project_name>]
 
 =head1 DESCRIPTION
 
-This multitrack audio application can be used for recording, effects
-processing, editing, mixing, and mastering, and live
+A multitrack audio application for recording, effects
+processing, editing, mixing, mastering and live
 performance. It can also perform general-purpose audio
-processing, such as a 5.1 to stereo converter. Nama uses the
-Ecasound audio engine for audio processing.
+processing, such as a 5.1 to stereo converter. Nama uses 
+Ecasound as the audio processing engine.
 
 =head2 Audio projects
 
 Projects in Nama are audio networks of tracks and buses.
 Tracks may contain one or more RIFF files, as well as
-multiple effects, sends, inserts, marks, regions, fades,
+effects, sends, inserts, marks, regions, fades,
 edits and sequences.  Tracks can host LADSPA, LV2 and
 Ecasound plugins.  Audio regions may be altered, duplicated,
 time-shifted or replaced.  
 
-Audio processing is performed in realtime when the track is
+Audio processing is performed in realtime when a track is
 played and may be cached (frozen) to a new audio file.
 
-Project data is serialized as JSON and the complete history
+Project data is serialized as JSON. The complete history
 is tracked by the git version control system.  As a result,
 projects can be managed using branches and tags, and provide
 undo/redo.
