@@ -88,7 +88,8 @@ sub forces { $forces{ $_[0]->rw } }
 # all buses that have mutable state, and therefore reason to
 # save or display that state
 
-sub all { grep{ ! $::config->{_is_special_bus}->{$_->name} } values %by_name };
+sub mutable { grep{ ! $::config->{_is_special_bus}->{$_->name} } values %by_name };
+sub all { values %by_name }
 
 sub overall_last { 
 	my $max = 0;
