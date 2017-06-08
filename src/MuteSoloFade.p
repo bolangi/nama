@@ -5,13 +5,13 @@ use Modern::Perl;
 
 sub mute {
 	return if $config->{opts}->{F};
-	return if $tn{Master}->rw eq OFF or ::ChainSetup::really_recording();
-	$tn{Master}->mute;
+	return if $tn{Main}->rw eq OFF or ::ChainSetup::really_recording();
+	$tn{Main}->mute;
 }
 sub unmute {
 	return if $config->{opts}->{F};
-	return if $tn{Master}->rw eq OFF or ::ChainSetup::really_recording();
-	$tn{Master}->unmute;
+	return if $tn{Main}->rw eq OFF or ::ChainSetup::really_recording();
+	$tn{Main}->unmute;
 }
 sub fade_around {
 	my ($coderef, @args) = @_;

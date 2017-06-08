@@ -7,9 +7,9 @@ sub check_level {
 
 	my $ev = add_effect( { track => $track, type => 'ev' } );
 
-	# disable Master so unused tracks are pruned
+	# disable Main so unused tracks are pruned
 	
-	$tn{Master}->set(rw => OFF); 
+	$tn{Main}->set(rw => OFF); 
 
 	# direct target track to null
 	
@@ -34,7 +34,7 @@ sub check_level {
 	# restore previous state
 	
 	remove_effect($ev);
-	$tn{Master}->set(rw => MON); 
+	$tn{Main}->set(rw => MON); 
 	::request_setup();
 }
 
@@ -56,15 +56,15 @@ sub automix {
 
 	#use Smart::Comments '###';
 	# add -ev to summed signal
-	my $ev = add_effect( { chain => $tn{Master}->n, type => 'ev' } );
+	my $ev = add_effect( { chain => $tn{Main}->n, type => 'ev' } );
 	### ev id: $ev
 
 	# turn off audio output
 	
-	my $old_send_type = $tn{Master}->{send_type};
-	my $old_send_id   = $tn{Master}->{send_id};
+	my $old_send_type = $tn{Main}->{send_type};
+	my $old_send_id   = $tn{Main}->{send_id};
 
-	$tn{Master}->set(send_type => 'null', send_id => 'null');
+	$tn{Main}->set(send_type => 'null', send_id => 'null');
 
 	### Status before mixdown:
 
@@ -114,7 +114,7 @@ sub automix {
 
 		throw("Signal appears to be silence. Skipping.");
 		for (@tracks){ nama_cmd("$_  $restore_vol_command") }
-		$tn{Master}->set(rw => MON);
+		$tn{Main}->set(rw => MON);
 		return;
 	}
 
@@ -127,7 +127,7 @@ sub automix {
 
 	### restore audio output
 
-	$tn{Master}->set( send_type => $old_send_type, send_id => $old_send_id); 
+	$tn{Main}->set( send_type => $old_send_type, send_id => $old_send_id); 
 
 	#no Smart::Comments;
 	

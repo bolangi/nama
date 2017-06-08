@@ -48,7 +48,7 @@ my @id_to_type = (
 	bus						=> 'bus',
 	null					=> 'null',
 	"loop,16"				=> 'loop',
-	"loop,Master"			=> 'loop',
+	"loop,Main"			=> 'loop',
 );
 
 while( my($dest,$type) = splice @id_to_type, 0,2){
@@ -294,7 +294,7 @@ nama_cmd('3; nosend; gen');
 
 $expected_setup_lines = <<EXPECTED;
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3,R3 -i:alsa,default
 
 # post-input processing
@@ -305,7 +305,7 @@ $expected_setup_lines = <<EXPECTED;
 # audio outputs
 
 -a:1 -o:alsa,default
--a:3 -o:loop,Master_in
+-a:3 -o:loop,Main_in
 -a:R3 -f:s16_le,1,44100,i -o:/tmp/nama-test/test/.wav/sax_1.wav
 EXPECTED
 
@@ -317,7 +317,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio inputs
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3,R3 -i:jack_multi,system:capture_2
 
 # post-input processing
@@ -327,7 +327,7 @@ $expected_setup_lines = <<EXPECTED;
 # audio outputs
 
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,Master_in
+-a:3 -o:loop,Main_in
 -a:R3 -f:s16_le,1,44100,i -o:/tmp/nama-test/test/.wav/sax_1.wav
 
 EXPECTED
@@ -337,7 +337,7 @@ check_setup('JACK basic setup' );
 nama_cmd('3; mon; gen');
 $expected_setup_lines = <<EXPECTED;
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:jack_multi,system:capture_2
 
 # post-input processing
@@ -347,7 +347,7 @@ $expected_setup_lines = <<EXPECTED;
 # audio outputs
 
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,Master_in
+-a:3 -o:loop,Main_in
 EXPECTED
 
 check_setup('JACK mon setup' );
@@ -355,7 +355,7 @@ check_setup('JACK mon setup' );
 force_alsa(); nama_cmd('gen');
 $expected_setup_lines = <<EXPECTED;
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:alsa,default
 
 # post-input processing
@@ -365,16 +365,16 @@ $expected_setup_lines = <<EXPECTED;
 # audio outputs
 
 -a:1 -o:alsa,default
--a:3 -o:loop,Master_in
+-a:3 -o:loop,Main_in
 
 EXPECTED
 
 check_setup('ALSA mon setup' );
-nama_cmd('Master; send 5;gen');
+nama_cmd('Main; send 5;gen');
 
 $expected_setup_lines = <<EXPECTED;
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:alsa,default
 
 # post-input processing
@@ -388,14 +388,14 @@ $expected_setup_lines = <<EXPECTED;
 # audio outputs
 
 -a:1 -o:alsa,default
--a:3 -o:loop,Master_in
+-a:3 -o:loop,Main_in
 EXPECTED
 
-check_setup('ALSA send-Master-to-alternate-channel setup' );
+check_setup('ALSA send-Main-to-alternate-channel setup' );
 force_jack(); nama_cmd('gen');
 
 $expected_setup_lines = <<EXPECTED;
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:jack_multi,system:capture_2
 
 # post-input processing
@@ -405,17 +405,17 @@ $expected_setup_lines = <<EXPECTED;
 # audio outputs
 
 -a:1 -o:jack_multi,system:playback_5,system:playback_6
--a:3 -o:loop,Master_in
+-a:3 -o:loop,Main_in
 EXPECTED
-check_setup('JACK send-Master-to-alternate-channel setup' );
+check_setup('JACK send-Main-to-alternate-channel setup' );
 
 =comment
 nama_cmd('Mixdown; rec; gen');
 $expected_setup_lines = <<EXPECTED;
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:jack_multi,system:capture_2
--a:Mixdown,J1 -i:loop,Master_out
+-a:Mixdown,J1 -i:loop,Main_out
 
 # post-input processing
 
@@ -423,8 +423,8 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio outputs
 
--a:1 -o:loop,Master_out
--a:3 -o:loop,Master_in
+-a:1 -o:loop,Main_out
+-a:3 -o:loop,Main_in
 -a:J1 -o:jack_multi,system:playback_5,system:playback_6
 -a:Mixdown -f:s16_le,2,44100,i -o:/tmp/nama-test/test/.wav/Mixdown_1.wav
 EXPECTED
@@ -433,9 +433,9 @@ check_setup('JACK mixdown setup with main out' );
 gen_alsa();
 
 $expected_setup_lines = <<EXPECTED;
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:alsa,default
--a:Mixdown,J1 -i:loop,Master_out
+-a:Mixdown,J1 -i:loop,Main_out
 
 # post-input processing
 
@@ -447,8 +447,8 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio outputs
 
--a:1 -o:loop,Master_out
--a:3 -o:loop,Master_in
+-a:1 -o:loop,Main_out
+-a:3 -o:loop,Main_in
 -a:J1 -o:alsa,default
 -a:Mixdown -f:s16_le,2,44100,i -o:/tmp/nama-test/test/.wav/Mixdown_1.wav
 EXPECTED
@@ -457,9 +457,9 @@ check_setup('ALSA mixdown setup with main out' );
 
 nama_cmd('master_on');
 $expected_setup_lines = <<EXPECTED;
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:alsa,default
--a:4 -i:loop,Master_out
+-a:4 -i:loop,Main_out
 -a:5,6,7 -i:loop,Eq_out
 -a:8 -i:loop,Boost_in
 -a:Mixdown,J8 -i:loop,Boost_out
@@ -474,8 +474,8 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio outputs
 
--a:1 -o:loop,Master_out
--a:3 -o:loop,Master_in
+-a:1 -o:loop,Main_out
+-a:3 -o:loop,Main_in
 -a:4 -o:loop,Eq_out
 -a:5,6,7 -o:loop,Boost_in
 -a:8 -o:loop,Boost_out
@@ -486,13 +486,13 @@ gen_alsa();
 check_setup('Mixdown in mastering mode - ALSA');
 
 
-nama_cmd('Master; stereo'); # normal output width
+nama_cmd('Main; stereo'); # normal output width
 
 $expected_setup_lines = <<EXPECTED;
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:jack_multi,system:capture_2
--a:4 -i:loop,Master_out
+-a:4 -i:loop,Main_out
 -a:5,6,7 -i:loop,Eq_out
 -a:8 -i:loop,Boost_in
 -a:Mixdown,J8 -i:loop,Boost_out
@@ -503,8 +503,8 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio outputs
 
--a:1 -o:loop,Master_out
--a:3 -o:loop,Master_in
+-a:1 -o:loop,Main_out
+-a:3 -o:loop,Main_in
 -a:4 -o:loop,Eq_out
 -a:5,6,7 -o:loop,Boost_in
 -a:8 -o:loop,Boost_out
@@ -517,12 +517,12 @@ check_setup('Mixdown in mastering mode - JACK');
 
 nama_cmd('mixoff; master_off');
 nama_cmd('for 4 5 6 7 8; remove_track quiet');
-nama_cmd('Master; send 1');
+nama_cmd('Main; send 1');
 nama_cmd('add_bus Horns; sax move_to_bus Horns; sax stereo');
 
 $expected_setup_lines = <<EXPECTED;
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:alsa,default
 -a:4 -i:loop,sax_out
 
@@ -534,14 +534,14 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:1 -o:alsa,default
 -a:3 -o:loop,sax_out
--a:4 -o:loop,Master_in
+-a:4 -o:loop,Main_in
 EXPECTED
 gen_alsa();
 check_setup('Bus - ALSA');
 gen_jack();
 
 $expected_setup_lines = <<EXPECTED;
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:jack_multi,system:capture_2,system:capture_3
 -a:4 -i:loop,sax_out
 
@@ -549,7 +549,7 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
 -a:3 -o:loop,sax_out
--a:4 -o:loop,Master_in
+-a:4 -o:loop,Main_in
 EXPECTED
 check_setup('Bus - JACK');
 
@@ -660,7 +660,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio inputs
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:10 -i:loop,R-L_in
 -a:11,12 -i:loop,R-L_out
 -a:3 -i:alsa,default
@@ -675,7 +675,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:1 -o:alsa,default
 -a:10 -o:loop,R-L_out
 -a:3 -o:loop,Stereo_out
--a:4,5,6,7,11,12 -o:loop,Master_in
+-a:4,5,6,7,11,12 -o:loop,Main_in
 -a:8,9 -o:loop,R-L_in
 EXPECTED
 
@@ -761,7 +761,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio inputs
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3,5 -i:jack_multi,system:capture_1
 -a:4,6 -i:jack_multi,system:capture_2,system:capture_3
 
@@ -773,7 +773,7 @@ $expected_setup_lines = <<EXPECTED;
 # audio outputs
 
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3,4 -o:loop,Master_in
+-a:3,4 -o:loop,Main_in
 -a:5,6 -o:jack_multi,system:playback_7,system:playback_8
 EXPECTED
 
@@ -786,7 +786,7 @@ nama_cmd('gen');
 $expected_setup_lines = <<EXPECTED;
 # audio inputs
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3,4,5,6 -i:alsa,default
 
 # post-input processing
@@ -804,7 +804,7 @@ $expected_setup_lines = <<EXPECTED;
 # audio outputs
 
 -a:1,5,6 -o:alsa,default
--a:3,4 -o:loop,Master_in
+-a:3,4 -o:loop,Main_in
 EXPECTED
 check_setup('Send Bus, Raw - ALSA');
 
@@ -821,7 +821,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio inputs
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:jack_multi,system:capture_1
 -a:4 -i:jack,jconvolver
 -a:J3,5 -i:loop,sax_insert_post
@@ -834,7 +834,7 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
 -a:3 -o:loop,sax_insert_post
--a:4,5 -o:loop,Master_in
+-a:4,5 -o:loop,Main_in
 -a:J3 -o:jack,jconvolver
 EXPECTED
 
@@ -850,7 +850,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio inputs
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:loop,sax_insert_pre
 -a:4 -i:jack,jconvolver
 -a:5,6 -i:jack_multi,system:capture_1
@@ -858,7 +858,7 @@ $expected_setup_lines = <<EXPECTED;
 # audio outputs
 
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,Master_in
+-a:3 -o:loop,Main_in
 -a:4,5 -o:loop,sax_insert_pre
 -a:6 -o:jack,jconvolver
 EXPECTED
@@ -867,7 +867,7 @@ check_setup('JACK client as pre-fader insert');
 load_project(name => "add_insert_via_soundcard-postfader", create => 1);
 nama_cmd("add sax; mon; source 2; add_insert post 5; gen");
 $expected_setup_lines = <<EXPECTED;
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:jack_multi,system:capture_2
 -a:4 -i:jack_multi,system:capture_7,system:capture_8
 -a:J3,5 -i:loop,sax_insert_post
@@ -880,7 +880,7 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
 -a:3 -o:loop,sax_insert_post
--a:4,5 -o:loop,Master_in
+-a:4,5 -o:loop,Main_in
 -a:J3 -o:jack_multi,system:playback_5,system:playback_6
 
 EXPECTED
@@ -896,7 +896,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio inputs
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3,4 -i:alsa,default
 -a:J3,5 -i:loop,sax_insert_post
 
@@ -913,7 +913,7 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:1,J3 -o:alsa,default
 -a:3 -o:loop,sax_insert_post
--a:4,5 -o:loop,Master_in
+-a:4,5 -o:loop,Main_in
 EXPECTED
 check_setup('Insert via soundcard, postfader - ALSA');
 
@@ -927,7 +927,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio inputs
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:loop,sax_insert_pre
 -a:4,5,6 -i:alsa,default
 
@@ -944,7 +944,7 @@ $expected_setup_lines = <<EXPECTED;
 # audio outputs
 
 -a:1,6 -o:alsa,default
--a:3 -o:loop,Master_in
+-a:3 -o:loop,Main_in
 -a:4,5 -o:loop,sax_insert_pre
 EXPECTED
 check_setup('Hardware insert via soundcard, prefader  - ALSA');
@@ -956,7 +956,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio inputs
 
--a:1 -i:loop,Master_in
+-a:1 -i:loop,Main_in
 -a:3 -i:loop,sax_insert_pre
 -a:4 -i:jack_multi,system:capture_7
 -a:5,6 -i:jack_multi,system:capture_2
@@ -964,7 +964,7 @@ $expected_setup_lines = <<EXPECTED;
 # audio outputs
 
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,Master_in
+-a:3 -o:loop,Main_in
 -a:4,5 -o:loop,sax_insert_pre
 -a:6 -o:jack_multi,system:playback_5
 EXPECTED

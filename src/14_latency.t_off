@@ -35,7 +35,7 @@ is( jack_port_latency('output','LinuxSampler:playback_1'),
 *cmd = \&command_process; # shortcut
 
 # 'send null' doesn't work!! 
-#cmd("Master; send null"); # so engine doesn't actually use JACK
+#cmd("Main; send null"); # so engine doesn't actually use JACK
 cmd("sh");
 cmd("add sine; source null; afx sine_fcac 220 0.1");
 cmd("Mixdown rec"); # record the cooked signal

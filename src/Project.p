@@ -139,12 +139,11 @@ sub load_project {
 	restart_wav_memoize();
 	initialize_project_git_repository();
 	restore_state($args{settings}) unless $config->{opts}->{M} ;
-	initialize_mixer() if not $tn{Master};
 
 	$config->{opts}->{M} = 0; # enable 
 	
-	# $args{nodig} allow skip for convert_project_format
-	dig_ruins() unless (scalar @::Track::all > 2 ) or $args{nodig};
+	initialize_mixer();
+	dig_ruins(); # in case there are audio files, but no tracks present
 
 	git_commit("initialize new project") if $config->{use_git};
 
@@ -168,15 +167,36 @@ sub restore_state {
 		}
 		else { restore_state_from_vcs($name)  }
 }
+sub initialize_mixer {
+	return if $tn{Main};
+		::SimpleTrack->new( 
+			group => 'Open', 
+			name => 'Main',
+			send_type => 'soundcard',
+			send_id => 1,
+			width => 2,
+			rw => MON,
+			source_type => undef,
+			source_id => undef); 
 
-sub dig_ruins { # only if there are no tracks 
+		my $mixdown = ::MixDownTrack->new( 
+			group => 'Mixdown', 
+			name => 'Mixdown', 
+			width => 2,
+			rw => OFF,
+			source_type => undef,
+			source_id => undef); 
+	$ui->create_master_and_mix_tracks();
+}
+
+
+
+sub dig_ruins {
 	
 	logsub("&dig_ruins");
 	return if user_tracks_present();
-	logpkg('debug', "looking for WAV files");
+	logpkg('debug', "looking for audio files");
 
-	# look for wave files
-		
 	my $d = this_wav_dir();
 	opendir my $wav, $d or carp "couldn't open directory $d: $!";
 
@@ -193,8 +213,6 @@ sub dig_ruins { # only if there are no tracks
 
 	logpkg('debug', "tracks found: @wavs");
  
-	initialize_mixer();
-
 	map{add_track($_)}@wavs;
 
 }
@@ -223,43 +241,27 @@ sub remove_riff_header_stubs {
 sub create_system_buses {
 	logsub("&create_system_buses");
 
-	# The following are ::Bus objects, no routing.
-	# They are hidden from the user.
-	
 	my $buses = q(
-			Master		# master fader track
-			Mixdown		# mixdown track
-			Mastering	# mastering network
-			Insert		# auxiliary tracks for inserts
-			Cooked		# for track caching
-			Temp		# temp tracks while generating setup
+		Main 		::SubBus send_type track send_id Main	# master fader track
+		Mixdown		::Bus									# mixdown track
+		Mastering	::Bus									# mastering network
+		Insert		::Bus									# auxiliary tracks for inserts
+		Cooked		::Bus									# for track caching
+		Temp		::Bus									# temp tracks while generating setup
+        Open		::Bus 									# unrouted for Main
+		Midi		::MidiBus	send_type null send_id null # all MIDI tracks
+		null		::SubBus	send_type null 				# routed only from track source_* and send_* fields
 	);
-	($buses) = strip_comments($buses); # need initial parentheses
-	my @system_buses = split " ", $buses;
-
-	# create them
-	
-	map{ ::Bus->new(name => $_ ) } @system_buses;
-
-	map{ $config->{_is_system_bus}->{$_}++ } @system_buses;
-
-	# create Main bus (the mixer)
-
-	::SubBus->new(
-		name 		=> 'Main',
-		send_type 	=> 'track', 
-		send_id => 'Master');
-
-	# null bus, routed only from track source_* and send_send_* fields 
-	::SubBus->new(
-		name 		=> 'null', 
-		send_type => 'null',
-	);
-	::MidiBus->new(
-		name 		=> 'Midi', 
-		send_type => 'null',
-		send_id	  => 'null',
-	);
+	($buses) = strip_comments($buses); 	# need initial parentheses
+	$buses =~ s/\A\s+//; 		   	   	# remove initial newline and whitespace
+	$buses =~ s/\s+\z//; 		   		# remove terminating newline and whitespace
+	my @buses = split "\n", $buses;
+	for my $bus (@buses)
+	{
+		my ($name, $class, @args) = split " ",$bus;
+		$class->new(name => $name, @args);
+		$config->{_is_special_bus}->{$name}++ unless $name eq 'Main';
+	}
 }
 
 

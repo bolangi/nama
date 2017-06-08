@@ -291,7 +291,7 @@ integer track-number assigned when the track is created.
 New user tracks initially belong to the Main bus.
 
 Track output signals are usually mixed and pass through the
-Master track on the way to soundcard for monitoring.
+Main track on the way to soundcard for monitoring.
 
 The following sections describes track attributes and
 their effects.
@@ -333,7 +333,7 @@ recorded audio files will show OFF status when set to PLAY.
 =head2 Track output
 
 By default a track belongs to the Main bus and is routed to
-Master, which has a final fader before the signal goes via 
+Main, which has a final fader before the signal goes via 
 ALSA or JACK to the audio device.
 
 =head2 Bus setting
@@ -479,7 +479,7 @@ to an external program such as jconverter.
 While Nama can address tracks by either name and track number,
 Ecasound chain setups use the track number exclusively.
 
-The Master track (mixer output) is always
+The Main track (mixer output) is always
 chain 1, the Mixdown track is always chain 2.
 
 Nama uses Ecasound loop devices where
@@ -496,11 +496,11 @@ We will divide the signal flow into track and mixer
 sections.  Parentheses show the track number/name.
 
 The stereo outputs of each user track terminate at 
-Master_in, a loop device at the mixer input.
+Main_in, a loop device at the mixer input.
 
 =head3 Track, REC status
 
-    Sound device   --+---(3)----> Master_in
+    Sound device   --+---(3)----> Main_in
       /JACK client   |
                      +---(R3)---> sax_1.wav
 
@@ -511,29 +511,29 @@ modes.
 
 =head3 Track, PLAY status
 
-    sax_1.wav ------(3)----> Master_in
+    sax_1.wav ------(3)----> Main_in
 
 =head3 Mixer, with mixdown enabled
 
 In the second part of the flow graph, the mixed signal is
-delivered to an output device through the Master chain,
-which can host effects. Usually the Master track
+delivered to an output device through the Main chain,
+which can host effects. Usually the Main track
 provides final control before audio output or mixdown.
 
-    Master_in --(1)--> Master_out --+--------> Sound device
+    Main_in --(1)--> Main_out --+--------> Sound device
                                     |
                                     +-->(2)--> Mixdown_1.wav
 
 =head3 Mastering Mode
 
 In mastering mode (invoked by C<master-on> and released
-C<master-off>) the following network, receives the Master
+C<master-off>) the following network, receives the Main
 track signal as input and provides an output to the
 soundcard or WAV file.
 
                        +- Low -+ 
                        |       |
-    Master_in --- Eq --+- Mid -+--- Boost -> soundcard/wav_out
+    Main_in --- Eq --+- Mid -+--- Boost -> soundcard/wav_out
                        |       |
                        +- High + 
 
@@ -552,7 +552,7 @@ in the configuration file F<.namarc>.
 The C<mixdown> command configures Nama for mixdown. The
 Mixdown track is set to REC (equivalent to C<Mixdown rec>)
 and the audio monitoring output is turned off (equivalent to
-C<Master off>).
+C<Main off>).
 
 Mixdown proceeds after you start the transport.
 
