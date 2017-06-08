@@ -340,10 +340,18 @@ sub restore_state_from_file {
 	}
 	if ( $project->{save_file_version_number} <= 1.208 )
 	{
-		map{ $_->{midi_versions} ||= [] } @tracks_data;
+		map
+		{ 
+			$_->{midi_versions} ||= [];
+			$_->{name} =~ s/^Master$/Main/;
+		} 
+		@tracks_data;
+		map
+		{
+			$_->{send_id} =~ s/^Master$/Main/;
+		}
+		@bus_data;
 	}
-
-
 	# restore effects, no change to track objects needed
 	
 	map
