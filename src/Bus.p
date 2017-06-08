@@ -85,8 +85,10 @@ sub forces { $forces{ $_[0]->rw } }
 	
 ## class methods
 
-# sub buses, and Main
-sub all { grep{ ! $::config->{_is_system_bus}->{$_->name} } values %by_name };
+# all buses that have mutable state, and therefore reason to
+# save or display that state
+
+sub all { grep{ ! $::config->{_is_special_bus}->{$_->name} } values %by_name };
 
 sub overall_last { 
 	my $max = 0;
@@ -98,7 +100,7 @@ sub settings_line {
 	my ($mix,$bus) = @_;
 	
 	my $nothing = '-' x 77 . "\n";
-	#return if $maybe_mix->name eq 'Master' or $maybe_mix->group eq 'Mastering';
+	#return if $maybe_mix->name eq 'Main' or $maybe_mix->group eq 'Mastering';
 	return unless defined $mix;
 
 	my ($bustype) = $bus->class =~ /(\w+)$/;
@@ -140,11 +142,11 @@ sub output_is_connectable {
  	
  	$bus->send_type eq 'track' and $::tn{$bus->send_id}->rec_status =~ /REC|MON/
 
-	# Or, during mixdown, we connect bus member tracks to Master
-	# even tho Master may be set to OFF
+	# Or, during mixdown, we connect bus member tracks to Main
+	# even tho Main may be set to OFF
 	
 	or $bus->send_type eq 'track' 
-				and $bus->send_id eq 'Master' 
+				and $bus->send_id eq 'Main' 
 				and $::tn{Mixdown}->rec
 	
 	# or we are connecting directly to a loop device
@@ -166,7 +168,7 @@ sub apply {
 		logpkg('debug', join " ", "bus output:", $_->name, $bus->send_id);
 
 		# connect member track outputs to target
-		# disregard Master track rec_status when connecting
+		# disregard Main track rec_status when connecting
 		# Main bus during mixdown handling
 
 		::Graph::add_path_for_send($g, $_->name, $bus->send_type, $bus->send_id )
@@ -285,7 +287,7 @@ our (
 );
 
 sub set_current_bus {
-	my $track = shift || ($this_track ||= $tn{Master});
+	my $track = shift || ($this_track ||= $tn{Main});
 
 	return unless $track; # needed for test environment
 
@@ -295,7 +297,7 @@ sub set_current_bus {
 	$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
 
 	my $bus_name = 
-		$track->name =~ /Master|Mixdown/ 	
+		$track->name =~ /Main|Mixdown/ 	
 		? 'Main'
 		: $track->is_mix_track()			
 			? $track->name 

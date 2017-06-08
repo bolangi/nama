@@ -1,4 +1,4 @@
-# ----------- Initialize --------
+# ----------- Initializations --------
 #
 #
 #  These routines are executed once on program startup
@@ -515,28 +515,6 @@ sub start_logging {
 	$config->{want_logging} = initialize_logger($config->{opts}->{L})
 }
 sub ecasound_iam{ $en{ecasound} and $en{ecasound}->ecasound_iam(@_) }
-
-sub initialize_mixer {
-		::SimpleTrack->new( 
-			group => 'Master', 
-			name => 'Master',
-			send_type => 'soundcard',
-			send_id => 1,
-			width => 2,
-			rw => MON,
-			source_type => undef,
-			source_id => undef); 
-
-		my $mixdown = ::MixDownTrack->new( 
-			group => 'Mixdown', 
-			name => 'Mixdown', 
-			width => 2,
-			rw => OFF,
-			source_type => undef,
-			source_id => undef); 
-	$ui->create_master_and_mix_tracks();
-}
-
 
 1;
 __END__
