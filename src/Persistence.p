@@ -33,7 +33,7 @@ sub save_state {
 	logpkg('debug', "saving palette");
 	$ui->save_palette;
 
-	# do nothing more if only Master and Mixdown
+	# do nothing more if only Main and Mixdown
 	
 	#user_tracks_present() or throw("No user tracks, skipping..."), return;
 	
@@ -356,8 +356,7 @@ sub restore_state_from_file {
 		
 	::Bus::initialize();	
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
-	create_system_buses();  # needed to avoid missing bus error
-							# shouldn't they be saved?
+	create_system_buses();
 
 	# temporary turn on mastering mode to enable
 	# recreating mastering tracksk
