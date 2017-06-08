@@ -366,7 +366,7 @@ sub user_mon_tracks { some_user_tracks(PLAY) }
 sub some_user_tracks {
 	my $which = shift;
 	my @user_tracks = ::audio_tracks();
-	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
+	splice @user_tracks, 0, 2; # drop Main and Mixdown tracks
 	return unless @user_tracks;
 	my @selected_user_tracks = grep { $_->rec_status eq $which } @user_tracks;
 	return unless @selected_user_tracks;
@@ -566,7 +566,7 @@ sub track_gui {
 					-tearoff => 0,
 				);
 	my @range;
-	push @range, 1..$config->{soundcard_channels} if $n > 2; # exclude Master/Mixdown
+	push @range, 1..$config->{soundcard_channels} if $n > 2; # exclude Main/Mixdown
 	
 	for my $v (@range) {
 		$ch_r->radiobutton(
@@ -796,18 +796,18 @@ sub create_master_and_mix_tracks {
 			[ 'command' => "MON",
 				-command  => sub { 
 						return if ::ecasound_engine_running();
-						$tn{Master}->set(rw => "MON");
-						$ui->refresh_track($tn{Master}->n);
+						$tn{Main}->set(rw => "MON");
+						$ui->refresh_track($tn{Main}->n);
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
 						return if ::ecasound_engine_running();
-						$tn{Master}->set(rw => "OFF");
-						$ui->refresh_track($tn{Master}->n);
+						$tn{Main}->set(rw => "OFF");
+						$ui->refresh_track($tn{Main}->n);
 			}],
 		);
 
-	$ui->track_gui( $tn{Master}->n, @rw_items );
+	$ui->track_gui( $tn{Main}->n, @rw_items );
 
 	$ui->track_gui( $tn{Mixdown}->n); 
 

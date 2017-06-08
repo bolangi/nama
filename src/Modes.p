@@ -80,7 +80,7 @@ sub master_off {
 	hide_mastering_tracks();
 	map{ $ui->remove_track_gui($tn{$_}->n) 
 		} @{$mastering->{track_names}};
-	$this_track = $tn{Master} if grep{ $this_track->name eq $_} @{$mastering->{track_names}};
+	$this_track = $tn{Main} if grep{ $this_track->name eq $_} @{$mastering->{track_names}};
 ;
 }
 
@@ -99,7 +99,7 @@ sub add_mastering_tracks {
 		name => 'Boost', 
 		rw => MON,
 		group => 'Mastering', 
-		target => 'Master',
+		target => 'Main',
 	);
 	$ui->track_gui( $track->n );
 

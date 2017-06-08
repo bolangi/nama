@@ -197,10 +197,10 @@ sub add_loop {
 		add_far_side_loop($g,$a,$b, in_loop($b))
 	} elsif ($fan_in == 1 and $fan_out == 1){
 
-	# we expect a single user track to feed to Master_in 
+	# we expect a single user track to feed to Main_in 
 	# as multiple user tracks do
 	
-			$b eq 'Master' 
+			$b eq 'Main' 
 				?  add_far_side_loop($g,$a,$b,in_loop($b))
 
 	# otherwise default to near_side ( *_out ) loops

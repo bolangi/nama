@@ -268,7 +268,7 @@ sub output_object_text {   # text for user display
 sub bus_name { 
 	my $track = shift;
 	return unless $track->is_mix_track;
-	$track->name eq 'Master' 
+	$track->name eq 'Main' 
 		? 'Main'
 		: $track->name
 }
@@ -276,7 +276,7 @@ sub source_status {
 	my $track = shift;
 	no warnings 'uninitialized';
 	return $track->current_wav if $track->play ;
-	#return $track->name eq 'Master' ? $track->bus_name : '' if $track->is_mix_track;
+	#return $track->name eq 'Main' ? $track->bus_name : '' if $track->is_mix_track;
 	return $track->bus_name . " bus" if $track->is_mix_track;
 	return $track->source_id unless $track->source_type eq 'soundcard';
 	my $ch = $track->source_id;
@@ -295,7 +295,7 @@ sub destination {
 	# track's own send_type/send_id
 	
 	my $out;
-	$out .= $track->group unless $track->group =~ /^(null|Master)$/;
+	$out .= $track->group unless $track->group =~ /^(null|Main)$/;
 	my $send_id = $track->send_id;
 	my $send_type = $track->send_type;
 	return $out if ! $send_type;

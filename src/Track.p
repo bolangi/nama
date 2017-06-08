@@ -202,11 +202,11 @@ sub rec_cleanup_script {
 sub current_edit { $_[0]->{current_edit}//={} }
 sub is_mix_track {
 	my $track = shift;
-	($bn{$track->name} or $track->name eq 'Master') and $track->rw eq MON
+	($bn{$track->name} or $track->name eq 'Main') and $track->rw eq MON
 }
 sub bus { $bn{$_[0]->group} }
 
-{ my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low
+{ my %system_track = map{ $_, 1} qw( Main Mixdown Eq Low
 Mid High Boost midi_record_buffer);
 sub is_user_track { ! $system_track{$_[0]->name} }
 sub is_system_track { $system_track{$_[0]->name} } 
@@ -242,7 +242,7 @@ sub current_midi {}
 
 
 {
-package ::SimpleTrack; # used for Master track
+package ::SimpleTrack; # used for Main track
 use ::Globals qw(:all);
 use Modern::Perl; use Carp; use ::Log qw(logpkg);
 use SUPER;
@@ -363,13 +363,13 @@ sub current_version {
 }
 sub source_status { 
 	my $track = shift; 
-	return 'Master' if $track->rec;
+	return 'Main' if $track->rec;
 	my $super = $track->super('source_status');
 	$super->($track)
 }
 sub destination {
 	my $track = shift; 
-	$tn{Master}->destination if $track->play
+	$tn{Main}->destination if $track->play
 }
 sub rec_status {
 	my $track = shift;

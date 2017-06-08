@@ -80,10 +80,10 @@ sub process_line {
 				reconfigure_engine();
 			}
 			reconfigure_engine();
-		# reset current track to Master if it is
+		# reset current track to Main if it is
 		# undefined, or the track has been removed
 		# from the index
-		$this_track = $tn{Master} if ! $this_track or
+		$this_track = $tn{Main} if ! $this_track or
 			(ref $this_track and ! $tn{$this_track->name});
 		setup_hotkeys() if $config->{hotkeys_always};
 	}
@@ -458,8 +458,8 @@ sub showlist {
 
 	my @sections;
 
-		push @sections, [undef,undef, map $tn{$_},qw(Master Mixdown)];
-		push @sections, [$tn{Master},$bn{Main},map $tn{$_},$bn{Main}->tracks ];
+		push @sections, [undef,undef, map $tn{$_},qw(Main Mixdown)];
+		push @sections, [$tn{Main},$bn{Main},map $tn{$_},$bn{Main}->tracks ];
 
 	if( $mode->mastering ){
 
@@ -514,13 +514,13 @@ sub mixdown {
 sub mixplay { 
 	pager_newline("Setting mixdown playback mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => PLAY);
-	$tn{Master}->set(rw => OFF); 
+	$tn{Main}->set(rw => OFF); 
 	$bn{Main}->set(rw => OFF);
 }
 sub mixoff { 
 	pager_newline("Leaving mixdown mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => OFF);
-	$tn{Master}->set(rw => MON); 
+	$tn{Main}->set(rw => MON); 
 	$bn{Main}->set(rw => MON);
 }
 sub remove_fade {
@@ -583,7 +583,7 @@ sub remove_track_cmd {
 		$quiet or pager( "Removing track /",$track->name,"/.  All WAV files will be kept.");
 		remove_submix_helper_tracks($track->name);
 		$track->remove;
-		$this_track = $tn{Master};
+		$this_track = $tn{Main};
 		1
 }
 sub unity {

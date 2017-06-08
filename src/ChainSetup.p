@@ -117,8 +117,8 @@ sub generate_setup_try {
 	add_paths_for_aux_sends();
 	logpkg('debug',"Graph after aux sends:\n$g");
 
-	add_paths_from_Master();
-	logpkg('debug',"Graph with paths from Master:\n$g");
+	add_paths_from_Main();
+	logpkg('debug',"Graph with paths from Main:\n$g");
 
 	add_paths_for_mixdown_handling();
 	logpkg('debug',"Graph with mixdown mods:\n$g");
@@ -139,12 +139,12 @@ sub generate_setup_try {
 
 	logpkg('debug',"Graph with inserts:\n$g");
 
-	# Mix tracks to mono if Master is mono
+	# Mix tracks to mono if Main is mono
 	# (instead of just throwing away right channel)
 
-	if ($g->has_vertex('Master') and $tn{Master}->width == 1)
+	if ($g->has_vertex('Main') and $tn{Main}->width == 1)
 	{
-		$g->set_vertex_attribute('Master', 'ecs_extra' => '-chmix:1')
+		$g->set_vertex_attribute('Main', 'ecs_extra' => '-chmix:1')
 	}
 	#logpkg('info',sub{"Graph object dump:\n",Dumper($g)});
 
@@ -164,29 +164,29 @@ sub add_paths_for_aux_sends {
 	# currently this routing is track-oriented 
 
 	# we could add this to the ::Bus base class
-	# then suppress it in Mixdown and Master groups
+	# then suppress it in Mixdown and Main groups
 
 	logsub("&add_paths_for_aux_sends");
 
 	map {  ::Graph::add_path_for_aux_send($g, $_ ) } 
 	grep { (ref $_) !~ /Slave/ 
-			and $_->group !~ /Mixdown|Master/
+			and $_->group !~ /Mixdown|Open/
 			and $_->send_type 
 			and $_->rec_status ne OFF } ::audio_tracks();
 }
 
 
-sub add_paths_from_Master {
-	logsub("&add_paths_from_Master");
+sub add_paths_from_Main {
+	logsub("&add_paths_from_Main");
 
 	if ($mode->mastering){
-		$g->add_path(qw[Master Eq Low Boost]);
+		$g->add_path(qw[Main Eq Low Boost]);
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
 	}
-	my $final_leg_origin = $mode->mastering ?  'Boost' : 'Master';
-	$g->add_path($final_leg_origin, output_node($tn{Master}->send_type)) 
-		if $tn{Master}->rw ne OFF
+	my $final_leg_origin = $mode->mastering ?  'Boost' : 'Main';
+	$g->add_path($final_leg_origin, output_node($tn{Main}->send_type)) 
+		if $tn{Main}->rw ne OFF
 
 }
 sub add_paths_for_mixdown_handling {
@@ -194,8 +194,8 @@ sub add_paths_for_mixdown_handling {
 
 	if ($tn{Mixdown}->rec){
 		# don't monitor via soundcard
-		$g->delete_edge('Master','soundcard_out');
-		my @p = (($mode->mastering ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
+		$g->delete_edge('Main','soundcard_out');
+		my @p = (($mode->mastering ? 'Boost' : 'Main'), ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
 		  	format_template		=> $config->{mix_to_disk_format},
@@ -206,11 +206,11 @@ sub add_paths_for_mixdown_handling {
 	# Mixdown handling - playback
 	
 	} elsif ($tn{Mixdown}->play){ 
-			my @e = ('wav_in','Mixdown',output_node($tn{Master}->send_type));
+			my @e = ('wav_in','Mixdown',output_node($tn{Main}->send_type));
 			$g->add_path(@e);
 			$g->set_vertex_attributes('Mixdown', {
-				send_type	=> $tn{Master}->send_type,
-				send_id		=> $tn{Master}->send_id,
+				send_type	=> $tn{Main}->send_type,
+				send_id		=> $tn{Main}->send_id,
 				chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 	}
@@ -296,7 +296,7 @@ sub non_track_dispatch {
 	# assign chain_id to edge based on chain_id of left-side loop's
 	# corresponding track:
 	#	
-	# hihat_out -- J7a -> Master_in
+	# hihat_out -- J7a -> Main_in
 	#
 	# soundcard_in -> wav_out (rec_file)
 	#
@@ -370,7 +370,7 @@ sub dispatch { # creates an IO object from a graph edge
 	my $track = $tn{$name};
 	my $class = ::IO::get_class( $endpoint, $direction );
 		# we need the $direction because there can be 
-		# edges to and from loop,Master_in
+		# edges to and from loop,Main_in
 		
 	my @args = (track => $name,
 				endpoint => massaged_endpoint($track, $endpoint, $direction),
@@ -515,11 +515,11 @@ its member tracks, and connecting them to its mix track.
 In the case of one track belonging to the Main (default) 
 bus, the initial graph would be:
 
-	soundcard_in -> sax -> Master -> soundcard_out
+	soundcard_in -> sax -> Main -> soundcard_out
 
 "soundcard_in" and "soundcard_out" will eventually be mapped
 to the appropriate JACK or ALSA source, depending on whether
-jackd is running. The Master track hosts the master fader,
+jackd is running. The Main track hosts the master fader,
 connects to the main output, and serves as the mix track for
 the Main bus.
 
@@ -539,7 +539,7 @@ the sax player) generates this additional route:
 Ecasound requires that we insert a loop device where signals fan 
 out or fan in.
 
-	soundcard_in -> sax -> sax_out -> Master -> soundcard_out
+	soundcard_in -> sax -> sax_out -> Main -> soundcard_out
 
 	                       sax_out -> soundcard_out
 
@@ -562,9 +562,9 @@ become the inputs and outputs of Ecasound chains.
 
 To create an Ecasound chain from 
 
-	Master -> soundcard_out 
+	Main -> soundcard_out 
 
-Nama uses 'Master' track attributes to provide
+Nama uses 'Main' track attributes to provide
 data. For example track index (1) serves as the chain_id,
 and the track's send settings determine the soundcard
 channel or other destination. 

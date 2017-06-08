@@ -1070,7 +1070,7 @@ add_submix_raw:
                       # going to the JACK client jconv .
 add_bus:
   type: bus
-  what: Add a sub bus. This is a bus, as known from other DAWs. The default output goes to a mix track and that is routed to the mixer (the Master track). All busses begin with a capital letter!
+  what: Add a sub bus. This is a bus, as known from other DAWs. The default output goes to a mix track and that is routed to the mixer (the Main track). All busses begin with a capital letter!
   short: abs
   parameters: <string:name> [ <string:track_name> | <string:jack_client> | <integer:soundcard_channel> ]
   example: |
