@@ -268,6 +268,7 @@ sub ecasound_iam{
 package ::MidiEngine;
 use Modern::Perl;
 use SUPER;
+use ::Globals qw($config %tn);
 our @ISA = '::Engine';
 
 sub new {
@@ -281,8 +282,8 @@ sub stop { ::stop_midi_transport() }
 sub cleanup { ::midi_rec_cleanup() }
 sub start { ::start_midi_transport() }
 sub rec_tracks { grep {$_->rec} $_[0]->user_tracks }
-sub system_tracks { $::tn{midi_record_buffer} } # XXX hardcoded
-sub user_tracks { grep { $_->[0]->name ne 'midi_record_buffer' } $_[0]->tracks } # XXX hardcoded
+sub system_tracks { $tn{$config->{midi_record_buffer}}}
+sub user_tracks { grep { $_->name ne $config->{midi_record_buffer} } $_[0]->tracks }
 sub play_tracks { grep {$_->play} $_[0]->user_tracks }
 sub is_active { $_[0]->rec_tracks or $_[0]->play_tracks }
 		
