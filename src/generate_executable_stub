@@ -9,8 +9,8 @@ my $script = "$script_dir/nama";
 my $exec = <<EXEC;
 #!/usr/bin/env perl
 require 5.10.1;
-use Audio::Nama;
-Audio::Nama::main();
+use Nama;
+Nama::main();
 __END__
 EXEC
 

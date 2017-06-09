@@ -9,7 +9,7 @@ cd "$CUR_DIR"
 ./check_hash_keys
 
 MD=..
-LIBPATH=$MD/lib/Audio/Nama
+LIBPATH=$MD/lib/Nama
 LD=$MD/lib
 TD=$MD/t
 SD=$MD/script
@@ -22,7 +22,7 @@ rm $TD/*.t
 mkdir -p $LIBPATH
 
 DEBUG=$1
-./preproc $DEBUG -r Audio::Nama \
+./preproc $DEBUG -r Nama \
 		-s $MD/src \
 		-t $LIBPATH \
 		-a p \
@@ -30,12 +30,12 @@ DEBUG=$1
 mv $LIBPATH/Nama.pm $LIBPATH/../Nama.pm 
 ./preproc $DEBUG -s $MD/src \
          -t $MD/t  \
-		 -r Audio::Nama \
+		 -r Nama \
 		 -a t \
 		 -b t
 ./generate_executable_stub
-cp makeman $MD/lib/Audio
-cd $MD/lib/Audio
+cp makeman $MD/lib/
+cd $MD/lib/
 ./makeman
 rm *.tmp
-cd ../../src
+cd $MD

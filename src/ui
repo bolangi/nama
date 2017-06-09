@@ -2,5 +2,5 @@
 use 5.10.0;
 use warnings;
 use lib "../lib";
-use Audio::Nama;
-Audio::Nama::main();
+use Nama;
+Nama::main();

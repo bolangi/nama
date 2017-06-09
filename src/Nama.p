@@ -46,8 +46,8 @@ use Try::Tiny;
 ########## Nama modules ###########
 #
 # Note that :: in the *.p source files is expanded by       # SKIP_PREPROC
-# preprocessing to Audio::Nama in the generated *.pm files. # SKIP_PREPROC
-# ::Assign becomes Audio::Nama::Assign                      # SKIP_PREPROC
+# preprocessing to Nama in the generated *.pm files. # SKIP_PREPROC
+# ::Assign becomes Nama::Assign                      # SKIP_PREPROC
 #
 # These modules import functions and variables
 #

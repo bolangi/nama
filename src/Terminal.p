@@ -334,7 +334,7 @@ sub load_keywords {
 	push @keywords, keys %{$text->{iam}};
 	push @keywords, keys %{$fx_cache->{partial_label_to_full}};
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
-	push @keywords, "Audio::Nama::";
+	push @keywords, "Nama::";
 	@{$text->{keywords}} = @keywords
 }
 

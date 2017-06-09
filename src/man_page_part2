@@ -57,9 +57,9 @@ The following commands, available on Unixlike systems with
 Perl installed, will pull in Nama and other Perl libraries
 required for text mode operation:
 
-C<cpanm Audio::Nama>
+C<cpanm Nama>
 -or-
-C<PERL_MM_USE_DEFAULT=1 cpan Audio::Nama>
+C<PERL_MM_USE_DEFAULT=1 cpan Nama>
 
 To use the GUI, you will need to install Tk:
 
