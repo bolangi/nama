@@ -6,7 +6,7 @@ package ::Track;
 use Role::Tiny::With;
 with '::Wav',
 	 '::WavModify',
-	 '::Waveform',
+#	 '::Waveform',
 	 '::TrackRegion',
 	 '::TrackIO',
 	 '::TrackComment',
