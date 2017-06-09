@@ -68,13 +68,13 @@ __END__
 
 =head1 NAME
  
-Audio::Nama::Globals - Nama global variables
+Nama::Globals - Nama global variables
  
 Variables are listed in multiple files in the source.
 
 =head2 Exported
 
-L<Audio::Nama::Globals> exports Nama globals, 
+L<Nama::Globals> exports Nama globals, 
 which it gets by merging the contents
 of the following files:
 

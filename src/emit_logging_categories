@@ -1,1 +1,1 @@
-ls *.p | perl -pe 's/\.p$//; s/^/Audio::Nama::/'
+ls *.p | perl -pe 's/\.p$//; s/^/Nama::/'

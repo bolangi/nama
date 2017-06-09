@@ -22,7 +22,7 @@ rm $TD/*.t
 mkdir -p $LIBPATH
 
 DEBUG=$1
-./preproc $DEBUG -r Audio::Nama \
+./preproc $DEBUG -r Nama \
 		-s $MD/src \
 		-t $LIBPATH \
 		-a p \
@@ -30,7 +30,7 @@ DEBUG=$1
 mv $LIBPATH/Nama.pm $LIBPATH/../Nama.pm 
 ./preproc $DEBUG -s $MD/src \
          -t $MD/t  \
-		 -r Audio::Nama \
+		 -r Nama \
 		 -a t \
 		 -b t
 ./generate_executable_stub

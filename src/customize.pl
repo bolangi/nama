@@ -9,7 +9,7 @@
 #     perl -I ~/build/nama/lib customize.pl
 
 use Modern::Perl;
-use Audio::Nama::Globals qw(:all);
+use Nama::Globals qw(:all);
 
 my @user_customization = (
 

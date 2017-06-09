@@ -2,7 +2,7 @@ BUILD INSTRUCTIONS
     You may decide to clone the Nama's github repository and from source
     rather than installing from CPAN. It is easier to browse or hack on
     Nama this way. Functionality is separated into a number of files, and
-    you will see $::package_var instead of $Audio::Nama::package_var.
+    you will see $::package_var instead of $Nama::package_var.
 
     You can get also updates more quickly and can share patches with other
     developers.
