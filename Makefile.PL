@@ -2,7 +2,7 @@ use inc::Module::Install;
 
          # Define metadata
          name                'Audio-Nama';
-		 version_from        'lib/Audio/Nama.pm';
+		 version_from        'lib/Nama.pm';
 		 all_from            'script/nama';
          license             'gpl';
 		 install_script      'script/nama'; 
