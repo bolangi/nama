@@ -120,6 +120,7 @@ sub save_system_state {
 	@project_effect_chain_data = sort $by_n map { $_->as_hash } 
 		::EffectChain::find(project => 1);
 
+
 	# save history -- 50 entries, maximum
 
 	my @history;
@@ -340,6 +341,20 @@ sub restore_state_from_file {
 	}
 	if ( $project->{save_file_version_number} <= 1.208 )
 	{
+		map 
+		{
+			$_->{class} =~ s/Audio::Nama/Nama/ if $_->{class} 
+		}	@tracks_data,
+			@bus_data,
+			@groups_data,
+			@marks_data,
+			@fade_data,
+			@edit_data,
+			@inserts_data,
+			@effects_data,
+			@global_effect_chain_data,
+			@project_effect_chain_data;
+
 		map
 		{ 
 			$_->{midi_versions} ||= [];
