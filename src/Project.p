@@ -260,7 +260,6 @@ sub create_system_buses {
 	{
 		my ($name, $class, @args) = split " ",$bus;
 		$class->new(name => $name, @args);
-		$config->{_is_special_bus}->{$name}++ unless $name eq 'Main';
 	}
 }
 
