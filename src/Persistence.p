@@ -359,6 +359,7 @@ sub restore_state_from_file {
 		{ 
 			$_->{midi_versions} ||= [];
 			$_->{name} =~ s/^Master$/Main/;
+			$_->{group} =~ s/^Open$/Main/;
 		} 
 		@tracks_data;
 		map
