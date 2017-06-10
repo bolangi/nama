@@ -250,7 +250,7 @@ sub create_system_buses {
 		Temp		::Bus									# temp tracks while generating setup
         Null		::Bus 									# unrouted for Main
 		Midi		::MidiBus	send_type null send_id null # all MIDI tracks
-		null		::SubBus	send_type null 				# routed only from track source_* and send_* fields
+		Aux			::SubBus	send_type null 				# routed only from track source_* and send_* fields
 	);
 	($buses) = strip_comments($buses); 	# need initial parentheses
 	$buses =~ s/\A\s+//; 		   	   	# remove initial newline and whitespace

@@ -23,8 +23,8 @@ add_bus R-L
 
 # we'll do our own routing for these tracks
 
-Stereo move_to_bus null
-R-L    move_to_bus null
+Stereo move_to_bus Aux
+R-L    move_to_bus Aux
 
 # no recording to disk, remove volume and pan controls
 
