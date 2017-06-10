@@ -364,6 +364,9 @@ sub restore_state_from_file {
 		map
 		{
 			$_->{send_id} =~ s/^Master$/Main/;
+			$_->{name}	  =~ s/^null$/Aux/;
+			$_->{name}	  =~ s/^Open$/Null/;
+
 		}
 		@bus_data;
 	}
