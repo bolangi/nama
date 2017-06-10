@@ -170,7 +170,7 @@ sub restore_state {
 sub initialize_mixer {
 	return if $tn{Main};
 		::SimpleTrack->new( 
-			group => 'Open', 
+			group => 'Null', 
 			name => 'Main',
 			send_type => 'soundcard',
 			send_id => 1,
@@ -248,7 +248,7 @@ sub create_system_buses {
 		Insert		::Bus									# auxiliary tracks for inserts
 		Cooked		::Bus									# for track caching
 		Temp		::Bus									# temp tracks while generating setup
-        Open		::Bus 									# unrouted for Main
+        Null		::Bus 									# unrouted for Main
 		Midi		::MidiBus	send_type null send_id null # all MIDI tracks
 		null		::SubBus	send_type null 				# routed only from track source_* and send_* fields
 	);
