@@ -109,7 +109,7 @@ command: iam_cmd predicate {
 	my $user_input = "$item{iam_cmd} $item{predicate}"; 
 	::logit('::Grammar','debug',"Found Ecasound IAM command: $user_input");
 	my $result = ::ecasound_iam($user_input);
-	::pager( $result );  
+	::pager( "$result\n" );  
 	1 }
 
 command: user_command predicate {
