@@ -360,6 +360,7 @@ sub restore_state_from_file {
 			$_->{midi_versions} ||= [];
 			$_->{name} =~ s/^Master$/Main/;
 			$_->{group} =~ s/^Master$/Null/;
+			$_->{group}	  =~ s/^Open$/Null/;
 		} 
 		@tracks_data;
 		map
