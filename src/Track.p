@@ -515,7 +515,7 @@ sub mute {
 	my $track = shift;
 	if ( $track->exists_midi )
 	{
-		::midish( 'mute '  . $_[0]->current_midi ) 
+		::midish_cmd( 'mute '  . $_[0]->current_midi ) 
 	}
 }
 sub unmute { 
@@ -523,10 +523,10 @@ sub unmute {
 	if ( $track->exists_midi )
 	{
 		# mute unselected versions
-		map{ ::midish( 'mute '. midi_version_name($track->name, $_) ) }
+		map{ ::midish_cmd( 'mute '. midi_version_name($track->name, $_) ) }
 		grep{ $_ != $track->version } @{$track->versions};
 
-		::midish( 'unmute '  . $_[0]->current_midi ) 
+		::midish_cmd( 'unmute '  . $_[0]->current_midi ) 
 	}
 }
 sub rw_set {
@@ -536,7 +536,7 @@ sub rw_set {
 }
 sub exists_midi {
 	my $track = shift;
-	my ($tlist) = ::midish('print [tlist]');
+	my ($tlist) = ::midish_cmd('print [tlist]');
 	$tlist =~ s/[}{]//g;
 	my ($match) = grep{$_ eq $track->current_midi} split " ", $tlist;
 }

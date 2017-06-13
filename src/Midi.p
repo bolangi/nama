@@ -6,7 +6,6 @@ use Modern::Perl;
 use Carp;
 
 {
-my $midi_rec_buf = 'midi_record_buffer'; # a midish track that is the target for all recording
 my ($pid, $sel);
 my @handles = my ($fh_midi_write, $fh_midi_read, $fh_midi_error) = map{ IO::Handle->new() } 1..3;
 map{ $_->autoflush(1) } @handles;
@@ -22,12 +21,12 @@ sub start_midish_process {
 	$sel = IO::Select->new();
 	$sel->add($fh_midi_read);
 	$sel->add($fh_midi_error);
-	midish( qq(print "Midish is ready.") );
+	midish_cmd( qq(print "Midish is ready.") );
 	write_aux_midi_commands();
-	midish( q(exec ").$file->aux_midi_commands.q(") );
+	midish_cmd( q(exec ").$file->aux_midi_commands.q(") );
 	$pid
 }
-sub midish {
+sub midish_cmd {
 	my $command = shift;
 	logsub('&midish');
 	return unless $config->{use_midi};
@@ -64,16 +63,16 @@ sub close_midish {
 }	
 sub save_midish {
 	my $fname = $file->midi_store;
-	midish( qq<save "$fname">);
+	midish_cmd( qq<save "$fname">);
 }
 
 sub reconfigure_midi {
-	add_midi_track($midi_rec_buf, n => 999, hide => 1) 
-		if not $tn{$midi_rec_buf}
+	add_midi_track($config->{midi_record_buffer}, n => 999, hide => 1) 
+		if not $tn{$config->{midi_record_buffer}}
 		and $this_track->current_midi
 		and $this_track->rec;
 
-	my $midi_rec = $tn{$midi_rec_buf};
+	my $midi_rec = $tn{$config->{midi_record_buffer}};
 
 	# mute all
 
@@ -88,11 +87,11 @@ sub reconfigure_midi {
 
 	# unset filters
 
-	do { $_->select_track; midish("fdel ".$_->name) } for @all;
+	do { $_->select_track; midish_cmd("fdel ".$_->name) } for @all;
 
 	# set filters for PLAY and MON tracks
 
-	do { $_->select_track; midish(join ' ', 'rnew', $_->source_id, $_->send_id) } for @audible;
+	do { $_->select_track; midish_cmd(join ' ', 'rnew', $_->source_id, $_->send_id) } for @audible;
 
 	my ($rec) = my @rec = $en{midish}->rec_tracks;
 
@@ -111,33 +110,33 @@ sub reconfigure_midi {
 
 	my $cmd = 'rnew';
 	$cmd = join ' ', $cmd, $rec->source_id, $rec->send_id;
-	midish($cmd);
+	midish_cmd($cmd);
 }
 sub start_midi_transport {
 	my $start_command = $en{midish}->rec_tracks ? 'r' : 'p';
-	midish($start_command);
+	midish_cmd($start_command);
 	$setup->{midish_running}++;
 }
 sub stop_midi_transport {
 	return unless midish_running();
-	midish('s'); 
+	midish_cmd('s'); 
 	delete $setup->{midish_running};
 }
 sub midi_rec_cleanup {
 	my ($track) = $en{midish}->rec_tracks; 
 	# midish allows one recording track 
 	defined $track or return;
-	my $length = midish('print [mend]');
+	my $length = midish_cmd('print [mend]');
 	$length > 0 or return;
 
 	my $version = $track->current_version;
 	$track->set_version($version);
 		push @{$track->midi_versions}, $version;
 		$track->set(rw => PLAY);
-		my $cmd = join ' ', 'chdup', $midi_rec_buf, $track->source_id, $track->midi_version;
+		my $cmd = join ' ', 'chdup', $config->{midi_record_buffer}, $track->source_id, $track->midi_version;
 		say "cmd: $cmd";
-		midish($cmd);
-		midish("clr $midi_rec_buf $length");
+		midish_cmd($cmd);
+		midish_cmd("clr $config->{midi_record_buffer} $length");
 		$track->unmute();
 		save_midish();
 }

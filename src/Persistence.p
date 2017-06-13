@@ -477,7 +477,7 @@ sub restore_state_from_file {
 		(@project_effect_chain_data, @global_effect_chain_data);
 
 	my $fname = $file->midi_store;
-	midish(qq<load "$fname">);
+	midish_cmd(qq<load "$fname">);
 	
 } 
 sub convert_rw {

@@ -15,7 +15,7 @@ midi_cmd: /[a-z]+/ predicate {
 	my $line = "$item[1] $item{predicate}";
 	# remove 'm' prepended to all midi commands
 	$line =~ s/^m//; 
-	::pager(::midish($line));
+	::pager(::midish_cmd($line));
 	1;
 }
 
@@ -1007,7 +1007,7 @@ import_audio: _import_audio path frequency {
 import_midi: _import_midi path { 
 	my $fname = $item{path};
 	$fname = qq("$fname") unless $fname =~ /"/; # should be a subroutine quote_name
-	::midish("import $fname"); 1
+	::midish_cmd("import $fname"); 1
 }
 import_audio: _import_audio path {
 	::import_audio($::this_track, $item{path}); 1;
@@ -1715,7 +1715,7 @@ remove_effect_surname: _remove_effect_surname { ::this_op_o()->set_surname(); 1}
 
 select_track: _select_track track_spec
 
-set_tempo: _set_tempo dd {::midish("t $item{dd}")}
+set_tempo: _set_tempo dd {::midish_cmd("t $item{dd}")}
 
 route_track: _route_track source_id send_id { 
 	::nama_cmd("source $item{source_id}");
