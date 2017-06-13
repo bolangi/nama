@@ -1207,6 +1207,40 @@ sub fade {
 	$self->_modify_effect($param, $to)
 }
 
+sub plan_fade {
+	return unless ecasound_engine_running();
+	my $self = shift;
+	my %args = @_;
+	my $param   = $args{param}   || 1;
+	my $from    = $args{from}    || 0;
+	my $to	    = $args{to}      || 0;
+	my $seconds = $args{seconds} || 1;
+	my $in_future 	= $args{in_future};
+	my $steps 	= $seconds * $config->{fade_resolution};
+	my $wink  	= 1/$config->{fade_resolution};
+	my $id 		= $self->id;
+	my $size 	= ($to - $from)/$steps;
+	logpkg('debug', "id: $id, param: $param, from: $from, to: $to, seconds: $seconds");
+	if ( not $in_future ){
+		for (1..$steps - 1){
+			$self->_modify_effect($param, $size, '+');
+			sleeper( $wink );
+		}		
+		$self->_modify_effect($param, $to)
+	}
+	else {
+		my $advance = $in_future;
+		my $coderef = sub { $self->_modify_effect($param, $size, '+') };
+		for (1..$steps - 1){
+			$advance += $wink;
+			schedule_ahead($advance, $coderef)
+		}		
+		$advance += $wink;
+		schedule_ahead($advance, sub { $self->_modify_effect($param, $to) } );
+		sub schedule_ahead {}
+	}
+}
+
 sub fadein {
 	my $self = shift;
 	my $to = shift;
