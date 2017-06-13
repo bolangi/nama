@@ -29,7 +29,13 @@
 	$jack_transport_mode 			$config->{jack_transport_mode}
 	$ecasound_jack_client_name 		$config->{ecasound_jack_client_name}
 	$ecasound_engine_name 			$config->{ecasound_engine_name}
+
+# 	[midi]
+
 	$midi_engine_name 				$config->{midi_engine_name}
+	$use_midi 						$config->{use_midi}
+	$midi_record_buffer 			$config->{midi_record_buffer}
+	$midi_default_input_channel 	$config->{midi_default_input_channel}
 
 #	[mastering]
 
@@ -48,7 +54,6 @@
 	$press_space_to_start_transport $config->{press_space_to_start}
 	$execute_on_project_load 		$config->{execute_on_project_load}
 	$initial_mode 					$config->{initial_mode}
-	$use_midi 						$config->{use_midi}
 	$quietly_remove_tracks 			$config->{quietly_remove_tracks}
 	$use_jack_plumbing 				$config->{use_jack_plumbing}
 	$use_playback_version_for_mixdown $config->{sync_mixdown_and_playback_version_numbers} 
@@ -64,7 +69,6 @@
 	$alias							$config->{alias}
 	$hotkeys						$config->{hotkeys}
 	$new_track_rw					$config->{new_track_rw}
-	$midi_record_buffer 			$config->{midi_record_buffer}
 
 ### the following variables may also be set 
 
