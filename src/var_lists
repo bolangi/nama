@@ -40,7 +40,6 @@
 	$mode->{loop_enable}
 	$mode->{mastering}
 	$mode->{preview}
-	$mode->{midi_terminal}
 	$mode->{midi_transport_sync}
 	$gui->{_seek_unit}
 	$text->{command_history}
