@@ -18,18 +18,26 @@ sub pos {
 	my $track = shift;
 	first_index{$_ eq $track->op} @{$track->ops};
 }
-
-
 sub user_ops_o {
 	my $track = shift;
 	map{ fxn($_) } $track->user_ops();
 }
-		
+sub channel_ops {
+	my $track = shift;
+	grep{ $::config->{ecasound_channel_ops}->{$_->type} } $track->ops_o;	
+}
+sub audio_ops {
+	my $track = shift;
+	grep{ ! $::config->{ecasound_channel_ops}->{$_->type} } $track->ops_o;
+}
+sub ops_o {
+	my $track = shift;
+	map{ ::fxn($_) } @{ $track->ops }
+}
 sub apply_ops {
 	my $track = shift;
 	map{ $_->apply_op }	# add operator to the ecasound chain
-	map{ fxn($_) } 		# convert to objects
-	@{ $track->ops }  	# start with track ops list
+	$track->audio_ops;
 }
 sub user_ops {
 	my $track = shift;
