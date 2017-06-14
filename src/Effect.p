@@ -1233,11 +1233,14 @@ sub plan_fade {
 		my $coderef = sub { $self->_modify_effect($param, $size, '+') };
 		for (1..$steps - 1){
 			$advance += $wink;
-			schedule_ahead($advance, $coderef)
+			schedule_fade($advance, $coderef)
 		}		
 		$advance += $wink;
-		schedule_ahead($advance, sub { $self->_modify_effect($param, $to) } );
-		sub schedule_ahead {}
+		schedule_fade($advance, sub { $self->_modify_effect($param, $to) } );
+		sub schedule_fade {
+			my ($after, $sub) = @_;
+			$project->{events}->{"fade_".$setup->{fade_counter}++} = AE::timer( $after, 0, $sub );
+		}
 	}
 }
 
