@@ -1268,6 +1268,12 @@ sub fade_out_level {
 	my $self = shift;
 	$config->{fade_out_level}->{$self->type}
 }
+sub ecasound_format {
+	my $self = shift;
+	my $cmd = '-'.$self->code;
+	$cmd .= ':'.join ',' ,@{$self->{params}} if $self->{params} and @{$self->{params}} > 0;
+	$cmd
+}
 
 } # end package Effect
 
