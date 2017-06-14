@@ -183,6 +183,7 @@ sub definitions {
 	#	beep_command					=> 'beep -f 350 -l 700',
 		midi_record_buffer => 'midi_record',
 		midi_default_input_channel => 'keyboard',
+		ecasound_channel_ops 		=> {map{$_,1} qw(chcopy chmove chorder chmix chmute)},
 
 	}, '::Config';
 
