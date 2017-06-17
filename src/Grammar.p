@@ -171,6 +171,7 @@ sub do_script {
 	my @lines = split "\n",$script;
 	my $old_opt_r = $config->{opts}->{R};
 	$config->{opts}->{R} = 1; # turn off auto reconfigure
+	map{ s/#.*$// } @lines;
 	for my $input (@lines) { process_line($input) unless $input =~ /^\s*#/};
 	$config->{opts}->{R} = $old_opt_r;
 }
