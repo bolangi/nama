@@ -1,23 +1,19 @@
 #create crossover_3chan_piano_cs
 
 # Input is 5-channel audio from Pianoteq keyboard
-# Output is 10 channels divided in pairs in order:
+# Output is 10 channels divided in pairs in the following order:
 # woofer, mid, tweeter, center, rear.
-# Center only is a mono output, others are stereo.
-# Soundcard channel 8 is unused
+# Center is a mono output, others are stereo.
+# Soundcard channel 8 is unused.
 
 # The following setup script will run correctly
 # under ALSA and also with jackd controlling the
 # soundcard.
 
-# disconnect Main track (default mixer)
-Main off
-# initialize tracks  without usual pan effect and no default
-# routing
+# initialize tracks  
 
 add-tracks pre1 pre2 woofer center rear mid tweeter
 for        pre1 pre2 woofer center rear mid tweeter; move-to-bus Aux
-for Aux; remove-fader-effect pan; remove-fader-effect vol 
 
 pre1 set-track width 5 
 
@@ -32,7 +28,7 @@ for mid tweeter; source track pre2
 
 select-track mid
 stereo
-send 3 # send output starting at channel 3
+send 3 # send output to soundcard starting at channel 3
 
 tweeter # trackname appearing alone or prepended to a command implies select-track
 stereo
@@ -48,7 +44,10 @@ afx chmove 4 1 # 'afx' is a shortcut for 'add-effect'
 afx chmove 5 2
 send 9
 
-# 
+for Aux; remove-fader-effect pan; remove-fader-effect vol 
+Main off; rffx vol; rffx pan
+
+
 # -n:crossover_3chan_piano_cs \
 #           -a:pre1    -pf:./pre1.ecp  -f:f32_le,5,48000 -i:jack -o:loop,1 \
 #           -a:pre2,woofer,center,rear -f:f32_le,5,48000 -i:loop,1 \
@@ -57,8 +56,7 @@ send 9
 #           -a:woofer  -pf:./woofer.ecp    -chorder:1,3,0,0,0,0,0,0,0,0 \
 #           -a:mid     -pf:./mid.ecp       -chorder:0,0,1,2,0,0,0,0,0,0 \
 #           -a:tweeter -pf:./tweeter.ecp   -chorder:0,0,0,0,1,2,0,0,0,0 \
-#           -a:center  -pf:./center_nodelay.ecp  -chorder:0,0,0,0,0,0,3,0,0,0
-# \
+#           -a:center  -pf:./center_nodelay.ecp  -chorder:0,0,0,0,0,0,3,0,0,0  \
 #           -a:rear    -pf:./rear.ecp      -chorder:0,0,0,0,0,0,0,0,4,5 \
 #           -a:woofer,mid,tweeter,center,rear -f:f32_le,10,48000 -o:jack \
 #           -a:all -z:mixmode,sum -z:nodb -B:rtlowlatency -b:64
