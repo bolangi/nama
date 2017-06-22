@@ -651,32 +651,7 @@ CONVERT51
 
 do_script($script);
 $expected_setup_lines = <<EXPECTED;
-
-# ecasound chainsetup file
-
-# general
-
--z:mixmode,sum -G:jack,NamaEcasound,send -b 256 -z:db,100000 -z:nointbuf
-
-# audio inputs
-
--a:1 -i:loop,Main_in
--a:10 -i:loop,R-L_in
--a:11,12 -i:loop,R-L_out
--a:3 -i:alsa,default
--a:4,5,6,7,8,9 -i:loop,Stereo_out
-
-# post-input processing
-
--a:3
-
-# audio outputs
-
--a:1 -o:alsa,default
--a:10 -o:loop,R-L_out
--a:3 -o:loop,Stereo_out
--a:4,5,6,7,11,12 -o:loop,Main_in
--a:8,9 -o:loop,R-L_in
+[% qx(cat ./stereo51.te ) %]
 EXPECTED
 
 force_alsa();
