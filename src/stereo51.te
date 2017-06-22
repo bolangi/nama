@@ -1,0 +1,35 @@
+# ecasound chainsetup file
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,NamaEcasound, -b 256 -z:db,100000 -z:nointbuf
+
+# audio inputs
+
+-a:1 -i:loop,Main_in
+-a:10 -i:loop,R-L_in
+-a:11,12 -i:loop,R-L_out
+-a:3 -i:alsa,default
+-a:4,5,6,7,8,9 -i:loop,Stereo_out
+
+# post-input processing
+
+-a:3
+-a:6 -chmix:3
+-a:7 -chmix:4
+-a:8 -chmute:2
+-a:9 -chmute:1
+-a:10 -chmix:1
+-a:11 -chmove:1,5
+
+# pre-output processing
+
+-a:12 -chmove:1,6
+
+# audio outputs
+
+-a:1 -o:alsa,default
+-a:10 -o:loop,R-L_out
+-a:3 -o:loop,Stereo_out
+-a:4,5,6,7,11,12 -o:loop,Main_in
+-a:8,9 -o:loop,R-L_in
