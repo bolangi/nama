@@ -243,7 +243,6 @@ sub process_routing_graph {
 	map { 
 		$inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;
-		# post-input modifiers
 		$post_input{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
 	} 
 	grep { $_->direction eq 'input' } @io;
@@ -253,7 +252,6 @@ sub process_routing_graph {
 	map { 
 		$outputs{$_->ecs_string} //= [];
 		push @{$outputs{$_->ecs_string}}, $_->chain_id;
-		# pre-output modifers
 		$pre_output{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
 	} 
 	grep { $_->direction eq 'output' } @io;
