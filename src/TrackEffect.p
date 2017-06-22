@@ -26,9 +26,35 @@ sub channel_ops {
 	my $track = shift;
 	grep{ $::config->{ecasound_channel_ops}->{$_->type} } $track->ops_o;	
 }
-sub audio_ops {
+sub input_channel_ops {
 	my $track = shift;
-	grep{ ! $::config->{ecasound_channel_ops}->{$_->type} } $track->ops_o;
+	my @channel_ops;
+	my @ops = $track->ops_o;
+	for my $op (@ops)
+	{
+		return @channel_ops if ! $::config->{ecasound_channel_ops}->{$op->type};
+		push @channel_ops, $op
+	}
+	@channel_ops
+}
+sub output_channel_ops {
+	my $track = shift;
+	my @channel_ops;
+	my @ops = $track->ops_o;
+	for my $op (reverse @ops)
+	{
+		return @channel_ops if ! $::config->{ecasound_channel_ops}->{$op->type};
+		unshift @channel_ops, $op
+	}
+	@channel_ops
+}
+sub probably_audio_ops {
+	my $track = shift;
+	my @ops = $track->ops_o;
+	my $input_channel_op_count  =()= $track->input_channel_ops();
+	my $output_channel_op_count =()= $track->output_channel_ops();
+	shift @ops for $input_channel_op_count;
+	pop   @ops for $output_channel_op_count;
 }
 sub ops_o {
 	my $track = shift;
@@ -36,8 +62,7 @@ sub ops_o {
 }
 sub apply_ops {
 	my $track = shift;
-	map{ $_->apply_op }	# add operator to the ecasound chain
-	$track->audio_ops;
+	map{ $_->apply_op }	$track->probably_audio_ops if $track->probably_audio_ops
 }
 sub user_ops {
 	my $track = shift;

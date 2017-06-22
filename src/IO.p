@@ -221,7 +221,8 @@ sub AUTOLOAD {
 		# ->can is reliable here because Track has no AUTOLOAD
 	}
 	# SUPPRESS ERRORS XXX
-	return undef if $call eq 'channel_ops';
+	return undef if $call eq 'input_channel_ops';
+	return undef if $call eq 'output_channel_ops';
 	return undef if $call eq 'name' or $call eq 'surname';
 	}
 	my $msg = "Autoload fell through. Object type: ". (ref $self). " illegal method call: $call\n";
@@ -401,13 +402,13 @@ sub new {
 	my %vals = @_;
 	$class->SUPER::new( %vals, device_id => "loop,$vals{endpoint}");
 }
-sub ecs_extra { join ' ', map{ $_->ecasound_format } $_[0]->channel_ops if $_[0]->channel_ops }
+sub ecs_extra { join ' ', map{ $_->ecasound_format } $_[0]->input_channel_ops if $_[0]->input_channel_ops }
 sub format {}
 }
 {
 package ::IO::to_loop;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO::from_loop';
-sub ecs_extra {}
+sub ecs_extra { join ' ', map{ $_->ecasound_format } $_[0]->output_channel_ops if $_[0]->output_channel_ops }
 }
 
 {
