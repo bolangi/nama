@@ -244,7 +244,7 @@ sub process_routing_graph {
 		$inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;
 		$post_input{$_->chain_id} .= $_->ecs_extra if $_->ecs_extra;
-		$post_input{$_->chain_id} .= join ' ', undef, map{ $_->ecasound_format } $_->channel_ops if $_->channel_ops 
+		$post_input{$_->chain_id} .= join ' ', map{ $_->ecasound_format } $_->channel_ops if $_->channel_ops 
 	} 
 	grep { $_->direction eq 'input' } @io;
 
