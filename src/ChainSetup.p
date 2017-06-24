@@ -243,11 +243,10 @@ sub process_routing_graph {
 	map { 
 		$inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;
-		$post_input{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
+		$post_input{$_->chain_id} .= $_->ecs_extra if $_->ecs_extra;
+		$post_input{$_->chain_id} .= join ' ', undef, map{ $_->ecasound_format } $_->channel_ops if $_->channel_ops 
 	} 
 	grep { $_->direction eq 'input' } @io;
-
-	# sort chain_ids by output
 
 	map { 
 		$outputs{$_->ecs_string} //= [];
@@ -255,6 +254,7 @@ sub process_routing_graph {
 		$pre_output{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
 	} 
 	grep { $_->direction eq 'output' } @io;
+
 
 	no warnings 'numeric';
 	my @in_keys = values %inputs;
