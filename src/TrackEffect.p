@@ -54,7 +54,9 @@ sub probably_audio_ops {
 	my $track = shift;
 	my @ops = $track->ops_o;
 	my $input_channel_op_count  =()= $track->input_channel_ops();
+	my $output_channel_op_count =()= $track->output_channel_ops();
 	shift @ops for $input_channel_op_count;
+	pop   @ops for $output_channel_op_count;
 	@ops
 }
 sub ops_o {
