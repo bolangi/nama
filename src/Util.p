@@ -45,6 +45,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	expand_tilde
 	resolve_path
 	dumper
+	route_output_channels
 
 ) ] );
 
@@ -240,6 +241,20 @@ sub dumper {
 	or ! (ref $_) and $_ 
 	#or (ref $_) =~ /HASH|ARRAY/ and ::json_out($_)
 	or ref $_ and Dumper($_)
+}
+sub route_output_channels {
+	# routes signals (1..$width) to ($dest..$dest+$width-1 )
+	# returns pairs as arguments to chmove
+		
+	my ($width, $dest) = @_;
+	return '' if ! $dest or $dest == 1;
+	# print "route: width: $width, destination: $dest\n\n";
+	my $offset = $dest - 1;
+	my @route;
+	for my $channel ( map{$width - $_ + 1} 1..$width ) {
+		push @route,[$channel,($channel + $offset)];
+	}
+	@route;
 }
 
 1;
