@@ -643,7 +643,7 @@ foreach(@tests){
 
 
 
-load_project(name => "$test_project-convert51", create => 1);
+load_project(name => "test_project-convert51", create => 1);
 
 my $script = <<CONVERT51;
 [% qx(cat ./stereo51.nms ) %]
@@ -657,6 +657,18 @@ EXPECTED
 force_alsa();
 nama_cmd('gen');
 check_setup('Stereo to 5.1 converter script' );
+
+load_project(name => "test_project-crossover", create => 1);
+$script = <<CROSSOVER;
+[% qx(cat ./crossover.nms ) %]
+CROSSOVER
+$expected_setup_lines = <<EXPECTED;
+[% qx(cat ./crossover-alsa.te ) %]
+EXPECTED
+force_alsa();
+nama_cmd('gen');
+check_setup('pianoteq feeding crossover network' );
+
 
 load_project(name => "$test_project-sendbus-cooked", create => 1);
 
