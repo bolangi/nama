@@ -22,11 +22,9 @@ sub user_ops_o {
 	my $track = shift;
 	map{ fxn($_) } $track->user_ops();
 }
-sub channel_ops {
-	my $track = shift;
-	grep{ $::config->{ecasound_channel_ops}->{$_->type} } $track->ops_o;	
-}
 sub input_channel_ops {
+	# return contiguous channel routing ops from the front
+	# of the list
 	my $track = shift;
 	my @channel_ops;
 	my @ops = $track->ops_o;
@@ -37,28 +35,14 @@ sub input_channel_ops {
 	}
 	@channel_ops
 }
-sub output_channel_ops {
-	my $track = shift;
-	my @channel_ops;
-	my @ops = $track->ops_o;
-	for my $op (reverse @ops)
-	{
-		return @channel_ops if ! $::config->{ecasound_channel_ops}->{$op->type};
-		unshift @channel_ops, $op
-	}
-	# Return empty list when all ops are channel ops.
-	# They will have been already supplied through the 
-	# input_channel_ops() method
-	
-	(scalar @ops == scalar @channel_ops) ? () : @channel_ops 
-}
+sub output_channel_ops {}
+
 sub probably_audio_ops {
 	my $track = shift;
 	my @ops = $track->ops_o;
 	my $input_channel_op_count  =()= $track->input_channel_ops();
-	my $output_channel_op_count =()= $track->output_channel_ops();
 	shift @ops for $input_channel_op_count;
-	pop   @ops for $output_channel_op_count;
+	@ops
 }
 sub ops_o {
 	my $track = shift;
