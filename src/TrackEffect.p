@@ -35,7 +35,20 @@ sub input_channel_ops {
 	}
 	@channel_ops
 }
-sub output_channel_ops {}
+sub output_channel_ops {
+   my $track = shift;
+   my @channel_ops;
+   my @ops = $track->ops_o;
+   for my $op (reverse @ops)
+   {
+	   return @channel_ops if ! $::config->{ecasound_channel_ops}->{$op->type};
+	   unshift @channel_ops, $op
+   }
+   # Return empty list when all ops are channel ops.
+   # They will have been already supplied through the 
+   # input_channel_ops() method
+   (scalar @ops == scalar @channel_ops) ? () : @channel_ops 
+}
 
 sub probably_audio_ops {
 	my $track = shift;
