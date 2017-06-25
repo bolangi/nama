@@ -38,8 +38,7 @@ sub ops_ecasound_order {
 	my $track = shift;
 	$track->channel_ops, track->audio_ops
 }
-# audio ops and their controllers, in order for applying to ecasound
-sub ops_dynamic { 
+sub ecasound_dynamic_apply_list { # audio ops and their controllers
 	my $track = shift;
 	grep{ ! $_->is_channeler } $track->ops_o;
 }
@@ -49,7 +48,7 @@ sub ops_o {
 }
 sub apply_ops {
 	my $track = shift;
-	$_->apply_op for $track->ops_dynamic;
+	$_->apply_op for $track->ecasound_dynamic_apply_list;
 }
 sub user_ops {
 	my $track = shift;
