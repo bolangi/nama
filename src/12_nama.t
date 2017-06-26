@@ -662,6 +662,8 @@ load_project(name => "test_project-crossover", create => 1);
 $script = <<CROSSOVER;
 [% qx(cat ./crossover.nms ) %]
 CROSSOVER
+
+do_script($script);
 $expected_setup_lines = <<EXPECTED;
 [% qx(cat ./crossover-alsa.te ) %]
 EXPECTED
