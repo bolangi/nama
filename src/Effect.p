@@ -615,7 +615,7 @@ sub append_effect {
 		}
 		$ui->add_effect_gui(\%args) unless $track->hide;
 
-		$add_effects_sub = sub{ $FX->apply_op };
+		$add_effects_sub = $FX->is_channel_op ? sub { ::request_setup() } : sub{ $FX->apply_op };
 	}
 	if( ::valid_engine_setup() )
 	{
@@ -807,6 +807,7 @@ sub remove_op {
 
 	my $id = shift;
 	my $self = fxn($id);
+	::request_setup(), return if $self->is_channel_op;
 	my $n = $self->chain;
 
 	# select chain
