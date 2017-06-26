@@ -24,11 +24,23 @@ sub user_ops_o {
 }
 sub channel_ops {
 	my $track = shift;
-	grep{ $::config->{ecasound_channel_ops}->{$_->type} } $track->ops_o;	
+	grep{ $_->is_channel_op } $track->ops_o;	
 }
 sub audio_ops {
 	my $track = shift;
-	grep{ ! $::config->{ecasound_channel_ops}->{$_->type} } $track->ops_o;	
+	grep{ 
+			! $_->is_channel_op
+		and ! $_->is_controller
+
+	} $track->ops_o;	
+}
+sub ops_ecasound_order {
+	my $track = shift;
+	$track->channel_ops, $track->audio_ops
+}
+sub ecasound_dynamic_apply_list { # audio ops and their controllers
+	my $track = shift;
+	grep{ ! $_->is_channel_op } $track->ops_o;
 }
 sub ops_o {
 	my $track = shift;
@@ -36,7 +48,7 @@ sub ops_o {
 }
 sub apply_ops {
 	my $track = shift;
-	map{ $_->apply_op }	$track->audio_ops if $track->audio_ops
+	$_->apply_op for $track->ecasound_dynamic_apply_list;
 }
 sub user_ops {
 	my $track = shift;

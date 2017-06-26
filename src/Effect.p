@@ -163,6 +163,8 @@ sub remove_name { my $self = shift; delete $self->{name} }
 sub set_name    { my $self = shift; $self->{name} = shift }
 sub set_surname { my $self = shift; $self->{surname} = shift}
 sub is_controller { my $self = shift; $self->parent } 
+sub is_channel_op { my $self = shift; $::config->{ecasound_channel_ops}->{$self->type} }
+
 
 sub has_read_only_param {
 	my $self = shift;
@@ -194,22 +196,6 @@ sub ecasound_controller_index {
 	$position -= $operator_count; # skip operators
 	++$position; # translates 0th to chain-position 1
 }
-sub ecasound_operator_index { # does not include offset
-	logsub("&ecasound_operator_index");
-	my $self = shift;
-	my $id = $self->id;
-	my $chain = $self->chain;
-	my $track = $ti{$chain};
-	my @ops = @{$track->ops};
-	my $controller_count = 0;
-	my $position;
-	for my $i (0..scalar @ops - 1) {
-		$position = $i, last if $ops[$i] eq $id;
-		$controller_count++ if ::fxn($ops[$i])->is_controller;
-	}
-	$position -= $controller_count; # skip controllers 
-	++$position; # translates 0th to chain-position 1
-}
 sub ecasound_effect_index { 
 	logsub("&ecasound_effect_index");
 	my $self = shift;
@@ -226,6 +212,10 @@ sub ecasound_effect_index {
 	no warnings 'uninitialized';
 	$self->offset + $opcount;
 }
+sub ecasound_effect_index_ {
+	my $self = shift;
+	1 + first_index {$_->id eq $self->id } $self->track->ops_ecasound_order();
+}
 sub track_effect_index { # the position of the ID in the track's op array
 	my $self = shift;
 	my $id = $self->id;
@@ -236,7 +226,7 @@ sub sync_one_effect {
 		my $self= shift;
 		my $chain = $self->chain;
 		ecasound_iam("c-select $chain");
-		ecasound_iam("cop-select " .( $self->offset + $self->ecasound_operator_index ) );
+		ecasound_iam("cop-select " . $self->ecasound_effect_index);
 		$self->set(params => get_ecasound_cop_params( scalar @{$self->params} ));
 }
 sub offset {
@@ -625,7 +615,7 @@ sub append_effect {
 		}
 		$ui->add_effect_gui(\%args) unless $track->hide;
 
-		$add_effects_sub = sub{ $FX->apply_op };
+		$add_effects_sub = $FX->is_channel_op ? sub { ::request_setup() } : sub{ $FX->apply_op };
 	}
 	if( ::valid_engine_setup() )
 	{
@@ -817,6 +807,7 @@ sub remove_op {
 
 	my $id = shift;
 	my $self = fxn($id);
+	::request_setup(), return if $self->is_channel_op;
 	my $n = $self->chain;
 
 	# select chain
@@ -926,15 +917,15 @@ sub _update_effect {
 	# update Ecasound's copy of the parameter
 	if( $FX->is_controller ){
 		my $i = $FX->ecasound_controller_index;
-		logpkg('debug', "controller $id: track: $chain, index: $i param: $param, value: $val");
+		logpkg('debug', "controller $id: track: $chain, index: $i, param: $param, value: $val");
 		ecasound_iam("ctrl-select $i");
 		ecasound_iam("ctrlp-select $param");
 		ecasound_iam("ctrlp-set $val");
 	}
 	else { # is operator
-		my $i = $FX->ecasound_operator_index;
+		my $i = $FX->ecasound_effect_index;
 		logpkg('debug', "operator $id: track $chain, index: $i, offset: ".  $FX->offset . " param $param, value $val");
-		ecasound_iam("cop-select ". ($FX->offset + $i));
+		ecasound_iam("cop-select $i");
 		ecasound_iam("copp-select $param");
 		ecasound_iam("copp-set $val");
 	}
