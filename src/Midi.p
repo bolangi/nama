@@ -32,7 +32,7 @@ sub midish_cmd {
 	return unless $config->{use_midi};
 	
 	print $fh_midi_write "$command\n";
-	say "applied midish command: $command";
+	#say "applied midish command: $command";
 	$project->{midi_history} //=[];
 	push  @{ $project->{midi_history} },$command;
 
