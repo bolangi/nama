@@ -23,6 +23,7 @@ sub rec_status {
 
 	# first, check for conditions resulting in status OFF
 
+	no warnings 'uninitialized';
 	if ( $bus->rw eq OFF
 		or $track->rw eq OFF
 		or $mode->doodle and ! $mode->eager and $track->rw eq REC and 
