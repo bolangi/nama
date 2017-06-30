@@ -151,8 +151,7 @@ sub definitions {
 		engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
 		engine_base_jack_seek_delay 	=> 0.1, # seconds
 		jack_tranport_mode				=> 'send',
-		ecasound_jack_client_name		=> 'NamaEcasound',
-		ecasound_engine_name			=> 'ecasound',
+		ecasound_engine_name			=> 'Nama',
 		midi_engine_name				=> 'midish',
 		engine_command_output_buffer_size => 2**22, # 4 MB
 		edit_playback_end_margin 		=> 3,
