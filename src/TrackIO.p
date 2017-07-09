@@ -2,7 +2,8 @@ package ::TrackIO;
 use Role::Tiny;
 use Modern::Perl;
 use ::Globals qw(:all);
-use ::Util qw(dest_string dest_type join_path);
+use File::Slurp qw(write_file);
+use ::Util qw(dest_string dest_type join_path freq);
 use ::Log qw(logpkg logsub);
 
 sub rec_status {
