@@ -3,6 +3,7 @@ use Role::Tiny;
 use Modern::Perl;
 use ::Globals qw(:all);
 use File::Slurp qw(write_file);
+use File::Copy;
 use ::Util qw(dest_string dest_type join_path freq);
 use ::Log qw(logpkg logsub);
 
