@@ -214,7 +214,7 @@ sub is_system_track { $system_track{$_[0]->name} }
 
 sub engine_group {
 	my $track = shift;
-	$track->{engine_group} || $config->{ecasound_engine_name}
+	$track->{engine_group} || $::config->{ecasound_engine_name}
 }
 sub engine {
 	my $track = shift;
@@ -270,7 +270,7 @@ our @ISA = '::SimpleTrack';
 
 sub rec_status{
 	my $track = shift;
- 	return OFF if $track->engine_group ne $en{ecasound}->name;
+ 	return OFF if $track->engine_group ne $en{$::config->{ecasound_engine_name}}->name;
 	$mode->{mastering} ? MON :  OFF;
 }
 sub source_status {}

@@ -129,10 +129,10 @@ sub ecasound_iam{
 	logit($category, 'debug', "Net-ECI sent: $cmd");
 
 	$cmd =~ s/\s*$//s; # remove trailing white space
-	$en{ecasound}->{socket}->send("$cmd\r\n");
+	$en{$::config->{ecasound_engine_name}}->{socket}->send("$cmd\r\n");
 	my $buf;
 	# get socket reply, restart ecasound on error
-	my $result = $en{ecasound}->{socket}->recv($buf, $config->{engine_command_output_buffer_size});
+	my $result = $en{$::config->{ecasound_engine_name}}->{socket}->recv($buf, $config->{engine_command_output_buffer_size});
 	defined $result or ::throw("Ecasound failed to respond"), return;
 
 	my ($return_value, $setup_length, $type, $reply) =

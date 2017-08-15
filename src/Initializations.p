@@ -516,7 +516,7 @@ sub munge_category {
 sub start_logging { 
 	$config->{want_logging} = initialize_logger($config->{opts}->{L})
 }
-sub ecasound_iam{ $en{ecasound} and $en{ecasound}->ecasound_iam(@_) }
+sub ecasound_iam{ $en{$::config->{ecasound_engine_name}} and $en{$::config->{ecasound_engine_name}}->ecasound_iam(@_) }
 
 1;
 __END__
