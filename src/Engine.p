@@ -74,9 +74,8 @@ sub sync_action {
 package ::NetEngine;
 our $VERSION = 1.0;
 use Modern::Perl;
-use ::Log qw(logpkg);
+use ::Log qw(logpkg logit);
 use ::Globals qw(:all);
-use ::Log qw(logit);
 use Carp qw(carp);
 use Role::Tiny::With;
 with '::EcasoundRun';
