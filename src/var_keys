@@ -44,6 +44,7 @@ $setup->{latency}				# track latency info
 $setup->{cache_track_args}
 $setup->{audio_run_ready}
 $setup->{midish_running}
+$setup->{fade_counter}
 
 $fx_cache->{registry}			# effects database
 $fx_cache->{full_label_to_index}# el:tap_pinknoise -> effect index
