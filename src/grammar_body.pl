@@ -314,7 +314,7 @@ seconds: /\d+/
 samples: /\d+sa/ {
 	my ($samples) = $item[1] =~ /(\d+)/;
  	#print "found $samples samples\n";
- 	$return = $samples/$::config->{sample_rate}
+ 	$return = $samples/$::project->{sample_rate}
 }
 min_sec: /\d+/ ':' /\d+/ { $item[1] * 60 + $item[3] }
 

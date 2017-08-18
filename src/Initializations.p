@@ -255,6 +255,8 @@ sub initialize_interfaces {
 	logpkg('debug', sub{"Command line options\n".  json_out($config->{opts})});
 
 	read_config(global_config());  # from .namarc if we have one
+	# set sample rate is needed for prepare_static_effects_data() and initialize_project_data()
+	$config->{sample_rate} = $config->{opts}->{z} if $config->{opts}->{z};
 
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 	

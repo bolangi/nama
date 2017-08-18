@@ -13,7 +13,7 @@ sub generate_waveforms {
 	initial_time_series($sourcefile, $datafile);
 	my $p1 = time_series_filename($track->name, $version, 1);
 	say "p1: $p1";
-	first_series($datafile, $p1, $config->{sample_rate});
+	first_series($datafile, $p1, $project->{sample_rate});
 	my $previous_file = $p1;
 	for my $power (2..8)
 	{

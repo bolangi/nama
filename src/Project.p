@@ -89,6 +89,7 @@ sub initialize_project_data {
 	$project->{repo} = undef;
 	$project->{artist} = undef;
 	$project->{bunch} = {};	
+	$project->{sample_rate} = $config->{sample_rate};
 	
 	create_system_buses();
 	$this_bus = 'Main';

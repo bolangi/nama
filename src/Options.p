@@ -32,6 +32,8 @@ sub nama_line_options {
 		log=s                       L
 		no-latency                  O
 		latency                     Q
+		sample-rate=s				z
+   
 );
 
 	map{$config->{opts}->{$_} = ''} values %options;
@@ -66,6 +68,7 @@ USAGE: nama [options] [project_name]
 --save-alsa, -a                  Save/restore alsa state with project data
 --help, -h                       This help display
 --regenerate-effects-cache, -r   Regenerate the effects data cache
+--sample-rate, -z                use this sample rate, and set as default for session
 
 Debugging options:
 

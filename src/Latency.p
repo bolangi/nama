@@ -381,7 +381,7 @@ sub get_live_param { # for effect, not controller
 
 sub frames_to_secs { # One time conversion for delay op
 	my $frames = shift;
-	$frames / $config->{sample_rate};
+	$frames / $project->{sample_rate};
 }
 sub start_latency_watcher {
 	$jack->{watcher} ||= 
