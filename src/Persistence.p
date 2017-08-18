@@ -372,6 +372,11 @@ sub restore_state_from_file {
 		}
 		@bus_data;
 	}
+	if ( $project->{save_file_version_number} <= 1.208 )
+	{
+		# older projects did not store this
+		$project->{sample_rate} //= $config->{sample_rate} 
+	}
 	# restore effects, no change to track objects needed
 	
 	map
