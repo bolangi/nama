@@ -178,8 +178,6 @@ sub ports {
 	) if $self->client
 }
 
-
-
 sub ecs_string {
 	my $self = shift;
 	my @parts;
@@ -383,6 +381,7 @@ sub device_id {
 	push @modifiers, $self->full_path;
 	join(q[,],@modifiers);
 }
+sub _format { $::setup->{wav_info}->{$_[0]->full_path}->{format} };
 sub ecs_extra { $_[0]->mono_to_stereo}
 sub client { 'system' if $jack->{jackd_running} } # since we share latency value
 sub ports { 'system:capture_1' }
