@@ -150,7 +150,7 @@ sub definitions {
 		engine_fade_length_on_start_stop => 0.18,# when starting/stopping transport
 		engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
 		engine_base_jack_seek_delay 	=> 0.1, # seconds
-		jack_tranport_mode				=> 'send',
+		jack_transport_mode				=> 'send',
 		ecasound_engine_name			=> 'Nama',
 		midi_engine_name				=> 'midish',
 		engine_command_output_buffer_size => 2**22, # 4 MB
