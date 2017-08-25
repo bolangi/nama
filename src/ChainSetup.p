@@ -425,17 +425,17 @@ sub write_chains {
 
 	## write general options
 	
-	my $globals .= join " ", $config->{engine_globals}->{common},
-							join(',', 	'-G:jack',
+	my @globals;
+	my $format = signal_format($config->{devices}->{jack}->{signal_format},2); # HARDCODED XXX
+	push @globals, $config->{engine_globals}->{common};
+	push @globals, "-f:$format", join(',', 	'-G:jack',
 										$config->{ecasound_jack_client_name},
 										$config->{jack_transport_mode}
-							),
-							"-b",$config->buffersize,
-							$config->globals_realtime;
+							) if $jack->{jackd_running};
+
+	push @globals, "-b", $config->buffersize, $config->globals_realtime;
+	my $globals = join " ", @globals;
 	
-	my $format = signal_format($config->{devices}->{jack}->{signal_format},2);
-	$globals .= " -f:$format" if $jack->{jackd_running};
-			
 	my $ecs_file = join "\n\n", 
 					"# ecasound chainsetup file",
 					"# general",
