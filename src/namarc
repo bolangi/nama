@@ -93,7 +93,14 @@ ecasound_globals:
 
 # ecasound_tcp_port: 2868  
 
-use_midi: 1
+# default without midi, till it is sorted out
+use_midi: 0
+
+# cheap version tracking for our projects, makes possible
+# undo/redo and branching
+
+use_git: 1
+
 
 # WAVs recorded at the same time get the same numeric suffix
 
