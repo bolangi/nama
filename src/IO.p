@@ -218,7 +218,7 @@ sub AUTOLOAD {
 		return $track->$call if $track->can($call)
 		# ->can is reliable here because Track has no AUTOLOAD
 	}
-	# XXXX Suppress errors in objects that don't have an
+	# XX Suppress exceptions on objects that don't have an
 	# associated track 
 	return undef if $call eq 'channel_ops';
 	return undef if $call eq 'name' or $call eq 'surname';
