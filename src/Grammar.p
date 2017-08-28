@@ -623,3 +623,18 @@ sub pan_back {
 		$track->set(old_pan_level => undef);
 	}
 }
+
+sub set_sample_rate {
+	my ($srate) = @_;
+	my @allowable = qw{ 96000 88200 64000 48000 44100 32000 24000 22050 16000 11025 8000 };
+	my %allowable = map{$_ => 1} @allowable; 
+	if ( $allowable{$srate} ){
+		$project->{sample_rate} = $srate;
+		pager("project $project->{name}: setting audio engine sample rate to $srate Hz for future runs." );
+		$srate
+	}
+	else {
+		pager("$srate is not an allowed samplerate.\nUse one of: @allowable");
+		undef
+	}
+}
