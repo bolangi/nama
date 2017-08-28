@@ -1716,4 +1716,8 @@ set_tempo:
   type: midi
   what: set MIDI tempo (bpm)
   parameters: <integer:tempo-setting>
+set_sample_rate:
+  type: general
+  what: configure the sample rate for the current project
+  parameters: <integer:sample-rate>
 ...
