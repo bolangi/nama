@@ -1722,3 +1722,6 @@ route_track: _route_track source_id send_id {
 	::nama_cmd("send $item{send_id}");
 	1
 }
+
+set_sample_rate: _set_sample_rate dd {::set_sample_rate($item{dd})}
+set_sample_rate: _set_sample_rate {::get_sample_rate()}

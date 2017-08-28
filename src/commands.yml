@@ -1718,6 +1718,7 @@ set_tempo:
   parameters: <integer:tempo-setting>
 set_sample_rate:
   type: general
-  what: configure the sample rate for the current project
+  short: ssr
+  what: configure the sample rate for the current project or report sample rate if no parameter
   parameters: <integer:sample-rate>
 ...

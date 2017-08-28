@@ -624,6 +624,11 @@ sub pan_back {
 	}
 }
 
+sub get_sample_rate {
+	pager("project $project->{name}: audio engine sample rate is ",$project->{sample_rate} );
+	$project->{sample_rate}
+}
+
 sub set_sample_rate {
 	my ($srate) = @_;
 	my @allowable = qw{ 96000 88200 64000 48000 44100 32000 24000 22050 16000 11025 8000 };
@@ -634,7 +639,8 @@ sub set_sample_rate {
 		$srate
 	}
 	else {
-		pager("$srate is not an allowed samplerate.\nUse one of: @allowable");
-		undef
+		get_sample_rate();
+		pager qq(The value "$srate" is not an allowable sample rate.);
+		pager("Use one of: @allowable");
 	}
 }
