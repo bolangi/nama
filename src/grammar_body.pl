@@ -189,11 +189,12 @@ ident: /[-\w]+/  #| <error: illegal name!>
 save_target: /[-:\w.]+/
 decimal_seconds: /\d+(\.\d+)?/ 
 marktime: /\d+\.\d+/ # decimal required
-markname: /[A-Za-z][\w_-]*/ { 
+markname: alphafirst { 
 	::throw("$item[1]: non-existent mark name. Skipping"), return undef 
 		unless $::Mark::by_name{$item[1]};
 	$item[1];
 }
+alphafirst: /[A-Za-z][\w_-]*/
 #region_default_end: 'END' | ''
 path: shellish
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
@@ -353,7 +354,7 @@ new_track_name: anytag  { #$item{anytag}
 $proposed
 } 
 			
-track_name: ident
+track_name: alphafirst
 existing_track_name: track_name { 
 	my $track_name = $item{track_name};
 	if ($::tn{$track_name}){
@@ -437,8 +438,7 @@ shift_track: _shift_track start_position {
 	}
 }
 
-start_position:  float | samples | mark_name
-mark_name: ident
+start_position:  float | samples | markname
 
 unshift_track: _unshift_track {
 	$::this_track->set(playat => undef)
