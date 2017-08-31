@@ -189,7 +189,7 @@ ident: /[-\w]+/  #| <error: illegal name!>
 save_target: /[-:\w.]+/
 decimal_seconds: /\d+(\.\d+)?/ 
 marktime: /\d+\.\d+/ # decimal required
-markname: /[A-Za-z]\w*/ { 
+markname: /[A-Za-z][\w_-]*/ { 
 	::throw("$item[1]: non-existent mark name. Skipping"), return undef 
 		unless $::Mark::by_name{$item[1]};
 	$item[1];
