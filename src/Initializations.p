@@ -154,16 +154,17 @@ sub definitions {
 		midi_engine_name				=> 'midish',
 		engine_command_output_buffer_size => 2**22, # 4 MB
 		edit_playback_end_margin 		=> 3,
-		edit_crossfade_time 			=> 0.03,
-		fade_down_fraction 				=> 0.75,
-		fade_time1_fraction 			=> 0.9,
-		fade_time2_fraction 			=> 0.1,
+
+		edit_crossfade_time             => 0.03,
+		engine_muting_time              => 0.03,
+		fade_down_fraction              => 0.75,
+		fade_time1_fraction             => 0.9,
+		fade_time2_fraction             => 0.1,
+		fade_resolution                 => 100, # steps per second
 		fader_op 						=> 'ea',
-		mute_level 						=> {ea => 0, 	eadb => -96}, 
-		fade_out_level 					=> {ea => 0, 	eadb => -40},
-		unity_level 					=> {ea => 100, 	eadb => 0}, 
-		fade_resolution 				=> 100, # steps per second
-		engine_muting_time				=> 0.03,
+		mute_level                      => {ea => 0,    eadb => -96},
+		fade_out_level                  => {ea => 0,    eadb => -40},
+		unity_level                     => {ea => 100,  eadb => 0},
 		enforce_channel_bounds			=> 1,
 
 		serialize_formats               => 'json',		# for save_system_state()
