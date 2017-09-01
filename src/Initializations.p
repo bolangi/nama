@@ -60,15 +60,14 @@ sub definitions {
 	# the sole instance of their class.
 	
 	$project = bless {}, '::Project';
-	$mode = bless {}, '::Mode';
+	our $mode = bless {}, '::Mode';
 	{ package ::Mode; 
 		sub mastering 	{ $::tn{Eq} and ! $::tn{Eq}->{hide} } 
-		no warnings 'uninitialized';
-		sub eager 		{ $::mode->{eager} 					}
-		sub doodle 		{ $::mode->{doodle} 				}
-		sub preview 	{ $::mode->{preview}				}
-		sub song 		{ $::mode->eager and $::mode->preview }
-		sub live		{ $::mode->eager and $::mode->doodle  }
+		sub eager 		{ $mode->{eager} 					}
+		sub doodle 		{ $mode->{doodle} 				}
+		sub preview 	{ $mode->{preview}				}
+		sub song 		{ $mode->eager and $mode->preview }
+		sub live		{ $mode->eager and $mode->doodle  }
 	}
 	# for example, $file belongs to class ::File, and uses
 	# AUTOLOAD to generate methods to provide full path
