@@ -321,6 +321,8 @@ sub add_bus {
 
 	@args = ( 
 		rw 			=> MON,
+		source_type => 'bus',
+		source_id   => $name,
 		@args
 	);
 
