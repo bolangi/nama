@@ -23,7 +23,7 @@ sub add_path_for_rec {
 	# Do *not* record signals if the source reports it is
 	# a track, bus or loop
 
-	if( $track->source_type !~ /track|bus|loop/ )
+	if( $track->source_type !~ /track|bus|loop/  and !  $track->is_mix_track)
 	{
 		# create temporary track for rec_file chain
 
@@ -60,7 +60,7 @@ sub add_path_for_rec {
 		});
 
 	} 
-	elsif ($track->source_type =~ /bus|track/) 
+	elsif ($track->source_type =~ /bus|track/ or $track->is_mix_track) 
 	{
 
 		# for tracks with identified (track|bus) input
