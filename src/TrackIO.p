@@ -493,7 +493,7 @@ sub rw_set {
 	my $track = shift;
 	logsub("&rw_set");
 	my ($bus, $rw) = @_;
-	my $type = $track->is_mix_track
+	my $type = $bn{$track->name} # should be $track->is_ mix_track
 		? 'mix_track'
 		: 'member_track';
 	$bus_logic{$type}{uc $rw}->($bus,$track);
