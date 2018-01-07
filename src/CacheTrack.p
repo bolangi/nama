@@ -31,11 +31,11 @@ sub cache_track { # launch subparts if conditions are met
 			$track->name. ": track caching requires PLAY or MON status. Aborting."), return;
 	
 	# abort if track is a mix track for a bus and the bus is OFF 
-	if( $track->is_mix_track){
+	if( $track->is_mixing){
 		my $bus = $bn{$track->name};
 	} 
 	throw($track->name. ": nothing to cache!  Skipping."), return 
-		unless 	$track->is_mix_track 
+		unless 	$track->is_mixing 
 				or $track->user_ops 
 				or $track->has_insert
 				or $track->is_region
@@ -106,7 +106,7 @@ sub prepare_to_cache {
 
 	# Case 1: Caching a standard track
 	
-	if(! $args->{track}->is_mix_track)
+	if(! $args->{track}->is_mixing)
 	{
 		# set the input path
 		$g->add_path('wav_in',$args->{track}->name);

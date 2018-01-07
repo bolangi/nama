@@ -298,7 +298,7 @@ sub set_current_bus {
 	my $bus_name = 
 		$track->name =~ /Main|Mixdown/ 	
 		? 'Main'
-		: $track->is_mix_track()			
+		: $track->is_mixing()			
 			? $track->name 
 			: $track->group;
 	

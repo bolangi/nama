@@ -142,7 +142,7 @@ sub input_path {
 	# the corresponding bus handles input routing for mix tracks
 	# so they don't need to be connected here
 	
-	return() if $track->is_mix_track and ! $track->play;
+	return() if $track->is_mixing and ! $track->play;
 
 	# the track may route to:
 	# + another track
@@ -200,7 +200,7 @@ sub rec_cleanup_script {
 	join_path(::project_dir(), $track->name."-rec-cleanup.sh")
 }
 sub current_edit { $_[0]->{current_edit}//={} }
-sub is_mix_track {
+sub is_mixing {
 	my $track = shift;
 	$bn{$track->name} and ($track->mon or $track->rec)
 }

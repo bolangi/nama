@@ -462,7 +462,7 @@ sub write_chains {
 sub setup_requires_realtime {
 	my $prof = $config->{realtime_profile};
 	if( $prof eq 'auto'){
-		grep{ ! $_->is_mix_track 
+		grep{ ! $_->is_mixing 
 				  and $_->is_user_track 
 				  and ($_->rec or $_->mon)
 			} ::audio_tracks() 

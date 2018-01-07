@@ -694,7 +694,7 @@ sub explode_track {
 	# quit if I am already a mix track
 
 	::throw($track->name,": I am already a mix track. I cannot explode!"),return
-		if $track->is_mix_track; # XX should not be allowed to explode if track is set to PLAY
+		if $track->is_mixing; # XX should not be allowed to explode if track is set to PLAY
 
 	my @versions = @{ $track->versions };
 
