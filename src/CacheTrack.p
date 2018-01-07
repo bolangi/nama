@@ -27,16 +27,16 @@ sub cache_track { # launch subparts if conditions are met
 	
 	pagers($track->name. ": preparing to cache.");
 	
+	$track->play or $track->mon or throw(
+			$track->name. ": track caching requires PLAY or MON status. Aborting."), return;
+	
 	# abort if track is a mix track for a bus and the bus is OFF 
 	if( $track->is_mix_track){
 		my $bus = $bn{$track->name};
-		$track->mon or throw($track->name.": mix track caching requires MON status. Aborting."), return ;
-	} else { 
-		$track->play or $track->mon or throw(
-			$track->name. ": track caching requires MON status. Aborting."), return;
-	}
+	} 
 	throw($track->name. ": nothing to cache!  Skipping."), return 
-		unless 	$track->user_ops 
+		unless 	$track->is_mix_track 
+				or $track->user_ops 
 				or $track->has_insert
 				or $track->is_region
 				or $bn{$track->name};
