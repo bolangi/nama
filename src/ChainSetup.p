@@ -464,7 +464,7 @@ sub setup_requires_realtime {
 	if( $prof eq 'auto'){
 		grep{ ! $_->is_mix_track 
 				  and $_->is_user_track 
-				  and $_->rec_status =~ /REC|MON/
+				  and ($_->rec or $_->mon)
 			} ::audio_tracks() 
 	} elsif ( $prof eq 'realtime') {
 		my @fields = qw(soundcard jack_client jack_manual jack_ports_list);
