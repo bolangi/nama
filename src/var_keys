@@ -165,6 +165,9 @@ $gui->{_save_id}
 # GUI objects
 $gui->{mw}						# main window
 $gui->{ew}						# effects window
+$gui->{ww}						# main window for waveform test
+$gui->{wwframe}					# waveform frame
+$gui->{wwcanvas}				# waveform canvas
 $gui->{canvas}					# canvas
 $gui->{load_frame}				# frames for various parts of the display
 $gui->{add_frame}
