@@ -102,5 +102,7 @@
 	$remote_control_port 			$config->{remote_control_port}
 	$engines						$config->{engines}
 
+	$default_waveform_height 			$config->{default_waveform_height}
+
 	# end
 
