@@ -56,6 +56,13 @@ sub init_gui {
 		-width => 2400,
 		-height => 480	
 		);
+
+sub wwgeometry {
+	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
+		= $gui->{wwcanvas}->geometry =~ /(\d+)x(\d+)([+-])(\d+)([+-])(\d+)/;
+	($width,$height)
+}
+
 	$gui->{wwframe} = $gui->{wwcanvas}->Frame;
 	my $wavform = $gui->{ww}->Photo(-format => 'png', -file => join_path(project_dir(),"tmh-2400x480.png"));
 	$gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $wavform);
