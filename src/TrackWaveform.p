@@ -1,18 +1,22 @@
 package ::TrackWaveform;
+use ::Globals qw($project);
 use Modern::Perl;
 use Role::Tiny;
 use Try::Tiny;
 sub gen_waveform {
 	my $self = shift;
 	my ($width, $height) = @_;
-	my $cmd = join ' ', 'waveform', "-W $width -H $height",
-			$self->full_path, waveform_name($self->full_path, $width, $height);
+	my $name = waveform_name($self->full_path, $width, $height);
+	my $cmd = join ' ', 'waveform', "-W $width -H $height", $self->full_path, $name;
 	say $cmd;
+	system($cmd);
+	$project->{waveform}->{$self->full_path} = $name;
 }
 sub waveform_name {
 	my($path, $width, $height) = @_;
 			$path . '.' . $width .'x' . "$height.png"
 }
+
 
 1 # obligatory
 	
