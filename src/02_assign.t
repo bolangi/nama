@@ -32,7 +32,6 @@ for my $c (@test_classes) {
 		#print json_out(\%dict); 
 		#print json_out($struct);
 		my $serialized = serialize( class => $c, vars => \@var_list);  
-		# store_vars output as string
 
 	my $expected = <<WANT;
 {

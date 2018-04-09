@@ -23,7 +23,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		serialize
 		assign
 		assign_singletons
-		store_vars
 		yaml_in
 		json_in
 		json_out

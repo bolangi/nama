@@ -40,7 +40,6 @@ for my $c (@test_classes) {
 
 	assign (data => $struct, class => $c, vars => \@var_list);
 		my $serialized = serialize( class => $c, vars => \@var_list);  
-		# store_vars output as string
 
 	my $expected = <<WANT;
 {
