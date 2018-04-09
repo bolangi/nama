@@ -6,12 +6,12 @@ package ::Track;
 use Role::Tiny::With;
 with '::Wav',
 	 '::WavModify',
-#	 '::Waveform',
 	 '::TrackRegion',
 	 '::TrackIO',
 	 '::TrackComment',
 	 '::TrackEffect',
 	 '::TrackLatency',
+	 '::TrackWaveform',
 	 '::EffectNickname',
 	 '::BusUtil';
 use ::Globals qw(:all);
