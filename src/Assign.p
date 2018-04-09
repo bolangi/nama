@@ -24,7 +24,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		assign
 		assign_singletons
 		store_vars
-		json_out
 		yaml_in
 		json_in
 		json_out
