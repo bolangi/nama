@@ -158,7 +158,7 @@ sub main {
 
 sub bootstrap_environment {
 	definitions();
-	nama_line_options();
+	process_command_line_options();
 	start_logging();
 	setup_grammar();
 	setup_hotkey_grammar();
