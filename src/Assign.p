@@ -47,7 +47,7 @@ use Carp;
 ) };
 sub var_map {  $var_map } # to allow outside access while keeping
                           # working lexical
-sub config_vars { grep {$_ ne '**' } keys %$var_map }
+sub config_vars { keys %$var_map }
 
 sub assign {
   # Usage: 
