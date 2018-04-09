@@ -6,9 +6,14 @@ sub gen_waveform {
 	my $self = shift;
 	my ($width, $height) = @_;
 	my $cmd = join ' ', 'waveform', "-W $width -H $height",
-			$self->full_path, $self->full_path . '.' . $width .'x' . "$height.png";
+			$self->full_path, waveform_name($self->full_path, $width, $height);
 	say $cmd;
 }
+sub waveform_name {
+	my($path, $width, $height) = @_;
+			$path . '.' . $width .'x' . "$height.png"
+}
+
 1 # obligatory
 	
 __END__
