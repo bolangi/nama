@@ -1,5 +1,12 @@
 ## refresh functions
 
+sub refresh_waveform_window {
+	# remove previous widgets
+	# get list of tracks
+	# iterate 
+	#   display waveform
+	#   write legend
+}
 sub set_widget_color {
 	my ($widget, $status) = @_;
 	my %rw_foreground = (	REC  => $gui->{_nama_palette}->{RecForeground},
