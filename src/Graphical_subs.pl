@@ -361,12 +361,12 @@ sub engine_mode_color {
 				$gui->{_nama_palette}->{RecBackground} # live recording 
 		} elsif ( ::ChainSetup::really_recording() ){ 
 				$gui->{_nama_palette}->{Mixdown}	# mixdown only 
-		} elsif ( user_mon_tracks() ){  
+		} elsif ( user_play_tracks() ){  
 				$gui->{_nama_palette}->{Play}; 	# just playback
 		} else { $gui->{_old_bg} } 
 }
 sub user_rec_tracks { some_user_tracks(REC) }
-sub user_mon_tracks { some_user_tracks(PLAY) }
+sub user_play_tracks { some_user_tracks(PLAY) }
 
 sub some_user_tracks {
 	my $which = shift;
