@@ -3,7 +3,7 @@ use ::Globals qw($project);
 use Modern::Perl;
 use Role::Tiny;
 use Try::Tiny;
-sub gen_waveform {
+sub generate_waveform {
 	my $self = shift;
 	my ($width, $height) = @_;
 	my $name = waveform_name($self->full_path, $width, $height);
