@@ -229,6 +229,7 @@ sub post_cache_processing {
 		# in a REC status
 
 		$args->{track}->set(rw => PLAY) if $args->{track}->rec;
+		$args->{track}->deactivate_bus if $args->{track}->is_mixing;
 
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
@@ -292,7 +293,7 @@ sub uncache_track {
 		if $track->is_region;
 
 	my $bus = $bn{$track->name};
-	$track->set(rw => REC), pagers($track->name. ": setting mix track to REC")
+	$track->activate_bus, $track->set(rw => REC), pagers($track->name. ": setting mix track to REC")
 		if defined $bus;
 }
 sub is_cached {
