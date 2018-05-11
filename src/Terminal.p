@@ -272,7 +272,7 @@ sub linecount {
 
 sub page_or_print {
 	my (@output) = @_;
-	$output[-1] .= "\n" unless $_[-1] =~ /\n\z/;
+	#$output[-1] .= "\n" unless $output[-1] =~ /\n\z/;
 	return unless paging_allowed();
 	linecount(@output) > $text->{screen_lines} - 2
 		? write_to_temp_file_and_view(@output)
