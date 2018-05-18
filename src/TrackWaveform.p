@@ -3,6 +3,11 @@ use ::Globals qw($project);
 use Modern::Perl;
 use Role::Tiny;
 use Try::Tiny;
+
+# files are assumed to be of the form sax_1.wav.1200x200.png
+# where the numbers correspond to width and height in pixels of the audio
+# waveform image. 
+
 sub generate_waveform {
 	my $self = shift;
 	my ($width, $height) = @_;
@@ -20,10 +25,11 @@ sub waveform_name {
 sub find_waveform {
 
 	my $self = shift;
+	my $match = shift() // '*';
 	my @files = File::Find::Rule->file()
-	 ->name( $self->current_wav . '.*.png'  )
+	 ->name( $self->current_wav . ".$match.png"  )
 	 ->in(   ::this_wav_dir()      );
-	say for @files;
+	@files;
 }
 
 
