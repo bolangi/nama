@@ -17,6 +17,15 @@ sub waveform_name {
 			$path . '.' . $width .'x' . "$height.png"
 }
 
+sub find_waveform {
+
+	my $self = shift;
+	my @files = File::Find::Rule->file()
+	 ->name( $self->current_wav . '.*.png'  )
+	 ->in(   ::this_wav_dir()      );
+	say for @files;
+}
+
 
 1 # obligatory
 	
