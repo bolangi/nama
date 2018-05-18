@@ -28,7 +28,8 @@ sub add_track {
 	my $bus = $bn{$track->group}; 
 	$bus->set(rw => MON) unless $track->target; # not if is alias
 
-	# normal tracks default to MON
+	# normal tracks set to config->new_track_rw 
+	# defaulting to MON
 	# track aliases default to PLAY
 	$track->set(rw => $track->{target}
 					?  PLAY
