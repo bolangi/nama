@@ -115,6 +115,8 @@ sub definitions {
 	$gui->{_save_id} = "State";
 	$gui->{_seek_unit} = 1;
 	$gui->{marks} = {};
+	$gui->{track_height} = 200;
+	$gui->{track_width};
 
 
 # 
