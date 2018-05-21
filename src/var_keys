@@ -75,10 +75,6 @@ $mode->{mastering}				# boolean
 $mode->{midi_terminal}			# 
 $mode->{midi_transport_sync}  # sync Ecasound start/stop with midish
 $project->{events}				# timers used during engine run
-# $en{ecasound}->{socket}			# socket for Ecasound command I/O (Net-ECI)
-# $en{ecasound}->{pids}			# Ecasound process PIDs
-# $en{ecasound}->{ecasound}		# Audio::Ecasound object (libecasoundc)
-# $en{ecasound}->{buffersize}		# engine buffersize
 
 $fx->{ecasound_effect_hints}	# hints for ecasound effects
 $fx->{offset}					# offset to locate first user-addressable 
