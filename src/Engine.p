@@ -14,16 +14,7 @@ use ::Globals qw(:all);
 use Role::Tiny::With;
 with '::EcasoundSetup';
 use ::Object qw( 
-				name
-				port
-				jack_seek_delay
-				jack_transport_mode
-				events
-				socket
-				pids
-				ecasound
-				buffersize
-				ready
+[% qx(./strip_all ./engine_fields ) %]
 				 );
 
 sub new {
