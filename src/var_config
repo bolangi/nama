@@ -65,6 +65,7 @@
 	$beep_command 					$config->{beep_command}
 	$hotkey_beep					$config->{hotkey_beep}
 	$eager							$mode->{eager}
+	$waveform_height 				$config->{waveform_height}
 
 	$alias							$config->{alias}
 	$hotkeys						$config->{hotkeys}
