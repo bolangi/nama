@@ -115,9 +115,6 @@ sub definitions {
 	$gui->{_save_id} = "State";
 	$gui->{_seek_unit} = 1;
 	$gui->{marks} = {};
-	$gui->{track_height} = 200;
-	$gui->{track_width};
-
 
 # 
 # use this section to specify 
@@ -185,6 +182,7 @@ sub definitions {
 		midi_record_buffer => 'midi_record',
 		midi_default_input_channel => 'keyboard',
 		ecasound_channel_ops 		=> {map{$_,1} qw(chcopy chmove chorder chmix chmute)},
+		waveform_height				=> 200,
 
 	}, '::Config';
 

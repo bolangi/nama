@@ -91,6 +91,8 @@ ecasound_globals:
   realtime: -z:db,100000 -z:nointbuf
   nonrealtime: -z:nodb -z:intbuf
 
+waveform_height: 200
+
 # ecasound_tcp_port: 2868  
 
 # default without midi, till it is sorted out
