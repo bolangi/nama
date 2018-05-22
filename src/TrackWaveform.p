@@ -4,22 +4,23 @@ use Modern::Perl;
 use Role::Tiny;
 use Try::Tiny;
 
-# files are assumed to be of the form sax_1.wav.1200x200.png
+# files are assumed to be of the form # sax_1.wav.1200x200.10.png 
 # where the numbers correspond to width and height in pixels of the audio
-# waveform image. 
+# waveform image, and the x-scaling in pixels per second (default 10)
 
 sub generate_waveform {
 	my $self = shift;
-	my ($width, $height) = @_;
-	my $name = waveform_name($self->full_path, $width, $height);
+	my ($width, $height, $pixels_per_second) = @_;
+	$width //= $self->wav_length * $project->{current_waveform_timescale};
+	my $name = waveform_name($self->full_path, $width, $height, $pixels_per_second);
 	my $cmd = join ' ', 'waveform', "-W $width -H $height", $self->full_path, $name;
 	say $cmd;
 	system($cmd);
 	$project->{waveform}->{$self->full_path} = $name;
 }
 sub waveform_name {
-	my($path, $width, $height) = @_;
-			$path . '.' . $width .'x' . "$height.png"
+	my($path, $width, $height, $pixels) = @_;
+			"$path."  . $width . 'x' . "$height.$pixels.png"
 }
 
 sub find_waveform {
@@ -31,6 +32,20 @@ sub find_waveform {
 	 ->in(   ::this_wav_dir()      );
 	@files;
 }
+sub refresh_waveform {
+	my $self = shift;
+	my ($waveform) = $self->find_waveform() || $self->generate_waveform; 
+	$project->{$self->name}->{waveform}->{current} = $waveform;
+	# remove Tk::Photo widget with waveform image
+    # load    " 	
+}
+
+#3m song, 2400 pixels
+#new_version_length_pixels = $length *  $project->{current_waveform_timescale}
+#allow user to choose timescale
+#$project->{current_waveform_timescale}
+#$project->{available_timescales}
+
 
 
 1 # obligatory
