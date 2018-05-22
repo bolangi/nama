@@ -1165,7 +1165,7 @@ sub get_saved_colors {
 
 	my $pal = $file->gui_palette;
 	$pal .= '.json' unless $pal =~ /\.json$/;
-	pager("pal $pal");
+	logpkg('debug',"pal $pal");
 	$pal = -f $pal 
 			? scalar read_file($pal)
 			: get_data_section('default_palette_json');
