@@ -10,7 +10,7 @@ $config->{fade_time2_fraction}
 $config->{fade_down_fraction}
 $config->{fader_op}				# Ecasound operator selected for fader 
 $config->{category}				# hack to change logging category
-$config->{want_logging}			# keys are categories requested for loggin
+$config->{want_logging}			# keys are categories requested for logging
 $config->{latency_op}			# operator for latency compensation
 $config->{latency_op_init}		# initial values
 $config->{latency_op_set}		# subroutine for setting latency compensation
