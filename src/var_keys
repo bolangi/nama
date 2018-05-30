@@ -6,7 +6,6 @@ $config->{disable_auto_reconfigure} # -R option
 $config->{engine_muting_time} 	# interval for engine to smoothly mute/unmute
 $config->{engine_command_output_buffer_size}
 $config->{fade_time1_fraction}	# two-part fade on engine start/stop
-$config->{fade_down_fraction}
 $config->{fade_time2_fraction}
 $config->{fade_down_fraction}
 $config->{fader_op}				# Ecasound operator selected for fader 
