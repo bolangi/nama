@@ -46,6 +46,11 @@ sub refresh_waveform {
 #$project->{current_waveform_timescale}
 #$project->{available_timescales}
 
+# 	$gui->{wwframe} = $gui->{wwcanvas}->Frame;
+# 	my $wavform = $gui->{ww}->Photo(-format => 'png', -file => join_path(this_wav_dir(),"tmh-2400x480.png"));
+#	$project->{current_waveform}->{$track->name}->{widget} = $gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $wavform);
+#	$project->{current_waveform}->{$track->name}->{file} = $gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $wavform);
+
 
 
 1 # obligatory
