@@ -3,7 +3,7 @@ $config->{hires_timer}			# indicates if we are capable
 $config->{opts}					# command line arguments
 $config->{soundcard_channels}	# a constant needed for GUI - can we discover this?
 $config->{disable_auto_reconfigure} # -R option
-$config->{engine_muting_time} 	# delay for engine to mute/unmute
+$config->{engine_muting_time} 	# interval for engine to smoothly mute/unmute
 $config->{engine_command_output_buffer_size}
 $config->{fade_time1_fraction}	# two-part fade on engine start/stop
 $config->{fade_down_fraction}
