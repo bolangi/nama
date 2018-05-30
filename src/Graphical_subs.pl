@@ -63,10 +63,6 @@ sub wwgeometry {
 	($width,$height)
 }
 
-	$gui->{wwframe} = $gui->{wwcanvas}->Frame;
-	my $wavform = $gui->{ww}->Photo(-format => 'png', -file => join_path(project_dir(),"tmh-2400x480.png"));
-	$gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $wavform);
-
 	$gui->{canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
 	$gui->{canvas}->configure(
 		scrollregion =>[2,2,10000,10000],
