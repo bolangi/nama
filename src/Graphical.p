@@ -27,8 +27,9 @@ sub loop {
 }
 
 sub initialize_tk { 
-	can_load( modules => { Tk => undef } ) ;
-	can_load( modules => { 'Tk::PNG' => undef } );
+	my $result1 = can_load( modules => { Tk => undef } ) ;
+	my $result2 = can_load( modules => { 'Tk::PNG' => undef } );
+	$result1
 }
 
 # the following graphical methods are placed in the root namespace
