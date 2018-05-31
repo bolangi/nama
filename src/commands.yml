@@ -1129,15 +1129,15 @@ delete_effect_chain:
   parameters: <string:effect_chain_name>
 find_effect_chains:
   type: effect
-  what: Dump effect chains, matching key/value pairs if provided
-  short: fec
+  what: Dump effect chains, filtering on key pairs (if provided)
+  short: fec lec
   parameters: [ <string:key_1> <string:value_1> ] ...
   example: |
     fec # List all effect chains with their effects.
 find_user_effect_chains:
   type: effect
   what: List all *user* created effect chains, matching key/value pairs, if provided.
-  short: fuec
+  short: fuec leca
   parameters: [ <string:key_1> <string:value_1> ] ...
 bypass_effects:
   type: effect

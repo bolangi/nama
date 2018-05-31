@@ -278,7 +278,8 @@ effects => <<EFFECTS,
 
 -  effect chains (presets, each consisting of multiple effects)
 
-   list_effect_chains,     lec   - list effect chains and their parameters
+   find_effect_chains,     fec   - find all effect chains (filtering on key/value pairs, if supplied)
+   find_user_effect_chains,fuec  - find all user-defined effect chains, filtering as above
    new_effect_chain,       nec   - define a new effect chain
    overwrite_effect_chain, oec   - as above, but overwite existing definition
    add_effect_chain,       aec   - add an effect chain to the current track
