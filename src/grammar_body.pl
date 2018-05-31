@@ -205,7 +205,7 @@ help_effect: _help_effect effect { ::help_effect($item{effect}) ; 1}
 find_effect: _find_effect anytag(s) { 
 	::find_effect(@{$item{"anytag(s)"}}); 1}
 help: _help anytag  { ::help($item{anytag}) ; 1}
-help: _help { ::pager( $::help->{screen} ); 1}
+help: _help { print( $::help->{screen} ); 1}
 project_name: _project_name { 
 	::pager( "project name: ", $::project->{name}); 1}
 new_project: _new_project project_id { 
