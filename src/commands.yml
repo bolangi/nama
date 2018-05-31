@@ -39,10 +39,7 @@ exit:
   parameters: none
 memoize:
   type: general
-  what: |
-    Enable WAV directory caching, so Nama won't have to scan
-    the entire project folder for new files after every run.
-    (default)
+  what: Cache WAV directory contents (default)
   parameters: none
 unmemoize:
   type: general

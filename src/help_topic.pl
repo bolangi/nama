@@ -46,27 +46,22 @@ project => <<PROJECT,
    tag                       - tag current commit with a name and optional 
                                message
    
-   memoize                   - enable WAV directory cache
-   unmemoize                 - disable WAV directory cache
-   
 PROJECT
 
 chain_setup => <<SETUP,
-   arm                       - generate and connect chain setup    
    show-setup, show          - show status, all tracks
    show-chain-setup, chains  - show Ecasound Setup.ecs file
-   generate, gen             - generate chainsetup for audio processing
-      (usually not necessary)
-   connect, con              - connect chainsetup (usually not necessary)
-   disconnect, dcon          - disconnect chainsetup (usually not necessary)
+   arm                       - generate and connect chain setup (not usually necessary)
+
 SETUP
 
 track => <<TRACK,
-   Most of the Track related commands operate on the 'current
-   track'. To cut volume for a track called 'sax',  you enter
-   'sax mute' or 'sax; mute'. The first part of the
-   command sets a new current track. You can also specify a
-   current track by number,  i.e.  '4 mute'.
+
+   Many commands in Nama operate on the currently selected track or 'current track'. 
+   track name or number to a command sets the current track before the command
+   executes.  For example, to cut the volume for a track called 'sax', you could
+   say 'sax mute', or even something like '4 mute'. Using the track number
+   can be convenient when executing commands on multiple tracks as 'for 4 5 6; unmute' 
 
    add-track, add            -  create one or more new tracks
                                 example: add sax; r 3 
@@ -141,11 +136,10 @@ track => <<TRACK,
 
  - rw-status
 
-   rec                     -  set track to REC (live signal source)
-   mon                     -  set track to PLAY (WAV file playback)
+   rec                     -  set track to REC (record and monitor live signal source)
+   mon                     -  set track to MON (monitor live signal source)
+   play                    -  set track to PLAY (WAV file playback)
    off                     -  set track OFF (omit from setup)
-   write-defeat, wd        -  toggle track WAV recording off
-   write-enable, we        -  toggle track WAV recording on
 
  - vol/pan 
 
