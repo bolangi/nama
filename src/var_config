@@ -65,6 +65,7 @@
 	$beep_command 					$config->{beep_command}
 	$hotkey_beep					$config->{hotkey_beep}
 	$eager							$mode->{eager}
+	$waveform_height 				$config->{waveform_height}
 
 	$alias							$config->{alias}
 	$hotkeys						$config->{hotkeys}
@@ -101,6 +102,8 @@
 	$osc_reply_port 				$config->{osc_reply_port}
 	$remote_control_port 			$config->{remote_control_port}
 	$engines						$config->{engines}
+
+	$default_waveform_height 			$config->{default_waveform_height}
 
 	# end
 

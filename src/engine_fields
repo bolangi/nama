@@ -1,0 +1,10 @@
+name # name of the engine
+port # tcp port for listening
+jack_seek_delay # obsolete? 
+jack_transport_mode
+events
+socket
+pids
+ecasound
+buffersize
+ready

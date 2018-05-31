@@ -23,8 +23,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		serialize
 		assign
 		assign_singletons
-		store_vars
-		json_out
 		yaml_in
 		json_in
 		json_out
@@ -47,7 +45,7 @@ use Carp;
 ) };
 sub var_map {  $var_map } # to allow outside access while keeping
                           # working lexical
-sub config_vars { grep {$_ ne '**' } keys %$var_map }
+sub config_vars { keys %$var_map }
 
 sub assign {
   # Usage: 

@@ -34,7 +34,7 @@ sub init_gui {
 	### init waveform window
 
 	$gui->{ww} = $gui->{mw}->Toplevel;
-	$gui->{ww}->title("Effect Window");
+	$gui->{ww}->title("Waveform Window");
 	$gui->{ww}->deiconify; 
 	
 
@@ -50,6 +50,19 @@ sub init_gui {
 	$gui->{ew}->bind('<Control-Key- >' => \&toggle_transport); 
 	$gui->{ww}->bind('<Control-Key- >' => \&toggle_transport); 
 	
+	$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
+	$gui->{wwcanvas}->configure(
+		scrollregion =>[0,0,2400,480],
+		-width => 2400,
+		-height => 480	
+		);
+
+sub wwgeometry {
+	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
+		= $gui->{wwcanvas}->geometry =~ /(\d+)x(\d+)([+-])(\d+)([+-])(\d+)/;
+	($width,$height)
+}
+
 	$gui->{canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
 	$gui->{canvas}->configure(
 		scrollregion =>[2,2,10000,10000],
@@ -344,12 +357,12 @@ sub engine_mode_color {
 				$gui->{_nama_palette}->{RecBackground} # live recording 
 		} elsif ( ::ChainSetup::really_recording() ){ 
 				$gui->{_nama_palette}->{Mixdown}	# mixdown only 
-		} elsif ( user_mon_tracks() ){  
+		} elsif ( user_play_tracks() ){  
 				$gui->{_nama_palette}->{Play}; 	# just playback
 		} else { $gui->{_old_bg} } 
 }
 sub user_rec_tracks { some_user_tracks(REC) }
-sub user_mon_tracks { some_user_tracks(PLAY) }
+sub user_play_tracks { some_user_tracks(PLAY) }
 
 sub some_user_tracks {
 	my $which = shift;
@@ -1148,7 +1161,7 @@ sub get_saved_colors {
 
 	my $pal = $file->gui_palette;
 	$pal .= '.json' unless $pal =~ /\.json$/;
-	pager("pal $pal");
+	logpkg('debug',"pal $pal");
 	$pal = -f $pal 
 			? scalar read_file($pal)
 			: get_data_section('default_palette_json');

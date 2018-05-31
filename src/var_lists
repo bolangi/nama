@@ -35,6 +35,7 @@
 	$project->{current_stepsize}
 	$project->{playback_position}
 	$project->{sample_rate}
+	$project->{waveform}
 	@project_effect_chain_data
 	$fx->{id_counter}
 	$setup->{loop_endpoints}

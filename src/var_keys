@@ -3,15 +3,14 @@ $config->{hires_timer}			# indicates if we are capable
 $config->{opts}					# command line arguments
 $config->{soundcard_channels}	# a constant needed for GUI - can we discover this?
 $config->{disable_auto_reconfigure} # -R option
-$config->{engine_muting_time} 	# delay for engine to mute/unmute
+$config->{engine_muting_time} 	# interval for engine to smoothly mute/unmute
 $config->{engine_command_output_buffer_size}
 $config->{fade_time1_fraction}	# two-part fade on engine start/stop
-$config->{fade_down_fraction}
 $config->{fade_time2_fraction}
 $config->{fade_down_fraction}
 $config->{fader_op}				# Ecasound operator selected for fader 
 $config->{category}				# hack to change logging category
-$config->{want_logging}			# keys are categories requested for loggin
+$config->{want_logging}			# keys are categories requested for logging
 $config->{latency_op}			# operator for latency compensation
 $config->{latency_op_init}		# initial values
 $config->{latency_op_set}		# subroutine for setting latency compensation
@@ -75,10 +74,6 @@ $mode->{mastering}				# boolean
 $mode->{midi_terminal}			# 
 $mode->{midi_transport_sync}  # sync Ecasound start/stop with midish
 $project->{events}				# timers used during engine run
-# $en{ecasound}->{socket}			# socket for Ecasound command I/O (Net-ECI)
-# $en{ecasound}->{pids}			# Ecasound process PIDs
-# $en{ecasound}->{ecasound}		# Audio::Ecasound object (libecasoundc)
-# $en{ecasound}->{buffersize}		# engine buffersize
 
 $fx->{ecasound_effect_hints}	# hints for ecasound effects
 $fx->{offset}					# offset to locate first user-addressable 
@@ -135,6 +130,8 @@ $project->{artist}				# Artist field for mp3/ogg encoding
 $project->{current_op}			# current effect, per track
 $project->{current_param}		# current parameter, per effect
 $project->{current_stepsize}	# stepsize, per effect/parameter
+$project->{current_waveform_timescale} # multiply by clip length for waveform image length in pixels.
+$project->{current_waveform}->{track_name}
 $project->{playback_position}	# in order to restore position after a reconfigure
 $project->{mark_sequence_counter} # used for system assigned mark names
 $project->{redo}				# last commit removed by undo
@@ -165,6 +162,9 @@ $gui->{_save_id}
 # GUI objects
 $gui->{mw}						# main window
 $gui->{ew}						# effects window
+$gui->{ww}						# main window for waveform test
+$gui->{wwframe}					# waveform frame
+$gui->{wwcanvas}				# waveform canvas
 $gui->{canvas}					# canvas
 $gui->{load_frame}				# frames for various parts of the display
 $gui->{add_frame}
