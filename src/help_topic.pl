@@ -26,12 +26,12 @@ help => <<HELP,
 HELP
 
 project => <<PROJECT,
-   load_project, load        - load an existing project 
-   project_name, name        - show the current project name
-   create_project, create    - create a new project directory tree 
-   list_projects, lp         - list all Nama projects
-   get_state, get            - retrieve named file or tag
-   save_state, keep, save    - save state as file or tag
+   load-project, load        - load an existing project 
+   project-name, name        - show the current project name
+   create-project, create    - create a new project directory tree 
+   list-projects, lp         - list all Nama projects
+   get-state, get            - retrieve named file or tag
+   save-state, keep, save    - save state as file or tag
    exit, quit                - exit program, saving state 
 
  (Version control)
@@ -40,8 +40,8 @@ project => <<PROJECT,
    get                       - checkout tag <tagname> 
                                or associated branch and load
    branch, br                - switch to designated branch and load
-   list_branches, lbr        - list branches and tags (without arguments)
-   new_branch, nbr           - create a new branch starting at the current 
+   list-branches, lbr        - list branches and tags (without arguments)
+   new-branch, nbr           - create a new branch starting at the current 
                                commit or a specified commit 
    tag                       - tag current commit with a name and optional 
                                message
@@ -53,8 +53,8 @@ PROJECT
 
 chain_setup => <<SETUP,
    arm                       - generate and connect chain setup    
-   show_setup, show          - show status, all tracks
-   show_chain_setup, chains  - show Ecasound Setup.ecs file
+   show-setup, show          - show status, all tracks
+   show-chain-setup, chains  - show Ecasound Setup.ecs file
    generate, gen             - generate chainsetup for audio processing
       (usually not necessary)
    connect, con              - connect chainsetup (usually not necessary)
@@ -68,34 +68,34 @@ track => <<TRACK,
    command sets a new current track. You can also specify a
    current track by number,  i.e.  '4 mute'.
 
-   add_track, add            -  create one or more new tracks
+   add-track, add            -  create one or more new tracks
                                 example: add sax; r 3 
                                     (record sax from input 3) 
                                 example: add piano; r synth
                                     (record piano from JACK client "synth") 
 
-   link_track, link          -  create a new, read-only track that uses audio
+   link-track, link          -  create a new, read-only track that uses audio
                                 files from an existing track. 
 
-                                example: link_track new_piano piano
-                                example: link_track intro Mixdown my_song_intro 
+                                example: link-track new-piano piano
+                                example: link-track intro Mixdown my-song-intro 
 
-   import_audio, import      - import a WAV file, resampling if necessary
+   import-audio, import      - import a WAV file, resampling if necessary
 
-   remove_track              - remove effects, parameters and GUI for current
+   remove-track              - remove effects, parameters and GUI for current
                                track
 
-   show_tracks, show, tracks -  show status of all tracks
+   show-tracks, show, tracks -  show status of all tracks
                                 and group settings
 
-   show_track, sh            -  show status of current track,
+   show-track, sh            -  show status of current track,
                                 including effects, versions, 
                                 modifiers,  "sax; sh"
 
-   show_bus_tracks, shb      -  show status of current bus,
+   show-bus-tracks, shb      -  show status of current bus,
                                 mix track and member tracks
 
-   show_tracks_all showa sha - show all tracks, including hidden
+   show-tracks-all showa sha - show all tracks, including hidden
 
    stereo                    -  set track width to 2 channels
 
@@ -139,21 +139,21 @@ track => <<TRACK,
 
    list_version, lver, lv        - list version numbers of current track
 
- - rw_status
+ - rw-status
 
    rec                     -  set track to REC (live signal source)
    mon                     -  set track to PLAY (WAV file playback)
    off                     -  set track OFF (omit from setup)
-   write_defeat, wd        -  toggle track WAV recording off
-   write_enable, we        -  toggle track WAV recording on
+   write-defeat, wd        -  toggle track WAV recording off
+   write-enable, we        -  toggle track WAV recording on
 
  - vol/pan 
 
    pan, p                  -  get/set pan position
-   pan_back, pb            -  restore pan after pr/pl/pc  
-   pan_center, pc          -  set pan center    
-   pan_left, pl            -  pan track fully left    
-   pan_right, pr           -  pan track fully right    
+   pan-back, pb            -  restore pan after pr/pl/pc  
+   pan-center, pc          -  set pan center    
+   pan-left, pl            -  pan track fully left    
+   pan-right, pr           -  pan track fully right    
    unity                   -  unity volume    
    vol, v                  -  get/set track volume    
                               sax vol + 20 (increase by 20)
@@ -175,27 +175,27 @@ track => <<TRACK,
    ecanormalize, normalize, norm 
                            - run ecanormalize on current track version
    ecafixdc, fixdc         - run ecafixdc on current track version
-   autofix_tracks, autofix - fixdc and normalize selected versions of all PLAY
+   autofix-tracks, autofix - fixdc and normalize selected versions of all PLAY
                              tracks
 
  - cutting and time shifting
 
-   set_region,    srg      - specify a track region using times or mark names
-   add_region,    arg      - define a region creating an auxiliary track
-   remove_region, rrg      - remove auxiliary track or region definition
-   shift_track,   shift    - set playback delay for track/region
-   unshift_track, unshift  - eliminate playback delay for track/region
+   set-region,    srg      - specify a track region using times or mark names
+   add-region,    arg      - define a region creating an auxiliary track
+   remove-region, rrg      - remove auxiliary track or region definition
+   shift-track,   shift    - set playback delay for track/region
+   unshift-track, unshift  - eliminate playback delay for track/region
 
 - track caching (intermediate mixdown)
 
-   cache_track,   cache,   ct  - store effects-processed track signal as new version
-   uncache_track, uncache, unc - select uncached track version, replace effects
+   cache-track,   cache,   ct  - store effects-processed track signal as new version
+   uncache-track, uncache, unc - select uncached track version, replace effects
 
  - hazardous or destructive commands for advanced users
 
-   set_track               - directly set current track parameters
+   set-track               - directly set current track parameters
 
-   destroy_current_wav     - unlink current track's selected WAV version.
+   destroy-current-wav     - unlink current track's selected WAV version.
 
 TRACK
 
@@ -208,14 +208,14 @@ transport => <<TRANSPORT,
    forward, fw        -  Forward some number of seconds, i.e. fw 75
    setpos, sp         -  Set the playback head position, i.e. setpos 49.2
    getpos, gp         -  Get the current head position 
-   to_start, beg      - set playback head to start
-   to_end, end        - set playback head to end
+   to-start, beg      - set playback head to start
+   to-end, end        - set playback head to end
 
-   loop_enable, loop  -  loop playback between two points
+   loop-enable, loop  -  loop playback between two points
                          example: loop 5.0 200.0 (positions in seconds)
                          example: loop start end (mark names)
                          example: loop 3 4       (mark numbers)
-   loop_disable, noloop, nl
+   loop-disable, noloop, nl
                       -  disable looping
 
    preview            -  start engine with WAV recording disabled
@@ -224,22 +224,22 @@ transport => <<TRANSPORT,
    doodle             -  start engine with all live inputs enabled.
                          Release with 'preview' or 'arm'.
                          
-   ecasound_start, T  - ecasound-only start (not usually needed)
+   ecasound-start, T  - ecasound-only start (not usually needed)
 
-   ecasound_stop, S   - ecasound-only stop (not usually needed)
+   ecasound-stop, S   - ecasound-only stop (not usually needed)
 
 
 TRANSPORT
 
 marks => <<MARKS,
-   new_mark,      mark, k     - drop mark at current position, with optional name
-   list_marks,    lmk,  lm    - list marks showing index, time, name
-   next_mark,     nmk,  nm    - jump to next mark 
-   previous_mark, pmk,  pm    - jump to previous mark 
-   name_mark,           nom   - give a name to current mark 
-   to_mark,       tmk,  tom   - jump to a mark by name or index
-   remove_mark,   rmk,  rom   - remove current mark
-   modify_mark, move_mark, 
+   new-mark,      mark, k     - drop mark at current position, with optional name
+   list-marks,    lmk,  lm    - list marks showing index, time, name
+   next-mark,     nmk,  nm    - jump to next mark 
+   previous-mark, pmk,  pm    - jump to previous mark 
+   name-mark,           nom   - give a name to current mark 
+   to-mark,       tmk,  tom   - jump to a mark by name or index
+   remove-mark,   rmk,  rom   - remove current mark
+   modify-mark, move-mark, 
     mmk, mm                   - change the time setting of current mark
 MARKS
 
@@ -247,67 +247,67 @@ effects => <<EFFECTS,
     
  - information commands
 
-   ladspa_register, lrg       - list LADSPA effects
-   preset_register, prg       - list Ecasound presets
-   ctrl_register,   crg       - list Ecasound controllers 
-   find_effect,     fe        - list available effects matching arguments
-                                example: find_effect reverb
-   help_effect, he            - full information about an effect 
-                                example: help_effect 1209 
+   ladspa-register, lrg       - list LADSPA effects
+   preset-register, prg       - list Ecasound presets
+   ctrl-register,   crg       - list Ecasound controllers 
+   find-effect,     fe        - list available effects matching arguments
+                                example: find-effect reverb
+   help-effect, he            - full information about an effect 
+                                example: help-effect 1209 
                                   (information about LADSPA plugin 1209)
-                                example: help_effect valve
+                                example: help-effect valve
                                   (information about LADSPA plugin valve)
 
  - effect manipulation commands
 
-   add_effect,     afx        - add an effect to the current track
-   add_controller, acl        - add an Ecasound controller
-   insert_effect,  ifx        - insert an effect before another effect
-   modify_effect,  mfx        - set, increment or decrement effect parameter
-   remove_effect,  rfx        - remove an effect or controller
-   append_effect, apfx        - add effect to the end of current track effect list 
-   bypass_effects, bypass, bye   - suspend current track effects except vol/pan
-   restore_effects, restore, ref - restore track effects
+   add-effect,     afx        - add an effect to the current track
+   add-controller, acl        - add an Ecasound controller
+   insert-effect,  ifx        - insert an effect before another effect
+   modify-effect,  mfx        - set, increment or decrement effect parameter
+   remove-effect,  rfx        - remove an effect or controller
+   append-effect, apfx        - add effect to the end of current track effect list 
+   bypass-effects, bypass, bye   - suspend current track effects except vol/pan
+   restore-effects, restore, ref - restore track effects
 
 -  send/receive inserts
 
-   add_insert,         ain    - add an insert to current track
-   remove_insert,      rin    - remove an insert from current track
-   set_insert_wetness, wet    - set/query insert wetness 
+   add-insert,         ain    - add an insert to current track
+   remove-insert,      rin    - remove an insert from current track
+   set-insert-wetness, wet    - set/query insert wetness 
                                 example: wet 99 (99% wet, 1% dry)
 
 -  effect chains (presets, each consisting of multiple effects)
 
-   find_effect_chains,     fec   - find all effect chains (filtering on key/value pairs, if supplied)
-   find_user_effect_chains,fuec  - find all user-defined effect chains, filtering as above
-   new_effect_chain,       nec   - define a new effect chain
-   overwrite_effect_chain, oec   - as above, but overwite existing definition
-   add_effect_chain,       aec   - add an effect chain to the current track
-   delete_effect_chain,    dec   - delete an effect chain definition
+   find-effect-chains,     fec   - find all effect chains (filtering on key/value pairs, if supplied)
+   find-user-effect-chains,fuec  - find all user-defined effect chains, filtering as above
+   new-effect-chain,       nec   - define a new effect chain
+   overwrite-effect-chain, oec   - as above, but overwite existing definition
+   add-effect-chain,       aec   - add an effect chain to the current track
+   delete-effect-chain,    dec   - delete an effect chain definition
 
 -  effect profiles (effect chains for a group of tracks)
 
-   new_effect_profile, nep       - define a new effect profile
-   apply_effect_profile, aep     - apply an effect profile
+   new-effect-profile, nep       - define a new effect profile
+   apply-effect-profile, aep     - apply an effect profile
                                    (current effects are bypassed)
-   overlay_effect_profile, oep   - apply an effect profile,
+   overlay-effect-profile, oep   - apply an effect profile,
                                    adding to current effects
-   delete_effect_profile, dep    - delete an effect profile definition
+   delete-effect-profile, dep    - delete an effect profile definition
 
 EFFECTS
 
 group => <<GROUP,
-   group_rec, grec, R         - group REC mode 
-   group_mon, gmon, M         - group PLAY mode 
-   group_off, goff, Z         - group OFF mode 
-   group_version, gver, gv    - select default group version 
+   group-rec, grec, R         - group REC mode 
+   group-mon, gmon, M         - group PLAY mode 
+   group-off, goff, Z         - group OFF mode 
+   group-version, gver, gv    - select default group version 
                               - used for switching among 
                                 several multitrack recordings
-   new_bunch, bunch, nb       - name a bunch of tracks
+   new-bunch, bunch, nb       - name a bunch of tracks
                                 e.g. bunch strings violins cello bass
                                 e.g. bunch 3 4 6 7 (track indexes)
-   list_bunches,     lb       - list groups of tracks (bunches)
-   remove_bunches,   rb       - remove bunch definitions
+   list-bunches,     lb       - list groups of tracks (bunches)
+   remove-bunches,   rb       - remove bunch definitions
 
    for                   - execute commands on several tracks 
                            by name, or by specifying a group or bunch
@@ -326,17 +326,17 @@ group => <<GROUP,
 GROUP
 
 bus => <<BUS,
-   list_buses,          lbs   - list bus data
-   add_submix_raw,      asr   - create bus and slave tracks for 
+   list-buses,          lbs   - list bus data
+   add-submix-raw,      asr   - create bus and slave tracks for 
                                 sending pre-fader track signals
-   add_submix_cooked, asc     - as above, for post-fader signals
-   update_submix,     usm     - refresh send bus track list
-   remove_bus,                - remove a bus
-   add_bus,           abs     - create a sub-bus feeding a regular user track
+   add-submix-cooked, asc     - as above, for post-fader signals
+   update-submix,     usm     - refresh send bus track list
+   remove-bus,                - remove a bus
+   add-bus,           abs     - create a sub-bus feeding a regular user track
                                 of the same name
-                                example: add_bus Strings 
-                                         add_tracks violin cello bass
-                                         for cello violin bass; move_to_bus Strings
+                                example: add-bus Strings 
+                                         add-tracks violin cello bass
+                                         for cello violin bass; move-to-bus Strings
 
 BUS
 
@@ -345,8 +345,8 @@ mixdown => <<MIXDOWN,
    mixoff,     mxo             - disable mixdown 
    mixplay,    mxp             - playback a recorded mix 
    automix                     - normalize track vol levels, then mixdown
-   master_on,  mr              - enter mastering mode
-   master_off, mro             - leave mastering mode
+   master-on,  mr              - enter mastering mode
+   master-off, mro             - leave mastering mode
 MIXDOWN
 
 prompt => <<PROMPT,
@@ -364,11 +364,11 @@ PROMPT
 
 diagnostics => <<DIAGNOSTICS,
 
-   dump_all,   dumpall,   dumpa - dump most internal state
-   dump_track, dumpt,     dump  - dump current track data
-   dump_group, dumpgroup, dumpg - dump group settings for user tracks
-   show_io,    showio           - show chain inputs and outputs
-   engine_status, egs           - display ecasound audio processing engine
+   dump-all,   dumpall,   dumpa - dump most internal state
+   dump-track, dumpt,     dump  - dump current track data
+   dump-group, dumpgroup, dumpg - dump group settings for user tracks
+   show-io,    showio           - show chain inputs and outputs
+   engine-status, egs           - display ecasound audio processing engine
                                    status
 DIAGNOSTICS
 
@@ -376,54 +376,54 @@ edits => <<EDITS,
 
 -  general
 
-   list_edits,       led        - list edits
-   new_edit,         ned        - create new edit for current track and version
-   select_edit,      sed        - choose an edit to modify, becomes current edit
-   end_edit_mode,    eem        - track plays full length
-   disable_edits,    ded        - disable edits for current track
-   destroy_edit                 - remove all WAV files and data for current edit
+   list-edits,       led        - list edits
+   new-edit,         ned        - create new edit for current track and version
+   select-edit,      sed        - choose an edit to modify, becomes current edit
+   end-edit-mode,    eem        - track plays full length
+   disable-edits,    ded        - disable edits for current track
+   destroy-edit                 - remove all WAV files and data for current edit
    
 -  edit marks
 
-   set_edit_points,  sep        - mark play start, rec start and rec end 
+   set-edit-points,  sep        - mark play start, rec start and rec end 
 
-   play_start_mark,  psm        - select and move to play start mark
-   rec_start_mark,   rsm        - select and move to rec start mark
-   red_end_mark,     rem        - select and move to rec end mark
+   play-start-mark,  psm        - select and move to play start mark
+   rec-start-mark,   rsm        - select and move to rec start mark
+   red-end-mark,     rem        - select and move to rec end mark
 
-   set_play_start_mark, spsm    - set mark to current position
-   set_rec_start_mark,  srsm    - set mark to current position
-   set_rec_end_mark,    srem    - set mark to current position
+   set-play-start-mark, spsm    - set mark to current position
+   set-rec-start-mark,  srsm    - set mark to current position
+   set-rec-end-mark,    srem    - set mark to current position
 
 -  preview edit segment
 
-   preview_edit_in   pei        - preview track with edit segment removed
-   preview_edit_out  peo        - preview edit segment to be removed
+   preview-edit-in   pei        - preview track with edit segment removed
+   preview-edit-out  peo        - preview edit segment to be removed
 
 -  record/play edit
 
-   record_edit       red        - record a WAV file for current edit
-   play_edit         ped        - play a completed edit
+   record-edit       red        - record a WAV file for current edit
+   play-edit         ped        - play a completed edit
 
 -  select edit related tracks
 
-   edit_track,       et         - set edit track as current track
-   edit_track,       et         - set edit track as current track
-   host_track,       ht         - set host track alias as current track
-   host_track_alias, hta        - set host track alias as current track
-   version_mix_track,vmt        - set version mix track as current track 
+   edit-track,       et         - set edit track as current track
+   edit-track,       et         - set edit track as current track
+   host-track,       ht         - set host track alias as current track
+   host-track-alias, hta        - set host track alias as current track
+   version-mix-track,vmt        - set version mix track as current track 
 EDITS
 
 fades => <<FADES,
-   add_fade,         afd, fade  - add fade (in or out) to current track
+   add-fade,         afd, fade  - add fade (in or out) to current track
                                   examples: 
-                                      fade in song_start 0.2
-                                  (fades in at mark 'song_start' over 0.2 s)
-                                      fade out 0.5 song_start
-                                  (fades out over 0.5 s ending at 'song_start')
+                                      fade in song-start 0.2
+                                  (fades in at mark 'song-start' over 0.2 s)
+                                      fade out 0.5 song-start
+                                  (fades out over 0.5 s ending at 'song-start')
                                   
-   remove_fade,      rfd        - remove fade (by index)
-   list_fade         lfd        - list all fades
+   remove-fade,      rfd        - remove fade (by index)
+   list-fade         lfd        - list all fades
 FADES
    
 );
