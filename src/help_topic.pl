@@ -174,7 +174,7 @@ track => <<TRACK,
    shift-track,   shift    - set playback delay for track/region
    unshift-track, unshift  - eliminate playback delay for track/region
 
-- track caching (intermediate mixdown)
+- track caching (freezing)
 
    cache-track,   cache,   ct  - store effects-processed track signal as new version
    uncache-track, uncache, unc - select uncached track version, replace effects
@@ -201,22 +201,16 @@ transport => <<TRANSPORT,
 
    loop-enable, loop  -  loop playback between two points
                          example: loop 5.0 200.0 (positions in seconds)
-                         example: loop start end (mark names)
-                         example: loop 3 4       (mark numbers)
+                         example: loop start end (mark names or numbers)
    loop-disable, noloop, nl
                       -  disable looping
 
    preview            -  start engine with WAV recording disabled
                          (for mic check, etc.) Release with 'arm'.
 
-   doodle             -  start engine with all live inputs enabled.
-                         Release with 'preview' or 'arm'.
+   doodle             -  Like preview, with WAV playback also disabled
+                         Release with 'arm'.
                          
-   ecasound-start, T  - ecasound-only start (not usually needed)
-
-   ecasound-stop, S   - ecasound-only stop (not usually needed)
-
-
 TRANSPORT
 
 marks => <<MARKS,
@@ -285,12 +279,6 @@ effects => <<EFFECTS,
 EFFECTS
 
 group => <<GROUP,
-   group-rec, grec, R         - group REC mode 
-   group-mon, gmon, M         - group PLAY mode 
-   group-off, goff, Z         - group OFF mode 
-   group-version, gver, gv    - select default group version 
-                              - used for switching among 
-                                several multitrack recordings
    new-bunch, bunch, nb       - name a bunch of tracks
                                 e.g. bunch strings violins cello bass
                                 e.g. bunch 3 4 6 7 (track indexes)
@@ -314,18 +302,23 @@ group => <<GROUP,
 GROUP
 
 bus => <<BUS,
-   list-buses,          lbs   - list bus data
-   add-submix-raw,      asr   - create bus and slave tracks for 
-                                sending pre-fader track signals
-   add-submix-cooked, asc     - as above, for post-fader signals
-   update-submix,     usm     - refresh send bus track list
-   remove-bus,                - remove a bus
-   add-bus,           abs     - create a sub-bus feeding a regular user track
+   add-bus,             abs   - create a sub-bus feeding a regular user track
                                 of the same name
                                 example: add-bus Strings 
                                          add-tracks violin cello bass
                                          for cello violin bass; move-to-bus Strings
+   list-buses,          lbs   - list bus data
+   remove-bus                 - remove a bus
+   bus-rec                    - set current bus to REC
+   bus-mon                    - set current bus to MON
+   bus-off                    - set current bus to OFF
+   bus-play                   - set current bus to OFF
+   bus-version                - select default version for all tracks on bus
 
+   add-submix-raw,      asr   - create bus and slave tracks for 
+                                sending pre-fader track signals
+   add-submix-cooked,   asc   - as above, for post-fader signals
+   update-submix,       usm   - refresh send bus track list
 BUS
 
 mixdown => <<MIXDOWN,
