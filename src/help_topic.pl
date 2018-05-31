@@ -57,17 +57,34 @@ SETUP
 
 track => <<TRACK,
 
-   Many commands in Nama operate on the currently selected track or 'current track'. 
-   track name or number to a command sets the current track before the command
-   executes.  For example, to cut the volume for a track called 'sax', you could
-   say 'sax mute', or even something like '4 mute'. Using the track number
-   can be convenient when executing commands on multiple tracks as 'for 4 5 6; unmute' 
-
    add-track, add            -  create one or more new tracks
                                 example: add sax; r 3 
                                     (record sax from input 3) 
                                 example: add piano; r synth
                                     (record piano from JACK client "synth") 
+
+ - track status
+
+   rec                     -  set track to REC (record and monitor live signal source)
+   mon                     -  set track to MON (monitor live signal source)
+   play                    -  set track to PLAY (WAV file playback)
+   off                     -  set track OFF (omit from setup)
+
+ - vol/pan 
+
+   pan, p                  -  get/set pan position
+   pan-back, pb            -  restore pan after pr/pl/pc  
+   pan-center, pc          -  set pan center    
+   pan-left, pl            -  pan track fully left    
+   pan-right, pr           -  pan track fully right    
+   unity                   -  unity volume    
+   vol, v                  -  get/set track volume    
+                              sax vol + 20 (increase by 20)
+                              sax vol - 20 (reduce by 20)
+                              sax vol * 3  (multiply by 3)
+                              sax vol / 2  (cut by half) 
+   mute, c, cut            -  mute volume 
+   unmute, nomute, uncut, C -  restore muted volume
 
    link-track, link          -  create a new, read-only track that uses audio
                                 files from an existing track. 
@@ -133,29 +150,6 @@ track => <<TRACK,
    set_version, version, ver, n  -  set current track version
 
    list_version, lver, lv        - list version numbers of current track
-
- - rw-status
-
-   rec                     -  set track to REC (record and monitor live signal source)
-   mon                     -  set track to MON (monitor live signal source)
-   play                    -  set track to PLAY (WAV file playback)
-   off                     -  set track OFF (omit from setup)
-
- - vol/pan 
-
-   pan, p                  -  get/set pan position
-   pan-back, pb            -  restore pan after pr/pl/pc  
-   pan-center, pc          -  set pan center    
-   pan-left, pl            -  pan track fully left    
-   pan-right, pr           -  pan track fully right    
-   unity                   -  unity volume    
-   vol, v                  -  get/set track volume    
-                              sax vol + 20 (increase by 20)
-                              sax vol - 20 (reduce by 20)
-                              sax vol * 3  (multiply by 3)
-                              sax vol / 2  (cut by half) 
-   mute, c, cut            -  mute volume 
-   unmute, nomute, uncut, C -  restore muted volume
 
  - chain object modifiers
 
@@ -344,6 +338,11 @@ mixdown => <<MIXDOWN,
 MIXDOWN
 
 prompt => <<PROMPT,
+   The prompt displays the name of the project and currently selected track and
+   bus (if other than Main.)
+
+   nama allegro violin / Strings > 
+
    At the command prompt, you can enter several types
    of commands:
 
@@ -353,6 +352,12 @@ prompt => <<PROMPT,
    Ecasound commands           cs-is-valid
    Shell expressions           ! ls
    Perl code                   eval 2*3     # prints '6'
+
+   Many commands in Nama operate on the currently selected track or 'current track'. 
+   track name or number to a command sets the current track before the command
+   executes.  For example, to mute the volume for a track called 'sax', you could
+   say 'sax mute', or even something like '4 mute'. Using the track number
+   can be convenient when executing commands on multiple tracks as 'for 4 5 6; unmute'
 
 PROMPT
 
