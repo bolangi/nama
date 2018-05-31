@@ -86,28 +86,28 @@ track => <<TRACK,
    mute, c, cut            -  mute volume 
    unmute, nomute, uncut, C -  restore muted volume
 
-   link-track, link          -  create a new, read-only track that uses audio
-                                files from an existing track. 
-
-                                example: link-track new-piano piano
-                                example: link-track intro Mixdown my-song-intro 
-
    import-audio, import      - import a WAV file, resampling if necessary
 
    remove-track              - remove effects, parameters and GUI for current
                                track
 
    show-tracks, show, tracks -  show status of all tracks
-                                and group settings
 
    show-track, sh            -  show status of current track,
                                 including effects, versions, 
-                                modifiers,  "sax; sh"
+                                modifiers,  "sax sh"
 
-   show-bus-tracks, shb      -  show status of current bus,
-                                mix track and member tracks
+   show-bus-tracks, shb      -  show tracks of current bus
 
    show-tracks-all showa sha - show all tracks, including hidden
+
+   link-track, link          -  create a new, read-only track that uses audio
+                                files from an existing track. 
+
+                                example: link-track new-piano piano
+                                example: link-track intro Mixdown my-song-intro 
+
+
 
    stereo                    -  set track width to 2 channels
 
