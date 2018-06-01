@@ -140,6 +140,7 @@ $project->{osc}					# Protocol::OSC object
 $project->{remote_control_socket} # text command listener socket
 $project->{midi_history}		# all text commands sent to midish
 $project->{sample_rate}
+$project->{waveform}
 
 $file->{effects_cache}			# Name of effects discovery cache
 $file->{global_effect_chains}	# Name of global effect chains file

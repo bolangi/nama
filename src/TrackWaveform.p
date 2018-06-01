@@ -43,8 +43,8 @@ sub refresh_waveform {
 #3m song, 2400 pixels
 #new_version_length_pixels = $length *  $project->{current_waveform_timescale}
 #allow user to choose timescale
-#$project->{current_waveform_timescale}
-#$project->{available_timescales}
+#$pr oject->{current_waveform_timescale}
+#$pr oject->{available_timescales}
 
 # 	$gui->{wwframe} = $gui->{wwcanvas}->Frame;
 # 	my $wavform = $gui->{ww}->Photo(-format => 'png', -file => join_path(this_wav_dir(),"tmh-2400x480.png"));
