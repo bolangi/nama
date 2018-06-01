@@ -271,7 +271,7 @@ our @ISA = '::SimpleTrack';
 sub rec_status{
 	my $track = shift;
  	return OFF if $track->engine_group ne $en{$::config->{ecasound_engine_name}}->name;
-	$mode->{mastering} ? MON :  OFF;
+	$mode->mastering ? MON :  OFF;
 }
 sub source_status {}
 sub group_last {0}
@@ -324,7 +324,7 @@ no warnings qw(uninitialized redefine);
 our @ISA = '::SlaveTrack';
 sub rec_status{
 	my $track = shift;
-	$mode->{mastering} ? MON :  OFF;
+	$mode->mastering ? MON :  OFF;
 }
 }
 {
