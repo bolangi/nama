@@ -7,16 +7,16 @@ help:
   example: |
     help marks # display the help category marks and all commands containing marks
     help 6 # display help on the effects category
-    help mfx # display help on modify_effect - shortcut mfx
+    help mfx # display help on modify-effect - shortcut mfx
 help_effect:
   type: help
   what: Display detailed help on LADSPA or LV2 effects.
   short: hfx he
   parameters: <string:label> | <integer:unique_id>
   example: |
-    help_effect 1970 
+    help-effect 1970 
     ! display help on Fons Adriaensen's parametric EQ (LADSPA)
-    help_effect etd 
+    help-effect etd 
     ! prints a short message to consult Ecasound manpage, 
     ! where the etd chain operator is documented.
     hfx lv2-vocProc 
@@ -27,7 +27,7 @@ find_effect:
   short: ffx fe
   parameters: <string:keyword1> [ <string:keyword2>... ]
   example: |
-    find_effect compressor 
+    find-effect compressor 
     ! List all effects containing "compressor" in their name or parameters
     fe feedback 
     ! List all effects matching "feedback" 
@@ -188,7 +188,7 @@ master_on:
     Turn on the mastering mode, adding tracks Eq, Low, Mid, High
     and Boost, if necessary. The mastering setup allows for one
     EQ and a three-band multiband compression and a final
-    boosting stage. Using "master_off" to leave the mastering mode. 
+    boosting stage. Using "master-off" to leave the mastering mode. 
   short: mr
   parameters: none
   example: |
@@ -207,7 +207,7 @@ add_track:
   short: add new
   parameters: <string:name>
   example: |
-    add_track clarinet 
+    add-track clarinet 
     ! create a mono track called clarinet with input 
     ! from soundcard channel 1.
 add_midi_track:
@@ -216,23 +216,23 @@ add_midi_track:
   short: amt
   parameters: <string:name>
   example: |
-    add_midi_track clarinet 
+    add-midi-track clarinet 
 add_tracks:
   type: track
   what: Create one or more new tracks in one go.
   parameters: <string:name1> [ <string:name2>... ]
-  example: add_tracks violin viola contra_bass
+  example: add-tracks violin viola contra_bass
 link_track:
   type: track
   what: Create a read-only track, that uses audio files from another track.
   short: link
-  parameters: [<string:project_name>] <string:track_name> <string:link_name>
+  parameters: [<string:project-name>] <string:track_name> <string:link_name>
   example: |
     link my_song_part1 Mixdown part_1  
     ! Create a read-only track "part_1" in the current project
     ! using files from track "Mixdown" in project "my_song_part_1".
     !
-    link_track compressed_piano piano
+    link-track compressed_piano piano
     ! Create a read-only track "compressed_piano" using files from
     ! track "piano". This is one way to provide wet and dry
     ! (processed and unprocessed) versions of same source.
@@ -341,7 +341,7 @@ source:
     ! whose outputs use one JACK port per voice.
 send:
   type: track
-  what: Set an aux send for the current track. Remove sends with remove_send .
+  what: Set an aux send for the current track. Remove sends with remove-send .
   short: aux
   parameters: <integer:soundcard_channel> | <string:jack_client_name> | <string:loop_id>
   example: |
@@ -387,7 +387,7 @@ list_versions:
   short: lver
   parameters: none
   example: |
-    list_versions # May print something like: 1 2 5 7 9
+    list-versions # May print something like: 1 2 5 7 9
     !             # The other versions might have been deleted earlier by you.
 vol:
   type: track
@@ -469,28 +469,28 @@ pan_right:
   type: track
   what: |
     Pan the current track hard right. this is a synonym for pan 100. 
-    Can be reversed with pan_back.
+    Can be reversed with pan-back.
   short: pr
   parameters: none
 pan_left:
   type: track
   what: |
     Pan the current track hard left. This is a synonym for pan 0. 
-    Can be reversed with pan_back.
+    Can be reversed with pan-back.
   short: pl
   parameters: none
 pan_center:
   type: track
   what: |
     Pan the current track to the centre. This is a synonym for pan 50.
-    Can be reversed with pan_back.
+    Can be reversed with pan-back.
   short: pc
   parameters: none
 pan_back:
   type: track
   what: |
-    Restore the current track's pan position prior to pan_left, 
-    pan_right or pan_center commands.
+    Restore the current track's pan position prior to pan-left, 
+    pan-right or pan-center commands.
   short: pb
   parameters: none
 show_tracks:
@@ -502,7 +502,7 @@ show_tracks:
   parameters: none
 show_tracks_all:
   type: track
-  what: Like show_tracks, but includes hidden tracks as well. Useful for debugging.
+  what: Like show-tracks, but includes hidden tracks as well. Useful for debugging.
   short: sha showa
   parameters: none
 show_bus_tracks:
@@ -539,7 +539,7 @@ set_region:
   type: track
   what: |
     Specify a playback region for the current track using marks. 
-    Can be reversed with remove_region.
+    Can be reversed with remove-region.
   short: srg
   parameters: <string:start_mark_name> <string:end_mark_name>
   example: |
@@ -548,7 +548,7 @@ set_region:
     mark sax_start # Create a mark
     sp 120.5       # Move playhead to 120.5 seconds.
     mark sax_end   # Create another mark
-    set_region sax_start sax_end 
+    set-region sax_start sax_end 
     !  Play only the audio from 2.5 to 120.5 seconds.
 add_region:
   type: track
@@ -558,7 +558,7 @@ add_region:
   parameters: <string:start_mark_name> | <float:start_time> <string:end_mark_name> | <float:end_time> [ <string:region_name> ]
   example: |
     sax # Select "sax" as the current track.
-    add_region sax_start 66.7 trimmed_sax 
+    add-region sax_start 66.7 trimmed_sax 
     ! Create "trimmed_sax", a copy of "sax" with a region defined
     ! from mark "sax_start" to 66.7 seconds. 
 remove_region:
@@ -572,7 +572,7 @@ shift_track:
   type: track
   what: |
     Choose an initial delay before playing a track or region.
-    Can be reversed by unshift_track.
+    Can be reversed by unshift-track.
   short: shift playat pat
   parameters: <string:start_mark_name> | <integer:start_mark_index | <float:start_seconds>
   example: |
@@ -635,7 +635,7 @@ bus_mon:
 bus_off:
   type: bus
   what: |
-    Set current bus mixtrack to OFF. Can be reversed with bus_mon.
+    Set current bus mixtrack to OFF. Can be reversed with bus-mon.
   short: boff
   parameters: none
 bus_version:
@@ -649,7 +649,7 @@ add_bunch:
   short: abn
   parameters: <string:bunch_name> [ <string:track_name_1> | <integer:track_index_1> ] ...
   example: |
-    add_bunch strings violin cello bass
+    add-bunch strings violin cello bass
     ! Create a bunch "strings" with tracks violin, cello and bass.
     for strings; mute # Mute all tracks in the strings bunch.
     for strings; vol * 0.8 
@@ -673,7 +673,7 @@ add_to_bunch:
   short: atbn
   parameters: <string:bunch_name> <string:track1> [ <string:track2> ] ...
   example: |
-    add_to_bunch woodwind oboe sax flute 
+    add-to-bunch woodwind oboe sax flute 
 commit:
   type: project
   what: commit Nama's current state
@@ -696,7 +696,7 @@ new_branch:
   type: project
   what: create a new branch
   short: nbr
-  parameters: <string:new_branch_name> [<string:existing_branch_name>]
+  parameters: <string:new-branch_name> [<string:existing_branch_name>]
 save_state:
   type: project
   what: Save the project settings as file or git snapshot
@@ -716,16 +716,16 @@ new_project:
   type: project
   what: Create or open a new empty Nama project.
   short: create
-  parameters: <string:new_project_name>
+  parameters: <string:new-project-name>
   example: |
     create jam 
     # creates empty project call "jam".
     # Now you can start adding your tracks, editing them and mixing them.
 load_project:
   type: project
-  what: Load an existing project. This will load the project from the default project state file. If you wish to load a project state saved to a user specific file, load the project and then use get_state.
+  what: Load an existing project. This will load the project from the default project state file. If you wish to load a project state saved to a user specific file, load the project and then use get-state.
   short: load
-  parameters: <string:existing_project_name>
+  parameters: <string:existing_project-name>
   example: load my_old_song # Will load my_old_song just as you left it.
 project_name:
   type: project
@@ -738,7 +738,7 @@ new_project_template:
   short: npt
   parameters: <string:template_name> [ <string:template_description> ]
   example: |
-    new_project_template my_band_setup "tracks and busses for bass, drums and me"
+    new-project_template my_band_setup "tracks and busses for bass, drums and me"
 use_project_template:
   type: project
   what: Use a template to create tracks in a newly created, empty project.
@@ -791,7 +791,7 @@ loop:
   parameters: <string:start_mark_name> | <integer:start_mark_index> | <float:start_time_in_secs> <string:end_mark_name> | <integer:end_mark_index> | <float:end_time_in_secs>
   example: |
     loop 1.5 10.0 # Loop between 1.5 and 10.0 seconds.
-    loop 1 5 # Loop between marks with indices 1 and 5, see list_marks.
+    loop 1 5 # Loop between marks with indices 1 and 5, see list-marks.
     loop sax_start 12.6 # Loop between mark sax_start and 12.6 seconds.
 noloop:
   type: setup
@@ -804,7 +804,7 @@ add_controller:
   short: acl
   parameters: [ <string:operator_id> ] <string:effect_code> [ <float:param1> <float:param2> ] ...
   example: |
-    add_effect etd 100 2 2 50 50 # Add a stero delay of 100ms.
+    add-effect etd 100 2 2 50 50 # Add a stero delay of 100ms.
     ! the delay will get the effect ID E .
     ! Now we want to slowly change the delay to 200ms.
     acl E klg 1 100 200 2 0 100 15 200 # Change the delay time linearly (klg)
@@ -819,7 +819,7 @@ add_effect:
     "before", "first" and "last" can be abbreviated "b", "f" and "l", respectively.
   example: |
     We want to add the decimator effect (a LADSPA plugin).
-    help_effect decimator # Print help about its paramters/controls.
+    help-effect decimator # Print help about its paramters/controls.
     !                     # We see two input controls: bitrate and samplerate
     afx decimator 12 22050  #  prints "Added GO (Decimator)"
     ! We have added the decimator with 12bits and a sample rate of 22050Hz.
@@ -875,7 +875,7 @@ position_effect:
   short: pfx
   parameters: <string:id_to_move> <string:position_id>
   example: |
-    position_effect G F # Move effecit with unique ID G before F.
+    position-effect G F # Move effecit with unique ID G before F.
 show_effect:
   type: effect
   what: Show information about an effect. Default is to print information on the current effect.
@@ -923,10 +923,10 @@ add_insert:
       External: ( pre | post ) <string:send_id> [ <string:return_id> ]
       Local wet/dry: local
   example: |
-    add_insert pre jconvolver 
+    add-insert pre jconvolver 
     ! Add a prefader insert. The current track signal is sent 
     ! to jconvolver and returned to the vol/pan controls.
-    add_insert post jconvolver csound 
+    add-insert post jconvolver csound 
     ! Send the current track postfader signal (after vol/pan
     ! controls) to jconvolver, getting the return from csound.
     guitar # Select the guitar track
@@ -951,7 +951,7 @@ remove_insert:
   parameters: [ pre | post ]
   example: |
     rin # If there is only one insert on the current track, remove it.
-    remove_insert post # Remove the postfader insert from the current track.
+    remove-insert post # Remove the postfader insert from the current track.
 ctrl_register:
   type: effect
   what: List all Ecasound controllers. Controllers include linear controllers and oscillators.
@@ -978,7 +978,7 @@ to_mark:
   short: tmk tom
   parameters: <string:mark_name> | <integer:mark_index>
   example: |
-    to_mark sax_start # Jump to the position marked by sax_mark.
+    to-mark sax_start # Jump to the position marked by sax_mark.
     tmk 2 # Move to the mark with the index 2.
 add_mark:
   type: mark
@@ -993,7 +993,7 @@ remove_mark:
   short: rmk
   parameters: [ <string:mark_name> | <integer:mark_index> ]
   example: |
-    remove_mark start # remove the mark named start
+    remove-mark start # remove the mark named start
     rmk 16 # Remove the mark with the index 16.
     rmk    # Remove the current mark
 next_mark:
@@ -1054,7 +1054,7 @@ add_submix_cooked:
   short: 
   parameters: <string:name> <destination>
   example: |
-    add_submix_cooked front_of_house 7
+    add-submix-cooked front_of_house 7
     ! send a custom mix named "front_of_house"
     ! to soundcard channels 7/8
 add_submix_raw:
@@ -1078,7 +1078,7 @@ update_submix:
   what: Include tracks added since the submix was created.
   short: usm
   parameters: <string:name>
-  example: update_submix Reverb # Include new tracks in the Reverb submix
+  example: update-submix Reverb # Include new tracks in the Reverb submix
 remove_bus:
   type: bus
   what: Remove a bus or submix
@@ -1099,7 +1099,7 @@ overwrite_effect_chain:
     Create a new effect chain, overwriting an existing one
     of the same name.
   short: oec
-  parameters: Same as for new_effect_chain
+  parameters: Same as for new-effect-chain
 new_effect_chain:
   type: effect
   what: | 
@@ -1109,7 +1109,7 @@ new_effect_chain:
   short: nec
   parameters: <string:name> [ <effect_id_1> <effect_id_2>... ] 
   example: |
-    new_effect_chain my_piano 
+    new-effect-chain my_piano 
     ! Create a new effect chain, "my_piano", storing all 
     ! effects and their settings from the current track
     ! except the fader (vol/pan) settings.
@@ -1152,14 +1152,14 @@ bring_back_effects:
   example: |
     bbfx                   # Restore the current effect.
     restore_effect AF      # Restore the effect with the unique ID AF.
-    bring_back_effects all # Restore all effects.
+    bring-back-effects all # Restore all effects.
 new_effect_profile:
   type: effect
   what: Create a new effect profile. An effect profile is a named group of effect chains for multiple tracks. Useful for storing a basic template of standard effects for a group of instruments, like a drum kit.
   short: nep
   parameters: <string:bunch_name> [ <string:effect_profile_name> ]
   example: |
-    add_bunch Drums snare toms kick # Create a buch called Drums.
+    add-bunch Drums snare toms kick # Create a buch called Drums.
     nep Drums my_drum_effects # Create an effect profile, call my_drum_effects
                               # containing all effects from snare toms and kick.
 apply_effect_profile:
@@ -1200,8 +1200,8 @@ cache_track:
     definition are removed and stored. 
 
     To go back to the original track state, use the
-    uncache_track command.  The show_track display appends a "c"
-    to version numbers created by cache_track (and therefore
+    uncache-track command.  The show-track display appends a "c"
+    to version numbers created by cache-track (and therefore
     reversible by uncache) 
     
   short: cache ct bounce freeze
@@ -1242,7 +1242,7 @@ remove_fade:
   short: rfd
   parameters: <integer:fade_index_1> [ <integer:fade_index_2> ] ...
   example: |
-    list_fade # Print a list of all fades and their tracks.
+    list-fade # Print a list of all fades and their tracks.
     rfd 2     # Remove the fade with the index (n) 2.
 list_fade:
   type: effect
@@ -1382,17 +1382,17 @@ rec_end_mark:
   parameters: none
 set_play_start_mark:
   type: edit
-  what: Set play_start_mark to the current playback position.
+  what: Set play-start-mark to the current playback position.
   short: spsm
   parameters: none
 set_rec_start_mark:
   type: edit
-  what: Set rec_start_mark to the current playback position.
+  what: Set rec-start-mark to the current playback position.
   short: srsm
   parameters: none
 set_rec_end_mark:
   type: edit
-  what: Set rec_end_mark to current playback position.
+  what: Set rec-end-mark to current playback position.
   short: srem
   parameters: none
 disable_edits:
@@ -1413,7 +1413,7 @@ explode_track:
   parameters: none
 move_to_bus:
   type: track
-  what: Move the current track to another bus. A new track is always in the Main bus. So to reverse this action use move_to_bus Main .
+  what: Move the current track to another bus. A new track is always in the Main bus. So to reverse this action use move-to-bus Main .
   short: mtb
   parameters: <string:bus_name>
   example: |
@@ -1432,7 +1432,7 @@ read_user_customizations:
   parameters: none
 limit_run_time:
   type: setup
-  what: Stop recording after the last audio file finishes playing. Can be turned off with limit_run_time_off.
+  what: Stop recording after the last audio file finishes playing. Can be turned off with limit-run-time_off.
   short: lr
   parameters: [ <float:additional_seconds> ]
 limit_run_time_off:
@@ -1637,7 +1637,7 @@ trim_submix:
   short: trim tsm
   example: |
     ! reduce vol of current track in in_ear_monitor by 3dB
-    select_submix in_ear_monitor
+    select-submix in_ear_monitor
     trim vol - 3 
 nickname_effect:
   type: effect
@@ -1645,7 +1645,7 @@ nickname_effect:
   what: Add a nickname to the current effect (and create an alias)
   parameters: <lower_case_string:nickname>
   example: |
-    add_track guitar
+    add-track guitar
     afx Plate
     nick reverb        # current effect gets name "reverb1"
                        # "reverb" becomes an alias for "Plate"
