@@ -195,7 +195,7 @@ sub update_cache_map {
 		my @ops_list = @{$track->ops};
 		my @ops_remove_list = $track->user_ops;
 		
-		if ( @inserts_list or @ops_remove_list or $track->is_region)
+		if ( @inserts_list or @ops_remove_list or $track->is_region or $track->is_mixing )
 		{
 			my %args = 
 			(
@@ -206,6 +206,7 @@ sub update_cache_map {
 				system => 1,
 				ops_list => \@ops_list,
 				inserts_data => \@inserts_list,
+				is_mixing => $track->is_mixing,
 			);
 			$args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
 			$args{track_target_original} = $track->target if $track->target; 
@@ -228,8 +229,8 @@ sub post_cache_processing {
 		# only set to PLAY tracks that would otherwise remain
 		# in a REC status
 
-		$args->{track}->set(rw => PLAY) if $args->{track}->rec;
-		$args->{track}->deactivate_bus if $args->{track}->is_mixing;
+		$args->{track}->deactivate_bus, $args->{track}->set( rw => PLAY)
+			if $args->{track}->is_mixing;
 
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
@@ -293,7 +294,7 @@ sub uncache_track {
 		if $track->is_region;
 
 	my $bus = $bn{$track->name};
-	$track->activate_bus, $track->set(rw => REC), pagers($track->name. ": setting mix track to REC")
+	$track->activate_bus, pagers($track->name. ": setting mix track to MON")
 		if defined $bus;
 }
 sub is_cached {

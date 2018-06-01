@@ -2,7 +2,7 @@
 package ::BusUtil;
 use Role::Tiny;
 use Modern::Perl;
-use ::Globals qw(%tn PLAY);
+use ::Globals qw(%tn %bn PLAY OFF MON);
 
 sub version_has_edits { 
 	my ($track) = @_;
@@ -20,12 +20,13 @@ sub bus_tree { # for solo function to work in sub buses
 
 sub activate_bus {
 	my $track = shift;
-	::add_bus($track->name) unless $track->is_system_track;
+	 ::add_bus($track->name) unless $track->is_system_track;
 }
 sub deactivate_bus {
 	my $track = shift;
 	return if $track->is_system_track;
-	$track->set( rw => PLAY);
+	my $bus = $bn{$track->name};
+	$bus->set( rw => OFF );
 }
 }
 1;

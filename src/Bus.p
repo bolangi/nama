@@ -311,13 +311,22 @@ sub select_bus {
 	$this_bus_o = $bus;
 }
 sub add_bus {
+	# creates named bus if necessary
+	# creates named track if necessary
+	# sets track rw and source for track
+	# sets rw for bus (MON)
 	my ($name, @args) = @_; 
 	
+	# don't create bus if such named already exists
 	::SubBus->new( 
 		name => $name, 
 		send_type => 'track',
 		send_id	 => $name,
-		) unless $::Bus::by_name{$name};
+		) unless $bn{$name};
+	
+	my $bus = $bn{$name};
+	# modify bus and track settings to activate bus
+	$bus->set(rw => MON); 
 
 	@args = ( 
 		rw 			=> MON,
@@ -331,8 +340,9 @@ sub add_bus {
 	my $track = $tn{$name}// add_track($name, width => 2);
 
 	$track->set( @args );
-	
 }
+	
+
 	
 sub add_submix {
 
