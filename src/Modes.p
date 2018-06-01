@@ -64,6 +64,9 @@ sub master_on {
 	
 	# create mastering tracks if needed
 	
+	# we use hiding/unhiding status of Eq track to indicate
+	# mastering mode, so no explicity use of $mode->{mastering}
+	
 	if ( ! $tn{Eq} ){  
 	
 		local $this_track;
