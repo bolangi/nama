@@ -26,6 +26,7 @@ sub deactivate_bus {
 	my $track = shift;
 	return if $track->is_system_track;
 	my $bus = $bn{$track->name};
+	return unless $bus;
 	$bus->set( rw => OFF );
 }
 sub is_mixer {
