@@ -202,7 +202,7 @@ sub rec_cleanup_script {
 sub current_edit { $_[0]->{current_edit}//={} }
 sub is_mixing {
 	my $track = shift;
-	$bn{$track->name} and ($track->mon or $track->rec)
+	$track->is_mixer and ($track->mon or $track->rec)
 }
 sub bus { $bn{$_[0]->group} }
 
