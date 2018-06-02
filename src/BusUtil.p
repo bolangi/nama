@@ -28,6 +28,11 @@ sub deactivate_bus {
 	my $bus = $bn{$track->name};
 	$bus->set( rw => OFF );
 }
+sub is_mixer {
+	my $track = shift;
+	my $bus = $bn{$track->name};
+	defined $bus	
+}
 }
 1;
 
