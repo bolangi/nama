@@ -293,9 +293,11 @@ sub uncache_track {
 		$track->region_start, " and ", $track->region_end, $/)
 		if $track->is_region;
 
-	my $bus = $bn{$track->name};
-	$track->activate_bus, pagers($track->name. ": setting mix track to MON")
-		if defined $bus;
+	$track->activate_bus, 
+		pagers("uncache for track ".$track->name.": enabling bus member tracks. 
+Warning: member track settings have not been restored, are not guaranteed to correspond 
+with pre-cache state")
+		if $track->is_mixer
 }
 sub is_cached {
 	my ($track, $version) = @_;
