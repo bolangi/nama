@@ -259,7 +259,6 @@ sub destination {
 }
 #sub rec_status_display { $_[0]->rw ne OFF ? PLAY : OFF }
 sub activate_bus {}
-sub deactivate_bus {}
 }
 {
 package ::MasteringTrack; # used for mastering chains 
