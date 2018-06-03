@@ -70,7 +70,7 @@ sub reactivate_vol_pan {
 sub prepare_to_cache {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
-	$args->{orig_version} = $args->{track}->playback_version;
+	$args->{orig_version} = $args->{track}->is_mixing ?  undef : $args->{track}->playback_version;
 
 
 	#   We route the signal thusly:
@@ -195,7 +195,7 @@ sub update_cache_map {
 		my @ops_list = @{$track->ops};
 		my @ops_remove_list = $track->user_ops;
 		
-		if ( @inserts_list or @ops_remove_list or $track->is_region or $track->is_mixing )
+		if ( @inserts_list or @ops_remove_list or $track->is_region )
 		{
 			my %args = 
 			(
@@ -206,8 +206,8 @@ sub update_cache_map {
 				system => 1,
 				ops_list => \@ops_list,
 				inserts_data => \@inserts_list,
-				is_mixing => $track->is_mixing,
 			);
+			#	is_mixing => $track->is_mixing,
 			$args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
 			$args{track_target_original} = $track->target if $track->target; 
 			# late, because this changes after removing target field
