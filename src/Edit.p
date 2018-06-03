@@ -55,9 +55,10 @@ sub new {
 	my $host = $::tn{$name};
 	confess( ::project_dir().": missing host_track".  $::this_track->dump. $self->dump. ::nama_cmd("dumpa")) if !$host;
 
+
 # Routing:
 #
-#    sax-v5-original --+
+#    sax-v5-original --+ #  version_bus/version_mix   host_bus/host
 #                      |
 #    sax-v5-edit1 -----+--- sax-v5 (bus/track) --- sax (bus/track) ----- 
 
@@ -751,20 +752,15 @@ Set the correct version and try again."), return
 
 	# turn on top-level bus and mix track
 	
-	$edit->host_bus->set(rw => REC);
-
 	$edit->host->activate_bus;
 
 	# turn off all version level buses/mix_tracks
 	
 	map{ $tn{$_}->set(rw => OFF);  # version mix tracks
-	      $bn{$_}->set(rw => OFF); # version buses
 	} $this_edit->host_bus->tracks;  # use same name for track/bus
 
 	# turn on what we want
 	
-	$edit->version_bus->set(rw => REC);
-
 	$edit->version_mix->activate_bus;
 
 	$edit->host_alias_track->set(rw => PLAY);
@@ -779,13 +775,10 @@ sub disable_edits {
 		unless defined $this_edit;
 	my $edit = $this_edit;
 
-	$edit->host_bus->set( rw => OFF);
+	$edit->host->set(rw => OFF); # XXX or what it was before??
 
-	$edit->version_bus->set( rw => OFF);
+	$edit->version_mix->set( rw => OFF);
 
-	# reset host track
-	
-	$edit->host->deactivate_bus;
 	
 }
 sub merge_edits {
