@@ -90,7 +90,7 @@ sub remove {
 
 	if ( defined $mix_track ){
 	 
-		$mix_track->deactivate_bus;
+		$mix_track->set(rw => OFF);
 	
 		# remove mix track unless it has some WAV files
 
