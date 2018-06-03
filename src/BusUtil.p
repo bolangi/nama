@@ -25,14 +25,14 @@ sub activate_bus {
 sub deactivate_bus {
 	my $track = shift;
 	return if $track->is_system_track;
-	my $bus = $bn{$track->name};
+	my $bus = $track->is_mixer;
 	return unless $bus;
 	$bus->set( rw => OFF );
 }
 sub is_mixer {
 	my $track = shift;
 	my $bus = $bn{$track->name};
-	defined $bus	
+	$bus	
 }
 }
 1;
