@@ -323,9 +323,8 @@ sub select_bus {
 }
 sub add_bus {
 	# creates named bus if necessary
-	# creates named track if necessary
-	# sets track rw and source for track
-	# sets rw for bus (MON)
+	# creates named mix track if necessary
+	# sets mix track to MON with bus as source
 	my ($name, @args) = @_; 
 	
 	# don't create bus if such named already exists
