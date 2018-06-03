@@ -226,12 +226,7 @@ sub update_cache_map {
 
 sub post_cache_processing {
 	my $args = shift;
-		# only set to PLAY tracks that would otherwise remain
-		# in a REC status
-
-		$args->{track}->deactivate_bus, $args->{track}->set( rw => PLAY)
-			if $args->{track}->is_mixing;
-
+		$args->{track}->set( rw => PLAY) if $args->{track}->is_mixing;
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
 		revise_prompt("default"); 
