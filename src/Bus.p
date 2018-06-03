@@ -130,7 +130,7 @@ package ::SubBus;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
 use ::Log qw(logsub logpkg);
 use ::Util qw(input_node);
-use ::Globals qw(:trackrw);
+use ::Globals qw(:trackrw %tn);
 
 # connect source --> member_track --> mix_track
 
@@ -202,6 +202,17 @@ sub remove {
 	
 	delete $::bn{$bus->name};
 } 
+sub mixtrack { 
+	my $bus = shift;
+	$tn{$bus->name}
+}
+sub rw {
+	my $bus = shift;
+	my $mixtrack;
+	# ignored rw field, sync to mixtrack rw field 
+	return $bus->{rw} unless defined($mixtrack = $bus->mixtrack);
+	$mixtrack->{rw} =~ /REC|MON/ ? MON : OFF
+}
 }
 {
 package ::SendBusRaw;
