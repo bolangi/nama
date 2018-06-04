@@ -24,7 +24,10 @@ sub activate_bus {
 }
 sub is_mixer {
 	my $track = shift;
-	my $bus = $bn{$track->name};
+	my $type = $track->{source_type};
+	return unless $type eq 'bus';
+	my $id = $track->{source_id};
+	my $bus = $bn{$id};
 	$bus	
 }
 }
