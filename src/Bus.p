@@ -73,6 +73,7 @@ sub remove { ::throw($_[0]->name, " is system bus. No can remove.") }
 
 { my %allows = (REC => 'REC/MON', MON => MON, OFF => 'OFF');
 sub allows { $allows{ $_[0]->rw } }
+## XX obsolete
 }
 { my %forces = (
 		REC => 'REC (allows REC/MON)', 
@@ -157,7 +158,11 @@ sub apply {
 	my ($bus, $g)  = @_;
 	logpkg('debug', "bus ". $bus->name. ": applying routes");
 	logpkg('debug', "Bus destination is type: $bus->{send_type}, id: $bus->{send_id}");
+	my @wantme = grep{ ($_->rec or $_->mon) and $_->source_type eq 'bus' and $_->source_id eq $bus->name }
+::all_tracks();
+	logpkg('debug', "bus ". $bus->name. "consumed by ".$_->name) for @wantme;
 	map{ 
+		my $member = $_;
 		# connect member track input paths
 		logpkg('debug', "track ".$_->name);
 		my @path = $_->input_path;
@@ -167,11 +172,11 @@ sub apply {
 		logpkg('debug', join " ", "bus output:", $_->name, $bus->send_id);
 
 		# connect member track outputs to target
-		# disregard Main track rec_status when connecting
-		# Main bus during mixdown handling
 
-		::Graph::add_path_for_send($g, $_->name, $bus->send_type, $bus->send_id )
-			if $bus->output_is_connectable;
+		for (@wantme) { 
+			my $consumer = $_; 
+			::Graph::add_path_for_send($g, $member->name, 'track', $consumer->name)
+		}
 		
 		# add paths for recording
 		
