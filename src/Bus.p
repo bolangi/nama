@@ -158,8 +158,7 @@ sub apply {
 	my ($bus, $g)  = @_;
 	logpkg('debug', "bus ". $bus->name. ": applying routes");
 	logpkg('debug', "Bus destination is type: $bus->{send_type}, id: $bus->{send_id}");
-	my @wantme = grep{ ($_->rec or $_->mon) and $_->source_type eq 'bus' and $_->source_id eq $bus->name }
-::all_tracks();
+	my @wantme = $bus->wantme;
 	logpkg('debug', "bus ". $bus->name. "consumed by ".$_->name) for @wantme;
 	map{ 
 		my $member = $_;
@@ -172,7 +171,6 @@ sub apply {
 		logpkg('debug', join " ", "bus output:", $_->name, $bus->send_id);
 
 		# connect member track outputs to target
-
 		for (@wantme) { 
 			my $consumer = $_; 
 			::Graph::add_path_for_send($g, $member->name, 'track', $consumer->name)
@@ -205,12 +203,20 @@ sub mixtrack {
 	my $bus = shift;
 	$tn{$bus->name}
 }
+sub wantme {
+	my $bus = shift;
+	my @wantme = grep{ ($_->{rw} =~ /REC|MON/ ) and $_->source_type eq 'bus' and $_->source_id eq $bus->name }
+::all_tracks();
+@wantme
+
+
+}
 sub rw {
 	my $bus = shift;
 	my $mixtrack;
-	# ignored rw field, sync to mixtrack rw field 
-	return $bus->{rw} unless defined($mixtrack = $bus->mixtrack);
-	$mixtrack->{rw} =~ /REC|MON/ ? MON : OFF
+	# ignored rw field, indicate bus status, which is
+	# controlled by whether it is used
+	$bus->wantme ? MON : OFF
 }
 }
 {
