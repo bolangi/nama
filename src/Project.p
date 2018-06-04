@@ -177,8 +177,9 @@ sub initialize_mixer {
 			send_id => 1,
 			width => 2,
 			rw => MON,
-			source_type => undef,
-			source_id => undef); 
+			source_type => 'bus',
+			source_id => 'Main',
+			); 
 
 		my $mixdown = ::MixDownTrack->new( 
 			group => 'Mixdown', 
