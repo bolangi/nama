@@ -633,17 +633,6 @@ remove_track:
     Remove the current track with its effects, inserts, etc.
     Audio files are unchanged. 
   parameters: none
-bus_mon:
-  type: bus
-  what: Set the current bus mix_track to monitor (the default behaviour).
-  short: bmon
-  parameters: none
-bus_off:
-  type: bus
-  what: |
-    Set current bus mixtrack to OFF. Can be reversed with bus-mon.
-  short: boff
-  parameters: none
 bus_version:
   type: group
   what: Set the default monitoring version for tracks in the current bus.

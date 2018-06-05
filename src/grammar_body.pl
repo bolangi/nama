@@ -518,22 +518,6 @@ show_track: _show_track dd {
 	1;}
 
 show_mode: _show_mode { ::pager( ::show_status()); 1}
-bus_mon: _bus_mon {
-	my $bus = $::bn{$::this_bus}; 
-	$bus->set(rw => 'MON');
-	# set up mix track
-	$::tn{$bus->send_id}->activate_bus
-		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
-	::pager( "Setting MON mode for $::this_bus bus.");
-	1; }
-bus_off: _bus_off {
-	my $bus = $::bn{$::this_bus}; 
-	$bus->set(rw => ::OFF);
-	# turn off mix track
-	if($bus->send_type eq 'track' and my $mix = $::tn{$bus->send_id})
-	{ $mix->set(rw => ::OFF) }
-	::pager( "Setting OFF mode for " , $::this_bus, " bus. Member tracks disabled."); 1  
-}
 bus_version: _bus_version dd { 
 	my $n = $item{dd};
 	::nama_cmd("for $::this_bus; version $n");
