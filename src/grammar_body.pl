@@ -587,12 +587,7 @@ rw_setting:   'REC ' | 'rec'
 			| 'MON'  | 'mon'
 			| 'OFF'  | 'off' { $return = $item[1] }
 rw: rw_setting {
-	$::this_track->is_system_track 
-		# for system tracks, just set track 'rw' field
-		? $::this_track->set(rw => uc $item{rw_setting}) 
-
-		# that make sure bus settings are cooperative
-		: $::this_track->rw_set($::Bus::by_name{$::this_bus},$item{rw_setting}); 
+		 $::this_track->set(rw => uc $item{rw_setting}) ;
 	1
 }
 
