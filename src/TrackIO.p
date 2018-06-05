@@ -106,7 +106,7 @@ sub set_io {
 
 			my $port_name = $track->jack_manual_port($direction);
 
-			::pager($track->name, ": JACK $direction port is $port_name. Make connections manually.");
+			::pagers($track->name, ": JACK $direction port is $port_name. Make connections manually.");
 			$id = 'manual';
 			$id = $port_name;
 			$type = 'jack_manual';
@@ -116,10 +116,10 @@ sub set_io {
 
 			my $name = $track->name;
 			my $width = scalar @{ ::jack_client_array($id, $client_direction) };
-			$width or ::pager(
+			$width or ::pagers(
 				qq(Track $name: $direction port for JACK client "$id" not found.));
 			$width or return;
-			$width ne $track->width and ::pager(
+			$width ne $track->width and ::pagers(
 				"Track $name set to ", ::width($track->width),
 				qq(, but JACK source "$id" is ), ::width($width), '.');
 		}
@@ -154,12 +154,12 @@ sub set_source {
 	my $new_source = $track->input_object_text;;
 	my $object = $new_source;
 	if ( $old_source  eq $new_source ){
-		::pager($track->name, ": input unchanged, $object");
+		::pagers($track->name, ": input unchanged, $object");
 	} else {
-		::pager("Track ",$track->name, ": source set to $object");
+		::pagers("Track ",$track->name, ": source set to $object");
 		if (transition_to_null($old_source, $new_source))
 		{
-			::pager("Track ",$track->name, ": null input, toggling to MON");
+			::pagers("Track ",$track->name, ": null input, toggling to MON");
 			$track->set(rw => MON) if $track->rw eq REC;		
 		}
 	}
@@ -180,10 +180,10 @@ sub set_version {
 	my ($track, $n) = @_;
 	my $name = $track->name;
 	if ($n == 0){
-		::pager("$name: following bus default\n");
+		::pagers("$name: following bus default");
 		$track->set(version => $n)
 	} elsif ( grep{ $n == $_ } @{$track->versions} ){
-		::pager("$name: anchoring version $n\n");
+		::pagers("$name: anchoring version $n");
 		$track->set(version => $n)
 	} else { 
 		::throw("$name: version $n does not exist, skipping.\n")
@@ -200,10 +200,10 @@ sub set_send {
 	logpkg('debug', "send is now $new_send");
 	my $object = $track->output_object_text;
 	if ( $old_send  eq $new_send ){
-		::pager("Track ",$track->name, ": send unchanged, ",
+		::pagers("Track ",$track->name, ": send unchanged, ",
 			( $object ?  $object : 'off'));
 	} else {
-		::pager("Track ",$track->name, ": ", 
+		::pagers("Track ",$track->name, ": ", 
 		$object 
 			? "$object is now a send target" 
 			: "send target is turned off.");
@@ -295,7 +295,7 @@ sub set_rw {
 	#my $already = $track->rw eq $setting ? " already" : "";
 	$track->set(rw => $setting);
 	my $status = $track->rec_status();
-	::pager("Track ",$track->name, " set to $setting", 
+	::pagers("Track ",$track->name, " set to $setting", 
 		($status ne $setting ? ", but current status is $status" : ""));
 
 }
