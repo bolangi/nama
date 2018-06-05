@@ -10,9 +10,9 @@
                     mixdown
                     prompt 
                     diagnostics
-					edits
-					fades
-					command_line_options
+                    edits
+                    fades
+                    command_line_options
                 ) ;
 
 %{$help->{topic}} = (
@@ -123,7 +123,7 @@ track => <<TRACK,
                              -  with no arguments returns current signal source
 
     ----------------------------------------------------------
-	for this input              use this command
+    for this input              use this command
     ----------------------------------------------------------
 
      * soundcard channel 3      source 3 
@@ -140,6 +140,12 @@ track => <<TRACK,
 
      * JACK ports list          source drum.ports (ports list from drums.ports)
                                 source ports  (ports list from trackname.ports)
+
+     * from track (after effects processing)
+                                source track sax
+
+     * from bus                 source bus Strings
+     
     -----------------------------------------------------------
 
    send, out, m, aux         -  create an auxiliary send
