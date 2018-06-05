@@ -404,7 +404,7 @@ sub new {
 sub _format { 
 	my $self = shift;
 	return if $::config->{opts}->{T}; # XX don't break tests
-	::signal_format($self->format_template, 2);
+	::signal_format($self->format_template, $config->{loop_chain_channel_width});
 }
 sub _format_template { $config->{cache_to_disk_format} } 
 }
