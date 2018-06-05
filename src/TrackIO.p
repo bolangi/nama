@@ -10,6 +10,7 @@ use ::Log qw(logpkg logsub);
 sub rec_status {
 #	logsub("&rec_status");
 	my $track = shift;
+	return $track->rw; # stop mental masturbation
 	
 	#my $source_id = $track->source_id;
 	my $playback_version = $track->playback_version;
