@@ -319,13 +319,19 @@ source:
     source null 
     ! Track's input is silence. This is useful for when an effect such 
     ! as a metronome or signal generator provides a source.
+    !
+    source bus Strings
+    ! set the Strings bus as source
+    ! 
+    source track trumpet
+    ! set the track trumpet as source
     ! 
     source LinuxSampler 
-    ! Record input from the JACK client named LinuxSampler.
+    ! set the JACK client named LinuxSampler as source
     ! 
     source synth:output_3 
-    ! record from the JACK client synth, using the 
-    ! port output_3 (see he jackd and jack_lsp manpages
+    ! use the signal from the JACK client synth, using the 
+    ! port output_3 (see the jackd and jack_lsp manpages
     ! for more information).
     !
     source jack 
