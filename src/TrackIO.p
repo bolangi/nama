@@ -351,54 +351,12 @@ sub jack_manual_port {
 	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
 }
 
-{
-my %bus_logic = ( 
-	member_track =>
-	{
-
-	# setting member track to REC
-	
-		REC => sub 
-		{ 
-			my ($bus, $track) = @_;
-
-			$track->set_rec() or return;
-
-		},
-
-	# setting member track to MON 
-	
-		MON => sub
-		{ 
-			my ($bus, $track) = @_;
-			$track->set_rw(MON);
-		},
-
-	# setting member track to PLAY
-	
-		PLAY => sub
-		{ 
-			my ($bus, $track) = @_;
-			$track->set_rw(PLAY);
-
-		},
-	# setting member track to OFF 
-
-		OFF => sub
-		{
-			my ($bus, $track) = @_;
-			$track->set_rw(OFF);
-		},
-	},
-);
-
 sub rw_set {
 	my $track = shift;
 	logsub("&rw_set");
 	my ($bus, $rw) = @_;
 	$track->set_rec, return if $rw eq REC;
-	my $type = 'member_track';
-	$bus_logic{$type}{uc $rw}->($bus,$track);
+	$track->set_rw($rw);
 }
 sub wantme {
 	my $track = shift;
@@ -406,7 +364,6 @@ sub wantme {
 						and $_->source_type eq 'track' 
 						and $_->source_id eq $track->name } ::all_tracks();
 @wantme
-}
 }
 1;
 	
