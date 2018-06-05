@@ -32,9 +32,8 @@ sub cache_track { # launch subparts if conditions are met
 	$track->play or $track->mon or throw(
 			$track->name. ": track caching requires PLAY or MON status. Aborting."), return;
 	
-	if( $track->is_mixing){
-		my $bus = $bn{$track->name};
-	} 
+	$args->{is_mixing}++ if $track->is_mixing;
+	
 	throw($track->name. ": nothing to cache!  Skipping."), return 
 		unless 	$track->is_mixing 
 				or $track->user_ops 
