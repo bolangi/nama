@@ -13,6 +13,9 @@ sub rec_status {
 
 	return OFF 
 		if $track->rw eq OFF
+#		or (not $track->bus->wantme and not $track->wantme)
+	#	and not ( a track is asking for me)
+		
 		or ($mode->doodle and ! $mode->eager and $track->rw eq REC and 
 			$setup->{tracks_with_duplicate_inputs}->{$track->name})
 		or ($track->engine_group ne $::this_engine->name );
@@ -469,7 +472,13 @@ sub rw_set {
 		: 'member_track';
 	$bus_logic{$type}{uc $rw}->($bus,$track);
 }
+sub wantme {
+	my $track = shift;
+	my @wantme = grep{ ($_->{rw} =~ /REC|MON/ ) 
+						and $_->source_type eq 'track' 
+						and $_->source_id eq $track->name } ::all_tracks();
+@wantme
 }
-
+}
 1;
 	
