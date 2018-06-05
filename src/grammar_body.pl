@@ -355,6 +355,7 @@ $proposed
 } 
 			
 track_name: alphafirst
+bus_name: alphafirst
 existing_track_name: track_name { 
 	my $track_name = $item{track_name};
 	if ($::tn{$track_name}){
@@ -362,6 +363,16 @@ existing_track_name: track_name {
 	}
 	else {	
 		::throw("$track_name: track does not exist.\n");
+		undef
+	}
+}
+existing_bus_name: bus_name { 
+	my $bus_name = $item{bus_name};
+	if ($::bn{$bus_name}){
+		$bus_name;
+	}
+	else {	
+		::throw("$bus_name: bus does not exist.\n");
 		undef
 	}
 }
@@ -545,6 +556,9 @@ source: _source ('track'|'t') trackname {
 	$::this_track->set_source($item{trackname}, 'track'); 1
 } 
 trackname: existing_track_name
+source: _source 'bus' existing_bus_name {
+		$::this_track->set(source_id => $item{existing_bus_name}, source_type => 'bus')
+		}
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
