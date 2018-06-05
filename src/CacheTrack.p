@@ -76,8 +76,13 @@ sub prepare_to_cache {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
 	$args->{orig_version} = $args->{track}->is_mixing ?  undef : $args->{track}->playback_version;
+	$args->{complete_caching_ref} = \&update_cache_map;
 
+	if(! $args->{track}->is_mixing)
+	{
 
+	# Case 1: Caching a standard track
+	
 	#   We route the signal thusly:
 	#
 	#   Target track --> CacheRecTrack --> wav_out
@@ -95,7 +100,7 @@ sub prepare_to_cache {
 
 	$g->add_path($args->{track}->name, $cooked->name, 'wav_out');
 
-	# save the output file name to return later
+	# save the output file name
 	
 	$args->{output_wav} = $cooked->current_wav;
 
@@ -107,15 +112,11 @@ sub prepare_to_cache {
 			version => (1 + $this_track->last),
 		}
 	); 
-	$args->{complete_caching_ref} = \&update_cache_map;
-
-	# Case 1: Caching a standard track
 	
-	if(! $args->{track}->is_mixing)
-	{
 		# set the input path
 		$g->add_path('wav_in',$args->{track}->name);
 		logpkg('debug', "The graph after setting input path:\n$g");
+
 	}
 
 	# Case 2: Caching a bus mix track
@@ -123,7 +124,7 @@ sub prepare_to_cache {
 	else {
 
 		# apply all buses (unneeded ones will be pruned)
-		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
+		#map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
 	}
 
 	logpkg('debug', "The graph after bus routing:\n$g");
