@@ -15,6 +15,8 @@ use ::Globals qw(:all);
 # output_wav
 # orig_volume
 # orig_pan
+# is_mixing
+# source_commit
 
 sub cache_track { # launch subparts if conditions are met
 
@@ -201,7 +203,7 @@ sub update_cache_map {
 				track_cache => 1,
 				track_name	=> $track->name,
 				track_version_original => $args->{orig_version},
-				track_source_md5 => 0,
+				source_commit => 0,
 				project => 1,
 				system => 1,
 				ops_list => \@ops_list,
