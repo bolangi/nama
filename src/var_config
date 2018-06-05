@@ -104,6 +104,7 @@
 	$engines						$config->{engines}
 
 	$default_waveform_height 			$config->{default_waveform_height}
+	$loop_chain_channel_width 	$config->{loop_chain_channel_width}
 
 	# end
 

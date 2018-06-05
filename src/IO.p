@@ -403,7 +403,12 @@ sub new {
 	my %vals = @_;
 	$class->SUPER::new( %vals, device_id => "loop,$vals{endpoint}");
 }
-sub format {}
+sub _format { 
+	my $self = shift;
+	return if $::config->{opts}->{T}; # XX don't break tests
+	::signal_format($self->format_template, $config->{loop_chain_channel_width});
+}
+sub _format_template { $config->{cache_to_disk_format} } 
 }
 {
 package ::IO::to_loop;
