@@ -309,10 +309,6 @@ bus => <<BUS,
                                          for cello violin bass; move-to-bus Strings
    list-buses,          lbs   - list bus data
    remove-bus                 - remove a bus
-   bus-rec                    - set current bus to REC
-   bus-mon                    - set current bus to MON
-   bus-off                    - set current bus to OFF
-   bus-play                   - set current bus to OFF
    bus-version                - select default version for all tracks on bus
 
    add-submix-raw,      asr   - create bus and slave tracks for 
