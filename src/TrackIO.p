@@ -13,8 +13,10 @@ sub rec_status {
 
 	return OFF 
 		if $track->rw eq OFF
-#		or (not $track->bus->wantme and not $track->wantme)
-	#	and not ( a track is asking for me)
+		or (	not $track->{rw} eq REC 
+			and not ($track->bus and $track->bus->wantme) 
+			and not $track->wantme
+			and not $track->send_type)
 		
 		or ($mode->doodle and ! $mode->eager and $track->rw eq REC and 
 			$setup->{tracks_with_duplicate_inputs}->{$track->name})
