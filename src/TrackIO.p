@@ -351,49 +351,8 @@ sub jack_manual_port {
 	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
 }
 
-## rw_set() for managing bus-level REC/MON/PLAY/OFF settings
-## in response to user commands rec/mon/play/off affecting
-## the current track.
-
 {
 my %bus_logic = ( 
-	mix_track =>
-	{
-
-	# setting mix track to REC
-	
-		REC => sub
-		{
-			my ($bus, $track) = @_;
-			$track->set_rec;
-		},
-
-	# setting a mix track to PLAY
-	
-		PLAY => sub
-		{
-			my ($bus, $track) = @_;
-		$track->set_rw(PLAY);
-		},
-
-	# setting a mix track to MON
-	
-		MON => sub
-		{
-			my ($bus, $track) = @_;
-			$track->set_rw(MON);
-		},
-
-	# setting mix track to OFF
-	
-		OFF => sub
-		{
-			my ($bus, $track) = @_;
-
-			$track->set_rw(OFF);
-
-		}
-	},
 	member_track =>
 	{
 
@@ -432,17 +391,13 @@ my %bus_logic = (
 		},
 	},
 );
-# for track commands 'rec', 'mon','off' we 
-# may toggle rw state of the bus as well
-#
 
 sub rw_set {
 	my $track = shift;
 	logsub("&rw_set");
 	my ($bus, $rw) = @_;
-	my $type = $bn{$track->name} # should be $track->is_ mix_track
-		? 'mix_track'
-		: 'member_track';
+	$track->set_rec, return if $rw eq REC;
+	my $type = 'member_track';
 	$bus_logic{$type}{uc $rw}->($bus,$track);
 }
 sub wantme {
