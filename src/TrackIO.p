@@ -10,7 +10,12 @@ use ::Log qw(logpkg logsub);
 sub rec_status {
 #	logsub("&rec_status");
 	my $track = shift;
-	return $track->rw; # stop mental masturbation
+
+	return OFF 
+		if $track->rw eq OFF
+		or ($mode->doodle and ! $mode->eager and $track->rw eq REC and 
+			$setup->{tracks_with_duplicate_inputs}->{$track->name})
+		or ($track->engine_group ne $::this_engine->name );
 	
 	#my $source_id = $track->source_id;
 	my $playback_version = $track->playback_version;
@@ -27,46 +32,11 @@ sub rec_status {
 	# first, check for conditions resulting in status OFF
 
 	no warnings 'uninitialized';
-	if ( $bus->rw eq OFF
-		or $track->rw eq OFF
-		or $mode->doodle and ! $mode->eager and $track->rw eq REC and 
-			$setup->{tracks_with_duplicate_inputs}->{$track->name}
-		or $track->engine_group ne $::this_engine->name
-	){ 	return			  OFF }
 
-	# having reached here, we know $bus->rw and $track->rw are REC or PLAY
-	# so the result will be REC or PLAY if conditions are met
+	return REC if $track->{rw} eq REC;
+	return MON if $track->{rw} eq MON;
+	return maybe_monitor($playback_version) if $track->{rw} eq PLAY;
 
-	# second, set REC status if possible
-	
-	if( $track->rw eq REC){
-
-		my $source_type = $track->source_type;
-		if ($source_type eq 'track' or $source_type eq 'loop'){ return REC }
-		elsif ($source_type eq 'jack_client'){
-
-				# we expect an existing JACK client that
-				# *outputs* a signal for our track input
-				
-				::jack_client_array($track->source_id,'output')
-					?  return REC
-					:  return OFF
-			}
-		elsif ($source_type eq 'jack_manual'){ return REC }
-		elsif ($source_type eq 'jack_ports_list'){ return REC }
-		elsif ($source_type eq 'null')	{ return REC }
-		elsif ($source_type eq 'rtnull')	{ return REC }
-		elsif ($source_type eq 'soundcard'){ return REC }
-		elsif ($source_type eq 'bus')	{ return REC } # maybe $track->rw ??
-		else { return OFF }
-	}
-	elsif( $track->rw eq MON){ MON }
-
-	# set PLAY status if possible
-	
-	else { 			maybe_monitor($playback_version)
-
-	}
 }
 
 sub maybe_monitor { # ordinary sub, not object method
