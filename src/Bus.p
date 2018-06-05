@@ -213,9 +213,6 @@ sub wantme {
 }
 sub rw {
 	my $bus = shift;
-	my $mixtrack;
-	# ignored rw field, indicate bus status, which is
-	# controlled by whether it is used
 	$bus->wantme ? MON : OFF
 }
 }
