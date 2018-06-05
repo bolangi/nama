@@ -55,9 +55,9 @@ our %io_class = qw(
 	jack_multi_out			::IO::to_jack_multi
 	jack_client_in			::IO::from_jack_client
 	jack_client_out			::IO::to_jack_client
-	bus_in					::IO::from_bus_members
+	bus_in					::IO::from_bus
 	);
-    #bus_out					::IO::to_bus_members # 
+    #bus_out					::IO::to_bus # 
 
 ### class descriptions
 
@@ -531,12 +531,12 @@ sub route {
 }
 }
 {
-package ::IO::from_bus_members;
+package ::IO::from_bus;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my %vals = @_;
-	print "from_bus_members: ", ::Dumper \%vals;
+	print "from_bus: ", ::Dumper \%vals;
 	#$class->SUPER::new( %vals, device_id => "loop,$vals{endpoint}");
 }
 }
