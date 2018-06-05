@@ -286,19 +286,6 @@ sub set_rec {
 	}
 	$track->set_rw(REC);
 }
-sub set_play {
-	my $track = shift;
-	$track->set_rw(PLAY);
-}
-sub set_mon {
-	my $track = shift;
-	$track->set_rw(MON);
-}
-sub set_off {
-	my $track = shift;
-	$track->set_rw(OFF);
-}
-
 sub set_rw {
 	my ($track, $setting) = @_;
 	#my $already = $track->rw eq $setting ? " already" : "";
@@ -386,7 +373,7 @@ my %bus_logic = (
 		PLAY => sub
 		{
 			my ($bus, $track) = @_;
-			$track->set_play;
+		$track->set_rw(PLAY);
 		},
 
 	# setting a mix track to MON
@@ -394,7 +381,7 @@ my %bus_logic = (
 		MON => sub
 		{
 			my ($bus, $track) = @_;
-			$track->set_mon;
+			$track->set_rw(MON);
 		},
 
 	# setting mix track to OFF
@@ -403,7 +390,7 @@ my %bus_logic = (
 		{
 			my ($bus, $track) = @_;
 
-			$track->set_off;
+			$track->set_rw(OFF);
 
 		}
 	},
@@ -425,7 +412,7 @@ my %bus_logic = (
 		MON => sub
 		{ 
 			my ($bus, $track) = @_;
-			$track->set_mon;
+			$track->set_rw(MON);
 		},
 
 	# setting member track to PLAY
@@ -433,7 +420,7 @@ my %bus_logic = (
 		PLAY => sub
 		{ 
 			my ($bus, $track) = @_;
-			$track->set_play;
+			$track->set_rw(PLAY);
 
 		},
 	# setting member track to OFF 
@@ -441,7 +428,7 @@ my %bus_logic = (
 		OFF => sub
 		{
 			my ($bus, $track) = @_;
-			$track->set_off;
+			$track->set_rw(OFF);
 		},
 	},
 );
