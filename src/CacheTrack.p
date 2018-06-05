@@ -195,6 +195,15 @@ sub update_cache_map {
 		my @ops_list = @{$track->ops};
 		my @ops_remove_list = $track->user_ops;
 		
+		
+		# tag state if recording a bus
+		
+		my $msg = join " ","bus", $track->source_id, "cached as track", $track->name,"v".$track->last;
+		my $tagname = join "-", "bus", $track->source_id, qw(cached as), $track->current_wav;
+		say $tagname;
+		say $msg;
+		#git(tag => $tagname, '-a','-m',$msg);
+		
 		if ( @inserts_list or @ops_remove_list or $track->is_region or $track->is_mixing)
 		{
 			my %args = 
@@ -202,12 +211,12 @@ sub update_cache_map {
 				track_cache => 1,
 				track_name	=> $track->name,
 				track_version_original => $args->{orig_version},
-				source_commit => 0,
+				source_commit => $tagname,
 				project => 1,
 				system => 1,
 				ops_list => \@ops_list,
 				inserts_data => \@inserts_list,
-				is_mixing => $track->is_mixing,
+				is_mixing => $args->{is_mixing}
 				
 			);
 			$args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
@@ -215,11 +224,15 @@ sub update_cache_map {
 			# late, because this changes after removing target field
 			map{ delete $track->{$_} } qw(target);
 			$args{track_version_result} = $track->last,
-			# update track settings
+
 			my $ec = ::EffectChain->new( %args );
+
+			# update track settings
+			
 			map{ remove_effect($_) } @ops_remove_list;
 			map{ $_->remove        } @inserts_list;
 			map{ delete $track->{$_} } qw( region_start region_end target );
+
 
 		pagers(qq(Saving effects for cached track "). $track->name. '".');
 		pagers(qq('uncache' will restore effects and set version $args->{orig_version}\n));
