@@ -247,7 +247,7 @@ sub source_status {
 	my $track = shift;
 	no warnings 'uninitialized';
 	return $track->current_wav if $track->play ;
-	return $track->name . " bus" if $track->is_mixing;
+	return $track->source_id. " bus" if $track->source_type eq 'bus';
 	return $track->source_id unless $track->source_type eq 'soundcard';
 	my $ch = $track->source_id;
 	my @channels;
