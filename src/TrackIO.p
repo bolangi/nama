@@ -24,7 +24,6 @@ sub rec_status {
 	my $playback_version = $track->playback_version;
 
 	my $bus = $bn{$track->group};
-	#logpkg('debug', join " ", "bus:",$bus->name, $bus->rw);
 	{
 	no warnings 'uninitialized';
 	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, monitor version: $playback_version");
@@ -406,9 +405,6 @@ my %bus_logic = (
 
 			$track->set_off;
 
-			# with the mix track off, 
-			# the member tracks get pruned 
-			# from the graph 
 		}
 	},
 	member_track =>
@@ -422,14 +418,6 @@ my %bus_logic = (
 
 			$track->set_rec() or return;
 
-			$bus->set(rw => MON);
-			
-			# we assume the bus is connected to a track,
-			# so it's send_id field is the track name.
-			
-			$tn{$bus->send_id}->activate_bus 
-				if $bus->send_type eq 'track' and $tn{$bus->send_id};
-			
 		},
 
 	# setting member track to MON 
@@ -437,7 +425,6 @@ my %bus_logic = (
 		MON => sub
 		{ 
 			my ($bus, $track) = @_;
-			$bus->set(rw => MON) if $bus->rw eq 'OFF';
 			$track->set_mon;
 		},
 
@@ -446,7 +433,6 @@ my %bus_logic = (
 		PLAY => sub
 		{ 
 			my ($bus, $track) = @_;
-			$bus->set(rw => MON) if $bus->rw eq 'OFF';
 			$track->set_play;
 
 		},
