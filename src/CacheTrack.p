@@ -17,6 +17,11 @@ use ::Globals qw(:all);
 # orig_pan
 # is_mixing
 # source_commit
+#
+# We have two cases of tracks to cache
+# ordinary tracks
+# mix tracks (e.g. tracks whose source_type is 'bus')
+# for mix tracks create a slavetrack without effects and same name for recording
 
 sub cache_track { # launch subparts if conditions are met
 
