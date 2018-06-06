@@ -70,6 +70,11 @@ sub reactivate_vol_pan {
 	pan_back($args->{track});
 	vol_back($args->{track});
 }
+sub prepare_to_cache_bus {
+	my $args = shift;
+ 	my $g = ::ChainSetup::initialize();
+	$args->{graph} = $g;
+}
 
 sub prepare_to_cache {
 	my $args = shift;
@@ -119,8 +124,12 @@ sub prepare_to_cache {
 # 		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
 # 	}
 
-	# both
+	process_cache_graph($g);
 
+}
+
+sub process_cache_graph {
+	my $g = shift;
 	logpkg('debug', "The graph after bus routing:\n$g");
 	::ChainSetup::prune_graph();
 	logpkg('debug', "The graph after pruning:\n$g");
@@ -136,6 +145,7 @@ sub prepare_to_cache {
 	}
 	$success
 }
+
 sub cache_engine_run {
 	my $args = shift;
 	connect_transport()
