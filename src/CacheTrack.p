@@ -11,7 +11,6 @@ use ::Globals qw(:all);
 # additional_time
 # processing_time
 # orig_version
-# complete_caching_ref
 # output_wav
 # orig_volume
 # orig_pan
@@ -77,7 +76,6 @@ sub prepare_to_cache {
  	my $g = ::ChainSetup::initialize();
 	my $track = $args->{track};
 	$args->{orig_version} = $track->is_mixing ?  undef : $track->playback_version;
-	$args->{complete_caching_ref} = \&update_cache_map;
 
 	if(! $track->is_mixing)
 	{
@@ -186,7 +184,7 @@ sub complete_caching {
 	my @files = grep{/$name/} new_files_were_recorded();
 	if (@files ){ 
 		
-		$args->{complete_caching_ref}->($args) if defined $args->{complete_caching_ref};
+		update_cache_map($args);
 		post_cache_processing($args);
 
 	} else { throw("track cache operation failed!") }
