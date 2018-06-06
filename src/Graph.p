@@ -84,7 +84,7 @@ sub add_path_for_rec {
 		# set chain_id to R3 (if original track is 3) 
 
 		$g->set_edge_attributes(@edge, { 
-			chain_id => 'R'.$track->n,
+			chain_id => $track->n,
 		});
 		
 		# if this path is left unconnected, 
