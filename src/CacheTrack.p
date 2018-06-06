@@ -75,11 +75,7 @@ sub prepare_to_cache {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
 	
-	# Case 1, caching an ordinary track
-	if(! $args->{track}->is_mixing)
-	{}
-
-	$args->{orig_version} = $args->{track}->is_mixing ?  undef : $args->{track}->playback_version;
+	$args->{orig_version} = $args->{track}->playback_version;
 
 
 	#   We route the signal thusly:
