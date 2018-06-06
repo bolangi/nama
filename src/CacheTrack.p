@@ -109,22 +109,17 @@ sub prepare_to_cache {
 	); 
 	$args->{complete_caching_ref} = \&update_cache_map;
 
-	# Case 1: Caching a standard track
-	
-	if(! $args->{track}->is_mixing)
-	{
 		# set the input path
 		$g->add_path('wav_in',$args->{track}->name);
 		logpkg('debug', "The graph after setting input path:\n$g");
-	}
 
-	# Case 2: Caching a bus mix track
+# 	else {
+# 
+# 		# apply all buses (unneeded ones will be pruned)
+# 		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
+# 	}
 
-	else {
-
-		# apply all buses (unneeded ones will be pruned)
-		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
-	}
+	# both
 
 	logpkg('debug', "The graph after bus routing:\n$g");
 	::ChainSetup::prune_graph();
