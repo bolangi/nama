@@ -125,12 +125,21 @@ sub prepare_to_cache {
  		my $track_was_rw = $track->{rw};
  		$track->set( rw => OFF);	
 		
+		my $slavename = $track->name.".slave";
 		my $mix = ::SlaveTrack->new( 
-				name => $track->name.".slave",
+				name => $slavename,
 				target => $track->name,
 				group => 'Temp',
 				hide => 1,
 				rw => REC);
+	# set WAV output format
+	
+	$g->set_vertex_attributes(
+		$slavename, 
+		{ format => signal_format($config->{cache_to_disk_format},$track->width),
+			version => (1 + $this_track->last),
+		}
+	); 
  		# apply all buses, excluding Main, (unneeded ones will be pruned)
  		map{ $_->apply($g) } grep { $_->name ne 'Main' } grep{ (ref $_) =~ /Sub/ } ::Bus::all();
 	}
@@ -216,7 +225,7 @@ sub update_cache_map {
 		my $tagname = join "-", "bus", $track->source_id, qw(cached as), $track->current_wav;
 		say $tagname;
 		say $msg;
-		#git(tag => $tagname, '-a','-m',$msg);
+		git(tag => $tagname, '-a','-m',$msg);
 		
 		if ( @inserts_list or @ops_remove_list or $track->is_region or $track->is_mixing)
 		{
