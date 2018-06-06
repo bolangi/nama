@@ -75,10 +75,11 @@ sub reactivate_vol_pan {
 sub prepare_to_cache {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
-	$args->{orig_version} = $args->{track}->is_mixing ?  undef : $args->{track}->playback_version;
+	my $track = $args->{track};
+	$args->{orig_version} = $track->is_mixing ?  undef : $track->playback_version;
 	$args->{complete_caching_ref} = \&update_cache_map;
 
-	if(! $args->{track}->is_mixing)
+	if(! $track->is_mixing)
 	{
 
 	# Case 1: Caching a standard track
@@ -92,13 +93,13 @@ sub prepare_to_cache {
 	#     - increments track version by one
 	
 	my $cooked = ::CacheRecTrack->new(
-		name   => $args->{track}->name . '_cooked',
+		name   => $track->name . '_cooked',
 		group  => 'Temp',
-		target => $args->{track}->name,
+		target => $track->name,
 		hide   => 1,
 	);
 
-	$g->add_path($args->{track}->name, $cooked->name, 'wav_out');
+	$g->add_path($track->name, $cooked->name, 'wav_out');
 
 	# save the output file name
 	
@@ -114,7 +115,7 @@ sub prepare_to_cache {
 	); 
 	
 		# set the input path
-		$g->add_path('wav_in',$args->{track}->name);
+		$g->add_path('wav_in',$track->name);
 		logpkg('debug', "The graph after setting input path:\n$g");
 
 	}
@@ -122,9 +123,18 @@ sub prepare_to_cache {
 	# Case 2: Caching a bus mix track
 
 	else {
-
-		# apply all buses (unneeded ones will be pruned)
-		#map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
+		
+ 		my $track_was_rw = $track->{rw};
+ 		$track->set( rw => OFF);	
+		
+		my $mix = ::SlaveTrack->new( 
+				name => $track->name.".slave",
+				target => $track->name,
+				group => 'Temp',
+				hide => 1,
+				rw => REC);
+ 		# apply all buses, excluding Main, (unneeded ones will be pruned)
+ 		map{ $_->apply($g) } grep { $_->name ne 'Main' } grep{ (ref $_) =~ /Sub/ } ::Bus::all();
 	}
 
 	logpkg('debug', "The graph after bus routing:\n$g");
