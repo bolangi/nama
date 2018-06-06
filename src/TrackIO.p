@@ -10,7 +10,7 @@ use ::Log qw(logpkg logsub);
 sub wanted {
 	my $track = shift;
 	my $bus = $track->bus;
-	($bus and $bus->wantme) 
+	($bus and $bus->can('wantme') and $bus->wantme) 
 	or $track->wantme
 }
 
@@ -370,6 +370,7 @@ sub rw_set {
 }
 sub wantme {
 	my $track = shift;
+	no warnings 'uninitialized';
 	my @wantme = grep{ ($_->{rw} =~ /REC|MON/ ) 
 						and $_->source_type eq 'track' 
 						and $_->source_id eq $track->name } ::all_tracks();
