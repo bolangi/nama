@@ -74,6 +74,29 @@ sub prepare_to_cache_bus {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
 	$args->{graph} = $g;
+	my $track = $args->{track};
+	my $track_was_rw = $track->{rw};
+	$track->set( rw => OFF);	
+		
+	my $slavename = $track->name.".slave";
+	my $mix = ::SlaveTrack->new( 
+			name => $slavename,
+			target => $track->name,
+			group => 'Temp',
+			hide => 1,
+			rw => REC);
+
+	# set WAV output format
+	
+	$g->set_vertex_attributes(
+		$slavename, 
+		{ format => signal_format($config->{cache_to_disk_format},$track->width),
+			version => (1 + $this_track->last),
+		}
+	); 
+#  		# apply all buses, excluding Main, (unneeded ones will be pruned)
+#  		map{ $_->apply($g) } grep { $_->name ne 'Main' } grep{ (ref $_) =~ /Sub/ } ::Bus::all();
+# 	
 }
 
 sub prepare_to_cache {
