@@ -28,8 +28,10 @@ sub cache_track { # launch subparts if conditions are met
 	
 	pagers($track->name. ": preparing to cache ".  ($track->is_mixing ? 'a bus' : 'an ordinary track'));
 	
-	$track->rw =~ /PLAY|MON/ or throw(
-			$track->name. ": caching requires setting track to PLAY or MON. Aborting."), return;
+	$track->is_mixing and $track->rw ne MON and throw(
+			$track->name. ": caching a bus requires setting the mix track to MON. Aborting."), return;
+	! $track->is_mixing and $track->rw ne PLAY and throw(
+			$track->name. ": caching a regular track requires setting it to PLAY. Aborting."), return;
 	
 	if( $track->is_mixing){
 		my $bus = $bn{$track->name};
