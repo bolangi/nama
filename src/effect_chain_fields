@@ -24,4 +24,8 @@
 
 		class				# for restore
 
+###     Group 2 
 
+        is_mixing           # 
+
+		source_tag 			#  git commit at time of caching
