@@ -11,16 +11,10 @@ use ::Globals qw(:all);
 # additional_time
 # processing_time
 # orig_version
+# complete_caching_ref
 # output_wav
 # orig_volume
 # orig_pan
-# is_mixing
-# source_commit
-#
-# We have two cases of tracks to cache
-# ordinary tracks
-# mix tracks (e.g. tracks whose source_type is 'bus')
-# for mix tracks create a slavetrack without effects and same name for recording
 
 sub cache_track { # launch subparts if conditions are met
 
@@ -36,8 +30,9 @@ sub cache_track { # launch subparts if conditions are met
 	$track->play or $track->mon or throw(
 			$track->name. ": track caching requires PLAY or MON status. Aborting."), return;
 	
-	$args->{is_mixing}++ if $track->is_mixing;
-	
+	if( $track->is_mixing){
+		my $bus = $bn{$track->name};
+	} 
 	throw($track->name. ": nothing to cache!  Skipping."), return 
 		unless 	$track->is_mixing 
 				or $track->user_ops 
@@ -74,14 +69,9 @@ sub reactivate_vol_pan {
 sub prepare_to_cache {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
-	my $track = $args->{track};
-	$args->{orig_version} = $track->is_mixing ?  undef : $track->playback_version;
+	$args->{orig_version} = $args->{track}->is_mixing ?  undef : $args->{track}->playback_version;
 
-	if(! $track->is_mixing)
-	{
 
-	# Case 1: Caching a standard track
-	
 	#   We route the signal thusly:
 	#
 	#   Target track --> CacheRecTrack --> wav_out
@@ -91,15 +81,15 @@ sub prepare_to_cache {
 	#     - increments track version by one
 	
 	my $cooked = ::CacheRecTrack->new(
-		name   => $track->name . '_cooked',
+		name   => $args->{track}->name . '_cooked',
 		group  => 'Temp',
-		target => $track->name,
+		target => $args->{track}->name,
 		hide   => 1,
 	);
 
-	$g->add_path($track->name, $cooked->name, 'wav_out');
+	$g->add_path($args->{track}->name, $cooked->name, 'wav_out');
 
-	# save the output file name
+	# save the output file name to return later
 	
 	$args->{output_wav} = $cooked->current_wav;
 
@@ -111,37 +101,23 @@ sub prepare_to_cache {
 			version => (1 + $this_track->last),
 		}
 	); 
-	
-		# set the input path
-		$g->add_path('wav_in',$track->name);
-		logpkg('debug', "The graph after setting input path:\n$g");
+	$args->{complete_caching_ref} = \&update_cache_map;
 
+	# Case 1: Caching a standard track
+	
+	if(! $args->{track}->is_mixing)
+	{
+		# set the input path
+		$g->add_path('wav_in',$args->{track}->name);
+		logpkg('debug', "The graph after setting input path:\n$g");
 	}
 
 	# Case 2: Caching a bus mix track
 
 	else {
-		
- 		my $track_was_rw = $track->{rw};
- 		$track->set( rw => OFF);	
-		
-		my $slavename = $track->name.".slave";
-		my $mix = ::SlaveTrack->new( 
-				name => $slavename,
-				target => $track->name,
-				group => 'Temp',
-				hide => 1,
-				rw => REC);
-	# set WAV output format
-	
-	$g->set_vertex_attributes(
-		$slavename, 
-		{ format => signal_format($config->{cache_to_disk_format},$track->width),
-			version => (1 + $this_track->last),
-		}
-	); 
- 		# apply all buses, excluding Main, (unneeded ones will be pruned)
- 		map{ $_->apply($g) } grep { $_->name ne 'Main' } grep{ (ref $_) =~ /Sub/ } ::Bus::all();
+
+		# apply all buses (unneeded ones will be pruned)
+		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
 	}
 
 	logpkg('debug', "The graph after bus routing:\n$g");
@@ -161,17 +137,16 @@ sub prepare_to_cache {
 }
 sub cache_engine_run {
 	my $args = shift;
-	my $track = $args->{track};
 	connect_transport()
 		or throw("Couldn't connect engine! Aborting."), return;
 
 	# remove fades from target track
 	
-	::Effect::remove_op($track->fader) if defined $track->fader;
+	::Effect::remove_op($args->{track}->fader) if defined $args->{track}->fader;
 
 	$args->{processing_time} = $setup->{audio_length} + $args->{additional_time};
 
-	pagers($track->name.": processing time: ". d2($args->{processing_time}). " seconds");
+	pagers($args->{track}->name.": processing time: ". d2($args->{processing_time}). " seconds");
 	pagers("Starting cache operation. Please wait.");
 	
 	revise_prompt(" "); 
@@ -194,7 +169,7 @@ sub complete_caching {
 	my @files = grep{/$name/} new_files_were_recorded();
 	if (@files ){ 
 		
-		update_cache_map($args);
+		$args->{complete_caching_ref}->($args) if defined $args->{complete_caching_ref};
 		post_cache_processing($args);
 
 	} else { throw("track cache operation failed!") }
@@ -208,55 +183,40 @@ sub update_cache_map {
 				join "\n","cache map", 
 				map{($_->dump)} ::EffectChain::find(track_cache => 1)
 			});
-		my $track = $args->{track};
-		 
-		my $tagname;
+		my @inserts_list = ::Insert::get_inserts($args->{track}->name);
 
 		# include all ops, include vol/pan operators 
 		# which serve as placeholders, won't overwrite
 		# the track's current vol/pan operators
 
+		my $track = $args->{track};
+		 
 		my @ops_list = @{$track->ops};
 		my @ops_remove_list = $track->user_ops;
-		my @inserts_list = ::Insert::get_inserts($track->name);
 		
-		# tag state if recording a bus
-		
-		my $msg = join " ","bus", $track->source_id, "cached as track", $track->name,"v".$track->last;
-		$tagname = join "-", "bus", $track->source_id, qw(cached as), $track->current_wav;
-		say $tagname;
-		say $msg;
-		git(tag => $tagname, '-a','-m',$msg);
-		
-		if ( @inserts_list or @ops_remove_list or $track->is_region or $track->is_mixing)
+		if ( @inserts_list or @ops_remove_list or $track->is_region )
 		{
 			my %args = 
 			(
 				track_cache => 1,
 				track_name	=> $track->name,
 				track_version_original => $args->{orig_version},
-				source_commit => $tagname,
 				project => 1,
 				system => 1,
 				ops_list => \@ops_list,
 				inserts_data => \@inserts_list,
-				is_mixing => $args->{is_mixing}
-				
 			);
+			#	is_mixing => $track->is_mixing,
 			$args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
 			$args{track_target_original} = $track->target if $track->target; 
 			# late, because this changes after removing target field
 			map{ delete $track->{$_} } qw(target);
 			$args{track_version_result} = $track->last,
-
-			my $ec = ::EffectChain->new( %args );
-
 			# update track settings
-			
+			my $ec = ::EffectChain->new( %args );
 			map{ remove_effect($_) } @ops_remove_list;
 			map{ $_->remove        } @inserts_list;
 			map{ delete $track->{$_} } qw( region_start region_end target );
-
 
 		pagers(qq(Saving effects for cached track "). $track->name. '".');
 		pagers(qq('uncache' will restore effects and set version $args->{orig_version}\n));
