@@ -24,6 +24,7 @@ sub cache_track { # launch subparts if conditions are met
 	($track, $args->{additional_time}) = @_;
 	$args->{track} = $track;
 	$args->{additional_time} //= 0;
+	$args->{is_mixing}++ if $track->is_mixing;
 	
 	pagers($track->name. ": preparing to cache.");
 	
