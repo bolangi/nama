@@ -74,9 +74,9 @@ sub reactivate_vol_pan {
 sub prepare_to_cache {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
+	$args->{graph} = $g;
 	
 	$args->{orig_version} = $args->{track}->playback_version;
-
 
 	#   We route the signal thusly:
 	#
