@@ -186,8 +186,9 @@ sub initialize_mixer {
 			name => 'Mixdown', 
 			width => 2,
 			rw => OFF,
-			source_type => undef,
-			source_id => undef); 
+			source_type => 'track',
+			source_id => 'Main',
+			); 
 	$ui->create_master_and_mix_tracks();
 }
 
