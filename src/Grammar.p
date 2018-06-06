@@ -511,18 +511,17 @@ sub t_create_project {
 sub mixdown {
 	pager_newline("Enabling mixdown to file") if ! $quiet;
 	$tn{Mixdown}->set(rw => REC); 
+	$tn{Main}->set(rw => MON); 
 }
 sub mixplay { 
 	pager_newline("Setting mixdown playback mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => PLAY);
 	$tn{Main}->set(rw => OFF); 
-	$bn{Main}->set(rw => OFF);
 }
 sub mixoff { 
 	pager_newline("Leaving mixdown mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => OFF);
 	$tn{Main}->set(rw => MON); 
-	$bn{Main}->set(rw => MON);
 }
 sub remove_fade {
 	my $i = shift;
