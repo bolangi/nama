@@ -75,14 +75,17 @@ sub prepare_to_cache_bus {
  	my $g = ::ChainSetup::initialize();
 	$args->{graph} = $g;
 	my $track = $args->{track};
-	my $track_was_rw = $track->{rw};
+	$args->{track_rw} = $track->{rw};
+	$args->{main_rw} = $tn{Main}->{rw}; # XXX restore
+	$tn{Main}->set( rw => OFF);
 	$track->set( rw => OFF);	
 		
-	my $slavename = $track->name.".slave";
-	my $mix = ::SlaveTrack->new( 
+	my $slavename = $track->name.".cache";
+	my $mix = ::Track->new( 
 			name => $slavename,
-			target => $track->name,
-			group => 'Temp',
+			source_type => 'bus',
+			source_id	=>  $track->source_id,
+			group => 'Aux',
 			hide => 1,
 			rw => REC);
 
@@ -94,9 +97,11 @@ sub prepare_to_cache_bus {
 			version => (1 + $this_track->last),
 		}
 	); 
-#  		# apply all buses, excluding Main, (unneeded ones will be pruned)
-#  		map{ $_->apply($g) } grep { $_->name ne 'Main' } grep{ (ref $_) =~ /Sub/ } ::Bus::all();
-# 	
+	map{ $_->apply($g) } grep{ (ref $_) =~ /SubBus/ } ::Bus::all();
+
+# 	grep { $_->name ne 'Main' } 
+
+	process_cache_graph($g);
 }
 
 sub prepare_to_cache {
