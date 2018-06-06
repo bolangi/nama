@@ -161,16 +161,17 @@ sub prepare_to_cache {
 }
 sub cache_engine_run {
 	my $args = shift;
+	my $track = $args->{track};
 	connect_transport()
 		or throw("Couldn't connect engine! Aborting."), return;
 
 	# remove fades from target track
 	
-	::Effect::remove_op($args->{track}->fader) if defined $args->{track}->fader;
+	::Effect::remove_op($track->fader) if defined $track->fader;
 
 	$args->{processing_time} = $setup->{audio_length} + $args->{additional_time};
 
-	pagers($args->{track}->name.": processing time: ". d2($args->{processing_time}). " seconds");
+	pagers($track->name.": processing time: ". d2($args->{processing_time}). " seconds");
 	pagers("Starting cache operation. Please wait.");
 	
 	revise_prompt(" "); 
@@ -209,7 +210,7 @@ sub update_cache_map {
 			});
 		my $track = $args->{track};
 		 
-		my @inserts_list = ::Insert::get_inserts($track->name);
+		my $tagname;
 
 		# include all ops, include vol/pan operators 
 		# which serve as placeholders, won't overwrite
@@ -217,12 +218,12 @@ sub update_cache_map {
 
 		my @ops_list = @{$track->ops};
 		my @ops_remove_list = $track->user_ops;
-		
+		my @inserts_list = ::Insert::get_inserts($track->name);
 		
 		# tag state if recording a bus
 		
 		my $msg = join " ","bus", $track->source_id, "cached as track", $track->name,"v".$track->last;
-		my $tagname = join "-", "bus", $track->source_id, qw(cached as), $track->current_wav;
+		$tagname = join "-", "bus", $track->source_id, qw(cached as), $track->current_wav;
 		say $tagname;
 		say $msg;
 		git(tag => $tagname, '-a','-m',$msg);
