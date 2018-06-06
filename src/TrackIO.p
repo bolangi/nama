@@ -13,7 +13,10 @@ sub wanted {
 	($bus and $bus->can('wantme') and $bus->wantme) 
 	or $track->wantme
 }
-
+sub is_consumed {
+	my $track = shift;
+	$track->wanted or $track->send_type
+}
 
 sub rec_status {
 #	logsub("&rec_status");
@@ -29,7 +32,7 @@ sub rec_status {
 
 	return OFF 
 		if $track->rw eq OFF
-			or (not $track->wanted and not $track->send_type)
+			or (not $track->is_consumed)
 			or ($track->engine_group ne $::this_engine->name );
 
 	return MON if $track->{rw} eq MON;
