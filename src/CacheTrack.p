@@ -39,7 +39,13 @@ sub cache_track { # launch subparts if conditions are met
 				or $track->has_insert
 				or $track->is_region;
 
-	if ( prepare_to_cache($args) )
+	my $result;
+	if($track->is_mixing)
+	{ $result = prepare_to_cache_bus($args) }
+	else
+	{ $result = prepare_to_cache($args) }
+	
+	if ( $result )
 	{ 
 		deactivate_vol_pan($args);
 		cache_engine_run($args);
@@ -68,6 +74,11 @@ sub reactivate_vol_pan {
 sub prepare_to_cache {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
+	
+	# Case 1, caching an ordinary track
+	if(! $args->{track}->is_mixing)
+	{}
+
 	$args->{orig_version} = $args->{track}->is_mixing ?  undef : $args->{track}->playback_version;
 
 
