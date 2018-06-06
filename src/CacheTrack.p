@@ -33,15 +33,11 @@ sub cache_track { # launch subparts if conditions are met
 	! $track->is_mixing and $track->rw ne PLAY and throw(
 			$track->name. ": caching a regular track requires setting it to PLAY. Aborting."), return;
 	
-	if( $track->is_mixing){
-		my $bus = $bn{$track->name};
-	} 
 	throw($track->name. ": nothing to cache!  Skipping."), return 
-		unless 	$track->is_mixing 
+		unless $track->is_mixing 
 				or $track->user_ops 
 				or $track->has_insert
-				or $track->is_region
-				or $bn{$track->name};
+				or $track->is_region;
 
 	if ( prepare_to_cache($args) )
 	{ 
