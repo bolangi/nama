@@ -59,4 +59,9 @@ sub remove_system_version_comment {
 	delete $project->{track_version_comments}{$t->name}{$v}{system} if
 		$project->{track_version_comments}{$t->name}{$v}
 }
+sub system_version_comment {
+	my ($track, $v) = @_;
+	return unless $project->{track_version_comments}->{$track->name}{$v};
+	$project->{track_version_comments}->{$track->name}{$v}{system};
+}
 1;
