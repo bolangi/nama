@@ -188,6 +188,8 @@ sub initialize_mixer {
 			rw => OFF,
 			source_type => 'track',
 			source_id => 'Main',
+			send_type => 'soundcard',
+			send_id => 1,
 			); 
 	$ui->create_master_and_mix_tracks();
 }
