@@ -192,10 +192,12 @@ sub add_paths_from_Main {
 sub add_paths_for_mixdown_handling {
 	logsub("&add_paths_for_mixdown_handling");
 
+	my $final_leg_origin = $mode->mastering ? 'Boost' : 'Main';
+
 	if ($tn{Mixdown}->rec){
 		# don't monitor via soundcard
 		$g->delete_edge('Main','soundcard_out');
-		my @p = (($mode->mastering ? 'Boost' : 'Main'), ,'Mixdown', 'wav_out');
+		my @p = ($final_leg_origin, ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
 		  	format_template		=> $config->{mix_to_disk_format},
