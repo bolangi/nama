@@ -78,26 +78,18 @@ sub prepare_to_cache_bus {
 	$args->{track_rw} = $track->{rw};
 	$args->{main_rw} = $tn{Main}->{rw}; # XXX restore
 	$tn{Main}->set( rw => OFF);
-	$track->set( rw => OFF);	
+	$track->set( rw => REC);	
 		
-	my $slavename = $track->name.".cache";
-	my $mix = ::Track->new( 
-			name => $slavename,
-			source_type => 'bus',
-			source_id	=>  $track->source_id,
-			group => 'Aux',
-			hide => 1,
-			rw => REC);
-
 	# set WAV output format
 	
+	map{ $_->apply($g) } grep{ (ref $_) =~ /SubBus/ } ::Bus::all();
+
 	$g->set_vertex_attributes(
-		$slavename, 
+		$track->name, 
 		{ format => signal_format($config->{cache_to_disk_format},$track->width),
-			version => (1 + $this_track->last),
+			version => (1 + $track->last),
 		}
 	); 
-	map{ $_->apply($g) } grep{ (ref $_) =~ /SubBus/ } ::Bus::all();
 
 # 	grep { $_->name ne 'Main' } 
 
