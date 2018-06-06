@@ -194,7 +194,7 @@ sub add_paths_for_mixdown_handling {
 
 	my $final_leg_origin = $mode->mastering ? 'Boost' : 'Main';
 
-	if ($tn{Mixdown}->rec){
+	if ($tn{Mixdown}->rw eq REC ){
 		# don't monitor via soundcard
 		$g->delete_edge('Main','soundcard_out');
 		my @p = ($final_leg_origin, ,'Mixdown', 'wav_out');
@@ -207,7 +207,7 @@ sub add_paths_for_mixdown_handling {
 												 
 	# Mixdown handling - playback
 	
-	} elsif ($tn{Mixdown}->play){ 
+	} elsif ($tn{Mixdown}->rw eq PLAY){ 
 			my @e = ('wav_in','Mixdown',output_node($tn{Main}->send_type));
 			$g->add_path(@e);
 			$g->set_vertex_attributes('Mixdown', {
