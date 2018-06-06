@@ -7,42 +7,48 @@ use File::Copy;
 use ::Util qw(dest_string dest_type join_path freq);
 use ::Log qw(logpkg logsub);
 
+sub wanted {
+	my $track = shift;
+	my $bus = $track->bus;
+	($bus and $bus->wantme) 
+	or $track->wantme
+}
+
+
 sub rec_status {
 #	logsub("&rec_status");
 	my $track = shift;
 	my $bus = $track->bus;
 
+	return OFF if $track->{rw} eq REC 
+				and $mode->doodle 
+				and ! $mode->eager 
+				and $setup->{tracks_with_duplicate_inputs}->{$track->name} ;
+
+	return REC if $track->{rw} eq REC;
+
 	return OFF 
 		if $track->rw eq OFF
-		or (	not $track->{rw} eq REC 
-			and not ($bus and $bus->wantme) 
-			and not $track->wantme
-			and not $track->send_type)
-		
-		or ($mode->doodle and ! $mode->eager and $track->rw eq REC and 
-			$setup->{tracks_with_duplicate_inputs}->{$track->name})
-		or ($track->engine_group ne $::this_engine->name );
+			or (not $track->wanted and not $track->send_type)
+			or ($track->engine_group ne $::this_engine->name );
+
+	return MON if $track->{rw} eq MON;
 	
 	#my $source_id = $track->source_id;
-	my $playback_version = $track->playback_version;
+	my $v = $track->playback_version;
 
 	{
 	no warnings 'uninitialized';
-	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, monitor version: $playback_version");
+	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, playback version: $v");
 	}
-	#logpkg('debug', "track: ", $track->name, ", source: ",
-	#	$track->source_id, ", monitor version: $playback_version");
-
 	# first, check for conditions resulting in status OFF
 
 	no warnings 'uninitialized';
 
-	return REC if $track->{rw} eq REC;
-	return MON if $track->{rw} eq MON;
-	return maybe_monitor($track, $playback_version) if $track->{rw} eq PLAY;
+	return maybe_playback($track, $v) if $track->{rw} eq PLAY;
 
 }
-sub maybe_monitor { # ordinary sub, not object method
+sub maybe_playback { # ordinary sub, not object method
 	my ($track, $playback_version) = @_;
 	return PLAY if $track->targets->{$playback_version} and ! $mode->doodle;
 	return OFF;
