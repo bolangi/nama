@@ -10,11 +10,12 @@ use ::Log qw(logpkg logsub);
 sub rec_status {
 #	logsub("&rec_status");
 	my $track = shift;
+	my $bus = $track->bus;
 
 	return OFF 
 		if $track->rw eq OFF
 		or (	not $track->{rw} eq REC 
-			and not ($track->bus and $track->bus->wantme) 
+			and not ($bus and $bus->wantme) 
 			and not $track->wantme
 			and not $track->send_type)
 		
@@ -25,7 +26,6 @@ sub rec_status {
 	#my $source_id = $track->source_id;
 	my $playback_version = $track->playback_version;
 
-	my $bus = $bn{$track->group};
 	{
 	no warnings 'uninitialized';
 	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, monitor version: $playback_version");
@@ -39,15 +39,15 @@ sub rec_status {
 
 	return REC if $track->{rw} eq REC;
 	return MON if $track->{rw} eq MON;
-	return maybe_monitor($playback_version) if $track->{rw} eq PLAY;
+	return maybe_monitor($track, $playback_version) if $track->{rw} eq PLAY;
 
 }
-
 sub maybe_monitor { # ordinary sub, not object method
-	my $playback_version = shift;
-	return PLAY if $playback_version and ! $mode->doodle;
+	my ($track, $playback_version) = @_;
+	return PLAY if $track->targets->{$playback_version} and ! $mode->doodle;
 	return OFF;
 }
+
 
 sub rec_status_display {
 	my $track = shift;
