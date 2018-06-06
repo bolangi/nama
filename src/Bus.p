@@ -205,6 +205,7 @@ sub mixtrack {
 }
 sub wantme {
 	my $bus = shift;
+	no warnings 'uninitialized';
 	my @wantme = grep{ ($_->{rw} =~ /REC|MON/ ) and $_->source_type eq 'bus' and $_->source_id eq $bus->name }
 ::all_tracks();
 @wantme
