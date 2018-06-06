@@ -32,32 +32,32 @@ sub version_comment {
 	"$v: $text\n" if $text;
 }
 sub show_version_comments {
-	my ($t, @v) = @_;
+	my ($track, @v) = @_;
 	return unless @v;
-	::pager(map{ $t->version_comment($_) } @v);
+	::pager(map{ $track->version_comment($_) } @v);
 }
 sub add_version_comment {
-	my ($t,$v,$text) = @_;
-	$t->targets->{$v} or ::throw("$v: no such version"), return;	
-	$project->{track_version_comments}->{$t->name}{$v}{user} = $text;
-	$t->version_comment($v);
+	my ($track,$v,$text) = @_;
+	$track->targets->{$v} or ::throw("$v: no such version"), return;	
+	$project->{track_version_comments}->{$track->name}{$v}{user} = $text;
+	$track->version_comment($v);
 }
 sub add_system_version_comment {
-	my ($t,$v,$text) = @_;
-	$t->targets->{$v} or ::throw("$v: no such version"), return;	
-	$project->{track_version_comments}{$t->name}{$v}{system} = $text;
-	$t->version_comment($v);
+	my ($track,$v,$text) = @_;
+	$track->targets->{$v} or ::throw("$v: no such version"), return;	
+	$project->{track_version_comments}{$track->name}{$v}{system} = $text;
+	$track->version_comment($v);
 }
 sub remove_version_comment {
-	my ($t,$v) = @_;
-	$t->targets->{$v} or ::throw("$v: no such version"), return;	
-	delete $project->{track_version_comments}{$t->name}{$v}{user};
-	$t->version_comment($v) || "$v: [comment deleted]\n";
+	my ($track,$v) = @_;
+	$track->targets->{$v} or ::throw("$v: no such version"), return;	
+	delete $project->{track_version_comments}{$track->name}{$v}{user};
+	$track->version_comment($v) || "$v: [comment deleted]\n";
 }
 sub remove_system_version_comment {
-	my ($t,$v) = @_;
-	delete $project->{track_version_comments}{$t->name}{$v}{system} if
-		$project->{track_version_comments}{$t->name}{$v}
+	my ($track,$v) = @_;
+	delete $project->{track_version_comments}{$track->name}{$v}{system} if
+		$project->{track_version_comments}{$track->name}{$v}
 }
 sub system_version_comment {
 	my ($track, $v) = @_;
