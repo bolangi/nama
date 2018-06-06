@@ -118,12 +118,6 @@ sub prepare_to_cache {
 		$g->add_path('wav_in',$args->{track}->name);
 		logpkg('debug', "The graph after setting input path:\n$g");
 
-# 	else {
-# 
-# 		# apply all buses (unneeded ones will be pruned)
-# 		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
-# 	}
-
 	process_cache_graph($g);
 
 }
