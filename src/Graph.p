@@ -70,7 +70,7 @@ sub add_path_for_rec {
 			nopan => 1,
 			name => $name);
 
-		my @edge = ($anon->name, 'wav_out');
+		my @edge = ($track->name, 'wav_out');
 
 		$g->add_path(@edge); 
 
