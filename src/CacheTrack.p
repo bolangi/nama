@@ -71,7 +71,7 @@ sub prepare_to_cache_bus {
 	$args->{graph} = $g;
 	my $track = $args->{track};
 	$args->{track_rw} = $track->{rw};
-	$args->{main_rw} = $tn{Main}->{rw}; # XXX restore
+	$args->{main_rw} = $tn{Main}->{rw};
 	$tn{Main}->set( rw => OFF);
 	$track->set( rw => REC);	
 		
