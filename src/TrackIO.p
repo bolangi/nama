@@ -8,42 +8,32 @@ use ::Util qw(dest_string dest_type join_path freq);
 use ::Log qw(logpkg logsub);
 
 sub is_used {
-	my $track = shift;
-	my $bus = $track->bus;
-	$track->send_type 
-	or ($bus and $bus->can('wantme') and $bus->wantme) 
-	or $track->wantme
+	my $track = shift;      # Track is used if:
+	my $bus = $track->bus;  # 
+	$track->send_type       # It's sending its own signal
+	or $track->{rw} eq REC  # It's recording its own signal
+	or $track->wantme       # Another track needs my signal
+	or ($bus and $bus->can('wantme') and $bus->wantme)  # A bus needs my signal
 }
 sub rec_status {
 #	logsub("&rec_status");
 	my $track = shift;
 	my $bus = $track->bus;
 
-	return OFF if $track->{rw} eq REC 
-				and $mode->doodle 
-				and ! $mode->eager 
-				and $setup->{tracks_with_duplicate_inputs}->{$track->name} ;
+	return OFF if 	! $track->engine_group eq $::this_engine->name
+				or 	! $track->is_used
+				and ! ($mode->doodle and ! $mode->eager and $setup->{tracks_with_duplicate_inputs}->{$track->name} ); 
 
-	return REC if $track->{rw} eq REC;
+	return $track->{rw} if $track->{rw} ne PLAY;
 
-	return OFF 
-		if $track->rw eq OFF
-			or (not $track->is_used)
-			or ($track->engine_group ne $::this_engine->name );
-
-	return MON if $track->{rw} eq MON;
-	
-	#my $source_id = $track->source_id;
 	my $v = $track->playback_version;
 
 	{
 	no warnings 'uninitialized';
 	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, playback version: $v");
 	}
-	# first, check for conditions resulting in status OFF
 
 	no warnings 'uninitialized';
-
 	return maybe_playback($track, $v) if $track->{rw} eq PLAY;
 
 }
@@ -370,7 +360,7 @@ sub rw_set {
 sub wantme {
 	my $track = shift;
 	no warnings 'uninitialized';
-	my @wantme = grep{ ($_->rec or $_->mon) #{rw} =~ /REC|MON/ ) 
+	my @wantme = grep{ ($_->{rw} =~ /REC|MON/)
 						and $_->source_type eq 'track' 
 						and $_->source_id eq $track->name } ::all_tracks();
 @wantme
