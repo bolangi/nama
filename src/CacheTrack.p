@@ -261,19 +261,9 @@ sub update_cache_map_bus {
 
 	add_system_version_comment($track, $track->last, $msg);
 	pagers($msg); 
-	pagers(qq(Using the 'uncache' command with $track->{name} version $args->{track_version_result} 
-can will simply re-enable the bus. Consider that someone could
-have muted one of the tracks or made other changes affecting
-the bus output.  To guarantee getting back to the exact same
-state, you will need to change to branch $tagname. In that
-case,  you will need to be able to be comfortable dividing
-your audio engineering work using different branches for
-different buses, and then combining the intermediate mixdowns. If
-you go this approach, try to understand what you are doing
-so that your commits go on the branches you intend.
-Consider it may be difficult or impossible to merge or
-graft branches of a Nama project the way you expect to do with
-source code.))
+	pagers(qq(After caching a bus, there is no need for the 'uncache' 
+command. You can simply enable the bus by saying '$track->{name} mon'.
+The state of the project is also tagged as $tagname)) 
 }
 
 sub post_cache_processing {
