@@ -27,7 +27,7 @@ sub rec_cleanup {
 		}
 
 		if( grep /Mixdown/, @files) { mixdown_postprocessing() }
-		else { post_rec_configure() }
+		post_rec_configure()
 	}
 }
 sub mixdown_postprocessing {
