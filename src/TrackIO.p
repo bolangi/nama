@@ -246,11 +246,16 @@ sub source_status {
 	return $track->source_id. " bus" if $track->source_type eq 'bus';
 	return "track ".$track->source_id  if $track->source_type eq 'track';
 	return 'jack client '.$track->source_id if $track->source_type eq 'jack_client';
-	return $track->source_type. ' => '.$track->source_id unless $track->source_type eq 'soundcard';
-	my $ch = $track->source_id;
-	my @channels;
-	push @channels, $_ for $ch .. ($ch + $track->width - 1);
-	join '/', @channels
+	if($track->source_type eq 'soundcard')
+	{
+		my $ch = $track->source_id;
+		my @channels;
+		push @channels, $_ for $ch .. ($ch + $track->width - 1);
+		return join '/', @channels
+	}
+	"type: $track->{source_type} id: $track->{source_id}" 
+		if $track->{source_id} =~ /\S/
+		or $track->{source_type} =~ /\S/;
 }
 sub destination {
 	my $track = shift;
