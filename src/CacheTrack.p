@@ -77,6 +77,8 @@ sub prepare_to_cache_bus {
 		
 	# set WAV output format
 	
+	$args->{complete_caching_ref} = \&update_cache_map_bus;
+	
 	map{ $_->apply($g) } grep{ (ref $_) =~ /SubBus/ } ::Bus::all();
 
 	$g->set_vertex_attributes(
