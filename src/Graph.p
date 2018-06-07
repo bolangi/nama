@@ -80,18 +80,6 @@ sub add_path_for_rec {
 			chain_id => $track->n,
 		});
 		
-		# if this path is left unconnected, 
-		# i.e. track gets no input		
-		# it will be removed by prune_graph()
-		
-		# to record raw:
-		
-		# source_type: loop
-		# source_id:   loop,track_name_in
-
-		# but for WAV to contain content, 
-		# we need to guarantee that track_name has
-		# an input
 	}
 }
 sub add_path_for_aux_send {

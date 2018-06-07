@@ -47,7 +47,7 @@ our (
 sub remove_temporary_tracks {
 	logsub("&remove_temporary_tracks");
 	map { logpkg('debug',"removing temporary track ",$_->group.'/'.$_->name); $_->remove  } 
-		grep{ $_->group =~ /^(Temp|Aux)$/ } ::audio_tracks();
+		grep{ $_->group eq 'Temp' } ::audio_tracks();
 }
 sub initialize {
 
