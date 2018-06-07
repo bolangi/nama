@@ -13,35 +13,35 @@
 
 # create tracks
 #            3       4       5      6       7          8        9   10  11     12
-add_tracks Stereo L_front R_front Center Subwoofer L_inverted Right R-L L_rear R_rear
-add_bunch all Stereo L_front R_front Center Subwoofer L_inverted Right R-L L_rear R_rear
+add-tracks Stereo L_front R_front Center Subwoofer L_inverted Right R-L L_rear R_rear
+add-bunch all Stereo L_front R_front Center Subwoofer L_inverted Right R-L L_rear R_rear
 
 Stereo stereo
 
 # create a bus for summing (inverted L) + R
-add_bus R-L
+add-bus R-L
 
 # we'll do our own routing for these tracks
 
-Stereo move_to_bus Aux
-R-L    move_to_bus Aux
+Stereo move-to-bus Aux
+R-L    move-to-bus Aux
 
 # no recording to disk, remove volume and pan controls
 
-for all; mon; remove_fader_effect vol; remove_fader_effect pan
+for all; mon; remove-fader_effect vol; remove-fader_effect pan
 
 # feed six tracks the stereo source
 
 for L_front R_front Center Subwoofer L_inverted Right; source track Stereo
 
-# prepare sources for R-L ('afx' is an abbreviation for # 'add_effect')
+# prepare sources for R-L ('afx' is an abbreviation for # 'add-effect')
 
 L_inverted afx chmute 2; afx ea -100
 Right afx chmute 1
 
 # feed these two tracks to R-L
 
-for L_inverted Right; move_to_bus R-L
+for L_inverted Right; move-to-bus R-L
 
 # sum R-L source channels to mono
 
