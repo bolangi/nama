@@ -7,17 +7,13 @@ use File::Copy;
 use ::Util qw(dest_string dest_type join_path freq);
 use ::Log qw(logpkg logsub);
 
-sub wanted {
+sub is_used {
 	my $track = shift;
 	my $bus = $track->bus;
-	($bus and $bus->can('wantme') and $bus->wantme) 
+	$track->send_type 
+	or ($bus and $bus->can('wantme') and $bus->wantme) 
 	or $track->wantme
 }
-sub is_consumed {
-	my $track = shift;
-	$track->wanted or $track->send_type
-}
-
 sub rec_status {
 #	logsub("&rec_status");
 	my $track = shift;
@@ -32,7 +28,7 @@ sub rec_status {
 
 	return OFF 
 		if $track->rw eq OFF
-			or (not $track->is_consumed)
+			or (not $track->is_used)
 			or ($track->engine_group ne $::this_engine->name );
 
 	return MON if $track->{rw} eq MON;

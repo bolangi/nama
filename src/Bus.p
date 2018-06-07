@@ -209,7 +209,7 @@ sub wantme {
 	my @wantme = grep{ 	$_->{rw} =~ /REC|MON/ 
 					and $_->source_type eq 'bus' 
 					and $_->source_id eq $bus->name 
-					and $_->is_consumed 			} ::all_tracks();
+					and $_->is_used} ::all_tracks();
 	@wantme
 
 }
