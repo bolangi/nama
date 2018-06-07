@@ -258,12 +258,11 @@ sub update_cache_map_bus {
 	say $tagname;
 	say $msg;
 	git(tag => $tagname, '-a','-m',$msg);
-
 	add_system_version_comment($track, $track->last, $msg);
 	pagers($msg); 
-	pagers(qq(After caching a bus, there is no need for the 'uncache' 
-command. You can simply enable the bus by saying '$track->{name} mon'.
-The state of the project is also tagged as $tagname)) 
+	pagers(qq(To return this track to the state prior to caching the bus,
+enable the bus by saying '$track->{name} mon'. The state of
+the project is saved (tagged) as $tagname.));
 }
 
 sub post_cache_processing {
