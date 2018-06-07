@@ -260,9 +260,12 @@ sub update_cache_map_bus {
 	git(tag => $tagname, '-a','-m',$msg);
 	add_system_version_comment($track, $track->last, $msg);
 	pagers($msg); 
-	pagers(qq(To return this track to the state prior to caching the bus,
-enable the bus by saying '$track->{name} mon'. The state of
-the project is saved (tagged) as $tagname.));
+	pagers(qq(To return this track to the state prior to caching,
+simply say '$track->{name} mon'. This will enable the bus '$track->{source_id}' 
+that is set as as source for track '$track->{name}' The state of
+the project at the time of caching is saved (tagged) as $tagname,
+and is available through the Nama branch command as well as usual
+git utilities.));
 }
 
 sub post_cache_processing {
