@@ -17,12 +17,8 @@ sub add_path_for_rec {
 	my($g,$track) = @_;
 
 	logsub("&add_path_for_rec: track ".$track->name);
-	# Track input from a WAV, JACK client, or soundcard
-	# Record 'raw' signal
-	#
-	# Do *not* record signals if the source reports it is
-	# a track, bus or loop
 
+	# Case 1: Regular track
 	if( $track->source_type !~ /track|bus|loop/  and !  $track->is_mixing)
 	{
 		# create temporary track for rec_file chain
@@ -60,6 +56,7 @@ sub add_path_for_rec {
 		});
 
 	} 
+	# Case 2: Mix track
 	elsif ($track->source_type =~ /bus|track/ or $track->is_mixing) 
 	{
 
