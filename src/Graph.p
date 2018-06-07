@@ -60,9 +60,17 @@ sub add_path_for_rec {
 	elsif ($track->source_type =~ /bus|track/ or $track->is_mixing) 
 	{
 
-		# for tracks with identified (track|bus) input
+		my $name = $track->name . '_rec_file';
+		my $anon = ::SlaveTrack->new( 
+			target => $track->name,
+			rw => OFF,
+			group => 'Temp',
+			hide => 1,
+			novol => 1,
+			nopan => 1,
+			name => $name);
 
-		my @edge = ($track->name, 'wav_out'); # cooked signal
+		my @edge = ($anon->name, 'wav_out');
 
 		$g->add_path(@edge); 
 
