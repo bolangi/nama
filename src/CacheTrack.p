@@ -244,6 +244,23 @@ sub update_cache_map {
 		pagers(qq('uncache' will restore effects and set version $args->{orig_version}\n));
 		}
 }
+sub update_cache_map_bus {
+	my $args = shift;
+	my $track = $args->{track};
+
+	$args->{track_version_result} = $track->last;
+
+	# system version comment with git tag
+	# tag state, so we can go back with certainty
+	
+	my $tagname;
+	my $msg = join " ","bus", $track->source_id, "cached as track", $track->name,"v".$track->last;
+	$tagname = join "-", "bus", $track->source_id, qw(cached as), $track->current_wav;
+	say $tagname;
+	say $msg;
+	git(tag => $tagname, '-a','-m',$msg);
+
+}
 
 sub post_cache_processing {
 	my $args = shift;
