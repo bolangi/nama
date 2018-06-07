@@ -360,9 +360,10 @@ sub rw_set {
 sub wantme {
 	my $track = shift;
 	no warnings 'uninitialized';
-	my @wantme = grep{ ($_->{rw} =~ /REC|MON/)
-						and $_->source_type eq 'track' 
-						and $_->source_id eq $track->name } ::all_tracks();
+	my @wantme = grep{ $_->name ne $track->name
+						and $_->source_type eq 'track'
+						and $_->source_id eq $track->name 
+						and ($_->rec or $_->mon) } ::all_tracks();
 @wantme
 }
 1;
