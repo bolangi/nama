@@ -65,23 +65,11 @@ sub add_path_for_rec {
 
 		# for tracks with identified (track|bus) input
 
-		# cache_tracks/merge_edits has its own logic
-		# therefore these connections (triggered from
-		# generate_setup()) will not affect AFAIK
-		# any other recording scenario
-
-		# special case, record 'cooked' signal
-
-		# generally a bus 
-
-		# - receives a stereo input
-		# - mix track width is set to stereo (default)
-
 		my @edge = ($track->name, 'wav_out'); # cooked signal
 
 		$g->add_path(@edge); 
 
-		# set chain_id to R3 (if original track is 3) 
+		# set chain_id same as original track
 
 		$g->set_edge_attributes(@edge, { 
 			chain_id => $track->n,
