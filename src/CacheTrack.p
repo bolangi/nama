@@ -26,6 +26,10 @@ sub cache_track { # launch subparts if conditions are met
 	$args->{additional_time} //= 0;
 	$args->{is_mixing}++ if $track->is_mixing;
 	
+	$args->{track_rw} = $track->{rw};
+	$args->{main_rw} = $tn{Main}->{rw};
+	$tn{Main}->set( rw => OFF);
+	$track->set( rw => REC);	
 	pagers($track->name. ": preparing to cache ".  ($track->is_mixing ? 'a bus' : 'an ordinary track'));
 	
 	throw($track->name. ": nothing to cache!  Skipping."), return 
@@ -70,10 +74,6 @@ sub prepare_to_cache_bus {
  	my $g = ::ChainSetup::initialize();
 	$args->{graph} = $g;
 	my $track = $args->{track};
-	$args->{track_rw} = $track->{rw};
-	$args->{main_rw} = $tn{Main}->{rw};
-	$tn{Main}->set( rw => OFF);
-	$track->set( rw => REC);	
 		
 	# set WAV output format
 	
@@ -278,11 +278,9 @@ source code.))
 
 sub post_cache_processing {
 	my $args = shift;
-	if ($args->{is_mixing}){
 		$args->{track}->{rw} = $args->{track_rw};
 		$tn{Main}->{rw} = $args->{main_rw}; 
-	}
-		$args->{track}->set( rw => PLAY) if $args->{track}->is_mixing;
+		$args->{track}->set( rw => PLAY);
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
 		revise_prompt("default"); 
