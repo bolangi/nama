@@ -264,6 +264,10 @@ sub update_cache_map_bus {
 
 sub post_cache_processing {
 	my $args = shift;
+	if ($args->{is_mixing}){
+		$args->{track}->{rw} = $args->{track_rw};
+		$tn{Main}->{rw} = $args->{main_rw}; 
+	}
 		$args->{track}->set( rw => PLAY) if $args->{track}->is_mixing;
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
