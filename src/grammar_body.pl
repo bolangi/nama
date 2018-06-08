@@ -1381,8 +1381,8 @@ show_version_comments_all: _show_version_comments_all {
 	my @v = @{$t->versions};
 	$t->show_version_comments(@v); 1;
 }
-set_system_version_comment: _set_system_version_comment dd text {
-	::pager( ::set_system_version_comment($::this_track,@item{qw(dd text)}));1;
+add_system_version_comment: _add_system_version_comment dd text {
+	::pagers( $::this_track->add_system_version_comment(@item{qw(dd text)}));1;
 }
 new_edit: _new_edit {
 	::new_edit();

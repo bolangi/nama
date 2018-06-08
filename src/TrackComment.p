@@ -46,7 +46,7 @@ sub add_system_version_comment {
 	my ($track,$v,$text) = @_;
 	$track->targets->{$v} or ::throw("$v: no such version"), return;	
 	$project->{track_version_comments}{$track->name}{$v}{system} = $text;
-	$track->version_comment($v);
+	$track->system_version_comment($v);
 }
 sub remove_version_comment {
 	my ($track,$v) = @_;
