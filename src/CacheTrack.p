@@ -257,7 +257,7 @@ sub update_cache_map_bus {
 	say $tagname;
 	say $msg;
 	git(tag => $tagname, '-a','-m',$msg);
-	add_system_version_comment($track, $args->{cached_version}, $msg);
+	$track->add_system_version_comment($track, $args->{cached_version}, $msg);
 	pagers($msg); 
 	pagers(qq(To return this track to the state prior to caching,
 simply say '$track->{name} mon'. This will enable the bus '$track->{source_id}' 
