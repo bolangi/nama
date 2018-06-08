@@ -25,6 +25,8 @@ sub cache_track { # launch subparts if conditions are met
 	$args->{track} = $track;
 	$args->{additional_time} //= 0;
 	$args->{is_mixing}++ if $track->is_mixing;
+	$args->{orig_version} = $track->is_mixing ? 0 : $args->{track}->playback_version;
+	$args->{track_version_result} = $args->{orig_version} + 1;
 	
 	$args->{track_rw} = $track->{rw};
 	$args->{main_rw} = $tn{Main}->{rw};
@@ -44,7 +46,6 @@ sub cache_track { # launch subparts if conditions are met
 	else
 	{ $result = prepare_to_cache($args) }
 	
-	$args->{track_version_result} = $args->{orig_version} + 1;
 	{ no warnings 'uninitialized';
 	}
 	if ( $result )
@@ -101,8 +102,6 @@ sub prepare_to_cache {
  	my $g = ::ChainSetup::initialize();
 	$args->{graph} = $g;
 	
-	$args->{orig_version} = $args->{track}->playback_version;
-
 	#   We route the signal thusly:
 	#
 	#   Target track --> CacheRecTrack --> wav_out
