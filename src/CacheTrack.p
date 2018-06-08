@@ -44,6 +44,9 @@ sub cache_track { # launch subparts if conditions are met
 	else
 	{ $result = prepare_to_cache($args) }
 	
+	$args->{track_version_result} = $args->{orig_version} + 1;
+	{ no warnings 'uninitialized';
+	}
 	if ( $result )
 	{ 
 		deactivate_vol_pan($args);
@@ -233,7 +236,6 @@ sub update_cache_map {
 			$args{track_target_original} = $track->target if $track->target; 
 			# late, because this changes after removing target field
 			map{ delete $track->{$_} } qw(target);
-			$args{track_version_result} = $track->last,
 			# update track settings
 			my $ec = ::EffectChain->new( %args );
 			map{ remove_effect($_) } @ops_remove_list;
