@@ -10,7 +10,7 @@ use ::Globals qw(:all);
 # track
 # additional_time
 # processing_time
-# orig_version
+# original_version
 # complete_caching_ref
 # output_wav
 # orig_volume
@@ -25,8 +25,8 @@ sub cache_track { # launch subparts if conditions are met
 	$args->{track} = $track;
 	$args->{additional_time} //= 0;
 	$args->{is_mixing}++ if $track->is_mixing;
-	$args->{orig_version} = $track->is_mixing ? 0 : $args->{track}->playback_version;
-	$args->{track_version_result} = $args->{orig_version} + 1;
+	$args->{original_version} = $track->is_mixing ? 0 : $args->{track}->playback_version;
+	$args->{cached_version} = $args->{original_version} + 1;
 	
 	$args->{track_rw} = $track->{rw};
 	$args->{main_rw} = $tn{Main}->{rw};
@@ -224,7 +224,7 @@ sub update_cache_map {
 			(
 				track_cache => 1,
 				track_name	=> $track->name,
-				track_version_original => $args->{orig_version},
+				track_version_original => $args->{original_version},
 				project => 1,
 				system => 1,
 				ops_list => \@ops_list,
@@ -242,7 +242,7 @@ sub update_cache_map {
 			map{ delete $track->{$_} } qw( region_start region_end target );
 
 		pagers(qq(Saving effects for cached track "). $track->name. '".');
-		pagers(qq('uncache' will restore effects and set version $args->{orig_version}\n));
+		pagers(qq('uncache' will restore effects and set version $args->{original_version}\n));
 		}
 }
 sub update_cache_map_bus {
@@ -252,12 +252,12 @@ sub update_cache_map_bus {
 	# system version comment with git tag
 	
 	my $tagname;
-	my $msg = join " ","bus", $track->source_id, "cached as track", $track->name,"v$args->{track_version_result}";
+	my $msg = join " ","bus", $track->source_id, "cached as track", $track->name,"v$args->{cached_version}";
 	$tagname = join "-", "bus", $track->source_id, qw(cached as), $track->current_wav;
 	say $tagname;
 	say $msg;
 	git(tag => $tagname, '-a','-m',$msg);
-	add_system_version_comment($track, $args->{track_version_result}, $msg);
+	add_system_version_comment($track, $args->{cached_version}, $msg);
 	pagers($msg); 
 	pagers(qq(To return this track to the state prior to caching,
 simply say '$track->{name} mon'. This will enable the bus '$track->{source_id}' 
