@@ -88,7 +88,7 @@ sub prepare_to_cache_bus {
 	$g->set_vertex_attributes(
 		$track->name, 
 		{ format => signal_format($config->{cache_to_disk_format},$track->width),
-			version => (1 + $track->last),
+			version => ($args->{track_result_version}),
 		}
 	); 
 
@@ -248,8 +248,6 @@ sub update_cache_map {
 sub update_cache_map_bus {
 	my $args = shift;
 	my $track = $args->{track};
-
-	$args->{track_version_result} = $track->last;
 
 	# system version comment with git tag
 	
