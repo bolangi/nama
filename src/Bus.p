@@ -71,18 +71,6 @@ sub last {
 
 sub remove { ::throw($_[0]->name, " is system bus. No can remove.") }
 
-{ my %allows = (REC => 'REC/MON', MON => MON, OFF => 'OFF');
-sub allows { $allows{ $_[0]->rw } }
-## XX obsolete
-}
-{ my %forces = (
-		REC => 'REC (allows REC/MON)', 
-		MON => 'MON (forces REC to MON)', 
-		OFF => 'OFF (enforces OFF)'
- );
-sub forces { $forces{ $_[0]->rw } }
-}
-	
 ## class methods
 
 # all buses that have mutable state, and therefore reason to
@@ -104,7 +92,7 @@ sub settings_line {
 	return unless defined $mix;
 
 	my ($bustype) = $bus->class =~ /(\w+)$/;
-	my $line = join " ", $bustype ,$bus->name,"is",$bus->forces;
+	my $line = join " ", $bustype ,$bus->name;
 	$line   .= " Version setting".$bus->version if $bus->version;
 	#$line   .= "feeds", 
 	$line .= " Mix track is ". $mix->rw;
