@@ -252,12 +252,12 @@ sub update_cache_map_bus {
 	# system version comment with git tag
 	
 	my $tagname;
-	my $msg = join " ","bus", $track->source_id, "cached as track", $track->name,"v".$track->last;
+	my $msg = join " ","bus", $track->source_id, "cached as track", $track->name,"v$args->{track_version_result}";
 	$tagname = join "-", "bus", $track->source_id, qw(cached as), $track->current_wav;
 	say $tagname;
 	say $msg;
 	git(tag => $tagname, '-a','-m',$msg);
-	add_system_version_comment($track, $track->last, $msg);
+	add_system_version_comment($track, $args->{track_version_result}, $msg);
 	pagers($msg); 
 	pagers(qq(To return this track to the state prior to caching,
 simply say '$track->{name} mon'. This will enable the bus '$track->{source_id}' 
