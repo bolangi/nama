@@ -25,66 +25,79 @@ help => <<HELP,
    help <topic_name>       - list commands under <topic_name> (lower case)
 HELP
 
-project => <<PROJECT,
-   load-project, load        - load an existing project 
-   project-name, name        - show the current project name
-   create-project, create    - create a new project directory tree 
-   list-projects, lp         - list all Nama projects
-   get-state, get            - retrieve named file or tag
-   save-state, keep, save    - save state as file or tag
+project => <<'PROJECT',
+   load-project, load        - load an existing project, e.g 'load <project-name>'
+   create-project, create    - create a new project (usually under $HOME/nama/project-name/)
+   list-projects, lp         - list all projects
+   save <tagname>            - label current autosave(**) state as <tagname>
    exit, quit                - exit program, saving state 
 
- (Version control)
-
-   save                      - save, commit and tag with <tagname>
-   get                       - checkout tag <tagname> 
-                               or associated branch and load
-   branch, br                - switch to designated branch and load
-   list-branches, lbr        - list branches and tags (without arguments)
-   new-branch, nbr           - create a new branch starting at the current 
-                               commit or a specified commit 
-   tag                       - tag current commit with a name and optional 
-                               message
-   
+   ** saving project state is automatic, if git is available on your system **
 PROJECT
+
+version_control => <<VCS,
+   save <tagname>            - label current project state as <tagname>
+   get <tagname>             - checkout project state tagged with <tagname>
+   branch <tagname>          - switch to branch and load state
+   list-branches, lbr        - list branches and tags
+   new-branch, nbr           - create a new branch starting at the current 
+                               commit or a specified commit, e.g. 'nbr <tagname>'
+   tag                       - tag current commit with a name and optional message
+
+   ** note that <tagname> can be a branch, tag, commit id.  
+VCS
+   
 
 chain_setup => <<SETUP,
    show-setup, show          - show status, all tracks
    show-chain-setup, chains  - show Ecasound Setup.ecs file
-   arm                       - generate and connect chain setup (not usually necessary)
 
 SETUP
 
 track => <<TRACK,
+TRACK
 
-   add-track, add            -  create one or more new tracks
-                                example: add sax; r 3 
-                                    (record sax from input 3) 
-                                example: add piano; r synth
-                                    (record piano from JACK client "synth") 
+add_track => <<ADDTRACK,
+   add-track, add            -  Create a new track
+                                Example: add sax
+                                         source 3
+                                         rec
 
- - track status
+                                Does: Add a new track 'sax'. Use soundcard input 3
+                                as the signal source. Prepare to record the audio track as
+                                as a file (e.g. sax_1.wav) on engine start. 
 
-   rec                     -  set track to REC (record and monitor live signal source)
-   mon                     -  set track to MON (monitor live signal source)
-   play                    -  set track to PLAY (WAV file playback)
-   off                     -  set track OFF (omit from setup)
+                                Example: add piano; source synth; rec
+                                Does: Similar to above, record from JACK client "synth" 
+ADDTRACK
 
- - vol/pan 
+track_status => <<TRACKSTATUS,
 
-   pan, p                  -  get/set pan position
-   pan-back, pb            -  restore pan after pr/pl/pc  
-   pan-center, pc          -  set pan center    
-   pan-left, pl            -  pan track fully left    
-   pan-right, pr           -  pan track fully right    
-   unity                   -  unity volume    
-   vol, v                  -  get/set track volume    
-                              sax vol + 20 (increase by 20)
-                              sax vol - 20 (reduce by 20)
-                              sax vol * 3  (multiply by 3)
-                              sax vol / 2  (cut by half) 
-   mute, c, cut            -  mute volume 
+** Track status - set conditions for next engine run
+
+   rec                     -  REC: record and monitor audio source
+   mon                     -  MON: monitor audio source
+   play                    -  PLAY: queue .wav file for playback
+   off                     -  OFF: omit track from audio network
+TRACKSTATUS
+
+track_fader => <<TRACKFADER,
+** Track volume/pan fader controls can be used to change settings
+   for current track while engine is running or stopped
+
+   pan, p                   -  get/set pan position
+   pan-back, pb             -  restore pan after pr/pl/pc  
+   pan-center, pc           -  set pan center    
+   pan-left, pl             -  pan track fully left    
+   pan-right, pr            -  pan track fully right    
+   unity                    -  unity volume    
+                               Examples:
+                               vol 0   (set to level 0 dB, unity, 100%, 1x gain)
+   mute, c, cut             -  mute track volume 
    unmute, nomute, uncut, C -  restore muted volume
+TRACKFADER
+
+rest => <<REST,
 
    import-audio, import      - import a WAV file, resampling if necessary
 
@@ -191,7 +204,7 @@ track => <<TRACK,
 
    destroy-current-wav     - unlink current track's selected WAV version.
 
-TRACK
+REST
 
 transport => <<TRANSPORT,
    start, t, SPACE    -  Start processing. SPACE must be at beginning of 
