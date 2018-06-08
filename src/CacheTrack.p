@@ -18,10 +18,12 @@ use ::Globals qw(:all);
 
 sub cache_track { # launch subparts if conditions are met
 
+	my $args = {};
+	(my $track, $args->{additional_time}) = @_;
 	local $this_track;
-	my $args = {}; # initialize args
-	my $track;
-	($track, $args->{additional_time}) = @_;
+	throw("Set track to MON or PLAY"), return if $this_track->rw eq OFF 
+											and $this_track->is_mixer 
+											and $this_track->targets;
 	$args->{track} = $track;
 	$args->{additional_time} //= 0;
 	$args->{is_mixing}++ if $track->is_mixing;
