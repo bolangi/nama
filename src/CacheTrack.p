@@ -2,6 +2,7 @@
 package ::;
 use Modern::Perl;
 use Storable 'dclone';
+use Try::Tiny;
 use ::Globals qw(:all);
 
 # The $args hashref passed among the subroutines in this file
@@ -250,23 +251,18 @@ sub update_cache_map {
 sub update_cache_map_bus {
 	my $args = shift;
 	my $track = $args->{track};
+	my $filename = $track->targets->{$args->{cached_version}};
 
 	# system version comment with git tag
 	
-	my $tagname;
-	my $msg = join " ","bus", $track->source_id, "cached as track", $track->name,"v$args->{cached_version}";
-	$tagname = join "-", "bus", $track->source_id, qw(cached as), $track->current_wav;
-	say $tagname;
-	say $msg;
-	git(tag => $tagname, '-a','-m',$msg);
-	$track->add_system_version_comment($track, $args->{cached_version}, $msg);
+	my $tagname = my $msg = join " ","bus", $track->source_id, "cached as", $filename;
+	$tagname =~ s/ /-/g;
+	try{ git(tag => $tagname, '-a','-m',$msg) };
+	$track->add_system_version_comment($args->{cached_version}, $msg);
 	pagers($msg); 
 	pagers(qq(To return this track to the state prior to caching,
-simply say '$track->{name} mon'. This will enable the bus '$track->{source_id}' 
-that is set as as source for track '$track->{name}' The state of
-the project at the time of caching is saved (tagged) as $tagname,
-and is available through the Nama branch command as well as usual
-git utilities.));
+simply say '$track->{name} mon' The state of the project is saved 
+and available through the tag $tagname));
 }
 
 sub post_cache_processing {
