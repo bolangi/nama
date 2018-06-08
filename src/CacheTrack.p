@@ -21,9 +21,9 @@ sub cache_track { # launch subparts if conditions are met
 	my $args = {};
 	(my $track, $args->{additional_time}) = @_;
 	local $this_track;
-	throw("Set track to MON or PLAY"), return if $this_track->rw eq OFF 
-											and $this_track->is_mixer 
-											and $this_track->targets;
+	throw("Set track to MON or PLAY"), return if $track->rw eq OFF 
+											and $track->is_mixer 
+											and $track->targets;
 	$args->{track} = $track;
 	$args->{additional_time} //= 0;
 	$args->{is_mixing}++ if $track->is_mixing;
@@ -130,7 +130,7 @@ sub prepare_to_cache {
 	$g->set_vertex_attributes(
 		$cooked->name, 
 		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
-			version => (1 + $this_track->last),
+			version => ($args->{cached_version}),
 		}
 	); 
 	$args->{complete_caching_ref} = \&update_cache_map;
