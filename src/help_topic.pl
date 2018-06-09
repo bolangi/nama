@@ -64,14 +64,14 @@ track_basics => <<'TRACKBASICS',
     
                                 <SPACE> can also be used to start and stop engine
 
-					   Example: add piano; source synth; stereo; rec
+                       Example: add piano; source synth; stereo; rec
                        This line of commands prepares to record track piano in stereo 
                        width from JACK client "synth". Use of semicolons allow several 
                        commands in one line of input.
    
-   remove-track         - Remove effects, parameters and GUI for current track
-                          (.wav files are not removed by this operation
-                          and generally not removed by Nama.)
+   remove-track      - Remove effects, parameters and GUI for current track
+                       (.wav files are not removed by this operation
+                       and generally not removed by Nama.)
 
    import-audio, import - Import a .wav file, resampling if necessary
 TRACKBASICS
