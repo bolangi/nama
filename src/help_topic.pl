@@ -35,11 +35,6 @@ project => <<'PROJECT',
    ** saving project state is automatic, if git is available on your system **
 PROJECT
 
-chain_setup => <<'SETUP',
-   show-tracks, show        - show status, all tracks
-   chains                   - show Ecasound config file Setup.ecs
-SETUP
-
 track_basics => <<'TRACKBASICS',
 **  add-track, add    - Create a new track
 
@@ -70,12 +65,16 @@ TRACKBASICS
 
 track_status => <<'TRACKSTATUS',
 
-** Track status - set conditions for next engine run
+** Track status - prepare conditions for next engine run
 
-   rec                     -  REC: record and monitor audio source
-   mon                     -  MON: monitor audio source
-   play                    -  PLAY: queue .wav file for playback
-   off                     -  OFF: omit track from audio network
+   rec              -  REC: record and monitor audio source
+   mon              -  MON: monitor audio source
+   play             -  PLAY: queue .wav file for playback
+   off              -  OFF: omit track from audio network
+   show-tracks, show - show status, all tracks
+   show-track, sh   - show status of current track, including effects, versions, 
+                      modifiers, etc
+   chains           - show the audio network configuration
 TRACKSTATUS
 
 track_fader => <<'TRACKFADER',
@@ -95,15 +94,6 @@ track_fader => <<'TRACKFADER',
    solo                      -  mute all tracks but current track
    all, nosolo               -  return to pre-solo status
 TRACKFADER
-
-track_info => <<'TRACKINFO',
-   show-tracks, show, tracks -  show status of all tracks
-   show-track, sh            -  show status of current track,
-                                including effects, versions, 
-                                modifiers,  "sax sh"
-   show-bus-tracks, shb      -  show tracks of current bus
-   show-tracks-all showa sha - show all tracks, including hidden
-TRACKINFO
 
 track_io => <<'TRACKIO',
 Track inputs and outputs are set by source and send commands, which take similar arguments. 
@@ -147,17 +137,17 @@ Track inputs and outputs are set by source and send commands, which take similar
 TRACKIO
 
 wav_versions => <<'WAV_VERSIONS',
-.wav Versions
+** .WAV Versions
 
-Nama allows multiple 'takes' or audio files belonging to a track.  They are
-named after the track. For example, recording a track named 'piano' will
-produce files with names with names like piano_1.wav, piano_2.wav. Only one
-version can be selected. Setting version 0 (the default) means 'use the most recent
-(highest numbered) take.'
+Nama allows multiple versions of audio files belonging to a track, also
+referred to as 'takes'. The filenames follow the trackname, so that recording a
+track named 'piano' will produce files with names with names like piano_1.wav,
+piano_2.wav.  Setting version 0 (the default) means "select the most recent
+(highest numbered) take." Only one version can be selected to play at a time. 
 
-   set_version, version, n       -  set current track version
+   list-version, lv              - list version numbers of audio files for current track
+   set-version, version, n       -  select a version number for the current track
 
-   list_version, lv              - list version numbers of current track
 WAV_VERSIONS
 
 version_control => <<'VCS',
@@ -171,14 +161,6 @@ version_control => <<'VCS',
 
    ** note that <tagname> can be a branch, tag, commit id.  
 VCS
-
-modifiers => <<'MODIFIERS',
-Ecasound chain object modifiers
-
-   modifiers, mods, mod          - show or assign select/reverse/playat modifiers
-                                   for current track
-   nomodifiers, nomods, nomod    - remove all modifiers from current track
-MODIFIERS
 
 normalization => <<'NORMAL',
 Normalization
