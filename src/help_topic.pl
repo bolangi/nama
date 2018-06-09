@@ -55,23 +55,25 @@ chain_setup => <<SETUP,
 SETUP
 
 track_basics => <<'TRACKBASICS',
-   add-track, add            -  Create a new track
-                                Example: add sax
-                                         source 3
-                                         rec
+   add-track, add    - Create a new track
+                       Example: add sax   # Add a new track 'sax'
+                                source 3  # Use soundcard channel 3 as input
+                                rec       # Arm for recording audio file (e.g. sax_1.wav)
+                                start     # begin recording
+                                stop      # stop recording, close file and queue for playback
+    
+                                <SPACE> can also be used to start and stop engine
 
-                                Does: Add a new track 'sax'. Use soundcard input 3
-                                as the signal source. Prepare to record the audio track as
-                                as a file (e.g. sax_1.wav) on engine start. 
-
-                                Example: add piano; source synth; stereo; rec
-                                Does: Similar to above, records stereo width audio 
-                                from JACK client "synth". 
+					   Example: add piano; source synth; stereo; rec
+                       This line of commands prepares to record track piano in stereo 
+                       width from JACK client "synth". Use of semicolons allow several 
+                       commands in one line of input.
    
-   remove-track              - Remove effects, parameters and GUI for current track.
-                               .wav files are retained.
+   remove-track         - Remove effects, parameters and GUI for current track
+                          (.wav files are not removed by this operation
+                          and generally not removed by Nama.)
 
-   import-audio, import      - Import a .wav file, resampling if necessary
+   import-audio, import - Import a .wav file, resampling if necessary
 TRACKBASICS
 
 track_status => <<'TRACKSTATUS',
