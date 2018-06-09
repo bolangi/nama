@@ -95,7 +95,7 @@ Setting version 0 (the default) means "select the most recent
    set-version, version, n       -  select a version number for the current track
 
 Note that once .wav files are recorded, they are considered permanent
-project resources, therefore can lie outside of version control.
+project resources, and are stored outside of version control.
 
 WAV_VERSIONS
 
