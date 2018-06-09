@@ -177,6 +177,8 @@ track_fader => <<'TRACKFADER',
 TRACKFADER
 
 marks => <<MARKS,
+** Marks - use them to indicate positions in the timeline.
+
    new-mark,      mark, k     - drop mark at current position, with optional name
    list-marks,    lmk,  lm    - list marks showing index, time, name
    next-mark,     nmk,  nm    - jump to next mark 
@@ -186,7 +188,15 @@ marks => <<MARKS,
    remove-mark,   rmk,  rom   - remove current mark
    modify-mark, move-mark, 
     mmk, mm                   - change the time setting of current mark
-MARKS
+
+Notes: 
+
+Marks belong to the overall timeline, not to a particular track.  At present,
+they do not move when a track is time-shifted.
+
+Many commands that can take time positions as as arguments can also take mark
+names. This has the advantage that the time of effect will change when the mark
+is adjusted.  MARKS
 
 
 time_shifting => <<'TIME_SHIFTING',
