@@ -32,7 +32,8 @@ project => <<'PROJECT',
    save <tagname>            - label current autosave(**) state as <tagname>
    exit, quit                - exit program, saving state 
 
-   ** saving project state is automatic, if git is available on your system **
+   ** saving project state is automatic, if git is available on your system 
+      however you must still backup audio files and other project files.
 PROJECT
 
 track_basics => <<'TRACKBASICS',
@@ -134,66 +135,30 @@ Track inputs and outputs are set by source and send commands, which take similar
    send, out, m, aux         -  Create an auxiliary send
                                 Same arguments as 'source'.
                                 One send is allowed per track.
+
+   Sends are not necessary to set up as most tracks are part
+   of a bus that directs output to the soundcard. 
 TRACKIO
 
 wav_versions => <<'WAV_VERSIONS',
 ** .WAV Versions
 
 Nama allows multiple versions of audio files belonging to a track, also
-referred to as 'takes'. The filenames follow the trackname, so that recording a
-track named 'piano' will produce files with names with names like piano_1.wav,
-piano_2.wav.  Setting version 0 (the default) means "select the most recent
+referred to as 'takes'. 
+
+The filenames follow the trackname, so that recording a track named 'piano'
+will produce files with names with names like piano_1.wav, piano_2.wav.  
+
+Setting version 0 (the default) means "select the most recent
 (highest numbered) take." Only one version can be selected to play at a time. 
 
    list-version, lv              - list version numbers of audio files for current track
    set-version, version, n       -  select a version number for the current track
 
+Note that once .wav files are recorded, they are considered permanent
+project resources, therefore can lie outside of version control.
+
 WAV_VERSIONS
-
-version_control => <<'VCS',
-   save <tagname>            - label current project state as <tagname>
-   get <tagname>             - checkout project state tagged with <tagname>
-   branch <tagname>          - switch to branch and load state
-   list-branches, lbr        - list branches and tags
-   new-branch, nbr           - create a new branch starting at the current 
-                               commit or a specified commit, e.g. 'nbr <tagname>'
-   tag                       - tag current commit with a name and optional message
-
-   ** note that <tagname> can be a branch, tag, commit id.  
-VCS
-
-normalization => <<'NORMAL',
-Normalization
-
-   ecanormalize, normalize, norm 
-                           - run ecanormalize on current track version
-   ecafixdc, fixdc         - run ecafixdc on current track version
-   autofix-tracks, autofix - fixdc and normalize selected versions of all PLAY
-NORMAL
-
-time_shifting => <<'TIME_SHIFTING',
-Regions and time shifting
-
-   set-region,    srg      - specify a track region using times or mark names
-   add-region,    arg      - define a region creating an auxiliary track
-   remove-region, rrg      - remove auxiliary track or region definition
-   shift-track,   shift    - set playback delay for track/region
-   unshift-track, unshift  - eliminate playback delay for track/region
-TIME_SHIFTING
-
-track_caching => <<'CACHING',
-Track caching (freezing)
-
-   cache                       - cache the output of a track or bus as a .wav file
-   uncache                     - restore effects and settings prior to cache operation
-CACHING
-
-advanced => <<'ADVANCED',
-
-   set-track               - directly set current track parameters
-
-   destroy-current-wav     - unlink current track's selected WAV version.
-ADVANCED
 
 transport => <<TRANSPORT,
    start, t, SPACE    -  Start processing. SPACE must be at beginning of 
@@ -207,19 +172,7 @@ transport => <<TRANSPORT,
    to-start, beg      - set playback head to start
    to-end, end        - set playback head to end
 
-   loop-enable, loop  -  loop playback between two points
-                         example: loop 5.0 200.0 (positions in seconds)
-                         example: loop start end (mark names or numbers)
-   loop-disable, noloop, nl
-                      -  disable looping
-
-   preview            -  start engine with WAV recording disabled
-                         (for mic check, etc.) Release with 'arm'.
-
-   doodle             -  Like preview, with WAV playback also disabled
-                         Release with 'arm'.
 TRANSPORT
-
 marks => <<MARKS,
    new-mark,      mark, k     - drop mark at current position, with optional name
    list-marks,    lmk,  lm    - list marks showing index, time, name
@@ -231,6 +184,72 @@ marks => <<MARKS,
    modify-mark, move-mark, 
     mmk, mm                   - change the time setting of current mark
 MARKS
+
+
+time_shifting => <<'TIME_SHIFTING',
+Regions and time shifting
+
+   set-region,    srg      - specify a track region using times or mark names
+   add-region,    arg      - define a region creating an auxiliary track
+   remove-region, rrg      - remove auxiliary track or region definition
+   shift-track,   shift    - set playback delay for track/region
+   unshift-track, unshift  - eliminate playback delay for track/region
+TIME_SHIFTING
+
+normalization => <<'NORMAL',
+Normalization
+
+   ecanormalize, normalize, norm 
+                           - run ecanormalize on current track version
+   ecafixdc, fixdc         - run ecafixdc on current track version
+   autofix-tracks, autofix - fixdc and normalize selected versions of all PLAY
+NORMAL
+
+track_caching => <<'CACHING',
+Track caching (freezing) - render effects to a new .wav file to fix a result and save cpu
+
+   cache                       - cache the output of a track or bus as a .wav file
+   uncache                     - restore effects and settings prior to cache operation
+CACHING
+
+advanced => <<'ADVANCED',
+
+   set-track               - directly set current track parameters
+
+   destroy-current-wav     - unlink current track's selected WAV version.
+ADVANCED
+
+advanced_transport => <<'ADVANCED_TRANSPORT',
+   loop-enable, loop  -  loop playback between two points
+                         example: loop 5.0 200.0 (positions in seconds)
+                         example: loop start end (mark names or numbers)
+   loop-disable, noloop, nl
+                      -  disable looping
+
+   preview            -  start engine with WAV recording disabled
+                         (for mic check, etc.) Release with 'arm'.
+
+   doodle             -  Like preview, with WAV playback also disabled
+                         Release with 'arm'.
+ADVANCED_TRANSPORT
+
+version_control => <<'VCS',
+** Version control 
+
+Nama uses git to save project state as a series of commits, a new commit after
+each command. It is easy to tag a commit as a way of documenting
+developments in a projects. 
+
+   save <tagname>            - label current project state as <tagname>
+   get <tagname>             - checkout project state tagged with <tagname>
+   branch <tagname>          - switch to branch and load state
+   list-branches, lbr        - list branches and tags
+   new-branch, nbr           - create a new branch starting at the current 
+                               commit or a specified commit, e.g. 'nbr <tagname>'
+   tag                       - tag current commit with a name and optional message
+
+   ** note that <tagname> can be a branch, tag, commit id.  
+VCS
 
 effect_info => <<'EFFECT_INFO',
     
