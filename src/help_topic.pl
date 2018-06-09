@@ -244,9 +244,9 @@ marks => <<MARKS,
     mmk, mm                   - change the time setting of current mark
 MARKS
 
-effects => <<EFFECTS,
+effect_info => <<'EFFECT_INFO',
     
- - information commands
+** Information commands
 
    ladspa-register, lrg       - list LADSPA effects
    preset-register, prg       - list Ecasound presets
@@ -258,26 +258,43 @@ effects => <<EFFECTS,
                                   (information about LADSPA plugin 1209)
                                 example: help-effect valve
                                   (information about LADSPA plugin valve)
+EFFECT_INFO
 
- - effect manipulation commands
+effect_manipulation => <<'EFFECT_DO',
+** Effect manipulation commands - type 'h <command>' for details
 
-   add-effect,     afx        - add an effect to the current track
-   add-controller, acl        - add an Ecasound controller
-   insert-effect,  ifx        - insert an effect before another effect
-   modify-effect,  mfx        - set, increment or decrement effect parameter
-   remove-effect,  rfx        - remove an effect or controller
-   append-effect, apfx        - add effect to the end of current track effect list 
+Note: Parameters are always separated by spaces
+
+   add-effect,     afx           - add an effect to the current track
+                                   Example: afx ea 50
+   add-controller, acl           - add an Ecasound controller to the parameter
+                                   of an effect  
+   insert-effect,  ifx           - insert an effect before another effect
+   modify-effect,  mfx           - set, increment or decrement effect parameter
+   remove-effect,  rfx           - remove an effect or controller
+   append-effect,  apfx          - add effect to the end of current track effect list 
    bypass-effects, bypass, bye   - suspend current track effects except vol/pan
    restore-effects, restore, ref - restore track effects
+EFFECT_DO
 
--  send/receive inserts
+inserts => <<'INSERTS',
+
+Patch the input to a track through an external effect,
+such as a JACK client, or an analog fx box hooked to
+your soundcard. 
 
    add-insert,         ain    - add an insert to current track
    remove-insert,      rin    - remove an insert from current track
    set-insert-wetness, wet    - set/query insert wetness 
                                 example: wet 99 (99% wet, 1% dry)
+INSERTS
 
--  effect chains (presets, each consisting of multiple effects)
+effect_chains => <<'EFFECT_CHAINS',
+
+Effect chains are presets that can consist of multiple effects. They are a
+convenient way to save by name sequences of effects with the parameters that
+you commonly use. You make an effect chain by saving effects from the current
+track. 
 
    find-effect-chains,     fec   - find all effect chains (filtering on key/value pairs, if supplied)
    find-user-effect-chains,fuec  - find all user-defined effect chains, filtering as above
@@ -285,8 +302,14 @@ effects => <<EFFECTS,
    overwrite-effect-chain, oec   - as above, but overwite existing definition
    add-effect-chain,       aec   - add an effect chain to the current track
    delete-effect-chain,    dec   - delete an effect chain definition
+EFFECT_CHAINS
 
--  effect profiles (effect chains for a group of tracks)
+effect_profiles => <<'EFFECT_PROFILES',
+Effect profiles (effect chains for a group of tracks)
+
+An effect profile is a group of effect chains, saved with the tracks that
+configure them. It is a convenient way to share parts of a project among other
+projects. 
 
    new-effect-profile, nep       - define a new effect profile
    apply-effect-profile, aep     - apply an effect profile
@@ -294,8 +317,7 @@ effects => <<EFFECTS,
    overlay-effect-profile, oep   - apply an effect profile,
                                    adding to current effects
    delete-effect-profile, dep    - delete an effect profile definition
-
-EFFECTS
+EFFECT_PROFILES
 
 group => <<GROUP,
    new-bunch, bunch, nb       - name a bunch of tracks
