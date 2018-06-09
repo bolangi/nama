@@ -165,7 +165,7 @@ track_fader => <<'TRACKFADER',
    pan-right, pr            -  pan track fully right    
    volume, vol              -  set or adjust track volume (in dB, 0 dB is unity gain)
                                Examples:
-							   vol 0  (set level to 0 dB, unity, 100%, 1x gain)
+                               vol 0  (set level to 0 dB, unity, 100%, 1x gain)
                                vol -20 (set level to -20 dB)
                                vol - 3 (reduce vol by 3 dB) 
                                       
