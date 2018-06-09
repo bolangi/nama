@@ -39,14 +39,14 @@ PROJECT
 track_basics => <<'TRACKBASICS',
 **  add-track, add    - Create a new track
 
-    Example: add sax    # Add a new track 'sax', 
-                        # sax is selected, and receives following messages
+    Example: add sax    # Add a new track 'sax'.
+                        # sax is selected, and receives following messages:
              source 3   # Use soundcard channel 3 as input
              rec        # Arm for recording an audio file (e.g. sax_1.wav)
              start      # engine start, begin recording
              stop       # engine stop, close file and queue for playback
    
-             <SPACE> can also be used to start and stop engine
+             <SPACE> can also be used at the prompt to start and stop engine
 
     Example: add piano; source synth; stereo; rec
 
@@ -77,24 +77,6 @@ track_status => <<'TRACKSTATUS',
                       modifiers, etc
    chains           - show the audio network configuration
 TRACKSTATUS
-
-track_fader => <<'TRACKFADER',
-** Track volume/pan fader controls can be used to change settings
-   for current track while engine is running or stopped
-
-   pan, p                   -  get/set pan position
-   pan-back, pb             -  restore pan after pr/pl/pc  
-   pan-center, pc           -  set pan center    
-   pan-left, pl             -  pan track fully left    
-   pan-right, pr            -  pan track fully right    
-   unity                    -  unity volume    
-                               Examples:
-                               vol 0   (set to level 0 dB, unity, 100%, 1x gain)
-   mute, c, cut             -  mute track volume 
-   unmute, nomute, uncut, C -  restore muted volume
-   solo                      -  mute all tracks but current track
-   all, nosolo               -  return to pre-solo status
-TRACKFADER
 
 track_io => <<'TRACKIO',
 Track inputs and outputs are set by source and send commands, which take similar arguments. 
@@ -137,7 +119,7 @@ Track inputs and outputs are set by source and send commands, which take similar
                                 One send is allowed per track.
 
    Sends are not necessary to set up as most tracks are part
-   of a bus that directs output to the soundcard. 
+   of a bus that routes the audio output. 
 TRACKIO
 
 wav_versions => <<'WAV_VERSIONS',
@@ -171,8 +153,29 @@ transport => <<TRANSPORT,
    getpos, gp         -  Get the current head position 
    to-start, beg      - set playback head to start
    to-end, end        - set playback head to end
-
 TRANSPORT
+track_fader => <<'TRACKFADER',
+** Track volume/pan fader controls can be used to change settings
+   for current track while engine is running or stopped
+
+   pan, p                   -  get/set pan position
+   pan-back, pb             -  restore pan after pr/pl/pc  
+   pan-center, pc           -  set pan center    
+   pan-left, pl             -  pan track fully left    
+   pan-right, pr            -  pan track fully right    
+   volume, vol              -  set or adjust track volume (in dB, 0 dB is unity gain)
+                               Examples:
+							   vol 0  (set level to 0 dB, unity, 100%, 1x gain)
+                               vol -20 (set level to -20 dB)
+                               vol - 3 (reduce vol by 3 dB) 
+                                      
+   unity                    -  set volume gain to unity
+   mute, c, cut             -  mute track volume 
+   unmute, nomute, uncut, C -  restore muted volume
+   solo                      -  mute all tracks but current track
+   all, nosolo               -  return to pre-solo status
+TRACKFADER
+
 marks => <<MARKS,
    new-mark,      mark, k     - drop mark at current position, with optional name
    list-marks,    lmk,  lm    - list marks showing index, time, name
