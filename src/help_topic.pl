@@ -35,45 +35,37 @@ project => <<'PROJECT',
    ** saving project state is automatic, if git is available on your system **
 PROJECT
 
-version_control => <<VCS,
-   save <tagname>            - label current project state as <tagname>
-   get <tagname>             - checkout project state tagged with <tagname>
-   branch <tagname>          - switch to branch and load state
-   list-branches, lbr        - list branches and tags
-   new-branch, nbr           - create a new branch starting at the current 
-                               commit or a specified commit, e.g. 'nbr <tagname>'
-   tag                       - tag current commit with a name and optional message
-
-   ** note that <tagname> can be a branch, tag, commit id.  
-VCS
-   
-
-chain_setup => <<SETUP,
-   show-setup, show          - show status, all tracks
-   show-chain-setup, chains  - show Ecasound Setup.ecs file
-
+chain_setup => <<'SETUP',
+   show-tracks, show        - show status, all tracks
+   chains                   - show Ecasound config file Setup.ecs
 SETUP
 
 track_basics => <<'TRACKBASICS',
-   add-track, add    - Create a new track
-                       Example: add sax   # Add a new track 'sax'
-                                source 3  # Use soundcard channel 3 as input
-                                rec       # Arm for recording audio file (e.g. sax_1.wav)
-                                start     # begin recording
-                                stop      # stop recording, close file and queue for playback
-    
-                                <SPACE> can also be used to start and stop engine
+**  add-track, add    - Create a new track
 
-                       Example: add piano; source synth; stereo; rec
-                       This line of commands prepares to record track piano in stereo 
-                       width from JACK client "synth". Use of semicolons allow several 
-                       commands in one line of input.
+    Example: add sax    # Add a new track 'sax', 
+                        # sax is selected, and receives following messages
+             source 3   # Use soundcard channel 3 as input
+             rec        # Arm for recording an audio file (e.g. sax_1.wav)
+             start      # engine start, begin recording
+             stop       # engine stop, close file and queue for playback
    
-   remove-track      - Remove effects, parameters and GUI for current track
-                       (.wav files are not removed by this operation
-                       and generally not removed by Nama.)
+             <SPACE> can also be used to start and stop engine
 
-   import-audio, import - Import a .wav file, resampling if necessary
+    Example: add piano; source synth; stereo; rec
+
+    This line of commands prepares to record track 'piano' in stereo 
+    width from JACK client 'synth'. Use of semicolons allow several 
+    commands in one line of input.
+   
+**  remove-track  - Remove effects, parameters and GUI for current track
+
+(.wav files are not removed by this operation and generally not removed by Nama.)
+
+**  undo - go back in time to the state before the last command. 
+**  redo - reapply the steps removed in undo
+
+** import-audio, import - Import a .wav file, resampling if necessary
 TRACKBASICS
 
 track_status => <<'TRACKSTATUS',
@@ -167,6 +159,18 @@ version can be selected. Setting version 0 (the default) means 'use the most rec
 
    list_version, lv              - list version numbers of current track
 WAV_VERSIONS
+
+version_control => <<'VCS',
+   save <tagname>            - label current project state as <tagname>
+   get <tagname>             - checkout project state tagged with <tagname>
+   branch <tagname>          - switch to branch and load state
+   list-branches, lbr        - list branches and tags
+   new-branch, nbr           - create a new branch starting at the current 
+                               commit or a specified commit, e.g. 'nbr <tagname>'
+   tag                       - tag current commit with a name and optional message
+
+   ** note that <tagname> can be a branch, tag, commit id.  
+VCS
 
 modifiers => <<'MODIFIERS',
 Ecasound chain object modifiers
