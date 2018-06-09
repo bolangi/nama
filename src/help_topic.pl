@@ -196,61 +196,6 @@ Regions and time shifting
    unshift-track, unshift  - eliminate playback delay for track/region
 TIME_SHIFTING
 
-normalization => <<'NORMAL',
-Normalization
-
-   ecanormalize, normalize, norm 
-                           - run ecanormalize on current track version
-   ecafixdc, fixdc         - run ecafixdc on current track version
-   autofix-tracks, autofix - fixdc and normalize selected versions of all PLAY
-NORMAL
-
-track_caching => <<'CACHING',
-Track caching (freezing) - render effects to a new .wav file to fix a result and save cpu
-
-   cache                       - cache the output of a track or bus as a .wav file
-   uncache                     - restore effects and settings prior to cache operation
-CACHING
-
-advanced => <<'ADVANCED',
-
-   set-track               - directly set current track parameters
-
-   destroy-current-wav     - unlink current track's selected WAV version.
-ADVANCED
-
-advanced_transport => <<'ADVANCED_TRANSPORT',
-   loop-enable, loop  -  loop playback between two points
-                         example: loop 5.0 200.0 (positions in seconds)
-                         example: loop start end (mark names or numbers)
-   loop-disable, noloop, nl
-                      -  disable looping
-
-   preview            -  start engine with WAV recording disabled
-                         (for mic check, etc.) Release with 'arm'.
-
-   doodle             -  Like preview, with WAV playback also disabled
-                         Release with 'arm'.
-ADVANCED_TRANSPORT
-
-version_control => <<'VCS',
-** Version control 
-
-Nama uses git to save project state as a series of commits, a new commit after
-each command. It is easy to tag a commit as a way of documenting
-developments in a projects. 
-
-   save <tagname>            - label current project state as <tagname>
-   get <tagname>             - checkout project state tagged with <tagname>
-   branch <tagname>          - switch to branch and load state
-   list-branches, lbr        - list branches and tags
-   new-branch, nbr           - create a new branch starting at the current 
-                               commit or a specified commit, e.g. 'nbr <tagname>'
-   tag                       - tag current commit with a name and optional message
-
-   ** note that <tagname> can be a branch, tag, commit id.  
-VCS
-
 effect_info => <<'EFFECT_INFO',
     
 ** Information commands
@@ -295,36 +240,17 @@ your soundcard.
    set-insert-wetness, wet    - set/query insert wetness 
                                 example: wet 99 (99% wet, 1% dry)
 INSERTS
-
-effect_chains => <<'EFFECT_CHAINS',
-
-Effect chains are presets that can consist of multiple effects. They are a
-convenient way to save by name sequences of effects with the parameters that
-you commonly use. You make an effect chain by saving effects from the current
-track. 
-
-   find-effect-chains,     fec   - find all effect chains (filtering on key/value pairs, if supplied)
-   find-user-effect-chains,fuec  - find all user-defined effect chains, filtering as above
-   new-effect-chain,       nec   - define a new effect chain
-   overwrite-effect-chain, oec   - as above, but overwite existing definition
-   add-effect-chain,       aec   - add an effect chain to the current track
-   delete-effect-chain,    dec   - delete an effect chain definition
-EFFECT_CHAINS
-
-effect_profiles => <<'EFFECT_PROFILES',
-Effect profiles (effect chains for a group of tracks)
-
-An effect profile is a group of effect chains, saved with the tracks that
-configure them. It is a convenient way to share parts of a project among other
-projects. 
-
-   new-effect-profile, nep       - define a new effect profile
-   apply-effect-profile, aep     - apply an effect profile
-                                   (current effects are bypassed)
-   overlay-effect-profile, oep   - apply an effect profile,
-                                   adding to current effects
-   delete-effect-profile, dep    - delete an effect profile definition
-EFFECT_PROFILES
+fades => <<FADES,
+   add-fade,         afd, fade  - add fade (in or out) to current track
+                                  examples: 
+                                      fade in song-start 0.2
+                                  (fades in at mark 'song-start' over 0.2 s)
+                                      fade out 0.5 song-start
+                                  (fades out over 0.5 s ending at 'song-start')
+                                  
+   remove-fade,      rfd        - remove fade (by index)
+   list-fade         lfd        - list all fades
+FADES
 
 group => <<GROUP,
    new-bunch, bunch, nb       - name a bunch of tracks
@@ -398,6 +324,83 @@ prompt => <<PROMPT,
 
 PROMPT
 
+normalization => <<'NORMAL',
+Normalization
+
+   ecanormalize, normalize, norm 
+                           - run ecanormalize on current track version
+   ecafixdc, fixdc         - run ecafixdc on current track version
+   autofix-tracks, autofix - fixdc and normalize selected versions of all PLAY
+NORMAL
+
+track_caching => <<'CACHING',
+Track caching (freezing) - render effects to a new .wav file to fix a result and save cpu
+
+   cache                       - cache the output of a track or bus as a .wav file
+   uncache                     - restore effects and settings prior to cache operation
+CACHING
+
+effect_chains => <<'EFFECT_CHAINS',
+
+Effect chains are presets that can consist of multiple effects. They are a
+convenient way to save by name sequences of effects with the parameters that
+you commonly use. You make an effect chain by saving effects from the current
+track. 
+
+   find-effect-chains,     fec   - find all effect chains (filtering on key/value pairs, if supplied)
+   find-user-effect-chains,fuec  - find all user-defined effect chains, filtering as above
+   new-effect-chain,       nec   - define a new effect chain
+   overwrite-effect-chain, oec   - as above, but overwite existing definition
+   add-effect-chain,       aec   - add an effect chain to the current track
+   delete-effect-chain,    dec   - delete an effect chain definition
+EFFECT_CHAINS
+
+effect_profiles => <<'EFFECT_PROFILES',
+Effect profiles (effect chains for a group of tracks)
+
+An effect profile is a group of effect chains, saved with the tracks that
+configure them. It is a convenient way to share parts of a project among other
+projects. 
+
+   new-effect-profile, nep       - define a new effect profile
+   apply-effect-profile, aep     - apply an effect profile
+                                   (current effects are bypassed)
+   overlay-effect-profile, oep   - apply an effect profile,
+                                   adding to current effects
+   delete-effect-profile, dep    - delete an effect profile definition
+EFFECT_PROFILES
+
+advanced_transport => <<'ADVANCED_TRANSPORT',
+   loop-enable, loop  -  loop playback between two points
+                         example: loop 5.0 200.0 (positions in seconds)
+                         example: loop start end (mark names or numbers)
+   loop-disable, noloop, nl
+                      -  disable looping
+
+   preview            -  start engine with WAV recording disabled
+                         (for mic check, etc.) Release with 'arm'.
+
+   doodle             -  Like preview, with WAV playback also disabled
+                         Release with 'arm'.
+ADVANCED_TRANSPORT
+
+version_control => <<'VCS',
+** Version control 
+
+Nama uses git to save project state as a series of commits, a new commit after
+each command. It is easy to tag a commit as a way of documenting
+developments in a projects. 
+
+   save <tagname>            - label current project state as <tagname>
+   get <tagname>             - checkout project state tagged with <tagname>
+   branch <tagname>          - switch to branch and load state
+   list-branches, lbr        - list branches and tags
+   new-branch, nbr           - create a new branch starting at the current 
+                               commit or a specified commit, e.g. 'nbr <tagname>'
+   tag                       - tag current commit with a name and optional message
+
+   ** note that <tagname> can be a branch, tag, commit id.  
+VCS
 diagnostics => <<DIAGNOSTICS,
 
    dump-all,   dumpall,   dumpa - dump most internal state
@@ -450,17 +453,14 @@ edits => <<EDITS,
    version-mix-track,vmt        - set version mix track as current track 
 EDITS
 
-fades => <<FADES,
-   add-fade,         afd, fade  - add fade (in or out) to current track
-                                  examples: 
-                                      fade in song-start 0.2
-                                  (fades in at mark 'song-start' over 0.2 s)
-                                      fade out 0.5 song-start
-                                  (fades out over 0.5 s ending at 'song-start')
-                                  
-   remove-fade,      rfd        - remove fade (by index)
-   list-fade         lfd        - list all fades
-FADES
+
+advanced => <<'ADVANCED',
+
+   set-track               - directly set current track parameters
+
+   destroy-current-wav     - unlink current track's selected WAV version.
+ADVANCED
+
    
 );
 # print values %{$help->{topic}};
