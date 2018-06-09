@@ -33,20 +33,20 @@ project => <<'PROJECT',
    exit, quit                - exit program, saving state 
 
    ** saving project state is automatic, if git is available on your system 
-      however you must still backup audio files and other project files.
+      however you will still need to backup your entire project tree.
 PROJECT
 
 track_basics => <<'TRACKBASICS',
 **  add-track, add    - Create a new track
 
-    Example: add sax    # Add a new track 'sax'.
+    Example: add sax    # Add a new track 'sax', mono by default
                         # sax is selected, and receives following messages:
              source 3   # Use soundcard channel 3 as input
              rec        # Arm for recording an audio file (e.g. sax_1.wav)
-             start      # engine start, begin recording
-             stop       # engine stop, close file and queue for playback
+             start      # start engine, begin recording
+             stop       # stop engine, close file and queue for playback
    
-             <SPACE> can also be used at the prompt to start and stop engine
+             <SPACE> can be used at the prompt to start and stop engine
 
     Example: add piano; source synth; stereo; rec
 
@@ -78,49 +78,6 @@ track_status => <<'TRACKSTATUS',
    chains           - show the audio network configuration
 TRACKSTATUS
 
-track_io => <<'TRACKIO',
-Track inputs and outputs are set by source and send commands, which take similar arguments. 
-
-   source, src, r            -  set track source
-                             -  with no arguments returns current signal source
-
-    ----------------------------------------------------------
-    for this input              use this command
-    ----------------------------------------------------------
-
-     * soundcard channel 3      source 3 
-
-     * soundcard channels 3,4   source 3; stereo
-
-     * JACK client              source fluidsynth
-     
-     * JACK port                source fluidsynth:left
-  
-     * JACK port with spaces    source "MPlayer [20120]:out_0"
- 
-     * unconnected JACK port    source manual
-     
-       note: the port for mono track 'piano' would be ecasound:piano_in_1 XX
-
-     * A list of JACK ports     source drum.ports (ports list from drums.ports)
-                                source ports (ports list from <trackname>.ports)
-
-     * from another track (after effects processing)
-                                source track Strings
-     * from a bus (raw output)  source bus Strings
-     
-     * from another track (before effects processing)
-                                source loop sax_in
-
-    -----------------------------------------------------------
-
-   send, out, m, aux         -  Create an auxiliary send
-                                Same arguments as 'source'.
-                                One send is allowed per track.
-
-   Sends are not necessary to set up as most tracks are part
-   of a bus that routes the audio output. 
-TRACKIO
 
 wav_versions => <<'WAV_VERSIONS',
 ** .WAV Versions
@@ -242,6 +199,49 @@ Note: Parameters are always separated by spaces
    restore-effects, restore, ref - restore track effects
 EFFECT_DO
 
+track_io => <<'TRACKIO',
+Track inputs and outputs are set by source and send commands, which take similar arguments. 
+
+   source, src, r            -  set track source
+                             -  with no arguments returns current signal source
+
+    ----------------------------------------------------------
+    for this input              use this command
+    ----------------------------------------------------------
+
+     * soundcard channel 3      source 3 
+
+     * soundcard channels 3,4   source 3; stereo
+
+     * JACK client              source fluidsynth
+     
+     * JACK port                source fluidsynth:left
+  
+     * JACK port with spaces    source "MPlayer [20120]:out_0"
+ 
+     * unconnected JACK port    source manual
+     
+       note: the port for mono track 'piano' would be ecasound:piano_in_1 XX
+
+     * A list of JACK ports     source drum.ports (ports list from drums.ports)
+                                source ports (ports list from <trackname>.ports)
+
+     * from another track (after effects processing)
+                                source track Strings
+     * from a bus (raw output)  source bus Strings
+     
+     * from another track (before effects processing)
+                                source loop sax_in
+
+    -----------------------------------------------------------
+
+   send, out, m, aux         -  Create an auxiliary send
+                                Same arguments as 'source'.
+                                One send is allowed per track.
+
+   Sends are not necessary to set up as most tracks are part
+   of a bus that routes the audio output. 
+TRACKIO
 inserts => <<'INSERTS',
 
 Patch the input to a track through an external effect,
