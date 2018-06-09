@@ -54,10 +54,7 @@ chain_setup => <<SETUP,
 
 SETUP
 
-track => <<TRACK,
-TRACK
-
-add_track => <<ADDTRACK,
+track_basics => <<'TRACKBASICS',
    add-track, add            -  Create a new track
                                 Example: add sax
                                          source 3
@@ -67,11 +64,17 @@ add_track => <<ADDTRACK,
                                 as the signal source. Prepare to record the audio track as
                                 as a file (e.g. sax_1.wav) on engine start. 
 
-                                Example: add piano; source synth; rec
-                                Does: Similar to above, record from JACK client "synth" 
-ADDTRACK
+                                Example: add piano; source synth; stereo; rec
+                                Does: Similar to above, records stereo width audio 
+                                from JACK client "synth". 
+   
+   remove-track              - Remove effects, parameters and GUI for current track.
+                               .wav files are retained.
 
-track_status => <<TRACKSTATUS,
+   import-audio, import      - Import a .wav file, resampling if necessary
+TRACKBASICS
+
+track_status => <<'TRACKSTATUS',
 
 ** Track status - set conditions for next engine run
 
@@ -81,7 +84,7 @@ track_status => <<TRACKSTATUS,
    off                     -  OFF: omit track from audio network
 TRACKSTATUS
 
-track_fader => <<TRACKFADER,
+track_fader => <<'TRACKFADER',
 ** Track volume/pan fader controls can be used to change settings
    for current track while engine is running or stopped
 
@@ -95,42 +98,21 @@ track_fader => <<TRACKFADER,
                                vol 0   (set to level 0 dB, unity, 100%, 1x gain)
    mute, c, cut             -  mute track volume 
    unmute, nomute, uncut, C -  restore muted volume
+   solo                      -  mute all tracks but current track
+   all, nosolo               -  return to pre-solo status
 TRACKFADER
 
-rest => <<REST,
-
-   import-audio, import      - import a WAV file, resampling if necessary
-
-   remove-track              - remove effects, parameters and GUI for current
-                               track
-
+track_info => <<'TRACKINFO',
    show-tracks, show, tracks -  show status of all tracks
-
    show-track, sh            -  show status of current track,
                                 including effects, versions, 
                                 modifiers,  "sax sh"
-
    show-bus-tracks, shb      -  show tracks of current bus
-
    show-tracks-all showa sha - show all tracks, including hidden
+TRACKINFO
 
-   link-track, link          -  create a new, read-only track that uses audio
-                                files from an existing track. 
-
-                                example: link-track new-piano piano
-                                example: link-track intro Mixdown my-song-intro 
-
-
-
-   stereo                    -  set track width to 2 channels
-
-   mono                      -  set track width to 1 channel
-
-   solo                      -  mute all tracks but current track
-
-   all, nosolo               -  return to pre-solo status
-
- - track inputs and outputs 
+track_io => <<'TRACKIO',
+Track inputs and outputs are set by source and send commands, which take similar arguments. 
 
    source, src, r            -  set track source
                              -  with no arguments returns current signal source
@@ -141,70 +123,89 @@ rest => <<REST,
 
      * soundcard channel 3      source 3 
 
+     * soundcard channels 3,4   source 3; stereo
+
      * JACK client              source fluidsynth
      
      * JACK port                source fluidsynth:left
   
      * JACK port with spaces    source "MPlayer [20120]:out_0"
  
-     * unconnected JACK port    source manual (or 'man')
+     * unconnected JACK port    source manual
      
-       note: the port for mono track 'piano' would be ecasound:piano_in_1
+       note: the port for mono track 'piano' would be ecasound:piano_in_1 XX
 
-     * JACK ports list          source drum.ports (ports list from drums.ports)
-                                source ports  (ports list from trackname.ports)
+     * A list of JACK ports     source drum.ports (ports list from drums.ports)
+                                source ports (ports list from <trackname>.ports)
 
-     * from track (after effects processing)
-                                source track sax
-
-     * from bus                 source bus Strings
+     * from another track (after effects processing)
+                                source track Strings
+     * from a bus (raw output)  source bus Strings
      
+     * from another track (before effects processing)
+                                source loop sax_in
+
     -----------------------------------------------------------
 
-   send, out, m, aux         -  create an auxiliary send
-                             -  same arguments as 'source'
-                             -  currently one send allowed per track
- - version 
+   send, out, m, aux         -  Create an auxiliary send
+                                Same arguments as 'source'.
+                                One send is allowed per track.
+TRACKIO
 
-   set_version, version, ver, n  -  set current track version
+wav_versions => <<'WAV_VERSIONS',
+.wav Versions
 
-   list_version, lver, lv        - list version numbers of current track
+Nama allows multiple 'takes' or audio files belonging to a track.  They are
+named after the track. For example, recording a track named 'piano' will
+produce files with names with names like piano_1.wav, piano_2.wav. Only one
+version can be selected. Setting version 0 (the default) means 'use the most recent
+(highest numbered) take.'
 
- - chain object modifiers
+   set_version, version, n       -  set current track version
 
-   mod, mods, modifiers    - show or assign select/reverse/playat modifiers
-                             for current track
-   nomod, nomods, 
-   nomodifiers             - remove all modifiers from current track
+   list_version, lv              - list version numbers of current track
+WAV_VERSIONS
 
- - signal processing
+modifiers => <<'MODIFIERS',
+Ecasound chain object modifiers
+
+   modifiers, mods, mod          - show or assign select/reverse/playat modifiers
+                                   for current track
+   nomodifiers, nomods, nomod    - remove all modifiers from current track
+MODIFIERS
+
+normalization => <<'NORMAL',
+Normalization
 
    ecanormalize, normalize, norm 
                            - run ecanormalize on current track version
    ecafixdc, fixdc         - run ecafixdc on current track version
    autofix-tracks, autofix - fixdc and normalize selected versions of all PLAY
-                             tracks
+NORMAL
 
- - cutting and time shifting
+time_shifting => <<'TIME_SHIFTING',
+Regions and time shifting
 
    set-region,    srg      - specify a track region using times or mark names
    add-region,    arg      - define a region creating an auxiliary track
    remove-region, rrg      - remove auxiliary track or region definition
    shift-track,   shift    - set playback delay for track/region
    unshift-track, unshift  - eliminate playback delay for track/region
+TIME_SHIFTING
 
-- track caching (freezing)
+track_caching => <<'CACHING',
+Track caching (freezing)
 
-   cache-track,   cache,   ct  - store effects-processed track signal as new version
-   uncache-track, uncache, unc - select uncached track version, replace effects
+   cache                       - cache the output of a track or bus as a .wav file
+   uncache                     - restore effects and settings prior to cache operation
+CACHING
 
- - hazardous or destructive commands for advanced users
+advanced => <<'ADVANCED',
 
    set-track               - directly set current track parameters
 
    destroy-current-wav     - unlink current track's selected WAV version.
-
-REST
+ADVANCED
 
 transport => <<TRANSPORT,
    start, t, SPACE    -  Start processing. SPACE must be at beginning of 
@@ -229,7 +230,6 @@ transport => <<TRANSPORT,
 
    doodle             -  Like preview, with WAV playback also disabled
                          Release with 'arm'.
-                         
 TRANSPORT
 
 marks => <<MARKS,
