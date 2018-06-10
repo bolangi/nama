@@ -132,40 +132,6 @@ track_fader => <<'TRACKFADER',
    solo                      -  mute all tracks but current track
    all, nosolo               -  return to pre-solo status
 TRACKFADER
-
-marks => <<MARKS,
-** Marks - use them to indicate positions in the timeline.
-
-   new-mark,      mark, k     - drop mark at current position, with optional name
-   list-marks,    lmk,  lm    - list marks showing index, time, name
-   next-mark,     nmk,  nm    - jump to next mark 
-   previous-mark, pmk,  pm    - jump to previous mark 
-   name-mark,           nom   - give a name to current mark 
-   to-mark,       tmk,  tom   - jump to a mark by name or index
-   remove-mark,   rmk,  rom   - remove current mark
-   modify-mark, move-mark, 
-    mmk, mm                   - change the time setting of current mark
-
-Notes: 
-
-Marks belong to the overall timeline, not to a particular track.  At present,
-they do not move when a track is time-shifted.
-
-Many commands that can take time positions as as arguments can also take mark
-names. This has the advantage that the time of effect will change when the mark
-is adjusted.  MARKS
-
-
-time_shifting => <<'TIME_SHIFTING',
-Regions and time shifting
-
-   set-region,    srg      - specify a track region using times or mark names
-   add-region,    arg      - define a region creating an auxiliary track
-   remove-region, rrg      - remove auxiliary track or region definition
-   shift-track,   shift    - set playback delay for track/region
-   unshift-track, unshift  - eliminate playback delay for track/region
-TIME_SHIFTING
-
 effect_info => <<'EFFECT_INFO',
     
 ** Information commands
@@ -198,6 +164,41 @@ Note: Parameters are always separated by spaces
    bypass-effects, bypass, bye   - suspend current track effects except vol/pan
    restore-effects, restore, ref - restore track effects
 EFFECT_DO
+
+
+marks => <<MARKS,
+** Marks - use them to indicate positions in the timeline.
+
+   new-mark,      mark, k     - drop mark at current position, with optional name
+   list-marks,    lmk,  lm    - list marks showing index, time, name
+   next-mark,     nmk,  nm    - jump to next mark 
+   previous-mark, pmk,  pm    - jump to previous mark 
+   name-mark,           nom   - give a name to current mark 
+   to-mark,       tmk,  tom   - jump to a mark by name or index
+   remove-mark,   rmk,  rom   - remove current mark
+   modify-mark, move-mark, 
+    mmk, mm                   - change the time setting of current mark
+
+Notes: 
+
+Marks belong to the overall timeline, not to a particular track.  At present,
+they do not move when a track is time-shifted.
+
+Many commands that can take time positions as as arguments can also take mark
+names. This has the advantage that the time of effect will change when the mark
+is adjusted.  
+MARKS
+
+
+time_shifting => <<'TIME_SHIFTING',
+Regions and time shifting
+
+   set-region,    srg      - specify a track region using times or mark names
+   add-region,    arg      - define a region creating an auxiliary track
+   remove-region, rrg      - remove auxiliary track or region definition
+   shift-track,   shift    - set playback delay for track/region
+   unshift-track, unshift  - eliminate playback delay for track/region
+TIME_SHIFTING
 
 track_io => <<'TRACKIO',
 Track inputs and outputs are set by source and send commands, which take similar arguments. 
