@@ -638,6 +638,12 @@ bus_version:
   what: Set the default monitoring version for tracks in the current bus.
   short: bver gver
   parameters: none
+bus_on:
+  type: group
+  what: restore tracks belonging to bus after bus-off
+bus_off:
+  type: group
+  what: turn off tracks belonging to current bus
 add_bunch:
   type: group
   what: 
