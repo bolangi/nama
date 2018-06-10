@@ -1,18 +1,30 @@
-@{$help->{arr_topic}} = qw( all
-                    project
-                    track
-                    chain_setup
-                    transport
-                    marks
-                    effects
-                    group
-                    bus
-                    mixdown
-                    prompt 
-                    diagnostics
-                    edits
-                    fades
-                    command_line_options
+@{$help->{arr_topic}} = qw(
+project
+track_basics
+track_status
+wav_versions
+transport
+track_fader
+effect_info
+effect_manipulation
+marks
+time_shifting
+track_io
+inserts
+fades
+group
+bus
+mixdown
+prompt
+normalization
+track_caching
+effect_chains
+effect_profiles
+advanced_transport
+version_control
+diagnostics
+edits
+advanced
                 ) ;
 
 %{$help->{topic}} = (
@@ -290,19 +302,16 @@ group => <<GROUP,
 GROUP
 
 bus => <<BUS,
-   add-bus,             abs   - create a sub-bus feeding a regular user track
-                                of the same name
-                                example: add-bus Strings 
-                                         add-tracks violin cello bass
-                                         for cello violin bass; move-to-bus Strings
-   list-buses,          lbs   - list bus data
-   remove-bus                 - remove a bus
-   bus-version                - select default version for all tracks on bus
-
-   add-submix-raw,      asr   - create bus and slave tracks for 
-                                sending pre-fader track signals
-   add-submix-cooked,   asc   - as above, for post-fader signals
-   update-submix,       usm   - refresh send bus track list
+   add-bus, abs         - create a sub-bus feeding a regular user track
+                          of the same name
+                          example: add-bus Strings 
+                                   add-tracks violin cello bass
+                                   for cello violin bass; move-to-bus Strings
+   list-buses, lbs      - list bus data
+   remove-bus           - remove a bus
+   bus-version          - select default version for all tracks on bus
+   bus-off              - turn all tracks off belonging to bus
+   bus-on               - restore tracks that were on by previous bus-off
 BUS
 
 mixdown => <<MIXDOWN,
@@ -492,20 +501,7 @@ help yml                - browse the YAML command source
 
 help is available for the following topics:
 
-0  All
-1  Project
-2  Track
-3  Chain setup
-4  Transport
-5  Marks
-6  Effects
-7  Group control
-8  Buses
-9  Mixdown
-10 Command prompt 
-11 Diagnostics
-12 Edits
-13 Fades
-14 Command line options
+#for arr_topic
+#$help->{index} = topic
 
 HELP
