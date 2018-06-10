@@ -1718,3 +1718,20 @@ route_track: _route_track source_id send_id {
 
 set_sample_rate: _set_sample_rate dd {::set_sample_rate($item{dd})}
 set_sample_rate: _set_sample_rate {::get_sample_rate()}
+
+bus_on: _bus_on 
+{ 
+	::pagers('turning bus on'); 
+	my $bus_name = $::this_track->source_type eq 'bus' ? $::this_track->source_id : $::this_bus;
+	print "bus_name: $bus_name\n";
+	$::bn{$bus_name}->tracks_on
+}
+
+bus_off: _bus_off 
+{ 
+	::pagers('turning bus off'); 
+	my $bus_name = $::this_track->source_type eq 'bus' ? $::this_track->source_id : $::this_bus;
+	print "bus_name: $bus_name\n";
+	$::bn{$bus_name}->tracks_off 
+}
+
