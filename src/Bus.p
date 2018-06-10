@@ -3,7 +3,7 @@
 package ::Bus;
 use Modern::Perl; use Carp; 
 use ::Log qw(logsub logpkg);
-use ::Globals qw(:trackrw); 
+use ::Globals qw(:trackrw $setup); 
 our @ISA = qw( ::Object );
 
 # share the following variables with subclasses
@@ -70,6 +70,28 @@ sub last {
 }
 
 sub remove { ::throw($_[0]->name, " is system bus. No can remove.") }
+
+sub tracks_on {
+	my $bus = shift;
+	for ( $bus->track_o )
+	{
+	my $old = $setup->{bus}->{oldrw}->{$_->name};
+		$_->set( rw =>  $old) if $old;
+			delete $setup->{bus}->{oldrw}->{$_->name };
+	}
+}
+
+sub tracks_off {
+	my $bus = shift;
+	return if not grep { $_->rw ne OFF } $bus->track_o;
+	for ( $bus->track_o )
+	{
+		delete $setup->{bus}->{oldrw}->{$_->name };
+		next if $_->rw eq OFF;
+		$setup->{bus}->{oldrw}->{$_->name } = $_->rw;
+		$_->set( rw => OFF );
+	}	
+}
 
 ## class methods
 
