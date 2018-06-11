@@ -268,7 +268,7 @@ sub destination {
 	# track's own send_type/send_id
 	
 	my $out;
-	$out .= $track->group unless $track->group =~ /^(Aux|Null)$/;
+	$out .= $track->group.' bus' unless $track->group =~ /^(Aux|Null)$/;
 	my $send_id = $track->send_id;
 	my $send_type = $track->send_type;
 	return $out if ! $send_type;
