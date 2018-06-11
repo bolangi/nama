@@ -52,7 +52,7 @@ sub format_help_topic {
 	my ($index, $key) = @_;
 	my $title = $help->{display}->[$index];
 	my @output;
-	push @output, "\n-- $help->{display}->[$index] --\n\n";
+	push @output, "\n-- $help->{title}->[$index] --\n\n";
 	push @output, $help->{topic}->{$key}, $/;
 	@output
 }
