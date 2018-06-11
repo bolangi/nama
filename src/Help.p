@@ -43,9 +43,9 @@ sub munge_help {
 }
 }
 sub helptopic {
-	my $index  = shift;
-	my $key = $help->{index}->{$index};
-	format_help_topic($index, $key);
+	my $i  = shift;
+	my $key = $help->{index}->{$i};
+	format_help_topic($i, $key);
 }
 
 sub format_help_topic {
@@ -69,9 +69,7 @@ IAM
 	my @output;
 	if ( $help->{topic}->{$name}){
 		@output = helptopic($name);
-	} elsif ($name =~ /^0/){
-		@output = map{ helptopic $_ } @{$help->{arr_topic}};
-	} elsif ( $name =~ /^(\d+)$/ and $1 < 20  ){
+	} elsif ( $name =~ /^(\d+)$/ ){
 		@output = helptopic($name)
 	} else {
 		my %helped = (); 
