@@ -147,16 +147,16 @@ track_fader => <<'TRACKFADER',
    all, nosolo              -  return to pre-solo status
 TRACKFADER
 effect_info => <<'EFFECT_INFO',
-   ladspa-register, lrg       - list LADSPA effects
-   preset-register, prg       - list Ecasound presets
-   ctrl-register,   crg       - list Ecasound controllers 
-   find-effect,     fe        - list available effects matching arguments
-                                example: find-effect reverb
-   help-effect, he            - full information about an effect 
-                                example: help-effect 1209 
-                                  (information about LADSPA plugin 1209)
-                                example: help-effect valve
-                                  (information about LADSPA plugin valve)
+   ladspa-register, lrg     - list LADSPA effects
+   preset-register, prg     - list Ecasound presets
+   ctrl-register, crg       - list Ecasound controllers 
+   find-effect, fe          - list available effects matching arguments
+                              example: find-effect reverb
+   help-effect, he          - full information about an effect 
+                              example: help-effect 1209 
+                                (information about LADSPA plugin 1209)
+                              example: help-effect valve
+                                (information about LADSPA plugin valve)
 EFFECT_INFO
 effect_manipulation => <<'EFFECT_DO',
    add-effect,     afx           - add an effect to the current track
