@@ -1,4 +1,4 @@
-@{$help->{arr_topic}} = qw(
+$help->{arr_topic}->@* = qw(
 project
 track_basics
 track_status
@@ -28,8 +28,11 @@ advanced
                 ) ;
 my $i;
 my @display_index = map{ $help->{index}->{++$i} = $_;  # integer => topic key
-							s/_/ /g; $_=ucfirst $_; 
-							(join " ",$i, $_)} 	$help->{arr_topic}->@*; 
+							s/_/ /g; 
+							my $name = ucfirst $_; 
+							$name = join " ",$i, $name;
+							$help->{display}->[$i] = $name;
+							} $help->{arr_topic}->@*; 
 sub pad {
 	my ($text, $len) = @_;
 	my $pad = ' ' x ( $len - length $text);
