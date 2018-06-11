@@ -30,6 +30,7 @@ my $i;
 my @display_index = map{ $help->{index}->{++$i} = $_;  # integer => topic key
 							s/_/ /g; 
 							my $name = ucfirst $_; 
+							$help->{title}->[$i] = $name;
 							$name = join " ",$i, $name;
 							$help->{display}->[$i] = $name;
 							} $help->{arr_topic}->@*; 
@@ -92,7 +93,7 @@ TRACKBASICS
 
 track_status => <<'TRACKSTATUS',
 
-** Track status - prepare conditions for next engine run
+Prepare conditions for next engine run
 
    rec              -  REC: record and monitor audio source
    mon              -  MON: monitor audio source
@@ -106,22 +107,18 @@ TRACKSTATUS
 
 
 wav_versions => <<'WAV_VERSIONS',
-** .WAV Versions
+   list-version, lv         - list version numbers of audio files in the current track
+   set-version, version, n  - select a version number for the current track
 
-Nama allows multiple versions of audio files belonging to a track, also
-referred to as 'takes'. 
+A track can record multiple audio files ('takes'). The audio filenames
+follow the trackname so that recording a track named 'piano' will
+produce files with names with names like piano_1.wav, piano_2.wav.
+One version can be selected as streaming source when when the track is
+set to PLAY. The version number is zero by default, which means
+select the most recent (highest numbered) take..
 
-The filenames follow the trackname, so that recording a track named 'piano'
-will produce files with names with names like piano_1.wav, piano_2.wav.  
-
-Setting version 0 (the default) means "select the most recent
-(highest numbered) take." Only one version can be selected to play at a time. 
-
-   list-version, lv              - list version numbers of audio files for current track
-   set-version, version, n       -  select a version number for the current track
-
-Note that once .wav files are recorded, they are considered permanent
-project resources, and are stored outside of version control.
+.Wav files recorded by Nama are considered immutable resources and
+stored outside of version control.
 
 WAV_VERSIONS
 
