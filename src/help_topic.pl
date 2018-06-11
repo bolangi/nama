@@ -127,8 +127,7 @@ transport => <<TRANSPORT,
    to-end, end        - set playback head to end
 TRANSPORT
 track_fader => <<'TRACKFADER',
-   Track volume/pan fader controls can be used to change settings
-   for current track.
+   Track volume/pan fader can be used to change settings for the current track.
 
    pan, p                   -  get/set pan position
    pan-back, pb             -  restore pan after pr/pl/pc  
