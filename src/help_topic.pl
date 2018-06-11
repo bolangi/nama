@@ -190,7 +190,7 @@ change when the mark is adjusted.
 MARKS
 
 time_shifting => <<'TIME_SHIFTING',
-Regions and time shifting
+   Regions and time shifting
 
    set-region,    srg      - specify a track region using times or mark names
    add-region,    arg      - define a region creating an auxiliary track
@@ -200,7 +200,8 @@ Regions and time shifting
 TIME_SHIFTING
 
 track_io => <<'TRACKIO',
-Track inputs and outputs are set by source and send commands, which take similar arguments. 
+   Track inputs and outputs are set by source and send commands, 
+   which take similar arguments. 
 
    source, src, r            -  set track source
                              -  with no arguments returns current signal source
@@ -244,8 +245,8 @@ Track inputs and outputs are set by source and send commands, which take similar
 TRACKIO
 inserts => <<'INSERTS',
 
-Patch the input to a track through an external effect,
-such as a JACK client, or an analog fx box hooked to
+Use inserts to pass an audio stream through an external effect
+such as a JACK client or an analog fx box hooked to
 your soundcard. 
 
    add-insert,         ain    - add an insert to current track
@@ -266,6 +267,7 @@ fades => <<FADES,
 FADES
 
 group => <<GROUP,
+Group control
    new-bunch, bunch, nb       - name a bunch of tracks
                                 e.g. bunch strings violins cello bass
                                 e.g. bunch 3 4 6 7 (track indexes)
