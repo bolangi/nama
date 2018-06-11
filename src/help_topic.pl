@@ -117,10 +117,8 @@ bus.
 WAV_VERSIONS
 
 transport => <<TRANSPORT,
-   start, t, SPACE    -  Start processing. SPACE must be at beginning of 
-                         command line.
-   stop, s, SPACE     -  Stop processing. SPACE must be at beginning of 
-                         command line.
+   start, t, SPACE    -  Start processing. SPACE must be at beginning of command line.
+   stop, s, SPACE     -  Stop processing. SPACE must be at beginning of command line.
    rewind, rw         -  Rewind  some number of seconds, i.e. rw 15
    forward, fw        -  Forward some number of seconds, i.e. fw 75
    setpos, sp         -  Set the playback head position, i.e. setpos 49.2
@@ -129,25 +127,25 @@ transport => <<TRANSPORT,
    to-end, end        - set playback head to end
 TRANSPORT
 track_fader => <<'TRACKFADER',
-** Track volume/pan fader controls can be used to change settings
-   for current track while engine is running or stopped
+   Track volume/pan fader controls can be used to change settings
+   for current track.
 
    pan, p                   -  get/set pan position
    pan-back, pb             -  restore pan after pr/pl/pc  
    pan-center, pc           -  set pan center    
    pan-left, pl             -  pan track fully left    
    pan-right, pr            -  pan track fully right    
-   volume, vol              -  set or adjust track volume (in dB, 0 dB is unity gain)
+   volume, vol              -  set or adjust track volume (in dB)
        Examples:
-       vol 0   (set level to 0 dB, unity, 100%, 1x gain)
+       vol 0   (set level to 0 dB or unity gain)
        vol -20 (set level to -20 dB)
        vol - 3 (reduce vol by 3 dB) 
                                       
    unity                    -  set volume gain to unity
    mute, c, cut             -  mute track volume 
    unmute, nomute, uncut, C -  restore muted volume
-   solo                      -  mute all tracks but current track
-   all, nosolo               -  return to pre-solo status
+   solo                     -  mute all tracks but current track
+   all, nosolo              -  return to pre-solo status
 TRACKFADER
 effect_info => <<'EFFECT_INFO',
     
