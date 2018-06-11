@@ -971,11 +971,11 @@ remove_bunch: _remove_bunch ident(s) {
  	map{ delete $::project->{bunch}->{$_} } @{$item{'ident(s)'}}; 1}
 add_to_bunch: _add_to_bunch ident(s) { ::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions { 
-	::pager( join " ", @{$::this_track->versions}); 1}
+	::pagers( join " ", @{$::this_track->versions}); 1}
 ladspa_register: _ladspa_register { 
 	::pager( ::ecasound_iam("ladspa-register")); 1}
 preset_register: _preset_register { 
-	::pager( ::ecasound_iam("preset-register")); 1}
+	::pagers( ::ecasound_iam("preset-register")); 1}
 ctrl_register: _ctrl_register { 
 	::pager( ::ecasound_iam("ctrl-register")); 1}
 preview: _preview { ::set_preview_mode(); 1}
