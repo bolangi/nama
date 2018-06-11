@@ -148,9 +148,6 @@ track_fader => <<'TRACKFADER',
    all, nosolo              -  return to pre-solo status
 TRACKFADER
 effect_info => <<'EFFECT_INFO',
-    
-** Information commands
-
    ladspa-register, lrg       - list LADSPA effects
    preset-register, prg       - list Ecasound presets
    ctrl-register,   crg       - list Ecasound controllers 
@@ -162,12 +159,7 @@ effect_info => <<'EFFECT_INFO',
                                 example: help-effect valve
                                   (information about LADSPA plugin valve)
 EFFECT_INFO
-
 effect_manipulation => <<'EFFECT_DO',
-** Effect manipulation commands - type 'h <command>' for details
-
-Note: Parameters are always separated by spaces
-
    add-effect,     afx           - add an effect to the current track
                                    Example: afx ea 50
    add-controller, acl           - add an Ecasound controller to the parameter
@@ -180,10 +172,7 @@ Note: Parameters are always separated by spaces
    restore-effects, restore, ref - restore track effects
 EFFECT_DO
 
-
 marks => <<MARKS,
-** Marks - use them to indicate positions in the timeline.
-
    new-mark,      mark, k     - drop mark at current position, with optional name
    list-marks,    lmk,  lm    - list marks showing index, time, name
    next-mark,     nmk,  nm    - jump to next mark 
@@ -194,16 +183,12 @@ marks => <<MARKS,
    modify-mark, move-mark, 
     mmk, mm                   - change the time setting of current mark
 
-Notes: 
-
-Marks belong to the overall timeline, not to a particular track.  At present,
-they do not move when a track is time-shifted.
-
-Many commands that can take time positions as as arguments can also take mark
-names. This has the advantage that the time of effect will change when the mark
-is adjusted.  
+Marks belong to the overall timeline, not to a particular track.
+They do not move when a track is time-shifted.  Many commands
+that can take time positions as as arguments can also take mark
+names. This has the advantage that the time of effect will
+change when the mark is adjusted.  
 MARKS
-
 
 time_shifting => <<'TIME_SHIFTING',
 Regions and time shifting
