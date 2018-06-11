@@ -26,8 +26,19 @@ diagnostics
 edits
 advanced
                 ) ;
+my $i;
+my @display_index = map{ $help->{index}->{++$i} = $_;  # integer => topic key
+							s/_/ /g; $_=ucfirst $_; 
+							(join " ",$i, $_)} 	$help->{arr_topic}->@*; 
+sub pad {
+	my ($text, $len) = @_;
+	my $pad = ' ' x ( $len - length $text);
+	$text.$pad
+}
+my @twocolumn = map{ pad($display_index[$_], 22).$display_index[$_+13].$/ } 0..12;
 
-%{$help->{topic}} = (
+
+$help->{topic}->%*  = (
 
 help => <<HELP,
    help <command>          - show help for <command>
@@ -488,7 +499,7 @@ ADVANCED
 );
 # print values %{$help->{topic}};
 
-$help->{screen} = <<HELP;
+$help->{screen} = <<HELP.
 
 Welcome to Nama help
 
@@ -501,7 +512,5 @@ help yml                - browse the YAML command source
 
 help is available for the following topics:
 
-#for arr_topic
-#$help->{index} = topic
-
 HELP
+join '',@twocolumn;
