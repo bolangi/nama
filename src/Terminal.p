@@ -236,7 +236,7 @@ sub pager_newline {
 	my @lines = @_;
 	for (@lines){ $_ .= "\n" if  ! /\n$/ }
 	push @{$text->{output_buffer}}, @lines;
-	print @lines;
+	print(@lines);
 }
 
 sub paging_allowed {
@@ -257,7 +257,9 @@ sub pager {
 	
 	logsub("&pager");
 	my @output = @_;
-	push @{$text->{output_buffer}}, @output, "\n\n";
+	chomp $output[-1];
+	$output[-1] .= "\n\n";
+	push @{$text->{output_buffer}}, @output;
 	page_or_print(@output);
 }
 
