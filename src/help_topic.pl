@@ -28,16 +28,16 @@ advanced
                 ) ;
 my $i;
 my @display_index = map{ $help->{index}->{++$i} = $_;  # integer => topic key
-							s/_/ /g; 
-							my $name = ucfirst $_; 
-							$help->{title}->[$i] = $name;
-							$name = join " ",$i, $name;
-							$help->{display}->[$i] = $name;
-							} $help->{arr_topic}->@*; 
+                            s/_/ /g; 
+                            my $name = ucfirst $_; 
+                            $help->{title}->[$i] = $name;
+                            $name = join " ",$i, $name;
+                            $help->{display}->[$i] = $name;
+                            } $help->{arr_topic}->@*; 
 sub pad {
-	my ($text, $len) = @_;
-	my $pad = ' ' x ( $len - length $text);
-	$text.$pad
+    my ($text, $len) = @_;
+    my $pad = ' ' x ( $len - length $text);
+    $text.$pad
 }
 my @twocolumn = map{ pad($display_index[$_], 22).$display_index[$_+13].$/ } 0..12;
 
@@ -45,50 +45,43 @@ my @twocolumn = map{ pad($display_index[$_], 22).$display_index[$_+13].$/ } 0..1
 $help->{topic}->%*  = (
 
 help => <<HELP,
-   help <command>          - show help for <command>
-   help <fragment>         - show help for commands matching /<fragment>/
-   help <ladspa_id>        - invoke analyseplugin for info on a LADSPA id
-   help <topic_number>     - list commands under <topic_number> 
-   help <topic_name>       - list commands under <topic_name> (lower case)
+   help <command>       - show help for <command>
+   help <fragment>      - show help for commands matching /<fragment>/
+   help <ladspa_id>     - info on a LADSPA id
+   help <topic_number>  - list commands under <topic_number> 
 HELP
 
 project => <<'PROJECT',
-   load-project, load        - load an existing project, e.g 'load <project-name>'
-   create-project, create    - create a new project (usually under $HOME/nama/project-name/)
-   list-projects, lp         - list all projects
-   save <tagname>            - label current autosave(**) state as <tagname>
-   exit, quit                - exit program, saving state 
+   load-project, load      - load an existing project, e.g 'load <project-name>'
+   create-project, create  - create a new project (usually under $HOME/nama/project-name/)
+   list-projects, lp       - list all projects
+   undo                    - go back in time to the state before the last command
+   redo                    - reapply the step rolled back by undo
+   exit, quit              - exit program, saving state 
 
-   ** saving project state is automatic, if git is available on your system 
-      however you will still need to backup your entire project tree.
+
 PROJECT
 
 track_basics => <<'TRACKBASICS',
-**  add-track, add    - Create a new track
+   add-track, add          - Create a new track
 
-    Example: add sax    # Add a new track 'sax', mono by default
-                        # sax is selected, and receives following messages:
-             source 3   # Use soundcard channel 3 as input
-             rec        # Arm for recording an audio file (e.g. sax_1.wav)
-             start      # start engine, begin recording
-             stop       # stop engine, close file and queue for playback
+      Example: add sax     - Add a new track 'sax', mono by default.
+                           - Sax is selected, and receives next commands.
+               source 3    - Use soundcard channel 3 as input
+               rec         - Arm for recording an audio file (e.g. sax_1.wav)
+               start       - Start engine, begin recording
+               stop        - Stop engine, close file and queue for playback
+     
+               <SPACE> can be used at the prompt to start and stop engine
    
-             <SPACE> can be used at the prompt to start and stop engine
-
-    Example: add piano; source synth; stereo; rec
-
-    This line of commands prepares to record track 'piano' in stereo 
-    width from JACK client 'synth'. Use of semicolons allow several 
-    commands in one line of input.
+      Example: add piano; source synth; stereo; rec
    
-**  remove-track  - Remove effects, parameters and GUI for current track
+      This line of commands prepares to record track 'piano' in stereo 
+      width from JACK client 'synth'. Use of semicolons allow several 
+      commands in one line of input.
 
-(.wav files are not removed by this operation and generally not removed by Nama.)
-
-**  undo - go back in time to the state before the last command. 
-**  redo - reapply the steps removed in undo
-
-** import-audio, import - Import a .wav file, resampling if necessary
+   import-audio, import    - Import a .wav file, resampling if necessary
+   remove-track            - Remove effects, parameters and GUI for current track
 TRACKBASICS
 
 track_status => <<'TRACKSTATUS',
@@ -99,9 +92,8 @@ Prepare conditions for next engine run
    mon              -  MON: monitor audio source
    play             -  PLAY: queue .wav file for playback
    off              -  OFF: omit track from audio network
-   show-tracks, show - show status, all tracks
-   show-track, sh   - show status of current track, including effects, versions, 
-                      modifiers, etc
+   show-tracks,show - show status, all tracks
+   show-track,sh    - show status of current track, including effects, versions, etc.
    chains           - show the audio network configuration
 TRACKSTATUS
 
@@ -144,10 +136,10 @@ track_fader => <<'TRACKFADER',
    pan-left, pl             -  pan track fully left    
    pan-right, pr            -  pan track fully right    
    volume, vol              -  set or adjust track volume (in dB, 0 dB is unity gain)
-	   Examples:
-	   vol 0   (set level to 0 dB, unity, 100%, 1x gain)
-	   vol -20 (set level to -20 dB)
-	   vol - 3 (reduce vol by 3 dB) 
+       Examples:
+       vol 0   (set level to 0 dB, unity, 100%, 1x gain)
+       vol -20 (set level to -20 dB)
+       vol - 3 (reduce vol by 3 dB) 
                                       
    unity                    -  set volume gain to unity
    mute, c, cut             -  mute track volume 
@@ -425,7 +417,7 @@ Nama uses git to save project state as a series of commits, a new commit after
 each command. It is easy to tag a commit as a way of documenting
 developments in a projects. 
 
-   save <tagname>            - label current project state as <tagname>
+   save <tagname>            - label current autosave state as <tagname>
    get <tagname>             - checkout project state tagged with <tagname>
    branch <tagname>          - switch to branch and load state
    list-branches, lbr        - list branches and tags
