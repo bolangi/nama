@@ -47,6 +47,7 @@ $setup->{cache_track_args}
 $setup->{audio_run_ready}
 $setup->{midish_running}
 $setup->{fade_counter}
+$setup->{bus}
 
 $fx_cache->{registry}			# effects database
 $fx_cache->{full_label_to_index}# el:tap_pinknoise -> effect index
@@ -66,6 +67,9 @@ $help->{arr_topic}				# sequential array of help pages
 $help->{topic}					# access help page by name
 $help->{usage}					# usage output
 $help->{midish}
+$help->{index}
+$help->{display}
+$help->{title}
 
 $mode->{preview}				#
 $mode->{doodle}					#
@@ -240,3 +244,5 @@ $jack->{is_own_port}
 $jack->{is_other_port}
 $jack->{graph}
 $jack->{watcher}
+
+
