@@ -303,10 +303,6 @@ sub stop_polling_cache_progress {
 sub uncache_track { 
 	my $track = shift;
 	local $this_track;
-		$track->set(rw => MON), 
-		pagers(track->name.": setting bus $track->{source_id} as source"),
-		return 
-			if $track->is_mixer;
 	$track->play or 
 		throw($track->name, ": cannot uncache unless track is set to PLAY"), return;
 	my $version = $track->playback_version;
