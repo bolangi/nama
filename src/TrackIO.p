@@ -290,6 +290,13 @@ sub set_rec {
 	}
 	$track->set_rw(REC);
 }
+sub rw_set {
+	my $track = shift;
+	logsub("&rw_set");
+	my ($bus, $rw) = @_;
+	$track->set_rec, return if $rw eq REC;
+	$track->set_rw($rw);
+}
 sub set_rw {
 	my ($track, $setting) = @_;
 	#my $already = $track->rw eq $setting ? " already" : "";
@@ -355,13 +362,6 @@ sub jack_manual_port {
 	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
 }
 
-sub rw_set {
-	my $track = shift;
-	logsub("&rw_set");
-	my ($bus, $rw) = @_;
-	$track->set_rec, return if $rw eq REC;
-	$track->set_rw($rw);
-}
 sub wantme {
 	my $track = shift;
 	no warnings 'uninitialized';
