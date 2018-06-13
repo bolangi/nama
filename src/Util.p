@@ -128,7 +128,7 @@ sub dest_type {
 
 	# non JACK related
 
-	if($dest eq 'bus')		 	{ 'bus'			}
+	elsif($dest eq 'bus')		 	{ 'bus'			}
 	elsif($dest eq 'null')	 	{ 'null'		}
 	elsif($dest eq 'rtnull')	{ 'rtnull'		}
 	elsif($dest =~ /^loop,/)	{ 'loop'		}
