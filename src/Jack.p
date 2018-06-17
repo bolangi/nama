@@ -7,13 +7,13 @@ no warnings 'uninitialized';
 # general functions
 
 sub poll_jack { 
-		jack_update(); # first time
+		update_jack_client_list(); # first time
 		# then repeat
-		$project->{events}->{poll_jack} = AE::timer(0,5,\&jack_update) 
+		$project->{events}->{poll_jack} = AE::timer(0,5,\&update_jack_client_list) 
 }
 
-sub jack_update {
-	#logsub("&jack_update");
+sub update_jack_client_list {
+	#logsub("&update_jack_client_list");
 	# cache current JACK status
 	
 	# skip if Ecasound is busy
