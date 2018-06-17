@@ -6,6 +6,10 @@ sub refresh_waveform_window {
 	# iterate 
 	#   display waveform
 	#   write legend
+	# $gui->{wwcanvas} 
+# 	my @playable = grep{ $_->play } all_tracks();
+# 	$_->exists_waveform or $_->generate_waveform
+# 	pack waveform
 }
 sub set_widget_color {
 	my ($widget, $status) = @_;
