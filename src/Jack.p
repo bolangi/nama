@@ -13,6 +13,7 @@ sub poll_jack {
 }
 
 sub update_jack_client_list {
+	state $warn_count;
 	#logsub("&update_jack_client_list");
 	# cache current JACK status
 	
@@ -30,7 +31,16 @@ sub update_jack_client_list {
 
 		my ($bufsize) = qx(jack_bufsize);
 		($jack->{periodsize}) = $bufsize =~ /(\d+)/;
-
+		my ($sample_rate) = qx(jack_samplerate);
+		chomp $sample_rate;
+		$project->{name} 
+			and $sample_rate //= $project->{sample_rate} 
+			and ($warn_count == 1 or $warn_count % 8 == 0) # warn less often
+		    and ::throw(qq(
+JACK audio daemon sample rate is $sample_rate but sample rate for project "$project->{name}" is $project->{sample_rate}.
+Please fix this problem before continuing (maybe restart jackd with --rate $project->{sample_rate}?))),
+			print prompt();
+		$warn_count++;
 	} else {  }
 }
 
