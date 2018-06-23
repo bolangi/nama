@@ -58,7 +58,7 @@ sub sync_action {
 	my ($method, @args) = @_;
 	$_->$method(@args) for engines()
 }
-*configure = \&::NetEngine::configure;
+sub configure { ::NetEngine::configure(@_) }
 }
 
 {
