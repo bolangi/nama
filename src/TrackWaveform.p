@@ -10,18 +10,17 @@ use Try::Tiny;
 
 sub generate_waveform {
 	my $self = shift;
-	my ($width, $height) = @_;
-	$project->{current_waveform_timescale} = 10;
+	my ($width, $height, $pixels_per_second) = @_;
 	$width //= $self->wav_length * $project->{current_waveform_timescale};
-	my $name = waveform_name($self->full_path, $width, $height);
+	my $name = waveform_name($self->full_path, $width, $height, $pixels_per_second);
 	my $cmd = join ' ', 'waveform', "-W $width -H $height", $self->full_path, $name;
 	say $cmd;
 	system($cmd);
 	$project->{waveform}->{$self->full_path} = $name;
 }
 sub waveform_name {
-	my($path, $width, $height) = @_;
-			"$path.${width}x$height.png"
+	my($path, $width, $height, $pixels) = @_;
+			"$path."  . $width . 'x' . "$height.$pixels.png"
 }
 
 sub find_waveform {
