@@ -18,7 +18,7 @@ sub generate_waveform {
 	my $cmd = join ' ', 'waveform', "-W $width -H $height", $self->full_path, $name;
 	say $cmd;
 	system($cmd);
-	$project->{waveform}->{$self->full_path} = $name;
+	$name;
 }
 sub waveform_name {
 	my($path, $width, $height, $pixels) = @_;
@@ -37,7 +37,7 @@ sub find_waveform {
 sub refresh_waveform {
 	my $self = shift;
 	my ($waveform) = $self->find_waveform() || $self->generate_waveform; 
-	$project->{$self->name}->{waveform}->{current} = $waveform;
+	$project->{waveform}{current}{$self->name} = $waveform;
 	# remove Tk::Photo widget with waveform image
     # load    " 	
 }
