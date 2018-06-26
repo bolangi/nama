@@ -1,5 +1,5 @@
 package ::TrackWaveform;
-use ::Globals qw($project);
+use ::Globals qw($project $config);
 use Modern::Perl;
 use Role::Tiny;
 use Try::Tiny;
