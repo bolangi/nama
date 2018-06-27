@@ -56,11 +56,14 @@ sub init_gui {
 		-width => 2400,
 		-height => 480	
 		);
+	# incorrect, call to wwgeometry too early to get correct value
+	my ($width,$height) = wwgeometry();
+	#say "width: $width, height: $height";
 
 sub wwgeometry {
 	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
 		= $gui->{wwcanvas}->geometry =~ /(\d+)x(\d+)([+-])(\d+)([+-])(\d+)/;
-	($width,$height)
+	$width,$height
 }
 
 	$gui->{canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
