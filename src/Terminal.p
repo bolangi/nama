@@ -245,8 +245,7 @@ sub paging_allowed {
 		# so do not use the pager in these conditions
 		# or if use_pager config variable is not set.
 		
-		(ref $ui) =~ /Text/
-		and $config->{use_pager} 
+		$config->{use_pager} 
 		and ! $config->{opts}->{T}
 }
 sub pager {
@@ -274,11 +273,10 @@ sub linecount {
 
 sub page_or_print {
 	my (@output) = @_;
-	#$output[-1] .= "\n" unless $output[-1] =~ /\n\z/;
-	return unless paging_allowed();
-	linecount(@output) > $text->{screen_lines} - 2
-		? write_to_temp_file_and_view(@output)
-		: print @output;
+	return unless scalar @output;
+	$output[-1] .= "\n" unless $output[-1] =~ /\n\z/;
+	print (@output), return if !paging_allowed() or scalar(@output) <= $text->{screen_lines} - 2;
+	write_to_temp_file_and_view(@output)
 }
 sub write_to_temp_file_and_view {
 	my @output = @_;
