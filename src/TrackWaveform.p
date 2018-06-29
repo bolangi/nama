@@ -37,23 +37,16 @@ sub find_waveform {
 sub refresh_waveform {
 	my $self = shift;
 	my ($waveform) = $self->find_waveform() || $self->generate_waveform; 
-	$project->{waveform}{current}{$self->name} = $waveform;
 	# remove Tk::Photo widget with waveform image
+	
     # load    " 	
+	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
+	$project->{waveform}{current}{$self->name}{widget} = $gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $widget);
+	$project->{waveform}{current}{$self->name}->@{qw(waveform widget)}  = ($waveform, $widget);
 }
 
 #3m song, 2400 pixels
 #new_version_length_pixels = $length *  $config->{waveform_pixels_per_second}
-#allow user to choose timescale
-#$pr oject->{current_waveform_timescale}
-#$pr oject->{available_timescales}
-
-# 	$gui->{wwframe} = $gui->{wwcanvas}->Frame;
-# 	my $wavform = $gui->{ww}->Photo(-format => 'png', -file => join_path(this_wav_dir(),"tmh-2400x480.png"));
-#	$project->{current_waveform}->{$track->name}->{widget} = $gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $wavform);
-#	$project->{current_waveform}->{$track->name}->{file} = $gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $wavform);
-
-
 
 1 # obligatory
 	
