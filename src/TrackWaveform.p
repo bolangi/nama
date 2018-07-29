@@ -41,8 +41,8 @@ sub refresh_waveform {
 	
     # load    " 	
 	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
-	$project->{waveform}{current}{$self->name}{widget} = $gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $widget);
-	$project->{waveform}{current}{$self->name}->@{qw(waveform widget)}  = ($waveform, $widget);
+	$gui->{waveform}{$self->name} = $gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $widget);
+	#$gui->{waveform}{$self->name}->@{qw(waveform widget)}  = ($waveform, $widget);
 }
 
 #3m song, 2400 pixels
