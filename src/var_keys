@@ -233,6 +233,7 @@ $gui->{_old_abg}				# default active background color
 $gui->{ww}						# main window for waveform test
 $gui->{wwframe}					# waveform frame
 $gui->{wwcanvas}				# waveform canvas
+$gui->{waveform}
 
 
 $config->{soundcard_loopback_delay}
