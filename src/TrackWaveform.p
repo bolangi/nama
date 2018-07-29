@@ -4,7 +4,7 @@ use Modern::Perl;
 use Role::Tiny;
 use Try::Tiny;
 
-# files are assumed to be of the form # sax_1.wav.1200x200.10.png 
+# files are of the form # sax_1.wav.1200x200-10.png 
 # where the numbers correspond to width and height in pixels of the audio
 # waveform image, and the x-scaling in pixels per second (default 10)
 
@@ -22,7 +22,7 @@ sub generate_waveform {
 }
 sub waveform_name {
 	my($path, $width, $height, $pixels) = @_;
-			"$path."  . $width . 'x' . "$height.$pixels.png"
+			"$path."  . $width . 'x' . "$height-$pixels.png"
 }
 
 sub find_waveform {
