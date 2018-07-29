@@ -38,11 +38,10 @@ sub refresh_waveform {
 	my $self = shift;
 	my ($waveform) = $self->find_waveform() || $self->generate_waveform; 
 	# remove Tk::Photo widget with waveform image
-	
+	delete $gui->{waveform}{$self->name};
     # load    " 	
 	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
 	$gui->{waveform}{$self->name} = $gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $widget);
-	#$gui->{waveform}{$self->name}->@{qw(waveform widget)}  = ($waveform, $widget);
 }
 
 #3m song, 2400 pixels

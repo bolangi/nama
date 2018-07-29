@@ -147,7 +147,6 @@ $project->{osc}					# Protocol::OSC object
 $project->{remote_control_socket} # text command listener socket
 $project->{midi_history}		# all text commands sent to midish
 $project->{sample_rate}
-$project->{waveform}
 
 $file->{effects_cache}			# Name of effects discovery cache
 $file->{global_effect_chains}	# Name of global effect chains file
@@ -168,9 +167,9 @@ $gui->{_chm}
 $gui->{_save_id}
 
 # GUI objects
-$gui->{mw}						# main window
-$gui->{ew}						# effects window
-$gui->{ww}						# main window for waveform test
+$gui->{mw}						# main window - control panel
+$gui->{ew}						# main window - effects 
+$gui->{ww}						# main window - waveform display
 $gui->{wwframe}					# waveform frame
 $gui->{wwcanvas}				# waveform canvas
 $gui->{canvas}					# canvas
@@ -230,11 +229,7 @@ $gui->{engine_start}			# start button
 $gui->{engine_stop}				# stop button
 $gui->{_old_bg}					# default background color
 $gui->{_old_abg}				# default active background color
-$gui->{ww}						# main window for waveform test
-$gui->{wwframe}					# waveform frame
-$gui->{wwcanvas}				# waveform canvas
-$gui->{waveform}
-
+$gui->{waveform}				# waveform display widgets, by trackname
 
 $config->{soundcard_loopback_delay}
 $jack->{connections}
