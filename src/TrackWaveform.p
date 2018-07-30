@@ -1,5 +1,5 @@
 package ::TrackWaveform;
-use ::Globals qw($project $config $gui);
+use ::Globals qw($project $config $gui %ti);
 use Modern::Perl;
 use Role::Tiny;
 use Try::Tiny;
@@ -34,18 +34,26 @@ sub find_waveform {
 	 ->in(   ::this_wav_dir()      );
 	@files;
 }
-sub refresh_waveform {
+sub display_waveform {
 	my $self = shift;
-	my ($waveform) = $self->find_waveform() || $self->generate_waveform; 
-	# remove Tk::Photo widget with waveform image
-	delete $gui->{waveform}{$self->name};
-    # load    " 	
+	my ($waveform) = $self->find_waveform; 
+	$waveform //= $self->generate_waveform; 
 	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
-	$gui->{waveform}{$self->name} = $gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $widget);
+	$gui->{waveform}{$self->name}
+			 = $gui->{wwcanvas}->createImage(	0,
+												$self->y_offset_multiplier * $config->{waveform_height}, 
+												-anchor => 'nw', 
+												-image => $widget);
 }
-
-#3m song, 2400 pixels
-#new_version_length_pixels = $length *  $config->{waveform_pixels_per_second}
+sub y_offset_multiplier {
+	my $self = shift;
+	my $before_me;
+	for (2 .. $self->n - 1){
+		$before_me++ if $ti{$_} and $ti{$_}->find_waveform
+	}
+	$before_me
+}
+		
 
 1 # obligatory
 	
