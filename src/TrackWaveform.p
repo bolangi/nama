@@ -13,7 +13,7 @@ sub generate_waveform {
 	my ($width, $height, $pixels_per_second) = @_;
 	$pixels_per_second //= $config->{waveform_pixels_per_second};
 	$height //= $config->{waveform_height};
-	$width //= $self->wav_length * $pixels_per_second;
+	$width //= int( $self->wav_length * $pixels_per_second);
 	my $name = waveform_name($self->full_path, $width, $height, $pixels_per_second);
 	my $cmd = join ' ', 'waveform', "-W $width -H $height", $self->full_path, $name;
 	say $cmd;
