@@ -187,7 +187,7 @@ sub ecasound_controller_index {
 	my $chain = $self->chain;
 	my $track = $ti{$chain};
 	my @ops = @{$track->ops};
-	my $operator_count = $self->offset;
+	my $operator_count = 0;
 	my $position;
 	for my $i (0..scalar @ops - 1) {
 		$position = $i, last if $ops[$i] eq $id;
