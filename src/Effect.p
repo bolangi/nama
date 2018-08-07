@@ -180,21 +180,20 @@ sub registry_index {
 	my $self = shift;
 	$fx_cache->{full_label_to_index}->{ $self->type };
 }
-sub ecasound_controller_index {
+sub ecasound_controller_index { 
 	logsub("&ecasound_controller_index");
 	my $self = shift;
+	my $n = $self->chain;
 	my $id = $self->id;
-	my $chain = $self->chain;
-	my $track = $ti{$chain};
-	my @ops = @{$track->ops};
-	my $operator_count = 0;
-	my $position;
-	for my $i (0..scalar @ops - 1) {
-		$position = $i, last if $ops[$i] eq $id;
-		$operator_count++ if ! ::fxn($ops[$i])->is_controller;
-	}
-	$position -= $operator_count; # skip operators
-	++$position; # translates 0th to chain-position 1
+	my $opcount = 0;
+	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
+	for my $op (@{ $ti{$n}->ops }) { 
+			# increment only controllers
+			next if ! $self->is_controller;
+			++$opcount;   # first index is 1
+			last if $op eq $id
+	} 
+	$opcount;
 }
 sub ecasound_effect_index { 
 	logsub("&ecasound_effect_index");
