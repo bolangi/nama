@@ -1054,7 +1054,7 @@ sub make_scale {
 			-resolution => resolution($i, $p),
 		  -width => 12,
 		  -length => $p{length} ? $p{length} : 100,
-		  -command => sub { ::_update_effect($id, $p, $FX->params->[$p]) },
+		  -command => sub { ::update_ecasound_effect($id, $p, $FX->params->[$p]) },
 			-state => $FX->is_read_only($p) ? 'disabled' : 'normal',
 		  );
 
@@ -1070,7 +1070,7 @@ sub make_scale {
 				-variable => \$FX->{params_log}->[$p],
 		  		-command => sub { 
 					$FX->params->[$p] = exp $FX->params_log->[$p];
-					::_update_effect($id, $p, $FX->params->[$p]);
+					::update_ecasound_effect($id, $p, $FX->params->[$p]);
 					$log_display->configure(
 						-text => 
 						$fx_cache->{registry}->[$i]->{params}->[$p]->{name} =~ /hz|frequency/i
@@ -1094,7 +1094,7 @@ sub make_scale {
 		return ${ $p{parent} }->Entry(
 			-textvariable =>\$FX->params->[$p],
 			-width => 6,
-	#		-command => sub { ::_update_effect($id, $p, $FX->params->[$p]) },
+	#		-command => sub { ::update_ecasound_effect($id, $p, $FX->params->[$p]) },
 			# doesn't work with Entry widget
 			);	
 

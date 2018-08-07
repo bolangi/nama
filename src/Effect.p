@@ -461,7 +461,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					modify_effect
 					modify_multiple_effects
 
-					_update_effect
+					update_ecasound_effect
 					update_effect
 					sync_effect_parameters
 					find_op_offsets
@@ -886,7 +886,7 @@ sub new_effect_id {
 ## synchronize Ecasound chain operator parameters 
 #  with Nama effect parameter
 
-sub _update_effect {
+sub update_ecasound_effect {
 	local $config->{category} = 'ECI_FX';
 
 	# update the parameters of the Ecasound chain operator
@@ -938,8 +938,8 @@ sub _update_effect {
 sub update_effect {
 	my ($id, $param, $val) = @_;
 	return if ! defined fxn($id);
-	_update_effect( @_ );
 	fxn($id)->params->[$param] = $val;
+	update_ecasound_effect( @_ );
 }
 
 sub sync_effect_parameters {
