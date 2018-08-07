@@ -188,10 +188,11 @@ sub ecasound_controller_index {
 	my $opcount = 0;
 	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
 	for my $op (@{ $ti{$n}->ops }) { 
-			# increment only controllers
-			next if ! $self->is_controller;
-			++$opcount;   # first index is 1
+		# increment only controllers
+		if ( $self->is_controller ){ 
+			++$opcount;
 			last if $op eq $id
+		}
 	} 
 	$opcount;
 }
