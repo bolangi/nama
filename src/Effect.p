@@ -937,8 +937,8 @@ sub _update_effect {
 
 sub update_effect {
 	my ($id, $param, $val) = @_;
-	_update_effect( @_ );
 	return if ! defined fxn($id);
+	_update_effect( @_ );
 	fxn($id)->params->[$param] = $val;
 }
 
