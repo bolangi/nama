@@ -1122,6 +1122,7 @@ Use a different name, or use "overwrite_effect_chain"/) && return;
 		name   => $item{ident},
 		ops_list => $ops,
 		inserts_data => $::this_track->inserts,
+		#fade_data => $::this_track->fades, # do we want fades by default?
 		@options,
 	);
 	1;
