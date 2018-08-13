@@ -121,6 +121,7 @@ sub new {
 		$vals{inserts_data} ||= [];
 		$vals{ops_list} 	||= [];
 		$vals{ops_data} 	||= {};
+		$vals{fade_data}    ||= [];
 		croak "undeclared field in: @_" if grep{ ! $_is_field{$_} } keys %vals;
 		croak "must have exactly one of 'global' or 'project' fields defined" 
 			unless ($vals{attrib}{global} xor $vals{attrib}{project});
@@ -350,8 +351,16 @@ sub add {
 	my $added = $self->add_ops($track, $args);
 	$self->add_inserts($track);
 	$self->add_region($track) if $self->region;
+	$self->add_fades($track) if $self->fade_data;
 	$added
 
+}
+sub add_fades {
+	my ($self, $track) = @_;
+	map{ 
+		my %h = %$_; 
+		my $fade = ::Fade->new( %h, track => $track->name ) ;
+	} $self->{fade_data}->@*;
 }
 sub destroy {
 	my $self = shift;
