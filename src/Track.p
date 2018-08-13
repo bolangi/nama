@@ -234,6 +234,7 @@ sub play { $_[0]->rec_status eq PLAY}
 sub off  { $_[0]->rec_status eq OFF }
 
 sub current_midi {}
+sub fades { grep { $_->{track} eq $_[0]->name } values %::Fade::by_index  }
 
 } # end package
 
