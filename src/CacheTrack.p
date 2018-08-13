@@ -235,11 +235,13 @@ sub update_cache_map {
 			);
 			#	is_mixing => $track->is_mixing,
 			$args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
+			$args{fade_data} = [ map  { $_->as_hash } $track->fades ];
 			$args{track_target_original} = $track->target if $track->target; 
 			# late, because this changes after removing target field
 			map{ delete $track->{$_} } qw(target);
 			# update track settings
 			my $ec = ::EffectChain->new( %args );
+			map{ $_->remove        } $track->fades;
 			map{ remove_effect($_) } @ops_remove_list;
 			map{ $_->remove        } @inserts_list;
 			map{ delete $track->{$_} } qw( region_start region_end target );
