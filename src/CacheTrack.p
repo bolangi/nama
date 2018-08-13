@@ -167,10 +167,6 @@ sub cache_engine_run {
 	connect_transport()
 		or throw("Couldn't connect engine! Aborting."), return;
 
-	# remove fades from target track
-	
-	::Effect::remove_op($args->{track}->fader) if defined $args->{track}->fader;
-
 	$args->{processing_time} = $setup->{audio_length} + $args->{additional_time};
 
 	pagers($args->{track}->name.": processing time: ". d2($args->{processing_time}). " seconds");
