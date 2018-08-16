@@ -183,6 +183,8 @@ sub definitions {
 		midi_default_input_channel => 'keyboard',
 		ecasound_channel_ops 		=> {map{$_,1} qw(chcopy chmove chorder chmix chmute)},
 		waveform_height				=> 200,
+		waveform_canvas_x			=> 2400,
+		waveform_canvas_y			=> 480,
 		waveform_pixels_per_second  => 10,
 		loop_chain_channel_width     => 16,
 

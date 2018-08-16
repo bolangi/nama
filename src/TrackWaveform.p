@@ -39,12 +39,15 @@ sub display_waveform {
 	my ($waveform) = $self->find_waveform; 
 	$waveform //= $self->generate_waveform; 
 	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
-	$gui->{waveform}{$self->name}
-			 = $gui->{wwcanvas}->createImage(	0,
+	$gui->{waveform}{$self->name} = [];
+	push $gui->{waveform}{$self->name}->@*, $gui->{wwcanvas}->createImage(	0,
 												$self->y_offset_multiplier * $config->{waveform_height}, 
 												-anchor => 'nw', 
 												-image => $widget);
 }
+# tagname for all items in waveform display
+# sax-waveform
+
 sub y_offset_multiplier {
 	my $self = shift;
 	my $before_me;

@@ -52,9 +52,9 @@ sub init_gui {
 	
 	$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
 	$gui->{wwcanvas}->configure(
-		scrollregion =>[0,0,2400,480],
-		-width => 2400,
-		-height => 480	
+		scrollregion =>[0,0,$config->{waveform_canvas_x},$config->{waveform_canvas_y}],
+		-width => $config->{waveform_canvas_x},
+		-height => $config->{waveform_canvas_y},
 		);
 	# incorrect, call to wwgeometry too early to get correct value
 	my ($width,$height) = wwgeometry();
