@@ -10,7 +10,9 @@ use ::Assign qw(:all);
 use ::Util qw(colonize);
 no warnings 'uninitialized';
 
-our @ISA = '::';      ## default to root class
+our @ISA = '::';      ## default to root namespace, e.g.  Refresh_subs, Graphical_subs
+						# actually this doesn't seem like a
+						# good idea
 # widgets
 
 ## The following methods belong to the Graphical interface class
