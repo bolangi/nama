@@ -138,13 +138,14 @@ sub current_position {
 }
 sub start_heartbeat {
  	$project->{events}->{poll_engine} = AE::timer(0, 1, \&::heartbeat);
+	$ui->setup_playback_indicator();
 }
-
 sub stop_heartbeat {
 	# the following test avoids double-tripping rec_cleanup()
 	# following manual stop
 	return unless $project->{events}->{poll_engine};
 	undef $project->{events}->{poll_engine};
+	undef $project->{events}->{update_playback_position_display};
 	$ui->reset_engine_mode_color_display();
 	rec_cleanup() 
 }

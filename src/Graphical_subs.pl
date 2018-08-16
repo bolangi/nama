@@ -1150,6 +1150,22 @@ sub destroy_marker {
 	$gui->{marks}->{$pos}->destroy; 
 }
 
+sub setup_playback_indicator {
+	my $ui = shift;
+	$project->{events}->{update_playback_position_display} = AE::timer(0, 0.1, \&update_indicator);
+} 	
+sub update_indicator {
+	$gui->{wwcanvas}->delete('playback-indicator');
+	my $pos = ::ecasound_iam("getpos");
+	my $xpos = int( $pos * $config->{waveform_pixels_per_second} );
+	$gui->{wwcanvas}->createLine(
+			$xpos,0,
+			$xpos,$config->{waveform_canvas_y},
+			-fill => 'red',
+			-width => 1,
+			-tags => 'playback-indicator'
+	);
+}
 
 sub get_saved_colors {
 	logsub("&get_saved_colors");
