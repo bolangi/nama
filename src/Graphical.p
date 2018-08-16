@@ -3,7 +3,7 @@
 package ::Graphical;  ## gui routines
 use Modern::Perl; use Carp;
 our $VERSION = 1.071;
-use ::Globals qw($text);
+use ::Globals qw($text $prompt);
 
 use Module::Load::Conditional qw(can_load);
 use ::Assign qw(:all);
@@ -17,7 +17,6 @@ our @ISA = '::';      ## default to root class
 
 sub hello {"make a window";}
 sub loop {
-	package ::;
 	$text->{term_attribs}->{already_prompted} = 0;
 	$text->{term}->tkRunning(1);
   	while (1) {
