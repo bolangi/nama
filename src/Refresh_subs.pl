@@ -1,15 +1,9 @@
 ## refresh functions
 
 sub refresh_waveform_window {
-	# remove previous widgets
-	# get list of tracks
-	# iterate 
-	#   display waveform
-	#   write legend
-	# $gui->{wwcanvas} 
-# 	my @playable = grep{ $_->play } all_tracks();
-# 	$_->exists_waveform or $_->generate_waveform
-# 	pack waveform
+	$gui->{wwcanvas}->delete('waveform',$_->name) for all_tracks();
+ 	my @playable = grep{ $_->play} user_tracks();
+	map{ $_->display_waveform } @playable;
 }
 sub set_widget_color {
 	my ($widget, $status) = @_;
