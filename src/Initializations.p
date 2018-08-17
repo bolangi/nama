@@ -264,7 +264,7 @@ sub initialize_interfaces {
 
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 	
-	::MidiEngine->new(name => $config->{midi_engine_name});
+	::MidiEngine->new(name => $config->{midi_engine_name}) if $config->{use_midi}; 
 	initialize_ecasound_engine();
 		
 	start_osc_listener($config->{osc_listener_port}) 
