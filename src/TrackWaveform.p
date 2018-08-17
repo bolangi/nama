@@ -40,9 +40,10 @@ sub display_waveform {
 	$waveform //= $self->generate_waveform; 
 	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
 	$gui->{waveform}{$self->name} = [];
-	push $gui->{waveform}{$self->name}->@*, $gui->{wwcanvas}->createImage(	0,
+	$gui->{wwcanvas}->createImage(	0,
 												$self->y_offset_multiplier * $config->{waveform_height}, 
 												-anchor => 'nw', 
+												-tags => ['waveform', $self->name],
 												-image => $widget);
 }
 # tagname for all items in waveform display
