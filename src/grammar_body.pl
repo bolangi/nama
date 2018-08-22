@@ -896,11 +896,11 @@ add_effect_before: _add_effect_before before add_target value(s?) {
 parent: op_id
 modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) value {
 	::modify_multiple_effects( @item{qw(fx_alias(s) parameter(s) sign value)});
-	::pager(::show_effect(@{ $item{'fx_alias(s)'} }))
+	::pager(::show_effect(@{ $item{'fx_alias(s)'} })); 1
 }
 modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) sign value {
 	::modify_multiple_effects( @item{qw(fx_alias(s) parameter(s) sign value)});
-	::pager(::show_effect(@{ $item{'fx_alias(s)'} }));
+	::pager(::show_effect(@{ $item{'fx_alias(s)'} })); 1
 }
 modify_effect: _modify_effect parameter(s /,/) value {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
@@ -909,12 +909,12 @@ modify_effect: _modify_effect parameter(s /,/) value {
 		$item{'parameter(s)'},
 		undef,
 		$item{value});
-	::pager( ::show_effect(::this_op(), "with track affiliation"))
+	::pager( ::show_effect(::this_op(), "with track affiliation")); 1
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
 	::modify_multiple_effects( [::this_op()], @item{qw(parameter(s) sign value)});
-	::pager( ::show_effect(::this_op()));
+	::pager( ::show_effect(::this_op())); 1
 }
 fx_alias3: ident { 
 	join " ", 
