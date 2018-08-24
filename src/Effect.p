@@ -615,6 +615,7 @@ sub append_effect {
 		}
 		$ui->add_effect_gui(\%args) unless $track->hide;
 
+		# XX we should announce that will take effect in new setup
 		$add_effects_sub = $FX->is_channel_op ? sub { ::request_setup() } : sub{ $FX->apply_op };
 	}
 	if( ::valid_engine_setup() )
