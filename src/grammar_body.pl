@@ -547,7 +547,7 @@ source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
 	my $status = $::this_track->rec_status;
-	::pager_newline($::this_track->name, ": input set to ", $::this_track->input_object_text, "\n",
+	::pager_newline(join "",$::this_track->name, ": input set to ", $::this_track->input_object_text, "\n",
 	"however track status is ", $status)
 		if $status ne ::REC and $status ne ::MON;
 	1;
