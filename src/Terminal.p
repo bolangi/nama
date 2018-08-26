@@ -225,7 +225,7 @@ sub throw {
 	logsub("&throw");
 	pager_newline(@_)
 }
-sub pagers { &pager_newline } # pass arguments along
+sub pagers { &pager_newline(join "",@_) } # pass arguments along
 
 sub pager_newline { 
 
