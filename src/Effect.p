@@ -184,17 +184,16 @@ sub ecasound_controller_index {
 	logsub("&ecasound_controller_index");
 	my $self = shift;
 	my $id = $self->id;
-	my $chain = $self->chain;
-	my $track = $ti{$chain};
-	my @ops = @{$track->ops};
-	my $operator_count = 0;
-	my $position;
-	for my $i (0..scalar @ops - 1) {
-		$position = $i, last if $ops[$i] eq $id;
-		$operator_count++ if ! ::fxn($ops[$i])->is_controller;
-	}
-	$position -= $operator_count; # skip operators
-	++$position; # translates 0th to chain-position 1
+	my $n = $self->chain;
+	my $opcount = 0;
+	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
+	for my $op (@{ $ti{$n}->ops }) { 
+		# increment only controllers
+		next unless fxn($op)->is_controller;
+		$opcount++;
+		last if $op eq $id;
+	} 
+	$opcount;
 }
 sub ecasound_effect_index { 
 	logsub("&ecasound_effect_index");
