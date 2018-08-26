@@ -183,6 +183,9 @@ sub definitions {
 		midi_default_input_channel => 'keyboard',
 		ecasound_channel_ops 		=> {map{$_,1} qw(chcopy chmove chorder chmix chmute)},
 		waveform_height				=> 200,
+		waveform_canvas_x			=> 2400,
+		waveform_canvas_y			=> 480,
+		waveform_pixels_per_second  => 10,
 		loop_chain_channel_width     => 16,
 
 	}, '::Config';
@@ -261,7 +264,7 @@ sub initialize_interfaces {
 
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 	
-	::MidiEngine->new(name => $config->{midi_engine_name});
+	::MidiEngine->new(name => $config->{midi_engine_name}) if $config->{use_midi}; 
 	initialize_ecasound_engine();
 		
 	start_osc_listener($config->{osc_listener_port}) 

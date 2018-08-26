@@ -4,7 +4,7 @@ B<Nama> - multitrack recorder and digital audio workstation
 
 =head1 SYNOPSIS
 
-B<nama> [I<options>] [I<project_name>]
+B<nama> [I<options>] [I<project-name>]
 
 =head1 DESCRIPTION
 
@@ -395,15 +395,15 @@ track, shifting the start time, applying effects, adjusting volume, etc.
 
 =head3 Using Tracks from Other Projects
 
-The C<link_track> clones a read-only track from
+The C<link-track> clones a read-only track from
 another track, which may belong to a different project. 
 
 =head2 Effects
 
 Each track gets volume and pan effects by default.  New
-effects added using C<add_effect> are applied before pan
+effects added using C<add-effect> are applied before pan
 volume controls.  You can position effects anywhere you
-choose using C<insert_effect> or C<position_effect>.
+choose using C<insert_effect> or C<position-effect>.
 
 =head3 Fades
 
@@ -455,13 +455,13 @@ three tracks to it. The mix track takes the name of
 the bus and is stereo by default.
 
 	# create a bus named Strings with a same-named mix track
-	add_bus Strings 
+	add-bus Strings 
 
 	# create tracks for the bus
-	add_tracks violin cello bass
+	add-tracks violin cello bass
 
 	# move the tracks from the Main bus (default) to the Strings bus
-	for violin cello bass; move_to_bus Strings
+	for violin cello bass; move-to-bus Strings
 
 	# use the mix track to control bus output volume
 	Strings vol - 10
@@ -558,7 +558,7 @@ Mixdown proceeds after you start the transport.
 
 As a convenience, Mixdown_nn.wav will be symlinked to
 F<<branch_name>_nn.wav> in the project directory. (If git is
-disabled or not available F<<project_name>_nn.wav> is used
+disabled or not available F<<project-name>_nn.wav> is used
 instead.)  Corresponding encoded files are created if the
 "mixdown_encodings" option is set. Acceptable values are a
 space-separated list. The default is "mixdown_encodings: ogg

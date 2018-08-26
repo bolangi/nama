@@ -1,217 +1,175 @@
-@{$help->{arr_topic}} = qw( all
-                    project
-                    track
-                    chain_setup
-                    transport
-                    marks
-                    effects
-                    group
-                    bus
-                    mixdown
-                    prompt 
-                    diagnostics
-					edits
-					fades
-					command_line_options
+$help->{arr_topic}->@* = qw(
+project
+track_basics
+track_status
+wav_versions
+transport
+track_fader
+effect_info
+effect_manipulation
+marks
+time_shifting
+track_io
+inserts
+fades
+group
+bus
+mixdown
+prompt
+normalization
+track_caching
+effect_chains
+effect_profiles
+advanced_transport
+version_control
+diagnostics
+edits
+advanced
                 ) ;
+my $i;
+my @display_index = map{ $help->{index}->{++$i} = $_;  # integer => topic key
+                            s/_/ /g; 
+                            my $name = ucfirst $_; 
+                            $help->{title}->[$i] = $name;
+                            $name = join " ",$i, $name;
+                            $help->{display}->[$i] = $name;
+                            } $help->{arr_topic}->@*; 
+sub pad {
+    my ($text, $len) = @_;
+    my $pad = ' ' x ( $len - length $text);
+    $text.$pad
+}
+my @twocolumn = map{ pad($display_index[$_], 22).$display_index[$_+13].$/ } 0..12;
 
-%{$help->{topic}} = (
+
+$help->{topic}->%*  = (
 
 help => <<HELP,
-   help <command>          - show help for <command>
-   help <fragment>         - show help for commands matching /<fragment>/
-   help <ladspa_id>        - invoke analyseplugin for info on a LADSPA id
-   help <topic_number>     - list commands under <topic_number> 
-   help <topic_name>       - list commands under <topic_name> (lower case)
+   help <command>       - show help for <command>
+   help <fragment>      - show help for commands matching /<fragment>/
+   help <ladspa_id>     - info on a LADSPA id
+   help <topic_number>  - list commands under <topic_number> 
 HELP
 
-project => <<PROJECT,
-   load-project, load        - load an existing project 
-   project-name, name        - show the current project name
-   create-project, create    - create a new project directory tree 
-   list-projects, lp         - list all Nama projects
-   get-state, get            - retrieve named file or tag
-   save-state, keep, save    - save state as file or tag
-   exit, quit                - exit program, saving state 
+project => <<'PROJECT',
+   load-project, load      - load an existing project, e.g 'load <project-name>'
+   create-project, create  - create a new project (usually under $HOME/nama/project-name/)
+   list-projects, lp       - list all projects
+   undo                    - go back in time to the state before the last command
+   redo                    - reapply the step rolled back by undo
+   exit, quit              - exit program, saving state 
 
- (Version control)
 
-   save                      - save, commit and tag with <tagname>
-   get                       - checkout tag <tagname> 
-                               or associated branch and load
-   branch, br                - switch to designated branch and load
-   list-branches, lbr        - list branches and tags (without arguments)
-   new-branch, nbr           - create a new branch starting at the current 
-                               commit or a specified commit 
-   tag                       - tag current commit with a name and optional 
-                               message
-   
 PROJECT
 
-chain_setup => <<SETUP,
-   show-setup, show          - show status, all tracks
-   show-chain-setup, chains  - show Ecasound Setup.ecs file
-   arm                       - generate and connect chain setup (not usually necessary)
+track_basics => <<'TRACKBASICS',
+   add-track, add          - Create a new track
 
-SETUP
-
-track => <<TRACK,
-
-   add-track, add            -  create one or more new tracks
-                                example: add sax; r 3 
-                                    (record sax from input 3) 
-                                example: add piano; r synth
-                                    (record piano from JACK client "synth") 
-
- - track status
-
-   rec                     -  set track to REC (record and monitor live signal source)
-   mon                     -  set track to MON (monitor live signal source)
-   play                    -  set track to PLAY (WAV file playback)
-   off                     -  set track OFF (omit from setup)
-
- - vol/pan 
-
-   pan, p                  -  get/set pan position
-   pan-back, pb            -  restore pan after pr/pl/pc  
-   pan-center, pc          -  set pan center    
-   pan-left, pl            -  pan track fully left    
-   pan-right, pr           -  pan track fully right    
-   unity                   -  unity volume    
-   vol, v                  -  get/set track volume    
-                              sax vol + 20 (increase by 20)
-                              sax vol - 20 (reduce by 20)
-                              sax vol * 3  (multiply by 3)
-                              sax vol / 2  (cut by half) 
-   mute, c, cut            -  mute volume 
-   unmute, nomute, uncut, C -  restore muted volume
-
-   import-audio, import      - import a WAV file, resampling if necessary
-
-   remove-track              - remove effects, parameters and GUI for current
-                               track
-
-   show-tracks, show, tracks -  show status of all tracks
-
-   show-track, sh            -  show status of current track,
-                                including effects, versions, 
-                                modifiers,  "sax sh"
-
-   show-bus-tracks, shb      -  show tracks of current bus
-
-   show-tracks-all showa sha - show all tracks, including hidden
-
-   link-track, link          -  create a new, read-only track that uses audio
-                                files from an existing track. 
-
-                                example: link-track new-piano piano
-                                example: link-track intro Mixdown my-song-intro 
-
-
-
-   stereo                    -  set track width to 2 channels
-
-   mono                      -  set track width to 1 channel
-
-   solo                      -  mute all tracks but current track
-
-   all, nosolo               -  return to pre-solo status
-
- - track inputs and outputs 
-
-   source, src, r            -  set track source
-                             -  with no arguments returns current signal source
-
-    ----------------------------------------------------------
-	for this input              use this command
-    ----------------------------------------------------------
-
-     * soundcard channel 3      source 3 
-
-     * JACK client              source fluidsynth
+      Example: add sax     - Add a new track 'sax', mono by default.
+                           - Sax is selected, and receives next commands.
+               source 3    - Use soundcard channel 3 as input
+               rec         - Arm for recording an audio file (e.g. sax_1.wav)
+               start       - Start engine, begin recording
+               stop        - Stop engine, close file and queue for playback
      
-     * JACK port                source fluidsynth:left
-  
-     * JACK port with spaces    source "MPlayer [20120]:out_0"
- 
-     * unconnected JACK port    source manual (or 'man')
-     
-       note: the port for mono track 'piano' would be ecasound:piano_in_1
+               <SPACE> can be used at the prompt to start and stop engine
+   
+      Example: add piano; source synth; stereo; rec
+   
+      This line of commands prepares to record track 'piano' in stereo 
+      width from JACK client 'synth'. Use of semicolons allow several 
+      commands in one line of input.
 
-     * JACK ports list          source drum.ports (ports list from drums.ports)
-                                source ports  (ports list from trackname.ports)
-    -----------------------------------------------------------
+   import-audio, import    - Import a .wav file, resampling if necessary
+   remove-track            - Remove effects, parameters and GUI for current track
+TRACKBASICS
 
-   send, out, m, aux         -  create an auxiliary send
-                             -  same arguments as 'source'
-                             -  currently one send allowed per track
- - version 
+track_status => <<'TRACKSTATUS',
 
-   set_version, version, ver, n  -  set current track version
+Prepare conditions for next engine run
 
-   list_version, lver, lv        - list version numbers of current track
+   rec              -  REC: record and monitor audio source
+   mon              -  MON: monitor audio source
+   play             -  PLAY: queue .wav file for playback
+   off              -  OFF: omit track from audio network
+   show-tracks,show - show status, all tracks
+   show-track,sh    - show status of current track, including effects, versions, etc.
+   chains           - show the audio network configuration
+TRACKSTATUS
 
- - chain object modifiers
 
-   mod, mods, modifiers    - show or assign select/reverse/playat modifiers
-                             for current track
-   nomod, nomods, 
-   nomodifiers             - remove all modifiers from current track
+wav_versions => <<'WAV_VERSIONS',
+   list-version, lver       - list version numbers of audio files in the current track
+                            - (this information also appears in the show-track listing)
+   set-version, version, n  - select a version number for the current track
 
- - signal processing
+A track can record multiple audio files ('takes'). The audio filenames
+follow the trackname so that recording a track named 'piano' will
+produce files with names with names like piano_1.wav, piano_2.wav.
+Audio files recorded by Nama are considered immutable resources and
+stored outside of version control.
 
-   ecanormalize, normalize, norm 
-                           - run ecanormalize on current track version
-   ecafixdc, fixdc         - run ecafixdc on current track version
-   autofix-tracks, autofix - fixdc and normalize selected versions of all PLAY
-                             tracks
-
- - cutting and time shifting
-
-   set-region,    srg      - specify a track region using times or mark names
-   add-region,    arg      - define a region creating an auxiliary track
-   remove-region, rrg      - remove auxiliary track or region definition
-   shift-track,   shift    - set playback delay for track/region
-   unshift-track, unshift  - eliminate playback delay for track/region
-
-- track caching (freezing)
-
-   cache-track,   cache,   ct  - store effects-processed track signal as new version
-   uncache-track, uncache, unc - select uncached track version, replace effects
-
- - hazardous or destructive commands for advanced users
-
-   set-track               - directly set current track parameters
-
-   destroy-current-wav     - unlink current track's selected WAV version.
-
-TRACK
+One version can be selected as streaming source when when the track is
+set to PLAY. The version number is zero by default, which means
+select the most recent (highest numbered) take. The bus-version command
+will set default version number for all tracks belonging to the current 
+bus.
+WAV_VERSIONS
 
 transport => <<TRANSPORT,
-   start, t, SPACE    -  Start processing. SPACE must be at beginning of 
-                         command line.
-   stop, s, SPACE     -  Stop processing. SPACE must be at beginning of 
-                         command line.
+   start, t, SPACE    -  Start processing. SPACE must be at beginning of command line.
+   stop, s, SPACE     -  Stop processing. SPACE must be at beginning of command line.
    rewind, rw         -  Rewind  some number of seconds, i.e. rw 15
    forward, fw        -  Forward some number of seconds, i.e. fw 75
    setpos, sp         -  Set the playback head position, i.e. setpos 49.2
    getpos, gp         -  Get the current head position 
    to-start, beg      - set playback head to start
    to-end, end        - set playback head to end
-
-   loop-enable, loop  -  loop playback between two points
-                         example: loop 5.0 200.0 (positions in seconds)
-                         example: loop start end (mark names or numbers)
-   loop-disable, noloop, nl
-                      -  disable looping
-
-   preview            -  start engine with WAV recording disabled
-                         (for mic check, etc.) Release with 'arm'.
-
-   doodle             -  Like preview, with WAV playback also disabled
-                         Release with 'arm'.
-                         
 TRANSPORT
+track_fader => <<'TRACKFADER',
+   Track volume/pan fader can be used to change settings for the current track.
+
+   pan, p                   -  get/set pan position
+   pan-back, pb             -  restore pan after pr/pl/pc  
+   pan-center, pc           -  set pan center    
+   pan-left, pl             -  pan track fully left    
+   pan-right, pr            -  pan track fully right    
+   volume, vol              -  set or adjust track volume (in dB)
+       Examples:
+       vol 0   (set level to 0 dB or unity gain)
+       vol -20 (set level to -20 dB)
+       vol - 3 (reduce vol by 3 dB) 
+                                      
+   unity                    -  set volume gain to unity
+   mute, c, cut             -  mute track volume 
+   unmute, nomute, uncut, C -  restore muted volume
+   solo                     -  mute all tracks but current track
+   all, nosolo              -  return to pre-solo status
+TRACKFADER
+effect_info => <<'EFFECT_INFO',
+   ladspa-register, lrg     - list LADSPA effects
+   preset-register, prg     - list Ecasound presets
+   ctrl-register, crg       - list Ecasound controllers 
+   find-effect, fe          - list available effects matching arguments
+                              example: find-effect reverb
+   help-effect, he          - full information about an effect 
+                              example: help-effect 1209 
+                                (information about LADSPA plugin 1209)
+                              example: help-effect valve
+                                (information about LADSPA plugin valve)
+EFFECT_INFO
+effect_manipulation => <<'EFFECT_DO',
+   add-effect,     afx           - add an effect to the current track
+                                   Example: afx ea 50
+   add-controller, acl           - add an Ecasound controller to the parameter
+                                   of an effect  
+   insert-effect,  ifx           - insert an effect before another effect
+   modify-effect,  mfx           - set, increment or decrement effect parameter
+   remove-effect,  rfx           - remove an effect or controller
+   append-effect,  apfx          - add effect to the end of current track effect list 
+   bypass-effects, bypass, bye   - suspend current track effects except vol/pan
+   restore-effects, restore, ref - restore track effects
+EFFECT_DO
 
 marks => <<MARKS,
    new-mark,      mark, k     - drop mark at current position, with optional name
@@ -223,62 +181,93 @@ marks => <<MARKS,
    remove-mark,   rmk,  rom   - remove current mark
    modify-mark, move-mark, 
     mmk, mm                   - change the time setting of current mark
+
+Marks belong to the overall timeline, not to a particular track.
+They do not move when a track is time-shifted.  Many commands
+that can take time positions as as arguments can also take mark
+names. This has the advantage that the time of effect will
+change when the mark is adjusted.  
 MARKS
 
-effects => <<EFFECTS,
-    
- - information commands
+time_shifting => <<'TIME_SHIFTING',
+   Regions and time shifting
 
-   ladspa-register, lrg       - list LADSPA effects
-   preset-register, prg       - list Ecasound presets
-   ctrl-register,   crg       - list Ecasound controllers 
-   find-effect,     fe        - list available effects matching arguments
-                                example: find-effect reverb
-   help-effect, he            - full information about an effect 
-                                example: help-effect 1209 
-                                  (information about LADSPA plugin 1209)
-                                example: help-effect valve
-                                  (information about LADSPA plugin valve)
+   set-region,    srg      - specify a track region using times or mark names
+   add-region,    arg      - define a region creating an auxiliary track
+   remove-region, rrg      - remove auxiliary track or region definition
+   shift-track,   shift    - set playback delay for track/region
+   unshift-track, unshift  - eliminate playback delay for track/region
+TIME_SHIFTING
 
- - effect manipulation commands
+track_io => <<'TRACKIO',
+   Track inputs and outputs are set by source and send commands, 
+   which take similar arguments. 
 
-   add-effect,     afx        - add an effect to the current track
-   add-controller, acl        - add an Ecasound controller
-   insert-effect,  ifx        - insert an effect before another effect
-   modify-effect,  mfx        - set, increment or decrement effect parameter
-   remove-effect,  rfx        - remove an effect or controller
-   append-effect, apfx        - add effect to the end of current track effect list 
-   bypass-effects, bypass, bye   - suspend current track effects except vol/pan
-   restore-effects, restore, ref - restore track effects
+   source, src, r            -  set track source
+                             -  with no arguments returns current signal source
 
--  send/receive inserts
+    ----------------------------------------------------------
+    for this input              use this command
+    ----------------------------------------------------------
+
+     * soundcard channel 3      source 3 
+
+     * soundcard channels 3,4   source 3; stereo
+
+     * JACK client              source fluidsynth
+     
+     * JACK port                source fluidsynth:left
+  
+     * JACK port with spaces    source "MPlayer [20120]:out_0"
+ 
+     * unconnected JACK port    source manual
+     
+       note: the port for mono track 'piano' would be ecasound:piano_in_1 XX
+
+     * A list of JACK ports     source drum.ports (ports list from drums.ports)
+                                source ports (ports list from <trackname>.ports)
+
+     * from another track (after effects processing)
+                                source track Strings
+     * from a bus (raw output)  source bus Strings
+     
+     * from another track (before effects processing)
+                                source loop sax_in
+
+    -----------------------------------------------------------
+
+   send, out, m, aux         -  Create an auxiliary send
+                                Same arguments as 'source'.
+                                One send is allowed per track.
+
+   Sends are not necessary to set up as most tracks are part
+   of a bus that routes the audio output. 
+TRACKIO
+inserts => <<'INSERTS',
+
+Use inserts to pass an audio stream through an external effect
+such as a JACK client or an analog fx box hooked to
+your soundcard. 
 
    add-insert,         ain    - add an insert to current track
    remove-insert,      rin    - remove an insert from current track
    set-insert-wetness, wet    - set/query insert wetness 
                                 example: wet 99 (99% wet, 1% dry)
-
--  effect chains (presets, each consisting of multiple effects)
-
-   find-effect-chains,     fec   - find all effect chains (filtering on key/value pairs, if supplied)
-   find-user-effect-chains,fuec  - find all user-defined effect chains, filtering as above
-   new-effect-chain,       nec   - define a new effect chain
-   overwrite-effect-chain, oec   - as above, but overwite existing definition
-   add-effect-chain,       aec   - add an effect chain to the current track
-   delete-effect-chain,    dec   - delete an effect chain definition
-
--  effect profiles (effect chains for a group of tracks)
-
-   new-effect-profile, nep       - define a new effect profile
-   apply-effect-profile, aep     - apply an effect profile
-                                   (current effects are bypassed)
-   overlay-effect-profile, oep   - apply an effect profile,
-                                   adding to current effects
-   delete-effect-profile, dep    - delete an effect profile definition
-
-EFFECTS
+INSERTS
+fades => <<FADES,
+   add-fade,         afd, fade  - add fade (in or out) to current track
+                                  examples: 
+                                      fade in song-start 0.2
+                                  (fades in at mark 'song-start' over 0.2 s)
+                                      fade out 0.5 song-start
+                                  (fades out over 0.5 s ending at 'song-start')
+                                  
+   remove-fade,      rfd        - remove fade (by index)
+   list-fade         lfd        - list all fades
+FADES
 
 group => <<GROUP,
+Group control
    new-bunch, bunch, nb       - name a bunch of tracks
                                 e.g. bunch strings violins cello bass
                                 e.g. bunch 3 4 6 7 (track indexes)
@@ -302,23 +291,16 @@ group => <<GROUP,
 GROUP
 
 bus => <<BUS,
-   add-bus,             abs   - create a sub-bus feeding a regular user track
-                                of the same name
-                                example: add-bus Strings 
-                                         add-tracks violin cello bass
-                                         for cello violin bass; move-to-bus Strings
-   list-buses,          lbs   - list bus data
-   remove-bus                 - remove a bus
-   bus-rec                    - set current bus to REC
-   bus-mon                    - set current bus to MON
-   bus-off                    - set current bus to OFF
-   bus-play                   - set current bus to OFF
-   bus-version                - select default version for all tracks on bus
-
-   add-submix-raw,      asr   - create bus and slave tracks for 
-                                sending pre-fader track signals
-   add-submix-cooked,   asc   - as above, for post-fader signals
-   update-submix,       usm   - refresh send bus track list
+   add-bus, abs         - create a sub-bus feeding a regular user track
+                          of the same name
+                          example: add-bus Strings 
+                                   add-tracks violin cello bass
+                                   for cello violin bass; move-to-bus Strings
+   list-buses, lbs      - list bus data
+   remove-bus           - remove a bus
+   bus-version          - select default .wav version for all tracks on bus
+   bus-off              - set all tracks belonging to bus to OFF
+   bus-on               - restore bus tracks to status at previous bus-off
 BUS
 
 mixdown => <<MIXDOWN,
@@ -354,6 +336,83 @@ prompt => <<PROMPT,
 
 PROMPT
 
+normalization => <<'NORMAL',
+Normalization
+
+   ecanormalize, normalize, norm 
+                           - run ecanormalize on current track version
+   ecafixdc, fixdc         - run ecafixdc on current track version
+   autofix-tracks, autofix - fixdc and normalize selected versions of all PLAY
+NORMAL
+
+track_caching => <<'CACHING',
+Track caching (freezing) - render effects to a new .wav file to fix a result and save cpu
+
+   cache                       - cache the output of a track or bus as a .wav file
+   uncache                     - restore effects and settings prior to cache operation
+CACHING
+
+effect_chains => <<'EFFECT_CHAINS',
+
+Effect chains are presets that can consist of multiple effects. They are a
+convenient way to save by name sequences of effects with the parameters that
+you commonly use. You make an effect chain by saving effects from the current
+track. 
+
+   find-effect-chains,     fec   - find all effect chains (filtering on key/value pairs, if supplied)
+   find-user-effect-chains,fuec  - find all user-defined effect chains, filtering as above
+   new-effect-chain,       nec   - define a new effect chain
+   overwrite-effect-chain, oec   - as above, but overwite existing definition
+   add-effect-chain,       aec   - add an effect chain to the current track
+   delete-effect-chain,    dec   - delete an effect chain definition
+EFFECT_CHAINS
+
+effect_profiles => <<'EFFECT_PROFILES',
+Effect profiles (effect chains for a group of tracks)
+
+An effect profile is a group of effect chains, saved with the tracks that
+configure them. It is a convenient way to share parts of a project among other
+projects. 
+
+   new-effect-profile, nep       - define a new effect profile
+   apply-effect-profile, aep     - apply an effect profile
+                                   (current effects are bypassed)
+   overlay-effect-profile, oep   - apply an effect profile,
+                                   adding to current effects
+   delete-effect-profile, dep    - delete an effect profile definition
+EFFECT_PROFILES
+
+advanced_transport => <<'ADVANCED_TRANSPORT',
+   loop-enable, loop  -  loop playback between two points
+                         example: loop 5.0 200.0 (positions in seconds)
+                         example: loop start end (mark names or numbers)
+   loop-disable, noloop, nl
+                      -  disable looping
+
+   preview            -  start engine with WAV recording disabled
+                         (for mic check, etc.) Release with 'arm'.
+
+   doodle             -  Like preview, with WAV playback also disabled
+                         Release with 'arm'.
+ADVANCED_TRANSPORT
+
+version_control => <<'VCS',
+** Version control 
+
+Nama uses git to save project state as a series of commits, a new commit after
+each command. It is easy to tag a commit as a way of documenting
+developments in a projects. 
+
+   save <tagname>            - label current autosave state as <tagname>
+   get <tagname>             - checkout project state tagged with <tagname>
+   branch <tagname>          - switch to branch and load state
+   list-branches, lbr        - list branches and tags
+   new-branch, nbr           - create a new branch starting at the current 
+                               commit or a specified commit, e.g. 'nbr <tagname>'
+   tag                       - tag current commit with a name and optional message
+
+   ** note that <tagname> can be a branch, tag, commit id.  
+VCS
 diagnostics => <<DIAGNOSTICS,
 
    dump-all,   dumpall,   dumpa - dump most internal state
@@ -406,22 +465,19 @@ edits => <<EDITS,
    version-mix-track,vmt        - set version mix track as current track 
 EDITS
 
-fades => <<FADES,
-   add-fade,         afd, fade  - add fade (in or out) to current track
-                                  examples: 
-                                      fade in song-start 0.2
-                                  (fades in at mark 'song-start' over 0.2 s)
-                                      fade out 0.5 song-start
-                                  (fades out over 0.5 s ending at 'song-start')
-                                  
-   remove-fade,      rfd        - remove fade (by index)
-   list-fade         lfd        - list all fades
-FADES
+
+advanced => <<'ADVANCED',
+
+   set-track               - directly set current track parameters
+
+   destroy-current-wav     - unlink current track's selected WAV version.
+ADVANCED
+
    
 );
 # print values %{$help->{topic}};
 
-$help->{screen} = <<HELP;
+$help->{screen} = <<HELP.
 
 Welcome to Nama help
 
@@ -434,20 +490,5 @@ help yml                - browse the YAML command source
 
 help is available for the following topics:
 
-0  All
-1  Project
-2  Track
-3  Chain setup
-4  Transport
-5  Marks
-6  Effects
-7  Group control
-8  Buses
-9  Mixdown
-10 Command prompt 
-11 Diagnostics
-12 Edits
-13 Fades
-14 Command line options
-
 HELP
+join '',@twocolumn;

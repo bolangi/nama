@@ -1,5 +1,5 @@
 					class 			# for storage and inspection
-					is_mix_track		
+					is_mix_track	# Obsolete, retained for backwards compatibility
 					n   			# track index 
 					name
 					group 			# group affiliation

@@ -7,72 +7,42 @@ use File::Copy;
 use ::Util qw(dest_string dest_type join_path freq);
 use ::Log qw(logpkg logsub);
 
+sub is_used {
+	my $track = shift;      # Track is used if:
+	my $bus = $track->bus;  # 
+	$track->send_type       # It's sending its own signal
+	or $track->{rw} eq REC  # It's recording its own signal
+	or $track->wantme       # Another track needs my signal
+	or ($bus and $bus->can('wantme') and $bus->wantme)  # A bus needs my signal
+}
 sub rec_status {
 #	logsub("&rec_status");
 	my $track = shift;
-	
-	#my $source_id = $track->source_id;
-	my $playback_version = $track->playback_version;
+	my $bus = $track->bus;
 
-	my $bus = $bn{$track->group};
-	#logpkg('debug', join " ", "bus:",$bus->name, $bus->rw);
+	return OFF if 	! $track->engine_group eq $::this_engine->name
+				or 	! $track->is_used
+				and ! ($mode->doodle and ! $mode->eager and $setup->{tracks_with_duplicate_inputs}->{$track->name} ); 
+
+	return $track->{rw} if $track->{rw} ne PLAY;
+
+	my $v = $track->playback_version;
+
 	{
 	no warnings 'uninitialized';
-	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, monitor version: $playback_version");
+	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, playback version: $v");
 	}
-	#logpkg('debug', "track: ", $track->name, ", source: ",
-	#	$track->source_id, ", monitor version: $playback_version");
-
-	# first, check for conditions resulting in status OFF
 
 	no warnings 'uninitialized';
-	if ( $bus->rw eq OFF
-		or $track->rw eq OFF
-		or $mode->doodle and ! $mode->eager and $track->rw eq REC and 
-			$setup->{tracks_with_duplicate_inputs}->{$track->name}
-		or $track->engine_group ne $::this_engine->name
-	){ 	return			  OFF }
+	return maybe_playback($track, $v) if $track->{rw} eq PLAY;
 
-	# having reached here, we know $bus->rw and $track->rw are REC or PLAY
-	# so the result will be REC or PLAY if conditions are met
-
-	# second, set REC status if possible
-	
-	if( $track->rw eq REC){
-
-		my $source_type = $track->source_type;
-		if ($source_type eq 'track' or $source_type eq 'loop'){ return REC }
-		elsif ($source_type eq 'jack_client'){
-
-				# we expect an existing JACK client that
-				# *outputs* a signal for our track input
-				
-				::jack_client_array($track->source_id,'output')
-					?  return REC
-					:  return OFF
-			}
-		elsif ($source_type eq 'jack_manual'){ return REC }
-		elsif ($source_type eq 'jack_ports_list'){ return REC }
-		elsif ($source_type eq 'null')	{ return REC }
-		elsif ($source_type eq 'rtnull')	{ return REC }
-		elsif ($source_type eq 'soundcard'){ return REC }
-		elsif ($source_type eq 'bus')	{ return REC } # maybe $track->rw ??
-		else { return OFF }
-	}
-	elsif( $track->rw eq MON){ MON }
-
-	# set PLAY status if possible
-	
-	else { 			maybe_monitor($playback_version)
-
-	}
 }
-
-sub maybe_monitor { # ordinary sub, not object method
-	my $playback_version = shift;
-	return PLAY if $playback_version and ! $mode->doodle;
+sub maybe_playback { # ordinary sub, not object method
+	my ($track, $playback_version) = @_;
+	return PLAY if $track->targets->{$playback_version} and ! $mode->doodle;
 	return OFF;
 }
+
 
 sub rec_status_display {
 	my $track = shift;
@@ -131,7 +101,7 @@ sub set_io {
 
 			my $port_name = $track->jack_manual_port($direction);
 
-			::pager($track->name, ": JACK $direction port is $port_name. Make connections manually.");
+			::pagers($track->name, ": JACK $direction port is $port_name. Make connections manually.");
 			$id = 'manual';
 			$id = $port_name;
 			$type = 'jack_manual';
@@ -141,10 +111,10 @@ sub set_io {
 
 			my $name = $track->name;
 			my $width = scalar @{ ::jack_client_array($id, $client_direction) };
-			$width or ::pager(
+			$width or ::pagers(
 				qq(Track $name: $direction port for JACK client "$id" not found.));
 			$width or return;
-			$width ne $track->width and ::pager(
+			$width ne $track->width and ::pagers(
 				"Track $name set to ", ::width($track->width),
 				qq(, but JACK source "$id" is ), ::width($width), '.');
 		}
@@ -179,12 +149,12 @@ sub set_source {
 	my $new_source = $track->input_object_text;;
 	my $object = $new_source;
 	if ( $old_source  eq $new_source ){
-		::pager($track->name, ": input unchanged, $object");
+		::pagers($track->name, ": input unchanged, $object");
 	} else {
-		::pager("Track ",$track->name, ": source set to $object");
+		::pagers("Track ",$track->name, ": source set to $object");
 		if (transition_to_null($old_source, $new_source))
 		{
-			::pager("Track ",$track->name, ": null input, toggling to MON");
+			::pagers("Track ",$track->name, ": null input, toggling to MON");
 			$track->set(rw => MON) if $track->rw eq REC;		
 		}
 	}
@@ -205,10 +175,10 @@ sub set_version {
 	my ($track, $n) = @_;
 	my $name = $track->name;
 	if ($n == 0){
-		::pager("$name: following bus default\n");
+		::pagers("$name: following bus default");
 		$track->set(version => $n)
 	} elsif ( grep{ $n == $_ } @{$track->versions} ){
-		::pager("$name: anchoring version $n\n");
+		::pagers("$name: anchoring version $n");
 		$track->set(version => $n)
 	} else { 
 		::throw("$name: version $n does not exist, skipping.\n")
@@ -225,10 +195,10 @@ sub set_send {
 	logpkg('debug', "send is now $new_send");
 	my $object = $track->output_object_text;
 	if ( $old_send  eq $new_send ){
-		::pager("Track ",$track->name, ": send unchanged, ",
+		::pagers("Track ",$track->name, ": send unchanged, ",
 			( $object ?  $object : 'off'));
 	} else {
-		::pager("Track ",$track->name, ": ", 
+		::pagers("Track ",$track->name, ": ", 
 		$object 
 			? "$object is now a send target" 
 			: "send target is turned off.");
@@ -272,16 +242,25 @@ sub output_object_text {   # text for user display
 sub source_status {
 	my $track = shift;
 	no warnings 'uninitialized';
+	return if $track->off;
 	return $track->current_wav if $track->play ;
-	return $track->name . " bus" if $track->is_mixing;
-	return $track->source_id unless $track->source_type eq 'soundcard';
-	my $ch = $track->source_id;
-	my @channels;
-	push @channels, $_ for $ch .. ($ch + $track->width - 1);
-	join '/', @channels
+	return $track->source_id. " bus" if $track->source_type eq 'bus';
+	return "track ".$track->source_id  if $track->source_type eq 'track';
+	return 'jack client '.$track->source_id if $track->source_type eq 'jack_client';
+	if($track->source_type eq 'soundcard')
+	{
+		my $ch = $track->source_id;
+		my @channels;
+		push @channels, $_ for $ch .. ($ch + $track->width - 1);
+		return join '/', @channels
+	}
+	"type: $track->{source_type} id: $track->{source_id}" 
+		if $track->{source_id} =~ /\S/
+		or $track->{source_type} =~ /\S/;
 }
 sub destination {
 	my $track = shift;
+	return if $track->off;
 	# display logic 
 	# always show the bus
 	# except for tracks that belongs to the bus null.
@@ -291,7 +270,7 @@ sub destination {
 	# track's own send_type/send_id
 	
 	my $out;
-	$out .= $track->group unless $track->group =~ /^(Aux|Null)$/;
+	$out .= $track->group.' bus' unless $track->group =~ /^(Aux|Null)$/;
 	my $send_id = $track->send_id;
 	my $send_type = $track->send_type;
 	return $out if ! $send_type;
@@ -313,25 +292,19 @@ sub set_rec {
 	}
 	$track->set_rw(REC);
 }
-sub set_play {
+sub rw_set {
 	my $track = shift;
-	$track->set_rw(PLAY);
+	logsub("&rw_set");
+	my ($bus, $rw) = @_;
+	$track->set_rec, return if $rw eq REC;
+	$track->set_rw($rw);
 }
-sub set_mon {
-	my $track = shift;
-	$track->set_rw(MON);
-}
-sub set_off {
-	my $track = shift;
-	$track->set_rw(OFF);
-}
-
 sub set_rw {
 	my ($track, $setting) = @_;
 	#my $already = $track->rw eq $setting ? " already" : "";
 	$track->set(rw => $setting);
 	my $status = $track->rec_status();
-	::pager("Track ",$track->name, " set to $setting", 
+	::pagers("Track ",$track->name, " set to $setting", 
 		($status ne $setting ? ", but current status is $status" : ""));
 
 }
@@ -391,114 +364,14 @@ sub jack_manual_port {
 	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
 }
 
-## rw_set() for managing bus-level REC/MON/PLAY/OFF settings
-## in response to user commands rec/mon/play/off affecting
-## the current track.
-
-{
-my %bus_logic = ( 
-	mix_track =>
-	{
-
-	# setting mix track to REC
-	
-		REC => sub
-		{
-			my ($bus, $track) = @_;
-			$track->set_rec;
-		},
-
-	# setting a mix track to PLAY
-	
-		PLAY => sub
-		{
-			my ($bus, $track) = @_;
-			$track->set_play;
-		},
-
-	# setting a mix track to MON
-	
-		MON => sub
-		{
-			my ($bus, $track) = @_;
-			$track->set_mon;
-		},
-
-	# setting mix track to OFF
-	
-		OFF => sub
-		{
-			my ($bus, $track) = @_;
-
-			$track->set_off;
-
-			# with the mix track off, 
-			# the member tracks get pruned 
-			# from the graph 
-		}
-	},
-	member_track =>
-	{
-
-	# setting member track to REC
-	
-		REC => sub 
-		{ 
-			my ($bus, $track) = @_;
-
-			$track->set_rec() or return;
-
-			$bus->set(rw => MON);
-			
-			# we assume the bus is connected to a track,
-			# so it's send_id field is the track name.
-			
-			$tn{$bus->send_id}->activate_bus 
-				if $bus->send_type eq 'track' and $tn{$bus->send_id};
-			
-		},
-
-	# setting member track to MON 
-	
-		MON => sub
-		{ 
-			my ($bus, $track) = @_;
-			$bus->set(rw => MON) if $bus->rw eq 'OFF';
-			$track->set_mon;
-		},
-
-	# setting member track to PLAY
-	
-		PLAY => sub
-		{ 
-			my ($bus, $track) = @_;
-			$bus->set(rw => MON) if $bus->rw eq 'OFF';
-			$track->set_play;
-
-		},
-	# setting member track to OFF 
-
-		OFF => sub
-		{
-			my ($bus, $track) = @_;
-			$track->set_off;
-		},
-	},
-);
-# for track commands 'rec', 'mon','off' we 
-# may toggle rw state of the bus as well
-#
-
-sub rw_set {
+sub wantme {
 	my $track = shift;
-	logsub("&rw_set");
-	my ($bus, $rw) = @_;
-	my $type = $bn{$track->name} # should be $track->is_ mix_track
-		? 'mix_track'
-		: 'member_track';
-	$bus_logic{$type}{uc $rw}->($bus,$track);
+	no warnings 'uninitialized';
+	my @wantme = grep{ $_->name ne $track->name
+						and $_->source_type eq 'track'
+						and $_->source_id eq $track->name 
+						and ($_->rec or $_->mon) } ::all_tracks();
+@wantme
 }
-}
-
 1;
 	

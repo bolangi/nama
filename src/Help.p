@@ -43,28 +43,17 @@ sub munge_help {
 }
 }
 sub helptopic {
-	my $user_input = shift;
-
-	# we expect topic number or topic name
-	
-	my ($index, $name);
-	if( $user_input =~ /(\D+)/ ){ 
-		$name = $1;
-	}
-	else { 
-		$index = $user_input;
-		$name = $help->{arr_topic}->[$index];
-	}
-	#system("man","nama") if $index== 15;
-	format_help_topic($index, $name);
+	my $i  = shift;
+	my $key = $help->{index}->{$i};
+	format_help_topic($i, $key);
 }
 
 sub format_help_topic {
-	my ($index, $name) = @_;
+	my ($index, $key) = @_;
+	my $title = $help->{display}->[$index];
 	my @output;
-	push @output, "\n-- ", ucfirst $name, " --\n\n";
-	push @output, $help->{topic}->{$name}, $/;
-	push @output, $help->{usage} if $index == 14;
+	push @output, "\n-- $help->{title}->[$index] --\n\n";
+	push @output, $help->{topic}->{$key}, $/;
 	@output
 }
 
@@ -80,9 +69,7 @@ IAM
 	my @output;
 	if ( $help->{topic}->{$name}){
 		@output = helptopic($name);
-	} elsif ($name =~ /^0/){
-		@output = map{ helptopic $_ } @{$help->{arr_topic}};
-	} elsif ( $name =~ /^(\d+)$/ and $1 < 20  ){
+	} elsif ( $name =~ /^(\d+)$/ ){
 		@output = helptopic($name)
 	} else {
 		my %helped = (); 
@@ -188,23 +175,6 @@ sub parse_midi_help {
 
 ## Initialization
 
-
-@{$help->{arr_topic}} = qw( all
-                    project
-                    track
-                    chain_setup
-                    transport
-                    marks
-                    effects
-                    group
-                    bus
-                    mixdown
-                    prompt 
-                    diagnostics
-					fades
-					edits
-
-                ) ;
 
 [% qx(cat ./help_topic.pl) %]
 

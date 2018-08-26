@@ -16,6 +16,7 @@
 	@effects_data
 
 	$project->{save_file_version_number}
+	$project->{sample_rate}
 	
 	$fx->{applied}
 	$fx->{params}

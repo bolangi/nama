@@ -3,7 +3,7 @@
 package ::Bus;
 use Modern::Perl; use Carp; 
 use ::Log qw(logsub logpkg);
-use ::Globals qw(:trackrw); 
+use ::Globals qw(:trackrw $setup); 
 our @ISA = qw( ::Object );
 
 # share the following variables with subclasses
@@ -71,17 +71,28 @@ sub last {
 
 sub remove { ::throw($_[0]->name, " is system bus. No can remove.") }
 
-{ my %allows = (REC => 'REC/MON', MON => MON, OFF => 'OFF');
-sub allows { $allows{ $_[0]->rw } }
+sub tracks_on {
+	my $bus = shift;
+	for ( $bus->track_o )
+	{
+	my $old = $setup->{bus}->{oldrw}->{$_->name};
+		$_->set( rw =>  $old) if $old;
+			delete $setup->{bus}->{oldrw}->{$_->name };
+	}
 }
-{ my %forces = (
-		REC => 'REC (allows REC/MON)', 
-		MON => 'MON (forces REC to MON)', 
-		OFF => 'OFF (enforces OFF)'
- );
-sub forces { $forces{ $_[0]->rw } }
+
+sub tracks_off {
+	my $bus = shift;
+	return if not grep { $_->rw ne OFF } $bus->track_o;
+	for ( $bus->track_o )
+	{
+		delete $setup->{bus}->{oldrw}->{$_->name };
+		next if $_->rw eq OFF;
+		$setup->{bus}->{oldrw}->{$_->name } = $_->rw;
+		$_->set( rw => OFF );
+	}	
 }
-	
+
 ## class methods
 
 # all buses that have mutable state, and therefore reason to
@@ -103,7 +114,7 @@ sub settings_line {
 	return unless defined $mix;
 
 	my ($bustype) = $bus->class =~ /(\w+)$/;
-	my $line = join " ", $bustype ,$bus->name,"is",$bus->forces;
+	my $line = join " ", $bustype ,$bus->name;
 	$line   .= " Version setting".$bus->version if $bus->version;
 	#$line   .= "feeds", 
 	$line .= " Mix track is ". $mix->rw;
@@ -157,7 +168,10 @@ sub apply {
 	my ($bus, $g)  = @_;
 	logpkg('debug', "bus ". $bus->name. ": applying routes");
 	logpkg('debug', "Bus destination is type: $bus->{send_type}, id: $bus->{send_id}");
+	my @wantme = $bus->wantme;
+	logpkg('debug', "bus ". $bus->name. "consumed by ".$_->name) for @wantme;
 	map{ 
+		my $member = $_;
 		# connect member track input paths
 		logpkg('debug', "track ".$_->name);
 		my @path = $_->input_path;
@@ -167,11 +181,10 @@ sub apply {
 		logpkg('debug', join " ", "bus output:", $_->name, $bus->send_id);
 
 		# connect member track outputs to target
-		# disregard Main track rec_status when connecting
-		# Main bus during mixdown handling
-
-		::Graph::add_path_for_send($g, $_->name, $bus->send_type, $bus->send_id )
-			if $bus->output_is_connectable;
+		for (@wantme) { 
+			my $consumer = $_; 
+			::Graph::add_path_for_send($g, $member->name, 'track', $consumer->name)
+		}
 		
 		# add paths for recording
 		
@@ -200,12 +213,19 @@ sub mixtrack {
 	my $bus = shift;
 	$tn{$bus->name}
 }
+sub wantme {
+	my $bus = shift;
+	no warnings 'uninitialized';
+	my @wantme = grep{ 	$_->{rw} =~ /REC|MON/ 
+					and $_->source_type eq 'bus' 
+					and $_->source_id eq $bus->name 
+					and $_->is_used} ::all_tracks();
+	@wantme
+
+}
 sub rw {
 	my $bus = shift;
-	my $mixtrack;
-	# ignored rw field, sync to mixtrack rw field 
-	return $bus->{rw} unless defined($mixtrack = $bus->mixtrack);
-	$mixtrack->{rw} =~ /REC|MON/ ? MON : OFF
+	$bus->wantme ? MON : OFF
 }
 }
 {

@@ -58,7 +58,6 @@ sub sync_action {
 	my ($method, @args) = @_;
 	$_->$method(@args) for engines()
 }
-*configure = \&::NetEngine::configure;
 }
 
 {
@@ -253,7 +252,8 @@ sub ecasound_iam{
 	}
 	"@result";
 }
-}
+sub configure { ::NetEngine::configure(@_) }
+} # end package
 { 
 package ::MidiEngine;
 use Modern::Perl;

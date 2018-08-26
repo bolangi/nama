@@ -18,6 +18,11 @@ $config->{_is_system_bus}		# a hash
 $config->{osc_listener_port}
 $config->{remote_control_port}
 $config->{use_midi}
+$config->{default_waveform_height}
+$config->{waveform_canvas_x}
+$config->{waveform_canvas_y}
+$config->{loop_chain_channel_width}
+
 
 $jack->{seek_delay}				# extra time for stop-seek-start process
 $jack->{jackd_running}			# jackd status, but this should be a subroutine
@@ -44,6 +49,7 @@ $setup->{cache_track_args}
 $setup->{audio_run_ready}
 $setup->{midish_running}
 $setup->{fade_counter}
+$setup->{bus}
 
 $fx_cache->{registry}			# effects database
 $fx_cache->{full_label_to_index}# el:tap_pinknoise -> effect index
@@ -63,6 +69,9 @@ $help->{arr_topic}				# sequential array of help pages
 $help->{topic}					# access help page by name
 $help->{usage}					# usage output
 $help->{midish}
+$help->{index}
+$help->{display}
+$help->{title}
 
 $mode->{preview}				#
 $mode->{doodle}					#
@@ -140,7 +149,6 @@ $project->{osc}					# Protocol::OSC object
 $project->{remote_control_socket} # text command listener socket
 $project->{midi_history}		# all text commands sent to midish
 $project->{sample_rate}
-$project->{waveform}
 
 $file->{effects_cache}			# Name of effects discovery cache
 $file->{global_effect_chains}	# Name of global effect chains file
@@ -161,9 +169,9 @@ $gui->{_chm}
 $gui->{_save_id}
 
 # GUI objects
-$gui->{mw}						# main window
-$gui->{ew}						# effects window
-$gui->{ww}						# main window for waveform test
+$gui->{mw}						# main window - control panel
+$gui->{ew}						# main window - effects 
+$gui->{ww}						# main window - waveform display
 $gui->{wwframe}					# waveform frame
 $gui->{wwcanvas}				# waveform canvas
 $gui->{canvas}					# canvas
@@ -223,10 +231,7 @@ $gui->{engine_start}			# start button
 $gui->{engine_stop}				# stop button
 $gui->{_old_bg}					# default background color
 $gui->{_old_abg}				# default active background color
-$gui->{ww}						# main window for waveform test
-$gui->{wwframe}					# waveform frame
-$gui->{wwcanvas}				# waveform canvas
-
+$gui->{waveform}				# waveform display widgets, by trackname
 
 $config->{soundcard_loopback_delay}
 $jack->{connections}
@@ -237,3 +242,5 @@ $jack->{is_own_port}
 $jack->{is_other_port}
 $jack->{graph}
 $jack->{watcher}
+
+

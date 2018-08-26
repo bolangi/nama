@@ -177,16 +177,20 @@ sub initialize_mixer {
 			send_id => 1,
 			width => 2,
 			rw => MON,
-			source_type => undef,
-			source_id => undef); 
+			source_type => 'bus',
+			source_id => 'Main',
+			); 
 
 		my $mixdown = ::MixDownTrack->new( 
 			group => 'Mixdown', 
 			name => 'Mixdown', 
 			width => 2,
 			rw => OFF,
-			source_type => undef,
-			source_id => undef); 
+			source_type => 'track',
+			source_id => 'Main',
+			send_type => 'soundcard',
+			send_id => 1,
+			); 
 	$ui->create_master_and_mix_tracks();
 }
 

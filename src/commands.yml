@@ -319,13 +319,19 @@ source:
     source null 
     ! Track's input is silence. This is useful for when an effect such 
     ! as a metronome or signal generator provides a source.
+    !
+    source bus Strings
+    ! set the Strings bus as source
+    ! 
+    source track trumpet
+    ! set the track trumpet as source
     ! 
     source LinuxSampler 
-    ! Record input from the JACK client named LinuxSampler.
+    ! set the JACK client named LinuxSampler as source
     ! 
     source synth:output_3 
-    ! record from the JACK client synth, using the 
-    ! port output_3 (see he jackd and jack_lsp manpages
+    ! use the signal from the JACK client synth, using the 
+    ! port output_3 (see the jackd and jack_lsp manpages
     ! for more information).
     !
     source jack 
@@ -627,22 +633,17 @@ remove_track:
     Remove the current track with its effects, inserts, etc.
     Audio files are unchanged. 
   parameters: none
-bus_mon:
-  type: bus
-  what: Set the current bus mix_track to monitor (the default behaviour).
-  short: bmon
-  parameters: none
-bus_off:
-  type: bus
-  what: |
-    Set current bus mixtrack to OFF. Can be reversed with bus-mon.
-  short: boff
-  parameters: none
 bus_version:
   type: group
   what: Set the default monitoring version for tracks in the current bus.
   short: bver gver
   parameters: none
+bus_on:
+  type: group
+  what: restore tracks belonging to bus after bus-off
+bus_off:
+  type: group
+  what: turn off tracks belonging to current bus
 add_bunch:
   type: group
   what: 
@@ -837,7 +838,7 @@ add_effect_first:
 add_effect_before:
   type: effect
   what: same as add-effect before
-  short: afxb
+  short: afxb insert_effect
   parameters: <fx_alias> <fx_alias> [ <float:param1> <float:param2>... ]
 modify_effect:
   type: effect
@@ -1291,10 +1292,10 @@ show_version_comments_all:
   what: Show all version comments for the current track.
   short: svca
   parameters: none
-set_system_version_comment:
+add_system_version_comment:
   type: track
   what: Set a system version comment. Useful for testing and diagnostics.
-  short: ssvc
+  short: asvc
   parameters: <string:comment>
 new_edit:
   type: edit

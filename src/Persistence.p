@@ -377,6 +377,17 @@ sub restore_state_from_file {
 		# older projects did not store this
 		$project->{sample_rate} //= $config->{sample_rate} 
 	}
+	if ( $project->{save_file_version_number} <= 1.211){ 
+		map { $_->{source_id} = 'Main', $_->{source_type} = 'bus' }
+		grep { $_->{name} eq 'Main'	} @tracks_data;
+		map { $_->{source_id} = 'Main'; 
+			  $_->{source_type} = 'track';
+			  $_->{send_type} = 'soundcard';
+			  $_->{send_id} = 1;
+			}
+		grep { $_->{name} eq 'Mixdown'	} @tracks_data;
+	}
+
 	# restore effects, no change to track objects needed
 	
 	map

@@ -52,15 +52,18 @@ sub init_gui {
 	
 	$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
 	$gui->{wwcanvas}->configure(
-		scrollregion =>[0,0,2400,480],
-		-width => 2400,
-		-height => 480	
+		scrollregion =>[0,0,$config->{waveform_canvas_x},$config->{waveform_canvas_y}],
+		-width => $config->{waveform_canvas_x},
+		-height => $config->{waveform_canvas_y},
 		);
+	# incorrect, call to wwgeometry too early to get correct value
+	my ($width,$height) = wwgeometry();
+	#say "width: $width, height: $height";
 
 sub wwgeometry {
 	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
 		= $gui->{wwcanvas}->geometry =~ /(\d+)x(\d+)([+-])(\d+)([+-])(\d+)/;
-	($width,$height)
+	$width,$height
 }
 
 	$gui->{canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
@@ -1051,7 +1054,7 @@ sub make_scale {
 			-resolution => resolution($i, $p),
 		  -width => 12,
 		  -length => $p{length} ? $p{length} : 100,
-		  -command => sub { ::_update_effect($id, $p, $FX->params->[$p]) },
+		  -command => sub { ::update_ecasound_effect($id, $p, $FX->params->[$p]) },
 			-state => $FX->is_read_only($p) ? 'disabled' : 'normal',
 		  );
 
@@ -1067,7 +1070,7 @@ sub make_scale {
 				-variable => \$FX->{params_log}->[$p],
 		  		-command => sub { 
 					$FX->params->[$p] = exp $FX->params_log->[$p];
-					::_update_effect($id, $p, $FX->params->[$p]);
+					::update_ecasound_effect($id, $p, $FX->params->[$p]);
 					$log_display->configure(
 						-text => 
 						$fx_cache->{registry}->[$i]->{params}->[$p]->{name} =~ /hz|frequency/i
@@ -1091,7 +1094,7 @@ sub make_scale {
 		return ${ $p{parent} }->Entry(
 			-textvariable =>\$FX->params->[$p],
 			-width => 6,
-	#		-command => sub { ::_update_effect($id, $p, $FX->params->[$p]) },
+	#		-command => sub { ::update_ecasound_effect($id, $p, $FX->params->[$p]) },
 			# doesn't work with Entry widget
 			);	
 
@@ -1147,6 +1150,22 @@ sub destroy_marker {
 	$gui->{marks}->{$pos}->destroy; 
 }
 
+sub setup_playback_indicator {
+	my $ui = shift;
+	$project->{events}->{update_playback_position_display} = AE::timer(0, 0.1, \&update_indicator);
+} 	
+sub update_indicator {
+	$gui->{wwcanvas}->delete('playback-indicator');
+	my $pos = ::ecasound_iam("getpos");
+	my $xpos = int( $pos * $config->{waveform_pixels_per_second} );
+	$gui->{wwcanvas}->createLine(
+			$xpos,0,
+			$xpos,$config->{waveform_canvas_y},
+			-fill => 'red',
+			-width => 1,
+			-tags => 'playback-indicator'
+	);
+}
 
 sub get_saved_colors {
 	logsub("&get_saved_colors");

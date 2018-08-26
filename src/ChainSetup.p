@@ -46,9 +46,8 @@ our (
 
 sub remove_temporary_tracks {
 	logsub("&remove_temporary_tracks");
-	map { logpkg('debug',"removing temporary track ",$_->name); $_->remove  } 
-		grep{ $_->group eq 'Temp'} 
-		::audio_tracks();
+	map { logpkg('debug',"removing temporary track ",$_->group.'/'.$_->name); $_->remove  } 
+		grep{ $_->group eq 'Temp' } ::audio_tracks();
 }
 sub initialize {
 
@@ -192,10 +191,12 @@ sub add_paths_from_Main {
 sub add_paths_for_mixdown_handling {
 	logsub("&add_paths_for_mixdown_handling");
 
-	if ($tn{Mixdown}->rec){
+	my $final_leg_origin = $mode->mastering ? 'Boost' : 'Main';
+
+	if ($tn{Mixdown}->rw eq REC ){
 		# don't monitor via soundcard
 		$g->delete_edge('Main','soundcard_out');
-		my @p = (($mode->mastering ? 'Boost' : 'Main'), ,'Mixdown', 'wav_out');
+		my @p = ($final_leg_origin, ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
 		  	format_template		=> $config->{mix_to_disk_format},
@@ -205,7 +206,7 @@ sub add_paths_for_mixdown_handling {
 												 
 	# Mixdown handling - playback
 	
-	} elsif ($tn{Mixdown}->play){ 
+	} elsif ($tn{Mixdown}->rw eq PLAY and $tn{Mixdown}->playback_version()){ 
 			my @e = ('wav_in','Mixdown',output_node($tn{Main}->send_type));
 			$g->add_path(@e);
 			$g->set_vertex_attributes('Mixdown', {

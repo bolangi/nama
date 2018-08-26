@@ -18,10 +18,15 @@
 							# + we need an additional two effect chains
 							#   for each insert to hold effects on wet or dry arm
 							#   maybe wet_effect_chain, dry_effect_chain
+		fade_data			# 
 		region				# array ref with [region_start, region_end]
 							
 		attrib 				# fields for searching
 
 		class				# for restore
 
+###     Group 2 
 
+        is_mixing           # 
+
+		source_tag 			#  git commit at time of caching

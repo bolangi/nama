@@ -66,6 +66,7 @@ sub paint_mute_buttons {}
 sub remove_track_gui {}
 sub reset_engine_mode_color_display {}
 sub set_engine_mode_color_display {}
+sub setup_playback_indicator {}
 
 1;
 __END__

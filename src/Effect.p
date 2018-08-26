@@ -180,7 +180,7 @@ sub registry_index {
 	my $self = shift;
 	$fx_cache->{full_label_to_index}->{ $self->type };
 }
-sub ecasound_controller_index {
+sub ecasound_controller_index { 
 	logsub("&ecasound_controller_index");
 	my $self = shift;
 	my $n = $self->chain;
@@ -460,7 +460,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					modify_effect
 					modify_multiple_effects
 
-					_update_effect
+					update_ecasound_effect
 					update_effect
 					sync_effect_parameters
 					find_op_offsets
@@ -614,6 +614,7 @@ sub append_effect {
 		}
 		$ui->add_effect_gui(\%args) unless $track->hide;
 
+		# XX we should announce that will take effect in new setup
 		$add_effects_sub = $FX->is_channel_op ? sub { ::request_setup() } : sub{ $FX->apply_op };
 	}
 	if( ::valid_engine_setup() )
@@ -885,7 +886,7 @@ sub new_effect_id {
 ## synchronize Ecasound chain operator parameters 
 #  with Nama effect parameter
 
-sub _update_effect {
+sub update_ecasound_effect {
 	local $config->{category} = 'ECI_FX';
 
 	# update the parameters of the Ecasound chain operator
@@ -936,9 +937,9 @@ sub _update_effect {
 
 sub update_effect {
 	my ($id, $param, $val) = @_;
-	_update_effect( @_ );
 	return if ! defined fxn($id);
 	fxn($id)->params->[$param] = $val;
+	update_ecasound_effect( @_ );
 }
 
 sub sync_effect_parameters {

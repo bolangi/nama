@@ -1,26 +1,28 @@
 package ::TrackWaveform;
-use ::Globals qw($project);
+use ::Globals qw($project $config $gui %ti);
 use Modern::Perl;
 use Role::Tiny;
 use Try::Tiny;
 
-# files are assumed to be of the form # sax_1.wav.1200x200.10.png 
+# files are of the form # sax_1.wav.1200x200-10.png 
 # where the numbers correspond to width and height in pixels of the audio
 # waveform image, and the x-scaling in pixels per second (default 10)
 
 sub generate_waveform {
 	my $self = shift;
 	my ($width, $height, $pixels_per_second) = @_;
-	$width //= $self->wav_length * $project->{current_waveform_timescale};
+	$pixels_per_second //= $config->{waveform_pixels_per_second};
+	$height //= $config->{waveform_height};
+	$width //= int( $self->wav_length * $pixels_per_second);
 	my $name = waveform_name($self->full_path, $width, $height, $pixels_per_second);
 	my $cmd = join ' ', 'waveform', "-W $width -H $height", $self->full_path, $name;
 	say $cmd;
 	system($cmd);
-	$project->{waveform}->{$self->full_path} = $name;
+	$name;
 }
 sub waveform_name {
 	my($path, $width, $height, $pixels) = @_;
-			"$path."  . $width . 'x' . "$height.$pixels.png"
+			"$path."  . $width . 'x' . "$height-$pixels.png"
 }
 
 sub find_waveform {
@@ -32,26 +34,30 @@ sub find_waveform {
 	 ->in(   ::this_wav_dir()      );
 	@files;
 }
-sub refresh_waveform {
+sub display_waveform {
 	my $self = shift;
-	my ($waveform) = $self->find_waveform() || $self->generate_waveform; 
-	$project->{$self->name}->{waveform}->{current} = $waveform;
-	# remove Tk::Photo widget with waveform image
-    # load    " 	
+	my ($waveform) = $self->find_waveform; 
+	$waveform //= $self->generate_waveform; 
+	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
+	$gui->{waveform}{$self->name} = [];
+	$gui->{wwcanvas}->createImage(	0,
+												$self->y_offset_multiplier * $config->{waveform_height}, 
+												-anchor => 'nw', 
+												-tags => ['waveform', $self->name],
+												-image => $widget);
 }
+# tagname for all items in waveform display
+# sax-waveform
 
-#3m song, 2400 pixels
-#new_version_length_pixels = $length *  $project->{current_waveform_timescale}
-#allow user to choose timescale
-#$pr oject->{current_waveform_timescale}
-#$pr oject->{available_timescales}
-
-# 	$gui->{wwframe} = $gui->{wwcanvas}->Frame;
-# 	my $wavform = $gui->{ww}->Photo(-format => 'png', -file => join_path(this_wav_dir(),"tmh-2400x480.png"));
-#	$project->{current_waveform}->{$track->name}->{widget} = $gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $wavform);
-#	$project->{current_waveform}->{$track->name}->{file} = $gui->{wwcanvas}->createImage(0,0, -anchor => 'nw', -image => $wavform);
-
-
+sub y_offset_multiplier {
+	my $self = shift;
+	my $before_me;
+	for (2 .. $self->n - 1){
+		$before_me++ if $ti{$_} and $ti{$_}->find_waveform
+	}
+	$before_me
+}
+		
 
 1 # obligatory
 	

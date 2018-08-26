@@ -117,7 +117,7 @@ arm();
 }
 sub something_to_run { audio_run_ready() or midi_run_ready()  }
 sub audio_run_ready { $setup->{audio_run_ready} }
-sub midi_run_ready { $en{midish}->is_active and $config->{use_midi} }
+sub midi_run_ready { $config->{use_midi} and $en{midish} and $en{midish}->is_active }
 
 sub connect_transport {
 	logsub("&connect_transport");

@@ -355,6 +355,7 @@ $proposed
 } 
 			
 track_name: alphafirst
+bus_name: alphafirst
 existing_track_name: track_name { 
 	my $track_name = $item{track_name};
 	if ($::tn{$track_name}){
@@ -362,6 +363,16 @@ existing_track_name: track_name {
 	}
 	else {	
 		::throw("$track_name: track does not exist.\n");
+		undef
+	}
+}
+existing_bus_name: bus_name { 
+	my $bus_name = $item{bus_name};
+	if ($::bn{$bus_name}){
+		$bus_name;
+	}
+	else {	
+		::throw("$bus_name: bus does not exist.\n");
 		undef
 	}
 }
@@ -507,22 +518,6 @@ show_track: _show_track dd {
 	1;}
 
 show_mode: _show_mode { ::pager( ::show_status()); 1}
-bus_mon: _bus_mon {
-	my $bus = $::bn{$::this_bus}; 
-	$bus->set(rw => 'MON');
-	# set up mix track
-	$::tn{$bus->send_id}->activate_bus
-		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
-	::pager( "Setting MON mode for $::this_bus bus.");
-	1; }
-bus_off: _bus_off {
-	my $bus = $::bn{$::this_bus}; 
-	$bus->set(rw => ::OFF);
-	# turn off mix track
-	if($bus->send_type eq 'track' and my $mix = $::tn{$bus->send_id})
-	{ $mix->set(rw => ::OFF) }
-	::pager( "Setting OFF mode for " , $::this_bus, " bus. Member tracks disabled."); 1  
-}
 bus_version: _bus_version dd { 
 	my $n = $item{dd};
 	::nama_cmd("for $::this_bus; version $n");
@@ -545,11 +540,14 @@ source: _source ('track'|'t') trackname {
 	$::this_track->set_source($item{trackname}, 'track'); 1
 } 
 trackname: existing_track_name
+source: _source 'bus' existing_bus_name {
+		$::this_track->set(source_id => $item{existing_bus_name}, source_type => 'bus')
+		}
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
 	my $status = $::this_track->rec_status;
-	::pager_newline($::this_track->name, ": input set to ", $::this_track->input_object_text, "\n",
+	::pager_newline(join "",$::this_track->name, ": input set to ", $::this_track->input_object_text, "\n",
 	"however track status is ", $status)
 		if $status ne ::REC and $status ne ::MON;
 	1;
@@ -589,12 +587,7 @@ rw_setting:   'REC ' | 'rec'
 			| 'MON'  | 'mon'
 			| 'OFF'  | 'off' { $return = $item[1] }
 rw: rw_setting {
-	$::this_track->is_system_track 
-		# for system tracks, just set track 'rw' field
-		? $::this_track->set(rw => uc $item{rw_setting}) 
-
-		# that make sure bus settings are cooperative
-		: $::this_track->rw_set($::Bus::by_name{$::this_bus},$item{rw_setting}); 
+		 $::this_track->set(rw => uc $item{rw_setting}) ;
 	1
 }
 
@@ -903,11 +896,11 @@ add_effect_before: _add_effect_before before add_target value(s?) {
 parent: op_id
 modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) value {
 	::modify_multiple_effects( @item{qw(fx_alias(s) parameter(s) sign value)});
-	::pager(::show_effect(@{ $item{'fx_alias(s)'} }))
+	::pager(::show_effect(@{ $item{'fx_alias(s)'} })); 1
 }
 modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) sign value {
 	::modify_multiple_effects( @item{qw(fx_alias(s) parameter(s) sign value)});
-	::pager(::show_effect(@{ $item{'fx_alias(s)'} }));
+	::pager(::show_effect(@{ $item{'fx_alias(s)'} })); 1
 }
 modify_effect: _modify_effect parameter(s /,/) value {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
@@ -916,12 +909,12 @@ modify_effect: _modify_effect parameter(s /,/) value {
 		$item{'parameter(s)'},
 		undef,
 		$item{value});
-	::pager( ::show_effect(::this_op(), "with track affiliation"))
+	::pager( ::show_effect(::this_op(), "with track affiliation")); 1
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
 	::modify_multiple_effects( [::this_op()], @item{qw(parameter(s) sign value)});
-	::pager( ::show_effect(::this_op()));
+	::pager( ::show_effect(::this_op())); 1
 }
 fx_alias3: ident { 
 	join " ", 
@@ -978,11 +971,11 @@ remove_bunch: _remove_bunch ident(s) {
  	map{ delete $::project->{bunch}->{$_} } @{$item{'ident(s)'}}; 1}
 add_to_bunch: _add_to_bunch ident(s) { ::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions { 
-	::pager( join " ", @{$::this_track->versions}); 1}
+	::pagers( join " ", @{$::this_track->versions}); 1}
 ladspa_register: _ladspa_register { 
 	::pager( ::ecasound_iam("ladspa-register")); 1}
 preset_register: _preset_register { 
-	::pager( ::ecasound_iam("preset-register")); 1}
+	::pagers( ::ecasound_iam("preset-register")); 1}
 ctrl_register: _ctrl_register { 
 	::pager( ::ecasound_iam("ctrl-register")); 1}
 preview: _preview { ::set_preview_mode(); 1}
@@ -1129,6 +1122,7 @@ Use a different name, or use "overwrite_effect_chain"/) && return;
 		name   => $item{ident},
 		ops_list => $ops,
 		inserts_data => $::this_track->inserts,
+		#fade_data => $::this_track->fades, # do we want fades by default?
 		@options,
 	);
 	1;
@@ -1349,7 +1343,7 @@ list_fade: _list_fade {  ::pager(join "\n",
 		map{ s/^---//; s/...\s$//; $_} map{$_->dump}
 		sort{$a->n <=> $b->n} values %::Fade::by_index) }
 add_comment: _add_comment text { 
- 	::pager( $::this_track->name, ": comment: $item{text}"); 
+ 	::pagers( $::this_track->name. ": comment: $item{text}"); 
  	$::project->{track_comments}->{$::this_track->name} = $item{text};
  	1;
 }
@@ -1388,8 +1382,8 @@ show_version_comments_all: _show_version_comments_all {
 	my @v = @{$t->versions};
 	$t->show_version_comments(@v); 1;
 }
-set_system_version_comment: _set_system_version_comment dd text {
-	::pager( ::set_system_version_comment($::this_track,@item{qw(dd text)}));1;
+add_system_version_comment: _add_system_version_comment dd text {
+	::pagers( $::this_track->add_system_version_comment(@item{qw(dd text)}));1;
 }
 new_edit: _new_edit {
 	::new_edit();
@@ -1725,3 +1719,20 @@ route_track: _route_track source_id send_id {
 
 set_sample_rate: _set_sample_rate dd {::set_sample_rate($item{dd})}
 set_sample_rate: _set_sample_rate {::get_sample_rate()}
+
+bus_on: _bus_on 
+{ 
+	::pagers('turning bus on'); 
+	my $bus_name = $::this_track->source_type eq 'bus' ? $::this_track->source_id : $::this_bus;
+	print "bus_name: $bus_name\n";
+	$::bn{$bus_name}->tracks_on
+}
+
+bus_off: _bus_off 
+{ 
+	::pagers('turning bus off'); 
+	my $bus_name = $::this_track->source_type eq 'bus' ? $::this_track->source_id : $::this_bus;
+	print "bus_name: $bus_name\n";
+	$::bn{$bus_name}->tracks_off 
+}
+

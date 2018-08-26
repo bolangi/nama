@@ -26,7 +26,7 @@ a live input.
 =head1 DIAGNOSTICS
 
 On any change in setup, the GUI display updates and
-C<show_tracks> command is executed automatically showing
+C<show-tracks> command is executed automatically showing
 what to expect the next time the engine is started.
 
 You can use the C<chains> command to verify the Ecasound

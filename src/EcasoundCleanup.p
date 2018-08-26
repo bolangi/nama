@@ -23,11 +23,14 @@ sub rec_cleanup {
 			$project->{playback_position} = 0;
 			$setup->{_last_rec_tracks} = \@rec_tracks;
 			pager(join " ", "Files recorded for these tracks:",
-				map{ $_->name } @rec_tracks);
+				map{ $_->current_wav } @rec_tracks);
 		}
 
-		if( grep /Mixdown/, @files) { mixdown_postprocessing() }
-		else { post_rec_configure() }
+		if( grep /Mixdown/, @files) { 
+				mixdown_postprocessing() ;
+				mixplay();
+		}
+		post_rec_configure() 
 	}
 }
 sub mixdown_postprocessing {
@@ -89,9 +92,6 @@ sub tag_mixdown_commit {
 	my $msg = "State for $sym ($mix)";
 	git_snapshot($msg);
 	git('tag', $name, '-m', $mix);
-
-	# rec_cleanup wants to audition the mixdown
-	mixplay();
 }
 sub delete_existing_mixdown_tag_and_convenience_encodings {
 	logsub('&delete_existing_mixdown_tag_and_convenience_encodings');
@@ -167,7 +167,8 @@ sub new_files_were_recorded {
 		} @files;
 	if(@recorded){
 		restart_wav_memoize();
-		pager(join $/, "recorded:",@recorded);
+		$recorded[0] =~ s/^/recorded: "/;
+		pagers(@recorded);
 	}
 	map{ _get_wav_info($_) } @recorded;
 	@recorded 

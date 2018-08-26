@@ -3,21 +3,22 @@
 package ::Graphical;  ## gui routines
 use Modern::Perl; use Carp;
 our $VERSION = 1.071;
-use ::Globals qw($text);
+use ::Globals qw($text $prompt);
 
 use Module::Load::Conditional qw(can_load);
 use ::Assign qw(:all);
 use ::Util qw(colonize);
 no warnings 'uninitialized';
 
-our @ISA = '::';      ## default to root class
+our @ISA = '::';      ## default to root namespace, e.g.  Refresh_subs, Graphical_subs
+						# actually this doesn't seem like a
+						# good idea
 # widgets
 
 ## The following methods belong to the Graphical interface class
 
 sub hello {"make a window";}
 sub loop {
-	package ::;
 	$text->{term_attribs}->{already_prompted} = 0;
 	$text->{term}->tkRunning(1);
   	while (1) {

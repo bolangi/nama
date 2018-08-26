@@ -234,6 +234,7 @@ sub play { $_[0]->rec_status eq PLAY}
 sub off  { $_[0]->rec_status eq OFF }
 
 sub current_midi {}
+sub fades { grep { $_->{track} eq $_[0]->name } values %::Fade::by_index  }
 
 } # end package
 
@@ -371,9 +372,10 @@ sub destination {
 	$tn{Main}->destination if $track->play
 }
 sub rec_status {
-	my $track = shift;
-	return REC if $track->rw eq REC;
-	::Track::rec_status($track);
+ 	my $track = shift;
+	$track->rw
+# 	return REC if $track->rw eq REC;
+# 	::Track::rec_status($track);
 }
 sub forbid_user_ops { 1 }
 }

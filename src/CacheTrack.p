@@ -2,6 +2,7 @@
 package ::;
 use Modern::Perl;
 use Storable 'dclone';
+use Try::Tiny;
 use ::Globals qw(:all);
 
 # The $args hashref passed among the subroutines in this file
@@ -10,7 +11,7 @@ use ::Globals qw(:all);
 # track
 # additional_time
 # processing_time
-# orig_version
+# original_version
 # complete_caching_ref
 # output_wav
 # orig_volume
@@ -18,30 +19,39 @@ use ::Globals qw(:all);
 
 sub cache_track { # launch subparts if conditions are met
 
+	my $args = {};
+	(my $track, $args->{additional_time}) = @_;
 	local $this_track;
-	my $args = {}; # initialize args
-	my $track;
-	($track, $args->{additional_time}) = @_;
+	throw("Set track to MON or PLAY"), return if $track->rw eq OFF 
+											and $track->is_mixer 
+											and $track->targets;
 	$args->{track} = $track;
 	$args->{additional_time} //= 0;
+	$args->{is_mixing}++ if $track->is_mixing;
+	$args->{original_version} = $track->is_mixing ? 0 : $args->{track}->playback_version;
+	$args->{cached_version} = $args->{original_version} + 1;
 	
-	pagers($track->name. ": preparing to cache.");
+	$args->{track_rw} = $track->{rw};
+	$args->{main_rw} = $tn{Main}->{rw};
+	$tn{Main}->set( rw => OFF);
+	$track->set( rw => REC);	
+	pagers($track->name. ": preparing to cache ".  ($track->is_mixing ? 'a bus' : 'an ordinary track'));
 	
-	$track->play or $track->mon or throw(
-			$track->name. ": track caching requires PLAY or MON status. Aborting."), return;
-	
-	# abort if track is a mix track for a bus and the bus is OFF 
-	if( $track->is_mixing){
-		my $bus = $bn{$track->name};
-	} 
 	throw($track->name. ": nothing to cache!  Skipping."), return 
-		unless 	$track->is_mixing 
+		unless $track->is_mixing 
 				or $track->user_ops 
 				or $track->has_insert
-				or $track->is_region
-				or $bn{$track->name};
+				or $track->is_region;
 
-	if ( prepare_to_cache($args) )
+	my $result;
+	if($track->is_mixing)
+	{ $result = prepare_to_cache_bus($args) }
+	else
+	{ $result = prepare_to_cache($args) }
+	
+	{ no warnings 'uninitialized';
+	}
+	if ( $result )
 	{ 
 		deactivate_vol_pan($args);
 		cache_engine_run($args);
@@ -66,13 +76,35 @@ sub reactivate_vol_pan {
 	pan_back($args->{track});
 	vol_back($args->{track});
 }
+sub prepare_to_cache_bus {
+	my $args = shift;
+ 	my $g = ::ChainSetup::initialize();
+	$args->{graph} = $g;
+	my $track = $args->{track};
+		
+	# set WAV output format
+	
+	$args->{complete_caching_ref} = \&update_cache_map_bus;
+	
+	map{ $_->apply($g) } grep{ (ref $_) =~ /SubBus/ } ::Bus::all();
+
+	$g->set_vertex_attributes(
+		$track->name, 
+		{ format => signal_format($config->{cache_to_disk_format},$track->width),
+			version => ($args->{track_result_version}),
+		}
+	); 
+
+# 	grep { $_->name ne 'Main' } 
+
+	process_cache_graph($g);
+}
 
 sub prepare_to_cache {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
-	$args->{orig_version} = $args->{track}->is_mixing ?  undef : $args->{track}->playback_version;
-
-
+	$args->{graph} = $g;
+	
 	#   We route the signal thusly:
 	#
 	#   Target track --> CacheRecTrack --> wav_out
@@ -99,28 +131,21 @@ sub prepare_to_cache {
 	$g->set_vertex_attributes(
 		$cooked->name, 
 		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
-			version => (1 + $this_track->last),
+			version => ($args->{cached_version}),
 		}
 	); 
 	$args->{complete_caching_ref} = \&update_cache_map;
 
-	# Case 1: Caching a standard track
-	
-	if(! $args->{track}->is_mixing)
-	{
 		# set the input path
 		$g->add_path('wav_in',$args->{track}->name);
 		logpkg('debug', "The graph after setting input path:\n$g");
-	}
 
-	# Case 2: Caching a bus mix track
+	process_cache_graph($g);
 
-	else {
+}
 
-		# apply all buses (unneeded ones will be pruned)
-		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
-	}
-
+sub process_cache_graph {
+	my $g = shift;
 	logpkg('debug', "The graph after bus routing:\n$g");
 	::ChainSetup::prune_graph();
 	logpkg('debug', "The graph after pruning:\n$g");
@@ -136,14 +161,11 @@ sub prepare_to_cache {
 	}
 	$success
 }
+
 sub cache_engine_run {
 	my $args = shift;
 	connect_transport()
 		or throw("Couldn't connect engine! Aborting."), return;
-
-	# remove fades from target track
-	
-	::Effect::remove_op($args->{track}->fader) if defined $args->{track}->fader;
 
 	$args->{processing_time} = $setup->{audio_length} + $args->{additional_time};
 
@@ -201,7 +223,7 @@ sub update_cache_map {
 			(
 				track_cache => 1,
 				track_name	=> $track->name,
-				track_version_original => $args->{orig_version},
+				track_version_original => $args->{original_version},
 				project => 1,
 				system => 1,
 				ops_list => \@ops_list,
@@ -209,24 +231,43 @@ sub update_cache_map {
 			);
 			#	is_mixing => $track->is_mixing,
 			$args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
+			$args{fade_data} = [ map  { $_->as_hash } $track->fades ];
 			$args{track_target_original} = $track->target if $track->target; 
 			# late, because this changes after removing target field
 			map{ delete $track->{$_} } qw(target);
-			$args{track_version_result} = $track->last,
 			# update track settings
 			my $ec = ::EffectChain->new( %args );
+			map{ $_->remove        } $track->fades;
 			map{ remove_effect($_) } @ops_remove_list;
 			map{ $_->remove        } @inserts_list;
 			map{ delete $track->{$_} } qw( region_start region_end target );
 
 		pagers(qq(Saving effects for cached track "). $track->name. '".');
-		pagers(qq('uncache' will restore effects and set version $args->{orig_version}\n));
+		pagers(qq('uncache' will restore effects and set version $args->{original_version}\n));
 		}
+}
+sub update_cache_map_bus {
+	my $args = shift;
+	my $track = $args->{track};
+	my $filename = $track->targets->{$args->{cached_version}};
+
+	# system version comment with git tag
+	
+	my $tagname = my $msg = join " ","bus", $track->source_id, "cached as", $filename;
+	$tagname =~ s/ /-/g;
+	try{ git(tag => $tagname, '-a','-m',$msg) };
+	$track->add_system_version_comment($args->{cached_version}, $msg);
+	pagers($msg); 
+	pagers(qq(To return this track to the state prior to caching,
+simply say '$track->{name} mon' The state of the project is saved 
+and available through the tag $tagname));
 }
 
 sub post_cache_processing {
 	my $args = shift;
-		$args->{track}->set( rw => PLAY) if $args->{track}->is_mixing;
+		$args->{track}->{rw} = $args->{track_rw};
+		$tn{Main}->{rw} = $args->{main_rw}; 
+		$args->{track}->set( rw => PLAY);
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
 		revise_prompt("default"); 
@@ -288,8 +329,6 @@ sub uncache_track {
 		$track->region_start, " and ", $track->region_end, $/)
 		if $track->is_region;
 
-	$track->activate_bus, pagers("uncache for track ".$track->name.": enabling bus")
-		if $track->is_mixer;
 }
 sub is_cached {
 	my ($track, $version) = @_;
