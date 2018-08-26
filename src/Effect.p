@@ -183,8 +183,8 @@ sub registry_index {
 sub ecasound_controller_index {
 	logsub("&ecasound_controller_index");
 	my $self = shift;
-	my $id = $self->id;
 	my $n = $self->chain;
+	my $id = $self->id;
 	my $opcount = 0;
 	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
 	for my $op (@{ $ti{$n}->ops }) { 
