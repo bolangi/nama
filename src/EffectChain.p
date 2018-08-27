@@ -360,7 +360,7 @@ sub add_fades {
 	map{ 
 		my %h = %$_; 
 		my $fade = ::Fade->new( %h, track => $track->name ) ;
-	} $self->{fade_data}->@*;
+	} @{ $self->{fade_data} }
 }
 sub destroy {
 	my $self = shift;

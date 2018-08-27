@@ -1,4 +1,4 @@
-$help->{arr_topic}->@* = qw(
+@{ $help->{arr_topic} } = qw(
 project
 track_basics
 track_status
@@ -33,7 +33,7 @@ my @display_index = map{ $help->{index}->{++$i} = $_;  # integer => topic key
                             $help->{title}->[$i] = $name;
                             $name = join " ",$i, $name;
                             $help->{display}->[$i] = $name;
-                            } $help->{arr_topic}->@*; 
+                            } @{ $help->{arr_topic} };
 sub pad {
     my ($text, $len) = @_;
     my $pad = ' ' x ( $len - length $text);
@@ -42,7 +42,7 @@ sub pad {
 my @twocolumn = map{ pad($display_index[$_], 22).$display_index[$_+13].$/ } 0..12;
 
 
-$help->{topic}->%*  = (
+%{ $help->{topic} }  = (
 
 help => <<HELP,
    help <command>       - show help for <command>

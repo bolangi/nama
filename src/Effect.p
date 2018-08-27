@@ -232,7 +232,7 @@ sub controllers {
 				grep{ $_->{parent} eq $self->id 
 					or $children{$_->{parent}} 
 					and $children{$_->id}++ 
-					} map{ fxn($_)} $self->track->ops->@*;
+					} map{ fxn($_)} @{ $self->track->ops };
 
 	@ctrl
 }
