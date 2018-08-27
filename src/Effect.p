@@ -221,6 +221,20 @@ sub track_effect_index { # the position of the ID in the track's op array
 	my $pos = first_index {$id eq $_} @{$self->track->ops} ;
 	$pos
 }
+sub controllers {
+	my $self = shift;
+	my %children;
+	# we want controllers with this parent, also controllers
+	# whos parents are children of this parent, and children
+	# of those children
+	my @ctrl =	map { $_->id }
+				grep{ $_->parent eq $self->id 
+					or $children{$_->parent} 
+					and $children{$_->id}++ 
+					} map{ fxn($_)} $self->track->ops->@*;
+
+	@ctrl
+}
 sub sync_one_effect {
 		my $self= shift;
 		my $chain = $self->chain;
@@ -341,12 +355,11 @@ sub _remove_effect {
 	return(); 
 }
 sub position_effect {
+	#logsub('&position_effect');
 	my($self, $pos) = @_;
 
 	my $op = $self->id;
 	
-	# disabled, debugging needed
-	# we cannot handle controllers
 	#::pager("$op or $pos: controller not allowed, skipping.\n"), return 
 	#	if grep{ fxn($_)->is_controller } $op, $pos;
 	
@@ -355,14 +368,16 @@ sub position_effect {
 	my $track = $ti{$self->chain};
 
 	my $op_index = $self->track_effect_index;
+	my @children = $self->controllers;
+	my $count = scalar @children + 1;
 	my @new_op_list = @{$track->ops};
 
-	# remove op
-	splice @new_op_list, $op_index, 1;
+	# remove op and children
+	my @op_and_ctrl = splice @new_op_list, $op_index, $count;
 
 	if ( $pos eq 'ZZZ'){
 		# put it at the end
-		push @new_op_list, $op;
+		push @new_op_list, @op_and_ctrl
 	}
 	else { 
 		my $POS = fxn($pos);
@@ -371,14 +386,15 @@ sub position_effect {
 			unless $track eq $track2;
 		my $new_op_index = $POS->track_effect_index; 
 		# insert op
-		splice @new_op_list, $new_op_index, 0, $op;
+		splice @new_op_list, $new_op_index, 0, @op_and_ctrl;
+
 	}
-	# reconfigure the entire engine (inefficient, but easy to do)
+	# easier to reconfigure the engine than to code for
+	# repositioning ecasound effects.
 	say join " - ",@new_op_list;
 	@{$track->ops} = @new_op_list;
 	::request_setup();
 	$this_track = $track;
-	# this command generates spurious warnings during test
 	nama_cmd('show_track');
 }
 
