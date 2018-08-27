@@ -812,7 +812,9 @@ sub remove_op {
 
 	# select chain
 	
-	return unless ecasound_select_chain($n);
+	return unless ecasound_iam('cs-is-valid');
+	
+	ecasound_select_chain($n);
 
 	# deal separately with controllers and chain operators
 	
