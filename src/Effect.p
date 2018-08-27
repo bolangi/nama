@@ -229,8 +229,8 @@ sub controllers {
 	# of those children
 	no warnings;
 	my @ctrl =	map { $_->id }
-				grep{ $_->parent eq $self->id 
-					or $children{$_->parent} 
+				grep{ $_->{parent} eq $self->id 
+					or $children{$_->{parent}} 
 					and $children{$_->id}++ 
 					} map{ fxn($_)} $self->track->ops->@*;
 
