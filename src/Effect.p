@@ -954,8 +954,10 @@ sub sync_effect_parameters {
 	# this routine syncs them in prep for save_state()
 	
  	return unless ::valid_engine_setup();
+   	push my @ops, ops_with_controller(), ops_with_read_only_params();
+	return unless @ops;
 	my $old_chain = ecasound_iam('c-selected');
-	map{ $_->sync_one_effect } grep{ $_ }  map{ fxn($_) } ops_with_controller(), ops_with_read_only_params();
+	map{ $_->sync_one_effect } grep{ $_ }  map{ fxn($_) } @ops;
 	ecasound_iam("c-select $old_chain");
 }
 
