@@ -812,7 +812,7 @@ sub remove_op {
 
 	# select chain
 	
-	return unless ecasound_iam('cs-is-valid');
+	return unless ::valid_engine_setup();
 	
 	ecasound_select_chain($n);
 
