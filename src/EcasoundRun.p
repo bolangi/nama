@@ -91,7 +91,7 @@ sub stop_command {
 
 
 sub valid_engine_setup {
-	ecasound_iam("cs-selected") and ecasound_iam("cs-is-valid");
+	ecasound_iam("cs-is-valid") and ecasound_iam("cs-selected"); 
 }
 sub ecasound_engine_running {
 	ecasound_iam("engine-status") eq "running"
