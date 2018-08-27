@@ -103,8 +103,7 @@ sub context {
 	$context
 }
 sub nama_cmd {
-	my $input = shift;
-	my $input_was = $input;
+	my $input_was = my $input = shift;
 
 	# parse repeatedly until all input is consumed
 	# return true on complete success
