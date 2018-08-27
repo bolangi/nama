@@ -227,6 +227,7 @@ sub controllers {
 	# we want controllers with this parent, also controllers
 	# whos parents are children of this parent, and children
 	# of those children
+	no warnings;
 	my @ctrl =	map { $_->id }
 				grep{ $_->parent eq $self->id 
 					or $children{$_->parent} 
