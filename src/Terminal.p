@@ -256,6 +256,7 @@ sub pager {
 	
 	logsub("&pager");
 	my @output = @_;
+	@output or return;
 	chomp $output[-1];
 	$output[-1] .= "\n\n";
 	push @{$text->{output_buffer}}, @output;
