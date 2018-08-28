@@ -1,6 +1,5 @@
 #!/usr/bin/env perl
-use strict;
-use warnings;
+use Modern::Perl;
 use Carp;
 no warnings "uninitialized";
 my $debug = 0;
@@ -15,6 +14,7 @@ my $in = qx(cat ./commands.yml);
 # preserve order for generating docs
 
 my @keys = $in =~ /^(\w+)/mg;
+s/_/-/g for @keys;
 my @types = $in =~ /^  type: (\w+)/mg;
 #print "$_\n" for @keys; 
 #print "$_\n" for @types; 
@@ -23,8 +23,28 @@ my @types = $in =~ /^  type: (\w+)/mg;
 # read in data structure
 
 my $ref = yaml_in( $in); 
-#print yaml_out $ref;
+# use hyphenated commands in pod, converting from underscore
+if ( $output eq 'pod' )
+{
+	my @cmds = keys %$ref;
+	push @cmds, map{ grep{/_/} split ' ', $_->{short} } grep { $_->{short} } values %$ref;
+	my @underscore = grep{ /_/ } @cmds;
+	@underscore = reverse sort { length $a <=> length $b } sort { $a cmp $b } @underscore;
+	#say for @underscore; exit;
+	my @hyphen = @underscore;
+	$_ =~ s/_/-/g for @hyphen;
+	my $hyp = $in;
+	my ($from, $to);
+	for (0 .. $#hyphen){
+		$from = $underscore[$_];
+		$to   = $hyphen[$_];
+		#say "from $from, to $to";
+		$hyp =~ s/$from/$to/g;
+	}
+	undef $ref;
+	$ref = yaml_in( $hyp); 
 
+}
 
 =comment testing for missing definitions
 
