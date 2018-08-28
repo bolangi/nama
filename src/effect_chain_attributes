@@ -1,0 +1,31 @@
+### 	attributes for searching, sorting, used by external functions
+
+  		name				# for user-defined effect chains
+
+  		project				# true value identifies project-specific effect chain
+
+  		global				# true value identifies global effect chain,
+
+  		profile				# name of associated effect profile
+
+  		user				# true value identifies user created effect chain
+
+  		system				# true value identifies system generated effect chain
+
+  		track_name			# applies to a track of this name
+
+  		track_version_result 	# WAV version of track after caching
+
+  		track_version_original 	# WAV version of track before caching 
+
+  		track_target_original #	WAV files were from this track
+
+  		insert				# true value identifies belonging to an insert
+
+  		track_cache			# true value identifies belonging to track caching
+
+ 		track_target		# unused
+
+  		bypass				# used for identifying effect bypass (obsolete)
+
+  		id					# duplicates purpose of id field? obsolete?
