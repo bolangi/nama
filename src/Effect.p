@@ -974,6 +974,7 @@ sub update_effect {
 }
 
 sub sync_effect_parameters {
+	logsub('&sync_effect_parameters');
 	local $config->{category} = 'ECI_FX';
 
 	# when a controller changes an effect parameter, the
@@ -1085,6 +1086,7 @@ sub set_bypass_state {
 	
 	local $config->{category} = 'ECI_FX';
 	my($track, $bypass_state, @ops) = @_;
+	logsub('&set_bypass_state');
 
 	# only process ops that belong to this track
 	@ops = intersect_with_track_ops_list($track,@ops);
