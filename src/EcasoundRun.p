@@ -214,6 +214,7 @@ sub wraparound {
 	$project->{events}->{wraparound} = AE::timer($diff,0, sub{set_position($start)});
 }
 sub ecasound_select_chain {
+	logsub("ecasound_select_chain");
 	my $n = shift;
 	my $cmd = "c-select $n";
 
