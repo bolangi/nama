@@ -1120,8 +1120,7 @@ sub set_current_op {
 	my $op_id = shift;
 	my $FX = fxn($op_id);
 	return unless $FX;
-	my $track = $ti{$FX->chain};
-	$project->{current_op}->{$track->name} = $op_id;
+	$project->{current_op}->{$FX->trackname} = $op_id;
 }
 sub set_current_param {
 	my $parameter = shift;
