@@ -223,6 +223,7 @@ sub configure {
 package ::LibEngine;
 our $VERSION = 1.0;
 use Modern::Perl;
+use Carp qw(carp);
 use ::Globals qw(:all);
 use ::Log qw(logit);
 our @ISA = '::Engine';
@@ -240,6 +241,7 @@ sub ecasound_iam{
 	my $cmd = shift;
 	my $category = ::munge_category(shift());
 	
+	carp "c-select" if $cmd =~ /c-select/;
 	logit($category,'debug',"LibEcasound-ECI sent: $cmd");
 
 	my (@result) = $self->{audio_ecasound}->eci($cmd);
