@@ -240,10 +240,10 @@ sub ecasound_iam{
 	my $cmd = shift;
 	my $category = ::munge_category(shift());
 	
-	logit($category,'debug',"ECI sent: $cmd");
+	logit($category,'debug',"LibEcasound-ECI sent: $cmd");
 
 	my (@result) = $self->{audio_ecasound}->eci($cmd);
-	logit($category, 'debug',"ECI  got: @result") 
+	logit($category, 'debug',"LibEcasound-ECI  got: @result") 
 		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
 	my $errmsg = $self->{audio_ecasound}->errmsg();
 	if( $errmsg ){
