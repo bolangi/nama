@@ -237,7 +237,7 @@ sub controllers {
 	@ctrl
 }
 sub sync_one_effect {
-		my $self= shift;
+		my $self = shift;
 		my $chain = $self->chain;
 		ecasound_iam("c-select $chain");
 		ecasound_iam("cop-select " . $self->ecasound_effect_index);
