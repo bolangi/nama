@@ -131,7 +131,7 @@ sub nama_cmd {
 	# select chain operator if appropriate
 	# and there is a current track
 
-
+	::valid_engine_setup() or return;
 	if ($this_track){
 		my $FX = fxn($this_track->op);
 		if ($FX and $this_track->n eq $FX->chain){
