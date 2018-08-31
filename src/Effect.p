@@ -1202,7 +1202,7 @@ sub fade {
 	my ($param, $from, $to, $seconds) = @_;
 
 	my $id = $self->id;
-	# no fade without Timer::HiRes
+	# no fade without Time::HiRes
 	# no fade unless engine is running
 	if ( ecasound_engine_running() and $config->{hires_timer} )
 	{
