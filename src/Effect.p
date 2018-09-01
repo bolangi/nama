@@ -923,10 +923,6 @@ sub update_ecasound_effect {
 	my $FX = fxn($id) or carp("$id: effect not found. skipping...\n"), return;
 	$param++; # so the value at $p[0] is applied to parameter 1
 	my $chain = $FX->chain;
-	my $old_chain;
-
-	say "fading..." if $FX->fade_in_progress;
-	if (not $FX->fade_in_progress){
 	return unless ::ChainSetup::is_ecasound_chain($chain);
 
 	logpkg('debug', "chain $chain id $id param $param value $val");
@@ -934,33 +930,25 @@ sub update_ecasound_effect {
 	# $param is zero-based. 
 	# $FX->params is  zero-based.
 
-	$old_chain = ecasound_iam('c-selected') if ::valid_engine_setup();
+	my $old_chain = ecasound_iam('c-selected') if ::valid_engine_setup();
 	ecasound_select_chain($chain);
-
-	}
 
 	# update Ecasound's copy of the parameter
 	if( $FX->is_controller ){
 		my $i = $FX->ecasound_controller_index;
 		logpkg('debug', "controller $id: track: $chain, index: $i, param: $param, value: $val");
-		if (not $FX->fade_in_progress){
 		ecasound_iam("ctrl-select $i");
 		ecasound_iam("ctrlp-select $param");
-		}
 		ecasound_iam("ctrlp-set $val");
 	}
 	else { # is operator
 		my $i = $FX->ecasound_effect_index;
 		logpkg('debug', "operator $id: track $chain, index: $i, offset: ".  $FX->offset . " param $param, value $val");
-		if (not $FX->fade_in_progress){
 		ecasound_iam("cop-select $i");
 		ecasound_iam("copp-select $param");
-		}
 		ecasound_iam("copp-set $val");
 	}
-	if( not $FX->fade_in_progress ){
 	ecasound_select_chain($old_chain);
-	}
 }
 
 # set both Nama effect and Ecasound chain operator
@@ -1226,16 +1214,11 @@ sub fade {
 		# first step by step
 		for (1..$steps - 1){
 			$self->_modify_effect($param, $size, '+');
-			$self->fade_has_started;	
 			sleeper( $wink );
 		}		
-		$self->fade_has_ended;
 	}
 	$self->_modify_effect($param, $to)
 }
-sub fade_in_progress { $_[0]->{is_fading} }
-sub fade_has_started { $_[0]->{is_fading}++ }
-sub fade_has_ended   { delete $_[0]->{is_fading} }
 
 sub plan_fade {
 	return unless ecasound_engine_running();
