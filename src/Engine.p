@@ -50,6 +50,37 @@ sub tracks {
 }
 sub ecasound_iam {}
 
+sub current_item {
+	my ($self, $n, $field, $cmd) = @_;
+	return $self->{$field} if not defined $n or $self->{$field} == $n;
+	ecasound_iam("$cmd $n");
+	$self->{$field} = $n;
+}
+sub current_chain {
+	my ($self, $n) = @_;
+	$self->current_item($n, 'current_chain', 'c-select');
+}
+sub current_chain_operator {
+	my ($self, $n) = @_;
+	$self->current_item($n, 'current_chain_operator', 'cop-select');
+}
+sub current_chain_operator_parameter {
+	my ($self, $n) = @_;
+	$self->current_item($n, 'current_chain_operator_parameter', 'copp-select');
+}
+sub current_controller {
+	my ($self, $n) = @_;
+	$self->current_item($n, 'current_controller', 'ctrl-select');
+}
+sub current_controller_parameter {
+	my ($self, $n) = @_;
+	$self->current_item($n, 'current_controller_parameter', 'ctrlp-select');
+}
+sub valid_setup {
+	my ($self) = @_;
+	$self->{valid_setup}
+}
+
 ### class methods
 
 sub engines { values %by_name }
@@ -194,7 +225,8 @@ sub configure {
 		map{$_->name => $_->rec_status } rec_hookable_tracks()
 	};
 	if ( $self->setup() ){
-	
+		$self->{valid_setup} = 1;
+
 		reset_latency_compensation() if $config->{opts}->{Q};
 		
 		logpkg('debug',"I generated a new setup");
