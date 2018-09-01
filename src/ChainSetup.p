@@ -1,7 +1,7 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($file $config $jack $setup %tn %bn %en $mode :trackrw);
+use ::Globals qw($file $config $jack $setup %tn %bn %en $mode :trackrw $this_engine);
 use ::Log qw(logsub logpkg);
 use Modern::Perl;
 use Data::Dumper::Concise;
@@ -64,6 +64,7 @@ sub initialize {
 	::disable_length_timer();
 	reset_aux_chain_counter();
 	unlink $file->chain_setup;
+	delete $this_engine->{valid_setup};
 	$g;
 }
 sub ecasound_chain_setup { $chain_setup } 
