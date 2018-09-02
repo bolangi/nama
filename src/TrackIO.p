@@ -353,7 +353,8 @@ sub import_audio  {
 		write_file($path, $ecs);
 		::load_ecs($path) or ::throw("$path: load failed, aborting"), return;
 		::ecasound_iam('start');
-		::sleeper(0.2); sleep 1 while ::ecasound_engine_running();
+		::sleeper(0.2); 
+		sleep 1 while $this_engine->running();
 	} 
 	::restart_wav_memoize() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
 }
