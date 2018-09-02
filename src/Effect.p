@@ -447,7 +447,6 @@ sub apply_op {
 
 sub import_engine_subs {
 
-	*valid_engine_setup = \&::valid_engine_setup;
 	*ecasound_engine_running		= \&::ecasound_engine_running;
 	*ecasound_iam			= \&::ecasound_iam;
 	*ecasound_select_chain = \&::ecasound_select_chain;
@@ -634,7 +633,7 @@ sub append_effect {
 		# XX we should announce that will take effect in new setup
 		$add_effects_sub = $FX->is_channel_op ? sub { ::request_setup() } : sub{ $FX->apply_op };
 	}
-	if( ::valid_engine_setup() )
+	if( $this_engine->valid_setup() )
 	{
 		if (::ecasound_engine_running())
 		{ 
@@ -820,7 +819,7 @@ sub remove_op {
 	local $config->{category} = 'ECI_FX';
 
 	# only if engine is configured
-	return unless ::valid_engine_setup();
+	return unless $this_engine->valid_setup();
 
 	my $id = shift;
 	my $self = fxn($id);
@@ -829,7 +828,7 @@ sub remove_op {
 
 	# select chain
 	
-	return unless ::valid_engine_setup();
+	return unless $this_engine->valid_setup();
 	
 	ecasound_select_chain($n);
 
@@ -969,7 +968,7 @@ sub sync_effect_parameters {
 	#
 	# this routine syncs them in prep for save_state()
 	
- 	return unless ::valid_engine_setup();
+ 	return unless $this_engine->valid_setup();
    	push my @ops, ops_with_controller(), ops_with_read_only_params();
 	return unless @ops;
 	my $old_chain = ecasound_iam('c-selected');

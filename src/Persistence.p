@@ -26,7 +26,7 @@ sub save_state {
 	$project->{save_file_version_number} = $VERSION;
 
 	# store playback position, if possible
-	$project->{playback_position} = ecasound_iam("getpos") if valid_engine_setup();
+	$project->{playback_position} = ecasound_iam("getpos") if $this_engine->valid_setup();
 
 	# some stuff get saved independently of our state file
 	
