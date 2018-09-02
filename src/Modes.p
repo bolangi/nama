@@ -28,7 +28,7 @@ MSG
 sub set_doodle_mode {
 
 	logsub("&doodle");
-	return if ecasound_engine_running() and ::ChainSetup::really_recording();
+	return if $this_engine->started() and ::ChainSetup::really_recording();
 	disable_preview_modes();
 	{
 	no warnings 'uninitialized';
@@ -50,7 +50,7 @@ sub exit_preview_modes {
 		logsub("&exit_preview_modes");
 		return unless $mode->{preview} or $mode->{doodle};
 		disable_preview_modes();
-		stop_transport() if ecasound_engine_running();
+		stop_transport();
 		pager("Exiting preview/doodle mode");
 }
 sub disable_preview_modes {
