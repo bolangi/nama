@@ -4,7 +4,6 @@ use Modern::Perl;
 sub add_track {
 
 	logsub("&add_track");
-	#return if transport_running();
 	my ($name, @params) = @_;
 	my %vals = (name => $name, @params);
 	my $class = $vals{class} // '::Track';

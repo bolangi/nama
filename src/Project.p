@@ -54,7 +54,6 @@ sub list_projects {
 sub initialize_project_data {
 	logsub("&initialize_project_data");
 
-	return if transport_running();
 	-d ::waveform_dir() or mkdir ::waveform_dir();
 	$ui->destroy_widgets();
 	$ui->project_label_configure(

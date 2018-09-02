@@ -176,7 +176,7 @@ sub wwgeometry {
 				);
 	$gui->{quit}->configure(-text => "Quit",
 		 -command => sub { 
-				return if transport_running();
+				stop_transport() if $this_engine->started;
 				save_state($gui->{_save_id});
 				pager("Exiting... \n");
 				#$text->{term}->tkRunning(0);
@@ -245,7 +245,7 @@ sub transport_gui {
 	$gui->{engine_start}->configure(
 		-text => "Start",
 		-command => sub { 
-		return if transport_running();
+		return if $this_engine->started;
 		my $color = engine_mode_color();
 		$ui->project_label_configure(-background => $color);
 		start_transport();

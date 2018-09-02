@@ -102,10 +102,8 @@ sub midish_running { $setup->{midish_running} }
 	
 sub toggle_transport { $this_engine->running() ?  stop_transport() : start_transport() }
 
-sub transport_running { $this_engine->ecasound_iam('engine-status') eq 'running'  }
-
 sub disconnect_transport {
-	return if transport_running();
+	return if $this_engine->running;
 	teardown_engine();
 }
 sub engine_is {
