@@ -192,7 +192,7 @@ sub transport_status {
 				 	"to ",   heuristic_time($end));
 	}
 	pagers("\nNow at: ", current_position());
-	pagers("Engine is ". ( ecasound_engine_running() ? "running." : "ready."));
+	pagers("Engine is ". ( $this_engine->started() ? "running." : "ready."));
 	pagers("\nPress SPACE to start or stop engine.")
 		if $config->{press_space_to_start};
 }
