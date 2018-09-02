@@ -85,15 +85,6 @@ use Modern::Perl; use Carp;
 no warnings 'uninitialized';
 use ::Util qw(process_is_running);
 
-sub stop_command {
-	return unless ecasound_engine_running();
-	ecasound_iam('stop-sync')
-}
-sub ecasound_engine_running {
-	ecasound_iam("engine-status") eq "running"
-};
-
-
 sub mixing_only {
 	my $i;
 	my $am_mixing;
