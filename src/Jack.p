@@ -18,7 +18,7 @@ sub update_jack_client_list {
 	# cache current JACK status
 	
 	# skip if Ecasound is busy
-	return if ecasound_engine_running();
+	return if $this_engine->started();
 
 	if( $jack->{jackd_running} = process_is_running('jackd') ){
 		# reset our clients data 
