@@ -419,7 +419,7 @@ sub group_gui {
 			'command' => MON,
 			-background => $gui->{_old_bg},
 			-command => sub { 
-				return if ::ecasound_engine_running();
+				return if $this_engine->started();
 				$group->set(rw => MON);
 				$gui->{group_rw}->configure(-text => MON);
 				refresh();
@@ -429,7 +429,7 @@ sub group_gui {
 			'command' => OFF,
 			-background => $gui->{_old_bg},
 			-command => sub { 
-				return if ::ecasound_engine_running();
+				return if $this_engine->started();
 				$group->set(rw => OFF);
 				$gui->{group_rw}->configure(-text => OFF);
 				refresh();
@@ -497,7 +497,7 @@ sub track_gui {
 			[ 'command' => "REC",
 				-foreground => 'red',
 				-command  => sub { 
-					return if ::ecasound_engine_running();
+					return if $this_engine->started();
 					$ti{$n}->set(rw => "REC");
 					
 					$ui->refresh_track($n);
@@ -506,7 +506,7 @@ sub track_gui {
 			}],
 			[ 'command' => "PLAY",
 				-command  => sub { 
-					return if ::ecasound_engine_running();
+					return if $this_engine->started();
 					$ti{$n}->set(rw => "PLAY");
 					$ui->refresh_track($n);
 					#refresh_group();
@@ -515,7 +515,7 @@ sub track_gui {
 			[ 'command' => "MON",
 				-foreground => 'red',
 				-command  => sub { 
-					return if ::ecasound_engine_running();
+					return if $this_engine->started();
 					$ti{$n}->set(rw => "MON");
 					
 					$ui->refresh_track($n);
@@ -524,7 +524,7 @@ sub track_gui {
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
-					return if ::ecasound_engine_running();
+					return if $this_engine->started();
 					$ti{$n}->set(rw => "OFF");
 					$ui->refresh_track($n);
 					#refresh_group();
@@ -577,7 +577,7 @@ sub track_gui {
 			-label => $v,
 			-value => $v,
 			-command => sub { 
-				return if ::ecasound_engine_running();
+				return if $this_engine->started();
 			#	$ti{$n}->set(rw => REC);
 				$ti{$n}->source($v);
 				$ui->refresh_track($n) }
@@ -597,7 +597,7 @@ sub track_gui {
 						-label => $v,
 						-value => $v,
 						-command => sub { 
-							return if ::ecasound_engine_running();
+							return if $this_engine->started();
 							local $this_track = $ti{$n};
 							if( $v eq 'off' )
 								 { nama_cmd('nosend') }
@@ -799,13 +799,13 @@ sub create_master_and_mix_tracks {
 	my @rw_items = (
 			[ 'command' => "MON",
 				-command  => sub { 
-						return if ::ecasound_engine_running();
+						return if $this_engine->started();
 						$tn{Main}->set(rw => "MON");
 						$ui->refresh_track($tn{Main}->n);
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
-						return if ::ecasound_engine_running();
+						return if $this_engine->started();
 						$tn{Main}->set(rw => "OFF");
 						$ui->refresh_track($tn{Main}->n);
 			}],
