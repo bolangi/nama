@@ -30,6 +30,7 @@ sub start {
 	schedule_wraparound();
 	mute();
 	$self->ecasound_iam('start');
+	$self->{started}++;
 	start_midi_transport() if midi_run_ready();
 
 	# limit engine run time if we are in mixdown or edit mode, 
