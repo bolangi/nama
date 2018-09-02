@@ -50,6 +50,10 @@ sub tracks {
 }
 sub ecasound_iam {}
 
+# the purpose of the following methods is to cache results
+# from the engine, so we don't burden it with extra
+# commands while the engine is running.
+
 sub current_item {
 	my ($self, $n, $field, $cmd) = @_;
 	return $self->{$field} if not defined $n or $self->{$field} == $n;
