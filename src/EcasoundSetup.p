@@ -127,7 +127,7 @@ sub connect_transport {
 	load_ecs($file->chain_setup) and $setup->{audio_run_ready}++;
 	if (audio_run_ready())
 	{
-		valid_engine_setup()
+		$this_engine->valid_setup()
 			or throw("Invalid chain setup, engine not ready."),return;
 		find_op_offsets(); 
 		ecasound_iam('cs-connect');

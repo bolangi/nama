@@ -88,11 +88,6 @@ sub stop_command {
 	return unless ecasound_engine_running();
 	ecasound_iam('stop-sync')
 }
-
-
-sub valid_engine_setup {
-	ecasound_iam("cs-selected") and ecasound_iam("cs-is-valid");
-}
 sub ecasound_engine_running {
 	ecasound_iam("engine-status") eq "running"
 };
