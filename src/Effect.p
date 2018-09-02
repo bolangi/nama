@@ -447,7 +447,6 @@ sub apply_op {
 
 sub import_engine_subs {
 
-	*ecasound_engine_running		= \&::ecasound_engine_running;
 	*ecasound_iam			= \&::ecasound_iam;
 	*ecasound_select_chain = \&::ecasound_select_chain;
 	*sleeper			= \&::sleeper;
@@ -635,7 +634,7 @@ sub append_effect {
 	}
 	if( $this_engine->valid_setup() )
 	{
-		if (::ecasound_engine_running())
+		if ($this_engine->started())
 		{ 
 			$track->mute;
 			my $result = ::stop_do_start($add_effects_sub, 0.05);
@@ -657,7 +656,7 @@ sub insert_effect {
 	my %args = %$p;
 	local $config->{category} = 'ECI_FX';
 	return(append_effect(\%args)) if $args{before} eq 'ZZZ';
-	my $running = ::ecasound_engine_running();
+	my $running = $this_engine->started();
 	pager("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
 	pager("Cannot insert effect before controller.\n"), return 
@@ -665,7 +664,7 @@ sub insert_effect {
 	if ($running){
 		$ui->stop_heartbeat;
 		::mute();
-		::stop_command();
+		$this_engine->stop_command;
 		sleeper( 0.05); 
 	}
 	my $pos = fxn($args{before}) or die "$args{before}: effect ID not found";
@@ -683,8 +682,7 @@ sub insert_effect {
 
 	# remove corresponding chain operators from the engine
 	logpkg('debug',"ops to remove and re-apply: @after_ops");
-	my $connected = ecasound_iam('cs-connected');
-	if ( $connected ){  
+	if ( $this_engine->valid_setup ){  
 		map{ remove_op($_)} reverse @after_ops; # reverse order for correct index
 	}
 
@@ -702,7 +700,7 @@ sub insert_effect {
 	logpkg('debug',sub{"@{$track->ops}"});
 
 	# replace the corresponding Ecasound chain operators
-	if ($connected ){  
+	if ($this_engine->valid_setup){  
 		map{ fxn($_)->apply_op } @after_ops;
 	}
 		
@@ -1202,7 +1200,7 @@ sub fade {
 	my $id = $self->id;
 	# no fade without Time::HiRes
 	# no fade unless engine is running
-	if ( ecasound_engine_running() and $config->{hires_timer} )
+	if ( $this_engine->started() and $config->{hires_timer} )
 	{
 		my $steps = $seconds * $config->{fade_resolution};
 		my $wink  = 1/$config->{fade_resolution};
@@ -1218,7 +1216,7 @@ sub fade {
 }
 
 sub plan_fade {
-	return unless ecasound_engine_running();
+	return unless $this_engine->started();
 	my $self = shift;
 	my %args = @_;
 	my $param   = $args{param}   || 1;
