@@ -53,7 +53,7 @@ sub ecasound_iam {}
 sub current_item {
 	my ($self, $n, $field, $cmd) = @_;
 	return $self->{$field} if not defined $n or $self->{$field} == $n;
-	ecasound_iam("$cmd $n");
+	$self->ecasound_iam("$cmd $n");
 	$self->{$field} = $n;
 }
 sub current_chain {
