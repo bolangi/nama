@@ -223,11 +223,12 @@ sub stop_do_start {
 
 }
 sub _stop_do_start {
+	my $self = shift;
 	my ($coderef, $delay) = @_;
-		stop_command();
+		$this_engine->stop_command();
 		my $result = $coderef->();
 		sleeper($delay) if $delay;
-		start_command();
+		$this_engine->start_command();
 		$result
 }
 sub restart_ecasound {
