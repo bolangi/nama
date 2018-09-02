@@ -4,11 +4,11 @@ use Modern::Perl;
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
 sub start { 
-	my $self = shift; 
 	package ::;
+	my $self = shift; 
 
 	audio_run_ready() 
-		and ecasound_iam("cs-connected") 
+		and $self->valid_setup
 		or throw("\nAudio engine is not configured. Cannot start.\n"),return;
 
 
