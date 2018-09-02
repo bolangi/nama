@@ -52,17 +52,17 @@ sub start {
 }
 sub stop {
 	package ::;
-	if (ecasound_engine_running())
+	my $self = shift;
+	if ($self->running())
 	{
 	# Since the playback position advances slightly during
 	# the fade, we restore the position to exactly where the
 	# stop command was issued.
 	
 	my $pos;
-	$pos = ecasound_iam('getpos') if ecasound_iam('cs-connected')
-		and ! ::ChainSetup::really_recording();
+	$pos = $self->ecasound_iam('getpos') if ! ::ChainSetup::really_recording();
 	mute();
-	stop_command();
+	$self->stop_command;
 	disable_length_timer();
 	if ( ! $quiet ){
 		sleeper(0.5);
@@ -77,6 +77,7 @@ sub stop {
 	set_position($pos) if $pos
 	}
 }
+sub stop_command { $_[0]->ecasound_iam('stop-sync') }
 ### routines defined in the root namespace
 
 package ::;
