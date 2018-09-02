@@ -913,7 +913,7 @@ sub update_ecasound_effect {
 	
 	#logsub("&update_effect");
 
-	return unless ::valid_engine_setup();
+	return unless $this_engine->valid_setup;
 	#my $es = ecasound_iam("engine-status");
 	#logpkg('debug', "engine is $es");
 	#return if $es !~ /not started|stopped|running/;
@@ -930,25 +930,23 @@ sub update_ecasound_effect {
 	# $param is zero-based. 
 	# $FX->params is  zero-based.
 
-	my $old_chain = ecasound_iam('c-selected') if ::valid_engine_setup();
-	ecasound_select_chain($chain);
+	$this_engine->current_chain($chain);
 
 	# update Ecasound's copy of the parameter
 	if( $FX->is_controller ){
 		my $i = $FX->ecasound_controller_index;
 		logpkg('debug', "controller $id: track: $chain, index: $i, param: $param, value: $val");
-		ecasound_iam("ctrl-select $i");
-		ecasound_iam("ctrlp-select $param");
-		ecasound_iam("ctrlp-set $val");
+		$this_engine->current_controller($i);
+		$this_engine->current_controller_parameter($param);
+		$this_engine->ecasound_iam("ctrlp-set $val");
 	}
 	else { # is operator
 		my $i = $FX->ecasound_effect_index;
 		logpkg('debug', "operator $id: track $chain, index: $i, offset: ".  $FX->offset . " param $param, value $val");
-		ecasound_iam("cop-select $i");
-		ecasound_iam("copp-select $param");
-		ecasound_iam("copp-set $val");
+		$this_engine->current_chain_operator($i);
+		$this_engine->current_chain_operator_parameter($param);
+		$this_engine->ecasound_iam("copp-set $val");
 	}
-	ecasound_select_chain($old_chain);
 }
 
 # set both Nama effect and Ecasound chain operator
