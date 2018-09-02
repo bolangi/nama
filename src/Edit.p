@@ -322,7 +322,7 @@ sub set_edit_points {
 	::throw("You must use a playback-only mode to setup edit marks. Aborting"), 
 		return 1 if ::ChainSetup::really_recording();
 	::throw("You need stop the engine first. Aborting"), 
-		return 1 if ecasound_engine_running();
+		return 1 if $this_engine->started();
 	::pager("Ready to set edit points!");
 	sleeper(0.2);
 	::pager(q(Press the "P" key three times to mark positions for:
