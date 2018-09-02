@@ -29,7 +29,7 @@ sub start {
 	pager("\n\nStarting at ", current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
-	ecasound_iam('start');
+	$self->ecasound_iam('start');
 	start_midi_transport() if midi_run_ready();
 
 	# limit engine run time if we are in mixdown or edit mode, 
