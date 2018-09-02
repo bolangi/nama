@@ -198,7 +198,7 @@ sub configure {
 
 	# don't disturb recording/mixing
 	
-	return if ::ChainSetup::really_recording() and ecasound_engine_running();
+	return if ::ChainSetup::really_recording() and $this_engine->started();
 	
 	# store a lists of wav-recording tracks for the rerecord
 	# function
