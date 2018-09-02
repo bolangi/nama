@@ -99,7 +99,7 @@ sub sync_transport_position { }
 
 sub midish_running { $setup->{midish_running} }
 	
-sub toggle_transport { $_[0]->running() ?  stop_transport() : start_transport() }
+sub toggle_transport { $this_engine->running() ?  stop_transport() : start_transport() }
 
 sub transport_running { $this_engine->ecasound_iam('engine-status') eq 'running'  }
 
