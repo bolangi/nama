@@ -99,13 +99,9 @@ sub sync_transport_position { }
 
 sub midish_running { $setup->{midish_running} }
 	
+sub toggle_transport { $_[0]->running() ?  stop_transport() : start_transport() }
 
-sub toggle_transport {
-	if (ecasound_engine_running()){ stop_transport() } 
-	else { start_transport() }
-}
-
-sub transport_running { ecasound_iam('engine-status') eq 'running'  }
+sub transport_running { $this_engine->ecasound_iam('engine-status') eq 'running'  }
 
 sub disconnect_transport {
 	return if transport_running();
@@ -113,14 +109,14 @@ sub disconnect_transport {
 }
 sub engine_is {
 	my $pos = shift;
-	"Engine is ". ecasound_iam("engine-status"). ( $pos ? " at $pos" : "" )
+	"Engine is ". $this_engine->ecasound_iam("engine-status"). ( $pos ? " at $pos" : "" )
 }
 sub engine_status { 
 	my ($pos, $before_newlines, $after_newlines) = @_;
 	pager("\n" x $before_newlines, engine_is($pos), "\n" x $after_newlines);
 }
 sub current_position { 
-	my $pos = ecasound_iam("getpos"); 
+	my $pos = $this_engine->ecasound_iam("getpos"); 
 	colonize(int($pos || 0)) 
 }
 sub start_heartbeat {
@@ -140,8 +136,8 @@ sub heartbeat {
 
 	#	print "heartbeat fired\n";
 
-	my $here   = ecasound_iam("getpos");
-	my $status = ecasound_iam('engine-status');
+	my $here   = $this_engine->ecasound_iam("getpos");
+	my $status = $this_engine->ecasound_iam('engine-status');
 	if( $status =~ /finished|error/ ){
 		engine_status(current_position(),2,1);
 		revise_prompt();
@@ -170,7 +166,7 @@ sub update_clock_display {
 sub schedule_wraparound {
 
 	return unless $mode->{loop_enable};
-	my $here   = ecasound_iam("getpos");
+	my $here   = $this_engine->ecasound_iam("getpos");
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
 	my $diff = $end - $here;
@@ -210,9 +206,9 @@ sub ecasound_select_chain {
 		::ChainSetup::is_ecasound_chain($n)
 
 		# engine is configured
-		and ecasound_iam( 'cs-connected' ) =~ /$file->{chain_setup}->[0]/
+		and $this_engine->ecasound_iam( 'cs-connected' ) =~ /$file->{chain_setup}->[0]/
 
-	){ 	ecasound_iam($cmd); 
+	){ 	$this_engine->ecasound_iam($cmd); 
 		return 1 
 
 	} else { 
@@ -223,7 +219,7 @@ sub ecasound_select_chain {
 }
 sub stop_do_start {
 	my ($coderef, $delay) = @_;
-	ecasound_engine_running() ?  _stop_do_start( $coderef, $delay)
+	$this_engine->started() ?  _stop_do_start( $coderef, $delay)
 					 : $coderef->()
 
 }
@@ -232,7 +228,7 @@ sub _stop_do_start {
 		stop_command();
 		my $result = $coderef->();
 		sleeper($delay) if $delay;
-		ecasound_iam('start');
+		start_command();
 		$result
 }
 sub restart_ecasound {
