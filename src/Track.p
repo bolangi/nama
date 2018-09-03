@@ -223,7 +223,8 @@ sub engine {
 sub select_track {
 		my $track = shift;
 		$::this_track = $track;
-		::ecasound_select_chain( $track->n );
+		$this_engine->current_chain( $track->n );
+		# XXX wrong engine for MIDI track
 		::set_current_bus();
 }
 sub is_selected { $::this_track->name eq $_[0]->name }
