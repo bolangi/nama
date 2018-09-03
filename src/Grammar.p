@@ -135,10 +135,10 @@ sub nama_cmd {
 	if ($this_track){
 		my $FX = fxn($this_track->op);
 		if ($FX and $this_track->n eq $FX->chain){
-			ecasound_iam("c-select ".$this_track->n);
+			$this_engine->current_chain($this_track->n);
 			$FX->is_controller 
-				? ecasound_iam("ctrl-select ".  $FX->ecasound_controller_index)
-				: ecasound_iam("cop-select ".  $FX->ecasound_effect_index);
+				? $this_engine->current_controller($FX->ecasound_controller_index)
+				: $this_engine->current_chain_operator($FX->ecasound_effect_index);
 		}
 	}
 
