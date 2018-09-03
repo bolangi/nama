@@ -195,27 +195,6 @@ sub wraparound {
 	$project->{events}->{wraparound} = undef;
 	$project->{events}->{wraparound} = AE::timer($diff,0, sub{set_position($start)});
 }
-sub ecasound_select_chain {
-	logsub("ecasound_select_chain");
-	my $n = shift;
-	my $cmd = "c-select $n";
-
-	if( 
-		# specified chain exists in the chain setup
-		::ChainSetup::is_ecasound_chain($n)
-
-		# engine is configured
-		and $this_engine->ecasound_iam( 'cs-connected' ) =~ /$file->{chain_setup}->[0]/
-
-	){ 	$this_engine->ecasound_iam($cmd); 
-		return 1 
-
-	} else { 
-		logpkg('trace',
-			"c-select $n: attempted to select non-existing Ecasound chain"); 
-		return 0
-	}
-}
 sub stop_do_start {
 	my ($coderef, $delay) = @_;
 	$this_engine->started() ?  _stop_do_start( $coderef, $delay)
