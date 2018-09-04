@@ -9,11 +9,9 @@ sub reconfigure_engine {
 	my $force = shift;
 
 	# skip if command line option is set
-	# don't skip if $force argument given
 	
 	return if ($config->{opts}->{R} or $config->{disable_auto_reconfigure})
-		and not $force;
-	::Engine::sync_action('configure',$force);
+	::Engine::sync_action('configure');
 }
 
 sub request_setup { 
