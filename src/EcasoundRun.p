@@ -142,9 +142,9 @@ sub heartbeat {
 		revise_prompt();
 		stop_heartbeat(); 
 		sleeper(0.2);
+		delete $this_engine->{started};
 		set_position(0);
 	}
-		#if $status =~ /finished|error|stopped/;
 	#print join " ", $status, colonize($here), $/;
 	my ($start, $end);
 	$start  = ::Mark::loop_start();
