@@ -385,6 +385,7 @@ sub show_status {
 	push @output, "Setup length is:  ", ::heuristic_time($setup->{audio_length}), $/; 
 	push @output, "Run time limit:   ", ::heuristic_time($setup->{runtime_limit}), $/
       if $setup->{runtime_limit};
+	@output
 }
 sub placeholder { 
 	my $val = shift;
