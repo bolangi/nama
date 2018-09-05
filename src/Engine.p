@@ -60,6 +60,7 @@ sub running { $_[0]->ecasound_iam("engine-status") eq 'running' }
 
 sub current_item {
 	my ($self, $n, $field, $cmd) = @_;
+	no warnings 'uninitialized';
 	return $self->{$field} if not defined $n or $self->{$field} == $n;
 	$self->ecasound_iam("$cmd $n");
 	$self->{$field} = $n;
