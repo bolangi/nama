@@ -202,7 +202,6 @@ sub stop_do_start {
 
 }
 sub _stop_do_start {
-	my $self = shift;
 	my ($coderef, $delay) = @_;
 		$this_engine->stop_command();
 		my $result = $coderef->();
