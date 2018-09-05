@@ -6,12 +6,6 @@ no warnings 'uninitialized';
 
 # general functions
 
-sub poll_jack { 
-		update_jack_client_list(); # first time
-		# then repeat
-		$project->{events}->{poll_jack} = AE::timer(0,5,\&update_jack_client_list) 
-}
-
 sub update_jack_client_list {
 	state $warn_count;
 	#logsub("&update_jack_client_list");

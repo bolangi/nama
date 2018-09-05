@@ -310,8 +310,6 @@ sub initialize_interfaces {
 
 	# periodically check if JACK is running, and get client/port/latency list
 
-	poll_jack() unless $config->{opts}->{J} or $config->{opts}->{A};
-
 	sleeper(0.2); # allow time for first polling
 
 	# we will start jack-plumbing only when we need it
