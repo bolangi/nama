@@ -34,7 +34,7 @@ sub update_jack_client_list {
 		my ($sample_rate) = qx(jack_samplerate);
 		chomp $sample_rate;
 		$project->{name} 
-			and $sample_rate //= $project->{sample_rate} 
+			and $sample_rate != $project->{sample_rate} 
 			and ($warn_count == 1 or $warn_count % 8 == 0) # warn less often
 		    and ::throw(qq(
 JACK audio daemon sample rate is $sample_rate but sample rate for project "$project->{name}" is $project->{sample_rate}.
