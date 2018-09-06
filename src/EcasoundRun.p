@@ -29,7 +29,7 @@ sub start {
 	pager("\n\nStarting at ", current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
-	$self->ecasound_iam('start');
+	$self->start_command;
 	$self->{started}++;
 	start_midi_transport() if midi_run_ready();
 
@@ -79,6 +79,7 @@ sub stop {
 	}
 }
 sub stop_command { $_[0]->ecasound_iam('stop-sync') }
+sub start_command { $_[0]->ecasound_iam('start') }
 ### routines defined in the root namespace
 
 package ::;
