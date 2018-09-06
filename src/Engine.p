@@ -54,7 +54,8 @@ sub ecasound_iam {}
 # from the engine, so we don't burden it with extra
 # commands while the engine is running.
 
-sub started { $_[0]->{started} } # cached
+#sub started { $_[0]->{started} } # cached
+sub started { $_[0]->running } # not cached
 sub stopped { ! $_[0]->started } # cached
 sub running { $_[0]->ecasound_iam("engine-status") eq 'running' }
 
