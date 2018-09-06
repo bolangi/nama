@@ -876,15 +876,15 @@ position_effect:
   short: pfx
   parameters: <string:id_to_move> <string:position_id>
   example: |
-    position-effect G F # Move effecit with unique ID G before F.
+    position-effect G F # Move effect with unique ID G immediately before effect F
 show_effect:
   type: effect
-  what: Show information about an effect. Default is to print information on the current effect.
+  what: Show information about an effect, defaulting to current effect
   short: sfx
   parameters: [ <string:effect_id1> ] [ <string:effect_id2> ] ...
   example: |
-    sfx # Print name, unique ID and parameters/controls of the current effect.
-    sfx H # Print out all information about effect with unique ID H.
+    sfx # Display name, unique ID and parameters/controls of the current effect.
+    sfx H # Display info on effect with unique ID H. H becomes the current effect.
 dump_effect:
   type: effect
   what: Dump all data of current effect object
