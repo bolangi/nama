@@ -257,6 +257,7 @@ new_branch: _new_branch branchname branchfrom(?) {
 	::throw("$name: branch already exists. Doing nothing."), return 1
 		if ::git_branch_exists($name);
 	::git_create_branch($name, $from);
+	1
 }
 tagname: ident
 branchname: ident
@@ -1340,9 +1341,10 @@ remove_fade: _remove_fade fade_index(s) {
 }
 fade_index: dd 
 
-list_fade: _list_fade {  ::pager(join "\n",
+list_fade: _list_fade { ::pager(join "\n",
 		map{ s/^---//; s/...\s$//; $_} map{$_->dump}
 		sort{$a->n <=> $b->n} values %::Fade::by_index) }
+		1
 add_comment: _add_comment text { 
  	::pagers( $::this_track->name. ": comment: $item{text}"); 
  	$::project->{track_comments}->{$::this_track->name} = $item{text};
