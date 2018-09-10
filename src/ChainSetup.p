@@ -52,7 +52,6 @@ sub remove_temporary_tracks {
 sub initialize {
 
 	remove_temporary_tracks(); # we will generate them again
-	delete $setup->{$_} for qw( audio_run_ready );
 	$setup->{audio_length} = 0;  
 	@io = (); 			# IO object list
 	::IO::initialize();

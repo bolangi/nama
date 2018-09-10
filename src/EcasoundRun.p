@@ -7,13 +7,10 @@ sub start {
 	package ::;
 	my $self = shift; 
 
-	audio_run_ready() 
-		and $self->valid_setup
+	$self->valid_setup
 		or throw("\nAudio engine is not configured. Cannot start.\n"),return;
 
 
-	if (audio_run_ready())
-	{
 	# use gradual unmuting to avoid pop on start
 	# 
 	#
@@ -49,7 +46,6 @@ sub start {
 	$ui->set_engine_mode_color_display();
 	start_heartbeat();
 	engine_status() unless $quiet;
-	}
 }
 sub stop {
 	package ::;

@@ -57,7 +57,7 @@ sub ecasound_iam {}
 #sub started { $_[0]->{started} } # cached
 sub started { $_[0]->running } # not cached
 sub stopped { ! $_[0]->started } # cached
-sub running { $_[0]->ecasound_iam("engine-status") eq 'running' }
+sub running { no warnings 'uninitialized'; $_[0]->ecasound_iam("engine-status") eq 'running' }
 
 sub current_item {
 	my ($self, $n, $field, $cmd) = @_;

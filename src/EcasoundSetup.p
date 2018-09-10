@@ -115,8 +115,8 @@ local %::IO::io_class = qw(
 arm();
 
 }
-sub something_to_run { audio_run_ready() or midi_run_ready()  }
-sub audio_run_ready { $setup->{audio_run_ready} }
+sub something_to_run { $en{Nama}->valid_setup or midi_run_ready()  }
+
 sub midi_run_ready { $config->{use_midi} and $en{midish} and $en{midish}->is_active }
 
 sub connect_transport {
@@ -124,9 +124,7 @@ sub connect_transport {
 	remove_riff_header_stubs();
 	register_other_ports(); # that don't belong to my upcoming instance
 	apply_fades();
-	load_ecs($file->chain_setup) and $setup->{audio_run_ready}++;
-	if (audio_run_ready())
-	{
+	load_ecs($file->chain_setup) or ::throw("failed to load chain setup"), return;
 		$this_engine->valid_setup()
 			or throw("Invalid chain setup, engine not ready."),return;
 		find_op_offsets(); 
@@ -162,7 +160,6 @@ sub connect_transport {
 			:  0;
 		connect_jack_ports_list();
 		transport_status() unless $quiet;
-	}
 	something_to_run() or throw("Neither audio nor MIDI tracks active. Nothing to run."), return; 
 	$ui->flash_ready();
 	#print ecasound_iam("fs");
