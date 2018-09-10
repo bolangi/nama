@@ -1343,8 +1343,8 @@ fade_index: dd
 
 list_fade: _list_fade { ::pager(join "\n",
 		map{ s/^---//; s/...\s$//; $_} map{$_->dump}
-		sort{$a->n <=> $b->n} values %::Fade::by_index) }
-		1
+		sort{$a->n <=> $b->n} values %::Fade::by_index); 
+	1 } 
 add_comment: _add_comment text { 
  	::pagers( $::this_track->name. ": comment: $item{text}"); 
  	$::project->{track_comments}->{$::this_track->name} = $item{text};
