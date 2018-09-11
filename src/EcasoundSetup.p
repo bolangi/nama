@@ -123,14 +123,14 @@ sub connect_transport {
 	logsub("&connect_transport");
 	remove_riff_header_stubs();
 	register_other_ports(); # that don't belong to my upcoming instance
-	apply_fades();
 	load_ecs($file->chain_setup) or ::throw("failed to load chain setup"), return;
 	$this_engine->valid_setup()
 		or throw("Invalid chain setup, engine not ready."),return;
 	find_op_offsets(); 
+	apply_ops();
+	apply_fades();
 	ecasound_iam('cs-connect');
 		#or throw("Failed to connect setup, engine not ready"),return;
-	apply_ops();
 	my $status = ecasound_iam("engine-status");
 	if ($status ne 'not started'){
 		throw("Invalid chain setup, cannot connect engine.\n");
