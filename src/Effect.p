@@ -203,8 +203,8 @@ sub ecasound_effect_index {
 	my $opcount = 0;
 	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
 	for my $op (@{ $ti{$n}->ops }) { 
-			# increment only for ops, not controllers
-			next if $self->is_controller;
+			my $fx = fxn($op);
+ 			next if $fx->is_controller;
 			++$opcount;   # first index is 1
 			last if $op eq $id
 	} 
