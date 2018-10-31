@@ -54,7 +54,7 @@ sub new {
 	
 	my $track = $tn{$object->track};
 
-	::request_setup(); # runs apply_fades and reconfigures engine
+	::request_setup(); # fades take effect after next engine stop
 	$object
 	
 }
@@ -327,7 +327,7 @@ sub fade_uses_mark {
 	grep{ $_->mark1 eq $mark_name or $_->mark2 eq $mark_name } values %::Fade::by_index;
 }
 	
-sub apply_fades { 
+sub setup_fades { 
 	# + data from Fade objects residing in %::Fade::by_name
 	# + apply to tracks 
 	#     * that are part of current chain setup

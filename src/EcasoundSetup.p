@@ -127,8 +127,7 @@ sub connect_transport {
 	$this_engine->valid_setup()
 		or throw("Invalid chain setup, engine not ready."),return;
 	find_op_offsets(); 
-	apply_ops();
-	apply_fades();
+	setup_fades();
 	ecasound_iam('cs-connect');
 		#or throw("Failed to connect setup, engine not ready"),return;
 	my $status = ecasound_iam("engine-status");
@@ -136,6 +135,7 @@ sub connect_transport {
 		throw("Invalid chain setup, cannot connect engine.\n");
 		return;
 	}
+	apply_ops();
 	ecasound_iam('engine-launch');
 	$status = ecasound_iam("engine-status");
 	if ($status ne 'stopped'){
