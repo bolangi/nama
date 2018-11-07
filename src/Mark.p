@@ -37,7 +37,7 @@ sub new {
 	#croak  "name already in use: $vals{name}\n"
 	#	 if $by_name{$vals{name}}; # null name returns false
 	
-	my $object = bless { 
+	my $self = bless { 
 
 		## 		defaults ##
 
@@ -46,14 +46,14 @@ sub new {
 
 					@_ 			}, $class;
 
-	#print "object class: $class, object type: ", ref $object, $/;
-	if ($object->name) {
-		$by_name{ $object->name } = $object;
+	#print "self class: $class, self type: ", ref $self, $/;
+	if ($self->name) {
+		$by_name{ $self->name } = $self;
 	}
-	push @all, $object;
-	$::this_mark = $object;
+	push @all, $self;
+	$::this_mark = $self;
 	
-	$object;
+	$self;
 	
 }
 
