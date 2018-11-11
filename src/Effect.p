@@ -933,16 +933,16 @@ sub update_ecasound_effect {
 	if( $FX->is_controller ){
 		my $i = $FX->ecasound_controller_index;
 		logpkg('debug', "controller $id: track: $chain, index: $i, param: $param, value: $val");
-		ecasound_iam("ctrl-select $i");
-		ecasound_iam("ctrlp-select $param");
-		ecasound_iam("ctrlp-set $val");
+		$this_engine->current_controller($i);
+		$this_engine->current_controller_parameter($param);
+		$this_engine->ecasound_iam("ctrlp-set $val");
 	}
 	else { # is operator
 		my $i = $FX->ecasound_effect_index;
 		logpkg('debug', "operator $id: track $chain, index: $i, offset: ".  $FX->offset . " param $param, value $val");
-		ecasound_iam("cop-select $i");
-		ecasound_iam("copp-select $param");
-		ecasound_iam("copp-set $val");
+		$this_engine->current_chain_operator($i);
+		$this_engine->current_chain_operator_parameter($param);
+		$this_engine->ecasound_iam("copp-set $val");
 	}
 }
 
