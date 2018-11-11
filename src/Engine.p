@@ -62,7 +62,15 @@ sub running { no warnings 'uninitialized'; $_[0]->ecasound_iam("engine-status") 
 sub current_item {
 	my ($self, $n, $field, $cmd) = @_;
 	no warnings 'uninitialized';
-	return $self->{$field} if not defined $n or $self->{$field} == $n;
+
+	# caching behavior: 
+
+	# do not execute if newly assigned value same as stored value
+
+	return $self->{$field} if not $n or $self->{$field} == $n;
+
+	# otherwise execute command and cache new value
+
 	$self->ecasound_iam("$cmd $n");
 	$self->{$field} = $n;
 }
