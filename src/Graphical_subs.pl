@@ -67,10 +67,6 @@ sub configure_waveform_window {
 		-width => $width//$config->{waveform_canvas_x},
 		-height => $height//$config->{waveform_canvas_y},
 		);
-	# incorrect, call to wwgeometry too early to get correct value
-	my ($width,$height) = wwgeometry();
-	#say "width: $width, height: $height";
-
 
 }
 
