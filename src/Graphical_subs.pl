@@ -59,12 +59,13 @@ sub init_gui {
 	}
 
 sub configure_waveform_window {
+	my ($width, $height) = @_;
 	return if $config->{no_waveform};
 
 	$gui->{wwcanvas}->configure(
-		scrollregion =>[0,0,$config->{waveform_canvas_x},$config->{waveform_canvas_y}],
-		-width => $config->{waveform_canvas_x},
-		-height => $config->{waveform_canvas_y},
+		scrollregion =>[0,0,$width//$config->{waveform_canvas_x},$height//$config->{waveform_canvas_y}],
+		-width => $width//$config->{waveform_canvas_x},
+		-height => $height//$config->{waveform_canvas_y},
 		);
 	# incorrect, call to wwgeometry too early to get correct value
 	my ($width,$height) = wwgeometry();
