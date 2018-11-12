@@ -234,6 +234,7 @@ $gui->{_old_abg}				# default active background color
 $gui->{waveform}				# waveform display widgets, by trackname
 
 $config->{soundcard_loopback_delay}
+$config->{no_waveform}
 $jack->{connections}
 $jack->{is_own_port}
 $jack->{connections}
