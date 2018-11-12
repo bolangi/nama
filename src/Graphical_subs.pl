@@ -33,24 +33,34 @@ sub init_gui {
 
 	### init waveform window
 
-	$gui->{ww} = $gui->{mw}->Toplevel;
-	$gui->{ww}->title("Waveform Window");
-	$gui->{ww}->deiconify; 
-	
+	if (not $config->{no_waveform})
+	{
+		$gui->{ww} = $gui->{mw}->Toplevel;
+		$gui->{ww}->title("Waveform Window");
+		$gui->{ww}->deiconify; 
+		$gui->{ww}->bind('<Control-Key-c>' => sub { exit } );
+		$gui->{ww}->bind('<Control-Key- >' => \&toggle_transport); 
+	}
 
 	### Exit via Ctrl-C 
 
 	$gui->{mw}->bind('<Control-Key-c>' => sub { exit } ); 
 	$gui->{ew}->bind('<Control-Key-c>' => sub { exit } );
-	$gui->{ww}->bind('<Control-Key-c>' => sub { exit } );
 
     ## Press SPACE to start/stop transport
 
 	$gui->{mw}->bind('<Control-Key- >' => \&toggle_transport); 
 	$gui->{ew}->bind('<Control-Key- >' => \&toggle_transport); 
-	$gui->{ww}->bind('<Control-Key- >' => \&toggle_transport); 
 	
-	$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
+	if (not $config->{no_waveform})
+	{
+		$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
+		configure_waveform_window();
+	}
+
+sub configure_waveform_window {
+	return if $config->{no_waveform};
+
 	$gui->{wwcanvas}->configure(
 		scrollregion =>[0,0,$config->{waveform_canvas_x},$config->{waveform_canvas_y}],
 		-width => $config->{waveform_canvas_x},
@@ -59,6 +69,9 @@ sub init_gui {
 	# incorrect, call to wwgeometry too early to get correct value
 	my ($width,$height) = wwgeometry();
 	#say "width: $width, height: $height";
+
+
+}
 
 sub wwgeometry {
 	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
