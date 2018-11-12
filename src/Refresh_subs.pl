@@ -96,9 +96,7 @@ sub refresh_track {
 
 sub refresh {  
 	::remove_riff_header_stubs();
- 	#$ui->refresh_group(); 
-	#map{ $ui->refresh_track($_) } map{$_->n} grep{!  $_->hide} ::audio_tracks();
-	#map{ $ui->refresh_track($_) } grep{$remove_track_widget{$_} map{$_->n}  ::audio_tracks();
 	map{ $ui->refresh_track($_) } map{$_->n}  ::audio_tracks();
+	refresh_waveform_window() unless $config->{no_waveform};
 }
 ### end
