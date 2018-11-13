@@ -58,17 +58,6 @@ sub init_gui {
 		configure_waveform_window();
 	}
 
-sub configure_waveform_window {
-	my ($width, $height) = @_;
-	return if $config->{no_waveform};
-
-	$gui->{wwcanvas}->configure(
-		scrollregion =>[0,0,$width//$config->{waveform_canvas_x},$height//$config->{waveform_canvas_y}],
-		-width => $width//$config->{waveform_canvas_x},
-		-height => $height//$config->{waveform_canvas_y},
-		);
-
-}
 
 	$gui->{fx_canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
 	$gui->{fx_canvas}->configure(
@@ -226,6 +215,21 @@ $gui->{palette}->AddItems( @color_items);
 	my @widgets;
 	map{ push @widgets, $gui->{track_frame}->Label(-text => $_)  } @labels;
 	$widgets[0]->grid(@widgets[1..$#widgets]);
+
+
+}
+sub configure_waveform_window {
+	my ($width, $height) = @_;
+	return if $config->{no_waveform};
+
+	$gui->{wwcanvas}->configure(
+		scrollregion =>[0,0,$width//$config->{waveform_canvas_x},$height//$config->{waveform_canvas_y}],
+		-width => $width//$config->{waveform_canvas_x},
+		-height => $height//$config->{waveform_canvas_y},
+		);
+
+}
+sub configure_effects_window {
 
 
 }
