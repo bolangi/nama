@@ -60,11 +60,8 @@ sub init_gui {
 
 
 	$gui->{fx_canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
-	$gui->{fx_canvas}->configure(
-		scrollregion =>[2,2,10000,10000],
-		-width => 1200,
-		-height => 700,	
-		);
+	configure_effects_window();
+
 	$gui->{fx_frame} = $gui->{fx_canvas}->Frame;
 	my $id = $gui->{fx_canvas}->createWindow(30,30, -window => $gui->{fx_frame},
 											-anchor => 'nw');
@@ -88,15 +85,11 @@ sub init_gui {
 	# $oid_frame = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
 	$gui->{clock_frame} = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
 	#$gui->{group_frame} = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
- 	my $track_canvas = $gui->{mw}->Scrolled('Canvas')->pack(-side => 'bottom', -fill => 'both');
- 	$track_canvas->configure(
- 		-scrollregion =>[2,2,400,9600],
- 		-width => 400,
- 		-height => 400,	
- 		);
-	$gui->{track_frame} = $track_canvas->Frame; # ->pack(-fill => 'both');
+ 	$gui->{track_canvas}= $gui->{mw}->Scrolled('Canvas')->pack(-side => 'bottom', -fill => 'both');
+	configure_track_canvas();
+	$gui->{track_frame} = $gui->{track_canvas}->Frame; # ->pack(-fill => 'both');
 	#$gui->{track_frame} = $gui->{mw}->Frame;
- 	my $id2 = $track_canvas->createWindow(0,0,
+ 	my $id2 = $gui->{track_canvas}->createWindow(0,0,
 		-window => $gui->{track_frame}, 
 		-anchor => 'nw');
  	#$gui->{group_label} = $gui->{group_frame}->Menubutton(-text => "GROUP",
@@ -230,8 +223,18 @@ sub configure_waveform_window {
 
 }
 sub configure_effects_window {
-
-
+	$gui->{fx_canvas}->configure(
+		scrollregion =>[2,2,10000,10000],
+		-width => 1200,
+		-height => 700,	
+		);
+}
+sub configure_track_canvas {
+ 	$gui->{track_canvas}->configure(
+ 		-scrollregion =>[2,2,400,9600],
+ 		-width => 400,
+ 		-height => 400,	
+ 		);
 }
 sub wwgeometry {
 	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
