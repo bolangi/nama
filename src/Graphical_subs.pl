@@ -76,14 +76,14 @@ sub wwgeometry {
 	$width,$height
 }
 
-	$gui->{canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
-	$gui->{canvas}->configure(
+	$gui->{fx_canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
+	$gui->{fx_canvas}->configure(
 		scrollregion =>[2,2,10000,10000],
 		-width => 1200,
 		-height => 700,	
 		);
-	$gui->{fx_frame} = $gui->{canvas}->Frame;
-	my $id = $gui->{canvas}->createWindow(30,30, -window => $gui->{fx_frame},
+	$gui->{fx_frame} = $gui->{fx_canvas}->Frame;
+	my $id = $gui->{fx_canvas}->createWindow(30,30, -window => $gui->{fx_frame},
 											-anchor => 'nw');
 
 	$gui->{project_head} = $gui->{mw}->Label->pack(-fill => 'both');
