@@ -236,12 +236,13 @@ sub configure_track_canvas {
  		-height => 400,	
  		);
 }
-sub wwgeometry {
+sub wwgeometry { wh($gui->{wwcanvas}) }
+sub wh {
+	my $widget = shift;
 	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
-		= $gui->{wwcanvas}->geometry =~ /(\d+)x(\d+)([+-])(\d+)([+-])(\d+)/;
+		= $widget->geometry =~ /(\d+)x(\d+)([+-])(\d+)([+-])(\d+)/;
 	$width,$height
 }
-
 
 sub transport_gui {
 	my $ui = shift;
