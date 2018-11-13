@@ -70,12 +70,6 @@ sub configure_waveform_window {
 
 }
 
-sub wwgeometry {
-	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
-		= $gui->{wwcanvas}->geometry =~ /(\d+)x(\d+)([+-])(\d+)([+-])(\d+)/;
-	$width,$height
-}
-
 	$gui->{fx_canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
 	$gui->{fx_canvas}->configure(
 		scrollregion =>[2,2,10000,10000],
@@ -235,6 +229,12 @@ $gui->{palette}->AddItems( @color_items);
 
 
 }
+sub wwgeometry {
+	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
+		= $gui->{wwcanvas}->geometry =~ /(\d+)x(\d+)([+-])(\d+)([+-])(\d+)/;
+	$width,$height
+}
+
 
 sub transport_gui {
 	my $ui = shift;
