@@ -115,4 +115,9 @@ sub unmute {
 
 	$track->set(old_vol_level => undef);
 }
+sub get_inserts {
+	my $track = shift;
+	grep{ $_->{track} eq $track->name} values %::Insert::by_index;
+}
+
 1;

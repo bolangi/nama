@@ -206,7 +206,7 @@ sub update_cache_map {
 				join "\n","cache map", 
 				map{($_->dump)} ::EffectChain::find(track_cache => 1)
 			});
-		my @inserts_list = ::Insert::get_inserts($args->{track}->name);
+		my @inserts_list = $args->{track}->get_inserts;
 
 		# include all ops, include vol/pan operators 
 		# which serve as placeholders, won't overwrite
