@@ -373,9 +373,10 @@ sub get_live_param { # for effect, not controller
 	my $FX = fxn($op);
 	my $n = $FX->chain;
 	my $i = $FX->ecasound_effect_index;
+	die "convert these direct IAM calls to cache";
 	ecasound_iam("c-select $n");
 	ecasound_iam("cop-select $i");
-	ecasound_iam("copp-select $param");
+	ecasound_iam("copp-select $param"); 
 	ecasound_iam("copp-get")
 }
 
