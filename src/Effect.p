@@ -845,6 +845,7 @@ sub remove_op {
 		$this_engine->current_chain_operator($self->ecasound_effect_index);
 		logpkg('debug',sub{"selected operator: ". ecasound_iam("cop-selected")});
 		$this_engine->ecasound_iam("cop-remove");
+		$this_engine->reset_ecasound_selections_cache();
 		logpkg('debug',sub{ecasound_iam("cs")});
 
 	} else { # controller

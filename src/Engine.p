@@ -76,7 +76,16 @@ sub current_item {
 }
 sub current_chain {
 	my ($self, $n) = @_;
+	reset_ecasound_selections_cache() if defined $n and $n > 0 and $self->{current_chain} != $n;
 	$self->current_item($n, 'current_chain', 'c-select');
+}
+sub reset_ecasound_selections_cache {
+	my $self = shift;
+	delete $self->{$_} for qw(	current_chain_operator
+								current_chain_operator_parameter
+								current_controller 
+								current_controller_parameter);
+
 }
 sub current_chain_operator {
 	my ($self, $n) = @_;
