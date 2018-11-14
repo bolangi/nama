@@ -982,7 +982,7 @@ sub get_ecasound_cop_params {
 	my $count = shift;
 	my @params;
 	for (1..$count){
-		ecasound_iam("copp-select $_");
+		$this_engine->current_chain_operator_parameter($_);
 		push @params, ecasound_iam("copp-get");
 	}
 	\@params
