@@ -76,7 +76,8 @@ sub current_item {
 }
 sub current_chain {
 	my ($self, $n) = @_;
-	reset_ecasound_selections_cache() if defined $n and $n > 0 and $self->{current_chain} != $n;
+	no warnings 'uninitialized';
+	reset_ecasound_selections_cache() if (defined $n) and $n > 0 and $self->{current_chain} != $n;
 	$self->current_item($n, 'current_chain', 'c-select');
 }
 sub reset_ecasound_selections_cache {
@@ -87,16 +88,23 @@ sub reset_ecasound_selections_cache {
 								current_controller_parameter);
 
 }
+sub reset_current_controller {
+	my $self = shift;
+	delete $self->{$_} for qw(current_controller current_controller_parameter)  
+}
 sub current_chain_operator {
 	my ($self, $n) = @_;
+	reset_ecasound_selections_cache() if defined $n and $n > 0 and $self->{current_chain_operator} != $n;
 	$self->current_item($n, 'current_chain_operator', 'cop-select');
 }
 sub current_chain_operator_parameter {
 	my ($self, $n) = @_;
+	reset_current_controller() if(defined $n and $n > 0 and $self->{current_controller} != $n);
 	$self->current_item($n, 'current_chain_operator_parameter', 'copp-select');
 }
 sub current_controller {
 	my ($self, $n) = @_;
+	reset_current_controller() if defined $n and $n > 0 and $self->{current_controller} != $n;
 	$self->current_item($n, 'current_controller', 'ctrl-select');
 }
 sub current_controller_parameter {
