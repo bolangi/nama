@@ -60,7 +60,7 @@ sub stopped { ! $_[0]->started } # cached
 sub running { no warnings 'uninitialized'; $_[0]->ecasound_iam("engine-status") eq 'running' }
 
 sub current_item {
-	my ($self, $n, $field, $cmd) = @_;
+	my ($self, $n, $field, $cmd, $reset_sub) = @_;
 	no warnings 'uninitialized';
 
 	# caching behavior: 
@@ -73,12 +73,12 @@ sub current_item {
 
 	$self->ecasound_iam("$cmd $n");
 	$self->{$field} = $n;
+	&$reset_sub if $reset_sub;
 }
 sub current_chain {
 	my ($self, $n) = @_;
 	no warnings 'uninitialized';
-	reset_ecasound_selections_cache() if (defined $n) and $n > 0 and $self->{current_chain} != $n;
-	$self->current_item($n, 'current_chain', 'c-select');
+	$self->current_item($n, 'current_chain', 'c-select', \&reset_ecasound_selections_cache);
 }
 sub reset_ecasound_selections_cache {
 	my $self = shift;
@@ -94,18 +94,15 @@ sub reset_current_controller {
 }
 sub current_chain_operator {
 	my ($self, $n) = @_;
-	reset_ecasound_selections_cache() if defined $n and $n > 0 and $self->{current_chain_operator} != $n;
-	$self->current_item($n, 'current_chain_operator', 'cop-select');
+	$self->current_item($n, 'current_chain_operator', 'cop-select', \&reset_ecasound_selections_cache)
 }
 sub current_chain_operator_parameter {
 	my ($self, $n) = @_;
-	reset_current_controller() if(defined $n and $n > 0 and $self->{current_controller} != $n);
-	$self->current_item($n, 'current_chain_operator_parameter', 'copp-select');
+	$self->current_item($n, 'current_chain_operator_parameter', 'copp-select', \&reset_current_controller);
 }
 sub current_controller {
 	my ($self, $n) = @_;
-	reset_current_controller() if defined $n and $n > 0 and $self->{current_controller} != $n;
-	$self->current_item($n, 'current_controller', 'ctrl-select');
+	$self->current_item($n, 'current_controller', 'ctrl-select', \&reset_current_controller);
 }
 sub current_controller_parameter {
 	my ($self, $n) = @_;
