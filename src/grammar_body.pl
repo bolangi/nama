@@ -1073,7 +1073,7 @@ set_insert_wetness: _set_insert_wetness prepost(?) parameter {
 	::throw("track '",$::this_track->n, "' has no insert.  Skipping."),
 		return 1 unless $i;
 	$i->set_wetness($p);
-	1;
+	 ::pager( "The insert is ", $i->wetness, "% wet, ", (100 - $i->wetness), "% dry.");
 }
 set_insert_wetness: _set_insert_wetness prepost(?) {
 	my $prepost = $item{'prepost(?)'}->[0];

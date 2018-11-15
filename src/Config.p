@@ -100,10 +100,6 @@ loads initial_mix.json");
 
 	$config->{use_git} = $config->{use_git} && git_executable_found() ? 1 : 0;
 
-	# for now we unite these two
-	
-	$config->{ecasound_jack_client_name} = $config->{ecasound_engine_name} ;
-
 }
 
 sub git_executable_found { qx(which git) }

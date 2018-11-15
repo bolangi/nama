@@ -74,6 +74,8 @@ sub load_ecs {
 	teardown_engine();
 	ecasound_iam("cs-load $setup");
 	ecasound_iam("cs-select $setup"); # needed by Audio::Ecasound, but not Net-ECI !!
+	my $result = ecasound_iam("cs-selected");
+	$setup eq $result or throw("$result: failed to select chain setup");
 	logpkg('debug',sub{map{ecasound_iam($_)} qw(cs es fs st ctrl-status)});
 	1;
 }
@@ -115,7 +117,7 @@ local %::IO::io_class = qw(
 arm();
 
 }
-sub something_to_run { $en{Nama}->valid_setup or midi_run_ready()  }
+sub something_to_run { $en{ecasound}->valid_setup or midi_run_ready()  }
 
 sub midi_run_ready { $config->{use_midi} and $en{midish} and $en{midish}->is_active }
 

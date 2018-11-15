@@ -108,6 +108,7 @@ sub initialize_project_data {
 	::ChainSetup::initialize();
 	reset_hotkey_buffers();
 	reset_command_buffer();
+	$this_engine->reset_ecasound_selections_cache();
 
 }
 

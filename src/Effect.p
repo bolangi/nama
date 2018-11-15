@@ -804,10 +804,10 @@ sub apply_ops {  # in addition to operators in .ecs file
 		my $n = $track->n;
  		next unless ::ChainSetup::is_ecasound_chain($n);
 		logpkg('debug', "chain: $n, offset: $fx->{offset}->{$n}");
+		$this_engine->reset_ecasound_selections_cache();
+		$this_engine->current_chain($n);
 		$track->apply_ops;
 	}
-	$this_engine->current_chain($this_track->n) 
-		if defined $this_track and ::ChainSetup::is_ecasound_chain($this_track->n);
 }
 
 sub remove_op {
@@ -845,6 +845,7 @@ sub remove_op {
 		$this_engine->current_chain_operator($self->ecasound_effect_index);
 		logpkg('debug',sub{"selected operator: ". ecasound_iam("cop-selected")});
 		$this_engine->ecasound_iam("cop-remove");
+		$this_engine->reset_ecasound_selections_cache();
 		logpkg('debug',sub{ecasound_iam("cs")});
 
 	} else { # controller
@@ -933,16 +934,16 @@ sub update_ecasound_effect {
 	if( $FX->is_controller ){
 		my $i = $FX->ecasound_controller_index;
 		logpkg('debug', "controller $id: track: $chain, index: $i, param: $param, value: $val");
-		ecasound_iam("ctrl-select $i");
-		ecasound_iam("ctrlp-select $param");
-		ecasound_iam("ctrlp-set $val");
+		$this_engine->current_controller($i);
+		$this_engine->current_controller_parameter($param);
+		$this_engine->ecasound_iam("ctrlp-set $val");
 	}
 	else { # is operator
 		my $i = $FX->ecasound_effect_index;
 		logpkg('debug', "operator $id: track $chain, index: $i, offset: ".  $FX->offset . " param $param, value $val");
-		ecasound_iam("cop-select $i");
-		ecasound_iam("copp-select $param");
-		ecasound_iam("copp-set $val");
+		$this_engine->current_chain_operator($i);
+		$this_engine->current_chain_operator_parameter($param);
+		$this_engine->ecasound_iam("copp-set $val");
 	}
 }
 
@@ -981,7 +982,7 @@ sub get_ecasound_cop_params {
 	my $count = shift;
 	my @params;
 	for (1..$count){
-		ecasound_iam("copp-select $_");
+		$this_engine->current_chain_operator_parameter($_);
 		push @params, ecasound_iam("copp-get");
 	}
 	\@params

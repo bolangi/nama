@@ -60,35 +60,50 @@ sub stopped { ! $_[0]->started } # cached
 sub running { no warnings 'uninitialized'; $_[0]->ecasound_iam("engine-status") eq 'running' }
 
 sub current_item {
-	my ($self, $n, $field, $cmd) = @_;
+	my ($self, $n, $field, $cmd, $reset_sub) = @_;
 	no warnings 'uninitialized';
+	logpkg('debug',"field: $field, n: $n, was: $self->{field} cmd: $cmd, reset sub: ", $reset_sub ? "yes" : "no");
 
 	# caching behavior: 
 
 	# do not execute if newly assigned value same as stored value
 
-	return $self->{$field} if not $n or $self->{$field} == $n;
+	return $self->{$field} if ! $n or $n > 0 and $self->{$field} == $n;
 
 	# otherwise execute command and cache new value
 
 	$self->ecasound_iam("$cmd $n");
+	&$reset_sub if $reset_sub;
 	$self->{$field} = $n;
 }
 sub current_chain {
 	my ($self, $n) = @_;
-	$self->current_item($n, 'current_chain', 'c-select');
+	$self->current_item($n, 'current_chain', 'c-select', \&reset_ecasound_selections_cache);
+}
+sub reset_ecasound_selections_cache {
+	my $self = shift;
+	delete $self->{$_} for qw(	current_chain
+								current_chain_operator
+								current_chain_operator_parameter
+								current_controller 
+								current_controller_parameter);
+
+}
+sub reset_current_controller {
+	my $self = shift;
+	delete $self->{$_} for qw(current_controller current_controller_parameter)  
 }
 sub current_chain_operator {
 	my ($self, $n) = @_;
-	$self->current_item($n, 'current_chain_operator', 'cop-select');
+	$self->current_item($n, 'current_chain_operator', 'cop-select', \&reset_ecasound_selections_cache)
 }
 sub current_chain_operator_parameter {
 	my ($self, $n) = @_;
-	$self->current_item($n, 'current_chain_operator_parameter', 'copp-select');
+	$self->current_item($n, 'current_chain_operator_parameter', 'copp-select', \&reset_current_controller);
 }
 sub current_controller {
 	my ($self, $n) = @_;
-	$self->current_item($n, 'current_controller', 'ctrl-select');
+	$self->current_item($n, 'current_controller', 'ctrl-select', \&reset_current_controller);
 }
 sub current_controller_parameter {
 	my ($self, $n) = @_;
