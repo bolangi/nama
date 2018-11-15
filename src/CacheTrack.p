@@ -29,7 +29,7 @@ sub cache_track { # launch subparts if conditions are met
 	$args->{additional_time} //= 0;
 	$args->{is_mixing}++ if $track->is_mixing;
 	$args->{original_version} = $track->is_mixing ? 0 : $args->{track}->playback_version;
-	$args->{cached_version} = $args->{original_version} + 1;
+	$args->{cached_version} = $args->{track}->last + 1;
 	
 	$args->{track_rw} = $track->{rw};
 	$args->{main_rw} = $tn{Main}->{rw};
@@ -128,10 +128,12 @@ sub prepare_to_cache {
 
 	# set WAV output format
 	
+	my $to_name = $args->{track}->name .  '_' .  $args->{cached_version} . '.wav';
+	my $to_path = join_path($args->{track}->dir, $to_name);
 	$g->set_vertex_attributes(
 		$cooked->name, 
 		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
-			version => ($args->{cached_version}),
+			full_version => $to_path,
 		}
 	); 
 	$args->{complete_caching_ref} = \&update_cache_map;
@@ -139,7 +141,14 @@ sub prepare_to_cache {
 		# set the input path
 		$g->add_path('wav_in',$args->{track}->name);
 		logpkg('debug', "The graph after setting input path:\n$g");
+	
+	my $from_name = $args->{track}->name .  '_' . $args->{original_version} . '.wav';
+	my $from_path = join_path($args->{track}->dir, $from_name);
 
+	$g->set_vertex_attributes(
+		$args->{track}->name,
+		{ full_path => $from_path }
+	);
 	process_cache_graph($g);
 
 }
