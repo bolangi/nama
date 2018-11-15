@@ -804,10 +804,10 @@ sub apply_ops {  # in addition to operators in .ecs file
 		my $n = $track->n;
  		next unless ::ChainSetup::is_ecasound_chain($n);
 		logpkg('debug', "chain: $n, offset: $fx->{offset}->{$n}");
+		$this_engine->reset_ecasound_selections_cache();
+		$this_engine->current_chain($n);
 		$track->apply_ops;
 	}
-	$this_engine->current_chain($this_track->n) 
-		if defined $this_track and ::ChainSetup::is_ecasound_chain($this_track->n);
 }
 
 sub remove_op {
