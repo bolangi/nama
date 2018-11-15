@@ -74,6 +74,8 @@ sub load_ecs {
 	teardown_engine();
 	ecasound_iam("cs-load $setup");
 	ecasound_iam("cs-select $setup"); # needed by Audio::Ecasound, but not Net-ECI !!
+	my $result = ecasound_iam("cs-selected");
+	$setup eq $result or throw("$result: failed to select chain setup");
 	logpkg('debug',sub{map{ecasound_iam($_)} qw(cs es fs st ctrl-status)});
 	1;
 }
