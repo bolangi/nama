@@ -115,7 +115,7 @@ local %::IO::io_class = qw(
 arm();
 
 }
-sub something_to_run { $en{Nama}->valid_setup or midi_run_ready()  }
+sub something_to_run { $en{ecasound}->valid_setup or midi_run_ready()  }
 
 sub midi_run_ready { $config->{use_midi} and $en{midish} and $en{midish}->is_active }
 
