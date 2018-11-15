@@ -61,8 +61,8 @@ sub running { no warnings 'uninitialized'; $_[0]->ecasound_iam("engine-status") 
 
 sub current_item {
 	my ($self, $n, $field, $cmd, $reset_sub) = @_;
-	logpkg('debug',"field: $field, n: $n, was: $self->{field} cmd: $cmd, reset sub: ", $reset_sub ? "yes" : "no");
 	no warnings 'uninitialized';
+	logpkg('debug',"field: $field, n: $n, was: $self->{field} cmd: $cmd, reset sub: ", $reset_sub ? "yes" : "no");
 
 	# caching behavior: 
 
