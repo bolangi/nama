@@ -11,12 +11,14 @@ sub is_region { defined $_[0]->{region_start} }
 
 sub region_start_time {
 	my $track = shift;
+	return unless $track->is_region;
 	#return if $track->rec_status ne PLAY;
 	carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
 	::Mark::time_from_tag( $track->region_start )
 }
 sub region_end_time {
 	my $track = shift;
+	return unless $track->is_region;
 	#return if $track->rec_status ne PLAY;
 	carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
 	no warnings 'uninitialized'; 
@@ -28,6 +30,7 @@ sub region_end_time {
 }
 sub playat_time {
 	my $track = shift;
+	return unless $track->is_region;
 	carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
 	#return if $track->rec_status ne PLAY;
 	::Mark::time_from_tag( $track->playat )
