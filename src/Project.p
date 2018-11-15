@@ -52,6 +52,7 @@ sub list_projects {
 }
 
 sub initialize_project_data {
+
 	logsub("&initialize_project_data");
 
 	-d ::waveform_dir() or mkdir ::waveform_dir();
