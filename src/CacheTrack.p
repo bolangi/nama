@@ -45,14 +45,14 @@ sub cache_track { # launch subparts if conditions are met
 
 	my $result;
 	if($track->is_mixing)
-	{ $result = prepare_to_cache_bus($args) }
+	{ generate_cache_graph_bus($args) }
 	else
-	{ $result = prepare_to_cache($args) }
+	{ generate_cache_graph($args) }
 	
-	{ no warnings 'uninitialized';
-	}
+	my $result = process_cache_graph($g);
 	if ( $result )
 	{ 
+		pager("generated graph");
 		deactivate_vol_pan($args);
 		cache_engine_run($args);
 		reactivate_vol_pan($args);
@@ -76,7 +76,7 @@ sub reactivate_vol_pan {
 	pan_back($args->{track});
 	vol_back($args->{track});
 }
-sub prepare_to_cache_bus {
+sub generate_cache_graph_bus {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
 	$args->{graph} = $g;
@@ -97,10 +97,9 @@ sub prepare_to_cache_bus {
 
 # 	grep { $_->name ne 'Main' } 
 
-	process_cache_graph($g);
 }
 
-sub prepare_to_cache {
+sub generate_cache_graph {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
 	$args->{graph} = $g;
@@ -149,7 +148,6 @@ sub prepare_to_cache {
 		$args->{track}->name,
 		{ full_path => $from_path }
 	);
-	process_cache_graph($g);
 
 }
 
