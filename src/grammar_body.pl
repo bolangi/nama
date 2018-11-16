@@ -523,6 +523,7 @@ bus_version: _bus_version dd {
 	my $n = $item{dd};
 	::nama_cmd("for $::this_bus; version $n");
 }
+mixdown: _mixdown additional_time { $::setup->{extra_run_time} = $item{additional_time}; ::mixdown(); 1}
 mixdown: _mixdown { ::mixdown(); 1}
 mixplay: _mixplay { ::mixplay(); 1}
 mixoff:  _mixoff  { ::mixoff(); 1}
