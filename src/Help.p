@@ -102,7 +102,7 @@ IAM
 	}
 	if (@output){
 		map{ s/_/-/g } @output;
-		::pager( map{"$_\n"}map{ split '\n', $_ }  @output );
+		::pager( @output ); 
 	} else { throw("$name: no help found.\n"); }
 	
 }
