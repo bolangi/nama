@@ -261,6 +261,7 @@ sub pager {
 	$output[-1] .= "\n\n";
 	push @{$text->{output_buffer}}, @output;
 	page_or_print(@output);
+	1
 }
 
 sub init_output_buffer { $text->{output_buffer} //= [] };
@@ -274,6 +275,7 @@ sub linecount {
 
 sub page_or_print {
 	my (@output) = @_;
+	@output = map{"$_\n"} map{ split "\n"} @output;
 	return unless scalar @output;
 	$output[-1] .= "\n" unless $output[-1] =~ /\n\z/;
 	print(@output), return if !paging_allowed() or scalar(@output) <= $text->{screen_lines} - 2;
