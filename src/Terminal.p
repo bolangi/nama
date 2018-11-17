@@ -277,7 +277,6 @@ sub page_or_print {
 	my (@output) = @_;
 	@output = map{"$_\n"} map{ split "\n"} @output;
 	return unless scalar @output;
-	$output[-1] .= "\n" unless $output[-1] =~ /\n\z/;
 	print(@output), return if !paging_allowed() or scalar(@output) <= $text->{screen_lines} - 2;
 	write_to_temp_file_and_view(@output)
 }
