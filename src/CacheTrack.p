@@ -18,7 +18,7 @@ use ::Globals qw(:all);
 # orig_pan
 
 sub cache_track { # launch subparts if conditions are met
-
+	logsub('&cache_track');
 	my $args = {};
 	(my $track, $args->{additional_time}) = @_;
 	local $this_track;
@@ -99,6 +99,7 @@ sub generate_cache_graph_bus {
 }
 
 sub generate_cache_graph {
+	logsub('&generate_cache_graph');
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
 	$args->{graph} = $g;
@@ -151,6 +152,7 @@ sub generate_cache_graph {
 }
 
 sub process_cache_graph {
+	logsub('&process_cache_graph');
 	my $g = shift;
 	logpkg('debug', "The graph after bus routing:\n$g");
 	::ChainSetup::prune_graph();
