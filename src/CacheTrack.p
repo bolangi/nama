@@ -169,6 +169,7 @@ sub process_cache_graph {
 }
 
 sub cache_engine_run {
+	logsub("&cache_engine_run");
 	my $args = shift;
 	connect_transport()
 		or throw("Couldn't connect engine! Aborting."), return;
@@ -193,6 +194,7 @@ sub cache_engine_run {
 	# It is triggered by stop_polling_cache_progress()
 }
 sub complete_caching {
+	logsub('&complete_caching');
 	my $args = shift;	
 	my $name = $args->{track}->name;
 	my @files = grep{/$name/} new_files_were_recorded();
@@ -205,6 +207,7 @@ sub complete_caching {
 	undef $setup->{cache_track_args};
 }
 sub update_cache_map {
+	logsub('&update_cache_map');
 	my $args = shift;
 		logpkg('debug', "updating track cache_map");
 		logpkg('debug', "current track cache entries:",
