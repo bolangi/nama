@@ -235,6 +235,7 @@ sub update_cache_map {
 				track_cache => 1,
 				track_name	=> $track->name,
 				track_version_original => $args->{original_version},
+				track_version_result => $args->{cached_version},
 				project => 1,
 				system => 1,
 				ops_list => \@ops_list,
