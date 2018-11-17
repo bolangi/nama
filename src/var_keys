@@ -22,6 +22,7 @@ $config->{default_waveform_height}
 $config->{waveform_canvas_x}
 $config->{waveform_canvas_y}
 $config->{loop_chain_channel_width}
+$config->{soundcard_loopback_delay}
 
 
 $jack->{seek_delay}				# extra time for stop-seek-start process
@@ -233,7 +234,6 @@ $gui->{_old_bg}					# default background color
 $gui->{_old_abg}				# default active background color
 $gui->{waveform}				# waveform display widgets, by trackname
 
-$config->{soundcard_loopback_delay}
 $jack->{connections}
 $jack->{is_own_port}
 $jack->{connections}
