@@ -43,7 +43,6 @@ sub cache_track { # launch subparts if conditions are met
 				or $track->has_insert
 				or $track->is_region;
 
-	my $result;
 	if($track->is_mixing)
 	{ generate_cache_graph_bus($args) }
 	else
