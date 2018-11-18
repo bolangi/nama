@@ -216,10 +216,12 @@ sub configure_waveform_window {
 	return if not $config->{display_waveform};
 
 	$gui->{wwcanvas}->configure(
-		scrollregion =>[0,0,$width//$config->{waveform_canvas_x},$height//$config->{waveform_canvas_y}],
+		-scrollregion =>[0,0,$width//$config->{waveform_canvas_x},$height//$config->{waveform_canvas_y}],
 		-width => $width//$config->{waveform_canvas_x},
 		-height => $height//$config->{waveform_canvas_y},
 		);
+	my $bbox = $gui->{wwcanvas}->bbox('all');
+	$gui->{wwcanvas}->configure(-scrollregion => $bbox ) if $bbox;
 
 }
 sub configure_effects_window {
