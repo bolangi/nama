@@ -23,7 +23,7 @@ $config->{waveform_canvas_x}
 $config->{waveform_canvas_y}
 $config->{loop_chain_channel_width}
 $config->{soundcard_loopback_delay}
-$config->{no_waveform}
+$config->{display_waveform}
 
 
 $jack->{seek_delay}				# extra time for stop-seek-start process

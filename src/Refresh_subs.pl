@@ -98,6 +98,6 @@ sub refresh_track {
 sub refresh {  
 	::remove_riff_header_stubs();
 	map{ $ui->refresh_track($_) } map{$_->n}  ::audio_tracks();
-	refresh_waveform_window() unless $config->{no_waveform};
+	refresh_waveform_window() unless $config->{display_waveform};
 }
 ### end
