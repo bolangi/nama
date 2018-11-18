@@ -33,7 +33,7 @@ sub init_gui {
 
 	### init waveform window
 
-	if (not $config->{display_waveform})
+	if ($config->{display_waveform})
 	{
 		$gui->{ww} = $gui->{mw}->Toplevel;
 		$gui->{ww}->title("Waveform Window");

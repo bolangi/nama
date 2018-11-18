@@ -115,6 +115,6 @@ alias:
   effect:
     reverb: gverb
 
-display_waveforms: 1
+display_waveform: 1
 # end
 
