@@ -52,7 +52,7 @@ sub init_gui {
 	$gui->{mw}->bind('<Control-Key- >' => \&toggle_transport); 
 	$gui->{ew}->bind('<Control-Key- >' => \&toggle_transport); 
 	
-	if (not $config->{display_waveform})
+	if ($config->{display_waveform})
 	{
 		$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
 		configure_waveform_window();
@@ -213,7 +213,7 @@ $gui->{palette}->AddItems( @color_items);
 }
 sub configure_waveform_window {
 	my ($width, $height) = @_;
-	return if $config->{display_waveform};
+	return if not $config->{display_waveform};
 
 	$gui->{wwcanvas}->configure(
 		scrollregion =>[0,0,$width//$config->{waveform_canvas_x},$height//$config->{waveform_canvas_y}],
