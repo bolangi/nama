@@ -220,8 +220,6 @@ sub configure_waveform_window {
 		-width => $width//$config->{waveform_canvas_x},
 		-height => $height//$config->{waveform_canvas_y},
 		);
-	my $bbox = $gui->{wwcanvas}->bbox('all');
-	$gui->{wwcanvas}->configure(-scrollregion => $bbox ) if $bbox;
 
 }
 sub configure_effects_window {
