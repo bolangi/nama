@@ -242,7 +242,6 @@ sub output_object_text {   # text for user display
 sub source_status {
 	my $track = shift;
 	no warnings 'uninitialized';
-	return if $track->off;
 	return $track->current_wav if $track->{rw} eq PLAY ;
 	return $track->source_id. " bus" if $track->source_type eq 'bus';
 	return "track ".$track->source_id  if $track->source_type eq 'track';
