@@ -111,7 +111,7 @@ sub current_controller_parameter {
 }
 sub valid_setup {
 	my ($self) = @_;
-	$self->{valid_setup}
+	$self->ecasound_iam('cs-is-valid');
 }
 
 ### class methods

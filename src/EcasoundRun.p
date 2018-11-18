@@ -33,8 +33,7 @@ sub start {
 	# limit engine run time if we are in mixdown or edit mode, 
 	# or if requested by user, set timer to specified time
 	# defaulting to the result of cs-get-length
-	
-	limit_processing_time( $setup->{runtime_limit} || $setup->{audio_length}) 
+	limit_processing_time( ($setup->{runtime_limit} || $setup->{audio_length}) + $setup->{extra_run_time}) 
 		if mixing_only() 
 		or edit_mode() 
 		or defined $setup->{runtime_limit};

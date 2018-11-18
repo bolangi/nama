@@ -22,6 +22,8 @@ $config->{default_waveform_height}
 $config->{waveform_canvas_x}
 $config->{waveform_canvas_y}
 $config->{loop_chain_channel_width}
+$config->{soundcard_loopback_delay}
+$config->{no_waveform}
 
 
 $jack->{seek_delay}				# extra time for stop-seek-start process
@@ -50,6 +52,7 @@ $setup->{audio_run_ready}
 $setup->{midish_running}
 $setup->{fade_counter}
 $setup->{bus}
+$setup->{extra_run_time}
 
 $fx_cache->{registry}			# effects database
 $fx_cache->{full_label_to_index}# el:tap_pinknoise -> effect index
@@ -233,8 +236,6 @@ $gui->{_old_bg}					# default background color
 $gui->{_old_abg}				# default active background color
 $gui->{waveform}				# waveform display widgets, by trackname
 
-$config->{soundcard_loopback_delay}
-$config->{no_waveform}
 $jack->{connections}
 $jack->{is_own_port}
 $jack->{connections}

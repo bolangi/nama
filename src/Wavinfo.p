@@ -65,6 +65,7 @@ sub ecasound_get_info {
 	local $config->{category} = 'ECI_WAVINFO';
 
 	$path = qq("$path");
+	my $old = ecasound_iam('cs-selected');
 	teardown_engine();
 	ecasound_iam('cs-add gl');
 	ecasound_iam('c-add g');
@@ -74,6 +75,7 @@ sub ecasound_get_info {
 	ecasound_iam('ai-select '. $path);
 	my $result = ecasound_iam($command);
 	teardown_engine();
+	ecasound_iam("cs-load $old") if $old;
 	$result;
 }
 1;

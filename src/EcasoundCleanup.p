@@ -167,8 +167,7 @@ sub new_files_were_recorded {
 		} @files;
 	if(@recorded){
 		restart_wav_memoize();
-		$recorded[0] =~ s/^/recorded: "/;
-		pagers(@recorded);
+		pagers("recorded:", @recorded);
 	}
 	map{ _get_wav_info($_) } @recorded;
 	@recorded 

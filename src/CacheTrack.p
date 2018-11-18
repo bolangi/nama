@@ -18,7 +18,7 @@ use ::Globals qw(:all);
 # orig_pan
 
 sub cache_track { # launch subparts if conditions are met
-
+	logsub('&cache_track');
 	my $args = {};
 	(my $track, $args->{additional_time}) = @_;
 	local $this_track;
@@ -29,7 +29,7 @@ sub cache_track { # launch subparts if conditions are met
 	$args->{additional_time} //= 0;
 	$args->{is_mixing}++ if $track->is_mixing;
 	$args->{original_version} = $track->is_mixing ? 0 : $args->{track}->playback_version;
-	$args->{cached_version} = $args->{original_version} + 1;
+	$args->{cached_version} = $args->{track}->last + 1;
 	
 	$args->{track_rw} = $track->{rw};
 	$args->{main_rw} = $tn{Main}->{rw};
@@ -43,16 +43,15 @@ sub cache_track { # launch subparts if conditions are met
 				or $track->has_insert
 				or $track->is_region;
 
-	my $result;
 	if($track->is_mixing)
-	{ $result = prepare_to_cache_bus($args) }
+	{ generate_cache_graph_bus($args) }
 	else
-	{ $result = prepare_to_cache($args) }
+	{ generate_cache_graph($args) }
 	
-	{ no warnings 'uninitialized';
-	}
+	my $result = process_cache_graph($g);
 	if ( $result )
 	{ 
+		pager("generated graph");
 		deactivate_vol_pan($args);
 		cache_engine_run($args);
 		reactivate_vol_pan($args);
@@ -76,7 +75,7 @@ sub reactivate_vol_pan {
 	pan_back($args->{track});
 	vol_back($args->{track});
 }
-sub prepare_to_cache_bus {
+sub generate_cache_graph_bus {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
 	$args->{graph} = $g;
@@ -97,10 +96,10 @@ sub prepare_to_cache_bus {
 
 # 	grep { $_->name ne 'Main' } 
 
-	process_cache_graph($g);
 }
 
-sub prepare_to_cache {
+sub generate_cache_graph {
+	logsub('&generate_cache_graph');
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
 	$args->{graph} = $g;
@@ -128,10 +127,12 @@ sub prepare_to_cache {
 
 	# set WAV output format
 	
+	my $to_name = $args->{track}->name .  '_' .  $args->{cached_version} . '.wav';
+	my $to_path = join_path($args->{track}->dir, $to_name);
 	$g->set_vertex_attributes(
 		$cooked->name, 
 		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
-			version => ($args->{cached_version}),
+			full_version => $to_path,
 		}
 	); 
 	$args->{complete_caching_ref} = \&update_cache_map;
@@ -139,12 +140,19 @@ sub prepare_to_cache {
 		# set the input path
 		$g->add_path('wav_in',$args->{track}->name);
 		logpkg('debug', "The graph after setting input path:\n$g");
+	
+	my $from_name = $args->{track}->name .  '_' . $args->{original_version} . '.wav';
+	my $from_path = join_path($args->{track}->dir, $from_name);
 
-	process_cache_graph($g);
+	$g->set_vertex_attributes(
+		$args->{track}->name,
+		{ full_path => $from_path }
+	);
 
 }
 
 sub process_cache_graph {
+	logsub('&process_cache_graph');
 	my $g = shift;
 	logpkg('debug', "The graph after bus routing:\n$g");
 	::ChainSetup::prune_graph();
@@ -163,6 +171,7 @@ sub process_cache_graph {
 }
 
 sub cache_engine_run {
+	logsub("&cache_engine_run");
 	my $args = shift;
 	connect_transport()
 		or throw("Couldn't connect engine! Aborting."), return;
@@ -187,6 +196,7 @@ sub cache_engine_run {
 	# It is triggered by stop_polling_cache_progress()
 }
 sub complete_caching {
+	logsub('&complete_caching');
 	my $args = shift;	
 	my $name = $args->{track}->name;
 	my @files = grep{/$name/} new_files_were_recorded();
@@ -199,6 +209,7 @@ sub complete_caching {
 	undef $setup->{cache_track_args};
 }
 sub update_cache_map {
+	logsub('&update_cache_map');
 	my $args = shift;
 		logpkg('debug', "updating track cache_map");
 		logpkg('debug', "current track cache entries:",
@@ -224,6 +235,7 @@ sub update_cache_map {
 				track_cache => 1,
 				track_name	=> $track->name,
 				track_version_original => $args->{original_version},
+				track_version_result => $args->{cached_version},
 				project => 1,
 				system => 1,
 				ops_list => \@ops_list,
