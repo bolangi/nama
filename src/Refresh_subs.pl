@@ -3,7 +3,7 @@
 sub refresh_waveform_window {
 	$gui->{wwcanvas}->delete('waveform',$_->name) for all_tracks();
  	my @playable = grep{ $_->play} user_tracks();
-	map{ $_->display_waveform } @playable;
+	map{ $_->waveform->display() } @playable;
 	configure_waveform_window();
 }
 sub set_widget_color {

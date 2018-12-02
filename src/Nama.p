@@ -100,6 +100,7 @@ use ::Edit;
 use ::EffectChain;
 use ::Lat;
 use ::Engine;
+use ::Waveform;
 
 ####### Nama Roles - loaded by another class
 
