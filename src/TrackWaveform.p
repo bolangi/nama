@@ -34,10 +34,14 @@ sub find_waveform {
 	 ->in(   ::this_wav_dir()      );
 	@files;
 }
-sub display_waveform {
+sub get_waveform {
 	my $self = shift;
 	my ($waveform) = $self->find_waveform; 
-	$waveform //= $self->generate_waveform; 
+	$waveform or $self->generate_waveform; 
+}
+sub display_waveform {
+	my $self = shift;
+	my ($waveform) = $self->get_waveform; 
 	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
 	$gui->{waveform}{$self->name} = [];
 	$gui->{wwcanvas}->createImage(	0,
@@ -45,10 +49,39 @@ sub display_waveform {
 												-anchor => 'nw', 
 												-tags => ['waveform', $self->name],
 												-image => $widget);
+	my ($width, $height) = ::wh($gui->{ww});
+	my $name_x = $width - 150;
+	my $name_y = $config->{waveform_height} * ($self->y_offset_multiplier + 1) - 10;
+	say "x pos $name_x, y pox $name_y";
+	#$gui->{wwcanvas}->createText( $name_x, $name_y, -text => $waveform);
 }
-# tagname for all items in waveform display
-# sax-waveform
+=comment
+sub waveform_width  {
+	my $self = shift;
+	my ($waveform) = $self->find_waveform; 
+	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
+		or ::throw("cannot parse waveform filename: $waveform");
+	say "wdith $width, height $height, pixels: $pixels_per_second";
+	$width
+}
+sub waveform_height  {
+	my $self = shift;
+	my ($waveform) = $self->find_waveform; 
+	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
+		or ::throw("cannot parse waveform filename: $waveform");
 
+	say "wdith $width, height $height, pixels: $pixels_per_second";
+	$height
+}
+sub waveform_pixels_per_second  {
+	my $self = shift;
+	my ($waveform) = $self->find_waveform; 
+	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
+		or ::throw("cannot parse waveform filename: $waveform");
+	say "wdith $width, height $height, pixels: $pixels_per_second";
+	$pixels_per_second
+}
+=cut
 sub y_offset_multiplier {
 	my $self = shift;
 	my $before_me;
