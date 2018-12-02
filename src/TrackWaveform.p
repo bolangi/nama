@@ -55,10 +55,9 @@ sub display_waveform {
 	say "x pos $name_x, y pox $name_y";
 	#$gui->{wwcanvas}->createText( $name_x, $name_y, -text => $waveform);
 }
-=comment
 sub waveform_width  {
 	my $self = shift;
-	my ($waveform) = $self->find_waveform; 
+	my ($waveform) = $self->get_waveform; 
 	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
 		or ::throw("cannot parse waveform filename: $waveform");
 	say "wdith $width, height $height, pixels: $pixels_per_second";
@@ -66,7 +65,7 @@ sub waveform_width  {
 }
 sub waveform_height  {
 	my $self = shift;
-	my ($waveform) = $self->find_waveform; 
+	my ($waveform) = $self->get_waveform; 
 	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
 		or ::throw("cannot parse waveform filename: $waveform");
 
@@ -75,13 +74,12 @@ sub waveform_height  {
 }
 sub waveform_pixels_per_second  {
 	my $self = shift;
-	my ($waveform) = $self->find_waveform; 
+	my ($waveform) = $self->get_waveform;
 	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
 		or ::throw("cannot parse waveform filename: $waveform");
 	say "wdith $width, height $height, pixels: $pixels_per_second";
 	$pixels_per_second
 }
-=cut
 sub y_offset_multiplier {
 	my $self = shift;
 	my $before_me;
