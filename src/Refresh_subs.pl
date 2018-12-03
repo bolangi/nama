@@ -5,6 +5,30 @@ sub refresh_waveform_window {
  	my @playable = grep{ $_->play} user_tracks();
 	map{ $_->waveform->display() } @playable;
 	configure_waveform_window();
+	generate_timeline(
+			widget => $gui->{wwcanvas}, 
+			seconds => 80,
+			pixels => 800,
+			y_pos => 600,
+	);
+}
+sub height { $_[0] % 5 ? 5 : 10 }
+sub generate_timeline {
+	my %args = @_;
+	my $increment = $args{pixels}/$args{seconds};
+	my $pps = $args{pixels}/$args{seconds};
+	for (0..$args{seconds})
+	{
+		my $xpos = $_ * $pps;
+		$args{widget}->createLine(
+			$xpos, $args{y_pos} - height($_),
+			$xpos, $args{y_pos},
+			-fill => 'black',
+			-width => 1,
+			-tags => 'timelime'
+		);
+	}
+
 }
 sub set_widget_color {
 	my ($widget, $status) = @_;
