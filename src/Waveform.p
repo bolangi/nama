@@ -33,28 +33,25 @@ sub new {
 	my %args = @_;
 	bless \%args, $class	
 }
-=comment
-sub png_path { ::join_path(::this_wav_dir() . $_[0]->wav) }
-
-sub png {
 
 sub generate_waveform {
 	my $self = shift;
 	my ($width, $height, $pixels_per_second) = @_;
 	$pixels_per_second //= $config->{waveform_pixels_per_second};
 	$height //= $config->{waveform_height};
-	$width //= int( $self->wav_length * $pixels_per_second);
-	my $name = waveform_name($self->full_path, $width, $height, $pixels_per_second);
+	$width //= int( $self->track->wav_length * $pixels_per_second);
+	my $name = waveform_name($self->track->full_path, $width, $height, $pixels_per_second);
 	my $cmd = join ' ', 'waveform', "-b #c2d6d6 -c #0080ff -W $width -H $height", $self->full_path, $name;
 	say $cmd;
 	system($cmd);
 	$name;
 }
-sub waveform_name {
-	my($path, $width, $height, $pixels) = @_;
-			"$path."  . $width . 'x' . "$height-$pixels.png"
-}
 
+# utility subroutine
+sub waveform_name {
+	my($path, $width, $height, $pixels, $start, $end) = @_;
+			"$path."  . $width . 'x' . "$height-$pixels" . region_def($start,$end) . ".png"
+}
 sub find_waveform {
 
 	my $self = shift;
@@ -69,15 +66,15 @@ sub get_waveform {
 	my ($waveform) = $self->find_waveform; 
 	$waveform or $self->generate_waveform; 
 }
-sub display_waveform {
+sub display {
 	my $self = shift;
 	my ($waveform) = $self->get_waveform; 
 	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
-	$gui->{waveform}{$self->name} = [];
+	$gui->{waveform}{$self->track->name} = [];
 	$gui->{wwcanvas}->createImage(	0,
 												$self->y_offset_multiplier * $config->{waveform_height}, 
 												-anchor => 'nw', 
-												-tags => ['waveform', $self->name],
+												-tags => ['waveform', $self->track->name],
 												-image => $widget);
 	my ($width, $height) = ::wh($gui->{ww});
 	my $name_x = $width - 150;
@@ -113,12 +110,11 @@ sub waveform_pixels_per_second  {
 sub y_offset_multiplier {
 	my $self = shift;
 	my $before_me;
-	for (2 .. $self->n - 1){
-		$before_me++ if $ti{$_} and $ti{$_}->find_waveform
+	for (2 .. $self->track->n - 1){
+		$before_me++ if $ti{$_} and $ti{$_}->play;
 	}
 	$before_me
 }
-=cut		
 
 1 # obligatory
 	
