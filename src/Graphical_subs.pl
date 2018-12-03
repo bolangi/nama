@@ -239,6 +239,7 @@ sub configure_track_canvas {
 sub wwgeometry { wh($gui->{wwcanvas}) }
 sub wh {
 	my $widget = shift;
+	$widget->update;
 	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
 		= $widget->geometry =~ /(\d+)x(\d+)([+-])(\d+)([+-])(\d+)/;
 	$width,$height
