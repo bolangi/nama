@@ -10,6 +10,7 @@ sub waveform {
 						wav     => $self->current_wav,
 						start   => $self->region_start_time,
 						end     => $self->region_end_time,
+						track	=> $self,
 	);
 }
 

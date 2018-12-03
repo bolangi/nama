@@ -4,7 +4,7 @@ use ::Util qw(join_path);
 use Modern::Perl;
 use Try::Tiny;
 use vars qw(%by_name);
-use ::Object qw(wav project start end);
+use ::Object qw(wav track project start end);
 
 # * objects of this class represent a waveform display 
 # * each object is associated with an audio file
