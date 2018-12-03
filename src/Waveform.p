@@ -78,7 +78,7 @@ sub display {
 												-image => $widget);
 	my ($width, $height) = ::wh($gui->{ww});
 	my $name_x = $width - 150;
-	my $name_y = $config->{waveform_height} * ($self->y_offset_multiplier + 1) - 10;
+	my $name_y = $config->{waveform_height} * $self->y_offset_multiplier  + 20;
 	$gui->{wwcanvas}->createText( $name_x, $name_y, -font => 'lucidasanstypewriter-bold-14', -text => $self->track->current_wav);
 }
 sub width  {
