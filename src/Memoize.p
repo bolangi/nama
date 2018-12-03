@@ -10,7 +10,7 @@ my @wav_functions = qw(
 	_targets 
 	_versions 
 );
-my @track_functions = qw(
+my @track_methods = qw(
 	dir 
 	basename 
 	full_path 
@@ -30,11 +30,11 @@ my @track_functions = qw(
 );
 sub track_memoize { # before generate_setup
 	return unless $config->{memoize};
-	map{package ::Track; memoize($_) } @track_functions;
+	map{package ::Track; memoize($_) } @track_methods;
 }
 sub track_unmemoize { # after generate_setup
 	return unless $config->{memoize};
-	map{package ::Track; unmemoize ($_)} @track_functions;
+	map{package ::Track; unmemoize ($_)} @track_methods;
 }
 sub restart_wav_memoize {
 	return unless $config->{memoize};
