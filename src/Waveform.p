@@ -81,29 +81,25 @@ sub display {
 	my $name_y = $config->{waveform_height} * ($self->y_offset_multiplier + 1) - 10;
 	$gui->{wwcanvas}->createText( $name_x, $name_y, -font => 'lucidasanstypewriter-bold-14', -text => $self->track->current_wav);
 }
-sub waveform_width  {
+sub width  {
 	my $self = shift;
 	my ($waveform) = $self->get_waveform; 
 	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
 		or ::throw("cannot parse waveform filename: $waveform");
-	say "wdith $width, height $height, pixels: $pixels_per_second";
 	$width
 }
-sub waveform_height  {
+sub height  {
 	my $self = shift;
 	my ($waveform) = $self->get_waveform; 
 	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
 		or ::throw("cannot parse waveform filename: $waveform");
-
-	say "wdith $width, height $height, pixels: $pixels_per_second";
 	$height
 }
-sub waveform_pixels_per_second  {
+sub pixels_per_second  {
 	my $self = shift;
 	my ($waveform) = $self->get_waveform;
 	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
 		or ::throw("cannot parse waveform filename: $waveform");
-	say "wdith $width, height $height, pixels: $pixels_per_second";
 	$pixels_per_second
 }
 sub y_offset_multiplier {
