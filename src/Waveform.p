@@ -79,8 +79,7 @@ sub display {
 	my ($width, $height) = ::wh($gui->{ww});
 	my $name_x = $width - 150;
 	my $name_y = $config->{waveform_height} * ($self->y_offset_multiplier + 1) - 10;
-	say "x pos $name_x, y pox $name_y";
-	#$gui->{wwcanvas}->createText( $name_x, $name_y, -text => $waveform);
+	$gui->{wwcanvas}->createText( $name_x, $name_y, -font => 'lucidasanstypewriter-bold-14', -text => $self->track->current_wav);
 }
 sub waveform_width  {
 	my $self = shift;
