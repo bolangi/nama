@@ -14,6 +14,7 @@ use ::Object qw(wav track project start end);
 #    + if region, trim the PNG existing for the track
 
 # the $track->waveform method will create a new object of this class 
+# we will memoize since it remains constant between reconfigures
 
 # keyed to the 
 # + name of the WAV file
