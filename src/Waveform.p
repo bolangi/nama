@@ -1,5 +1,6 @@
 package ::Waveform;
 use ::Globals qw($project $config $gui %ti);
+use ::Util qw(join_path);
 use Modern::Perl;
 use Try::Tiny;
 use vars qw(%by_name);
