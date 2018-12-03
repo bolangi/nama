@@ -70,7 +70,7 @@ sub display {
 	my $self = shift;
 	my ($waveform) = $self->get_waveform; 
 	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
-	$gui->{waveform}{$self->track->name} = [];
+	$gui->{waveform}{$self->track->name} = []; # unused? 
 	$gui->{wwcanvas}->createImage(	0,
 												$self->y_offset_multiplier * $config->{waveform_height}, 
 												-anchor => 'nw', 
