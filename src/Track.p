@@ -296,7 +296,7 @@ sub rec_status { $_[0]->{rw} }
 sub width { $_[0]->{width} }
 }
 {
-package ::SlaveTrack; # for instrument monitor bus
+package ::SlaveTrack;
 use ::Globals qw(:all);
 use Modern::Perl; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
