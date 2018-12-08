@@ -282,6 +282,13 @@ sub new {
 				hide => 1,
 				rw => REC
 	);
+	if ($wet_send->width == 1){
+		::add_effect({
+			track  => $wet_send, 
+			type   => 'chcopy',
+			params => [1,2]
+		});
+	}
 	map{ ::remove_effect($_)} $wet_send->vol, $wet_send->pan;
 	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet_send;
 	$self
