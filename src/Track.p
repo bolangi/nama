@@ -329,7 +329,7 @@ sub rec_status{
 }
 }
 {
-package ::CacheRecTrack; # for graph generation
+package ::CacheRecTrack;
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
 our @ISA = qw(::SlaveTrack);
