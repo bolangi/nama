@@ -336,10 +336,7 @@ our @ISA = qw(::SlaveTrack);
 sub current_version {
 	my $track = shift;
 	my $target = $tn{$track->target};
-		$target->last + 1
-# 	if ($target->play
-# 		or $target->rec and $bn{$track->target}){
-# 	}
+	$target->last + 1
 }
 sub current_wav {
 	my $track = shift;
