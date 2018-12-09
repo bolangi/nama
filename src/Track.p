@@ -322,7 +322,7 @@ package ::BoostTrack;
 use ::Globals qw(:all);
 use Modern::Perl; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
-our @ISA = '::SlaveTrack';
+our @ISA = '::Track';
 sub rec_status{
 	my $track = shift;
 	$mode->mastering ? MON :  OFF;
