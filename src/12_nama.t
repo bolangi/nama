@@ -409,7 +409,6 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 check_setup('JACK send-Main-to-alternate-channel setup' );
 
-=comment
 nama_cmd('Mixdown; rec; gen');
 $expected_setup_lines = <<EXPECTED;
 
@@ -513,7 +512,6 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 gen_jack();
 check_setup('Mixdown in mastering mode - JACK');
-=cut
 
 nama_cmd('mixoff; master_off');
 nama_cmd('for 4 5 6 7 8; remove_track quiet');
