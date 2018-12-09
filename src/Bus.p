@@ -169,7 +169,7 @@ sub apply {
 	logpkg('debug', "bus ". $bus->name. ": applying routes");
 	logpkg('debug', "Bus destination is type: $bus->{send_type}, id: $bus->{send_id}");
 	my @wantme = $bus->wantme;
-	logpkg('debug', "bus ". $bus->name. "consumed by ".$_->name) for @wantme;
+	logpkg('debug', "bus ". $bus->name. " consumed by ".$_->name) for @wantme;
 	map{ 
 		my $member = $_;
 		# connect member track input paths
