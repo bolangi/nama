@@ -106,6 +106,7 @@
 	$default_waveform_height 			$config->{default_waveform_height}
 	$loop_chain_channel_width 	$config->{loop_chain_channel_width}
 	$waveform_pixels_per_second		$config->{waveform_pixels_per_second}
+	$display_waveform					$config->{display_waveform}
 
 	# end
 

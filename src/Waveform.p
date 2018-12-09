@@ -1,135 +1,130 @@
-{package ::Waveform;
-use IPC::System::Simple;
-use Role::Tiny;
-use Modern::Perl;
-use ::Globals qw(:all);
+package ::Waveform;
+use ::Globals qw($project $config $gui %ti);
 use ::Util qw(join_path);
-use autodie qw(:all);
+use Modern::Perl;
+use Try::Tiny;
+use vars qw(%by_name);
+use ::Object qw(wav track project start end);
 
-sub generate_waveforms {
-	my ($track, $version) = @_;
-	my $sourcefile = join_path(::this_wav_dir(), $track->targets->{$version});
-	my $datafile = time_series_filename($track->name, $version);
-	initial_time_series($sourcefile, $datafile);
-	my $p1 = time_series_filename($track->name, $version, 1);
-	say "p1: $p1";
-	first_series($datafile, $p1, $project->{sample_rate});
-	my $previous_file = $p1;
-	for my $power (2..8)
-	{
-		my $datafile = time_series_filename($track->name, $version, $power);
-		my $factor = 10; 
-		my $unit = 'seconds';
-		rms_series($previous_file, $datafile, $factor, $unit);
-		$previous_file = $datafile;
+# * objects of this class represent a waveform display 
+# * each object is associated with an audio file
+# * object will find or generate PNG for the audio
+# * will display waveform
+#    + if shift, correctly position PNG
+#    + if region, trim the PNG existing for the track
+
+# the $track->waveform method will create a new object of this class 
+# we will memoize since it remains constant between reconfigures
+
+# keyed to the 
+# + name of the WAV file
+# + name of project
+# + start and end times
+
+# the get_png() method will find or generate the appropriate PNG
+
+
+# files are of the form # sax_1.wav.1200x200-10.png 
+# where the numbers correspond to width and height in pixels of the audio
+# waveform image, and the x-scaling in pixels per second (default 10)
+
+sub new {
+	my $class = shift;
+	my %args = @_;
+	bless \%args, $class	
+}
+
+sub generate_waveform {
+	my $self = shift;
+	my ($width, $height, $pixels_per_second) = @_;
+	$pixels_per_second //= $config->{waveform_pixels_per_second};
+	$height //= $config->{waveform_height};
+	$width //= int( $self->track->wav_length * $pixels_per_second);
+	my $name = waveform_name($self->track->full_path, $width, $height, $pixels_per_second);
+	my $cmd = join ' ', 'waveform', "-b #c2d6d6 -c #0080ff -W $width -H $height", $self->full_path, $name;
+	say $cmd;
+	system($cmd);
+	$name;
+}
+
+# utility subroutine
+sub waveform_name {
+	my($path, $width, $height, $pixels, $start, $end) = @_;
+			"$path."  . $width . 'x' . "$height-$pixels" . region_def($start,$end) . ".png"
+}
+sub find_waveform {
+
+	my $self = shift;
+	my $match = shift() // '*';
+	my @files = File::Find::Rule->file()
+	 ->name( $self->wav . ".$match.png"  )
+	 ->in(   ::this_wav_dir()      );
+	@files;
+}
+sub get_waveform {
+	my $self = shift;
+	my ($waveform) = $self->find_waveform; 
+	$waveform or $self->generate_waveform; 
+}
+sub display {
+	my $self = shift;
+	my ($waveform) = $self->get_waveform; 
+	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
+	$gui->{waveform}{$self->track->name} = []; # unused? 
+	$gui->{wwcanvas}->createImage(	0,
+												$self->y_offset_multiplier * $config->{waveform_height}, 
+												-anchor => 'nw', 
+												-tags => ['waveform', $self->track->name],
+												-image => $widget);
+	my ($width, $height) = ::wh($gui->{ww});
+	my $name_x = $width - 150;
+	my $name_y = $config->{waveform_height} * $self->y_offset_multiplier  + 20;
+	$gui->{wwcanvas}->createText( $name_x, $name_y, -font =>
+'lucidasanstypewriter-bold-14', -text => uc($self->track->name) . ' - '.$self->track->current_wav);
+}
+sub width  {
+	my $self = shift;
+	my ($waveform) = $self->get_waveform; 
+	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
+		or ::throw("cannot parse waveform filename: $waveform");
+	$width
+}
+sub height  {
+	my $self = shift;
+	my ($waveform) = $self->get_waveform; 
+	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
+		or ::throw("cannot parse waveform filename: $waveform");
+	$height
+}
+sub pixels_per_second  {
+	my $self = shift;
+	my ($waveform) = $self->get_waveform;
+	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
+		or ::throw("cannot parse waveform filename: $waveform");
+	$pixels_per_second
+}
+sub y_offset_multiplier {
+	my $self = shift;
+	my $before_me;
+	for (2 .. $self->track->n - 1){
+		$before_me++ if $ti{$_} and $ti{$_}->play;
 	}
+	$before_me
 }
 
-sub time_series_filename {
-	my ($trackname, $version, $power) = @_;
-	my $filename = ! $power 
-		? "${trackname}_$version.dat"
-		: "${trackname}_$version#$power.dat";
-	join_path(::waveform_dir(),$filename)
-}
+1 # obligatory
 	
-sub initial_time_series {
-	my ($from, $to) = @_;
-	my @cmd = ('tsriff', $from, $to);
-	my $cmd = join " ", @cmd;
-	say "ts-command: $cmd";
-	system(@cmd) == 0 or die "system @cmd failed: $?";
- 	#guitar_2.wav guitar_2.dat 
-}
-	
-sub first_series {
-	my ($from, $to, $sample_rate) = @_;
-	open my $rh, '<', $from;
-	open my $wh, '>', $to;
-	my $i = 0;
-	while (my $line = <$rh>)
-	{
-		$line =~ /(\d+)/ and say $wh sprintf("%.2f",++$i/$sample_rate), " $1";
-		# take first channel, throw away the rest
-		# output:  seconds   level 
-	}
-}
-sub rms_series {
-	my($from, $to, $factor, $unit) = @_;
-	open my $in_h, '<', $from;
-	open my $out_h, '>', $to;
-	my ($pos, $acc, $count, $level);
-	while (! eof $in_h)
-	{
-		for (1..$factor)
-		{	$count = $acc = 0; 
-			my $entry = <$in_h>;
-			defined $entry or last;
-			($pos, $level, undef) = split ' ', $entry;
-			$count++;
-			$acc += $level**2;
-		}
-		if ($count) {
-			my $rms = sqrt($acc/$count);
-			say $out_h "$pos -$rms $rms";
-		}
-	}
-}
-# 	rms for $factor values
-#     write outfile (time (s/min), rms )
-sub generate_plot {
-# 	my ($file, %params) = @_
-# 	outfile guitar_2#2.png
-# 	gnuplot(@params)
-} 
-
-}
-1
 __END__
-
-
 =comment
-# track guitar.wav version 2
-# screen width e.g. 800
-# try for 2 hours max on screen
-# 800 dots / 125 minutes =  6.4 dots/min
-# 2400 dots / 120 minute = 20 dots/ min
-# 1600 dots / 120 minute = 13.3 dots/min
- or 1 dot / 33 million samples
-
-# 
-
-scale down factor | resolution
-1 					48000 dots per second
-10 					4800  dots / sec
-100  				480 dots / sec
-1_000 				48 dots / sec
-10_000 				4.8 dots/sec
-100_000  			288 dots/min
-1_000_000 			28.8 dots/min
-10_000_000 			2.9 dots/min
-
-
-
-
-my %dispatch = (
-	1 => 
-	2 =>
-	3 =>
-	4 =>
-	5 =>
-	6 =>
-	7 =>
-	8 =>
-);
-
-    
-                     guitar_2.dat   # initial_time_series
-                     guitar_2#1.dat  # first_series
-                     guitar_2#2.dat # rms_series
-                     guitar_2#3.dat  
-                     guitar_2#4.dat  
-                     guitar_2#5.dat  
-                     guitar_2#6.dat  
-                     guitar_2#7.dat  
+Usage: waveform [options] source_audio [ouput.png]
+    -W, --width WIDTH                Width (in pixels) of generated waveform image -- Default 1800.
+    -H, --height HEIGHT              Height (in pixels) of generated waveform image -- Default 280.
+    -c, --color COLOR                Color (hex code) to draw the waveform. Can also pass 'transparent' to cut it out of the background -- Default #00ccff.
+    -b, --background COLOR           Background color (hex code) to draw waveform on -- Default #666666.
+    -m, --method METHOD              Wave analyzation method (can be 'peak' or 'rms') -- Default 'peak'.
+    -q, --quiet                      Don't print anything out when generating waveform
+    -F, --force                      Force generationg of waveform if file exists
+    -h, --help                       Display this screen
+	
 =cut
+

@@ -291,7 +291,7 @@ sub destination {
 	my $bus = $track->bus;
 	dest_string($bus->send_type,$bus->send_id, $track->width);
 }
-sub source_status { $_[0]->target }
+sub source_status { $tn{$_[0]->target}->source_status }
 sub rec_status { $_[0]->{rw} }
 sub width { $_[0]->{width} }
 }

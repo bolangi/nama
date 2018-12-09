@@ -33,47 +33,37 @@ sub init_gui {
 
 	### init waveform window
 
-	$gui->{ww} = $gui->{mw}->Toplevel;
-	$gui->{ww}->title("Waveform Window");
-	$gui->{ww}->deiconify; 
-	
+	if ($config->{display_waveform})
+	{
+		$gui->{ww} = $gui->{mw}->Toplevel;
+		$gui->{ww}->title("Waveform Window");
+		$gui->{ww}->deiconify; 
+		$gui->{ww}->bind('<Control-Key-c>' => sub { exit } );
+		$gui->{ww}->bind('<Control-Key- >' => \&toggle_transport); 
+	}
 
 	### Exit via Ctrl-C 
 
 	$gui->{mw}->bind('<Control-Key-c>' => sub { exit } ); 
 	$gui->{ew}->bind('<Control-Key-c>' => sub { exit } );
-	$gui->{ww}->bind('<Control-Key-c>' => sub { exit } );
 
     ## Press SPACE to start/stop transport
 
 	$gui->{mw}->bind('<Control-Key- >' => \&toggle_transport); 
 	$gui->{ew}->bind('<Control-Key- >' => \&toggle_transport); 
-	$gui->{ww}->bind('<Control-Key- >' => \&toggle_transport); 
 	
-	$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
-	$gui->{wwcanvas}->configure(
-		scrollregion =>[0,0,$config->{waveform_canvas_x},$config->{waveform_canvas_y}],
-		-width => $config->{waveform_canvas_x},
-		-height => $config->{waveform_canvas_y},
-		);
-	# incorrect, call to wwgeometry too early to get correct value
-	my ($width,$height) = wwgeometry();
-	#say "width: $width, height: $height";
+	if ($config->{display_waveform})
+	{
+		$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
+		configure_waveform_window();
+	}
 
-sub wwgeometry {
-	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
-		= $gui->{wwcanvas}->geometry =~ /(\d+)x(\d+)([+-])(\d+)([+-])(\d+)/;
-	$width,$height
-}
 
-	$gui->{canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
-	$gui->{canvas}->configure(
-		scrollregion =>[2,2,10000,10000],
-		-width => 1200,
-		-height => 700,	
-		);
-	$gui->{fx_frame} = $gui->{canvas}->Frame;
-	my $id = $gui->{canvas}->createWindow(30,30, -window => $gui->{fx_frame},
+	$gui->{fx_canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
+	configure_effects_window();
+
+	$gui->{fx_frame} = $gui->{fx_canvas}->Frame;
+	my $id = $gui->{fx_canvas}->createWindow(30,30, -window => $gui->{fx_frame},
 											-anchor => 'nw');
 
 	$gui->{project_head} = $gui->{mw}->Label->pack(-fill => 'both');
@@ -95,15 +85,11 @@ sub wwgeometry {
 	# $oid_frame = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
 	$gui->{clock_frame} = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
 	#$gui->{group_frame} = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
- 	my $track_canvas = $gui->{mw}->Scrolled('Canvas')->pack(-side => 'bottom', -fill => 'both');
- 	$track_canvas->configure(
- 		-scrollregion =>[2,2,400,9600],
- 		-width => 400,
- 		-height => 400,	
- 		);
-	$gui->{track_frame} = $track_canvas->Frame; # ->pack(-fill => 'both');
+ 	$gui->{track_canvas}= $gui->{mw}->Scrolled('Canvas')->pack(-side => 'bottom', -fill => 'both');
+	configure_track_canvas();
+	$gui->{track_frame} = $gui->{track_canvas}->Frame; # ->pack(-fill => 'both');
 	#$gui->{track_frame} = $gui->{mw}->Frame;
- 	my $id2 = $track_canvas->createWindow(0,0,
+ 	my $id2 = $gui->{track_canvas}->createWindow(0,0,
 		-window => $gui->{track_frame}, 
 		-anchor => 'nw');
  	#$gui->{group_label} = $gui->{group_frame}->Menubutton(-text => "GROUP",
@@ -224,6 +210,39 @@ $gui->{palette}->AddItems( @color_items);
 	$widgets[0]->grid(@widgets[1..$#widgets]);
 
 
+}
+sub configure_waveform_window {
+	my ($width, $height) = @_;
+	return if not $config->{display_waveform};
+
+	$gui->{wwcanvas}->configure(
+		-scrollregion =>[0,0,$width//$config->{waveform_canvas_x},$height//$config->{waveform_canvas_y}],
+		-width => $width//$config->{waveform_canvas_x},
+		-height => $height//$config->{waveform_canvas_y},
+		);
+
+}
+sub configure_effects_window {
+	$gui->{fx_canvas}->configure(
+		scrollregion =>[2,2,10000,10000],
+		-width => 1200,
+		-height => 700,	
+		);
+}
+sub configure_track_canvas {
+ 	$gui->{track_canvas}->configure(
+ 		-scrollregion =>[2,2,400,9600],
+ 		-width => 400,
+ 		-height => 400,	
+ 		);
+}
+sub wwgeometry { wh($gui->{wwcanvas}) }
+sub wh {
+	my $widget = shift;
+	$widget->update;
+	my ($width,$height,$sign1,$xpos,$sign2,$ypos) 
+		= $widget->geometry =~ /(\d+)x(\d+)([+-])(\d+)([+-])(\d+)/;
+	$width,$height
 }
 
 sub transport_gui {

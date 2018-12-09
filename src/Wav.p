@@ -48,7 +48,7 @@ sub current_wav {
 	my $last = $track->current_version;
 	if 	($track->rec){ 
 		$track->name . '_' . $last . '.wav'
-	} elsif ( $track->play){ 
+	} elsif ( $track->rw eq PLAY){ 
 		my $filename = $track->targets->{ $track->playback_version } ;
 		$filename
 	} else {

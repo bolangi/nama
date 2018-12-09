@@ -114,5 +114,7 @@ alias:
     djp: disable_jack_polling
   effect:
     reverb: gverb
+
+display_waveform: 1
 # end
 

@@ -26,6 +26,7 @@ my @track_methods = qw(
 	playat_time 
 	user_ops 
 	input_path 
+	waveform
 );
 sub track_memoize { # before generate_setup
 	return unless $config->{memoize};

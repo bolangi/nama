@@ -123,4 +123,6 @@ lib/Audio/Nama/Wavinfo.pm
 lib/Audio/Nama/Engine.pm
 lib/Audio/Nama/RegionComp.pm
 lib/Audio/Nama/Sequence.pm
+lib/Audio/Nama/Waveform.pm
+lib/Audio/Nama/TrackWaveform.pm
 lib/Audio/Nama.pm
