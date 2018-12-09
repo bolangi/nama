@@ -137,7 +137,7 @@ sub apply {}  # base class does no routing of its own
 
 ### subclasses
 {
-package ::SubBus;
+package ::SubBus; # with magic for Main bus
 use Modern::Perl; use Carp; our @ISA = '::Bus';
 use ::Log qw(logsub logpkg);
 use ::Util qw(input_node);
