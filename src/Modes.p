@@ -102,7 +102,6 @@ sub add_mastering_tracks {
 		name => 'Boost', 
 		rw => MON,
 		group => 'Mastering', 
-		target => 'Main',
 	);
 	$ui->track_gui( $track->n );
 
