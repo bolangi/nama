@@ -177,7 +177,8 @@ $gui->{ew}						# main window - effects
 $gui->{ww}						# main window - waveform display
 $gui->{wwframe}					# waveform frame
 $gui->{wwcanvas}				# waveform canvas
-$gui->{canvas}					# canvas
+$gui->{track_canvas}
+$gui->{fx_canvas}
 $gui->{load_frame}				# frames for various parts of the display
 $gui->{add_frame}
 $gui->{group_frame}
