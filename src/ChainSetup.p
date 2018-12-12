@@ -192,9 +192,6 @@ sub add_paths_from_Main {
 		# try to get output going out
 		$tn{Boost}->{send_id}   = $tn{Mixdown}->rec ? undef : $tn{Main}->send_id;
 		$tn{Boost}->{send_type} = $tn{Mixdown}->rec ? undef : $tn{Main}->send_type;
-		
-		$g->add_path('Boost', output_node($tn{Main}->send_type)) 
-			if $tn{Main}->mon and not $tn{Mixdown}->rec
 	}
 	else { 
 		$g->add_path('Main', output_node($tn{Main}->send_type)) 
