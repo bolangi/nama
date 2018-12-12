@@ -179,12 +179,6 @@ sub add_paths_from_Main {
 	logsub("&add_paths_from_Main");
 
 	if ($mode->mastering){
-		my @tracks = $g->predecessors('Main');
-		for(@tracks)
-		{
-			$g->delete_edge($_,'Main');
-			$g->add_edge(   $_,'Eq');			
-		}
 		$g->add_path(qw[Main Eq Low Boost]);
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
