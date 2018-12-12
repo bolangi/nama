@@ -533,7 +533,7 @@ soundcard or WAV file.
 
                        +- Low -+ 
                        |       |
-    Main_in --- Eq --+- Mid -+--- Boost -> soundcard/wav_out
+    Main_in --- Eq   --+- Mid -+--- Boost -> soundcard/wav_out
                        |       |
                        +- High + 
 

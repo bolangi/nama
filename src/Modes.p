@@ -99,10 +99,12 @@ sub add_mastering_tracks {
 
  	} grep{ $_ ne 'Boost' } @{$mastering->{track_names}};
 	my $track = ::BoostTrack->new(
-		name => 'Boost', 
-		rw => MON,
-		group => 'Mastering', 
-		target => 'Main',
+		name 		=> 'Boost', 
+		rw 			=> MON,
+		group 		=> 'Mastering', 
+		width		=> 2,
+		source_type => undef,
+		source_id	=> undef,
 	);
 	$ui->track_gui( $track->n );
 

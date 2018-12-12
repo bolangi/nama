@@ -182,15 +182,20 @@ sub add_paths_from_Main {
 		$g->add_path(qw[Main Eq Low Boost]);
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
+
+		# route monitoring output unless mixdown pending
+
+		$tn{Boost}->{send_id}   = $tn{Mixdown}->rec ? undef : $tn{Main}->send_id;
+		$tn{Boost}->{send_type} = $tn{Mixdown}->rec ? undef : $tn{Main}->send_type;
 	}
-	my $final_leg_origin = $mode->mastering ?  'Boost' : 'Main';
-	$g->add_path($final_leg_origin, output_node($tn{Main}->send_type)) 
-		if $tn{Main}->rw ne OFF
+	else { 
+		$g->add_path('Main', output_node($tn{Main}->send_type)) 
+			if $tn{Main}->mon and not $tn{Mixdown}->rec
+	}
 
 }
 sub add_paths_for_mixdown_handling {
 	logsub("&add_paths_for_mixdown_handling");
-
 	my $final_leg_origin = $mode->mastering ? 'Boost' : 'Main';
 
 	if ($tn{Mixdown}->rw eq REC ){

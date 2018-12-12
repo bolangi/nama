@@ -387,6 +387,11 @@ sub restore_state_from_file {
 			}
 		grep { $_->{name} eq 'Mixdown'	} @tracks_data;
 	}
+	if ( $project->{save_file_version_number} <= 1.212 )
+	{
+		my($boost) = grep{$_->{name} eq 'Boost'} @tracks_data; 
+		delete $boost->{target}
+	}
 
 	# restore effects, no change to track objects needed
 	
