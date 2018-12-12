@@ -176,7 +176,7 @@ sub ports {
 							$client_direction,
 							$self->target_channel,
 							$self->width, 
-							::try{$self->name} 
+							try{$self->name} 
 	) if $self->client
 }
 
