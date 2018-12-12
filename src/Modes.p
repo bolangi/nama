@@ -101,8 +101,10 @@ sub add_mastering_tracks {
 	my $track = ::BoostTrack->new(
 		name 		=> 'Boost', 
 		rw 			=> MON,
-		width 		=> 2,
 		group 		=> 'Mastering', 
+		width		=> 2,
+		source_type => undef,
+		source_id	=> undef,
 	);
 	$ui->track_gui( $track->n );
 
