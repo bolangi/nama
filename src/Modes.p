@@ -104,7 +104,6 @@ sub add_mastering_tracks {
 		width => 2,
 		group => 'Mastering', 
 	);
-	delete $track->{$_} for qw(source_type source_id);
 	$ui->track_gui( $track->n );
 
 	
