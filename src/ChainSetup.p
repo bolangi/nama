@@ -183,7 +183,8 @@ sub add_paths_from_Main {
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
 
-		# try to get output going out
+		# route monitoring output unless mixdown pending
+
 		$tn{Boost}->{send_id}   = $tn{Mixdown}->rec ? undef : $tn{Main}->send_id;
 		$tn{Boost}->{send_type} = $tn{Mixdown}->rec ? undef : $tn{Main}->send_type;
 	}
