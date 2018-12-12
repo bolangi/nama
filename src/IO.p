@@ -385,7 +385,7 @@ sub device_id {
 }
 sub _format { $::setup->{wav_info}->{$_[0]->full_path}->{format} };
 sub ecs_extra { $_[0]->mono_to_stereo}
-sub client { 'system' if $jack->{jackd_running} } # since we share latency value
+sub client { 'system' if $jack->{jackd_running} } 
 sub ports { 'system:capture_1' }
 }
 {
