@@ -409,111 +409,6 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 check_setup('JACK send-Main-to-alternate-channel setup' );
 
-nama_cmd('Mixdown; rec; gen');
-$expected_setup_lines = <<EXPECTED;
-
--a:1 -i:loop,Main_in
--a:3 -i:jack_multi,system:capture_2
--a:Mixdown,J1 -i:loop,Main_out
-
-# post-input processing
-
--a:3 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:loop,Main_out
--a:3 -o:loop,Main_in
--a:J1 -o:jack_multi,system:playback_5,system:playback_6
--a:Mixdown -f:s16_le,2,44100,i -o:/tmp/nama-test/test/.wav/Mixdown_1.wav
-EXPECTED
-
-check_setup('JACK mixdown setup with main out' );
-gen_alsa();
-
-$expected_setup_lines = <<EXPECTED;
--a:1 -i:loop,Main_in
--a:3 -i:alsa,default
--a:Mixdown,J1 -i:loop,Main_out
-
-# post-input processing
-
--a:3 -chmove:2,1 -chcopy:1,2
-
-# pre-output processing
-
--a:J1  -chmove:2,6 -chmove:1,5
-
-# audio outputs
-
--a:1 -o:loop,Main_out
--a:3 -o:loop,Main_in
--a:J1 -o:alsa,default
--a:Mixdown -f:s16_le,2,44100,i -o:/tmp/nama-test/test/.wav/Mixdown_1.wav
-EXPECTED
-
-check_setup('ALSA mixdown setup with main out' );
-
-nama_cmd('master_on');
-$expected_setup_lines = <<EXPECTED;
--a:1 -i:loop,Main_in
--a:3 -i:alsa,default
--a:4 -i:loop,Main_out
--a:5,6,7 -i:loop,Eq_out
--a:8 -i:loop,Boost_in
--a:Mixdown,J8 -i:loop,Boost_out
-
-# post-input processing
-
--a:3 -chmove:2,1 -chcopy:1,2
-
-# pre-output processing
-
--a:J8  -chmove:2,6 -chmove:1,5
-
-# audio outputs
-
--a:1 -o:loop,Main_out
--a:3 -o:loop,Main_in
--a:4 -o:loop,Eq_out
--a:5,6,7 -o:loop,Boost_in
--a:8 -o:loop,Boost_out
--a:J8 -o:alsa,default
--a:Mixdown -f:s16_le,2,44100,i -o:/tmp/nama-test/test/.wav/Mixdown_1.wav
-EXPECTED
-gen_alsa();
-check_setup('Mixdown in mastering mode - ALSA');
-
-
-nama_cmd('Main; stereo'); # normal output width
-
-$expected_setup_lines = <<EXPECTED;
-
--a:1 -i:loop,Main_in
--a:3 -i:jack_multi,system:capture_2
--a:4 -i:loop,Main_out
--a:5,6,7 -i:loop,Eq_out
--a:8 -i:loop,Boost_in
--a:Mixdown,J8 -i:loop,Boost_out
-
-# post-input processing
-
--a:3 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:loop,Main_out
--a:3 -o:loop,Main_in
--a:4 -o:loop,Eq_out
--a:5,6,7 -o:loop,Boost_in
--a:8 -o:loop,Boost_out
--a:J8 -o:jack_multi,system:playback_5,system:playback_6
--a:Mixdown -f:s16_le,2,44100,i -o:/tmp/nama-test/test/.wav/Mixdown_1.wav
-EXPECTED
-gen_jack();
-check_setup('Mixdown in mastering mode - JACK');
-
-nama_cmd('mixoff; master_off');
 nama_cmd('for 4 5 6 7 8; remove_track quiet');
 nama_cmd('Main; send 1');
 nama_cmd('add_bus Horns; sax move_to_bus Horns; sax stereo');
@@ -957,8 +852,8 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 # SKIP check_setup('Hardware insert via soundcard, prefader  - JACK');
 
-load_project(name => "midi", create => 1);
-add_midi_track('synth');
+#load_project(name => "midi", create => 1);
+#add_midi_track('synth');
 
 sub gen_alsa { force_alsa(); nama_cmd('gen')}
 sub gen_jack { force_jack(); nama_cmd('gen')}
