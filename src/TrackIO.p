@@ -215,6 +215,7 @@ my %object_to_text = (
 	jack_ports_list => "JACK ports list",
 	bus				=> "bus",
 	midi			=> 'MIDI input channel',
+	track			=> 'track',
 );
 sub object_as_text {
 	my ($track, $direction) = @_; # $direction: source | send
