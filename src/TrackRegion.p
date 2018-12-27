@@ -48,6 +48,7 @@ sub shifted_length {
 	} else {
 		$setup_length = 	$track->wav_length;
 	}
+	no warnings 'uninitialized';
 	$setup_length += $track->shifted_playat_time;
 }
 
