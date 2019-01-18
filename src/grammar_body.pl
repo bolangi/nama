@@ -1593,7 +1593,7 @@ track_identifier: tid {  # allow either index or name
 tid: ident
 list_sequences: _list_sequences { 
 	::pager( map {::json_out($_->as_hash)} 
-			grep {$_->{class} =~ /Sequence/} ::Bus::all() );
+			grep {$_->{class} =~ /Sequence/} ::Bus::all() ); 1
 }
 show_sequence: _show_sequence { ::pager($::this_sequence->list_output) }
 append_to_sequence: _append_to_sequence track_identifier(s?) { 
