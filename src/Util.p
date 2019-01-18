@@ -134,7 +134,7 @@ sub dest_type {
 
 	elsif($dest =~ /^man/)		{ 'jack_manual'	}
 	elsif($dest eq 'jack')		{ 'jack_manual'	}
-	elsif($dest =~  /(^\w+\.)?ports/)	{ 'jack_ports_list' }
+	elsif($dest =~  /\.ports$/)	{ 'jack_ports_list' }
 	elsif( $tn{$dest} )			{ 'track' 		}
 	else 						{ 'jack_client'	} 
 }
