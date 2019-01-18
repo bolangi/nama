@@ -153,11 +153,12 @@ sub new_sequence {
 	my @tracks = defined $args{tracks} ? @{ $args{tracks} } : ();
 	my $group = $args{group} || 'Main';
 	my $mix_track = $tn{$name} || add_track($name, group => $group);
-	$mix_track->set( rw 			=> MON);
+	$mix_track->set( rw => MON,
+					 source_type => 'bus',
+					 source_id	 => $name,
+					);
 	my $sequence = ::Sequence->new(
 		name => $name,
-		send_type => 'track',
-		send_id	 => $name,
 	);
 ;
 	map{ $sequence->append_item($_) }
