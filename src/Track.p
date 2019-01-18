@@ -456,6 +456,7 @@ sub playat_time {
 	my $previous = $self->predecessor;
 	$previous ? $previous->endpoint : 0
 }
+sub rec_status { $_[0]->version ? PLAY : OFF } 
 
 # we currently are not compatible with offset run mode
 # perhaps we can enforce OFF status for clips under 
