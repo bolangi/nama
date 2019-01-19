@@ -20,7 +20,7 @@ sub rec_status {
 	my $track = shift;
 	my $bus = $track->bus;
 
-	return OFF if 	! ($track->engine_group eq $::this_engine->name)
+	return OFF if 0 # 	! ($track->engine_group eq $::this_engine->name)
 				or 	! $track->is_used
 				and ! ($mode->doodle and ! $mode->eager and $setup->{tracks_with_duplicate_inputs}->{$track->name} ); 
 
