@@ -174,7 +174,7 @@ sub apply {
 		my $member = $_;
 		# connect member track input paths
 		logpkg('debug', "track ".$_->name);
-		my @path = $_->input_path;
+		my @path = $member->input_path;
 		$g->add_path(@path) if @path;
 		logpkg('debug',"input path: @path") if scalar @path;
 
