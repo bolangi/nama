@@ -7,19 +7,27 @@ sub refresh_waveform_window {
 	configure_waveform_window();
 	generate_timeline(
 			widget => $gui->{wwcanvas}, 
-			seconds => 80,
-			pixels => 800,
 			y_pos => 600,
 	);
 }
 sub height { $_[0] % 5 ? 5 : 10 }
 sub generate_timeline {
 	my %args = @_;
-	my $increment = $args{pixels}/$args{seconds};
-	my $pps = $args{pixels}/$args{seconds};
+	my $length = ecasound_iam('cs-get-length');
+	$length = int($length + 5.5);
+	$args{seconds} = $length;
+	my $pps = 10; # HARDCODED
 	for (0..$args{seconds})
 	{
 		my $xpos = $_ * $pps;
+		if ($_ % 10 == 0)
+		{
+			$args{widget}->createText( 
+							$xpos, $args{y_pos} - 20, 
+							-font => 'lucidasanstypewriter-bold-14', 
+							-text => $_,
+							);
+		}
 		$args{widget}->createLine(
 			$xpos, $args{y_pos} - height($_),
 			$xpos, $args{y_pos},
