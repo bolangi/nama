@@ -219,10 +219,6 @@ sub wantme {
 	@wantme
 
 }
-sub rw {
-	my $bus = shift;
-	$bus->wantme ? MON : OFF
-}
 }
 {
 package ::SendBusRaw;
