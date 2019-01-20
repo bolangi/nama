@@ -16,7 +16,7 @@ sub generate_timeline {
 	my $length = ecasound_iam('cs-get-length');
 	$length = int($length + 5.5);
 	$args{seconds} = $length;
-	my $pps = 10; # HARDCODED
+	my $pps = $config->{waveform_pixels_per_second};
 	for (0..$args{seconds})
 	{
 		my $xpos = $_ * $pps;
