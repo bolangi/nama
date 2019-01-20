@@ -28,7 +28,7 @@ R-L    move-to-bus Aux
 
 # no recording to disk, remove volume and pan controls
 
-for all; mon; remove-fader_effect vol; remove-fader_effect pan
+for all; mon; remove-fader-effect vol; remove-fader-effect pan
 
 # feed six tracks the stereo source
 
