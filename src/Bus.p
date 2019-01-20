@@ -145,24 +145,6 @@ use ::Globals qw(:trackrw %tn);
 
 # connect source --> member_track --> mix_track
 
-sub output_is_connectable {
- 	my $bus = shift;
-
-	# Either the bus's mix track is set to REC or MON
- 	
- 	$bus->send_type eq 'track' and $::tn{$bus->send_id}->rec_status =~ /REC|MON/
-
-	# Or, during mixdown, we connect bus member tracks to Main
-	# even tho Main may be set to OFF
-	
-	or $bus->send_type eq 'track' 
-				and $bus->send_id eq 'Main' 
-				and $::tn{Mixdown}->rec
-	
-	# or we are connecting directly to a loop device
-	or $bus->send_type eq 'loop' and $bus->send_id =~ /^\w+_(in|out)$/;
-}
-
 sub apply {
 	no warnings 'uninitialized';
 	my ($bus, $g)  = @_;
@@ -274,12 +256,6 @@ use Modern::Perl; use Carp; our @ISA = '::Bus';
 use ::Log qw(logsub logpkg);
 use ::Util qw(input_node);
 use ::Globals qw(:trackrw);
-
-sub output_is_connectable {
- 	my $bus = shift;
-	undef	
-
-}
 
 sub apply {
 	my ($bus)  = @_;
