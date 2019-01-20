@@ -209,10 +209,6 @@ sub remove {
 	
 	delete $::bn{$bus->name};
 } 
-sub mixtrack { 
-	my $bus = shift;
-	$tn{$bus->name}
-}
 sub wantme {
 	my $bus = shift;
 	no warnings 'uninitialized';
