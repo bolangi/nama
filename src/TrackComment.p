@@ -20,7 +20,10 @@ sub set_comment {
 	my ($track, $comment) = @_;
 	$project->{track_comments}->{$track->name} = $comment
 }
-sub comment { $project->{track_comments}->{$_[0]->name} }
+sub comment { 
+	my ($track) = @_;
+	$project->{track_comments}->{$track->name} 
+}
 
 sub version_comment {
 	my ($track, $v) = @_;
