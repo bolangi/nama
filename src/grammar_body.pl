@@ -1356,11 +1356,11 @@ remove_comment: _remove_comment {
  	1;
 }
 show_comment: _show_comment {
-	map{ ::pager( "(",$_->group,") ", $_->name, ": ", $_->comment) } $::this_track;
+	::pager( map{ $_->name. ": ". $_->comment } $::this_track );
 	1;
 }
 show_comments: _show_comments {
-	map{ ::pager( "(",$_->group,") ", $_->name, ": ", $_->comment) } ::all_tracks();
+	::pager( map{ $_->name. ": ". $_->comment } ::all_tracks() );
 	1;
 }
 add_version_comment: _add_version_comment dd(?) text {
