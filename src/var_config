@@ -22,7 +22,7 @@
 #	[engine]
 
 	$ecasound_tcp_port 				$config->{engine_tcp_port}
-	$ecasound_globals				$config->{engine_globals}
+	$ecasound_globals				$config->{ecasound_globals}
 	$ecasound_buffersize 			$config->{engine_buffersize} 
 	$realtime_profile 				$config->{realtime_profile}
 	$jack_seek_delay    			$config->{engine_base_jack_seek_delay}

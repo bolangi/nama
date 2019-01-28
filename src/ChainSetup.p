@@ -433,7 +433,7 @@ sub write_chains {
 	
 	my @globals;
 	my $format = signal_format($config->{devices}->{jack}->{signal_format},2); # HARDCODED XXX
-	push @globals, $config->{engine_globals}->{common};
+	push @globals, $config->{ecasound_globals}->{common};
 	push @globals, "-f:$format", join(',', 	'-G:jack',
 										$config->{ecasound_jack_client_name},
 										$config->{jack_transport_mode}

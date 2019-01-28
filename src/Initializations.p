@@ -210,8 +210,8 @@ sub definitions {
  	}
 	sub globals_realtime {
 		::ChainSetup::setup_requires_realtime()
-			? $config->{engine_globals}->{realtime}
-			: $config->{engine_globals}->{nonrealtime}
+			? $config->{ecasound_globals}->{realtime}
+			: $config->{ecasound_globals}->{nonrealtime}
 	}
 	} # end ::Config package
 
