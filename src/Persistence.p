@@ -392,6 +392,14 @@ sub restore_state_from_file {
 		my($boost) = grep{$_->{name} eq 'Boost'} @tracks_data; 
 		delete $boost->{target}
 	}
+	if ( $project->{save_file_version_number} <= 1.212 )
+	{
+		map { 
+			$project->{track_comments}->{         $_->{name} } = delete $_->{comment}         if $_->{comment};
+			$project->{track_version_comments}->{ $_->{name} } = delete $_->{version_comment} if $_->{version_comment};
+
+		} @tracks_data; 
+	}
 
 	# restore effects, no change to track objects needed
 	
