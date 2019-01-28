@@ -150,6 +150,7 @@ sub definitions {
 		engine_base_jack_seek_delay 	=> 0.1, # seconds
 		jack_transport_mode				=> 'send',
 		ecasound_engine_name			=> 'ecasound',
+		ecasound_jack_client_name		=> 'nama',
 		midi_engine_name				=> 'midish',
 		engine_command_output_buffer_size => 2**22, # 4 MB
 		edit_playback_end_margin 		=> 3,
