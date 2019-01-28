@@ -392,7 +392,7 @@ sub restore_state_from_file {
 		my($boost) = grep{$_->{name} eq 'Boost'} @tracks_data; 
 		delete $boost->{target}
 	}
-	if ( $project->{save_file_version_number} <= 1.212 )
+	if ( $project->{save_file_version_number} <= 1.213 )
 	{
 		map { 
 			$project->{track_comments}->{         $_->{name} } = delete $_->{comment}         if $_->{comment};
