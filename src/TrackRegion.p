@@ -30,7 +30,6 @@ sub region_end_time {
 }
 sub playat_time {
 	my $track = shift;
-	return unless $track->is_region;
 	carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
 	#return if $track->rec_status ne PLAY;
 	::Mark::time_from_tag( $track->playat )
