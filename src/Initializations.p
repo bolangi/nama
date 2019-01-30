@@ -152,7 +152,7 @@ sub definitions {
 		ecasound_engine_name			=> 'ecasound',
 		ecasound_jack_client_name		=> 'nama',
 		midi_engine_name				=> 'midish',
-		engine_command_output_buffer_size => 2**22, # 4 MB
+		engine_command_output_buffer_size => 2**26, # 64 MB
 		edit_playback_end_margin 		=> 3,
 
 		edit_crossfade_time             => 0.03,
