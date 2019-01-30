@@ -317,7 +317,17 @@ sub uncache_track {
 		throw($track->name, ": cannot uncache unless track is set to PLAY"), return;
 	my $version = $track->playback_version;
 	my ($ec) = is_cached($track, $version);
-	defined $ec or throw($track->name, ": version $version is not cached"), return;
+	if (not defined $ec)
+	{
+		if ($track->source_type eq 'bus')
+		{
+			$track->set(rw => MON);
+			pager("Enabling bus $track->{group} by setting mix track $track->{name} to MON");
+			return
+		}
+
+		else{ throw($track->name, ": version $version is not cached"), return }
+	}
 	$track->user_ops and 
 		throw($track->name, ": cannot uncache while user effects are present\n",
 			"You must delete them before you can uncache this WAV version."), return;
