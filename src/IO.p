@@ -459,8 +459,7 @@ package ::IO::to_jack_port;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub format_template { $config->{devices}->{jack}->{signal_format} }
 sub device_id { 'jack,,'.$_[0]->port_name.'_out' }
-sub ports { "Nama:".$_[0]->port_name. '_out_1' } # at least this one port
-	# HARDCODED port name
+sub ports { $config->{ecasound_jack_client_name}. ":".$_[0]->port_name. '_out_1' } # at least this one port
 }
 
 {
@@ -468,8 +467,7 @@ package ::IO::from_jack_port;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO::to_jack_port';
 sub device_id { 'jack,,'.$_[0]->port_name.'_in' }
 sub ecs_extra { $_[0]->mono_to_stereo }
-sub ports { "Nama:".$_[0]->port_name. '_in_1' } # at least this one port
-	# HARDCODED port name
+sub ports { $config->{ecasound_jack_client_name}.":".$_[0]->port_name. '_in_1' } # at least this one port
 }
 
 {
