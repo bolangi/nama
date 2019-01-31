@@ -210,7 +210,7 @@ sub parse_ports_list {
 	# default to output of jack_lsp -p
 	
 	logsub("&parse_ports_list");
-	my $j = shift || qx(jack_lsp -p 2> /dev/null); 
+	my $j = shift || qx(jack_lsp -tp 2> /dev/null); 
 	logpkg('debug', "input: $j");
 
 	# convert to single lines
@@ -241,6 +241,7 @@ sub parse_ports_list {
 
 	} 
 	grep{ ! /^jack:/i } # skip spurious jackd diagnostic messages
+	grep{ ! /8 bit raw midi/ }
 	split "\n",$j;
 }
 
