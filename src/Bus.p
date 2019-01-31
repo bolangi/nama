@@ -160,8 +160,6 @@ sub apply {
 		$g->add_path(@path) if @path;
 		logpkg('debug',"input path: @path") if scalar @path;
 
-		logpkg('debug', join " ", "bus output:", $_->name, $bus->send_id);
-
 		# connect member track outputs to target
 		for (@wantme) { 
 			my $consumer = $_; 
