@@ -124,7 +124,7 @@ sub midi_run_ready { $config->{use_midi} and $en{midish} and $en{midish}->is_act
 sub connect_transport {
 	logsub("&connect_transport");
 	remove_riff_header_stubs();
-	register_other_ports(); # that don't belong to my upcoming instance
+	register_other_ports(); # we won't see Nama ports since Nama hasn't started
 	load_ecs($file->chain_setup) or ::throw("failed to load chain setup"), return;
 	$this_engine->valid_setup()
 		or throw("Invalid chain setup, engine not ready."),return;
@@ -146,7 +146,7 @@ sub connect_transport {
 	}
 	$setup->{audio_length} = ecasound_iam('cs-get-length'); # returns zero if unknown
 	sync_effect_parameters();
-	register_own_ports(); # as distinct from other Nama instances
+	register_own_ports();
 	$ui->length_display(-text => colonize($setup->{audio_length}));
 	ecasound_iam("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->rec_status eq REC and $setup->{audio_length};
 	$ui->clock_config(-text => colonize(0));
