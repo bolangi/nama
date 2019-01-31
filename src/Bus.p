@@ -134,7 +134,12 @@ sub trackslist {
 
 sub apply {}  # base class does no routing of its own
 
-
+sub display_type { 
+	my ($type) = $_[0]->class  =~ /([^:]+)$/;
+	$type = lc $type;
+	$type =~ s/sub//;
+	$type
+}
 ### subclasses
 {
 package ::SubBus; # with magic for Main bus
