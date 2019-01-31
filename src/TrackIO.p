@@ -245,7 +245,8 @@ sub source_status {
 	no warnings 'uninitialized';
 	return if $track->off;
 	return $track->current_wav if $track->{rw} eq PLAY ;
-	return $track->source_id. " bus" if $track->source_type eq 'bus';
+	my $bus = $bn{$track->source_id}; 
+	return join " ", $bus->name, $bus->display_type if $track->source_type eq 'bus';
 	return "track ".$track->source_id  if $track->source_type eq 'track';
 	return 'jack client '.$track->source_id if $track->source_type eq 'jack_client';
 	if($track->source_type eq 'soundcard')
