@@ -369,11 +369,6 @@ sub start_jack_plumbing {
 			or die "can't run jack-plumbing: $?"
 	}
 }
-sub jack_client : lvalue {
-	my $name = shift;
-	logit('::Jack','info',"$name: non-existent JACK client") if not $jack->{clients}->{$name} ;
-	$jack->{clients}->{$name}
-}
 sub port_mapping {
 	my $jack_port = shift;
 	my $own_port;
