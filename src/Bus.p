@@ -162,8 +162,8 @@ sub apply {
 
 		# connect member track outputs to target
 		for (@wantme) { 
-			my $consumer = $_; 
-			::Graph::add_path_for_send($g, $member->name, 'track', $consumer->name)
+			my $mix_track = $_; 
+			::Graph::add_path_for_send($g, $member->name, 'track', $mix_track->name)
 		}
 		
 		# add paths for recording
