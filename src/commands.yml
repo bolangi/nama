@@ -511,10 +511,10 @@ show_tracks_all:
   what: Like show-tracks, but includes hidden tracks as well. Useful for debugging.
   short: sha showa
   parameters: none
-show_bus_tracks:
-  type: track 
-  what: Show a list of tracks in the current bus.
-  short: ltb showb
+show_bus:
+  type: bus
+  what: list tracks in the current bus
+  short: shb
   parameters: none
 show_track:
   type: track
