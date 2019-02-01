@@ -513,9 +513,9 @@ show_tracks_all:
   parameters: none
 show_bus:
   type: bus
-  what: list tracks in the current bus
+  what: list tracks in current or named bus
   short: shb
-  parameters: none
+  parameters: [ <string:busname> ]
 show_track:
   type: track
   what: |
