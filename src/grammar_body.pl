@@ -478,6 +478,12 @@ show_tracks_all: _show_tracks_all {
 	::pager(::show_tracks($list));
 	1;
 }
+show_bus: _show_bus existing_bus_name { 	
+	my $bus = $::bn{$item{existing_bus_name}};
+	my $list = $bus->trackslist;
+	::pager(::show_tracks($list));
+	1;
+}
 show_bus: _show_bus { 	
 
 	my $bus = $::bn{$::this_bus};
