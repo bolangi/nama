@@ -32,7 +32,7 @@ sub version_comment {
 	$text .= " " if $text;
 	my $system = $project->{track_version_comments}->{$track->name}{$v}{system};
 	$text .= "* $system" if $system;
-	"$v: $text\n" if $text;
+	$track->name." version $v: $text\n" if $text;
 }
 sub show_version_comments {
 	my ($track, @v) = @_;

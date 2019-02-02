@@ -1366,7 +1366,7 @@ show_comment: _show_comment {
 	1;
 }
 show_comments: _show_comments {
-	::pager( map{ $_->name. ": ". $_->comment } ::all_tracks() );
+	::pager( map{ $_->name. ": ". $_->comment } grep{ $_->comment } ::all_tracks() );
 	1;
 }
 add_version_comment: _add_version_comment dd(?) text {
@@ -1378,18 +1378,27 @@ remove_version_comment: _remove_version_comment dd {
 	my $t = $::this_track;
 	::pager( $t->remove_version_comment($item{dd})); 1
 }
-show_version_comment: _show_version_comment dd(s?) {
+show_version_comment: _show_version_comment dd(s) {
 	my $t = $::this_track;
-	my @v = @{$item{'dd(s?)'}};
+	my @v = @{$item{'dd(s)'}};
 	if(!@v){ @v = $t->playback_version}
 	@v or return 1;
 	$t->show_version_comments(@v);
 	 1;
 }
-show_version_comments_all: _show_version_comments_all {
+show_version_comment: _show_version_comment {
 	my $t = $::this_track;
 	my @v = @{$t->versions};
 	$t->show_version_comments(@v); 1;
+}
+show_version_comments_all: _show_version_comments_all {
+	map 
+	{
+		my $t = $_;
+		my @v = @{$t->versions};
+		$t->show_version_comments(@v); 
+	} ::all_tracks();
+	1;
 }
 add_system_version_comment: _add_system_version_comment dd text {
 	::pagers( $::this_track->add_system_version_comment(@item{qw(dd text)}));1;
