@@ -53,8 +53,8 @@ our %io_class = qw(
 	jack_ports_list_out		::IO::to_jack_port
 	jack_multi_in			::IO::from_jack_multi
 	jack_multi_out			::IO::to_jack_multi
-	jack_client_in			::IO::from_jack_client
-	jack_client_out			::IO::to_jack_client
+	jack_client_in			::IO::from_jack_multi
+	jack_client_out			::IO::to_jack_multi
 	bus_in					::IO::from_bus
 	);
     #bus_out					::IO::to_bus # 

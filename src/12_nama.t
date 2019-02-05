@@ -705,7 +705,7 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Main_in
 -a:3 -i:jack_multi,system:capture_1
--a:4 -i:jack,jconvolver
+-a:4 -i:jack_multi,jconvolver:out_1,jconvolver:out_2
 -a:J3,5 -i:loop,sax_insert_post
 
 # post-input processing
@@ -717,7 +717,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
 -a:3 -o:loop,sax_insert_post
 -a:4,5 -o:loop,Main_in
--a:J3 -o:jack,jconvolver
+-a:J3 -o:jack_multi,jconvolver:in_1,jconvolver:in_2
 EXPECTED
 
 check_setup('JACK client as postfader insert');
