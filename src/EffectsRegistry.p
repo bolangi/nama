@@ -195,6 +195,19 @@ sub sort_ladspa_effects {
 		 sort { $fx_cache->{registry}->[$a]->{name} cmp $fx_cache->{registry}->[$b]->{name} } ($aa .. $zz) ;
 	logpkg('debug', "sorted array length: ". scalar @{$fx_cache->{ladspa_sorted}});
 }		
+sub run_external_ecasound_cmd {
+	my $cmd = shift;
+	my $output = qx(sh -c 'echo $cmd | ecasound -c '); 
+}
+sub trim_output {
+	my $output = shift;
+	$output =~ s/\n\.{3} //g;
+	$output =~ s/\r//;
+	my @output = split "\n",$output;
+	splice @output, 0,8;
+	splice @output, -3,3;
+	join "\n",@output;
+}
 sub read_in_effects_data {
 	
 	logsub("&read_in_effects_data");
@@ -202,11 +215,9 @@ sub read_in_effects_data {
 
 	#### LADSPA
 
-	my $lr = ecasound_iam("ladspa-register");
+	my $lr = trim_output(run_external_ecasound_cmd('ladspa-register'));
 	logpkg('debug',"ladpsa-register output:\n",$lr);
 
-	#print $lr; 
-	
 	my @ladspa =  split "\n", $lr;
 	
 	# join the two lines of each entry
@@ -216,7 +227,8 @@ sub read_in_effects_data {
 
 	#### LV2
 
-	my $lv2 = ecasound_iam('lv2-register'); # TODO test fake lv2-register
+	my $lv2 = trim_output(run_external_ecasound_cmd('lv2-register'));
+										# TODO test fake lv2-register
 										# get_data_section('fake_lv2_register');
 	logpkg('debug',"lv2-register output:\n",$lv2);
 
