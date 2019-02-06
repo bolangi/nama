@@ -190,13 +190,13 @@ sub ecasound_iam{
 	defined $result or ::throw("Ecasound failed to respond"), return;
 
 	my ($return_value, $setup_length, $type, $reply) =
-		$buf =~ /(\d+)# digits
+		$buf =~ /(\d+)# digits, log_level
 				 \    # space
-				 (\d+)# digits
+				 (\d+)# digits, msg_size
 				 \    # space
- 				 ([^\r\n]+) # a line of text, probably one character 
+ 				 ([^\r\n]+) # string, return_type 
 				\r\n    # newline
-				(.+)  # rest of string
+				(.+)  # rest of string, message
 				/sx;  # s-flag: . matches newline
 
 if(	! $return_value == 256 ){
