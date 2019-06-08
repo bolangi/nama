@@ -567,7 +567,6 @@ logpkg('debug', sub{join "\n", grep {/el:/} sort keys %{$fx_cache->{full_label_t
 
 }
 
-## generate effects help data
 
 sub prepare_effects_help {
 
@@ -579,30 +578,22 @@ sub prepare_effects_help {
 					push @{$fx_cache->{user_help}},    $_;  #store help
 
 				}  split "\n",ecasound_iam("preset-register");
+	map{  generate_ladspa_help($_) } @{ $fx_cache->{ladspa_register} }
 
-	# LADSPA
-	my $label;
-	map{ 
-
-		if (  my ($_label) = /-(el:[-\w]+)/  ){
-				$label = $_label;
-				s/^\s+/ /;				 # trim spaces 
-				s/'//g;     			 # remove apostrophes
-				$_ .="\n";               # add newline
-				push @{$fx_cache->{user_help}}, $_;  # store help
-
-		} else { 
-				# replace leading number with LADSPA Unique ID
-				s/^\d+/$fx_cache->{ladspa_label_to_unique_id}->{$label}/;
-
-				s/\s+$/ /;  			# remove trailing spaces
-				substr($fx_cache->{user_help}->[-1],0,0) = $_; # join lines
-				$fx_cache->{user_help}->[-1] =~ s/,/, /g; # 
-				$fx_cache->{user_help}->[-1] =~ s/,\s+$//;
-				
-		}
-
-	} reverse split "\n",ecasound_iam("ladspa-register");
+}
+sub generate_ladspa_help {
+	my $line = shift;
+		say "line: $_";
+		my ($label) = $line =~ /-(el:[-\w]+)/;
+		$line =~ s/^\s{2,} //g;			 # trim spaces 
+		$line =~ s/\t/ /g; 				# convert tabs to spaces
+		$line =~ s/'//g;     			 # remove apostrophes
+		$line =~ s/,/, /g; 				# for nice linebreaks
+		$line =~ s/\s+$/ /;  			 # remove trailing spaces
+		$line .="\n";               	 # add newline
+							 			# replace leading number with LADSPA Unique ID
+		$line =~ s/^\d+/$fx_cache->{ladspa_label_to_unique_id}->{$label}/;
+		push @{$fx_cache->{user_help}}, $line  # store help
 
 }
 
