@@ -583,7 +583,6 @@ sub prepare_effects_help {
 }
 sub generate_ladspa_help {
 	my $line = shift;
-		say "line: $_";
 		my ($label) = $line =~ /-(el:[-\w]+)/;
 		$line =~ s/^\s{2,} //g;			 # trim spaces 
 		$line =~ s/\t/ /g; 				# convert tabs to spaces
