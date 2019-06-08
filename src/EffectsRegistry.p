@@ -177,7 +177,8 @@ sub extract_effects_data {
  		}
 		# remove Ecasound registry index No., if present
 		$line =~ s/^\d+\.\s*//;
-		push @{$fx_cache->{user_help}}, $line;
+		push @{$fx_cache->{user_help}}, $line
+			unless $id =~ /^el:/; # LADSPA plugin are handled by prepare_effects_help();
 
 		# abbreviate index takes full names as well
 		$fx_cache->{partial_label_to_full}->{$id} = $id;
