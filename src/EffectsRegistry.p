@@ -199,6 +199,7 @@ sub sort_ladspa_effects {
 sub run_external_ecasound_cmd {
 	my $cmd = shift;
 	my $output = qx(sh -c 'echo $cmd | ecasound -c '); 
+	trim_output($output)
 }
 sub trim_output {
 	my $output = shift;
@@ -216,7 +217,7 @@ sub read_in_effects_data {
 
 	#### LADSPA
 
-	my $lr = trim_output(run_external_ecasound_cmd('ladspa-register'));
+	my $lr = run_external_ecasound_cmd('ladspa-register');
 	logpkg('debug',"ladpsa-register output:\n",$lr);
 
 	my @ladspa =  split "\n", $lr;
@@ -228,7 +229,7 @@ sub read_in_effects_data {
 
 	#### LV2
 
-	my $lv2 = trim_output(run_external_ecasound_cmd('lv2-register'));
+	my $lv2 = run_external_ecasound_cmd('lv2-register');
 										# TODO test fake lv2-register
 										# get_data_section('fake_lv2_register');
 	logpkg('debug',"lv2-register output:\n",$lv2);
