@@ -225,7 +225,7 @@ sub read_in_effects_data {
 	# join the two lines of each entry
 	my @lad = map { join " ", splice(@ladspa,0,2) } 1..@ladspa/2; 
 	#logpkg('debug',join "\n","ladpsa-register processed output:",@lad);
-
+	$fx_cache->{ladspa_register} = \@lad;
 
 	#### LV2
 
