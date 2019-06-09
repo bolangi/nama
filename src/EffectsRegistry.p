@@ -124,13 +124,21 @@ sub prepare_effect_index {
 	logsub("&prepare_effect_index");
 	map{ 
 		my $code = $_;
+ 		
+		# abbrevations for lv2: lv2-foo for elv2:http://something.com/other/foo
+		if ( my ($suffix) = $code =~ /(?:elv2:).*?([^\/]+)$/ )
+		{
+			$fx_cache->{partial_label_to_full}->{"lv2-$suffix"} = $code;
+		}
+		else {
 		my ($short) = $code =~ /:([-\w]+)/;
 		if ( $short ) { 
 			if ($fx_cache->{partial_label_to_full}->{$short}) { warn "name collision: $_\n" }
 			else { $fx_cache->{partial_label_to_full}->{$short} = $code }
 		}
+		}
 		$fx_cache->{partial_label_to_full}->{$code} = $code;
-	} grep{ !/^elv2:/ }keys %{$fx_cache->{full_label_to_index}};
+	} keys %{$fx_cache->{full_label_to_index}};
 	#print json_out $fx_cache->{partial_label_to_full};
 }
 sub extract_effects_data {
