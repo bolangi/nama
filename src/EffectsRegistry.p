@@ -562,18 +562,22 @@ logpkg('debug', sub{join "\n", grep {/el:/} sort keys %{$fx_cache->{full_label_t
 
 sub generate_effects_help {
 
-	# presets
-	map{	s/^.*? //; 				# remove initial number
-					$_ .= "\n";				# add newline
-					my ($id) = /(pn:\w+)/; 	# find id
-					s/,/, /g;				# to help line breaks
-					push @{$fx_cache->{user_help}},    $_;  #store help
-
-				}  split "\n",ecasound_iam("preset-register");
+	map{  generate_help($_)		   } @{ $fx_cache->{preset_register} }, 
+									 @{ $fx_cache->{ctrl_register}   }, 
+									 @{ $fx_cache->{cop_register}    };
 	map{  generate_ladspa_help($_) } @{ $fx_cache->{ladspa_register} };
-	map{  generate_lv2_help($_)    } @{ $fx_cache->{lv2_register} }
+	map{  generate_lv2_help($_)    } @{ $fx_cache->{lv2_register} 	 };
 
 }
+sub generate_help {
+	my $line = shift;
+	$line =~ s/^.*? //; 				# remove initial number
+	$line .= "\n";						# add newline
+	s/,/, /g;							# to help line breaks
+	push @{$fx_cache->{user_help}}, $line;
+}
+
+
 sub generate_lv2_help {
 
 		my $line = shift;
