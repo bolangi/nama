@@ -53,8 +53,8 @@ sub prepare_static_effects_data{
 		integrate_ladspa_hints();
 		integrate_cop_hints();
 		sort_ladspa_effects();
-		prepare_effect_index();
-		prepare_effects_help();
+		generate_mappings_for_shortcuts();
+		generate_effects_help();
 		logpkg('debug', "updating effects cache on disk: ",$file->effects_cache);
 		serialize (
 			file => $file->effects_cache, 
@@ -120,8 +120,8 @@ sub modified_stamp {
 sub initialize_effect_index {
 	$fx_cache->{partial_label_to_full} = {};
 }
-sub prepare_effect_index {
-	logsub("&prepare_effect_index");
+sub generate_mappings_for_shortcuts {
+	logsub("&generate_mappings_for_shortcuts");
 	map{ 
 		my $code = $_;
  		
@@ -560,7 +560,7 @@ logpkg('debug', sub{join "\n", grep {/el:/} sort keys %{$fx_cache->{full_label_t
 }
 
 
-sub prepare_effects_help {
+sub generate_effects_help {
 
 	# presets
 	map{	s/^.*? //; 				# remove initial number
