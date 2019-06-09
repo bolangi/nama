@@ -237,14 +237,17 @@ sub read_in_effects_data {
 
 	my $preset = ecasound_iam("preset-register");
 	my @preset = grep {! /^\s*$/ } split "\n", $preset;
+	$fx_cache->{preset_register} = \@preset;
 	logpkg('debug',"preset-register output:\n",$preset);
 
 	my $ctrl = 	ecasound_iam("ctrl-register");
 	my @ctrl  = grep {! /^\s*$/ } split "\n", $ctrl;
+	$fx_cache->{ctrl_register} = \@ctrl;
 	logpkg('debug',"ctrl-register output:\n",$ctrl);
 
 	my $cop = ecasound_iam("cop-register");
 	my @cop = grep {! /^\s*$/ } split "\n", $cop;
+	$fx_cache->{cop_register} = \@cop;
 	logpkg('debug',"cop-register output:\n",$cop);
 
 	logpkg('debug', "found ", scalar @cop, " Ecasound chain operators");
