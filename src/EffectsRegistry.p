@@ -249,6 +249,7 @@ sub read_in_effects_data {
 	
 	# split on newlines
 	my @lv2 = split /\n/,$lv2;
+	$fx_cache->{lv2_register} = \@lv2;
 
 #	logpkg('debug',sub{ json_out(\@lv2) });
 
