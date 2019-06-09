@@ -170,26 +170,6 @@ sub extract_effects_data {
 		$fx_cache->{registry}->[$j]->{display} = qq(field);
 		map{ push @{$fx_cache->{registry}->[$j]->{params}}, {name => $_} } @p_names
 			if @p_names;
- 		# abbrevations for lv2: lv2-foo for elv2:http://something.com/other/foo
- 		if ($id =~ /elv2:/){
-
- 			my ($suffix) = $id =~ /(?:elv2:).*?([^\/]+)$/;
-			my $trimmed = $line;
-			$trimmed =~ s/^\d+\.\s*//;
-			$trimmed =~ s/\t/ /g;
-			$trimmed =~ s/'//g;
-			$trimmed =~ s/,/, /g;
-			$trimmed = "LV2 $trimmed";
- 			$fx_cache->{partial_label_to_full}->{"lv2-$suffix"} = $id;
-			$line = $trimmed;
- 		}
-		# remove Ecasound registry index No., if present
-		$line =~ s/^\d+\.\s*//;
-		push @{$fx_cache->{user_help}}, $line
-			unless $id =~ /^el:/; # LADSPA plugin are handled by prepare_effects_help();
-
-		# abbreviate index takes full names as well
-		$fx_cache->{partial_label_to_full}->{$id} = $id;
 	}
 
 }
@@ -587,7 +567,26 @@ sub prepare_effects_help {
 					push @{$fx_cache->{user_help}},    $_;  #store help
 
 				}  split "\n",ecasound_iam("preset-register");
-	map{  generate_ladspa_help($_) } @{ $fx_cache->{ladspa_register} }
+	map{  generate_ladspa_help($_) } @{ $fx_cache->{ladspa_register} };
+	map{  generate_lv2_help($_)    } @{ $fx_cache->{lv2_register} }
+
+}
+sub generate_lv2_help {
+
+		my $line = shift;
+ 		if ($line =~ /elv2:/){
+
+			my $trimmed = $line;
+			$trimmed =~ s/^\d+\.\s*//;
+			$trimmed =~ s/\t/ /g;
+			$trimmed =~ s/'//g;
+			$trimmed =~ s/,/, /g;
+			$trimmed = "LV2 $trimmed";
+			$line = $trimmed;
+ 		}
+		# remove Ecasound registry index No., if present
+		$line =~ s/^\d+\.\s*//;
+		push @{$fx_cache->{user_help}}, $line
 
 }
 sub generate_ladspa_help {
