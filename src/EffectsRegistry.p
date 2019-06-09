@@ -53,7 +53,6 @@ sub prepare_static_effects_data{
 		integrate_ladspa_hints();
 		integrate_cop_hints();
 		sort_ladspa_effects();
-		generate_mappings_for_shortcuts();
 		generate_effects_help();
 		logpkg('debug', "updating effects cache on disk: ",$file->effects_cache);
 		serialize (
@@ -63,6 +62,7 @@ sub prepare_static_effects_data{
 			format => 'json') unless is_test_script();
 				
 	}
+	generate_mappings_for_shortcuts();
 }
 
 sub ladspa_plugin_list {
