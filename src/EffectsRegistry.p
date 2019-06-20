@@ -205,7 +205,10 @@ sub read_in_effects_data {
 
 	#### LADSPA
 
-	my $lr = run_external_ecasound_cmd('ladspa-register');
+	my $lr = $config->{use_effects_bugfix} 
+					?  run_external_ecasound_cmd('ladspa-register') 
+					:  ecasound_iam('ladspa-register');
+
 	logpkg('debug',"ladpsa-register output:\n",$lr);
 
 	my @ladspa =  split "\n", $lr;
@@ -217,7 +220,9 @@ sub read_in_effects_data {
 
 	#### LV2
 
-	my $lv2 = run_external_ecasound_cmd('lv2-register');
+	my $lv2 = $config->{use_effects_bugfix} 
+					?  run_external_ecasound_cmd('lv2-register') 
+					:  ecasound_iam('lv2-register');
 										# TODO test fake lv2-register
 										# get_data_section('fake_lv2_register');
 	logpkg('debug',"lv2-register output:\n",$lv2);
