@@ -24,6 +24,7 @@ $config->{waveform_canvas_y}
 $config->{loop_chain_channel_width}
 $config->{soundcard_loopback_delay}
 $config->{display_waveform}
+$config->{use_effects_bugfix}
 
 
 $jack->{seek_delay}				# extra time for stop-seek-start process
@@ -246,4 +247,10 @@ $jack->{is_other_port}
 $jack->{graph}
 $jack->{watcher}
 
-
+$fx_cache->{ladspa_register}
+$fx_cache->{lv2_register}
+$fx_cache->{preset_register}
+$fx_cache->{ctrl_register}
+$fx_cache->{cop_register}
+$fx_cache->{preset_register}
+$fx_cache->{ctrl_register}
