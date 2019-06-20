@@ -567,11 +567,14 @@ logpkg('debug', sub{join "\n", grep {/el:/} sort keys %{$fx_cache->{full_label_t
 
 sub generate_effects_help {
 
-	map{  generate_help($_)		   } @{ $fx_cache->{preset_register} }, 
-									 @{ $fx_cache->{ctrl_register}   }, 
-									 @{ $fx_cache->{cop_register}    };
-	map{  generate_ladspa_help($_) } @{ $fx_cache->{ladspa_register} };
-	map{  generate_lv2_help($_)    } @{ $fx_cache->{lv2_register} 	 };
+	generate_help($_) 		    for @{ $fx_cache->{preset_register} }, 
+									@{ $fx_cache->{ctrl_register}   }, 
+									@{ $fx_cache->{cop_register}    };
+
+	generate_ladspa_help($_) 	for @{ $fx_cache->{ladspa_register} };
+
+
+	generate_lv2_help($_)	 	for @{ $fx_cache->{lv2_register} 	};
 
 }
 sub generate_help {
