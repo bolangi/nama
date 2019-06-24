@@ -300,17 +300,6 @@ sub show_effect {
 		and push @lines, parameter_info_padded($op_id, $_) for scalar @pnames .. (scalar @{$FX->params} - 1);
 	@lines
 }
-sub extended_name {
-	no warnings 'uninitialized';
-	my $op_id = shift;
-	my $FX = fxn($op_id);
-	return unless $FX;
-	my $name = $FX->name;
-	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{$FX->type};
-	$name .= " ($ladspa_id)" if $ladspa_id;
-	$name .= " (bypassed)" if $FX->bypassed;
-	$name;
-}
 sub parameter_info {
 	no warnings 'uninitialized';
 	my ($op_id, $parameter) = @_;  # zero based
