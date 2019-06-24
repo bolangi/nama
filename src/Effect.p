@@ -265,10 +265,14 @@ sub ladspa_id {
 }
 sub nameline {
 	my $self = shift;
-	my @attr_keys = qw( name surname fxname type ladspa_id bypassed trackname);
-	my $nameline = $self->id. ": ". join q(, ), grep{$_} map{$self->$_} @attr_keys;
-	$nameline .= "\n";
-	$nameline
+	my @attr_keys = qw(name surname fxname type ladspa_id trackname);
+	my %attr = %$self{ @attr_keys };
+	my $bypassed = $self->{bypassed} ? " (bypassed)" : undef;
+	#not defined $attr{$_} and delete $attr{$_} for @attr_keys;
+	#::json_out(\%attr);	
+	my $nameline = $self->id. ": ". join q(, ), grep{defined $_} map{$attr{$_}} @attr_keys;
+	$nameline .= "$bypassed\n";
+	$nameline;
 }
 sub _effect_index { 
 	my $self = shift;
