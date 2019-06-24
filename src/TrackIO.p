@@ -237,7 +237,7 @@ sub source_status {
 		my $ch = $track->source_id;
 		my @channels;
 		push @channels, $_ for $ch .. ($ch + $track->width - 1);
-		return join '/', @channels
+		return 'CH '. join '/', @channels
 	}
 	"type: $track->{source_type} id: $track->{source_id}" 
 		if $track->{source_id} =~ /\S/
