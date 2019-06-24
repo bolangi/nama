@@ -265,12 +265,13 @@ sub ladspa_id {
 }
 sub nameline {
 	my $self = shift;
-	my @attr_keys = qw(name surname fxname type ladspa_id trackname);
-	my %attr = %$self{ @attr_keys };
+	my @attr_keys = qw(id name surname fxname type ladspa_id);
+	my %display = map{ $_ => 1         } grep { !/fxname|type|ladspa_id|id/ } @attr_keys;
+	my %attr    = map{ $_ => $self->$_ } @attr_keys ;
 	my $bypassed = $self->{bypassed} ? " (bypassed)" : undef;
-	#not defined $attr{$_} and delete $attr{$_} for @attr_keys;
-	#::json_out(\%attr);	
-	my $nameline = $self->id. ": ". join q(, ), grep{defined $_} map{$attr{$_}} @attr_keys;
+	not defined $attr{$_} and delete $attr{$_} for @attr_keys;
+	my $nameline =  join qq( ),  
+			map{ $display{$_} ? "$_: $attr{$_}" : $attr{$_} } grep{$attr{$_}}  @attr_keys;
 	$nameline .= "$bypassed\n";
 	$nameline;
 }
