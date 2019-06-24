@@ -144,7 +144,7 @@ sub dest_string {
 		my $ch = $id;
 		my @channels;
 		push @channels, $_ for $ch .. ($ch + $width - 1);
-		join '/', @channels
+		'CH '.join '/', @channels
 	}
 	else { $id }
 }
