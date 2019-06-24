@@ -271,7 +271,7 @@ sub nameline {
 	my $bypassed = $self->{bypassed} ? " (bypassed)" : undef;
 	not defined $attr{$_} and delete $attr{$_} for @attr_keys;
 	my $nameline =  join qq( ),  
-			map{ $display{$_} ? "$_: $attr{$_}" : $attr{$_} } grep{$attr{$_}}  @attr_keys;
+			map{ $display{$_} ? "$_:$attr{$_}" : $attr{$_} } grep{$attr{$_}}  @attr_keys;
 	$nameline .= "$bypassed\n";
 	$nameline;
 }
