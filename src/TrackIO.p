@@ -152,23 +152,7 @@ sub set_source {
 		::pagers($track->name, ": input unchanged, $object");
 	} else {
 		::pagers("Track ",$track->name, ": source set to $object");
-		if (transition_to_null($old_source, $new_source))
-		{
-			::pagers("Track ",$track->name, ": null input, toggling to MON");
-			$track->set(rw => MON) if $track->rw eq REC;		
-		}
 	}
-}
-{
-my $null_re = qr/^\s*(rt)?null\s*$/;
-sub transition_from_null {
-	my ($old, $new) = @_;
-	$old =~ /$null_re/ and $new !~ /$null_re/
-}
-sub transition_to_null {
-	my ($old, $new) = @_;
-	$old !~ /$null_re/ and $new =~ /$null_re/
-}
 }
 
 sub set_version {
