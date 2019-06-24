@@ -31,6 +31,7 @@
 
 					source_id		# signal source (channel No. or jack client)
 					source_type		# soundcard or jack_client
+					last_source		# text representation
 
 					# acceptable source_type values (also applies to send_type)
 					#
