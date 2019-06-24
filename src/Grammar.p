@@ -294,13 +294,10 @@ sub show_effect {
 	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 	{
 	no warnings 'uninitialized';
-	map { push @lines, parameter_info_padded($op_id, $_) } (0..scalar @pnames - 1) 
+	push @lines, parameter_info_padded($op_id, $_) for 0..scalar @pnames - 1;
 	}
-	map
-	{ 	push @lines, parameter_info_padded($op_id, $_) 
-	 	
-	} (scalar @pnames .. (scalar @{$FX->params} - 1)  )
-		if scalar @{$FX->params} - scalar @pnames - 1; 
+	scalar @{$FX->params} - scalar @pnames - 1 
+		and push @lines, parameter_info_padded($op_id, $_) for scalar @pnames .. (scalar @{$FX->params} - 1);
 	@lines
 }
 sub extended_name {
