@@ -140,9 +140,17 @@ sub generate_mappings_for_shortcuts {
 	} keys %{$fx_cache->{full_label_to_index}};
 	#print json_out $fx_cache->{partial_label_to_full};
 }
+{ my %dispatch =
+		{
+			ctrl 	=> \&generate_help,
+			lv2	 	=> \&generate_lv2_help,
+			ladspa 	=> \&generate_ladspa_help,
+			cop		=> \&generate_help,
+			preset	=> \&generate_help,
+		};
 sub extract_effects_data {
 	logsub("&extract_effects_data");
-	my ($lower, $upper, $regex, $separator, @lines) = @_;
+	my ($plugin_type, $lower, $upper, $regex, $separator, @lines) = @_;
 	carp ("incorrect number of lines ", join ' ',$upper-$lower,scalar @lines)
 		if $lower + @lines - 1 != $upper;
 	logpkg('debug',"lower: $lower upper: $upper  separator: $separator");
@@ -167,10 +175,13 @@ sub extract_effects_data {
 		$fx_cache->{registry}->[$j]->{count} = scalar @p_names;
 		$fx_cache->{registry}->[$j]->{params} = [];
 		$fx_cache->{registry}->[$j]->{display} = qq(field);
+		$fx_cache->{registry}->{plugin_type} = $plugin_type;
+		$fx_cache->{user_help}->[$j] = $dispatch{$plugin_type}->($line);
 		map{ push @{$fx_cache->{registry}->[$j]->{params}}, {name => $_} } @p_names
 			if @p_names;
 	}
 
+}
 }
 sub sort_ladspa_effects {
 	logsub("&sort_ladspa_effects");
@@ -334,6 +345,7 @@ sub read_in_effects_data {
 	/x;
 
 	extract_effects_data(
+		'cop',
 		$fx_cache->{split}->{cop}{a},
 		$fx_cache->{split}->{cop}{z},
 		$cop_re,
@@ -341,6 +353,7 @@ sub read_in_effects_data {
 		@cop,
 	);
 	extract_effects_data(
+		'ladspa',
 		$fx_cache->{split}->{ladspa}{a},
 		$fx_cache->{split}->{ladspa}{z},
 		$ladspa_re,
@@ -348,6 +361,7 @@ sub read_in_effects_data {
 		@lad,
 	);
 	extract_effects_data(
+		'lv2',
 		$fx_cache->{split}->{lv2}{a},
 		$fx_cache->{split}->{lv2}{z},
 		$lv2_re,
@@ -356,6 +370,7 @@ sub read_in_effects_data {
 	);
 
 	extract_effects_data(
+		'preset',
 		$fx_cache->{split}->{preset}{a},
 		$fx_cache->{split}->{preset}{z},
 		$preset_re,
@@ -363,6 +378,7 @@ sub read_in_effects_data {
 		@preset,
 	);
 	extract_effects_data(
+		'ctrl',
 		$fx_cache->{split}->{ctrl}{a},
 		$fx_cache->{split}->{ctrl}{z},
 		$ctrl_re,
