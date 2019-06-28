@@ -141,13 +141,17 @@ sub generate_mappings_for_shortcuts {
 	#print json_out $fx_cache->{partial_label_to_full};
 }
 { my %dispatch =
-		{
+		(
 			ctrl 	=> \&generate_help,
 			lv2	 	=> \&generate_lv2_help,
 			ladspa 	=> \&generate_ladspa_help,
 			cop		=> \&generate_help,
 			preset	=> \&generate_help,
-		};
+		);
+	say "ref: ", ref $dispatch{ctrl}; 
+	say dumper \%dispatch ;
+	use Data::Dumper::Concise;
+		
 sub extract_effects_data {
 	logsub("&extract_effects_data");
 	my ($plugin_type, $lower, $upper, $regex, $separator, @lines) = @_;
@@ -175,7 +179,7 @@ sub extract_effects_data {
 		$fx_cache->{registry}->[$j]->{count} = scalar @p_names;
 		$fx_cache->{registry}->[$j]->{params} = [];
 		$fx_cache->{registry}->[$j]->{display} = qq(field);
-		$fx_cache->{registry}->{plugin_type} = $plugin_type;
+		$fx_cache->{registry}->[$j]->{plugin_type} = $plugin_type;
 		$fx_cache->{user_help}->[$j] = $dispatch{$plugin_type}->($line);
 		map{ push @{$fx_cache->{registry}->[$j]->{params}}, {name => $_} } @p_names
 			if @p_names;
