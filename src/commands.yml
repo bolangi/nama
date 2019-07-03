@@ -1561,7 +1561,7 @@ convert_to_sequence:
 merge_sequence:
   type: sequence
   short: msq
-  what: cache and MON the current sequence mix track, disable the sequence
+  what: cache the current sequence mix track, and set it to PLAY
   parameters: none
 snip:
   type: sequence
