@@ -322,6 +322,8 @@ sub rec_status{
 	my $track = shift;
 	$mode->mastering ? MON :  OFF;
 }
+sub send_type { $tn{Main}->send_type }
+sub send_id { $tn{Main}->send_id }
 }
 {
 package ::CacheRecTrack;
