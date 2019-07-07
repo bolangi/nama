@@ -151,7 +151,7 @@ sub find_effect {
 		my $didnt_match;
 		map{ $_help =~ /\Q$_\E/i or $didnt_match++ }  @keys;
 		! $didnt_match; # select if no cases of non-matching
-	} @{$fx_cache->{user_help}};
+	} grep{$_} @{$fx_cache->{user_help}};
 	if ( @matches ){
 	::pager( $text->{wrap}->paragraphs(@matches) , "\n" );
 	} else { throw(join " ", "No effects were found matching:",@keys,"\n\n") }
