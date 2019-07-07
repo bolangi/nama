@@ -158,7 +158,7 @@ sub generate_setup_try {
 	}
 }
 
-sub add_paths_for_aux_sends {
+sub add_paths_for_aux_sends { # not including Main
 
 	# currently this routing is track-oriented 
 
