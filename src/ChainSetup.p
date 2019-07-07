@@ -201,6 +201,7 @@ sub add_paths_for_mixdown_handling {
 	if ($tn{Mixdown}->rw eq REC ){
 		# don't monitor via soundcard
 		$g->delete_edge('Main','soundcard_out');
+		$g->delete_edge('Boost','soundcard_out');
 		my @p = ($final_leg_origin, ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
