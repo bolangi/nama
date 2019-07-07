@@ -497,7 +497,14 @@ sub get_ladspa_hints{
 		}	#	pager( join "\n======\n", @stanzas);
 		#last if ++$i > 10;
 	}
-
+		
+	for (1..scalar @{ $fx_cache->{user_help}} )
+	{
+		next if $fx_cache->{registry}->[$_]->{plugin_type} ne 'ladspa';
+		my $code = $fx_cache->{registry}->[$_]->{code};
+		my $id = $fx_cache->{ladspa_label_to_unique_id}->{$code};
+		$fx_cache->{user_help}->[$_] =~ s/^\d+/$id/;
+	}
 	logpkg('debug', sub{json_out($fx_cache->{ladspa})});
 }
 
