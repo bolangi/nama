@@ -597,7 +597,7 @@ sub generate_help {
 	$line =~ s/^.*? //; 				# remove initial number
 	$line .= "\n";						# add newline
 	s/,/, /g;							# to help line breaks
-	push @{$fx_cache->{user_help}}, $line;
+	$line;
 }
 
 
@@ -616,7 +616,7 @@ sub generate_lv2_help {
  		}
 		# remove Ecasound registry index No., if present
 		$line =~ s/^\d+\.\s*//;
-		push @{$fx_cache->{user_help}}, $line
+		$line
 
 }
 sub generate_ladspa_help {
@@ -628,10 +628,6 @@ sub generate_ladspa_help {
 		$line =~ s/,/, /g; 				# for nice linebreaks
 		$line =~ s/\s+$/ /;  			 # remove trailing spaces
 		$line .="\n";               	 # add newline
-							 			# replace leading number with LADSPA Unique ID
-		$line =~ s/^\d+/$fx_cache->{ladspa_label_to_unique_id}->{$label}/;
-		push @{$fx_cache->{user_help}}, $line  # store help
-
 }
 
 1;
