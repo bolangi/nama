@@ -148,9 +148,6 @@ sub generate_mappings_for_shortcuts {
 			cop		=> \&generate_help,
 			preset	=> \&generate_help,
 		);
-	say "ref: ", ref $dispatch{ctrl}; 
-	say dumper \%dispatch ;
-	use Data::Dumper::Concise;
 		
 sub extract_effects_data {
 	logsub("&extract_effects_data");
