@@ -207,8 +207,8 @@ sub trim_output {
 	my $output = shift;
 	$output =~ s/\n\.{3} //g;
 	$output =~ s/\r//;
-	$output =~ s/^.+?Registered \w+ plugins:\s+//; # XXX HARDCODED for plugins only
-	$output =~ s/ecasound ('h' for help).+$//;
+	$output =~ s/^.+?Registered \w+ plugins:\s*//s; # XXX HARDCODED for plugins only
+	$output =~ s/^ecasound .+?\Z//ms;
 	my @output = split "\n",$output;
 	#splice @output, 0,8;
 	#splice @output, -3,3;
