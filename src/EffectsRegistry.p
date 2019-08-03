@@ -207,9 +207,11 @@ sub trim_output {
 	my $output = shift;
 	$output =~ s/\n\.{3} //g;
 	$output =~ s/\r//;
+	$output =~ s/^.+?Registered \w+ plugins:\s+//; # XXX HARDCODED for plugins only
+	$output =~ s/ecasound ('h' for help).+$//;
 	my @output = split "\n",$output;
-	splice @output, 0,8;
-	splice @output, -3,3;
+	#splice @output, 0,8;
+	#splice @output, -3,3;
 	join "\n",@output;
 }
 sub read_in_effects_data {
