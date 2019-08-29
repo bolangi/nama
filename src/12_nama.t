@@ -55,14 +55,6 @@ while( my($dest,$type) = splice @id_to_type, 0,2){
 	is( dest_type($dest), $type, "$dest => $type");
 }
 
-
-# SKIP: { 
-# my $cs_got = ecasound_iam('cs');
-# my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
-# Chain "default" [selected] );
-# is( $cs_got, $cs_want, "Evaluate Ecasound 'cs' command");
-# }
-
 my $test_project = 'test';
 
 load_project(name => $test_project, create => 1);
