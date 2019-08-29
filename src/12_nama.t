@@ -736,7 +736,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:4,5 -o:loop,sax_insert_pre
 -a:6 -o:jack,jconvolver
 EXPECTED
-# SKIP check_setup('JACK client as pre-fader insert');
+check_setup('JACK client as pre-fader insert');
 
 load_project(name => "add_insert_via_soundcard-postfader", create => 1);
 nama_cmd("add sax; mon; source 2; add_insert post 5; gen");
@@ -821,7 +821,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:3 -o:loop,Main_in
 -a:4,5 -o:loop,sax_insert_pre
 EXPECTED
-# SKIP check_setup('Hardware insert via soundcard, prefader  - ALSA');
+check_setup('Hardware insert via soundcard, prefader  - ALSA');
 gen_jack();
 $expected_setup_lines = <<EXPECTED;
 # general
@@ -842,7 +842,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:4,5 -o:loop,sax_insert_pre
 -a:6 -o:jack_multi,system:playback_5
 EXPECTED
-# SKIP check_setup('Hardware insert via soundcard, prefader  - JACK');
+check_setup('Hardware insert via soundcard, prefader  - JACK');
 
 #load_project(name => "midi", create => 1);
 #add_midi_track('synth');
