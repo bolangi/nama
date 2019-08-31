@@ -726,7 +726,7 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Main_in
 -a:3 -i:loop,sax_insert_pre
--a:4 -i:jack,jconvolver
+-a:4 -i:jack_multi,jconvolver:out_1
 -a:5,6 -i:jack_multi,system:capture_1
 
 # audio outputs
@@ -734,7 +734,8 @@ $expected_setup_lines = <<EXPECTED;
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
 -a:3 -o:loop,Main_in
 -a:4,5 -o:loop,sax_insert_pre
--a:6 -o:jack,jconvolver
+-a:6 -chcopy:1,2
+-a:6 -o:jack_multi,jconvolver:in_1
 EXPECTED
 check_setup('JACK client as pre-fader insert');
 
