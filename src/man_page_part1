@@ -428,23 +428,13 @@ Each track can have one pre-fader and one post-fader insert.
 
 =head2 Bunches
 
-A bunch is just a list of track names. Bunch names are used
-with the keyword C<for> to apply one or more commands to several
-tracks at once. A bunch can be created with the C<new-bunch>
-command. Any bus name can also be treated as a bunch.
-Finally, several system defined bunches are available:
-
-=over 12
-
-=item B<rec>, B<mon>, B<off>
-
-All tracks with the corresponding I<setting> in the current bus
-
-=back
-
+A bunch is just a list of track names. Using the C<for>
+keyword with the name of a bunch will apply the commands
+that follow to all of the tracks in the bunch. A bunch can be
+created with the C<new-bunch> command. A bus name can also
+be treated as a bunch.
+ 
 =head2 Buses
-
-=head3 Sub Buses
 
 B<Buses> enable multiple tracks to be routed through a
 single mix track before feeding the Main mixer bus (or
@@ -493,7 +483,7 @@ Let's examine the signal flow from track 3, the first
 available user track. Assume track 3 is named "sax".
 
 We will divide the signal flow into track and mixer
-sections.  Parentheses show the track number/name.
+sections.  Parentheses show the chain id.
 
 The stereo outputs of each user track terminate at 
 Main_in, a loop device at the mixer input.
@@ -521,21 +511,21 @@ which can host effects. Usually the Main track
 provides final control before audio output or mixdown.
 
     Main_in --(1)--> Main_out --+--------> Sound device
-                                    |
-                                    +-->(2)--> Mixdown_1.wav
+                                |
+                                +-->(2)--> Mixdown_1.wav
 
 =head3 Mastering Mode
 
 In mastering mode (invoked by C<master-on> and released
-C<master-off>) the following network, receives the Main
+C<master-off>) the following network receives the Main
 track signal as input and provides an output to the
 soundcard or WAV file.
 
-                       +- Low -+ 
-                       |       |
-    Main_in --- Eq   --+- Mid -+--- Boost -> soundcard/wav_out
-                       |       |
-                       +- High + 
+                     +- Low -+ 
+                     |       |
+    Main_in --- Eq --+- Mid -+--- Boost -> soundcard/wav_out
+                     |       |
+                     +- High + 
 
 The B<Eq> track hosts an equalizer.
 
