@@ -101,10 +101,6 @@ sub generate_setup_try {
 
 	my $extra_setup_code = shift;
 
-	# in an ideal CS world, all of the following routing
-	# routines (add_paths_for_*) would be accomplished by
-	# the track or bus itself, rather than handcoded below.
-	
 	# start with bus routing
 	
 	map{ $_->apply($g) } ::Bus::all();
