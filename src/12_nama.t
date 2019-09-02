@@ -810,7 +810,7 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:4 -chmove:7,1 
 -a:5 -chmove:2,1 
--a:6 -chmove:2,1 
+-a:6 -chmove:2,1 -chcopy:1,2
 
 # pre-output processing
 
@@ -841,6 +841,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
 -a:3 -o:loop,Main_in
 -a:4,5 -o:loop,sax_insert_pre
+-a:6 -chcopy:1,2
 -a:6 -o:jack_multi,system:playback_5
 EXPECTED
 check_setup('Hardware insert via soundcard, prefader  - JACK');
