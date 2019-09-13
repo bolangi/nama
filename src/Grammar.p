@@ -631,3 +631,7 @@ sub set_sample_rate {
 		pager("Use one of: @allowable");
 	}
 }
+sub list_buses {
+	::pager(map{ $_->list } ::Bus::all())
+
+}

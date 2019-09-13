@@ -140,6 +140,20 @@ sub display_type {
 	$type =~ s/sub//;
 	$type
 }
+
+sub list {
+	my $self = shift;
+	my @fields = qw( name
+                    rw
+                    version
+                    send_type
+                    send_id
+                    class 
+					);
+                    # version
+                    # engine_group
+	my $list = join "", map{"$_: ".$self->$_."\n"} grep {$self->$_} @fields;
+}
 ### subclasses
 {
 package ::SubBus; # with magic for Main bus
@@ -268,7 +282,6 @@ sub apply {
 }
 sub remove { }  # We never remove the Midi bus
 }
-
 # ---------- Bus routines --------
 {
 package ::;

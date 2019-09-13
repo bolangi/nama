@@ -1052,7 +1052,7 @@ update_submix: _update_submix existing_bus_name {
 }
 set_bus: _set_bus key someval { $::bn{$::this_bus}->set($item{key} => $item{someval}); 1 }
 
-list_buses: _list_buses { ::pager(map{ $_->dump } ::Bus::all()) ; 1}
+list_buses: _list_buses { ::list_buses() ; 1}
 add_insert: _add_insert 'local' {
 	::Insert::add_insert( $::this_track,'postfader_insert');
 	1;
