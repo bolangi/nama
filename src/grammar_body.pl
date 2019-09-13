@@ -1378,6 +1378,10 @@ remove_version_comment: _remove_version_comment dd {
 	my $t = $::this_track;
 	::pager( $t->remove_version_comment($item{dd})); 1
 }
+remove_version_comment: _remove_version_comment {
+	my $t = $::this_track;
+	::pager( $t->remove_version_comment($t->version)); 1
+}
 show_version_comment: _show_version_comment dd(s) {
 	my $t = $::this_track;
 	my @v = @{$item{'dd(s)'}};
