@@ -86,7 +86,6 @@ $mode->{loop_enable}			# boolean
 $mode->{mastering}				# boolean
 $mode->{midi_terminal}			# 
 $mode->{midi_transport_sync}  # sync Ecasound start/stop with midish
-$project->{events}				# timers used during engine run
 
 $fx->{ecasound_effect_hints}	# hints for ecasound effects
 $fx->{offset}					# offset to locate first user-addressable 
@@ -131,6 +130,7 @@ $text->{eval_result}			# buffer for result of eval_perl()
 $text->{output_buffer}			# buffer for output of OSC commands
 $text->{midi_cmd} 				# list of Midish commands for the parser to recognize
 
+$project->{events}				# timers used during engine run
 $project->{name}				# project name
 $project->{bunch}				# track bunches lists
 $project->{repo}				# Git::Repository object
