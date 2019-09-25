@@ -196,7 +196,7 @@ sub set_current_track {
 }
 
 
-### allow commands to abbreviate Nama::Class as ::Class # SKIP_PREPROC
+### allow commands to abbreviate Audio::Nama::Class as ::Class # SKIP_PREPROC
 
 { my @namespace_abbreviations = qw(
 	Assign 
@@ -215,7 +215,7 @@ sub set_current_track {
 	ChainSetup
 );
 
-my $namespace_root = 'Nama';
+my $namespace_root = 'Audio::Nama';
 
 sub eval_perl {
 	my $code = shift;

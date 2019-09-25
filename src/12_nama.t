@@ -66,7 +66,7 @@ $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("project project wav dir: ".this_wav_dir
 
 is( project_dir(), "$test_dir/$test_project", "establish project directory");
 
-is( ref $bn{Main}, q(::SubBus), 'Bus initializtion');
+is( ref $bn{Main}, q(Audio::Nama::SubBus), 'Bus initializtion');
 
 
 force_jack();
@@ -175,7 +175,7 @@ for (@test) {
 	my %t = %$_;
 	$i++;
 	$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "IO.pm unit test $i";
-	my $class = "::IO::$t{class}";
+	my $class = "Audio::Nama::IO::$t{class}";
 	my $io = $class->new(%{$t{args}});
 	my @keys = sort grep{ $_ ne 'class'} keys %t;
 	is( $io->ecs_string, $t{ecs_string}, "$t{class} ecs_string");

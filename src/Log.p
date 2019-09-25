@@ -69,11 +69,11 @@ sub initialize_logger {
 sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
 
 sub expand_cats {
-	# Convert Module  -> ::Module  -> Nama::Module
-	# Convert !Module -> !::Module -> !Nama::Module
+	# Convert Module  -> ::Module  -> Audio::Nama::Module
+	# Convert !Module -> !::Module -> !Audio::Nama::Module
 	no warnings 'uninitialized';
 	my @cats = @_;
-	map { s/^(#)?::/$1Nama::/; $_}                    # SKIP_PREPROC
+	map { s/^(#)?::/$1Audio::Nama::/; $_}                    # SKIP_PREPROC
 	map { s/^(#)?/$1::/ unless /^::/ or /^#?ECI/ or /^#?SUB/ or /^ALL$/; $_ }# SKIP_PREPROC
 	@cats;
 }
@@ -99,11 +99,11 @@ sub logsub { logit('SUB','debug',$_[0]) }
 
 sub logpkg { 
 	my( $file, $line_no, $level, @message) = @_;
-	# convert Effects.pm to Nama::Effects to support logpkg
+	# convert Effects.pm to Audio::Nama::Effects to support logpkg
 	my $pkg = $file;
 	($pkg) = $file =~ m| ([^/]+)\.pm$ |x;
 	$pkg //= "Dummy::Pkg";
-	$pkg = "Nama::$pkg";  # SKIP_PREPROC
+	$pkg = "Audio::Nama::$pkg";  # SKIP_PREPROC
 	#say "category: $pkg";
 	logit ($line_no,$pkg,$level, @message) 
 }
