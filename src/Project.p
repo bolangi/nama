@@ -208,7 +208,7 @@ sub dig_ruins {
 
 	# remove version numbers
 	
-	my @wavs = grep{s/(_\d+)?\.wav//i} readdir $wav;
+	my @wavs = grep{s/(_\d+)?\.wav$//i} readdir $wav;
 
 	closedir $wav if $wav;
 
