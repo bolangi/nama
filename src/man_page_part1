@@ -62,19 +62,16 @@ The help system provides documentation and keyword search
 covering Nama commands and effects-processing
 plugins.
 
-A hotkey mode provides a convenient way to select, view,
+The hotkey mode provides a convenient way to select, view,
 and modify effect parameters.
 
-By default, Nama displays a graphic user interface while
-the command processor runs in a terminal window.
- 
 =head1 OPTIONS
 
 =over 12
 
 =item B<--gui, -g>
 
-Start Nama in GUI mode
+Start Nama in GUI mode (default when Tk is available)
 
 =item B<--text, -t>
 
