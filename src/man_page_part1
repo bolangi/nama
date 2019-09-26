@@ -17,7 +17,7 @@ Ecasound as the audio processing engine.
 =head2 Audio projects
 
 Projects in Nama are audio networks of tracks and buses.
-Tracks may contain one or more RIFF files, as well as
+Tracks may contain one or more RIFF (.wav) files, as well as
 effects, sends, inserts, marks, regions, fades,
 edits and sequences.  Tracks can host LADSPA, LV2 and
 Ecasound plugins.  Audio regions may be altered, duplicated,
