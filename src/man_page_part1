@@ -11,7 +11,7 @@ B<nama> [I<options>] [I<project-name>]
 A multitrack audio application for recording, effects
 processing, editing, mixing, mastering and live
 performance. It can also perform general-purpose audio
-processing, such as a 5.1 to stereo converter. Nama uses 
+processing, such as 5.1 to stereo conversion. Nama uses 
 Ecasound as the audio processing engine.
 
 =head2 Audio projects
