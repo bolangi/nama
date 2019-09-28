@@ -83,7 +83,6 @@ sub initialize_project_data {
 
 	$mode->{mastering} = 0;
 
-	$project->{save_file_version_number} = 0; 
 	$project->{track_comments} = {};
 	$project->{track_version_comments} = {};
 	$project->{repo} = undef;
