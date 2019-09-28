@@ -30,7 +30,6 @@ lib/Audio/Nama/Modes.pm
 lib/Audio/Nama/Fade.pm
 lib/Audio/Nama/MuteSoloFade.pm
 lib/Audio/Nama/EcasoundSetup.pm
-lib/Audio/Nama/File.pm
 lib/Audio/Nama/Lat.pm
 lib/Audio/Nama/ChainSetup.pm
 lib/Audio/Nama/Latency.pm
