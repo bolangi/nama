@@ -137,7 +137,8 @@ $project->{repo}				# Git::Repository object
 $project->{timebase}			# seconds or samples, unused
 $project->{track_comments}		# per track comments
 $project->{track_version_comments} # per version comments
-$project->{save_file_version_number} # version of Nama that wrote State.json
+$project->{nama_version} 		# version of Nama that wrote State.json
+$project->{save_file_version_number} 		# obsolete name for above
 $project->{command_buffer}			# command history for commit message
 $project->{artist}				# Artist field for mp3/ogg encoding
 $project->{current_op}			# current effect, per track
