@@ -23,7 +23,7 @@ sub save_state {
 									: join_path(project_dir(),$filename) 
 	}
 	my $path = $filename || $file->state_store();
-	$project->{save_file_version_number} = $VERSION;
+	$project->{nama_version} = $VERSION;
 
 	# store playback position, if possible
 	$project->{playback_position} = ecasound_iam("getpos") if $this_engine->valid_setup();
@@ -278,8 +278,11 @@ sub restore_state_from_file {
 
 	####### Backward Compatibility ########
 
-	if ( $project->{save_file_version_number} <= 1.213 )
+	if ( $project->{save_file_version_number}  ) # 1.214 or older
 	{
+		delete $project->{save_file_version_number}; 
+
+		# convert namespace
 		map 
 		{
 			$_->{class} =~ s/^Nama::/Audio::Nama::/ if $_->{class} 
