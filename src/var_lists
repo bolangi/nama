@@ -16,7 +16,6 @@
 	@effects_data
 
 	$project->{nama_version}
-	$project->{save_file_version_number}
 	$project->{sample_rate}
 	
 	$fx->{applied}
@@ -27,7 +26,6 @@
 @persistent_vars = qw(
 
 	$project->{nama_version}
-	$project->{save_file_version_number}
 	$project->{timebase}
 	$project->{command_buffer}
 	$project->{track_version_comments}
