@@ -23,7 +23,7 @@ sub start {
 	# sleep 1s
 	#
 
-	pager("\n\nStarting at ", current_position()) unless $quiet;
+	pager("\n\nStarting at ". current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
 	$self->start_command;
@@ -104,7 +104,7 @@ sub disconnect_transport {
 }
 sub engine_is {
 	my $pos = shift;
-	"Engine is ". $this_engine->ecasound_iam("engine-status"). ( $pos ? " at $pos" : "" )
+	"\n\nEngine is ". $this_engine->ecasound_iam("engine-status"). ( $pos ? " at $pos" : "" )
 }
 sub engine_status { 
 	my ($pos, $before_newlines, $after_newlines) = @_;
