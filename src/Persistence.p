@@ -278,25 +278,7 @@ sub restore_state_from_file {
 
 	####### Backward Compatibility ########
 
-	if ( $project->{save_file_version_number}  ) # 1.214 or older
-	{
-		delete $project->{save_file_version_number}; 
-
-		# convert namespace
-		map 
-		{
-			$_->{class} =~ s/^Nama::/Audio::Nama::/ if $_->{class} 
-		}	@tracks_data,
-			@bus_data,
-			@marks_data,
-			@fade_data,
-			@edit_data,
-			@inserts_data,
-			@effects_data,
-			@global_effect_chain_data,
-			@project_effect_chain_data;
-	}
-
+	if ( $project->{nama_version}  < 1.214 )  { }
 
 	# restore effects, no change to track objects needed
 	
