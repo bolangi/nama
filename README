@@ -61,11 +61,11 @@ entire project without audio files.
 The following command will install Nama, automatically
 pulling in all Perl modules required to run Nama in text mode:
 
-		cpanm Nama
+		cpanm Audio::Nama
 
 However if you don't have cpanm, this should still work:
 
-		PERL_MM_USE_DEFAULT=1 cpan Nama
+		PERL_MM_USE_DEFAULT=1 cpan Audio::Nama
 
 To use the GUI, you will need to install Tk:
 

@@ -1,4 +1,8 @@
-Changes to Nama
+Changes to Audio::Nama
+
+1.214 Sep 26, 2019
+
+    * numerous updates (1,040 commits since 1.205)
 
 1.205 Dec 31, 2015
 
@@ -93,7 +97,7 @@ Changes to Nama
 
 
 1.064  August 6, 2010
-      * fix Bug rt.cpan.org #60024: Nama::Assign::expand_tilde()
+      * fix Bug rt.cpan.org #60024: Audio::Nama::Assign::expand_tilde()
 
 1.063  August 2, 2010
 

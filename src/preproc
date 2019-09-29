@@ -3,7 +3,7 @@
 # This script provides templating functions for building
 # a perl module from sources.
 #
-# Run 'myproc' to provide preprocessing for Nama
+# Run 'myproc' to provide preprocessing for Audio::Nama
 #
 #
 # special cases: 
@@ -81,7 +81,7 @@ sub process {
 
 	my $text = $template->fill_in(HASH=>$hash);
 
-#### Convert ::Something to Nama::Something
+#### Convert ::Something to Audio::Nama::Something
 
 	my $rooted_text = &bestow_module_root($new_root,$text);
 
@@ -93,7 +93,7 @@ sub process {
 # we are going to standardize on using :: as the 
 # root package name, so that coding will be
 # separate from the final place in the hierarchy.
-# ::, ::Text will be translated to Nama, # Nama::Text
+# ::, ::Text will be translated to Audio::Nama, # Audio::Nama::Text
 # after the file includes
 
 	if ( $file_out ) { write_file($file_out, $rooted_text) }

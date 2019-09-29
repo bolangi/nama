@@ -1,7 +1,7 @@
 package ::;
 require 5.14.4;
 use vars qw($VERSION);
-$VERSION = "1.213";
+$VERSION = "1.214";
 use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
@@ -46,8 +46,8 @@ use Try::Tiny;
 ########## Nama modules ###########
 #
 # Note that :: in the *.p source files is expanded by       # SKIP_PREPROC
-# preprocessing to Nama in the generated *.pm files. # SKIP_PREPROC
-# ::Assign becomes Nama::Assign                      # SKIP_PREPROC
+# preprocessing to Audio::Nama in the generated *.pm files. # SKIP_PREPROC
+# ::Assign becomes Audio::Nama::Assign                      # SKIP_PREPROC
 #
 # These modules import functions and variables
 #

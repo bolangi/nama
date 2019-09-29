@@ -391,7 +391,7 @@ sub new_edit {
 			if $nst < $rst and $ret < $net;
 		$fail
 	} grep{ $_->host_track eq $this_track->name} 
-		values %::Edit::by_name;
+		values %Audio::Nama::Edit::by_name;
 	::throw("Aborting."), return if $overlap;
 	my $name = $this_track->name;
 	my $editre = qr($name-v\d+-edit\d+);

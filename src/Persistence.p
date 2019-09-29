@@ -23,7 +23,7 @@ sub save_state {
 									: join_path(project_dir(),$filename) 
 	}
 	my $path = $filename || $file->state_store();
-	$project->{save_file_version_number} = $VERSION;
+	$project->{nama_version} = $VERSION;
 
 	# store playback position, if possible
 	$project->{playback_position} = ecasound_iam("getpos") if $this_engine->valid_setup();
@@ -120,7 +120,6 @@ sub save_system_state {
 	@project_effect_chain_data = sort $by_n map { $_->as_hash } 
 		::EffectChain::find(project => 1);
 
-
 	# save history -- 50 entries, maximum
 
 	my @history;
@@ -140,7 +139,7 @@ sub save_system_state {
 			serialize(
 				file => $path,
 				format => $format,
-				vars => \@tracked_vars,
+				vars => [ (grep {!  /save_file_version_number/ } @tracked_vars) ],
 				class => '::',
 				);
 
@@ -149,7 +148,7 @@ sub save_system_state {
 	serialize(
 		file => $file->untracked_state_store,
 		format => 'json',
-		vars => \@persistent_vars,
+		vars => [ (grep {!  /save_file_version_number/ } @persistent_vars) ],
 		class => '::',
 	);	
 
@@ -279,74 +278,16 @@ sub restore_state_from_file {
 
 	####### Backward Compatibility ########
 
-	if ( $project->{save_file_version_number} < 1.100){ 
-		map{ ::EffectChain::move_attributes($_) } 
-			(@project_effect_chain_data, @global_effect_chain_data)
-	}
-	if ( $project->{save_file_version_number} < 1.105){ 
-		map{ $_->{class} = '::BoostTrack' } 
-		grep{ $_->{name} eq 'Boost' } @tracks_data;
-	}
-	if ( $project->{save_file_version_number} < 1.109){ 
-		map
-		{ 	if ($_->{class} eq '::MixTrack') { 
-				$_->{is_mix_track}++;
-				$_->{class} = $_->{was_class};
-				$_->{class} = '::Track';
-		  	}
-		  	delete $_->{was_class};
-		} @tracks_data;
-		map
-		{    if($_->{class} eq '::MasterBus') {
-				$_->{class} = '::SubBus';
-			 }
-		} @bus_data;
+	if ( $project->{save_file_version_number}  ) # 1.214 or older
+	{
+		delete $project->{save_file_version_number}; 
 
-	}
-	if ( $project->{save_file_version_number} < 1.111){ 
-		map
-		{
-			convert_rw($_);
-			delete $_->{effect_chain_stack} ;
-            delete $_->{rec_defeat};
-            delete $_->{was_class};
-			delete $_->{is_mix_track};
-			$_->{rw} = MON if $_->{name} eq 'Master';
-		} @tracks_data;
-		map
-		{
-			$_->{rw} = MON if $_->{rw} eq 'REC'
-		} @bus_data;
-	}
-
-	# convert effect object format
-	
-	if ( $project->{save_file_version_number} < 1.200 )
-	{
-		@effects_data = 
-			map{ my $hashref = $fx->{applied}->{$_}; 
-					$hashref->{params} = $fx->{params}->{$_}; 
-					$hashref->{class} = '::Effect';
-					$hashref->{owns} ||= [];
-					$hashref }
-			grep { defined $_ } 
-			keys %{$fx->{applied}};
-		#say "effects data: ", json_out \@effects_data;
-		delete $fx->{applied};
-		delete $fx->{params};
-	}
-	if ( $project->{save_file_version_number} <= 1.201 )
-	{
-		map{ $_->{owns} ||= [] } @effects_data;
-	}
-	if ( $project->{save_file_version_number} <= 1.208 )
-	{
+		# convert namespace
 		map 
 		{
-			$_->{class} =~ s/Audio::Nama/Nama/ if $_->{class} 
+			$_->{class} =~ s/^Nama::/Audio::Nama::/ if $_->{class} 
 		}	@tracks_data,
 			@bus_data,
-			@groups_data,
 			@marks_data,
 			@fade_data,
 			@edit_data,
@@ -354,52 +295,8 @@ sub restore_state_from_file {
 			@effects_data,
 			@global_effect_chain_data,
 			@project_effect_chain_data;
+	}
 
-		map
-		{ 
-			$_->{midi_versions} ||= [];
-			$_->{name} =~ s/^Master$/Main/;
-			$_->{group} =~ s/^Master$/Null/;
-			$_->{group}	  =~ s/^Open$/Null/;
-		} 
-		@tracks_data;
-		map
-		{
-			$_->{send_id} =~ s/^Master$/Main/;
-			$_->{name}	  =~ s/^null$/Aux/;
-			$_->{name}	  =~ s/^Open$/Null/;
-
-		}
-		@bus_data;
-	}
-	if ( $project->{save_file_version_number} <= 1.208 )
-	{
-		# older projects did not store this
-		$project->{sample_rate} //= $config->{sample_rate} 
-	}
-	if ( $project->{save_file_version_number} <= 1.211){ 
-		map { $_->{source_id} = 'Main', $_->{source_type} = 'bus' }
-		grep { $_->{name} eq 'Main'	} @tracks_data;
-		map { $_->{source_id} = 'Main'; 
-			  $_->{source_type} = 'track';
-			  $_->{send_type} = 'soundcard';
-			  $_->{send_id} = 1;
-			}
-		grep { $_->{name} eq 'Mixdown'	} @tracks_data;
-	}
-	if ( $project->{save_file_version_number} <= 1.212 )
-	{
-		my($boost) = grep{$_->{name} eq 'Boost'} @tracks_data; 
-		delete $boost->{target}
-	}
-	if ( $project->{save_file_version_number} <= 1.213 )
-	{
-		map { 
-			$project->{track_comments}->{         $_->{name} } = delete $_->{comment}         if $_->{comment};
-			$project->{track_version_comments}->{ $_->{name} } = delete $_->{version_comment} if $_->{version_comment};
-
-		} @tracks_data; 
-	}
 
 	# restore effects, no change to track objects needed
 	

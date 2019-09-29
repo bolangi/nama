@@ -11,13 +11,13 @@ B<nama> [I<options>] [I<project-name>]
 A multitrack audio application for recording, effects
 processing, editing, mixing, mastering and live
 performance. It can also perform general-purpose audio
-processing, such as a 5.1 to stereo converter. Nama uses 
+processing, such as 5.1 to stereo conversion. Nama uses 
 Ecasound as the audio processing engine.
 
 =head2 Audio projects
 
 Projects in Nama are audio networks of tracks and buses.
-Tracks may contain one or more RIFF files, as well as
+Tracks may contain one or more RIFF (.wav) files, as well as
 effects, sends, inserts, marks, regions, fades,
 edits and sequences.  Tracks can host LADSPA, LV2 and
 Ecasound plugins.  Audio regions may be altered, duplicated,
@@ -62,19 +62,16 @@ The help system provides documentation and keyword search
 covering Nama commands and effects-processing
 plugins.
 
-A hotkey mode provides a convenient way to select, view,
+The hotkey mode provides a convenient way to select, view,
 and modify effect parameters.
 
-By default, Nama displays a graphic user interface while
-the command processor runs in a terminal window.
- 
 =head1 OPTIONS
 
 =over 12
 
 =item B<--gui, -g>
 
-Start Nama in GUI mode
+Start Nama in GUI mode (default when Tk is available)
 
 =item B<--text, -t>
 
@@ -205,7 +202,7 @@ running.
 General configuration of sound devices and program options
 is performed by editing the F<.namarc> file, which is
 formatted as YAML. On Nama's first run, a default version of
-F<.namarc> is usually placed in the user's home directory.
+F<.namarc> is placed in the user's home directory.
 
 =head1 Tk GRAPHICAL UI 
 
@@ -235,11 +232,14 @@ are used to enter parameters values for plugins without
 hinted ranges. Any parameter label can be clicked to 
 add a parameter controller.
 
+=head2 Waveform Window
+
+Provides a conventional view with waveform and playback head.
+
 =head2 Terminal Window 
 
-The command prompt is available in the terminal window
-during GUI operation. Text commands are used to access
-Nama's more advanced functions.
+The command prompt is available the terminal window
+and provides access to all of Nama's functions.
 
 =head1 TEXT USER INTERFACE
 
@@ -248,17 +248,18 @@ command prompt, which will look something like this:
 
 =over 12
 
-C<nama sax ('h' for help)E<gt>>
+C<nama untitled sax ('h' for help)E<gt>>
 
 =back
 
-In this instance, 'sax' is the current track.
+In this instance, 'sax' is the current track in the
+'untitled' default project. 
 
 When using buses, the bus is indicated before the track:
 
 =over 12
 
-C<nama Strings/violin ('h' for help)E<gt>>
+C<nama untitled Strings/violin ('h' for help)E<gt>>
 
 =back
 
@@ -326,15 +327,15 @@ The I<PLAY> setting enqueues an audio file for playback from
 disk as the track source.
  
 The I<OFF> setting tells Nama to remove the track from the
-audio network. I<OFF> status may result for a track when the
-audio source is not available. For example, a track with no
+audio network. I<OFF> status may result for a track when no
+audio source is available. For example, a track with no
 recorded audio files will show OFF status when set to PLAY.
 
 =head2 Track output
 
 By default a track belongs to the Main bus and is routed to
-Main, which has a final fader before the signal goes via 
-ALSA or JACK to the audio device.
+the Main track. This track provides a final fader before the
+signal goes via ALSA or JACK to the audio device.
 
 =head2 Bus setting
 
@@ -547,12 +548,12 @@ C<Main off>).
 Mixdown proceeds after you start the transport.
 
 As a convenience, Mixdown_nn.wav will be symlinked to
-F<<branch_name>_nn.wav> in the project directory. (If git is
-disabled or not available F<<project-name>_nn.wav> is used
-instead.)  Corresponding encoded files are created if the
-"mixdown_encodings" option is set. Acceptable values are a
-space-separated list. The default is "mixdown_encodings: ogg
-mp3".
+F<<project-name>_nn.wav> or F<<branch_name>_nn.wav> in the
+project directory. The latter format is used branches other
+than the default F<master> branch.) Corresponding encoded
+files are created if the F<mixdown_encodings> option is set
+in F<.namarc>.  Acceptable values are a space-separated
+list. The default is "mixdown_encodings: ogg mp3".
 
 =head2 Preview, Doodle and Eager Modes
 
