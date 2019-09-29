@@ -139,7 +139,7 @@ sub save_system_state {
 			serialize(
 				file => $path,
 				format => $format,
-				vars => [ (grep {!  /save_file_version_number/ } @tracked_vars) ],
+				vars => \@tracked_vars,
 				class => '::',
 				);
 
@@ -148,7 +148,7 @@ sub save_system_state {
 	serialize(
 		file => $file->untracked_state_store,
 		format => 'json',
-		vars => [ (grep {!  /save_file_version_number/ } @persistent_vars) ],
+		vars => \@persistent_vars,
 		class => '::',
 	);	
 
