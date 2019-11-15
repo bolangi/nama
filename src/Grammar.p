@@ -91,6 +91,7 @@ sub process_line {
 		my $result = check_fx_consistency();
 		logpkg('logcluck',"Inconsistency found in effects data",
 			Dumper ($result)) if $result->{is_error};
+		git_snapshot();
 	}
 	my $output = delete $text->{output_buffer};
 	revise_prompt();
