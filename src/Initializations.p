@@ -409,7 +409,7 @@ sub reset_remote_control_socket {
 
 sub start_osc_listener {
 	my $port = shift;
-	say("Starting OSC listener on port $port");
+	pager_newline("Starting OSC listener on port $port");
 	my $osc_in = $project->{osc_socket} = IO::Socket::INET->new(
 		LocalAddr => 'localhost',
 		LocalPort => $port,
