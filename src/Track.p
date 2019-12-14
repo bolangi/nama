@@ -93,6 +93,7 @@ sub new {
 					width => 1,
 					vol  	=> undef,
 					pan 	=> undef,
+					rw		=> 'MON',
 
 					modifiers 		=> q(), # start, reverse, audioloop, playat
 					looping 		=> undef, # do we repeat our sound sample
