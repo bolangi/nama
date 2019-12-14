@@ -52,6 +52,7 @@ sub waveform_name {
 	my($path, $width, $height, $pixels, $start, $end) = @_;
 			"$path."  . $width . 'x' . "$height-$pixels" . region_def($start,$end) . ".png"
 }
+sub region_def {}
 sub find_waveform {
 
 	my $self = shift;
