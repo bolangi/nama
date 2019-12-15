@@ -654,7 +654,7 @@ sub track_gui {
 		 logpkg('debug',sub{my %q = %p; delete $q{parent}; print
 		 "=============\n%p\n",json_out(\%q)});
 
-		$vol = make_scale ( \%p );
+		$vol = make_scale( \%p );
 		# Mute
 
 		$mute = $gui->{track_frame}->Button(
@@ -707,7 +707,7 @@ sub track_gui {
 				p_num		=> $p_num,
 				);
 		# logpkg('debug',sub{ my %q = %p; delete $q{parent}; print "x=============\n%p\n",json_out(\%q) });
-		$pan = make_scale ( \%q );
+		$pan = make_scale( \%q );
 
 		# Center
 
