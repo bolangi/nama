@@ -89,7 +89,7 @@ sub process_line {
 	}
 	if (! $this_engine->started() ){
 		my $result = check_fx_consistency();
-		logpkg('logcluck',"Inconsistency found in effects data",
+		pagers("Inconsistency found in effects data",
 			Dumper ($result)) if $result->{is_error};
 		git_snapshot();
 	}
