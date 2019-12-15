@@ -855,10 +855,9 @@ sub add_effect_gui {
 		logsub("&add_effect_gui");
 		my $ui = shift;
 		my %p 			= %{shift()};
-		my ($n,$code,$id,$parent,$parameter) =
-			@p{qw(chain type id parent parameter)};
+		my ($n,$code,$id,$parent,$parameter,$FX) =
+			@p{qw(chain type id parent parameter self)};
 		my $i = $fx_cache->{full_label_to_index}->{$code};
-		my $FX = fxn($id);
 
 		logpkg('debug', sub{json_out(\%p)});
 
@@ -933,6 +932,7 @@ sub add_effect_gui {
 			{	parent => \$frame,
 				id => $id, 
 				p_num  => $p,
+				self => $FX,
 			};
 			push @sliders,make_scale($v);
 		}
@@ -1028,7 +1028,7 @@ sub make_scale {
 # 	p_num      => parameter number, starting at 0
 # 	length       => length widget # optional 
 	my $id = $p{id};
-	my $FX = fxn($id);
+	my $FX = fxn($id) // $p{self};
 	my $n = $FX->chain;
 	my $code = $FX->type;
 	my $p  = $p{p_num};

@@ -621,6 +621,7 @@ sub append_effect {
 			}  
 		}
 		my $FX = ::Effect->new(%args);
+		$args{self} = $FX;
 		push @added, $FX;
 		if( ! $FX->name )
 		{
