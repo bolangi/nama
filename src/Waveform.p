@@ -41,7 +41,7 @@ sub generate_waveform {
 	$height //= $config->{waveform_height};
 	$width //= int( $self->track->wav_length * $pixels_per_second);
 	my $name = waveform_name($self->track->full_path, $width, $height, $pixels_per_second);
-	my $cmd = join ' ', 'waveform', "-b #c2d6d6 -c #0080ff -W $width -H $height", $self->full_path, $name;
+	my $cmd = join ' ', 'waveform', "-b #c2d6d6 -c #0080ff -W $width -H $height", $self->track->full_path, $name;
 	say $cmd;
 	system($cmd);
 	$name;
