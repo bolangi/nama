@@ -31,10 +31,10 @@ sub initialize_terminal {
 
 	# handle Control-C from terminal
 
-	#$SIG{INT} = \&cleanup_exit; 
+	
 
-	# responds in a more timely way than abovce
 	$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
+	# responds in a more timely way than $SIG{INT} = \&cleanup_exit; 
 
 	$SIG{USR1} = sub { git_snapshot() };
 }
