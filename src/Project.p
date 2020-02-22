@@ -352,7 +352,6 @@ sub use_project_template {
  		name     => $project->{name},
  		settings => join_path(project_root(),"templates","$name.json"),
 	);
-	save_state();
 }
 sub list_project_templates {
 	my @templates= map{ /(.+?)\.json$/; $1}  read_dir(join_path(project_root(), "templates"));

@@ -147,7 +147,7 @@ sub rename_track {
 	use Cwd;
 	use File::Slurp;
 	my ($oldname, $newname, $statefile, $dir) = @_;
-	save_state();
+	git_snapshot();
 	my $old_dir = cwd();
 	chdir $dir;
 
