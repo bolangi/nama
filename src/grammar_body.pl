@@ -540,7 +540,6 @@ master_on: _master_on { ::master_on(); 1 }
 master_off: _master_off { ::master_off(); 1 }
 
 exit: _exit {   
-	::git_snapshot(); 
 	::cleanup_exit();
 	CORE::exit;
 }	
