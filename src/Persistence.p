@@ -278,15 +278,17 @@ sub restore_state_from_file {
 
 	####### Backward Compatibility ########
 
-	if ( $project->{save_file_version_number} < 1.100){ 
+	$project->{nama_version} //= delete $project->{save_file_version_number};
+
+	if ( $project->{nama_version} < 1.100){ 
 		map{ ::EffectChain::move_attributes($_) } 
 			(@project_effect_chain_data, @global_effect_chain_data)
 	}
-	if ( $project->{save_file_version_number} < 1.105){ 
+	if ( $project->{nama_version} < 1.105){ 
 		map{ $_->{class} = '::BoostTrack' } 
 		grep{ $_->{name} eq 'Boost' } @tracks_data;
 	}
-	if ( $project->{save_file_version_number} < 1.109){ 
+	if ( $project->{nama_version} < 1.109){ 
 		map
 		{ 	if ($_->{class} eq '::MixTrack') { 
 				$_->{is_mix_track}++;
@@ -302,7 +304,7 @@ sub restore_state_from_file {
 		} @bus_data;
 
 	}
-	if ( $project->{save_file_version_number} < 1.111){ 
+	if ( $project->{nama_version} < 1.111){ 
 		map
 		{
 			convert_rw($_);
@@ -320,7 +322,7 @@ sub restore_state_from_file {
 
 	# convert effect object format
 	
-	if ( $project->{save_file_version_number} < 1.200 )
+	if ( $project->{nama_version} < 1.200 )
 	{
 		@effects_data = 
 			map{ my $hashref = $fx->{applied}->{$_}; 
@@ -334,11 +336,11 @@ sub restore_state_from_file {
 		delete $fx->{applied};
 		delete $fx->{params};
 	}
-	if ( $project->{save_file_version_number} <= 1.201 )
+	if ( $project->{nama_version} <= 1.201 )
 	{
 		map{ $_->{owns} ||= [] } @effects_data;
 	}
-	if ( $project->{save_file_version_number} <= 1.208 )
+	if ( $project->{nama_version} <= 1.208 )
 	{
 		map
 		{ 
@@ -357,12 +359,12 @@ sub restore_state_from_file {
 		}
 		@bus_data;
 	}
-	if ( $project->{save_file_version_number} <= 1.208 )
+	if ( $project->{nama_version} <= 1.208 )
 	{
 		# older projects did not store this
 		$project->{sample_rate} //= $config->{sample_rate} 
 	}
-	if ( $project->{save_file_version_number} <= 1.211){ 
+	if ( $project->{nama_version} <= 1.211){ 
 		map { $_->{source_id} = 'Main', $_->{source_type} = 'bus' }
 		grep { $_->{name} eq 'Main'	} @tracks_data;
 		map { $_->{source_id} = 'Main'; 
@@ -372,12 +374,12 @@ sub restore_state_from_file {
 			}
 		grep { $_->{name} eq 'Mixdown'	} @tracks_data;
 	}
-	if ( $project->{save_file_version_number} <= 1.212 )
+	if ( $project->{nama_version} <= 1.212 )
 	{
 		my($boost) = grep{$_->{name} eq 'Boost'} @tracks_data; 
 		delete $boost->{target}
 	}
-	if ( $project->{save_file_version_number} <= 1.213 )
+	if ( $project->{nama_version} <= 1.213 )
 	{
 		map { 
 			$project->{track_comments}->{         $_->{name} } = delete $_->{comment}         if $_->{comment};
@@ -385,6 +387,22 @@ sub restore_state_from_file {
 
 		} @tracks_data; 
 	}
+	if ( $project->{nama_version}  ) # 1.214 or older
+	{
+		map 
+		{
+			$_->{class} =~ s/^Nama::/Audio::Nama::/ if $_->{class} 
+		}	@tracks_data,
+			@bus_data,
+			@marks_data,
+			@fade_data,
+			@edit_data,
+			@inserts_data,
+			@effects_data,
+			@global_effect_chain_data,
+			@project_effect_chain_data;
+	}
+
 
 	# restore effects, no change to track objects needed
 	
