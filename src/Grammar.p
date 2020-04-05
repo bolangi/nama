@@ -541,14 +541,13 @@ sub destroy_current_wav {
 	#my $reply = chr($text->{term}->read_key()); 
 	if ( $reply =~ /y/i ){
 		# remove version comments, if any
-		delete $this_track->{version_comment}{$this_track->current_version};
+		delete $project->{track_version_comments}{$this_track->name}{$this_track->version};
 		pager("Unlinking.\n");
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		restart_wav_memoize();
 	}
 	$text->{term}->remove_history($text->{term}->where_history);
-	$this_track->set(version => 0);  # reset
-	$this_track->set(version => $this_track->current_version); 
+	$this_track->set(version => $this_track->last); 
 	1;
 }
 
