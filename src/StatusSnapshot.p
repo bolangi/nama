@@ -47,8 +47,6 @@ sub status_snapshot {
 }
 sub status_snapshot_string { 
 	my $json = json_out(status_snapshot());
-	# hack to avoid false diff due to string/numerical
-	# representation 
 	$json =~ s/: "(\d+)"/: $1/g; 
 	$json
 }
