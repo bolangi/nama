@@ -76,7 +76,10 @@ sub restore_state_from_vcs {
 sub git_snapshot {
 	logsub("&git_snapshot");
 	my $commit_message = shift() || "";
-	return unless $config->{use_git} and ! $config->{opts}->{R};
+	$config->{use_git} 
+		and $project->{name} 
+		and $project->{repo}
+		or throw('failed to create snapshot'), return;
 	save_state();
 	reset_command_buffer(), return unless state_changed();
 	git_commit($commit_message);
@@ -188,7 +191,11 @@ sub list_branches {
 
 sub autosave {
 		logsub("&autosave");
-		$this_engine->started() ? return : git_snapshot();
+		git_snapshot(), return if $config->{autosave}
+							and not $config->{opts}->{R}
+							and not ($this_engine->started() 
+											and ::ChainSetup::really_recording());
+		throw('failed to autosave, are you recording?');
 }
 sub redo {
 	if ($project->{redo}){

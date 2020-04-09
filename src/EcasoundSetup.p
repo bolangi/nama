@@ -21,18 +21,12 @@ sub setup {
 	
 	ecasound_iam('cs-disconnect') if ecasound_iam('cs-connected');
 
+	::ChainSetup::remove_temporary_tracks();
+	restart_wav_memoize(); # check if someone has snuck in some files
+	find_duplicate_inputs(); # we will warn the user later
+	autosave() ;	
 	::ChainSetup::initialize();
-
 	
-	# this is our chance to save state without the noise
-	# of temporary tracks, avoiding the issue of getting diffs 
-	# in the project data from each new chain setup.
-	autosave() if $config->{autosave} eq 'setup'
-					and $project->{name}
-					and $config->{use_git} 
-					and $project->{repo};
-	
-	# TODO: use try/catch
 	# catch errors unless testing (no-terminal option)
 	local $@ unless $config->{opts}->{T}; 
 	track_memoize(); 			# freeze track state 

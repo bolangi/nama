@@ -141,7 +141,7 @@ sub definitions {
 		use_pager 						=> 1,
 		use_placeholders 				=> 1,
 		use_git							=> 1,
-		autosave						=> 'undo',
+		autosave						=> 1,
 		volume_control_operator 		=> 'ea', # default to linear scale
 		sync_mixdown_and_playback_version_numbers => 1, # not implemented yet
 		engine_tcp_port					=> 2868, # 'default' engine
