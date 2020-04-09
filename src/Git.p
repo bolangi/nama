@@ -191,9 +191,11 @@ sub list_branches {
 
 sub autosave {
 		logsub("&autosave");
-		git_snapshot() if $config->{autosave}
-							and ! $config->{opts}->{R}
-							and ! $this_engine->started() 
+		git_snapshot(), return if $config->{autosave}
+							and not $config->{opts}->{R}
+							and not ($this_engine->started() 
+											and ::ChainSetup::really_recording());
+		throw('failed to autosave, are you recording?');
 }
 sub redo {
 	if ($project->{redo}){
