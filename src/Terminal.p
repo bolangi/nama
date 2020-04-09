@@ -36,7 +36,7 @@ sub initialize_terminal {
 	$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
 	# responds in a more timely way than $SIG{INT} = \&cleanup_exit; 
 
-	$SIG{USR1} = sub { git_snapshot() };
+	$SIG{USR1} = sub { autosave() };
 }
 
 sub setup_hotkeys {
