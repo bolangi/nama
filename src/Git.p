@@ -79,7 +79,7 @@ sub git_snapshot {
 	$config->{use_git} 
 		and $project->{name} 
 		and $project->{repo}
-		or return;
+		or throw('failed to create snapshot'), return;
 	save_state();
 	reset_command_buffer(), return unless state_changed();
 	git_commit($commit_message);
