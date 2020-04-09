@@ -68,18 +68,9 @@ sub process_line {
 								  command => $user_input };
 			push(@{$project->{command_buffer}}, $command_stamp);
 			
-			if ( 		$config->{autosave} eq 'undo'
-					and $config->{use_git} 
-					and $project->{name}
-					and $project->{repo}
-					and ! $this_engine->started() 
-			){
-				local $quiet = 1;
-				::ChainSetup::remove_temporary_tracks();
-				autosave() unless $config->{opts}->{R};
-				reconfigure_engine();
-			}
+			autosave();
 			reconfigure_engine();
+
 		# reset current track to Main if it is
 		# undefined, or the track has been removed
 		# from the index
@@ -91,7 +82,6 @@ sub process_line {
 		my $result = check_fx_consistency();
 		pagers("Inconsistency found in effects data",
 			Dumper ($result)) if $result->{is_error};
-		git_snapshot();
 	}
 	my $output = delete $text->{output_buffer};
 	revise_prompt();
@@ -476,7 +466,7 @@ sub t_load_project {
 	throw("Project $name does not exist\n"), return
 		unless -d join_path(project_root(), $name) or $args{create};
 	stop_transport() if $this_engine->started(); 
-	git_snapshot();
+	autosave();
 	load_project( name => $name, %args );
 	pager("loaded project: $project->{name}\n") unless $args{create};
 	{no warnings 'uninitialized';
