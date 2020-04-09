@@ -22,6 +22,8 @@ sub setup {
 	ecasound_iam('cs-disconnect') if ecasound_iam('cs-connected');
 
 	::ChainSetup::remove_temporary_tracks();
+	restart_wav_memoize(); # check if someone has snuck in some files
+	find_duplicate_inputs(); # we will warn the user later
 	autosave() ;	
 	::ChainSetup::initialize();
 	

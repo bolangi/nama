@@ -229,10 +229,6 @@ sub configure {
 	# store a lists of wav-recording tracks for the rerecord
 	# function
 	
-	restart_wav_memoize(); # check if someone has snuck in some files
-	
-	find_duplicate_inputs(); # we will warn the user later
-
 	if( $force or $setup->{changed} ){ 
 		logpkg('debug',"reconfigure requested");
 		$setup->{_old_snapshot} = status_snapshot_string();
