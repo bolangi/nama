@@ -11,6 +11,7 @@ sub cleanup {
 package ::;
 use Modern::Perl;
 use Cwd;
+use File::Spec::Functions qw(splitpath);
 use ::Globals qw(:all);
 
 sub rec_cleanup {  
@@ -22,8 +23,6 @@ sub rec_cleanup {
 		{
 			$project->{playback_position} = 0;
 			$setup->{_last_rec_tracks} = \@rec_tracks;
-			pager(join " ", "Files recorded for these tracks:",
-				map{ $_->current_wav } @rec_tracks);
 		}
 
 		if( grep /Mixdown/, @files) { 
@@ -167,11 +166,16 @@ sub new_files_were_recorded {
 		} @files;
 	if(@recorded){
 		restart_wav_memoize();
-		pagers("recorded:", @recorded);
+		pager(join " ", "recorded:", map{ filename($_) } @recorded);
 	}
 	map{ _get_wav_info($_) } @recorded;
 	@recorded 
 } 
+sub filename {
+	my $path = shift;
+	my(undef, undef, $name) = splitpath($path);
+	$name
+}
 1;
 __END__
 
