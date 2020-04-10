@@ -95,35 +95,6 @@ waveform_height: 200
 
 # ecasound_tcp_port: 2868  
 
-# default without midi, till it is sorted out
-use_midi: 0
-
-# cheap version tracking for our projects, makes possible
-# undo/redo and branching
-
-use_git: 1
-
-
-# WAVs recorded at the same time get the same numeric suffix
-
-use_group_numbering: 1
-
-# Enable pressing SPACE to start/stop transport (in terminal, cursor in column 1)
-
-press_space_to_start_transport: 1
-
-# commands to execute each time a project is loaded
-
-execute_on_project_load: ~
-
-volume_control_operator: eadb # must be 'ea' or 'eadb'
-
-# beep PC speaker on command error
-
-# beep_command: beep -f 350 -l 700
-
-# hotkey_beep: beep -f 250 -l 200
-
 # effects for use in mastering mode
 
 eq: Parametric1 1 0 0 40 1 0 0 200 1 0 0 600 1 0 0 3300 1 0
