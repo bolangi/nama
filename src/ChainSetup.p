@@ -69,19 +69,7 @@ sub initialize {
 sub ecasound_chain_setup { $chain_setup } 
 sub is_ecasound_chain { $is_ecasound_chain{$_[0]} }
 
-sub engine_tracks { # tracks that belong to current chain setup
-     map{$::ti{$_}} grep{$::ti{$_}} keys %is_ecasound_chain;
-}
-sub is_engine_track { 
-		# takes Track object, name or index
-		# returns object if corresponding track belongs to current chain setup
-	my $t = shift;
-	my $n;
-	if( (ref $t) =~ /Track/){ $n = $t->n     }
-	if( $t =~ ! /\D/ )      { $n = $t        }
-	if( $t =~ /\D/ and $tn{$_} ){ $n = $::tn{$t}->n}
-	$::ti{$n} if $is_ecasound_chain{$n}
-}
+sub engine_tracks { ::audio_tracks() } 
 sub engine_wav_out_tracks {
 	grep{$_->rec} engine_tracks();
 }
