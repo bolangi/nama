@@ -50,6 +50,24 @@ meta: eval perlcode stopper {
 }
 # execute for each specified track if leading 'for'
 
+meta: 'for' 'track' ';' namacode stopper { 
+ 	::logit('Grammar','debug',"for track, namacode: $item{namacode}");
+ 	my @tracks = grep{ ! $_->is_mixer } $::bn{$::this_bus}->track_o;
+ 	for my $t(@tracks) {
+ 		$t->select_track;
+		$::text->{parser}->meta($item{namacode});
+	}
+	1;
+}
+meta: for 'bus' ';' namacode stopper { 
+ 	::logit('Grammar','debug',"for bus, namacode: $item{namacode}");
+ 	my @tracks = grep{ $_->is_mixer } $::bn{$::this_bus}->track_o;
+ 	for my $t(@tracks) {
+ 		$t->select_track;
+		$::text->{parser}->meta($item{namacode});
+	}
+	1;
+}
 meta: for bunch_spec ';' namacode stopper { 
  	::logit('Grammar','debug',"namacode: $item{namacode}");
  	my @tracks = ::bunch_tracks($item{bunch_spec});
