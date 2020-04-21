@@ -185,7 +185,7 @@ sub rename_track {
 
 	write_file($statefile, $state);
 	my $msg = "Rename track $oldname -> $newname";
-	git_commit($msg);
+	git_snapshot($msg);
 	::pager($msg);
 	load_project(name => $::project->{name});
 }

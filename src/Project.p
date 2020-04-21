@@ -146,7 +146,7 @@ sub load_project {
 	initialize_mixer();
 	dig_ruins(); # in case there are audio files, but no tracks present
 
-	git_commit("initialize new project") if $config->{use_git};
+	git_snapshot("initialize new project");
 
 	# possible null if Text mode
 	
