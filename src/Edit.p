@@ -368,8 +368,8 @@ sub new_edit {
 
 	# abort for many different reasons
 	
-	::throw("You must use 'set_edit_points' before creating a new edit. Aborting."),
-		return unless @{$setup->{edit_points}};
+	::throw("You must use 'set-edit-points' before creating a new edit. Aborting."),
+		return unless defined $setup->{edit_points};
 	my $overlap = grep { 
 		my $fail;
 		my $rst = $_->rec_start_time;
