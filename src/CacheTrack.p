@@ -34,7 +34,8 @@ sub cache_track { # launch subparts if conditions are met
 	$track->set( rw => REC);	
 	pagers($track->name. ": preparing to cache ".  ($track->is_mixing ? 'a bus' : 'an ordinary track'));
 	
-	throw($track->name. ": nothing to cache!  Skipping."), return 
+	throw($track->name. ": nothing to cache!  Skipping.
+Can only cache effects, inserts, a region or a mix track."), return 
 		unless $track->is_mixing 
 				or $track->user_ops 
 				or $track->has_insert
