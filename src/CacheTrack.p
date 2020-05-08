@@ -21,11 +21,10 @@ sub cache_track { # launch subparts if conditions are met
 	logsub('&cache_track');
 	my $args = {};
 	(my $track, $args->{additional_time}) = @_;
-	local $this_track;
 	throw("Track is OFF. Set to PLAY (MON for a bus) and try again"), return if $track->off;
+	local $this_track;
 	$args->{track} = $track;
 	$args->{additional_time} //= 0;
-	$args->{is_mixing}++ if $track->is_mixing;
 	$args->{original_version} = $track->is_mixing ? 0 : $args->{track}->playback_version;
 	$args->{cached_version} = $args->{track}->last + 1;
 	
