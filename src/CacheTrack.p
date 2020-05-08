@@ -91,9 +91,6 @@ sub generate_cache_graph_bus {
 			version => ($args->{track_result_version}),
 		}
 	); 
-
-# 	grep { $_->name ne 'Main' } 
-
 }
 
 sub generate_cache_graph {
