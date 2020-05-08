@@ -22,9 +22,7 @@ sub cache_track { # launch subparts if conditions are met
 	my $args = {};
 	(my $track, $args->{additional_time}) = @_;
 	local $this_track;
-	throw("Set track to MON or PLAY"), return if $track->rw eq OFF 
-											and $track->is_mixer 
-											and $track->targets;
+	throw("Track is OFF. Set to PLAY (MON for a bus) and try again"), return if $track->off;
 	$args->{track} = $track;
 	$args->{additional_time} //= 0;
 	$args->{is_mixing}++ if $track->is_mixing;
