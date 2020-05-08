@@ -28,8 +28,8 @@ sub cache_track { # launch subparts if conditions are met
 	$args->{original_version} = $track->is_mixing ? 0 : $args->{track}->playback_version;
 	$args->{cached_version} = $args->{track}->last + 1;
 	
-	$args->{track_rw} = $track->{rw};
-	$args->{main_rw} = $tn{Main}->{rw};
+	$args->{track_rw} = $track->rw;
+	$args->{main_rw} = $tn{Main}->rw;
 	$tn{Main}->set( rw => OFF);
 	$track->set( rw => REC);	
 	pagers($track->name. ": preparing to cache ".  ($track->is_mixing ? 'a bus' : 'an ordinary track'));
