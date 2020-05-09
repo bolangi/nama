@@ -18,7 +18,7 @@ use ::Globals qw(:all);
 # orig_pan
 
 sub cache_track { # launch subparts if conditions are met
-	logsub('&cache_track');
+	logsub((caller(0))[3]);
 	my $args = {};
 	(my $track, $args->{additional_time}) = @_;
 	throw("Track is OFF. Set to PLAY (MON for a bus) and try again"), return if $track->off;
@@ -94,7 +94,7 @@ sub generate_cache_graph_bus {
 }
 
 sub generate_cache_graph {
-	logsub('&generate_cache_graph');
+	logsub((caller(0))[3]);
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
 	$args->{graph} = $g;
@@ -147,7 +147,7 @@ sub generate_cache_graph {
 }
 
 sub process_cache_graph {
-	logsub('&process_cache_graph');
+	logsub((caller(0))[3]);
 	my $g = shift;
 	logpkg('debug', "The graph after bus routing:\n$g");
 	::ChainSetup::prune_graph();
@@ -191,7 +191,7 @@ sub cache_engine_run {
 	# It is triggered by stop_polling_cache_progress()
 }
 sub complete_caching {
-	logsub('&complete_caching');
+	logsub((caller(0))[3]);
 	my $args = shift;	
 	my $name = $args->{track}->name;
 	my @files = grep{/$name/} new_files_were_recorded();
@@ -204,7 +204,7 @@ sub complete_caching {
 	undef $setup->{cache_track_args};
 }
 sub update_cache_map {
-	logsub('&update_cache_map');
+	logsub((caller(0))[3]);
 	my $args = shift;
 		logpkg('debug', "updating track cache_map");
 		logpkg('debug', "current track cache entries:",

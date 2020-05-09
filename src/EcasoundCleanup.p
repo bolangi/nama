@@ -76,7 +76,7 @@ sub mixdown_postprocessing {
 	chdir $was_in;
 }
 sub tag_mixdown_commit {
-	logsub('&tag_mixdown_commit');
+	logsub((caller(0))[3]);
 	my ($name, $newfile, $mixdownfile) = @_;
 	logpkg('debug',"tag_mixdown_commit: @_");
 
@@ -93,7 +93,7 @@ sub tag_mixdown_commit {
 	git('tag', $name, '-m', $mix);
 }
 sub delete_existing_mixdown_tag_and_convenience_encodings {
-	logsub('&delete_existing_mixdown_tag_and_convenience_encodings');
+	logsub((caller(0))[3]);
 	my $name = shift;
 	logpkg('debug',"name: $name");
 		git('tag', '-d', $name);

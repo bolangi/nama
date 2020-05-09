@@ -62,7 +62,7 @@ sub jack_client_array {
 }
 
 sub jacks_get_port_latency {
-	logsub('&jacks_get_port_latency');
+	logsub((caller(0))[3]);
 	delete $jack->{clients};
 
 my $jc;

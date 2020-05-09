@@ -9,7 +9,7 @@ You may want to set use_git: 1 in .namarc"), return;
 	$project->{repo}->run(@_) 
 }
 sub initialize_project_git_repository {
-	logsub('&initialize_project_git_repository');
+	logsub((caller(0))[3]);
 	confess("no project dir") if ! project_dir();
 	return unless $config->{use_git} and not is_test_script();
 	pager("Creating git repository in ", join_path( project_dir(),  '.git' ))
@@ -28,7 +28,7 @@ sub initialize_project_git_repository {
 		);
 }
 sub git_tag_exists {
-	logsub('&git_tag_exists');
+	logsub((caller(0))[3]);
 	my $tag = shift;
 	grep { $tag eq $_ } git( 'tag','--list');
 }

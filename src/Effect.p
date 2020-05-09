@@ -361,7 +361,7 @@ sub _remove_effect {
 	return(); 
 }
 sub position_effect {
-	#logsub('&position_effect');
+	#logsub((caller(0))[3]);
 	my($self, $pos) = @_;
 
 	my $op = $self->id;
@@ -555,7 +555,7 @@ sub set_chain_value {
 #				* restores the operators
 		 
 sub add_effect {
-	#logsub('&add_effect');
+	#logsub((caller(0))[3]);
 	my $args = shift;
 	my $added = _add_effect($args);
 	$added->[0]->id
@@ -964,7 +964,7 @@ sub update_effect {
 }
 
 sub sync_effect_parameters {
-	logsub('&sync_effect_parameters');
+	logsub((caller(0))[3]);
 	local $config->{category} = 'ECI_FX';
 
 	# when a controller changes an effect parameter, the
@@ -1076,7 +1076,7 @@ sub set_bypass_state {
 	
 	local $config->{category} = 'ECI_FX';
 	my($track, $bypass_state, @ops) = @_;
-	logsub('&set_bypass_state');
+	logsub((caller(0))[3]);
 
 	# only process ops that belong to this track
 	@ops = intersect_with_track_ops_list($track,@ops);

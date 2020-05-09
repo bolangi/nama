@@ -193,7 +193,7 @@ qw(
 [% qx(./strip_all ./var_singletons) %]
 );
 sub assign_singletons {
-	logsub('&assign_singletons');
+	logsub((caller(0))[3]);
 	my $ref = shift;
 	my $data = $ref->{data} or die "expected data got undefined";
 	my $class = $ref->{class} // '::';

@@ -29,7 +29,7 @@ sub initialize_jack_graph {
 
 
 sub propagate_latency {   
-	logsub('&propagate_latency');
+	logsub((caller(0))[3]);
 
 	initialize_jack_graph();
 	logpkg('debug',"jack graph\n","$lg");
@@ -48,7 +48,7 @@ sub propagate_capture_latency {
 }
 
 sub propagate_playback_latency {
-	logsub('&propagate_playback_latency'); 
+	logsub((caller(0))[3]); 
  	logpkg('debug',"jack graph\n","$lg");
     my @sources = grep{ $lg->is_source_vertex($_) } $lg->vertices();
  	logpkg('debug',"recurse through latency graph starting at sources: @sources");
