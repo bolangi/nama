@@ -8,7 +8,7 @@ sub setup_grammar {
 
 	### COMMAND LINE PARSER 
 
-	logsub("&setup_grammar");
+	logsub((caller(0))[3]);
 
 	$text->{commands_yml} = get_data_section("commands_yml");
 	$text->{commands_yml} = quote_yaml_scalars($text->{commands_yml});
@@ -51,7 +51,7 @@ sub setup_grammar {
 }
 sub process_line {
 	state $total_effects_count;
-	logsub("&process_line");
+	logsub((caller(0))[3]);
 	no warnings 'uninitialized';
 	my ($user_input) = @_;
 	# convert hyphenated commands to underscore form

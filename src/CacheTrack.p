@@ -166,7 +166,7 @@ sub process_cache_graph {
 }
 
 sub cache_engine_run {
-	logsub("&cache_engine_run");
+	logsub((caller(0))[3]);
 	my $args = shift;
 	connect_transport()
 		or throw("Couldn't connect engine! Aborting."), return;

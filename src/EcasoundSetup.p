@@ -9,7 +9,7 @@ sub setup {
 	my $self = shift;
 	# return 1 if successful
 	# catch errors from generate_setup_try() and cleanup
-	logsub("&setup");
+	logsub((caller(0))[3]);
 
 	# extra argument (setup code) will be passed to generate_setup_try()
 	my (@extra_setup_code) = @_;
@@ -51,7 +51,7 @@ sub find_duplicate_inputs { # in Main bus only
 
 	%{$setup->{tracks_with_duplicate_inputs}} = ();
 	%{$setup->{inputs_used}} = ();
-	logsub("&find_duplicate_inputs");
+	logsub((caller(0))[3]);
 	map{	my $source = $_->source;
 			$setup->{tracks_with_duplicate_inputs}->{$_->name}++ if $setup->{inputs_used}->{$source} ;
 		 	$setup->{inputs_used}->{$source} //= $_->name;
@@ -79,7 +79,7 @@ sub teardown_engine {
 }
 
 sub arm {
-	logsub("&arm");
+	logsub((caller(0))[3]);
 	exit_preview_modes();
 	reconfigure_engine('force');
 }
@@ -116,7 +116,7 @@ sub something_to_run { $en{ecasound}->valid_setup or midi_run_ready()  }
 sub midi_run_ready { $config->{use_midi} and $en{midish} and $en{midish}->is_active }
 
 sub connect_transport {
-	logsub("&connect_transport");
+	logsub((caller(0))[3]);
 	remove_riff_header_stubs();
 	register_other_ports(); # we won't see Nama ports since Nama hasn't started
 	load_ecs($file->chain_setup) or ::throw("failed to load chain setup"), return;

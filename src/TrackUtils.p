@@ -3,7 +3,7 @@ use Modern::Perl;
 
 sub add_track {
 
-	logsub("&add_track");
+	logsub((caller(0))[3]);
 	my ($name, @params) = @_;
 	my %vals = (name => $name, @params);
 	my $class = $vals{class} // '::Track';

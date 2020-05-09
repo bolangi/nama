@@ -8,7 +8,7 @@ no warnings 'uninitialized';
 
 sub update_jack_client_list {
 	state $warn_count;
-	#logsub("&update_jack_client_list");
+	#logsub((caller(0))[3]);
 	# cache current JACK status
 	
 	# skip if Ecasound is busy
@@ -209,7 +209,7 @@ sub parse_ports_list {
 
 	# default to output of jack_lsp -p
 	
-	logsub("&parse_ports_list");
+	logsub((caller(0))[3]);
 	my $j = shift || qx(jack_lsp -tp 2> /dev/null); 
 	logpkg('debug', "input: $j");
 

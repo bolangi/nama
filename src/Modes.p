@@ -7,7 +7,7 @@ sub set_preview_mode {
 
 	# set preview mode, releasing doodle mode if necessary
 	
-	logsub("&preview");
+	logsub((caller(0))[3]);
 
 	# do nothing if already in 'preview' mode
 	
@@ -27,7 +27,7 @@ MSG
 }
 sub set_doodle_mode {
 
-	logsub("&doodle");
+	logsub((caller(0))[3]);
 	return if $this_engine->started() and ::ChainSetup::really_recording();
 	disable_preview_modes();
 	{
@@ -47,7 +47,7 @@ Exit using 'preview' or 'arm' commands
 MSG
 }
 sub exit_preview_modes {
-		logsub("&exit_preview_modes");
+		logsub((caller(0))[3]);
 		return unless $mode->{preview} or $mode->{doodle};
 		disable_preview_modes();
 		stop_transport();

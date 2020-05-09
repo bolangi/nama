@@ -177,7 +177,7 @@ sub kill_and_reap {
 }
 	
 sub cleanup_exit {
-	logsub("&cleanup_exit");
+	logsub((caller(0))[3]);
  	remove_riff_header_stubs();
 	trigger_rec_cleanup_hooks();
 	# for each process: 

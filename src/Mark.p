@@ -166,7 +166,7 @@ use Modern::Perl;
 use ::Globals qw(:all);
 
 sub drop_mark {
-	logsub("&drop_mark");
+	logsub((caller(0))[3]);
 	my $name = shift;
 	my $here = ecasound_iam("getpos");
 
@@ -186,7 +186,7 @@ sub drop_mark {
 	$ui->marker($mark); # for GUI
 }
 sub mark { # GUI_CODE
-	logsub("&mark");
+	logsub((caller(0))[3]);
 	my $mark = shift;
 	my $pos = $mark->time;
 	if ($gui->{_markers_armed}){ 
@@ -201,7 +201,7 @@ sub mark { # GUI_CODE
 }
 
 sub next_mark {
-	logsub("&next_mark");
+	logsub((caller(0))[3]);
 	my $jumps = shift || 0;
 	$jumps and $jumps--;
 	my $here = ecasound_iam("cs-get-position");
@@ -216,7 +216,7 @@ sub next_mark {
 	}
 }
 sub previous_mark {
-	logsub("&previous_mark");
+	logsub((caller(0))[3]);
 	my $jumps = shift || 0;
 	$jumps and $jumps--;
 	my $here = ecasound_iam("getpos");
@@ -234,12 +234,12 @@ sub previous_mark {
 ## jump recording head position
 
 sub to_start { 
-	logsub("&to_start");
+	logsub((caller(0))[3]);
 	return if ::ChainSetup::really_recording();
 	set_position( 0 );
 }
 sub to_end { 
-	logsub("&to_end");
+	logsub((caller(0))[3]);
 	# ten seconds shy of end
 	return if ::ChainSetup::really_recording();
 	my $end = ecasound_iam('cs-get-length') - 10 ;  
@@ -248,7 +248,7 @@ sub to_end {
 sub jump {
 	return if ::ChainSetup::really_recording();
 	my $delta = shift;
-	logsub("&jump");
+	logsub((caller(0))[3]);
 	my $here = ecasound_iam('getpos');
 	logpkg('debug', "delta: $delta, here: $here, unit: $gui->{_seek_unit}");
 	my $new_pos = $here + $delta * $gui->{_seek_unit};
@@ -263,7 +263,7 @@ sub jump {
 sub set_position { fade_around(\&_set_position, @_) }
 
 sub _set_position {
-	logsub("&set_position");
+	logsub((caller(0))[3]);
 
     return if ::ChainSetup::really_recording(); # don't allow seek while recording
 

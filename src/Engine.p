@@ -297,7 +297,7 @@ sub launch_ecasound_server {
 	$self->{audio_ecasound} = Audio::Ecasound->new();
 }
 sub ecasound_iam{
-	#logsub("&ecasound_iam");
+	#logsub((caller(0))[3]);
 	my $self = shift;
 	my $cmd = shift;
 	my $category = ::munge_category(shift());

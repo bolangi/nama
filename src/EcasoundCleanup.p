@@ -15,7 +15,7 @@ use File::Spec::Functions qw(splitpath);
 use ::Globals qw(:all);
 
 sub rec_cleanup {  
-	logsub("&rec_cleanup");
+	logsub((caller(0))[3]);
 	logpkg('debug',"transport still running, can't cleanup"), return if $this_engine->running;
 	if( my (@files) = new_files_were_recorded() )
 	{
@@ -33,7 +33,7 @@ sub rec_cleanup {
 	}
 }
 sub mixdown_postprocessing {
-	logsub("&mixdown_postprocessing");
+	logsub((caller(0))[3]);
 	nama_cmd('mixplay');
 	my ($oldfile) = $tn{Mixdown}->full_path =~ m{([^/]+)$};
 	$oldfile = join_path('.wav',$oldfile);

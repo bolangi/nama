@@ -58,7 +58,7 @@ sub read_config {
 	#
 	# use the embedded default file if none other is present
 	
-	logsub("&read_config");
+	logsub((caller(0))[3]);
 	
 	my $config_file = shift;
 	
@@ -105,7 +105,7 @@ loads initial_mix.json");
 sub git_executable_found { qx(which git) }
 
 sub walk_tree {
-	#logsub("&walk_tree");
+	#logsub((caller(0))[3]);
 	my $ref = shift;
 	map { substitute($ref, $_) } 
 		grep {$_ ne q(abbreviations)} 

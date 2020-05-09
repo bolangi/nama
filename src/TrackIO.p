@@ -16,7 +16,7 @@ sub is_used {
 	or ($bus and $bus->can('wantme') and $bus->wantme)  # A bus needs my signal
 }
 sub rec_status {
-#	logsub("&rec_status");
+#	logsub((caller(0))[3]);
 	my $track = shift;
 	my $bus = $track->bus;
 
@@ -279,7 +279,7 @@ sub set_rec {
 }
 sub rw_set {
 	my $track = shift;
-	logsub("&rw_set");
+	logsub((caller(0))[3]);
 	my ($bus, $rw) = @_;
 	$track->set_rec, return if $rw eq REC;
 	$track->set_rw($rw);

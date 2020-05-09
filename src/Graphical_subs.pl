@@ -8,7 +8,7 @@
 
 sub init_gui {
 
-	logsub("&init_gui");
+	logsub((caller(0))[3]);
 
 	init_palettefields(); # keys only
 
@@ -247,7 +247,7 @@ sub wh {
 
 sub transport_gui {
 	my $ui = shift;
-	logsub("&transport_gui");
+	logsub((caller(0))[3]);
 
 	$gui->{engine_label} = $gui->{transport_frame}->Label(
 		-text => 'TRANSPORT',
@@ -276,7 +276,7 @@ sub transport_gui {
 }
 sub time_gui {
 	my $ui = shift;
-	logsub("&time_gui");
+	logsub((caller(0))[3]);
 
 	my $time_label = $gui->{clock_frame}->Label(
 		-text => 'TIME', 
@@ -504,7 +504,7 @@ sub global_version_buttons {
  	}
 }
 sub track_gui { 
-	logsub("&track_gui");
+	logsub((caller(0))[3]);
 	my $ui = shift;
 	my $n = shift;
 	pager("track_gui already generated"), return
@@ -796,7 +796,7 @@ sub track_gui {
 sub remove_track_gui {
  	my $ui = shift;
  	my $n = shift;
-	logsub("&remove_track_gui");
+	logsub((caller(0))[3]);
 	return unless $gui->{tracks_remove}->{$n};
  	map {$_->destroy  } @{ $gui->{tracks_remove}->{$n} };
 	delete $gui->{tracks_remove}->{$n};
@@ -812,7 +812,7 @@ sub paint_mute_buttons {
 }
 
 sub create_master_and_mix_tracks { 
-	logsub("&create_master_and_mix_tracks");
+	logsub((caller(0))[3]);
 
 
 	my @rw_items = (
@@ -852,7 +852,7 @@ sub update_version_button {
 }
 
 sub add_effect_gui {
-		logsub("&add_effect_gui");
+		logsub((caller(0))[3]);
 		my $ui = shift;
 		my %p 			= %{shift()};
 		my ($n,$code,$id,$parent,$parameter,$FX) =
@@ -971,7 +971,7 @@ sub destroy_widgets {
 }
 sub remove_effect_gui { 
 	my $ui = shift;
-	logsub("&remove_effect_gui");
+	logsub((caller(0))[3]);
 	my $id = shift;
 	my $FX = fxn($id);
 	my $n = $FX->chain;
@@ -986,7 +986,7 @@ sub remove_effect_gui {
 }
 
 sub effect_button {
-	logsub("&effect_button");
+	logsub((caller(0))[3]);
 	my ($n, $label, $start, $end) = @_;
 	logpkg('debug', "chain $n label $label start $start end $end");
 	my @items;
@@ -1019,7 +1019,7 @@ sub effect_button {
 
 sub make_scale {
 	
-	logsub("&make_scale");
+	logsub((caller(0))[3]);
 	my $ref = shift;
 	my %p = %{$ref};
 # 	%p contains following:
@@ -1187,7 +1187,7 @@ sub update_indicator {
 }
 
 sub get_saved_colors {
-	logsub("&get_saved_colors");
+	logsub((caller(0))[3]);
 
 	# aliases
 	
@@ -1269,7 +1269,7 @@ sub namaset {
 }
 
 sub colorchooser { 
-	logsub("&colorchooser");
+	logsub((caller(0))[3]);
 	my ($field, $initialcolor) = @_;
 	logpkg('debug', "field: $field, initial color: $initialcolor");
 	my $new_color = $gui->{mw}->chooseColor(

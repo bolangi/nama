@@ -222,7 +222,7 @@ sub detect_spacebar {
 	});
 }
 sub throw {
-	logsub("&throw");
+	logsub((caller(0))[3]);
 	pager_newline(@_)
 }
 sub pagers { &pager_newline(join "",@_) } # pass arguments along
@@ -254,7 +254,7 @@ sub pager {
 	# and print on terminal or view in pager
 	# as appropriate
 	
-	logsub("&pager");
+	logsub((caller(0))[3]);
 	my @output = @_;
 	@output or return;
 	chomp $output[-1];
@@ -291,7 +291,7 @@ sub file_pager {
 
 	# given a filename, run the pager on it
 	
-	logsub("&file_pager");
+	logsub((caller(0))[3]);
 	my $fname = shift;
 	if (! -e $fname or ! -r $fname ){
 		carp "file not found or not readable: $fname\n" ;

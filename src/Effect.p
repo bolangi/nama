@@ -181,7 +181,7 @@ sub registry_index {
 	$fx_cache->{full_label_to_index}->{ $self->type };
 }
 sub ecasound_controller_index { 
-	logsub("&ecasound_controller_index");
+	logsub((caller(0))[3]);
 	my $self = shift;
 	my $n = $self->chain;
 	my $id = $self->id;
@@ -196,7 +196,7 @@ sub ecasound_controller_index {
 	$opcount;
 }
 sub ecasound_effect_index { 
-	logsub("&ecasound_effect_index");
+	logsub((caller(0))[3]);
 	my $self = shift;
 	my $n = $self->chain;
 	my $id = $self->id;
@@ -311,7 +311,7 @@ sub _modify_effect {
 	1
 }
 sub _remove_effect { 
-	logsub("&_remove_effect");
+	logsub((caller(0))[3]);
 	my $self = shift;
 	my $id = $self->id;
 	my $n 		= $self->chain;
@@ -405,7 +405,7 @@ sub position_effect {
 }
 
 sub apply_op {
-	logsub("&apply_op");
+	logsub((caller(0))[3]);
 	my $self = shift;
 	local $config->{category} = 'ECI_FX';
 	my $id = $self->id;
@@ -562,7 +562,7 @@ sub add_effect {
 }
 sub _add_effect {
 	my $p = shift;
-	logsub("&_add_effect");
+	logsub((caller(0))[3]);
 	#logpkg('debug',sub{ "add effect arguments - 0:\n".json_out($p)});
 	
 	set_chain_value($p);
@@ -718,7 +718,7 @@ sub insert_effect {
 	$added;
 }
 sub modify_effect {
-	logsub("&modify_effect");
+	logsub((caller(0))[3]);
 	my ($op_id, $parameter, $sign, $value) = @_;
 		# $parameter: one-based
 	
@@ -729,7 +729,7 @@ sub modify_effect {
 
 
 sub modify_multiple_effects {
-	logsub("&modify_multiple_effects");
+	logsub((caller(0))[3]);
 	my ($op_ids, $parameters, $sign, $value) = @_;
 	map{ my $op_id = $_;
 		map{ 	my $parameter = $_;
@@ -741,7 +741,7 @@ sub modify_multiple_effects {
 }
 
 sub remove_effect { 
-	logsub("&remove_effect");
+	logsub((caller(0))[3]);
 	my $id = shift;
 	my $FX = fxn($id)
 		or logpkg('logcarp',"$id: does not exist, skipping...\n"), return;
@@ -805,7 +805,7 @@ sub fx_defaults {
 ## Ecasound engine -- apply/remove chain operators
 
 sub apply_ops {  # in addition to operators in .ecs file
-	logsub("&apply_ops");
+	logsub((caller(0))[3]);
 	for my $track ( ::audio_tracks() ) {
 		my $n = $track->n;
  		next unless ::ChainSetup::is_ecasound_chain($n);
@@ -819,7 +819,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 sub remove_op {
 	# remove chain operator from Ecasound engine
 
-	logsub("&remove_op");
+	logsub((caller(0))[3]);
 	local $config->{category} = 'ECI_FX';
 
 	# only if engine is configured
@@ -915,7 +915,7 @@ sub update_ecasound_effect {
 	# update the parameters of the Ecasound chain operator
 	# referred to by a Nama operator_id
 	
-	#logsub("&update_effect");
+	#logsub((caller(0))[3]);
 
 	return unless $this_engine->valid_setup;
 	#my $es = ecasound_iam("engine-status");
@@ -1012,7 +1012,7 @@ sub ops_with_read_only_params {
 sub find_op_offsets {
 
 	local $config->{category} = 'ECI_FX';
-	logsub("&find_op_offsets");
+	logsub((caller(0))[3]);
 	my @op_offsets = grep{ /"\d+"/} split "\n",ecasound_iam("cs");
 	logpkg('debug', join "\n\n",@op_offsets);
 	for my $output (@op_offsets){

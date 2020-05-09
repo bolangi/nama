@@ -233,7 +233,7 @@ sub definitions {
 
 sub initialize_interfaces {
 	
-	logsub("&intialize_interfaces");
+	logsub((caller(0))[3]);
 	
 	if ( ! $config->{opts}->{t} and ::Graphical::initialize_tk() ){ 
 		$ui = ::Graphical->new();

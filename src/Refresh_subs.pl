@@ -56,7 +56,7 @@ sub set_widget_color {
 }
 sub refresh_group { 
 	# main group, in this case we want to skip null group
-	logsub("&refresh_group");
+	logsub((caller(0))[3]);
 	
 	
 		my $status;
@@ -91,7 +91,7 @@ sub refresh_track {
 	
 	my $ui = shift;
 	my $n = shift;
-	logsub("&refresh_track");
+	logsub((caller(0))[3]);
 	
 	my $rec_status = $ti{$n}->rec_status;
 	logit('::Refresh','debug', "track: $n rec_status: $rec_status");

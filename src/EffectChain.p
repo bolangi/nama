@@ -410,7 +410,7 @@ sub add_effect_chain {
 	1;
 }
 sub new_effect_profile {
-	logsub("&new_effect_profile");
+	logsub((caller(0))[3]);
 	my ($bunch, $profile) = @_;
 	my @tracks = bunch_tracks($bunch);
 	::pager( qq(effect profile "$profile" created for tracks: @tracks) );
@@ -426,14 +426,14 @@ sub new_effect_profile {
 	} @tracks;
 }
 sub delete_effect_profile { 
-	logsub("&delete_effect_profile");
+	logsub((caller(0))[3]);
 	my $name = shift;
 	::pager( qq(deleting effect profile: $name) );
 	map{ $_->destroy} ::EffectChain::find( profile => $name );
 }
 
 sub apply_effect_profile {  # overwriting current effects
-	logsub("&apply_effect_profile");
+	logsub((caller(0))[3]);
 	my ($profile) = @_;
 	my @chains = ::EffectChain::find(profile => $profile);
 

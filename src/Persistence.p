@@ -6,7 +6,7 @@ use File::Copy;
 use Modern::Perl; no warnings 'uninitialized';
 
 sub save_state {
-	logsub("&save_state");
+	logsub((caller(0))[3]);
 	my $filename = shift;
 	if ($filename)
 	{
@@ -225,7 +225,7 @@ sub decode {
 }
 
 sub restore_state_from_file {
-	logsub("&restore_state_from_file");
+	logsub((caller(0))[3]);
 	my $filename = shift;
 	$filename =~ s/\.json$//;
 	$filename = join_path(project_dir(), $filename) 
@@ -543,7 +543,7 @@ sub save_global_effect_chains {
 }
 sub restore_global_effect_chains {
 
-	logsub("&restore_global_effect_chains");
+	logsub((caller(0))[3]);
 		my $path =  $file->global_effect_chains;
 		my ($resolved, $format) = get_newest($path);  
 		throw("$resolved: file not found"), return unless $resolved;

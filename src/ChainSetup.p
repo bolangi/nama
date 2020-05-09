@@ -45,7 +45,7 @@ our (
 
 
 sub remove_temporary_tracks {
-	logsub("&remove_temporary_tracks");
+	logsub((caller(0))[3]);
 	map { logpkg('debug',"removing temporary track ",$_->group.'/'.$_->name); $_->remove  } 
 		grep{ $_->group eq 'Temp' } ::audio_tracks();
 }
@@ -85,7 +85,7 @@ sub show_io {
 }
 
 sub generate_setup_try {
-	logsub("&generate_setup_try");
+	logsub((caller(0))[3]);
 
 	my $extra_setup_code = shift;
 
@@ -149,7 +149,7 @@ sub add_paths_for_aux_sends { # not including Main
 	# we could add this to the ::Bus base class
 	# then suppress it in Mixdown and Main groups
 
-	logsub("&add_paths_for_aux_sends");
+	logsub((caller(0))[3]);
 
 	map {  ::Graph::add_path_for_aux_send($g, $_ ) } 
 	grep { (ref $_) !~ /Slave/ 
@@ -160,7 +160,7 @@ sub add_paths_for_aux_sends { # not including Main
 
 
 sub add_paths_from_Main {
-	logsub("&add_paths_from_Main");
+	logsub((caller(0))[3]);
 
 	if ($mode->mastering){
 		$g->add_path(qw[Main Eq Low Boost]);
@@ -177,7 +177,7 @@ sub add_paths_from_Main {
 
 }
 sub add_paths_for_mixdown_handling {
-	logsub("&add_paths_for_mixdown_handling");
+	logsub((caller(0))[3]);
 	my $final_leg_origin = $mode->mastering ? 'Boost' : 'Main';
 
 	if ($tn{Mixdown}->rw eq REC ){
@@ -205,7 +205,7 @@ sub add_paths_for_mixdown_handling {
 	}
 }
 sub prune_graph {
-	logsub("&prune_graph");
+	logsub((caller(0))[3]);
 	::Graph::simplify_send_routing($g);
 	logpkg('debug',"Graph after simplify_send_routing:\n$g");
 	::Graph::remove_out_of_bounds_tracks($g) if ::edit_mode();
@@ -218,7 +218,7 @@ sub prune_graph {
 # object based dispatch from routing graph
 	
 sub process_routing_graph {
-	logsub("&process_routing_graph");
+	logsub((caller(0))[3]);
 
 	# generate a set of IO objects from edges
 	@io = map{ dispatch($_) } $g->edges;
@@ -390,7 +390,7 @@ sub override {
 	# data from edges has priority over data from vertexes
 	# we specify $name, because it could be left or right 
 	# vertex
-	logsub("&override");
+	logsub((caller(0))[3]);
 	my ($name, $edge) = @_;
 	(override_from_vertex($name), override_from_edge($edge))
 }
@@ -410,7 +410,7 @@ sub override_from_edge {
 							
 sub write_chains {
 
-	logsub("&write_chains");
+	logsub((caller(0))[3]);
 
 	## write general options
 	

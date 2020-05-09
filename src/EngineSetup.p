@@ -5,7 +5,7 @@ use Modern::Perl; use Carp;
 
 sub reconfigure_engine {
 
-	logsub("&reconfigure_engine");
+	logsub((caller(0))[3]);
 	my $force = shift;
 
 	# skip if command line option is set
@@ -24,14 +24,14 @@ sub request_setup {
 sub generate_setup {::Engine::sync_action('setup') }
 
 sub start_transport { 
-	logsub("&start_transport");
+	logsub((caller(0))[3]);
 	::Engine::sync_action('start');
 
 }
 
 sub stop_transport { 
 
-	logsub("&stop_transport"); 
+	logsub((caller(0))[3]); 
 	::Engine::sync_action('stop');
 }
 	

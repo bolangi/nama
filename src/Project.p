@@ -53,7 +53,7 @@ sub list_projects {
 
 sub initialize_project_data {
 
-	logsub("&initialize_project_data");
+	logsub((caller(0))[3]);
 
 	-d ::waveform_dir() or mkdir ::waveform_dir();
 	$ui->destroy_widgets();
@@ -113,7 +113,7 @@ sub initialize_project_data {
 }
 
 sub load_project {
-	logsub("&load_project");
+	logsub((caller(0))[3]);
 	my %args = @_;
 	logpkg('debug', sub{json_out \%args});
 	$project->{name} = $args{name} if $args{name};
@@ -198,7 +198,7 @@ sub initialize_mixer {
 
 sub dig_ruins {
 	
-	logsub("&dig_ruins");
+	logsub((caller(0))[3]);
 	return if user_tracks_present();
 	logpkg('debug', "looking for audio files");
 
@@ -227,7 +227,7 @@ sub remove_riff_header_stubs {
 	# 44 byte stubs left by a recording chainsetup that is 
 	# connected by not started
 	
-	logsub("&remove_riff_header_stubs");
+	logsub((caller(0))[3]);
 	
 
 	logpkg('debug', "this wav dir: ", this_wav_dir());
@@ -244,7 +244,7 @@ sub remove_riff_header_stubs {
 }
 
 sub create_system_buses {
-	logsub("&create_system_buses");
+	logsub((caller(0))[3]);
 
 	my $buses = q(
 		Main 		::SubBus send_type track send_id Main	# master fader track

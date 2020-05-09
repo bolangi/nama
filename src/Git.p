@@ -39,7 +39,7 @@ sub git_tag_exists {
 sub tag_branch { "$_[0]-branch" }
 
 sub restore_state_from_vcs {
-	logsub("&restore_state_from_vcs");
+	logsub((caller(0))[3]);
 	my $name = shift; # tag or branch
 	
 	# checkout branch if matching branch exists
@@ -74,7 +74,7 @@ sub restore_state_from_vcs {
 }
  
 sub git_snapshot {
-	logsub("&git_snapshot");
+	logsub((caller(0))[3]);
 	my $commit_message = shift() || "";
 	$config->{use_git} 
 		and $project->{name} 
@@ -87,7 +87,7 @@ sub git_snapshot {
 sub reset_command_buffer { $project->{command_buffer} = [] } 
 
 sub git_commit {
-	logsub("&git_commit");
+	logsub((caller(0))[3]);
 	my $commit_message = shift;
 	no warnings 'uninitialized';
 	use utf8;
@@ -104,7 +104,7 @@ sub git_commit {
 }
 
 sub git_checkout {
-	logsub("&git_checkout");
+	logsub((caller(0))[3]);
 	my ($branchname, @args) = @_;
 	return unless $config->{use_git};
 
@@ -131,7 +131,7 @@ these changes, or throw them away."
 
 }
 sub git_create_branch {
-	logsub("&git_create_branch");
+	logsub((caller(0))[3]);
 	my ($branchname, $branchfrom) = @_;
 	return unless $config->{use_git};
 	# create new branch
@@ -145,13 +145,13 @@ sub git_create_branch {
 }
 
 sub state_changed {  
-	logsub("&state_changed");
+	logsub((caller(0))[3]);
 	return unless $config->{use_git};
 	git("diff");
 }
 
 sub git_branch_exists { 
-	logsub("&git_branch_exists");
+	logsub((caller(0))[3]);
 	return unless $config->{use_git};
 	my $branchname = shift;
 	grep{ $_ eq $branchname } 
@@ -160,7 +160,7 @@ sub git_branch_exists {
 }
 
 sub current_branch {
-	logsub("&current_branch");
+	logsub((caller(0))[3]);
 	return unless $project->{repo};
 	my ($b) = map{ /\* (\S+)/ } grep{ /\*/ } split "\n", git('branch');
 	$b
@@ -172,7 +172,7 @@ sub git_sha {
 		$sha
 }
 sub git_branch_display {
-	logsub("&git_branch_display");
+	logsub((caller(0))[3]);
 	my $display = $::project->{name};
 	return $display unless $config->{use_git};
 	my $cb = current_branch();
@@ -190,7 +190,7 @@ sub list_branches {
 }
 
 sub autosave {
-		logsub("&autosave");
+		logsub((caller(0))[3]);
 		git_snapshot(), return if $config->{autosave}
 							and not $config->{opts}->{R}
 							and not ($this_engine->started() 

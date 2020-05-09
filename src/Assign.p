@@ -56,7 +56,7 @@ sub assign {
   #	class => $class
   #	);
 
-	logsub("&assign");
+	logsub((caller(0))[3]);
 	
 	my %h = @_; # parameters appear in %h
 	my $class;
@@ -251,7 +251,7 @@ sub serialize_and_write {
 			$ 				# end anchor
 			/x;
 sub serialize {
-	logsub("&serialize");
+	logsub((caller(0))[3]);
 
 	my %h = @_;
 	my @vars = @{ $h{vars} };
@@ -325,7 +325,7 @@ sub serialize {
 }
 
 sub json_out {
-	logsub("&json_out");
+	logsub((caller(0))[3]);
 	my $data_ref = shift;
 	my $type = ref $data_ref;
 	croak "attempting to code wrong data type: $type"
@@ -334,7 +334,7 @@ sub json_out {
 }
 
 sub json_in {
-	logsub("&json_in");
+	logsub((caller(0))[3]);
 	my $json = shift;
 	my $data_ref = decode_json($json);
 	$data_ref
@@ -342,7 +342,7 @@ sub json_in {
 
 sub yaml_in {
 	
-	# logsub("&yaml_in");
+	# logsub((caller(0))[3]);
 	my $input = shift;
 	my $yaml = $input =~ /\n/ # check whether file or text
 		? $input 			# yaml text
