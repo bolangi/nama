@@ -34,7 +34,7 @@ sub rec_status {
 	}
 
 	no warnings 'uninitialized';
-	return maybe_playback($track, $v) if $track->{rw} eq PLAY;
+	return maybe_playback($track, $v);
 
 }
 sub maybe_playback { # ordinary sub, not object method
