@@ -12,7 +12,7 @@ sub is_used {
 	my $bus = $track->bus;  # 
 	$track->send_type       # It's sending its own signal
 	or $track->{rw} eq REC  # It's recording its own signal
-	or $track->wantme       # Another track needs my signal
+	or $track->used_by_another_track
 	or ($bus and $bus->can('wantme') and $bus->wantme)  # A bus needs my signal
 }
 sub rec_status {
@@ -350,14 +350,14 @@ sub jack_manual_port {
 	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
 }
 
-sub wantme {
+sub used_by_another_track {
 	my $track = shift;
 	no warnings 'uninitialized';
-	my @wantme = grep{ $_->name ne $track->name
+	my @used =    grep{ $_->name ne $track->name
 						and $_->source_type eq 'track'
 						and $_->source_id eq $track->name 
 						and ($_->rec or $_->mon) } ::all_tracks();
-@wantme
+@used
 }
 1;
 	
