@@ -29,6 +29,8 @@ meta: bang shellcode stopper {
 	::logit('::Grammar','debug',"Evaluating shell commands!");
 	my $shellcode = $item{shellcode};
 	$shellcode =~ s/\$thiswav/$::this_track->full_path/e;
+
+	# support "!git" syntax
 	my $olddir = ::getcwd();
 	my $prefix = "chdir ". ::project_dir().";";
 	$shellcode = "$prefix $shellcode" if $shellcode =~ /^\s*git /;
