@@ -1565,9 +1565,11 @@ show_latency_all: _show_latency_all {
 	1;
 }
 analyze_level: _analyze_level { ::check_level($::this_track);1 }
-git: _git shellcode stopper { 
-#print ::json_out(\%item);
-::pager(map {$_.="\n"} $::project->{repo}->run( split " ", $item{shellcode})) 
+something: /\S.+/
+git: _git something { 
+	my @result = map{ $_ .= "\n" } $::project->{repo}->run( split " ", $item{something});
+	::pager(@result);
+	1;
 }
 edit_rec_setup_hook: _edit_rec_setup_hook { 
 	system("$ENV{EDITOR} ".$::this_track->rec_setup_script() );
