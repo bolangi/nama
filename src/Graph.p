@@ -326,8 +326,6 @@ sub remove_tracks {
 		} @names;
 }
 
-# for latency-related graph transformations
-
 sub remove_branch {
 	my ($g, $v) = @_;
 	my @p = $g->predecessors($v);
