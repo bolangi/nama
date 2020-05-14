@@ -54,14 +54,14 @@ sub process_line {
 	logsub((caller(0))[3]);
 	no warnings 'uninitialized';
 	my ($user_input) = @_;
-	# convert hyphenated commands to underscore form
-	while( my ($from, $to) = each %{$text->{hyphenated_commands}})
-	{ $user_input =~ s/$from/$to/g }
 	logpkg('debug',"user input: $user_input");
 	if (defined $user_input and $user_input !~ /^\s*$/) {
 		$text->{term}->addhistory($user_input) 
 			unless $user_input eq $text->{previous_cmd} or ! $text->{term};
 		$text->{previous_cmd} = $user_input;
+		
+		# convert hyphenated commands to underscore form
+		while( my($from, $to) = each %{$text->{hyphenated_commands}} ){ $user_input =~ s/$from/$to/g }
 			my $context = context();
 			my $success = nama_cmd( $user_input );
 			my $command_stamp = { context => $context, 
