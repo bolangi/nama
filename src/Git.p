@@ -73,7 +73,7 @@ sub restore_state_from_vcs {
 	restore_state_from_file();
 }
  
-sub git_snapshot {
+sub project_snaphot {
 	logsub((caller(0))[3]);
 	my $commit_message = shift() || "";
 	$config->{use_git} 
@@ -191,7 +191,7 @@ sub list_branches {
 
 sub autosave {
 		logsub((caller(0))[3]);
-		git_snapshot(), return if $config->{autosave}
+		project_snaphot(), return if $config->{autosave}
 							and not $config->{opts}->{R}
 							and not ($this_engine->started() 
 											and ::ChainSetup::really_recording());
