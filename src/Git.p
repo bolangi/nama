@@ -16,16 +16,16 @@ sub initialize_project_git_repository {
 		if ! -d join_path( project_dir(),  '.git' );
 	Git::Repository->run( init => project_dir());
 	$project->{repo} = Git::Repository->new( work_tree => project_dir() );
-	my $is_new;
-	$is_new = 1 if not -e $file->git_state_store;
-	write_file($file->git_state_store, "{}\n") if $is_new;
-	git( add => $file->git_state_store );
-	write_file($file->midi_store, ""), git( add => $file->midi_store )
-			if ! -e $file->midi_store;
-	git( commit => '--quiet', '--message' => $is_new 
+	my $is_new_project;
+	$is_new_project = 1 if not -e $file->git_state_store;
+	write_file($file->git_state_store, "{}\n") if $is_new_project;
+	write_file($file->midi_store,          "") if not -e $file->midi_store;
+	write_file($file->tempo_map,           "") if not -e $file->tempo_map; 
+	git( add => $_ ) for $file->midi_store, $file->tempo_map, $file->git_state_store;
+	git( commit => '--quiet', '--message' => $is_new_project 
 											?  'initialize repository' 
-											: "changes from previous session"
-		);
+											:  'committing prior unsaved changes (left after program abort?)' 
+	);
 }
 sub git_tag_exists {
 	logsub((caller(0))[3]);
