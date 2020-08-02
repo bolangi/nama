@@ -8,7 +8,7 @@ You may want to set use_git: 1 in .namarc"), return;
 	logpkg('debug',"VCS command: git @_"); 
 	$project->{repo}->run(@_) 
 }
-sub initialize_project_git_repository {
+sub initialize_project_repository {
 	logsub((caller(0))[3]);
 	confess("no project dir") if ! project_dir();
 	return unless $config->{use_git} and not is_test_script();
