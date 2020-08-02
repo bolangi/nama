@@ -138,7 +138,7 @@ sub load_project {
 	remove_riff_header_stubs(); 
 	cache_wav_info();
 	restart_wav_memoize();
-	initialize_project_git_repository();
+	initialize_project_repository();
 	restore_state($args{settings}) unless $config->{opts}->{M} ;
 
 	$config->{opts}->{M} = 0; # enable 
