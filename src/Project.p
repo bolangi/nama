@@ -146,8 +146,6 @@ sub load_project {
 	initialize_mixer();
 	dig_ruins(); # in case there are audio files, but no tracks present
 
-	git_snapshot("initialize new project");
-
 	# possible null if Text mode
 	
 	#$ui->global_version_buttons(); 
