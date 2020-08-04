@@ -139,6 +139,7 @@ sub load_project {
 	cache_wav_info();
 	restart_wav_memoize();
 	initialize_project_repository();
+	read_tempo_map($file->tempo_map);
 	restore_state($args{settings}) unless $config->{opts}->{M} ;
 
 	$config->{opts}->{M} = 0; # enable 
