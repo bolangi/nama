@@ -16,6 +16,7 @@ my $tempo = qr| (?<tempo> \d+ ( - \d+)? )    |x;
 
 sub read_tempo_map {
 	my $file = shift;
+	return unless -e $file;
 	my @lines = read_file($file);
 	for ( @lines )
 	{
@@ -24,6 +25,7 @@ sub read_tempo_map {
 		say "label: $+{label} bars: $+{bars} meter: $+{meter} tempo: $+{tempo}";
 		my %chunk;
 		@chunk{ qw( label bars meter tempo ) } = @+{ qw( label bars meter tempo ) };
+		bless \%chunk, 
 		say Dumper \%chunk;
 		push @tempo, \%chunk;
 			
