@@ -14,6 +14,8 @@ my $bars  = qr| (?<bars>  \d+      )         |x;
 my $meter = qr| (?<meter> \d / \d  )         |x;
 my $tempo = qr| (?<tempo> \d+ ( - \d+)? )    |x;
 
+our %tempo_mark;
+
 sub read_tempo_map {
 	my $file = shift;
 	return unless -e $file;
@@ -25,12 +27,19 @@ sub read_tempo_map {
 		say "label: $+{label} bars: $+{bars} meter: $+{meter} tempo: $+{tempo}";
 		my %chunk;
 		@chunk{ qw( label bars meter tempo ) } = @+{ qw( label bars meter tempo ) };
-		bless \%chunk, 
-		say Dumper \%chunk;
-		push @tempo, \%chunk;
-			
+		my $chunk = bless \%chunk, '::Tempo';
+		say Dumper $chunk;
+		push @tempo, $chunk;
+		$tempo_mark{$chunk->label} = $chunk if $chunk->label;
 	}
 }
+
+sub is_tempo_mark { $tempo_mark{$_[0]} }
+
+package ::Tempo;
+use Modern::Perl;
+use ::Object qw( label bars meter tempo );
+
 1
 __END__
 
