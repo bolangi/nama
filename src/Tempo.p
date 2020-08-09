@@ -8,13 +8,23 @@ use ::Log qw(logsub logpkg);
 use ::Util qw(strip_comments);
 use File::Slurp;
 
-our @tempo;
+our @chunks;
+our @beats;
+our @bars;
+
 my $label = qr| (?<label> [-_\d\w]+) :       |x;
 my $bars  = qr| (?<bars>  \d+      )         |x;
 my $meter = qr| (?<meter> \d / \d  )         |x;
-my $tempo = qr| (?<tempo> \d+ ( - \d+)? )    |x;
+my $chunks = qr| (?<tempo> \d+ ( - \d+)? )    |x;
 
-our %tempo_mark;
+my @fields = qw( label bars meter tempo );
+
+sub beat { $beats[ $_[0] - 1] }
+sub bar  {  $bars[ $_[0] - 1] }
+sub barbeat { 
+	# advance bars
+	# 
+}
 
 sub read_tempo_map {
 	my $file = shift;
@@ -22,53 +32,57 @@ sub read_tempo_map {
 	my @lines = read_file($file);
 	for ( @lines )
 	{
-		chomp; say	;
-		/^\s* $label? \s+ $bars \s+ ($meter \s+)? $tempo/x;
-		say "label: $+{label} bars: $+{bars} meter: $+{meter} tempo: $+{tempo}";
+		no warnings 'uninitialized';
+		chomp; 
+		# say	;
+		/^\s* $label? \s+ $bars \s+ ($meter \s+)? $chunks/x;
+		#say "label: $+{label} bars: $+{bars} meter: $+{meter} tempo: $+{tempo}";
 		my %chunk;
-		@chunk{ qw( label bars meter tempo ) } = @+{ qw( label bars meter tempo ) };
+		@chunk{ @fields } = @+{ @fields };
 		my $chunk = bless \%chunk, '::Tempo';
-		say Dumper $chunk;
-		push @tempo, $chunk;
-		$tempo_mark{$chunk->label} = $chunk if $chunk->label;
+		#say Dumper $chunk;
+		push @chunks, $chunk;
+		# make real mark$tempo_mark{$chunk->label} = $chunk if $chunk->label;
 	}
 }
 
-sub is_tempo_mark { $tempo_mark{$_[0]} }
+sub create_marks {
+	for my $chunk (@chunks){
+	#	index_beats
+
+	}	
+
+}
 
 package ::Tempo;
 use Modern::Perl;
-use ::Object qw( label bars meter tempo );
+use ::Object qw( note count label bars meter tempo );
+# we divide time in chunks specified by klick metronome tempo map
+# 
+# note: denominator of time signature
+# count: numerator of time signature
+# bars: measures in this chunk
+# meter: time signature e.g 3/4
+# tempo: bpm or range
+
+no warnings 'redefine';
+sub note {
+	my $self = shift;
+	my ($note) = $self->{meter} =~ m| / (\d+) |x;
+}
+sub count {
+	my $self = shift;
+	my ($count) = $self->{meter} =~ m| (\d+) / |x;
+}
+sub beats {
+	my $self = shift;
+	$self->bars * $self->count
+}
 
 1
 __END__
 
 #  [label:] bars [meter] tempo [pattern] [volume]
-
-#my $fixed_tempo = qr| 
-
-Tn = n t0 +  [ (tn - t0) / n ] n (n + 1) / 2                                                                                                                           
-    = n t0  +  (tn - t0) (n + 1) / 2                                                                                                                                   
-    = t0 (n - n/2 - 1/2)  +  tn (n + 1) / 2                                                                                                                            
-                                                                                                                                                                       
-*    = t0 (n - 1) / 2  +  tn (n + 1) / 2*
-
-
-export 
-#
-
-iinterface
-
-$tempo->pos('chorus2')
-$tempo->pos(4,3)
-$tempo->pos(4)
-
-bar_pos('chorus2')
-
-my $pos = is_bar_pos(@args) # 'chorus2' '4 1'
-
-my $barpos = is_bar_pos(@args);
-$pos = $pos ? $pos : markpos(@args)
 
 parse into array
 
