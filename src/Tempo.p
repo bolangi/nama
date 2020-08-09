@@ -78,6 +78,24 @@ sub beats {
 	my $self = shift;
 	$self->bars * $self->count
 }
+sub beat_lengths {
+	my $self = shift;
+}
+	
+sub fixed_tempo {
+	my $self = shift;
+	$self->{tempo} !~ /-/;	
+}
+sub start_tempo {
+	my $self = shift;
+	my ($start_tempo) = $self->fixed_tempo ? $self->tempo
+										   : $self->tempo =~ / (\d+) - /x;
+}
+sub end_tempo {
+	my $self = shift;
+	my ($end_tempo) = $self->fixed_tempo ? $self->tempo
+										 : $self->tempo =~ / - (\d+) /x;
+}
 
 1
 __END__
