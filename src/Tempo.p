@@ -19,9 +19,9 @@ my $chunks = qr| (?<tempo> \d+ ( - \d+)? )    |x;
 
 my @fields = qw( label bars meter tempo );
 
-sub beat { $beats[ $_[0] - 1] }
-sub bar  {  $bars[ $_[0] - 1] }
-sub barbeat { 
+sub beat { $beats[ $_[0] - 1] } # position in time of the nth beat
+sub bar  {  $bars[ $_[0] - 1] } # position in time of the nth bar
+sub barbeat { 					# position in time of nth bar, mth beat 
 	# advance bars
 	# 
 }
