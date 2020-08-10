@@ -1705,7 +1705,7 @@ snip: _snip new_sequence_name mark_pair(s) {}
 rename_track: _rename_track existing_track_name new_track_name { 
 	::rename_track(
 		@item{qw(existing_track_name new_track_name)}, 
-		$::file->git_state_store, 
+		$::file->state_store, 
 		::this_wav_dir()
 	);
 }
