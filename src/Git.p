@@ -18,10 +18,13 @@ sub initialize_project_repository {
 	$project->{repo} = Git::Repository->new( work_tree => project_dir() );
 	my $is_new_project;
 	$is_new_project = 1 if not -e $file->git_state_store;
-	write_file($file->git_state_store, "{}\n") if $is_new_project;
+	if( $is_new_project ){
+	write_file($file->git_state_store, "{}\n");
 	write_file($file->midi_store,          "") if not -e $file->midi_store;
 	write_file($file->tempo_map,           "") if not -e $file->tempo_map; 
-	git( add => $_ ) for $file->midi_store, $file->tempo_map, $file->git_state_store;
+	refresh_tempo_map('force') if -s $file->tempo_map > 5;
+	}
+	git( add => $_ ) for $file->midi_store, $file->git_state_store;
 	git( commit => '--quiet', '--message' => $is_new_project 
 											?  'initialize repository' 
 											:  'committing prior unsaved changes (left after program abort?)' 
@@ -76,11 +79,12 @@ sub restore_state_from_vcs {
 sub project_snaphot {
 	logsub((caller(0))[3]);
 	my $commit_message = shift() || "";
+	refresh_tempo_map();
+	save_state();
 	$config->{use_git} 
 		and $project->{name} 
 		and $project->{repo}
 		or throw('failed to create snapshot'), return;
-	save_state();
 	reset_command_buffer(), return unless state_changed();
 	git_commit($commit_message);
 }
@@ -98,7 +102,7 @@ sub git_commit {
 		"* track: $project->{command_buffer}->[0]->{context}->{track}",
 		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
 		"* op:    $project->{command_buffer}->[0]->{context}->{op}",
-	git( add => $file->git_state_store );
+	git( add => $file->git_state_store, $file->midi_store );
 	git( commit => '--quiet', '--message', $commit_message);
 	reset_command_buffer();
 }
