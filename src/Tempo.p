@@ -68,7 +68,11 @@ sub barbeat { 					# position in time of nth bar, mth beat
 	# advance bars
 	# 
 }
-
+sub refresh_tempo_map {
+		delete_tempo_marks();
+		initialize_tempo_map();
+		read_tempo_map();
+}
 sub initialize_tempo_map { @chunks = @bars = @beats = ()  }
 sub delete_tempo_marks {
 
