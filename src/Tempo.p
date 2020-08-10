@@ -69,9 +69,14 @@ sub barbeat { 					# position in time of nth bar, mth beat
 	# 
 }
 sub refresh_tempo_map {
+		my $force = shift;
+		if ($config->{use_git} and git( diff => $file->tempo_map ) || $force ){
+			git( add => $file->tempo_map );
+  			git( commit => '--quiet', '--message', 'change in tempo map '. $file->tempo_map);
+		}
 		delete_tempo_marks();
 		initialize_tempo_map();
-		read_tempo_map();
+		read_tempo_map($file->tempo_map);
 }
 sub initialize_tempo_map { @chunks = @bars = @beats = ()  }
 sub delete_tempo_marks {
