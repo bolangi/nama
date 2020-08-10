@@ -1,59 +1,6 @@
 #----- Tempo.pm ------
 # support for beats and bars
 
-package ::;
-use Modern::Perl;
-use Data::Dumper::Concise;
-use ::Log qw(logsub logpkg);
-use ::Util qw(strip_comments);
-use File::Slurp;
-
-our @chunks;
-our @beats;
-our @bars;
-
-my $label = qr| (?<label> [-_\d\w]+) :       |x;
-my $bars  = qr| (?<bars>  \d+      )         |x;
-my $meter = qr| (?<meter> \d / \d  )         |x;
-my $chunks = qr| (?<tempo> \d+ ( - \d+)? )    |x;
-
-my @fields = qw( label bars meter tempo );
-
-sub beat { $beats[ $_[0] - 1] } # position in time of the nth beat
-sub bar  {  $bars[ $_[0] - 1] } # position in time of the nth bar
-sub barbeat { 					# position in time of nth bar, mth beat 
-	# advance bars
-	# 
-}
-
-sub read_tempo_map {
-	my $file = shift;
-	return unless -e $file;
-	my @lines = read_file($file);
-	for ( @lines )
-	{
-		no warnings 'uninitialized';
-		chomp; 
-		# say	;
-		/^\s* $label? \s+ $bars \s+ ($meter \s+)? $chunks/x;
-		#say "label: $+{label} bars: $+{bars} meter: $+{meter} tempo: $+{tempo}";
-		my %chunk;
-		@chunk{ @fields } = @+{ @fields };
-		my $chunk = bless \%chunk, '::Tempo';
-		#say Dumper $chunk;
-		push @chunks, $chunk;
-		# make real mark$tempo_mark{$chunk->label} = $chunk if $chunk->label;
-	}
-}
-
-sub create_marks {
-	for my $chunk (@chunks){
-	#	index_beats
-
-	}	
-
-}
-
 package ::Tempo;
 use Modern::Perl;
 use ::Object qw( note count label bars meter tempo );
@@ -95,6 +42,59 @@ sub end_tempo {
 	my $self = shift;
 	my ($end_tempo) = $self->fixed_tempo ? $self->tempo
 										 : $self->tempo =~ / - (\d+) /x;
+}
+
+our @chunks;
+our @beats;
+our @bars;
+
+package ::;
+use Modern::Perl;
+use Data::Dumper::Concise;
+use ::Log qw(logsub logpkg);
+use ::Util qw(strip_comments);
+use File::Slurp;
+
+my $label = qr| (?<label> [-_\d\w]+) :       |x;
+my $bars  = qr| (?<bars>  \d+      )         |x;
+my $meter = qr| (?<meter> \d / \d  )         |x;
+my $chunks = qr| (?<tempo> \d+ ( - \d+)? )    |x;
+
+my @fields = qw( label bars meter tempo );
+
+sub beat { $beats[ $_[0] - 1] } # position in time of the nth beat
+sub bar  {  $bars[ $_[0] - 1] } # position in time of the nth bar
+sub barbeat { 					# position in time of nth bar, mth beat 
+	# advance bars
+	# 
+}
+
+sub read_tempo_map {
+	my $file = shift;
+	return unless -e $file;
+	my @lines = read_file($file);
+	for ( @lines )
+	{
+		no warnings 'uninitialized';
+		chomp; 
+		# say	;
+		/^\s* $label? \s+ $bars \s+ ($meter \s+)? $chunks/x;
+		#say "label: $+{label} bars: $+{bars} meter: $+{meter} tempo: $+{tempo}";
+		my %chunk;
+		@chunk{ @fields } = @+{ @fields };
+		my $chunk = bless \%chunk, '::Tempo';
+		#say Dumper $chunk;
+		push @chunks, $chunk;
+		# make real mark$tempo_mark{$chunk->label} = $chunk if $chunk->label;
+	}
+}
+
+sub create_marks {
+	for my $chunk (@chunks){
+	#	index_beats
+
+	}	
+
 }
 
 1
