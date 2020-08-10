@@ -17,14 +17,14 @@ sub initialize_project_repository {
 	Git::Repository->run( init => project_dir());
 	$project->{repo} = Git::Repository->new( work_tree => project_dir() );
 	my $is_new_project;
-	$is_new_project = 1 if not -e $file->git_state_store;
+	$is_new_project = 1 if not -e $file->state_store;
 	if( $is_new_project ){
-	write_file($file->git_state_store, "{}\n");
+	write_file($file->state_store, "{}\n");
 	write_file($file->midi_store,          "") if not -e $file->midi_store;
 	write_file($file->tempo_map,           "") if not -e $file->tempo_map; 
 	refresh_tempo_map('force') if -s $file->tempo_map > 5;
 	}
-	git( add => $_ ) for $file->midi_store, $file->git_state_store;
+	git( add => $_ ) for $file->midi_store, $file->state_store;
 	git( commit => '--quiet', '--message' => $is_new_project 
 											?  'initialize repository' 
 											:  'committing prior unsaved changes (left after program abort?)' 
@@ -102,7 +102,7 @@ sub git_commit {
 		"* track: $project->{command_buffer}->[0]->{context}->{track}",
 		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
 		"* op:    $project->{command_buffer}->[0]->{context}->{op}",
-	git( add => $file->git_state_store, $file->midi_store );
+	git( add => $file->state_store, $file->midi_store );
 	git( commit => '--quiet', '--message', $commit_message);
 	reset_command_buffer();
 }
