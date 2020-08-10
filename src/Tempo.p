@@ -69,6 +69,10 @@ sub barbeat { 					# position in time of nth bar, mth beat
 	# 
 }
 
+sub initialize_tempo_map { @chunks = @bars = @beats = ()  }
+sub delete_tempo_marks {
+
+}
 sub read_tempo_map {
 	my $file = shift;
 	return unless -e $file;
