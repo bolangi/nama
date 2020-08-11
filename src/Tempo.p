@@ -137,6 +137,12 @@ sub read_tempo_map {
 	}
 }
 
+sub populate_bar_and_beat_arrays {
+	for my $chunk (@chunks){
+
+
+	}
+}
 sub create_marks {
 	for my $chunk (@chunks){
 	#	index_beats
