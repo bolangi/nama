@@ -129,6 +129,7 @@ sub read_tempo_map {
 		#say "label: $+{label} bars: $+{bars} meter: $+{meter} tempo: $+{tempo}";
 		my %chunk;
 		@chunk{ @fields } = @+{ @fields };
+		$chunk{meter} //= '4/4';
 		my $chunk = bless \%chunk, '::Tempo';
 		#say Dumper $chunk;
 		push @chunks, $chunk;
