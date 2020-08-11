@@ -34,7 +34,6 @@ sub beat_lengths {
 		for (1..$self->beats){ push @beat_lengths, $seconds_per_beat }
 	}	
 	else {
-		# r = (t final / t initial) * exp(1 / n)
 		# r = exp [ ln( t final / t initial )  / n ]
 		my $ratio = ratio( $self->tempo_start, $self->tempo_end, $self->beats - 1 );
 		my $current_length = beat_length_from_bpm($self->tempo_start);
