@@ -27,8 +27,35 @@ sub beats {
 }
 sub beat_lengths {
 	my $self = shift;
+	my @beat_lengths;
+	if ( $self->fixed_tempo ){
+		my $bps = $self->tempo / 60;
+		my $seconds_per_beat = 1 / $bps;
+		for (1..$self->beats){ push @beat_lengths, $seconds_per_beat }
+	}	
+	else {
+		# r = (t final / t initial) * exp(1 / n)
+		# r = exp [ ln( t final / t initial )  / n ]
+		my $ratio = ratio( $self->tempo_start, $self->tempo_end, $self->beats - 1 );
+		my $current_length = beat_length_from_bpm($self->tempo_start);
+		push @beat_lengths, $current_length;
+		for (2 .. $self->beats - 1){
+			$current_length *= $ratio;
+			push @beat_lengths, $current_length;
+		}
+		push @beat_lengths, beat_length_from_bpm($self->tempo_end);
+	}
+	@beat_lengths
 }
-	
+sub ratio {
+	my ($tempo_start, $tempo_end, $beats) = @_;
+	my $ratio = exp( log(beat_length_from_bpm($tempo_end) / beat_length_from_bpm($tempo_start)) / $beats );
+}
+sub beat_length_from_bpm {
+	my $bpm = shift;
+	my $bps = $bpm / 60;
+	my $seconds_per_beat = 1 / $bps;
+}
 sub fixed_tempo {
 	my $self = shift;
 	$self->{tempo} !~ /-/;	
