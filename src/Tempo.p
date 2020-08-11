@@ -81,6 +81,7 @@ use Data::Dumper::Concise;
 use ::Log qw(logsub logpkg);
 use ::Util qw(strip_comments);
 use File::Slurp;
+use List::Util qw(sum);
 
 my $label = qr| (?<label> [-_\d\w]+) :       |x;
 my $bars  = qr| (?<bars>  \d+      )         |x;
@@ -89,8 +90,14 @@ my $chunks = qr| (?<tempo> \d+ ( - \d+)? )    |x;
 
 my @fields = qw( label bars meter tempo );
 
-sub beat { $beats[ $_[0] - 1] } # position in time of the nth beat
-sub bar  {  $bars[ $_[0] - 1] } # position in time of the nth bar
+sub beat {  
+	my $nth = shift;
+	sum @bars[0..$nth-1]
+}
+sub bar  {
+	my $nth = shift;
+	sum @bars[0..$nth-1]
+}
 sub barbeat { 					# position in time of nth bar, mth beat 
 	# advance bars
 	# 
