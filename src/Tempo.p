@@ -4,6 +4,7 @@
 package ::Tempo;
 use Modern::Perl;
 use ::Object qw( note count label bars meter tempo );
+use List::Util qw(sum);
 # we divide time in chunks specified by klick metronome tempo map
 # 
 # note: denominator of time signature
@@ -45,6 +46,15 @@ sub beat_lengths {
 		push @beat_lengths, beat_length_from_bpm($self->tempo_end);
 	}
 	@beat_lengths
+}
+sub bar_lengths {
+	my $self = shift;
+	my @beats = $self->beat_lengths;
+	my @bars;
+	while (scalar @beats){
+		push @bars, sum splice @beats, 0, $self->count; 
+	}
+	@bars
 }
 sub ratio {
 	my ($tempo_start, $tempo_end, $beats) = @_;
