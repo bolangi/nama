@@ -67,6 +67,8 @@ keys %EXPORT_TAGS;
 __END__
 
 =head1 NAME
+
+=encoding UTF-8
  
 Audio::Nama::Globals - Nama global variables
  
