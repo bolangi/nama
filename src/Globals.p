@@ -114,10 +114,14 @@ Keys of variables appearing in ./var_singletons
 should be listed in var_keys or in var_config.
 Undeclared keys will trigger warnings during build.
 
+=back
+
 =head2 F<var_lists>
 
 Declares lists of variables used in
 serializing/deserializing.
+
+=over
 
 =item C<@global_effect_chain_vars>
 
