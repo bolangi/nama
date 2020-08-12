@@ -34,8 +34,5 @@ mv $LIBPATH/Nama.pm $LIBPATH/../Nama.pm
 		 -a t \
 		 -b t
 ./generate_executable_stub
-cp makeman $MD/lib/Audio
-cd $MD/lib/Audio
 ./makeman
 rm *.tmp
-cd ../../src
