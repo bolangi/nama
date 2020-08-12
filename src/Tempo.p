@@ -41,14 +41,14 @@ sub beat_lengths {
 	}	
 	else {
 		# r = exp [ ln( t final / t initial )  / n ]
-		my $ratio = ratio( $self->tempo_start, $self->tempo_end, $self->beats - 1 );
-		my $current_length = beat_length_from_bpm($self->tempo_start);
+		my $ratio = ratio( $self->start_tempo, $self->end_tempo, $self->beats - 1 );
+		my $current_length = beat_length_from_bpm($self->start_tempo);
 		push @beat_lengths, $current_length;
 		for (2 .. $self->beats - 1){
 			$current_length *= $ratio;
 			push @beat_lengths, $current_length;
 		}
-		push @beat_lengths, beat_length_from_bpm($self->tempo_end);
+		push @beat_lengths, beat_length_from_bpm($self->end_tempo);
 	}
 	@beat_lengths
 }
@@ -85,8 +85,8 @@ sub ending_time {
 	$time
 }
 sub ratio {
-	my ($tempo_start, $tempo_end, $beats) = @_;
-	my $ratio = exp( log(beat_length_from_bpm($tempo_end) / beat_length_from_bpm($tempo_start)) / $beats );
+	my ($start_tempo, $end_tempo, $beats) = @_;
+	my $ratio = exp( log(beat_length_from_bpm($end_tempo) / beat_length_from_bpm($start_tempo)) / $beats );
 }
 sub beat_length_from_bpm {
 	my $bpm = shift;
