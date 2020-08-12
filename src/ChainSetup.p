@@ -475,8 +475,11 @@ sub setup_requires_realtime {
 sub has_vertex { $g->has_vertex($_[0]) }
 
 1;
+__END__
 
 =head1 NAME
+
+=encoding UTF-8
 
 ::ChainSetup - routines for generating Ecasound chain setup
 
