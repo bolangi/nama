@@ -66,7 +66,7 @@ sub length {
 	my $length = sum $self->bar_lengths();
 }
 
-sub starting_time {
+sub start_time {
 	my $self = shift;
 	my $time = 0;
 	for (@chunks){
@@ -75,7 +75,7 @@ sub starting_time {
 	}
 	$time
 }
-sub ending_time {
+sub end_time {
 	my $self = shift;
 	my $time = 0;
 	for (@chunks){
