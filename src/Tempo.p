@@ -14,6 +14,11 @@ use List::Util qw(sum);
 # tempo: bpm or range
 
 no warnings 'redefine';
+
+our @chunks;
+our @beats;
+our @bars;
+
 sub note {
 	my $self = shift;
 	my ($note) = $self->{meter} =~ m| / (\d+) |x;
@@ -56,6 +61,29 @@ sub bar_lengths {
 	}
 	@bars
 }
+sub length {
+	my $self = shift;
+	my $length = sum $self->bar_lengths();
+}
+
+sub starting_time {
+	my $self = shift;
+	my $time = 0;
+	for (@chunks){
+		last if $_ == $self;
+		$time += $_->length;
+	}
+	$time
+}
+sub ending_time {
+	my $self = shift;
+	my $time = 0;
+	for (@chunks){
+		$time += $_->length;
+		last if $_ == $self;
+	}
+	$time
+}
 sub ratio {
 	my ($tempo_start, $tempo_end, $beats) = @_;
 	my $ratio = exp( log(beat_length_from_bpm($tempo_end) / beat_length_from_bpm($tempo_start)) / $beats );
@@ -79,10 +107,6 @@ sub end_tempo {
 	my ($end_tempo) = $self->fixed_tempo ? $self->tempo
 										 : $self->tempo =~ / - (\d+) /x;
 }
-
-our @chunks;
-our @beats;
-our @bars;
 
 package ::;
 use Modern::Perl;
@@ -146,12 +170,6 @@ sub read_tempo_map {
 	}
 }
 
-sub populate_bar_and_beat_arrays {
-	for my $chunk (@chunks){
-
-
-	}
-}
 sub create_marks {
 	for my $chunk (@chunks){
 	#	index_beats
