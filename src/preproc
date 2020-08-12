@@ -120,7 +120,6 @@ sub wanted {
 	my $re = qr/(\w+)\.$exta$/;
 	$File::Find::name =~ /$re/ or return;
 	$stub = $1;
-	#return unless $stub eq "Flow";
 	$debug and print $File::Find::name, $/; 
 	$debug and print "stub: $stub\n";
 	$debug and print "cwd: ", getcwd, $/;
