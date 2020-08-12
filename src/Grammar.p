@@ -187,30 +187,9 @@ sub set_current_track {
 }
 
 
-### allow commands to abbreviate Audio::Nama::Class as ::Class # SKIP_PREPROC
-
-{ my @namespace_abbreviations = qw(
-	Assign 
-	Track
-	Bus
-	Mark
-	IO
-	Graph
-	Wav
-	Insert
-	Fade                                                      
-	Edit
-	Text
-	Effect
-	EffectChain
-	ChainSetup
-);
-
-my $namespace_root = 'Audio::Nama';
-
 sub eval_perl {
 	my $code = shift;
-	map{ $code =~ s/(^|[^A-Za-z])::$_/$1$namespace_root\::$_/ } @namespace_abbreviations; # SKIP_PREPROC
+	$code = expand_root($code);
 	my $err;
 	undef $text->{eval_result};
 	my @result = eval $code;
@@ -225,8 +204,19 @@ sub eval_perl {
 		pager(join "\n", @result) 
 	}	
 }
-} # end namespace abbreviations
 
+sub expand_root {
+	my ($text) = @_;
+	my $new_root = 'Audio::Nama';
+
+		my $new = join "\n",map{ 
+			s/([^\w\}\\\/]|^)(::)([\w:])/$1$new_root$2$3/g unless /SKIP_PREPROC/;
+			s/([^\w\}\\\/]|^)(::)([^\w])/$1$new_root$3/mg unless /SKIP_PREPROC/;
+			$_;
+		} split "\n",$text;
+		$new;
+}
+say expand_root('Audio::Nama', '@::Tempo::chunks');
 #### Formatted text output
 
 sub show_versions {
