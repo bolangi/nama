@@ -402,6 +402,10 @@ sub restore_state_from_file {
 			@global_effect_chain_data,
 			@project_effect_chain_data;
 	}
+	if ( $project->{nama_version} <= 1.216)
+	{
+		map { delete $_->{active} } @marks_data
+	}
 
 
 	# restore effects, no change to track objects needed
