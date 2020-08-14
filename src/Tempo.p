@@ -115,6 +115,7 @@ use ::Log qw(logsub logpkg);
 use ::Util qw(strip_comments);
 use File::Slurp;
 use List::Util qw(sum);
+use autodie qw(:all);
 
 my $label = qr| (?<label> [-_\d\w]+) :       |x;
 my $bars  = qr| (?<bars>  \d+      )         |x;
@@ -176,6 +177,26 @@ sub create_marks {
 
 	}	
 
+}
+
+sub create_metronome_track {
+	my $plugin = 'klick';
+	my $m = 'metronome';
+	throw qq(metronome program not found, please install "klick"), return if not `which klick`;
+	local $this_track;
+	
+	if ($tn{$m}){ $this_track = $tn{$m} }	
+ 	else { add_track($m) }
+	$this_track->set(rw => REC); # to get correct value for ->current_wav
+	
+	my $map = $file->tempo_map;
+	my $rate = $project->sample_rate;
+	my $output = $this_track->current_wav;
+	my $cmd = "klick -f $map -r $rate -W $output";
+	system($cmd); 
+
+ 	@{$setup->{_last_rec_tracks}} = ($this_track);
+	rec_cleanup();
 }
 
 1
