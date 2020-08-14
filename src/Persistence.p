@@ -387,7 +387,7 @@ sub restore_state_from_file {
 
 		} @tracks_data; 
 	}
-	if ( $project->{nama_version}  ) # 1.214 or older
+	if ( $project->{nama_version} <= 1.214 )
 	{
 		map 
 		{
