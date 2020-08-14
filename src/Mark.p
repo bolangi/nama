@@ -13,7 +13,6 @@ use ::Globals qw(:all);
 use ::Object qw( 
 				 name 
                  time
-				 active
 				 );
 
 sub initialize {
@@ -41,7 +40,6 @@ sub new {
 
 		## 		defaults ##
 
-					active  => 1,
 					name => "",
 
 					@_ 			}, $class;
