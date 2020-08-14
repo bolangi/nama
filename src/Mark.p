@@ -13,6 +13,7 @@ use ::Globals qw(:all);
 use ::Object qw( 
 				 name 
                  time
+				 tempo
 				 );
 
 sub initialize {
