@@ -70,7 +70,7 @@ sub start_time {
 	my $self = shift;
 	my $time = 0;
 	for (@chunks){
-		last if $_ == $self;
+		last if $_ == $self; # exit before final increment
 		$time += $_->length;
 	}
 	$time
@@ -79,7 +79,7 @@ sub end_time {
 	my $self = shift;
 	my $time = 0;
 	for (@chunks){
-		$time += $_->length;
+		$time += $_->length; # increment before exit
 		last if $_ == $self;
 	}
 	$time
