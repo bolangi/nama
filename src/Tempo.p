@@ -126,7 +126,7 @@ my @fields = qw( label bars meter tempo );
 
 sub beat {  
 	my $nth = shift;
-	sum @bars[0..$nth-1]
+	sum @beats[0..$nth-1]
 }
 sub bar  {
 	my $nth = shift;
