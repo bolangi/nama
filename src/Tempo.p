@@ -175,7 +175,7 @@ sub create_marks_and_beat_index {
 	for my $chunk (@chunks){
 		push @bars, $chunk->bar_lengths;
 		push @beats, $chunk->beat_lengths;
-		::Mark->new(name => $chunk->name, time => $chunk->start_time, tempo => 1);
+		::Mark->new(name => $chunk->name, time => $chunk->start_time, tempo_map => 1);
 	}
 }
 
