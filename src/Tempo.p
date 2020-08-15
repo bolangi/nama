@@ -153,7 +153,7 @@ sub delete_tempo_marks {
 sub read_tempo_map {
 	my $file = shift;
 	return unless -e $file;
-	my @lines = read_file($file);
+	my @lines = grep{ ! /^\s*$/ } ::strip_comments(read_file($file));
 	for ( @lines )
 	{
 		no warnings 'uninitialized';
