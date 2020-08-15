@@ -19,10 +19,10 @@ sub initialize_project_repository {
 	my $is_new_project;
 	$is_new_project = 1 if not -e $file->state_store;
 	if( $is_new_project ){
-	write_file($file->state_store, "{}\n");
-	write_file($file->midi_store,          "") if not -e $file->midi_store;
-	write_file($file->tempo_map,           "") if not -e $file->tempo_map; 
-	refresh_tempo_map('force') if -s $file->tempo_map > 5;
+		write_file($file->state_store, "{}\n");
+		write_file($file->midi_store,          "") if not -e $file->midi_store;
+		write_file($file->tempo_map,           "") if not -e $file->tempo_map; 
+		refresh_tempo_map('force') if -s $file->tempo_map > 5;
 	}
 	git( add => $_ ) for $file->midi_store, $file->state_store;
 	git( commit => '--quiet', '--message' => $is_new_project 
