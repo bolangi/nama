@@ -171,12 +171,12 @@ sub read_tempo_map {
 	}
 }
 
-sub create_marks {
+sub create_marks_and_beat_index {
 	for my $chunk (@chunks){
-	#	index_beats
-
-	}	
-
+		push @bars, $chunk->bar_lengths;
+		push @beats, $chunk->beat_lengths;
+		::Mark->new(name => $chunk->name, time => $chunk->start_time, tempo => 1);
+	}
 }
 
 sub create_metronome_track {
