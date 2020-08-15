@@ -13,7 +13,7 @@ use ::Globals qw(:all);
 use ::Object qw( 
 				 name 
                  time
-				 tempo
+				 tempo_map
 				 );
 
 sub initialize {
