@@ -12,6 +12,7 @@ use List::Util qw(sum);
 # bars: measures in this chunk
 # meter: time signature e.g 3/4
 # tempo: bpm or range
+# ticks: quarter note duration / 48
 
 no warnings 'redefine';
 
