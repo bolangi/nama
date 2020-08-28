@@ -189,16 +189,15 @@ sub create_metronome_track {
 	
 	if ($tn{$m}){ $this_track = $tn{$m} }	
  	else { add_track($m) }
-	$this_track->set(rw => REC); # to get correct value for ->current_wav
 	
 	my $map = $file->tempo_map;
-	my $rate = $project->sample_rate;
-	my $output = $this_track->current_wav;
+	my $rate = $project->{sample_rate};
+	my $output = join_path( this_wav_dir(), 'klick.wav');
 	my $cmd = "klick -f $map -r $rate -W $output";
+	::pager("executing: $cmd");
 	system($cmd); 
-
- 	@{$setup->{_last_rec_tracks}} = ($this_track);
-	rec_cleanup();
+	nama_cmd("import_audio $output");
+	unlink $output;
 }
 
 1
