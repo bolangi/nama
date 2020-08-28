@@ -76,7 +76,7 @@ sub restore_state_from_vcs {
 	restore_state_from_file();
 }
  
-sub project_snaphot {
+sub project_snapshot {
 	logsub((caller(0))[3]);
 	my $commit_message = shift() || "";
 	refresh_tempo_map();
@@ -195,7 +195,7 @@ sub list_branches {
 
 sub autosave {
 		logsub((caller(0))[3]);
-		project_snaphot(), return if $config->{autosave}
+		project_snapshot(), return if $config->{autosave}
 							and not $config->{opts}->{R}
 							and not ($this_engine->started() 
 											and ::ChainSetup::really_recording());

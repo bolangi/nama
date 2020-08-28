@@ -89,7 +89,7 @@ sub tag_mixdown_commit {
 	mixoff();
 
 	my $msg = "State for $sym ($mix)";
-	project_snaphot($msg);
+	project_snapshot($msg);
 	git('tag', $name, '-m', $mix);
 }
 sub delete_existing_mixdown_tag_and_convenience_encodings {
