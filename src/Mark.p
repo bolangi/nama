@@ -47,6 +47,9 @@ sub new {
 
 	#print "self class: $class, self type: ", ref $self, $/;
 	if ($self->name) {
+		if ( $by_name{$self->name} ) {
+			@all = grep{ $_->name ne $self->name } @all;
+		}
 		$by_name{ $self->name } = $self;
 	}
 	push @all, $self;
