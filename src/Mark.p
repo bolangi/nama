@@ -47,7 +47,8 @@ sub new {
 
 	#print "self class: $class, self type: ", ref $self, $/;
 	if ($self->name) {
-		if ( $by_name{$self->name} ) {
+		if ( my $old = delete $by_name{$self->name} ) {
+			::pager("replacing previous mark at " .  $old->time);
 			@all = grep{ $_->name ne $self->name } @all;
 		}
 		$by_name{ $self->name } = $self;
