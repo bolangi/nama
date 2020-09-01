@@ -10,8 +10,10 @@ sub reconfigure_engine {
 
 	# skip if command line option is set
 	
-	return if ($config->{opts}->{R} or $config->{disable_auto_reconfigure});
+	return if $config->{opts}->{R};
 	update_jack_client_list();
+	refresh_tempo_map();
+	autosave();
 	::Engine::sync_action('configure');
 }
 
