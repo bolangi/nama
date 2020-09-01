@@ -78,16 +78,22 @@ sub restore_state_from_vcs {
  
 sub project_snapshot {
 	logsub((caller(0))[3]);
-	my $commit_message = shift() || "";
-	refresh_tempo_map();
+	return if $config->{opts}->{R}
+		   or ! $config->{autosave}
+		   or $this_engine->running and ::ChainSetup::really_recording();
+	# we skip storing commands that do not affect project state
+
 	save_state();
-	$config->{use_git} 
-		and $project->{name} 
-		and $project->{repo}
-		or throw('failed to create snapshot'), return;
-	reset_command_buffer(), return unless state_changed();
+	reset_command_buffer(), return if not state_changed();
+
+	return if not $config->{use_git} 
+	  	   or not $project->{name} 
+		   or not $project->{repo};
+
+	my $commit_message = shift() || "";
 	git_commit($commit_message);
 }
+
 sub reset_command_buffer { $project->{command_buffer} = [] } 
 
 sub git_commit {
@@ -134,6 +140,7 @@ these changes, or throw them away."
 	git(checkout => $branchname, @args);
 
 }
+
 sub git_create_branch {
 	logsub((caller(0))[3]);
 	my ($branchname, $branchfrom) = @_;
@@ -193,14 +200,8 @@ sub list_branches {
 	);
 }
 
-sub autosave {
-		logsub((caller(0))[3]);
-		project_snapshot(), return if $config->{autosave}
-							and not $config->{opts}->{R}
-							and not ($this_engine->started() 
-											and ::ChainSetup::really_recording());
-		throw('failed to autosave, are you recording?');
-}
+sub autosave { &project_snapshot }
+
 sub redo {
 	if ($project->{redo}){
 		git('cherry-pick',$project->{redo});
