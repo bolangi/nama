@@ -24,7 +24,6 @@ sub setup {
 	::ChainSetup::remove_temporary_tracks();
 	restart_wav_memoize(); # check if someone has snuck in some files
 	find_duplicate_inputs(); # we will warn the user later
-	autosave() ;	
 	::ChainSetup::initialize();
 	
 	# catch errors unless testing (no-terminal option)
