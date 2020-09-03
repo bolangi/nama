@@ -455,7 +455,7 @@ sub t_load_project {
 	throw("Project $name does not exist\n"), return
 		unless -d join_path(project_root(), $name) or $args{create};
 	stop_transport() if $this_engine->started(); 
-	autosave();
+	project_snapshot();
 	load_project( name => $name, %args );
 	pager("loaded project: $project->{name}\n") unless $args{create};
 	{no warnings 'uninitialized';

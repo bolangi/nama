@@ -13,7 +13,7 @@ sub reconfigure_engine {
 	return if $config->{opts}->{R};
 	update_jack_client_list();
 	refresh_tempo_map();
-	autosave();
+	project_snapshot();
 	::Engine::sync_action('configure');
 }
 
