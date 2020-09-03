@@ -200,8 +200,6 @@ sub list_branches {
 	);
 }
 
-sub autosave { &project_snapshot }
-
 sub redo {
 	if ($project->{redo}){
 		git('cherry-pick',$project->{redo});
