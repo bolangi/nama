@@ -341,7 +341,7 @@ sub import_audio  {
 		::sleeper(0.2); 
 		sleep 1 while $this_engine->running();
 	} 
-	::restart_wav_memoize() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
+	::refresh_wav_cache() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
 }
 
 sub port_name { $_[0]->target || $_[0]->name } 
