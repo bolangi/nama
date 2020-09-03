@@ -68,7 +68,6 @@ sub process_line {
 								  command => $user_input };
 			push(@{$project->{command_buffer}}, $command_stamp);
 			
-			autosave();
 			reconfigure_engine();
 
 		# reset current track to Main if it is
