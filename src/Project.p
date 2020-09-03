@@ -137,7 +137,7 @@ sub load_project {
 	initialize_project_data();
 	remove_riff_header_stubs(); 
 	cache_wav_info();
-	restart_wav_memoize();
+	refresh_wav_cache();
 	initialize_project_repository();
 	restore_state($args{settings}) unless $config->{opts}->{M} ;
 

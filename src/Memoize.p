@@ -36,7 +36,7 @@ sub track_unmemoize { # after generate_setup
 	return unless $config->{memoize};
 	map{package ::Track; unmemoize ($_)} @track_methods;
 }
-sub restart_wav_memoize {
+sub refresh_wav_cache {
 	return unless $config->{memoize};
 	map{package ::Wav; unmemoize ($_); memoize($_) } 
 		@wav_functions;
