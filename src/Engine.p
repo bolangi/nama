@@ -229,7 +229,7 @@ sub configure {
 	# store a lists of wav-recording tracks for the rerecord
 	# function
 	
-	if( $force or $setup->{changed} ){ 
+	if( $setup->{changed} ){ 
 		logpkg('debug',"reconfigure requested");
 		$setup->{_old_snapshot} = status_snapshot_string();
 } 

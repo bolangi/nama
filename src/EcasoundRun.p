@@ -210,7 +210,8 @@ sub restart_ecasound {
 	kill_my_ecasound_processes();
 	pager_newline(q(restarting Ecasound engine - your may need to use the "arm" command));	
 	initialize_ecasound_engine();
-	reconfigure_engine('force');
+	request_setup();
+	reconfigure_engine();
 }
 sub kill_my_ecasound_processes {
 	my @signals = (15, 9);

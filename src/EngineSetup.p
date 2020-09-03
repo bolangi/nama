@@ -6,7 +6,6 @@ use Modern::Perl; use Carp;
 sub reconfigure_engine {
 
 	logsub((caller(0))[3]);
-	my $force = shift;
 
 	# skip if command line option is set
 	
