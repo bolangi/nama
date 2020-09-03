@@ -165,7 +165,7 @@ sub rename_track {
 		send_id| 
 		target| 
 		current_edit| 
-		send_id| 
+		source_id| 
 		return_id| 
 		wet_track| 
 		dry_track| 
