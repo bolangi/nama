@@ -403,7 +403,7 @@ Nama uses git to save project state as a series of commits, a new commit after
 each command. It is easy to tag a commit as a way of documenting
 developments in a projects. 
 
-   save <tagname>            - label current autosave state as <tagname>
+   save <tagname>            - label current snapshot as <tagname>
    get <tagname>             - checkout project state tagged with <tagname>
    branch <tagname>          - switch to branch and load state
    list-branches, lbr        - list branches and tags

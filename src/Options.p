@@ -75,7 +75,7 @@ Debugging options (for developers)
 --no-state, -M                   Don't load project state
 --no-static-effects-data, -S     Don't load effects data
 --no-static-effects-cache, -C    Don't load effects data cache
---no-reconfigure-engine, -R      Don't autosave, autoreconfigure or git snapshot
+--no-reconfigure-engine, -R      Don't automatically save or reconfigure
 --fake-jack, -J                  Simulate JACK environment
 --fake-alsa, -A                  Simulate ALSA environment
 --no-ecasound, -E                Don't spawn Ecasound process
