@@ -33,10 +33,6 @@ sub save_state {
 	logpkg('debug', "saving palette");
 	$ui->save_palette;
 
-	# do nothing more if only Main and Mixdown
-	
-	#user_tracks_present() or throw("No user tracks, skipping..."), return;
-	
 	logpkg('debug',"Saving state as ", $path);
 	save_system_state($path);
 	save_global_effect_chains();
