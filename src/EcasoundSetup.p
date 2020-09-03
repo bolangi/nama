@@ -80,7 +80,8 @@ sub teardown_engine {
 sub arm {
 	logsub((caller(0))[3]);
 	exit_preview_modes();
-	reconfigure_engine('force');
+	request_setup();
+	reconfigure_engine();
 }
 
 # substitute all live inputs by clock-sync'ed 
