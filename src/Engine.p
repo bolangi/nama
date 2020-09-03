@@ -255,7 +255,6 @@ sub configure {
 		map{$_->name => $_->rec_status } rec_hookable_tracks()
 	};
 	if ( $self->setup() ){
-		$self->{valid_setup} = 1;
 
 		reset_latency_compensation() if $config->{opts}->{Q};
 		

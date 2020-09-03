@@ -63,7 +63,6 @@ sub initialize {
 	::disable_length_timer();
 	reset_aux_chain_counter();
 	unlink $file->chain_setup;
-	delete $this_engine->{valid_setup};
 	$g;
 }
 sub ecasound_chain_setup { $chain_setup } 
