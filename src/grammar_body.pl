@@ -1306,7 +1306,7 @@ full_effect_profiles: _full_effect_profiles ident(?) {
 	1;
 }
 do_script: _do_script shellish { ::do_script($item{shellish});1}
-scan: _scan { ::pager( "scanning ", ::this_wav_dir()); ::restart_wav_memoize() }
+scan: _scan { ::pager( "scanning ", ::this_wav_dir()); ::refresh_wav_cache() }
 add_fade: _add_fade in_or_out mark1 duration(?)
 { 	::Fade->new(  type => $item{in_or_out},
 					mark1 => $item{mark1},
