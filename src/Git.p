@@ -79,7 +79,6 @@ sub restore_state_from_vcs {
 sub project_snapshot {
 	logsub((caller(0))[3]);
 	return if $config->{opts}->{R}
-		   or ! $config->{autosave}
 		   or $this_engine->running and ::ChainSetup::really_recording();
 	# we skip storing commands that do not affect project state
 

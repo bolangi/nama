@@ -144,7 +144,6 @@ sub definitions {
 		use_git							=> 1,
 		use_midi						=> 0,
 		use_group_numbering				=> 1,
-		autosave						=> 1,
 		volume_control_operator 		=> 'ea', # default to linear scale
 		sync_mixdown_and_playback_version_numbers => 1, # not implemented yet
 		engine_tcp_port					=> 2868, # 'default' engine
