@@ -10,6 +10,7 @@ sub reconfigure_engine {
 	# skip if command line option is set
 	
 	return if $config->{opts}->{R};
+	refresh_wav_cache();
 	update_jack_client_list();
 	refresh_tempo_map();
 	project_snapshot();
