@@ -1601,8 +1601,6 @@ show_head_commit:
   what: |
     show the last commit, which undo will roll back.
     A commit may contain multiple commands. 
-    The last_* aliases are meaningful when autosave: undo is set.
-    In that case each commit contains only a single command
 eager:
   type: mode
   what: set eager mode
