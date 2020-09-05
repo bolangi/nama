@@ -3,6 +3,7 @@
 
 package ::Tempo;
 use Modern::Perl;
+use ::Globals qw($config);
 use ::Object qw( note count label bars meter tempo );
 use List::Util qw(sum);
 # we divide time in chunks specified by klick metronome tempo map
@@ -32,24 +33,28 @@ sub beats {
 	my $self = shift;
 	$self->bars * $self->count
 }
+sub ticks { 
+	my $self = shift;
+	$self->beats * ( 4 / $self->note ) * 48
+}
 sub beat_lengths {
 	my $self = shift;
 	my @beat_lengths;
 	if ( $self->fixed_tempo ){
 		my $bps = $self->tempo / 60;
-		my $seconds_per_beat = 1 / $bps;
+		my $seconds_per_beat = 1 / $bps * $self->note_fraction;
 		for (1..$self->beats){ push @beat_lengths, $seconds_per_beat }
 	}	
 	else {
 		# r = exp [ ln( t final / t initial )  / n ]
 		my $ratio = ratio( $self->start_tempo, $self->end_tempo, $self->beats - 1 );
-		my $current_length = beat_length_from_bpm($self->start_tempo);
+		my $current_length = quarter_length_from_bpm($self->start_tempo) * $self->note_fraction;
 		push @beat_lengths, $current_length;
 		for (2 .. $self->beats - 1){
 			$current_length *= $ratio;
 			push @beat_lengths, $current_length;
 		}
-		push @beat_lengths, beat_length_from_bpm($self->end_tempo);
+		push @beat_lengths, quarter_length_from_bpm($self->end_tempo);
 	}
 	@beat_lengths
 }
@@ -87,12 +92,12 @@ sub end_time {
 }
 sub ratio {
 	my ($start_tempo, $end_tempo, $beats) = @_;
-	my $ratio = exp( log(beat_length_from_bpm($end_tempo) / beat_length_from_bpm($start_tempo)) / $beats );
+	my $ratio = exp( log(quarter_length_from_bpm($end_tempo) / quarter_length_from_bpm($start_tempo)) / $beats );
 }
-sub beat_length_from_bpm {
+sub quarter_length_from_bpm {
 	my $bpm = shift;
 	my $bps = $bpm / 60;
-	my $seconds_per_beat = 1 / $bps;
+	my $seconds_per_beat = 1 / $bps
 }
 sub fixed_tempo {
 	my $self = shift;
@@ -107,6 +112,46 @@ sub end_tempo {
 	my $self = shift;
 	my ($end_tempo) = $self->fixed_tempo ? $self->tempo
 										 : $self->tempo =~ / - (\d+) /x;
+}
+
+sub note_fraction {
+	my $self = shift;
+	4 / $self->note;
+}
+
+sub nth_tick_time {
+	my ($self, $n) = @_;
+	if ( $self->fixed_tempo ){
+		my $bps = $self->tempo / 60;
+		my $seconds_per_quarter = 1 / $bps;
+		my $seconds_per_tick = $seconds_per_quarter / $config->{ticks_per_quarter_note};
+		$seconds_per_tick * ($n - 1);
+	}	
+	else {
+		# r = exp [ ln( t final / t initial )  / n ]
+		my $ratio = ratio( $self->start_tempo, $self->end_tempo, $self->ticks - 1 );
+		my $time = 0;
+		my $current_length = quarter_length_from_bpm($self->start_tempo) / $config->{ticks_per_quarter_note};
+		$time += $current_length; # beat 1
+		for (2 .. $n - 1){        # beats 2 to $n - 1, giving offset to tick $n
+			$current_length *= $ratio;
+			$time += $current_length;
+		}
+		$time
+	}
+}
+	
+sub notation_to_time {
+	my $self = shift;
+	my ($bars, $beats, $ticks) = @_;
+	my $time = 0;
+	my $no_of_beats = $self->count * ($bars - 1) + $beats;
+	my @widths = $self->beat_lengths();
+	for (1..$no_of_beats - 1) { my $w = shift @widths; $time += $w } 
+	if ($ticks){
+		$time += $self->nth_tick_time($ticks)
+	}
+	$time	
 }
 
 package ::;
@@ -206,6 +251,19 @@ sub render_metronome_track {
 	refresh_wav_cache();
 }
 
+sub notation_to_time {
+	my( $bars, $beats, $ticks) = @_;
+	my $time = 0;
+	my $in;
+	for (@chunks){
+		if ($bars > $_->bars) # does not appear during this chunk
+			{ $bars -= $_->bars }
+		else { $in = $_, last }
+	}	
+	$time += $in->start_time;
+	$time += $in->notation_to_time($bars,$beats, $ticks)
+}
+	
 1
 __END__
 
