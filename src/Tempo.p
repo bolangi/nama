@@ -138,17 +138,26 @@ sub barbeat { 					# position in time of nth bar, mth beat
 	# 
 }
 sub refresh_tempo_map {
-		my $force = shift;
 		-e $file->tempo_map and -s $file->tempo_map > 5 or return;
-		$tn{metronome} or create_metronome_track(), $tn{metronome}->set(rw => PLAY);
-		if ($config->{use_git} and git( diff => $file->tempo_map ) || $force ){
+		if ($config->{use_git} and git( diff => $file->tempo_map ) ){
+			local $this_track = metronome_track();
+			render_metronome_track();
+			
+			# populate data structures
+			delete_tempo_marks();
+			initialize_tempo_map();
+			read_tempo_map($file->tempo_map);
+			create_marks_and_beat_index();
+
 			git( add => $file->tempo_map );
   			git( commit => '--quiet', '--message', 'change in tempo map '. $file->tempo_map);
 		}
-		delete_tempo_marks();
-		initialize_tempo_map();
-		read_tempo_map($file->tempo_map);
 }
+sub metronome_track {
+	my $m = 'metronome';
+	if ($tn{$m}){ $tn{$m} } else { add_track($m) }
+}
+
 sub initialize_tempo_map { @chunks = @bars = @beats = ()  }
 sub delete_tempo_marks {
 
@@ -178,26 +187,23 @@ sub create_marks_and_beat_index {
 	for my $chunk (@chunks){
 		push @bars, $chunk->bar_lengths;
 		push @beats, $chunk->beat_lengths;
-		::Mark->new(name => $chunk->name, time => $chunk->start_time, tempo_map => 1);
+		::Mark->new(name => $chunk->label, time => $chunk->start_time, tempo_map => 1);
 	}
 }
 
-sub create_metronome_track {
-	my $m = 'metronome';
+sub render_metronome_track {
 	throw qq(metronome program not found, please install "klick"), return if not `which klick`;
-	local $this_track;
+	local $this_track = $tn{metronome};
 	
-	if ($tn{$m}){ $this_track = $tn{$m} }	
- 	else { add_track($m) }
-	
+	$this_track->set(rw => REC);
+	my $output = $this_track->full_path;
 	my $map = $file->tempo_map;
 	my $rate = $project->{sample_rate};
-	my $output = join_path( this_wav_dir(), 'klick.wav');
 	my $cmd = "klick -f $map -r $rate -W $output";
 	::pager("executing: $cmd");
 	system($cmd); 
-	nama_cmd("import_audio $output");
-	unlink $output;
+	$this_track->set(rw => PLAY);
+	refresh_wav_cache();
 }
 
 1
