@@ -22,7 +22,7 @@ sub initialize_project_repository {
 		write_file($file->state_store, "{}\n");
 		write_file($file->midi_store,          "") if not -e $file->midi_store;
 		write_file($file->tempo_map,           "") if not -e $file->tempo_map; 
-		refresh_tempo_map('force') if -s $file->tempo_map > 5;
+		refresh_tempo_map();
 	}
 	git( add => $_ ) for $file->midi_store, $file->state_store;
 	git( commit => '--quiet', '--message' => $is_new_project 
