@@ -139,7 +139,8 @@ sub barbeat { 					# position in time of nth bar, mth beat
 }
 sub refresh_tempo_map {
 		my $force = shift;
-		-e $file->tempo_map or return;
+		-e $file->tempo_map and -s $file->tempo_map > 5 or return;
+		$tn{metronome} or create_metronome_track(), $tn{metronome}->set(rw => PLAY);
 		if ($config->{use_git} and git( diff => $file->tempo_map ) || $force ){
 			git( add => $file->tempo_map );
   			git( commit => '--quiet', '--message', 'change in tempo map '. $file->tempo_map);
