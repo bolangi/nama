@@ -7,12 +7,12 @@ use ::Object qw( note count label bars meter tempo );
 use List::Util qw(sum);
 # we divide time in chunks specified by klick metronome tempo map
 # 
-# note: denominator of time signature
+# note: denominator of time signature, e.g. 4 means quarter note, 8 means eighth
 # count: numerator of time signature
 # bars: measures in this chunk
-# meter: time signature e.g 3/4
+# meter: time signature e.g 3/4 count/note, note is 4, count is 3
 # tempo: bpm or range
-# ticks: 48 ticks equals one quarter note
+# ticks: default 24 ticks equals one quarter note
 
 no warnings 'redefine';
 
