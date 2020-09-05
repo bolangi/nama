@@ -183,7 +183,6 @@ sub create_marks_and_beat_index {
 }
 
 sub create_metronome_track {
-	my $plugin = 'klick';
 	my $m = 'metronome';
 	throw qq(metronome program not found, please install "klick"), return if not `which klick`;
 	local $this_track;
