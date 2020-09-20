@@ -697,10 +697,9 @@ noloop: _noloop { $::mode->{loop_enable} = 0; 1}
 name_mark: _name_mark ident {$::this_mark->set_name( $item{ident}); 1}
 list_marks: _list_marks { 
 	my $i = 0;
-	my @lines = map{ ( $_->{time} == $::this_mark->{time} ? q(*) : q()
-	,join " ", $i++, sprintf("%.1f", $_->{time}), $_->name, "\n")  } 
-		  #sort { $a->time <=> $b->time } 
-		  @::Mark::all;
+	my @lines = map{ 	my $pre =  $_->{time} == $::this_mark->{time} ? q(*) : q();
+						$pre . join " ", $i++, sprintf("%.1f", $_->{time}), $_->name, "\n"
+		} @::Mark::all;
 	my $start = my $end = "undefined";
 	push @lines, "now at ". sprintf("%.1f\n", ::ecasound_iam("getpos"));
 	::pager(@lines);
