@@ -526,7 +526,7 @@ show_track: _show_track {
 	$output .= ::show_track_comment($::this_track);
 	$output .= ::show_region();
 	$output .= ::show_versions();
-	$output .= ::show_version_comment($::this_track, $::this_track->version);
+	$output .= ::show_version_comment_brief($::this_track, $_) for @{$::this_track->versions};
 	$output .= ::show_send();
 	$output .= ::show_bus();
 	$output .= ::show_modifiers();
