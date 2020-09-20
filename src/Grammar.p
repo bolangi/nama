@@ -239,6 +239,11 @@ sub show_version_comment {
 	my $text = $track->is_version_comment($version);
 	$text and "Version comment: $text\n";
 }
+sub show_version_comment_brief {
+	my ($track, $version) = @_;
+	my $text = $track->is_version_comment($version);
+	$text and "  $version: $text\n";
+}
 sub show_send { "Send: ". $this_track->send_id. $/ 
 					if ! $this_track->off
 						and $this_track->send_id
