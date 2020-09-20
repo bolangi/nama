@@ -183,30 +183,53 @@ sub barbeat { 					# position in time of nth bar, mth beat
 	# 
 }
 sub refresh_tempo_map {
-		-e $file->tempo_map and -s $file->tempo_map > 5 or return;
-		if ($config->{use_git} and git( diff => $file->tempo_map ) ){
-			local $this_track = metronome_track();
-			render_metronome_track();
+		
+	if ( -e $file->tempo_map or git( 'ls-files' => $file->tempo_map)){
 			
-			# populate data structures
-			delete_tempo_marks();
-			initialize_tempo_map();
-			read_tempo_map($file->tempo_map);
-			create_marks_and_beat_index();
-
-			git( add => $file->tempo_map );
-  			git( commit => '--quiet', '--message', 'change in tempo map '. $file->tempo_map);
+			# case 1 - tempo map appears
+			if (not git( 'ls-files' => $file->tempo_map)){
+				my $msg = 'tempo map created';
+				git( add => $file->tempo_map);
+				git( commit => '--quiet', '--message', $msg, $file->tempo_map);
+				process_tempo_map();
+			}
+			# case 2 - change in tempo map
+			elsif (git( diff => $file->tempo_map ) ){
+				if (-e $file->tempo_map ){
+					my $msg = 'change in tempo map';
+					git( commit => '--quiet', '--message', $msg, $file->tempo_map);
+					process_tempo_map();
+				} else { 
+					my $msg = 'delete tempo map';
+					::pager('tempo map has been deleted, turning of metronome track');
+					$this_track = metronome_track()->set( rw => OFF );
+					git( commit => '--quiet', '--message', $msg, $file->tempo_map);
+					initialize_tempo_map();
+				};
+			}
 		}
+			
+}
+
+sub process_tempo_map {
+	local $this_track = metronome_track();
+	-e $file->tempo_map or return;
+	initialize_tempo_map();
+	read_tempo_map($file->tempo_map);
+	create_marks_and_beat_index();
+	render_metronome_track();
 }
 sub metronome_track {
 	my $m = 'metronome';
 	if ($tn{$m}){ $tn{$m} } else { add_track($m) }
 }
 
-sub initialize_tempo_map { @chunks = @bars = @beats = ()  }
-sub delete_tempo_marks {
-
+sub initialize_tempo_map { 
+	@chunks = @bars = @beats = ();	
+	delete_tempo_marks();
 }
+sub delete_tempo_marks { for( ::Mark::all() ){ $_->remove if $_->tempo_map } }
+
 sub read_tempo_map {
 	my $file = shift;
 	return unless -e $file;
@@ -238,7 +261,7 @@ sub create_marks_and_beat_index {
 
 sub render_metronome_track {
 	throw qq(metronome program not found, please install "klick"), return if not `which klick`;
-	local $this_track = $tn{metronome};
+	local $this_track = metronome_track();
 	
 	$this_track->set(rw => REC);
 	my $output = $this_track->full_path;
