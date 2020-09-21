@@ -221,10 +221,9 @@ say expand_root('Audio::Nama', '@::Tempo::chunks');
 sub show_versions {
 		no warnings 'uninitialized';
 		if (@{$this_track->versions} ){
-			"All versions: ". join(" ", 
+			"Versions: ". join(" ", 
 				map { 
 					my $cached = is_cached($this_track, $_) ? 'c' : '';
-					$cached .= 'C' if $this_track->is_version_comment($_);
 					$_ . $cached } @{$this_track->versions}
 			). $/
 		} else {}
@@ -233,6 +232,11 @@ sub show_track_comment {
 	my $track = shift;
 	my $text = $track->is_comment;
 	$text and "Track comment: $text\n";
+}
+sub show_track_comment_brief {
+	my $track = shift;
+	my $text = $track->is_comment;
+	$text and "Comment: $text\n";
 }
 sub show_version_comment {
 	my ($track, $version) = @_;

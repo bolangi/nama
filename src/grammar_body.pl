@@ -523,7 +523,7 @@ dump_io: _dump_io { ::ChainSetup::show_io(); 1}
 show_track: _show_track {
 	my $output = $::text->{format_top};
 	$output .= ::show_tracks_section($::this_track);
-	$output .= ::show_track_comment($::this_track);
+	$output .= ::show_track_comment_brief($::this_track);
 	$output .= ::show_region();
 	$output .= ::show_versions();
 	$output .= ::show_version_comment_brief($::this_track, $_) for @{$::this_track->versions};
