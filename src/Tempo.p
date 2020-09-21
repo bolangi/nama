@@ -35,7 +35,7 @@ sub beats {
 }
 sub ticks { 
 	my $self = shift;
-	$self->beats * ( 4 / $self->note ) * 48
+	$self->beats * ( 4 / $self->note ) * $config->{ticks_per_quarter_note}
 }
 sub beat_lengths {
 	my $self = shift;
