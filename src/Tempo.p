@@ -91,9 +91,86 @@ sub end_time {
 	$time
 }
 sub ratio {
-	my ($start_tempo, $end_tempo, $beats) = @_;
-	my $ratio = exp( log(quarter_length_from_bpm($end_tempo) / quarter_length_from_bpm($start_tempo)) / $beats );
+	my ($start_bpm, $end_bpm, $beats) = @_;
+	my $ratio = exp( log(quarter_length_from_bpm($end_bpm) / quarter_length_from_bpm($start_bpm)) / $beats );
 }
+
+sub ramp_position_mth_of_n {
+
+	my ($start_bpm, $end_bpm, $n, $m) = @_;
+
+	# start_tempo: notes per minute
+	# end_tempo: notes per minute
+	# n: notes in ramp interval
+	# m: ordinal whose position we want
+
+	# this algorithm calculates the position of the
+	# *end* of the mth note. To get the starting pos
+	# we decrement m
+
+	$m--;
+
+	# we will change time by a constant delta
+	# delta = total change / number of steps (n)
+
+	# increment first note length by 0 delta
+	# increment second note by 1 delta
+	# increment (nth) note by (n-1) delta
+	
+	# we only increment (no. of steps - 1) times, since the measure
+	# following the ramp will presumably continue with the tempo
+	# at ramp end. 
+
+	# example: if 4 measures of 4/4, delta is ramp/16, then 15 steps of adding
+	# delta. The first note of the next measure will be at the intended tempo
+
+	my $notes_per_second_start = 60 / $start_bpm; 
+	my $t1 = my $seconds_per_note_start = 1 / $notes_per_second_start;
+	my $notes_per_second_end = 60 / $end_bpm; 
+	my $tn = my $seconds_per_note_end = 1 / $notes_per_second_end;
+
+	#Tm = m (t1 + (tn - t1) / n * (m - 1) / 2 )
+	my $pos = $m * ($t1 + ($tn - $t1) / $n * ($m - 1) / 2);
+    
+	# Consider this ramp. The initial time interval 
+    # 
+    # t0  = 60 s / 100 bpm = 0.6 s.  
+    # 
+    # The final time interval after 16 beats is 
+    # 
+    # t16 = 60 s / 120 bpm = 0.5 s.
+    # 
+    # There are two ways I can think of for the time interval between beats to
+    # change.  One is when the time interval changes linearly with the number of
+    # beats; the other is that the time interval changes by a constant ratio with
+    # each beat.
+    # 
+    # Let's consider the linear change first.  For your case, the time change
+    # with each beat delta ("d") is given by
+    # 
+    # d = (tn - t1) / n  Where n is the number of notes in the chunk
+    # 
+    # The time Tm when the mth note ends is
+    # Tm =  t1 + ...+ tm
+    #     = t1 + (t1 + d) + (t1 + 2 d) + ,,, (t0 + (m-1)d )
+    #     = m t1  +  (1 + ... m - 1) d
+    # 
+    # There are m - 1 terms in the sum (1 + 2 + ... m - 1), and
+    # the average term is  (m / 2)  
+    # 
+    # sum = (m - 1)(m / 2)
+    # 
+    # Plugging into T,
+    # 
+    # Tm = m t1 +  d (m-1) m / 2
+    # 
+    # substitute d to get
+    # 
+    # Tm = m t1 +  (tn - t1) / n * (m - 1) * m  / 2
+    # Tm = m (t1 + (tn - t1) / n * (m - 1) / 2 )
+
+}
+
 sub quarter_length_from_bpm {
 	my $bpm = shift;
 	my $bps = $bpm / 60;
@@ -105,12 +182,12 @@ sub fixed_tempo {
 }
 sub start_tempo {
 	my $self = shift;
-	my ($start_tempo) = $self->fixed_tempo ? $self->tempo
+	my ($start_bpm) = $self->fixed_tempo ? $self->tempo
 										   : $self->tempo =~ / (\d+) - /x;
 }
 sub end_tempo {
 	my $self = shift;
-	my ($end_tempo) = $self->fixed_tempo ? $self->tempo
+	my ($end_bpm) = $self->fixed_tempo ? $self->tempo
 										 : $self->tempo =~ / - (\d+) /x;
 }
 
@@ -119,27 +196,6 @@ sub note_fraction {
 	4 / $self->note;
 }
 
-sub nth_tick_time {
-	my ($self, $n) = @_;
-	if ( $self->fixed_tempo ){
-		my $bps = $self->tempo / 60;
-		my $seconds_per_quarter = 1 / $bps;
-		my $seconds_per_tick = $seconds_per_quarter / $config->{ticks_per_quarter_note};
-		$seconds_per_tick * ($n - 1);
-	}	
-	else {
-		# r = exp [ ln( t final / t initial )  / n ]
-		my $ratio = ratio( $self->start_tempo, $self->end_tempo, $self->ticks - 1 );
-		my $time = 0;
-		my $current_length = quarter_length_from_bpm($self->start_tempo) / $config->{ticks_per_quarter_note};
-		$time += $current_length; # beat 1
-		for (2 .. $n - 1){        # beats 2 to $n - 1, giving offset to tick $n
-			$current_length *= $ratio;
-			$time += $current_length;
-		}
-		$time
-	}
-}
 	
 sub notation_to_time {
 	my $self = shift;
