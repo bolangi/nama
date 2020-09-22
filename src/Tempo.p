@@ -93,6 +93,26 @@ sub end_time {
 sub ratio {
 	my ($start_bpm, $end_bpm, $beats) = @_;
 	my $ratio = exp( log(bpm_to_length($end_bpm) / bpm_to_length($start_bpm)) / $beats );
+
+	# To calculate the factor for multiplying by beat length of note n 
+	# to get beat length of note n+1
+	#
+	# t final / t initial = r^n
+	#
+	# where
+	# t final is the final beat interval
+	# t initial is the initial beat interval
+	# r is the ratio
+	# n is the number of beats for the transition
+	#
+	# Taking the natural logarithm of both sides,
+	#
+	# ln( t final / t initial ) = n ln r
+	#
+	# Hence
+	#
+	# r = exp [ ln( t final / t initial )  / n ]
+
 }
 
 sub bpm_to_length {
