@@ -125,22 +125,20 @@ sub bpm_to_length {
 }
 
 sub constant_rate_ramp_position_mth_of_n {
-	my ($start_bpm, $end_bpm, $n, $m, $arr_ref ) = @_;
+	my ($start_bpm, $end_bpm, $n, $m ) = @_;
 	my $ratio = ratio($start_bpm, $end_bpm, $n);
 	my $total = 0;
 	my $current_length = bpm_to_length($start_bpm);
 	$total += $current_length; # first note
-	push @$arr_ref, $current_length if $arr_ref;
 	for (2..$m-1){
 		$current_length *= $ratio;
-		push @$arr_ref, $current_length if $arr_ref;
 		$total += $current_length;
 	}
 	$total
 }
 sub linear_ramp_position_mth_of_n {
 
-	my ($start_bpm, $end_bpm, $n, $m, $arr_ref) = @_;
+	my ($start_bpm, $end_bpm, $n, $m) = @_;
 
 	# start_tempo: notes per minute
 	# end_tempo: notes per minute
