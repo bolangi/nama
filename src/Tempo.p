@@ -24,10 +24,12 @@ our @bars;
 sub note {
 	my $self = shift;
 	my ($note) = $self->{meter} =~ m| / (\d+) |x;
+	$note;
 }
 sub count {
 	my $self = shift;
 	my ($count) = $self->{meter} =~ m| (\d+) / |x;
+	$count;
 }
 sub beats {
 	my $self = shift;
