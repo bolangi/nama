@@ -95,7 +95,24 @@ sub ratio {
 	my $ratio = exp( log(bpm_to_length($end_bpm) / bpm_to_length($start_bpm)) / $beats );
 }
 
-sub ramp_position_mth_of_n {
+sub bpm_to_length {
+	my $bpm = shift;
+	60 / $bpm 
+}
+
+sub constant_rate_ramp_position_mth_of_n {
+	my ($start_bpm, $end_bpm, $n, $m ) = @_;
+	my $ratio = ratio($start_bpm, $end_bpm, $n);
+	my $total = 0;
+	my $current_length = bpm_to_length($start_bpm);
+	$total += $current_length; # first note
+	for (2..$m-1){
+		$current_length *= $ratio;
+		$total += $current_length;
+	}
+	$total
+}
+sub linear_ramp_position_mth_of_n {
 
 	my ($start_bpm, $end_bpm, $n, $m) = @_;
 
