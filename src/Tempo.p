@@ -92,7 +92,7 @@ sub end_time {
 }
 sub ratio {
 	my ($start_bpm, $end_bpm, $beats) = @_;
-	my $ratio = exp( log(quarter_length_from_bpm($end_bpm) / quarter_length_from_bpm($start_bpm)) / $beats );
+	my $ratio = exp( log(bpm_to_length($end_bpm) / bpm_to_length($start_bpm)) / $beats );
 }
 
 sub ramp_position_mth_of_n {
