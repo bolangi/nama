@@ -241,6 +241,8 @@ sub note_fraction {
 sub notation_to_time {
 	my $self = shift;
 	my ($bars, $beats, $ticks) = @_;
+	$beats-- unless ! $beats; # first beat is time zero
+	$bars--  unless ! $bars;  # first bar is time zero;
 	my $position_in_ticks = ($bars * $self->count + $beats) * $self->note_fraction * $config->{ticks_per_quarter_note} + $ticks;
 
 	$self->fixed_tempo ? bpm_to_length($self->tempo) * $self->note_fraction / $config->{ticks_per_quarter_note}  * $position_in_ticks
