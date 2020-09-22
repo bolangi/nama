@@ -290,6 +290,7 @@ sub refresh_tempo_map {
 				git( add => $file->tempo_map);
 				git( commit => '--quiet', '--message', $msg, $file->tempo_map);
 				process_tempo_map();
+				render_metronome_track();
 			}
 			# case 2 - change in tempo map
 			elsif (git( diff => $file->tempo_map ) ){
@@ -297,6 +298,7 @@ sub refresh_tempo_map {
 					my $msg = 'change in tempo map';
 					git( commit => '--quiet', '--message', $msg, $file->tempo_map);
 					process_tempo_map();
+					render_metronome_track();
 				} else { 
 					my $msg = 'delete tempo map';
 					::pager('tempo map has been deleted, turning of metronome track');
@@ -315,7 +317,6 @@ sub process_tempo_map {
 	initialize_tempo_map();
 	read_tempo_map($file->tempo_map);
 	create_marks_and_beat_index();
-	render_metronome_track();
 }
 sub metronome_track {
 	my $m = 'metronome';
