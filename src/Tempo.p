@@ -241,14 +241,12 @@ sub note_fraction {
 sub notation_to_time {
 	my $self = shift;
 	my ($bars, $beats, $ticks) = @_;
-	my $time = 0;
-	my $no_of_beats = $self->count * ($bars - 1) + $beats;
-	my @widths = $self->beat_lengths();
-	for (1..$no_of_beats - 1) { my $w = shift @widths; $time += $w } 
-	if ($ticks){
-		$time += $self->nth_tick_time($ticks)
-	}
-	$time	
+	my $position_in_ticks = ($bars * $self->count + $beats) * $self->note_fraction * $config->{ticks_per_quarter_note} + $ticks;
+
+	$self->fixed_tempo ? bpm_to_length($self->tempo) * $self->note_fraction / $config->{ticks_per_quarter_note}  * $position_in_ticks
+					   : linear_ramp_position_mth_of_n ( $self->start_tempo, $self->end_tempo, $self->ticks, $position_in_ticks )
+	
+
 }
 
 package ::;
