@@ -165,10 +165,8 @@ sub linear_ramp_position_mth_of_n {
 	# example: if 4 measures of 4/4, delta is ramp/16, then 15 steps of adding
 	# delta. The first note of the next measure will be at the intended tempo
 
-	my $notes_per_second_start = 60 / $start_bpm; 
-	my $t1 = my $seconds_per_note_start = 1 / $notes_per_second_start;
-	my $notes_per_second_end = 60 / $end_bpm; 
-	my $tn = my $seconds_per_note_end = 1 / $notes_per_second_end;
+	my $t1 = bpm_to_length($start_bpm);
+	my $tn = bpm_to_length($end_bpm);
 
 	#Tm = m (t1 + (tn - t1) / n * (m - 1) / 2 )
 	my $pos = $m * ($t1 + ($tn - $t1) / $n * ($m - 1) / 2);
