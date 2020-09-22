@@ -163,13 +163,12 @@ sub linear_ramp_position_mth_of_n {
 	# at ramp end. 
 
 	# example: For 4 measures of 4/4, the delta is total change in beat length/16, 
-	# we then increment length of subsequent beats from beat 2 to beat 16.,
+	# we then increment length of subsequent beats from beat 2 to beat 16 by
 	# delta. The first note of the next measure will be at the intended tempo
 
 	my $t1 = bpm_to_length($start_bpm);
 	my $tn = bpm_to_length($end_bpm);
 
-	#Tm = m (t1 + (tn - t1) / n * (m - 1) / 2 )
 	my $pos = $m * ($t1 + ($tn - $t1) / $n * ($m - 1) / 2);
     
 	# Consider this ramp. The initial time interval 
