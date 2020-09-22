@@ -162,7 +162,8 @@ sub linear_ramp_position_mth_of_n {
 	# following the ramp will presumably continue with the tempo
 	# at ramp end. 
 
-	# example: if 4 measures of 4/4, delta is ramp/16, then 15 steps of adding
+	# example: For 4 measures of 4/4, the delta is total change in beat length/16, 
+	# we then increment length of subsequent beats from beat 2 to beat 16.,
 	# delta. The first note of the next measure will be at the intended tempo
 
 	my $t1 = bpm_to_length($start_bpm);
