@@ -1,0 +1,10 @@
+intro:    8 120           # play 8 measures at 120 bpm (4/4)                                                                                                           
+verse1:   12 120 X.x.     # 12 measures at 120 bpm, playing only the 1st and 3rd beat                                                                                  
+          4 120-140 X.x.  # gradually increase tempo to 140 bpm                                                                                                        
+chorus1:  16 140                                                                                                                                                       
+bridge:   8 3/4 140 0.5   # change to 3/4 time, reduce volume                                                                                                          
+          8 3/4 140       # normal volume again                                                                                                                        
+verse2:   12 120          # back to 4/4 (implied)                                                                                                                      
+chorus2:  16 140          # jump to 140 bpm                                                                                                                            
+outro:    6 140                                                                                                                                                        
+          2 140-80        # ritardando over the last 2 bars    
