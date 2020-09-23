@@ -315,7 +315,7 @@ sub process_tempo_map {
 	local $this_track = metronome_track();
 	-e $file->tempo_map or return;
 	initialize_tempo_map();
-	read_tempo_map($file->tempo_map);
+	read_tempo_map_file($file->tempo_map);
 	create_marks_and_beat_index();
 }
 sub metronome_track {
@@ -329,10 +329,14 @@ sub initialize_tempo_map {
 }
 sub delete_tempo_marks { for( ::Mark::all() ){ $_->remove if $_->tempo_map } }
 
-sub read_tempo_map {
+sub read_tempo_map_file {
 	my $file = shift;
 	return unless -e $file;
 	my @lines = grep{ ! /^\s*$/ } ::strip_comments(read_file($file));
+	read_tempo_map( @lines );
+}
+sub read_tempo_map {
+	my @lines = @_;
 	for ( @lines )
 	{
 		no warnings 'uninitialized';
