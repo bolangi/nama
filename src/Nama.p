@@ -227,3 +227,5 @@ __DATA__
 [% qx(cat ./midi_help) %]
 @@ aux_midi_commands
 [% qx(cat ./fs_midish) %]
+@@ test_tempo_map
+[% qx(cat ./tempo-map) %]
