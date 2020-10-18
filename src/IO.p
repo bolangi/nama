@@ -316,22 +316,25 @@ sub jack_multi_ports {
 	# can we route to these channels?
 	my $end   = $start + $width - 1;
 
-	# the following logic avoids deferencing undef for a 
-	# non-existent client, and correctly handles
-	# the case of a portname (containing colon)
-	
- 	my $channel_count = scalar @{$jack->{clients}->{$client}{$direction}};
+	my $c = client_info($client, $direction);
+	$c or return;
+ 	my $channel_count = scalar @{ $c->{$direction} };
 	my $source_or_send = $direction eq 'input' ? 'send' : 'source';
   	die(qq(
 Track $trackname: $source_or_send would cover channels $start - $end,
 out of bounds for JACK client "$client" ($channel_count channels max).
 Change $source_or_send setting, or set track OFF.)) 
 	if $end > $channel_count and $config->{enforce_channel_bounds};
-		return @{$jack->{clients}->{$client}{$direction}}[$start-1..$end-1]
-		 	if $jack->{clients}->{$client}{$direction};
+		return @{$c->{$direction}}[$start-1..$end-1]
+		 	if $c->{$direction};
 
 }
 #sub one_port { $jack->{clients}->{$client}->{$direction}->[$start-1] }
+
+sub client_info {
+	my ($client, $direction) = @_;
+ 	my $info = $jack->{clients}->{$client};
+}
 
 sub quote_jack_port {
 	my $port = shift;
