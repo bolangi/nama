@@ -29,11 +29,11 @@ sub setup {
 	
 	# catch errors unless testing (no-terminal option)
 	local $@ unless $config->{opts}->{T}; 
-	track_memoize(); 			# freeze track state 
+	track_memoize(); 			# cache track methods 
 	my $success = $config->{opts}->{T}      # don't catch errors during testing 
 		?  ::ChainSetup::generate_setup_try(@extra_setup_code)
 		:  eval { ::ChainSetup::generate_setup_try(@extra_setup_code) }; 
-	track_unmemoize(); 			# unfreeze track state
+	track_unmemoize(); 			# clear methods cache
 	if ($@){
 		throw("error caught while generating setup: $@");
 		::ChainSetup::initialize();
