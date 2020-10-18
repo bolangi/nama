@@ -24,9 +24,12 @@ sub rec_status {
 				or  $track->{rw} eq OFF
 				or 	! $track->is_used
 				and ! ($mode->doodle and ! $mode->eager and $setup->{tracks_with_duplicate_inputs}->{$track->name} ); 
-
-	return $track->{rw} if $track->{rw} ne PLAY;
-
+	if ($track->{rw} ne PLAY) # e.g. MON or REC
+	{
+		return OFF if $track->source_type eq 'jack_client' 
+					and not $jack->{clients}->{$track->{source_id}};
+		return $track->{rw}
+	}
 	my $v = $track->playback_version;
 
 	{
