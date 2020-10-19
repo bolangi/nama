@@ -224,7 +224,7 @@ sub configure {
 
 	# don't disturb recording/mixing
 	
-	return if ::ChainSetup::really_recording() and $this_engine->started();
+	return if ::ChainSetup::really_recording() and $this_engine->running();
 	
 	# store a lists of wav-recording tracks for the rerecord
 	# function
