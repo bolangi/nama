@@ -152,6 +152,7 @@ sub add_paths_for_aux_sends { # not including Main
 	logsub((caller(0))[3]);
 
 	map {  ::Graph::add_path_for_aux_send($g, $_ ) } 
+	grep { $_->send_type !~ /jack/ or $_->send_type =~ /jack/ and $jack->{clients}->{$_->send_id} }	
 	grep {  $_->group !~ /Mixdown|Null/
 			and $_->send_type 
 			and $_->rec_status ne OFF } ::audio_tracks();
