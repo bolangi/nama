@@ -304,6 +304,7 @@ sub soundcard_output_device_string {
 
 sub jack_multi_route {
 	my (@ports)  = @_;
+	@ports or return;
 	join q(,),q(jack_multi),
 	map{quote_jack_port($_)} @ports
 }
@@ -338,9 +339,11 @@ sub client_info {
 
 sub quote_jack_port {
 	my $port = shift;
+	defined $port or return;
 	($port =~ /\s/ and $port !~ /^"/) ? qq("$port") : $port
 }
 sub rectified { # client name from number
+	defined $_[0] or return;
 	$_[0] =~ /^\d+$/ 
 		? 'system'
 		: $_[0]
