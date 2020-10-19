@@ -309,8 +309,8 @@ sub playback_version { $tn{$_[0]->target}->playback_version}
 sub source_type { $tn{$_[0]->target}->source_type}
 sub source_id { $tn{$_[0]->target}->source_id}
 sub source_status { $tn{$_[0]->target}->source_status }
-sub send_type { $tn{$_[0]->target}->send_type}
-sub send_id { $tn{$_[0]->target}->send_id}
+sub send_type {}
+sub send_id {}
 sub dir { $tn{$_[0]->target}->dir }
 }
 {
