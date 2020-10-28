@@ -118,8 +118,6 @@ sub generate_setup_try {
 	add_paths_for_mixdown_handling();
 	logpkg('debug',"Graph with mixdown mods:\n$g");
 	
-	# run extra setup
-	
 	$extra_setup_code->($g) if $extra_setup_code;
 
 	prune_graph();
