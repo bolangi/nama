@@ -127,7 +127,6 @@ sub generate_setup_try {
 
 	logpkg('debug',"Graph after adding loop devices:\n$g");
 
-	# insert handling
 	::Graph::add_inserts($g);
 
 	logpkg('debug',"Graph with inserts:\n$g");
