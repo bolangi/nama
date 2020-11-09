@@ -37,13 +37,7 @@ sub new {
 	#croak  "name already in use: $vals{name}\n"
 	#	 if $by_name{$vals{name}}; # null name returns false
 	
-	my $self = bless { 
-
-		## 		defaults ##
-
-					name => "",
-
-					@_ 			}, $class;
+	my $self = bless { @_ }, $class;
 
 	#print "self class: $class, self type: ", ref $self, $/;
 	if ($self->name) {
