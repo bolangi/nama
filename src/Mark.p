@@ -312,6 +312,8 @@ our @ISA = '::Mark';
 	use Modern::Perl;
 	use ::Log qw(logpkg);
 	use ::Globals qw(:all);
+	our @ISA = '::Mark';
+	use SUPER; 
 	use ::Object qw( 
 					 name 
 					bars	
