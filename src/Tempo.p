@@ -327,7 +327,7 @@ sub initialize_tempo_map {
 	@chunks = @bars = @beats = ();	
 	delete_tempo_marks();
 }
-sub delete_tempo_marks { for( ::Mark::all() ){ $_->remove if $_->tempo_map } }
+sub delete_tempo_marks { for( ::Mark::all() ){ $_->remove if ref $_ =~ /Tempo/  } }
 
 sub read_tempo_map_file {
 	my $file = shift;
@@ -358,7 +358,7 @@ sub create_marks_and_beat_index {
 	for my $chunk (@chunks){
 		push @bars, $chunk->bar_lengths;
 		push @beats, $chunk->beat_lengths;
-		::Mark->new(name => $chunk->label, time => $chunk->start_time, tempo_map => 1);
+		::TempoMark->new(name => $chunk->label, time => $chunk->start_time);
 	}
 }
 
