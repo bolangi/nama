@@ -307,5 +307,19 @@ our @ISA = '::Mark';
 
 }
 
+{ package ::TempoMark;
+
+	our $VERSION = 1.0;
+	use Modern::Perl;
+	use ::Log qw(logpkg);
+	use ::Globals qw(:all);
+	use ::Object qw( 
+					 name 
+					bars	
+					beats
+					ticks
+					 );
+}
+
 1;
 __END__
