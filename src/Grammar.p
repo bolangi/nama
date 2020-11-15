@@ -512,6 +512,8 @@ sub remove_fade {
 sub import_audio {
 
 	my ($track, $path, $frequency) = @_;
+
+	throw("$path: file not found"), return if not -r $path;
 	
 	$track->import_audio($path, $frequency);
 
