@@ -75,10 +75,8 @@ sub new {
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
 	
-	# silently return if track already exists
-	# why not return track? TODO
-	
-	return if $by_name{$vals{name}};
+	my $track = $by_name{$vals{name}};
+	return $track if $track;
 
 	my $n = $vals{n} || idx(); 
 	my $object = bless { 
