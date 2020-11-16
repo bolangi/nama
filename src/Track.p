@@ -95,10 +95,10 @@ sub new {
 					pan 	=> undef,
 					rw		=> 'MON',
 
-					modifiers 		=> q(), # start, reverse, audioloop, playat
+					modifiers 		=> undef, # start, reverse, audioloop, playat
 					looping 		=> undef, # do we repeat our sound sample
 					source_type 	=> q(soundcard),
-					source_id   	=> "1",
+					source_id   	=> 1,
 					send_type 		=> undef,
 					send_id   		=> undef,
 					old_vol_level	=> undef,
