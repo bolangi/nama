@@ -79,7 +79,7 @@ sub new {
 	return $track if $track;
 
 	my $n = $vals{n} || idx(); 
-	my $object = bless { 
+	$track = bless { 
 
 
 		## 		defaults ##
@@ -104,15 +104,15 @@ sub new {
 					@_ 			}, $class;
 
 	$track_names{$vals{name}}++;
-	$by_index{$n} = $object;
-	$by_name{ $object->name } = $object;
+	$by_index{$n} = $track;
+	$by_name{ $track->name } = $track;
 	::add_pan_control($n) unless $nopan or $restore;
 	::add_volume_control($n) unless $novol or $restore;
 
-	$::this_track = $object;
-	$::ui->track_gui($object->n) unless $object->hide;
-	logpkg('debug',$object->name, ": ","newly created track",$/,json_out($object->as_hash));
-	$object;
+	$::this_track = $track;
+	$::ui->track_gui($track->n) unless $track->hide;
+	logpkg('debug',$track->name, ": ","newly created track",$/,json_out($track->as_hash));
+	$track;
 }
 
 
