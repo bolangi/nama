@@ -674,7 +674,7 @@ sub insert_effect {
 	}
 	my $pos = fxn($args{before}) or die "$args{before}: effect ID not found";
 	my $track = $pos->track;
-	$this_track eq $pos->track or die "$args{before} is not on current track";
+	local $this_track = $pos->track;
 	#
 	#logpkg('debug', $track->name, $/;
 	#logpkg('debug', "@{$track->ops}")
