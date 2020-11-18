@@ -70,7 +70,7 @@ USAGE: nama [options] [project_name]
 --regenerate-effects-cache, -r   Regenerate the effects data cache
 --sample-rate, -z                use this sample rate, and set as default for session
 
-Debugging options:
+Debugging options (for developers)
 
 --no-state, -M                   Don't load project state
 --no-static-effects-data, -S     Don't load effects data
