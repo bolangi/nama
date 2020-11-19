@@ -73,7 +73,6 @@ sub add_track_alias_project {
 }
 # vol/pan requirements of mastering and mixdown tracks
 
-# called from Track_subs, Graphical_subs
 { my %volpan = (
 	Eq => {},
 	Low => {},
@@ -85,11 +84,6 @@ sub add_track_alias_project {
 
 sub need_vol_pan {
 
-	# this routine used by 
-	#
-	# + add_track() to determine whether a new track _will_ need vol/pan controls
-	# + add_track_gui() to determine whether an existing track needs vol/pan  
-	
 	my ($track_name, $type) = @_;
 
 	# $type: vol | pan
