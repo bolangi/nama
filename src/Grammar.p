@@ -68,7 +68,6 @@ sub process_line {
 								  command => $user_input };
 			push(@{$project->{command_buffer}}, $command_stamp);
 			
-			autosave();
 			reconfigure_engine();
 
 		# reset current track to Main if it is
@@ -187,30 +186,9 @@ sub set_current_track {
 }
 
 
-### allow commands to abbreviate Audio::Nama::Class as ::Class # SKIP_PREPROC
-
-{ my @namespace_abbreviations = qw(
-	Assign 
-	Track
-	Bus
-	Mark
-	IO
-	Graph
-	Wav
-	Insert
-	Fade                                                      
-	Edit
-	Text
-	Effect
-	EffectChain
-	ChainSetup
-);
-
-my $namespace_root = 'Audio::Nama';
-
 sub eval_perl {
 	my $code = shift;
-	map{ $code =~ s/(^|[^A-Za-z])::$_/$1$namespace_root\::$_/ } @namespace_abbreviations; # SKIP_PREPROC
+	$code = expand_root($code);
 	my $err;
 	undef $text->{eval_result};
 	my @result = eval $code;
@@ -225,8 +203,19 @@ sub eval_perl {
 		pager(join "\n", @result) 
 	}	
 }
-} # end namespace abbreviations
 
+sub expand_root {
+	my ($text) = @_;
+	my $new_root = 'Audio::Nama';
+
+		my $new = join "\n",map{ 
+			s/([^\w\}\\\/]|^)(::)([\w:])/$1$new_root$2$3/g unless /SKIP_PREPROC/;
+			s/([^\w\}\\\/]|^)(::)([^\w])/$1$new_root$3/mg unless /SKIP_PREPROC/;
+			$_;
+		} split "\n",$text;
+		$new;
+}
+say expand_root('Audio::Nama', '@::Tempo::chunks');
 #### Formatted text output
 
 sub show_versions {
@@ -466,7 +455,7 @@ sub t_load_project {
 	throw("Project $name does not exist\n"), return
 		unless -d join_path(project_root(), $name) or $args{create};
 	stop_transport() if $this_engine->started(); 
-	autosave();
+	project_snapshot();
 	load_project( name => $name, %args );
 	pager("loaded project: $project->{name}\n") unless $args{create};
 	{no warnings 'uninitialized';
@@ -534,7 +523,7 @@ sub destroy_current_wav {
 		delete $project->{track_version_comments}{$this_track->name}{$this_track->version};
 		pager("Unlinking.\n");
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
-		restart_wav_memoize();
+		refresh_wav_cache();
 	}
 	$text->{term}->remove_history($text->{term}->where_history);
 	$this_track->set(version => $this_track->last); 

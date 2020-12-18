@@ -33,10 +33,6 @@ sub save_state {
 	logpkg('debug', "saving palette");
 	$ui->save_palette;
 
-	# do nothing more if only Main and Mixdown
-	
-	#user_tracks_present() or throw("No user tracks, skipping..."), return;
-	
 	logpkg('debug',"Saving state as ", $path);
 	save_system_state($path);
 	save_global_effect_chains();
@@ -387,7 +383,7 @@ sub restore_state_from_file {
 
 		} @tracks_data; 
 	}
-	if ( $project->{nama_version}  ) # 1.214 or older
+	if ( $project->{nama_version} <= 1.214 )
 	{
 		map 
 		{
@@ -401,6 +397,10 @@ sub restore_state_from_file {
 			@effects_data,
 			@global_effect_chain_data,
 			@project_effect_chain_data;
+	}
+	if ( $project->{nama_version} <= 1.216)
+	{
+		map { delete $_->{active} } @marks_data
 	}
 
 

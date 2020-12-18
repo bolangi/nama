@@ -229,7 +229,7 @@ sub configure {
 	# store a lists of wav-recording tracks for the rerecord
 	# function
 	
-	if( $force or $setup->{changed} ){ 
+	if( $setup->{changed} ){ 
 		logpkg('debug',"reconfigure requested");
 		$setup->{_old_snapshot} = status_snapshot_string();
 } 
@@ -255,7 +255,6 @@ sub configure {
 		map{$_->name => $_->rec_status } rec_hookable_tracks()
 	};
 	if ( $self->setup() ){
-		$self->{valid_setup} = 1;
 
 		reset_latency_compensation() if $config->{opts}->{Q};
 		

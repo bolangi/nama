@@ -6,12 +6,14 @@ use Modern::Perl; use Carp;
 sub reconfigure_engine {
 
 	logsub((caller(0))[3]);
-	my $force = shift;
 
 	# skip if command line option is set
 	
-	return if ($config->{opts}->{R} or $config->{disable_auto_reconfigure});
+	return if $config->{opts}->{R};
+	refresh_wav_cache();
 	update_jack_client_list();
+	refresh_tempo_map();
+	project_snapshot();
 	::Engine::sync_action('configure');
 }
 

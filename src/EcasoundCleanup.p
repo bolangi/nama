@@ -89,7 +89,7 @@ sub tag_mixdown_commit {
 	mixoff();
 
 	my $msg = "State for $sym ($mix)";
-	git_snapshot($msg);
+	project_snapshot($msg);
 	git('tag', $name, '-m', $mix);
 }
 sub delete_existing_mixdown_tag_and_convenience_encodings {
@@ -165,7 +165,7 @@ sub new_files_were_recorded {
 				}
 		} @files;
 	if(@recorded){
-		restart_wav_memoize();
+		refresh_wav_cache();
 		pager(join " ", "recorded:", map{ filename($_) } @recorded);
 	}
 	map{ _get_wav_info($_) } @recorded;

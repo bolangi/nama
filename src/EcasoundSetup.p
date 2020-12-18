@@ -22,9 +22,8 @@ sub setup {
 	ecasound_iam('cs-disconnect') if ecasound_iam('cs-connected');
 
 	::ChainSetup::remove_temporary_tracks();
-	restart_wav_memoize(); # check if someone has snuck in some files
+	refresh_wav_cache(); # check if someone has snuck in some files
 	find_duplicate_inputs(); # we will warn the user later
-	autosave() ;	
 	::ChainSetup::initialize();
 	
 	# catch errors unless testing (no-terminal option)
@@ -81,7 +80,8 @@ sub teardown_engine {
 sub arm {
 	logsub((caller(0))[3]);
 	exit_preview_modes();
-	reconfigure_engine('force');
+	request_setup();
+	reconfigure_engine();
 }
 
 # substitute all live inputs by clock-sync'ed 

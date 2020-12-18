@@ -8,24 +8,27 @@ You may want to set use_git: 1 in .namarc"), return;
 	logpkg('debug',"VCS command: git @_"); 
 	$project->{repo}->run(@_) 
 }
-sub initialize_project_git_repository {
+sub initialize_project_repository {
 	logsub((caller(0))[3]);
-	confess("no project dir") if ! project_dir();
+	die project_dir(),": no project dir"  if ! -d project_dir();
 	return unless $config->{use_git} and not is_test_script();
 	pager("Creating git repository in ", join_path( project_dir(),  '.git' ))
 		if ! -d join_path( project_dir(),  '.git' );
 	Git::Repository->run( init => project_dir());
 	$project->{repo} = Git::Repository->new( work_tree => project_dir() );
-	my $is_new;
-	$is_new = 1 if not -e $file->git_state_store;
-	write_file($file->git_state_store, "{}\n") if $is_new;
-	git( add => $file->git_state_store );
-	write_file($file->midi_store, ""), git( add => $file->midi_store )
-			if ! -e $file->midi_store;
-	git( commit => '--quiet', '--message' => $is_new 
+	my $is_new_project;
+	$is_new_project = 1 if not -e $file->state_store;
+	if( $is_new_project ){
+		write_file($file->state_store, "{}\n");
+		write_file($file->midi_store,          "") if not -e $file->midi_store;
+		write_file($file->tempo_map,           "") if not -e $file->tempo_map; 
+		refresh_tempo_map('force') if -s $file->tempo_map > 5;
+	}
+	git( add => $_ ) for $file->midi_store, $file->state_store;
+	git( commit => '--quiet', '--message' => $is_new_project 
 											?  'initialize repository' 
-											: "changes from previous session"
-		);
+											:  'committing prior unsaved changes (left after program abort?)' 
+	);
 }
 sub git_tag_exists {
 	logsub((caller(0))[3]);
@@ -73,17 +76,23 @@ sub restore_state_from_vcs {
 	restore_state_from_file();
 }
  
-sub git_snapshot {
+sub project_snapshot {
 	logsub((caller(0))[3]);
-	my $commit_message = shift() || "";
-	$config->{use_git} 
-		and $project->{name} 
-		and $project->{repo}
-		or throw('failed to create snapshot'), return;
+	return if $config->{opts}->{R}
+		   or $this_engine->running and ::ChainSetup::really_recording();
+	# we skip storing commands that do not affect project state
+
 	save_state();
-	reset_command_buffer(), return unless state_changed();
+	reset_command_buffer(), return if not state_changed();
+
+	return if not $config->{use_git} 
+	  	   or not $project->{name} 
+		   or not $project->{repo};
+
+	my $commit_message = shift() || "";
 	git_commit($commit_message);
 }
+
 sub reset_command_buffer { $project->{command_buffer} = [] } 
 
 sub git_commit {
@@ -98,7 +107,7 @@ sub git_commit {
 		"* track: $project->{command_buffer}->[0]->{context}->{track}",
 		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
 		"* op:    $project->{command_buffer}->[0]->{context}->{op}",
-	git( add => $file->git_state_store );
+	git( add => $file->state_store, $file->midi_store );
 	git( commit => '--quiet', '--message', $commit_message);
 	reset_command_buffer();
 }
@@ -130,6 +139,7 @@ these changes, or throw them away."
 	git(checkout => $branchname, @args);
 
 }
+
 sub git_create_branch {
 	logsub((caller(0))[3]);
 	my ($branchname, $branchfrom) = @_;
@@ -189,14 +199,6 @@ sub list_branches {
 	);
 }
 
-sub autosave {
-		logsub((caller(0))[3]);
-		git_snapshot(), return if $config->{autosave}
-							and not $config->{opts}->{R}
-							and not ($this_engine->started() 
-											and ::ChainSetup::really_recording());
-		throw('failed to autosave, are you recording?');
-}
 sub redo {
 	if ($project->{redo}){
 		git('cherry-pick',$project->{redo});

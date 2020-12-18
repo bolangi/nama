@@ -83,7 +83,7 @@ sub process {
 
 #### Convert ::Something to Audio::Nama::Something
 
-	my $rooted_text = &bestow_module_root($new_root,$text);
+	my $rooted_text = &expand_root($new_root,$text);
 
 #### Hack arguments to logging subroutines 
 
@@ -99,9 +99,8 @@ sub process {
 	if ( $file_out ) { write_file($file_out, $rooted_text) }
 	else { print $rooted_text }
 }
-sub bestow_module_root {
+sub expand_root {
 	my ($new_root, $text) = @_;
-
 		join "\n",map{ 
 			s/([^\w\}\\\/]|^)(::)([\w:])/$1$new_root$2$3/g unless /SKIP_PREPROC/;
 			s/([^\w\}\\\/]|^)(::)([^\w])/$1$new_root$3/mg unless /SKIP_PREPROC/;
@@ -120,7 +119,6 @@ sub wanted {
 	my $re = qr/(\w+)\.$exta$/;
 	$File::Find::name =~ /$re/ or return;
 	$stub = $1;
-	#return unless $stub eq "Flow";
 	$debug and print $File::Find::name, $/; 
 	$debug and print "stub: $stub\n";
 	$debug and print "cwd: ", getcwd, $/;

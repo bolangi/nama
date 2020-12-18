@@ -137,16 +137,14 @@ sub load_project {
 	initialize_project_data();
 	remove_riff_header_stubs(); 
 	cache_wav_info();
-	restart_wav_memoize();
-	initialize_project_git_repository();
+	refresh_wav_cache();
+	initialize_project_repository();
 	restore_state($args{settings}) unless $config->{opts}->{M} ;
 
 	$config->{opts}->{M} = 0; # enable 
 	
 	initialize_mixer();
 	dig_ruins(); # in case there are audio files, but no tracks present
-
-	git_snapshot("initialize new project");
 
 	# possible null if Text mode
 	

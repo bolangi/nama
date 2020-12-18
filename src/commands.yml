@@ -1601,8 +1601,6 @@ show_head_commit:
   what: |
     show the last commit, which undo will roll back.
     A commit may contain multiple commands. 
-    The last_* aliases are meaningful when autosave: undo is set.
-    In that case each commit contains only a single command
 eager:
   type: mode
   what: set eager mode
@@ -1709,6 +1707,10 @@ select_track:
     set a particular track as the current, or default track
     against which track-related commands are executed.
   parameters: <string:track-name> | <integer:track-number>
+edit_tempo_map:
+  short: etm
+  what: edit tempo map file
+  parameters: none
 set_tempo:
   short: tempo tp
   type: midi

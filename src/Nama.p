@@ -147,6 +147,8 @@ use ::Latency ();
 use ::Log qw(logit loggit logpkg logsub initialize_logger);
 use ::TrackUtils ();
 
+use ::Tempo ();
+
 sub main { 
 	say eval join(get_data_section('banner'), qw(" "));
 	bootstrap_environment() ;
@@ -187,7 +189,7 @@ sub cleanup_exit {
 	# - allow time to close down
 	# - SIGKILL
 	delete $project->{events};
-	autosave(); 
+	project_snapshot(); 
 	::Engine::sync_action('kill_and_reap');
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
 	exit;

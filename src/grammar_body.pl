@@ -248,14 +248,14 @@ destroy_project_template: _destroy_project_template key(s) {
 }
 
 tag: _tag tagname message(?) {   
-	::git_snapshot();
+	::project_snapshot();
 	my @args = ('tag', $item{tagname});
 	push @args, '-m', "@{$item{'message(?)'}}" if @{$item{'message(?)'}};
 	::git(@args);
 	1;
 }
 commit: _commit message(?) { 
-	::git_snapshot(@{$item{'message(?)'}});
+	::project_snapshot(@{$item{'message(?)'}});
 	1;
 }
 branch: _branch branchname { 
@@ -300,7 +300,7 @@ save_state: _save_state save_target message(?) {
 	else 
 	{
 		# save state if necessary
-		::git_snapshot();
+		::project_snapshot();
 
 		# tag the current commit
 		my @args = ('tag', $name);
@@ -311,7 +311,7 @@ save_state: _save_state save_target message(?) {
 	}
 	1
 }
-save_state: _save_state { ::git_snapshot('user save'); 1}
+save_state: _save_state { ::project_snapshot('user save'); 1}
 
 # load project from named state file
 get_state: _get_state save_target {
@@ -1306,7 +1306,7 @@ full_effect_profiles: _full_effect_profiles ident(?) {
 	1;
 }
 do_script: _do_script shellish { ::do_script($item{shellish});1}
-scan: _scan { ::pager( "scanning ", ::this_wav_dir()); ::restart_wav_memoize() }
+scan: _scan { ::pager( "scanning ", ::this_wav_dir()); ::refresh_wav_cache() }
 add_fade: _add_fade in_or_out mark1 duration(?)
 { 	::Fade->new(  type => $item{in_or_out},
 					mark1 => $item{mark1},
@@ -1705,7 +1705,7 @@ snip: _snip new_sequence_name mark_pair(s) {}
 rename_track: _rename_track existing_track_name new_track_name { 
 	::rename_track(
 		@item{qw(existing_track_name new_track_name)}, 
-		$::file->git_state_store, 
+		$::file->state_store, 
 		::this_wav_dir()
 	);
 }
@@ -1753,6 +1753,8 @@ remove_effect_surname: _remove_effect_surname { ::this_op_o()->set_surname(); 1}
 select_track: _select_track track_spec
 
 set_tempo: _set_tempo dd {::midish_cmd("t $item{dd}")}
+
+edit_tempo_map: _edit_tempo_map { system("$ENV{EDITOR} ".$::file->tempo_map); 1 }
 
 route_track: _route_track source_id send_id { 
 	::nama_cmd("source $item{source_id}");

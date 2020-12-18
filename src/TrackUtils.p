@@ -141,7 +141,7 @@ sub rename_track {
 	use Cwd;
 	use File::Slurp;
 	my ($oldname, $newname, $statefile, $dir) = @_;
-	autosave();
+	project_snapshot();
 	my $old_dir = cwd();
 	chdir $dir;
 
@@ -165,7 +165,7 @@ sub rename_track {
 		send_id| 
 		target| 
 		current_edit| 
-		send_id| 
+		source_id| 
 		return_id| 
 		wet_track| 
 		dry_track| 
@@ -179,7 +179,7 @@ sub rename_track {
 
 	write_file($statefile, $state);
 	my $msg = "Rename track $oldname -> $newname";
-	git_snapshot($msg);
+	project_snapshot($msg);
 	::pager($msg);
 	load_project(name => $::project->{name});
 }

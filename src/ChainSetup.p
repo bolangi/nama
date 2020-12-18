@@ -63,7 +63,6 @@ sub initialize {
 	::disable_length_timer();
 	reset_aux_chain_counter();
 	unlink $file->chain_setup;
-	delete $this_engine->{valid_setup};
 	$g;
 }
 sub ecasound_chain_setup { $chain_setup } 
@@ -475,8 +474,11 @@ sub setup_requires_realtime {
 sub has_vertex { $g->has_vertex($_[0]) }
 
 1;
+__END__
 
 =head1 NAME
+
+=encoding UTF-8
 
 ::ChainSetup - routines for generating Ecasound chain setup
 

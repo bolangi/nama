@@ -13,7 +13,7 @@ use ::Globals qw(:all);
 use ::Object qw( 
 				 name 
                  time
-				 active
+				 tempo_map
 				 );
 
 sub initialize {
@@ -41,13 +41,16 @@ sub new {
 
 		## 		defaults ##
 
-					active  => 1,
 					name => "",
 
 					@_ 			}, $class;
 
 	#print "self class: $class, self type: ", ref $self, $/;
 	if ($self->name) {
+		if ( my $old = delete $by_name{$self->name} ) {
+			::pager("replacing previous mark at " .  $old->time);
+			@all = grep{ $_->name ne $self->name } @all;
+		}
 		$by_name{ $self->name } = $self;
 	}
 	push @all, $self;

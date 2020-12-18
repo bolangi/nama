@@ -97,7 +97,7 @@ sub definitions {
 		effects_cache 			=> ['.effects_cache.json',	\&project_root],
 		gui_palette 			=> ['palette',        		\&project_root],
 		state_store 			=> ['State',      			\&project_dir ],
-		git_state_store 		=> ['State.json',      		\&project_dir ],
+		state_store 		=> ['State.json',      		\&project_dir ],
 		untracked_state_store => ['Aux',					\&project_dir ],
 		effect_profile 			=> ['effect_profiles',		\&project_root],
 		chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
@@ -108,6 +108,7 @@ sub definitions {
 		_logfile				=> ['nama.log',				\&project_root],
 		midi_store				=> ['midi.msh',				\&project_dir ],
 		aux_midi_commands		=> ['aux_midi_commands', 	\&project_root],
+		tempo_map				=> ['tempo', 				\&project_dir ],
 
 
 	}, '::File';
@@ -143,7 +144,6 @@ sub definitions {
 		use_git							=> 1,
 		use_midi						=> 0,
 		use_group_numbering				=> 1,
-		autosave						=> 1,
 		volume_control_operator 		=> 'ea', # default to linear scale
 		sync_mixdown_and_playback_version_numbers => 1, # not implemented yet
 		engine_tcp_port					=> 2868, # 'default' engine
