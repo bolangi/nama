@@ -320,8 +320,6 @@ sub new_project_template {
 	
 	save_state( join_path(project_root(), "templates", "$template_name.json"));
 
-	# add description, but where?
-	
 	# recall temp name
 	
  	load_project(  # restore_state() doesn't do the whole job
