@@ -144,7 +144,6 @@ sub load_project {
 	$config->{opts}->{M} = 0; # enable 
 	
 	initialize_mixer();
-	dig_ruins(); # in case there are audio files, but no tracks present
 
 	# possible null if Text mode
 	
