@@ -191,7 +191,7 @@ sub cleanup_exit {
 	# - allow time to close down
 	# - SIGKILL
 	delete $project->{events};
-	project_snapshot(); 
+	#project_snapshot(); 
 	::Engine::sync_action('kill_and_reap');
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
 	exit;
