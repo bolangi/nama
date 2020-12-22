@@ -254,11 +254,6 @@ sub initialize_interfaces {
 	choose_sleep_routine();
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
-	$project->{name} = shift @ARGV;
-	{no warnings 'uninitialized';
-	logpkg('debug',"project name: $project->{name}");
-	}
-
 	logpkg('debug', sub{"Command line options\n".  json_out($config->{opts})});
 
 	read_config(global_config());  # from .namarc if we have one
