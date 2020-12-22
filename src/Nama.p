@@ -152,7 +152,9 @@ use ::Tempo ();
 sub main { 
 	say eval join(get_data_section('banner'), qw(" "));
 	bootstrap_environment() ;
-	load_project();
+	load_project(name => shift @ARGV,
+				 create => delete $config->{opts}->{c}); 
+				 		 # ^^^^ remove option for next project load
 	nama_cmd($config->{execute_on_project_load});
 	reconfigure_engine();
 	nama_cmd($config->{opts}->{X});
