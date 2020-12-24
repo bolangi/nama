@@ -8,8 +8,7 @@ use Modern::Perl; no warnings 'uninitialized';
 sub save_state {
 	logsub((caller(0))[3]);
 	my $filename = shift;
-	if ($filename)
-	{
+	my $path = $filename || $file->state_store();
 
 		# remove extension if present
 		
@@ -20,9 +19,7 @@ sub save_state {
 		$filename = 
 				$filename =~ m{/} 	
 									? $filename	# as-is if input contains slashes
-									: join_path(project_dir(),$filename) 
-	}
-	my $path = $filename || $file->state_store();
+									: join_path(project_dir(),$filename) ;
 	$project->{nama_version} = $VERSION;
 
 	# store playback position, if possible
@@ -223,10 +220,7 @@ sub decode {
 sub restore_state_from_file {
 	logsub((caller(0))[3]);
 	my $filename = shift;
-	$filename =~ s/\.json$//;
-	$filename = join_path(project_dir(), $filename) 
-		if $filename and not $filename =~ m(/);
-	$filename ||= $file->state_store();
+	$filename //= $file->state_store();
 
 	my ($ref, $path, $source, $suffix); 
 
@@ -250,7 +244,9 @@ sub restore_state_from_file {
 		assign_singletons( { data => $ref });
 	}
 	
-	( $path, $suffix ) = get_newest($filename);
+	#( $path, $suffix ) = get_newest($filename);
+	my $path = $filename;
+	my $suffix = 'json';
 	if ($path)
 	{
 		$source = read_file($path);
