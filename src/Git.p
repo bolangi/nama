@@ -98,6 +98,16 @@ sub project_snapshot {
 
 sub reset_command_buffer { $project->{command_buffer} = [] } 
 
+sub command_buffer_contents {
+	scalar @{$project->{command_buffer}} and join("\n", 
+		undef,
+		(map{ $_->{command} } @{$project->{command_buffer}}),
+		# context for first command of group
+		"* track: $project->{command_buffer}->[0]->{context}->{track}",
+		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
+		"* op: $project->{command_buffer}->[0]->{context}->{op}"
+		) or undef
+}
 sub git_commit {
 	logsub((caller(0))[3]);
 	my $commit_message = shift;
@@ -105,14 +115,8 @@ sub git_commit {
 	my @files = scalar @_ ? @_ : @defaults;
 	no warnings 'uninitialized';
 	@files = @defaults if not @files;
+	$commit_message .= command_buffer_contents();
 	use utf8;
-	scalar @{$project->{command_buffer}} and $commit_message .= join "\n", 
-		undef,
-		(map{ $_->{command} } @{$project->{command_buffer}}),
-		# context for first command
-		"* track: $project->{command_buffer}->[0]->{context}->{track}",
-		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
-		"* op:    $project->{command_buffer}->[0]->{context}->{op}",
 	git( add => @files);
 	git( commit => '--quiet', '--message', $commit_message);
 	reset_command_buffer();
