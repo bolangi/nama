@@ -8,27 +8,30 @@ You may want to set use_git: 1 in .namarc"), return;
 	logpkg('debug',"VCS command: git @_"); 
 	$project->{repo}->run(@_) 
 }
+sub repo_git_dir { join_path(project_dir(),'.git') }
+sub init_repo_obj { $project->{repo} = Git::Repository->new( work_tree => project_dir() ) }
+sub create_repo { Git::Repository->run( init => project_dir() )}
+
 sub initialize_project_repository {
 	logsub((caller(0))[3]);
-	die project_dir(),": no project dir"  if ! -d project_dir();
-	return unless $config->{use_git} and not is_test_script();
-	pager("Creating git repository in ", join_path( project_dir(),  '.git' ))
-		if ! -d join_path( project_dir(),  '.git' );
-	Git::Repository->run( init => project_dir());
-	$project->{repo} = Git::Repository->new( work_tree => project_dir() );
-	my $is_new_project;
-	$is_new_project = 1 if not -e $file->state_store;
-	if( $is_new_project ){
-		write_file($file->state_store, "{}\n");
-		write_file($file->midi_store,          "") if not -e $file->midi_store;
-		write_file($file->tempo_map,           "") if not -e $file->tempo_map; 
-		refresh_tempo_map('force') if -s $file->tempo_map > 5;
+	::throw("either a test script running or use_git: 0 is configured in .namarc. ",
+		"No repo created for project ", project_dir()), 
+		return if not $config->{use_git} or is_test_script();
+	if (not -d repo_git_dir()){
+		pager("Creating git repository in ", repo_git_dir()); 
+		create_repo;
+		init_repo_obj();
+		create_file_stubs();
+		git_commit('initialize_repository');
+	} else {
+		init_repo_obj();
+		#git_commit('committing prior changes') if git_diff();
 	}
-	git( add => $_ ) for $file->midi_store, $file->state_store;
-	git( commit => '--quiet', '--message' => $is_new_project 
-											?  'initialize repository' 
-											:  'committing prior unsaved changes (left after program abort?)' 
-	);
+}
+sub git_diff { 
+	my @files = @_; 
+	my $diff = git('diff', @files); 
+	$diff =~ /\S/ ? $diff : undef 
 }
 sub git_tag_exists {
 	logsub((caller(0))[3]);
@@ -95,19 +98,26 @@ sub project_snapshot {
 
 sub reset_command_buffer { $project->{command_buffer} = [] } 
 
+sub command_buffer_contents {
+	scalar @{$project->{command_buffer}} and join("\n", 
+		undef,
+		(map{ $_->{command} } @{$project->{command_buffer}}),
+		# context for first command of group
+		"* track: $project->{command_buffer}->[0]->{context}->{track}",
+		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
+		"* op: $project->{command_buffer}->[0]->{context}->{op}"
+		) or undef
+}
 sub git_commit {
 	logsub((caller(0))[3]);
 	my $commit_message = shift;
+	my @defaults = ($file->state_store, $file->midi_store, $file->tempo_map);
+	my @files = scalar @_ ? @_ : @defaults;
 	no warnings 'uninitialized';
+	@files = @defaults if not @files;
+	$commit_message .= command_buffer_contents();
 	use utf8;
-	scalar @{$project->{command_buffer}} and $commit_message .= join "\n", 
-		undef,
-		(map{ $_->{command} } @{$project->{command_buffer}}),
-		# context for first command
-		"* track: $project->{command_buffer}->[0]->{context}->{track}",
-		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
-		"* op:    $project->{command_buffer}->[0]->{context}->{op}",
-	git( add => $file->state_store, $file->midi_store );
+	git( add => @files);
 	git( commit => '--quiet', '--message', $commit_message);
 	reset_command_buffer();
 }
@@ -157,7 +167,7 @@ sub git_create_branch {
 sub state_changed {  
 	logsub((caller(0))[3]);
 	return unless $config->{use_git};
-	git("diff");
+	git_diff();
 }
 
 sub git_branch_exists { 

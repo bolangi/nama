@@ -152,10 +152,12 @@ use ::Tempo ();
 sub main { 
 	say eval join(get_data_section('banner'), qw(" "));
 	bootstrap_environment() ;
-	load_project();
+	load_project(name => shift @ARGV,
+				 create => delete $config->{opts}->{c}); 
+				 		 # remove option for next project load
 	nama_cmd($config->{execute_on_project_load});
-	reconfigure_engine();
 	nama_cmd($config->{opts}->{X});
+	reconfigure_engine();
 	$ui->loop();
 }
 
@@ -189,7 +191,7 @@ sub cleanup_exit {
 	# - allow time to close down
 	# - SIGKILL
 	delete $project->{events};
-	project_snapshot(); 
+	#project_snapshot(); 
 	::Engine::sync_action('kill_and_reap');
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
 	exit;

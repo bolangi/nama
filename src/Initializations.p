@@ -96,15 +96,14 @@ sub definitions {
 	{
 		effects_cache 			=> ['.effects_cache.json',	\&project_root],
 		gui_palette 			=> ['palette',        		\&project_root],
-		state_store 			=> ['State',      			\&project_dir ],
-		state_store 		=> ['State.json',      		\&project_dir ],
-		untracked_state_store => ['Aux',					\&project_dir ],
-		effect_profile 			=> ['effect_profiles',		\&project_root],
+		state_store 			=> ['State.json',  			\&project_dir ],
+		untracked_state_store 	=> ['Aux.json',				\&project_dir ],
+		effect_profile 			=> ['effect_profiles.json',	\&project_root],
 		chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
 		user_customization 		=> ['customize.pl',    		\&project_root],
-		project_effect_chains 	=> ['project_effect_chains',\&project_dir ],
-		global_effect_chains  	=> ['global_effect_chains', \&project_root],
-		old_effect_chains  		=> ['effect_chains', 		\&project_root],
+		project_effect_chains 	=> ['project_effect_chains.json',\&project_dir ],
+		global_effect_chains  	=> ['global_effect_chains.json', \&project_root],
+		old_effect_chains  		=> ['effect_chains.json', 		\&project_root],
 		_logfile				=> ['nama.log',				\&project_root],
 		midi_store				=> ['midi.msh',				\&project_dir ],
 		aux_midi_commands		=> ['aux_midi_commands', 	\&project_root],
@@ -253,11 +252,6 @@ sub initialize_interfaces {
 		and $jack->{use_jacks}++;
 	choose_sleep_routine();
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
-
-	$project->{name} = shift @ARGV;
-	{no warnings 'uninitialized';
-	logpkg('debug',"project name: $project->{name}");
-	}
 
 	logpkg('debug', sub{"Command line options\n".  json_out($config->{opts})});
 

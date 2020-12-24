@@ -1,5 +1,4 @@
 # --------- Project related subroutines ---------
-
 {
 package ::Project;
 use Modern::Perl; use Carp;
@@ -112,22 +111,28 @@ sub initialize_project_data {
 
 }
 
+sub create_project_dirs {
+	map{create_dir($_)} project_dir(), this_wav_dir(), waveform_dir() 
+}
+sub create_file_stubs {
+		write_file($file->state_store, "{}\n") unless -e $file->state_store;
+		write_file($file->midi_store,    "\n") unless -e $file->midi_store; 
+		write_file($file->tempo_map,     "\n") unless -e $file->tempo_map;
+}
 sub load_project {
 	logsub((caller(0))[3]);
 	my %args = @_;
 	logpkg('debug', sub{json_out \%args});
-	$project->{name} = $args{name} if $args{name};
-	$config->{opts}->{c} and $args{create}++;
-	if (! $project->{name} or $project->{name} and ! -d project_dir() and ! $args{create})
+	
+	$project->{name} = $args{name};
+	if (not $project->{name} or not -d project_dir() and not $args{create})
 	{
 		no warnings 'uninitialized';
 		::pager_newline(qq(Project "$project->{name}" not found. Loading project "untitled".)); 
-		$project->{name} = "untitled", $args{create}++,
+		load_project(name => 'Untitled', create => 1);
+
 	}
-	if ( ! -d project_dir() )
-	{
-		map{create_dir($_)} project_dir(), this_wav_dir(), waveform_dir() if $args{create};
-	}
+	create_project_dirs() if $args{create};
 
 	# we used to check each project dir for customized .namarc
 	# read_config( global_config() ); 
@@ -138,8 +143,8 @@ sub load_project {
 	remove_riff_header_stubs(); 
 	cache_wav_info();
 	refresh_wav_cache();
+	restore_state() unless $config->{opts}->{M} ;
 	initialize_project_repository();
-	restore_state($args{settings}) unless $config->{opts}->{M} ;
 
 	$config->{opts}->{M} = 0; # enable 
 	
@@ -157,6 +162,7 @@ sub load_project {
  1;
 }	
 sub restore_state {
+	logsub((caller(0))[3]);
 		my $name = shift;
 
 		if( ! $name  or $name =~ /.json$/ or !  $config->{use_git})

@@ -137,13 +137,10 @@ sub barbeat { 					# position in time of nth bar, mth beat
 	# advance bars
 	# 
 }
+sub change_in_tempo_map{ $config->{use_git} and git_diff($file->tempo_map) }
 sub refresh_tempo_map {
-		my $force = shift;
-		-e $file->tempo_map or return;
-		if ($config->{use_git} and git( diff => $file->tempo_map ) || $force ){
-			git( add => $file->tempo_map );
-  			git( commit => '--quiet', '--message', 'change in tempo map '. $file->tempo_map);
-		}
+		return unless -e $file->tempo_map or change_in_tempo_map();
+		git_commit('change in tempo map', $file->tempo_map);
 		delete_tempo_marks();
 		initialize_tempo_map();
 		read_tempo_map($file->tempo_map);
