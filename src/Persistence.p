@@ -147,45 +147,6 @@ sub save_system_state {
 
 	"$path.json";
 }
-{
-my %is_legal_suffix = ( 
-		json => 'json', 
-		yml => 'yaml', 
-		pl 	 => 'perl',
-		bin  => 'storable',
-		yaml => 'yaml', # we allow formats as well
-		perl => 'perl',
-		storable => 'storable',
-);
-sub get_newest {
-	
-	# choose the newest
-	#
-	my ($path, $format) = @_;
-	
-	# simply return the file
-	# if filename matches exactly, 
-	# and we know the format
-	
-	return($path, $format) if -f $path and $is_legal_suffix{$format};
-
-	my ($dir, $name) = $path =~ m!^(.*?)([^/]+)$!; 
-	
-	# otherwise we glob, sort and filter directory entries
-	
-	my @sorted = 
-		sort{ $a->[1] <=> $b->[1] } 
-		grep{ $is_legal_suffix{$_->[2]} }
-		map 
-		{ 
-			my ($suffix) = m/^$path(?:\.(\w+))?$/;
-			[$_, -M $_, $suffix] 
-		} 
-		glob("$path*");
-	logpkg('debug', sub{json_out \@sorted});
-	($sorted[0]->[0], $sorted[0]->[2]);
-}
-}
 
 { my %decode = 
 	(
@@ -222,21 +183,15 @@ sub restore_state_from_file {
 	my $filename = shift;
 	$filename //= $file->state_store();
 
-	my ($ref, $path, $source, $suffix); 
-
-	# get state file, newest if more than one
-	# with same name, differing extensions
-	# i.e. State.json and State.yml
 	initialize_marshalling_arrays();
 
-	# restore from default filenames	
-	
-	( $path, $suffix ) = get_newest($file->untracked_state_store);
-	if ($path)
+	my $suffix = 'json';	
+	my $path = $file->untracked_state_store;
+	if (-r $path)
 	{
-		$source = read_file($path);
+		my $source = read_file($path);
 
-		$ref = decode($source, $suffix);
+		my $ref = decode($source, $suffix);
 		assign(
 				data	=> $ref,	
 				vars   	=> \@persistent_vars,
@@ -244,13 +199,11 @@ sub restore_state_from_file {
 		assign_singletons( { data => $ref });
 	}
 	
-	#( $path, $suffix ) = get_newest($filename);
-	my $path = $filename;
-	my $suffix = 'json';
-	if ($path)
+	$path = $filename;
+	if (-r $path)
 	{
-		$source = read_file($path);
-		$ref = decode($source, $suffix);
+		my $source = read_file($path);
+		my $ref = decode($source, $suffix);
 
 		assign(
 					data => $ref,
@@ -541,12 +494,11 @@ sub restore_global_effect_chains {
 
 	logsub((caller(0))[3]);
 		my $path =  $file->global_effect_chains;
-		my ($resolved, $format) = get_newest($path);  
-		throw("$resolved: file not found"), return unless $resolved;
-		my $source = read_file($resolved);
-		throw("$resolved: empty file"), return unless $source;
-		logpkg('debug', "format: $format, source: \n",$source);
-		my $ref = decode($source, $format);
+		-r $path or return;
+		my $source = read_file($path);
+		throw("$path: empty file"), return unless $source;
+		my $suffix = 'json';
+		my $ref = decode($source, $suffix);
 		assign(
 				data => $ref,
 				vars   => \@global_effect_chain_vars, 
