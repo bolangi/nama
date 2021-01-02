@@ -139,6 +139,7 @@ sub barbeat { 					# position in time of nth bar, mth beat
 }
 sub change_in_tempo_map{ $config->{use_git} and git_diff($file->tempo_map) }
 sub refresh_tempo_map {
+		return;
 		return unless -e $file->tempo_map or change_in_tempo_map();
 		git_commit('change in tempo map', $file->tempo_map);
 		delete_tempo_marks();
