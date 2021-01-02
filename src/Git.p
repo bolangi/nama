@@ -99,6 +99,7 @@ sub project_snapshot {
 sub reset_command_buffer { $project->{command_buffer} = [] } 
 
 sub command_buffer_contents {
+	no warnings 'uninitialized'; 
 	scalar @{$project->{command_buffer}} and join("\n", 
 		undef,
 		(map{ $_->{command} } @{$project->{command_buffer}}),
