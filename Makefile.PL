@@ -58,5 +58,5 @@ use inc::Module::Install;
 			Try::Tiny  0
 			YAML::Tiny  0
 		);
-        WriteAll;
+        WriteAll 'meta'
 

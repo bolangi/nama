@@ -523,10 +523,10 @@ dump_io: _dump_io { ::ChainSetup::show_io(); 1}
 show_track: _show_track {
 	my $output = $::text->{format_top};
 	$output .= ::show_tracks_section($::this_track);
-	$output .= ::show_track_comment($::this_track);
+	$output .= ::show_track_comment_brief($::this_track);
 	$output .= ::show_region();
 	$output .= ::show_versions();
-	$output .= ::show_version_comment($::this_track, $::this_track->version);
+	$output .= ::show_version_comment_brief($::this_track, $_) for @{$::this_track->versions};
 	$output .= ::show_send();
 	$output .= ::show_bus();
 	$output .= ::show_modifiers();
@@ -697,10 +697,9 @@ noloop: _noloop { $::mode->{loop_enable} = 0; 1}
 name_mark: _name_mark ident {$::this_mark->set_name( $item{ident}); 1}
 list_marks: _list_marks { 
 	my $i = 0;
-	my @lines = map{ ( $_->{time} == $::this_mark->{time} ? q(*) : q()
-	,join " ", $i++, sprintf("%.1f", $_->{time}), $_->name, "\n")  } 
-		  #sort { $a->time <=> $b->time } 
-		  @::Mark::all;
+	my @lines = map{ 	my $pre =  $_->{time} == $::this_mark->{time} ? q(*) : q();
+						$pre . join " ", $i++, sprintf("%.1f", $_->{time}), $_->name, "\n"
+		} @::Mark::all;
 	my $start = my $end = "undefined";
 	push @lines, "now at ". sprintf("%.1f\n", ::ecasound_iam("getpos"));
 	::pager(@lines);
