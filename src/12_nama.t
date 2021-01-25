@@ -869,6 +869,16 @@ sub check_setup {
 		json_out(setup_content($expected_setup_lines)), 
 		$test_name);
 }
+sub check_tempo_conversions {
+	# make objects
+	# run tests
+
+
+
+
+
+
+}
 
 
 cleanup_dirs();

@@ -221,10 +221,9 @@ say expand_root('Audio::Nama', '@::Tempo::chunks');
 sub show_versions {
 		no warnings 'uninitialized';
 		if (@{$this_track->versions} ){
-			"All versions: ". join(" ", 
+			"Versions: ". join(" ", 
 				map { 
 					my $cached = is_cached($this_track, $_) ? 'c' : '';
-					$cached .= 'C' if $this_track->is_version_comment($_);
 					$_ . $cached } @{$this_track->versions}
 			). $/
 		} else {}
@@ -234,10 +233,20 @@ sub show_track_comment {
 	my $text = $track->is_comment;
 	$text and "Track comment: $text\n";
 }
+sub show_track_comment_brief {
+	my $track = shift;
+	my $text = $track->is_comment;
+	$text and "Comment: $text\n";
+}
 sub show_version_comment {
 	my ($track, $version) = @_;
 	my $text = $track->is_version_comment($version);
 	$text and "Version comment: $text\n";
+}
+sub show_version_comment_brief {
+	my ($track, $version) = @_;
+	my $text = $track->is_version_comment($version);
+	$text and "  $version: $text\n";
 }
 sub show_send { "Send: ". $this_track->send_id. $/ 
 					if ! $this_track->off
@@ -546,7 +555,7 @@ sub remove_track_cmd {
 	
 	# avoid having ownerless SlaveTracks.  
  	::ChainSetup::remove_temporary_tracks();
-		$quiet or pager( "Removing track /$track->name/.  All WAV files will be kept. Other data will be lost.");
+		$quiet or pager( "Removing track ",$track->name, ".  WAV files will be kept. Other data will be lost.");
 		remove_submix_helper_tracks($track->name);
 		$track->remove;
 		$this_track = $tn{Main};

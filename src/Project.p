@@ -143,8 +143,9 @@ sub load_project {
 	remove_riff_header_stubs(); 
 	cache_wav_info();
 	refresh_wav_cache();
-	restore_state() unless $config->{opts}->{M} ;
 	initialize_project_repository();
+	restore_state($args{settings}) unless $config->{opts}->{M} ;
+	process_tempo_map() unless $config->{opts}->{T};
 
 	$config->{opts}->{M} = 0; # enable 
 	

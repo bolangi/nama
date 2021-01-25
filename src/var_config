@@ -107,5 +107,7 @@
 	$waveform_pixels_per_second		$config->{waveform_pixels_per_second}
 	$display_waveform					$config->{display_waveform}
 
+	$ticks_per_quarter_note 		$config->{ticks_per_quarter_note}
+
 	# end
 

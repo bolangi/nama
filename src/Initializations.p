@@ -190,6 +190,9 @@ sub definitions {
 		waveform_pixels_per_second  => 10,
 		loop_chain_channel_width     => 16,
 
+		ticks_per_quarter_note		=> 24,
+		
+
 	}, '::Config';
 
 	{ package ::Config;

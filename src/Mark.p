@@ -13,7 +13,6 @@ use ::Globals qw(:all);
 use ::Object qw( 
 				 name 
                  time
-				 tempo_map
 				 );
 
 sub initialize {
@@ -37,13 +36,7 @@ sub new {
 	#croak  "name already in use: $vals{name}\n"
 	#	 if $by_name{$vals{name}}; # null name returns false
 	
-	my $self = bless { 
-
-		## 		defaults ##
-
-					name => "",
-
-					@_ 			}, $class;
+	my $self = bless { @_ }, $class;
 
 	#print "self class: $class, self type: ", ref $self, $/;
 	if ($self->name) {
@@ -311,6 +304,22 @@ use Modern::Perl;
 our @ISA = '::Mark';
 
 
+}
+
+{ package ::TempoMark;
+
+	our $VERSION = 1.0;
+	use Modern::Perl;
+	use ::Log qw(logpkg);
+	use ::Globals qw(:all);
+	our @ISA = '::Mark';
+	use SUPER; 
+	use ::Object qw( 
+					 name 
+					bars	
+					beats
+					ticks
+					 );
 }
 
 1;
