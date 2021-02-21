@@ -12,7 +12,7 @@ use List::Util qw(sum);
 # bars: measures in this chunk
 # meter: time signature e.g 3/4 count/note, note is 4, count is 3
 # tempo: bpm or range
-# ticks: default 24 ticks equals one quarter note
+# ticks: number of ticks in this chunk
 # note: denominator of time signature, e.g. 4 means quarter note, 8 means eighth
 # count: numerator of time signature
 
