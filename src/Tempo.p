@@ -4,7 +4,7 @@
 package ::Tempo;
 use Modern::Perl;
 use ::Globals qw($config);
-use ::Object qw( note count label bars meter tempo );
+use ::Object qw( label bars meter tempo );
 use List::Util qw(sum);
 # we divide time in chunks specified by klick metronome tempo map
 # 
