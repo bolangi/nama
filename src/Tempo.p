@@ -44,26 +44,23 @@ sub quarter_notes {
 	my $self = shift;
 	$self->beats * $self->note_fraction
 }
-sub beat_lengths {
+sub note_lengths {
 	my $self = shift;
-	my @beat_lengths;
+	my @note_lengths;
 	if ( $self->fixed_tempo ){
-		my $bps = $self->tempo / 60;
-		my $seconds_per_beat = 1 / $bps * $self->note_fraction;
-		for (1..$self->beats){ push @beat_lengths, $seconds_per_beat }
+		my $beat_length = 60 / $self->tempo;
+		my $seconds_per_note =  $beat_length * $self->note_fraction;
+		@note_lengths = $seconds_per_note x $self->notes;
 	}	
 	else {
-		# r = exp [ ln( t final / t initial )  / n ]
-		my $ratio = ratio( $self->start_tempo, $self->end_tempo, $self->beats - 1 );
-		my $current_length = quarter_length_from_bpm($self->start_tempo) * $self->note_fraction;
-		push @beat_lengths, $current_length;
-		for (2 .. $self->beats - 1){
-			$current_length *= $ratio;
-			push @beat_lengths, $current_length;
+		my $nl_start = note_length($self->start_tempo, $self->note_fraction);
+		my $nl_end   = note_length($self->end_tempo,   $self->note_fraction);
+		my $delta = ($nl_end - $nl_start) / $self->notes;
+		for my $incr (0 .. $self->notes - 1){
+			push @note_lengths, ($nl_start + $incr * $delta);
 		}
-		push @beat_lengths, quarter_length_from_bpm($self->end_tempo);
 	}
-	@beat_lengths
+	@note_lengths
 }
 sub bar_lengths {
 	my $self = shift;
@@ -127,22 +124,29 @@ sub bpm_to_length {
 	60 / $bpm 
 }
 
-sub linear_ramp_position_mth_of_n {
+sub note_length { }
+sub note_position {
+	
 
-	my ($start_bpm, $end_bpm, $n, $m) = @_;
+}
+sub note_position_during_tempo_ramp {
 
-	# start_tempo: notes per minute
-	# end_tempo: notes per minute
-	# n: notes in ramp interval
-	# m: ordinal whose position we want
+=comment
+	my ($start_bpm, $end_bpm, $beats, $nth) = @_;
 
-	# this algorithm calculates the position of the
-	# *end* of the mth note. To get the starting pos
-	# we decrement m
+	# start_tempo: beats per minute
+	# end_tempo: beats per minute
+	# nth: beat whose position we want
+	# beats: total beats in ramp interval
 
-	$m--;
+	return 0 if $nth == 1;
+	::throw("$nth: zero or missing nth beat"), return if ! $nth;
+
+	# To determine the start of a beat we accumlate
+	# time through the end of the previous beat.
 
 	# we will change time by a constant delta
+
 	# delta = total change / number of steps (n)
 
 	# increment first note length by 0 delta
@@ -199,9 +203,10 @@ sub linear_ramp_position_mth_of_n {
     # Tm = m t1 +  (tn - t1) / n * (m - 1) * m  / 2
     # Tm = m (t1 + (tn - t1) / n * (m - 1) / 2 )
 
+=cut
 }
 
-sub quarter_length_from_bpm {
+sub quarter_length {
 	my $bpm = shift;
 	my $bps = $bpm / 60;
 	my $seconds_per_beat = 1 / $bps
