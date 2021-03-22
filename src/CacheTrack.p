@@ -266,7 +266,7 @@ sub update_cache_map_bus {
 	$track->add_system_version_comment($args->{cached_version}, $msg);
 	pagers($msg); 
 	pagers(qq(To return this track to the state prior to caching,
-simply say '$track->{name} mon' The state of the project is saved 
+say "$track->{name} mon" The state of the project is saved 
 and available through the tag $tagname));
 }
 
