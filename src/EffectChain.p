@@ -231,7 +231,7 @@ sub add_ops {
 	} else {
 		@ops_list = @{$self->ops_list};
 	}
-	map 
+	for (@ops_list)
 	{	
 		my $args = 
 		{
@@ -266,8 +266,7 @@ sub add_ops {
 			map{ $self->parent_id($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
 		
-	} @ops_list;
-	\@added
+	}
 }
 sub add_inserts {
 	my ($self, $track) = @_;
@@ -305,11 +304,18 @@ sub add {
 	my $args = {};
 	$args->{before} = $successor;
 	$args->{surname} = $self->name if $self->name;
-	my $added = $self->add_ops($track, $args);
+	$self->add_ops($track, $args);
+	#$track->{ops} = dclone($self->ops_list);
 	$self->add_inserts($track);
 	$self->add_region($track) if $self->region;
 	$self->add_fades($track) if $self->fade_data;
-	$added
+	$track->set(version => $self->track_version_original);
+	$track->set(target => $self->track_target_original) if $self->track_target_original;
+	pager($track->name, ": setting uncached version ", $track->version, $/);
+	pager($track->name, ": setting original region bounded by marks ", 
+		$track->region_start, " and ", $track->region_end, $/)
+		if $track->is_region;
+	1 # succeeded 
 
 }
 sub add_fades {
