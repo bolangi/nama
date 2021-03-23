@@ -38,11 +38,10 @@ sub cache_track { # launch subparts if conditions are met
 						or $track->is_region  and 'a region' 
 						or 'an ordinary track'));
 	
-	push my @cached, 'bus' if $args->{bus};
-	push @cached, 'region' if $track->is_region;
-	push @cached, 'effects' if $track->user_ops;
-	push @cached, 'insert' if $track->has_insert;
-	@cached or throw("Nothing to cache: one effect, insert or region is needed"), return;
+	my @to_cache = cachable_things($track);
+	
+	@to_cache or throw("Nothing to cache: effect, insert or region is needed"), return;
+	pagers("Caching @to_cache");
 	if($args->{bus})
 	{ generate_cache_bus_graph($args) }
 	else
@@ -63,6 +62,15 @@ sub cache_track { # launch subparts if conditions are met
 		return;
 	}
 
+}
+sub cachable_things {
+	my $track = shift;
+	my @cached;
+	push @cached, 'bus' if $track->is_mixer;
+	push @cached, 'region' if $track->is_region;
+	push @cached, 'effects' if $track->user_ops;
+	push @cached, 'insert' if $track->has_insert;
+	@cached;
 }
 
 sub deactivate_vol_pan {
@@ -323,28 +331,13 @@ sub uncache_track {
 
 		else{ throw($track->name, ": version $version is not cached"), return }
 	}
-	$track->user_ops and 
-		throw($track->name, ": cannot uncache while user effects are present\n",
-			"You must delete them before you can uncache this WAV version."), return;
-	$track->is_region and 
-		throw($track->name, ": cannot uncache while region is set for this track\n",
-			"Remove it and try again."), return;
-# 	$ec->inserts and $track->inserts and throw($track->name,
-# 	": cannot uncache inserts because an insert is already set for this track\n",
-# 	"Remove it and try again."), return;
+	my @in_the_way = grep {$_ !~ 'bus'} cachable_things($track);
+	if (@in_the_way){
+		throw("track $track->{name}, has @in_the_way.
+You must remove them before you can uncache this version."), return;
+	}
 
 	$ec->add($track);
-	# replace track's effect list with ours
-	$track->{ops} = dclone($ec->ops_list);
-	# applying the the effect chain doesn't set the version or target
-	# so we do it here
-	$track->set(version => $ec->track_version_original);
-    $track->set(target => $ec->track_target_original) if $ec->track_target_original;
-
-	pager($track->name, ": setting uncached version ", $track->version, $/);
-	pager($track->name, ": setting original region bounded by marks ", 
-		$track->region_start, " and ", $track->region_end, $/)
-		if $track->is_region;
 
 }
 sub is_cached {
