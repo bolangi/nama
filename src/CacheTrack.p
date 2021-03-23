@@ -16,6 +16,7 @@ use ::Globals qw(:all);
 # output_wav
 # orig_volume
 # orig_pan
+# bus - we are caching a bus
 
 sub cache_track { # launch subparts if conditions are met
 	logsub((caller(0))[3]);
@@ -24,27 +25,28 @@ sub cache_track { # launch subparts if conditions are met
 	throw("Track is OFF. Set to PLAY (MON for a bus) and try again"), return if $track->off;
 	local $this_track;
 	$args->{track} = $track;
+	$args->{bus} = $args->{track}->is_mixing;
 	$args->{additional_time} //= 0;
-	$args->{original_version} = $track->is_mixing ? 0 : $args->{track}->playback_version;
+	$args->{original_version} = $args->{bus} ? 0 : $args->{track}->playback_version;
 	$args->{cached_version} = $args->{track}->last + 1;
-	
 	$args->{track_rw} = $track->rw;
 	$args->{main_rw} = $tn{Main}->rw;
 	$tn{Main}->set( rw => OFF);
 	$track->set( rw => REC);	
-	pagers($track->name. ": preparing to cache ".  ($track->is_mixing ? 'a bus' : 'an ordinary track'));
+	pagers($track->name. ': preparing to cache '.
+		($args->{bus} and 'a bus' 
+						or $track->is_region  and 'a region' 
+						or 'an ordinary track'));
 	
-	throw($track->name. ": nothing to cache!  Skipping.
-Can only cache effects, inserts, a region or a mix track."), return 
-		unless $track->is_mixing 
-				or $track->user_ops 
-				or $track->has_insert
-				or $track->is_region;
-
-	if($track->is_mixing)
-	{ generate_cache_graph_bus($args) }
+	push my @cached, 'bus' if $args->{bus};
+	push @cached, 'region' if $track->is_region;
+	push @cached, 'effects' if $track->user_ops;
+	push @cached, 'insert' if $track->has_insert;
+	@cached or throw("Nothing to cache: one effect, insert or region is needed"), return;
+	if($args->{bus})
+	{ generate_cache_bus_graph($args) }
 	else
-	{ generate_cache_graph($args) }
+	{ generate_cache_track_graph($args) }
 	
 	my $result = process_cache_graph($g);
 	if ( $result )
@@ -73,18 +75,15 @@ sub reactivate_vol_pan {
 	pan_back($args->{track});
 	vol_back($args->{track});
 }
-sub generate_cache_graph_bus {
+sub generate_cache_bus_graph {
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
 	$args->{graph} = $g;
 	my $track = $args->{track};
 		
-	# set WAV output format
-	
-	$args->{complete_caching_ref} = \&update_cache_map_bus;
-	
 	map{ $_->apply($g) } grep{ (ref $_) =~ /SubBus/ } ::Bus::all();
 
+	# set WAV output format
 	$g->set_vertex_attributes(
 		$track->name, 
 		{ format => signal_format($config->{cache_to_disk_format},$track->width),
@@ -93,7 +92,7 @@ sub generate_cache_graph_bus {
 	); 
 }
 
-sub generate_cache_graph {
+sub generate_cache_track_graph {
 	logsub((caller(0))[3]);
 	my $args = shift;
  	my $g = ::ChainSetup::initialize();
@@ -130,8 +129,6 @@ sub generate_cache_graph {
 			full_version => $to_path,
 		}
 	); 
-	$args->{complete_caching_ref} = \&update_cache_map;
-
 		# set the input path
 		$g->add_path('wav_in',$args->{track}->name);
 		logpkg('debug', "The graph after setting input path:\n$g");
@@ -197,7 +194,7 @@ sub complete_caching {
 	my @files = grep{/$name/} new_files_were_recorded();
 	if (@files ){ 
 		
-		$args->{complete_caching_ref}->($args) if defined $args->{complete_caching_ref};
+		update_cache_map($args);	
 		post_cache_processing($args);
 
 	} else { throw("track cache operation failed!") }
@@ -223,8 +220,9 @@ sub update_cache_map {
 		my @ops_list = @{$track->ops};
 		my @ops_remove_list = $track->user_ops;
 		
-		if ( @inserts_list or @ops_remove_list or $track->is_region )
+		if ( $args->{bus} or @inserts_list or @ops_remove_list or $track->is_region )
 		{
+			# set up arguments for effect chain constructor
 			my %args = 
 			(
 				track_cache => 1,
@@ -236,7 +234,6 @@ sub update_cache_map {
 				ops_list => \@ops_list,
 				inserts_data => \@inserts_list,
 			);
-			#	is_mixing => $track->is_mixing,
 			$args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
 			$args{fade_data} = [ map  { $_->as_hash } $track->fades ];
 			$args{track_target_original} = $track->target if $track->target; 
@@ -248,14 +245,16 @@ sub update_cache_map {
 			map{ remove_effect($_) } @ops_remove_list;
 			map{ $_->remove        } @inserts_list;
 			map{ delete $track->{$_} } qw( region_start region_end target );
+			my $obj = $args->{bus} ? 'bus' : 'track';
 
-		pagers(qq(Saving effects for cached track "). $track->name. '".');
-		pagers(qq('uncache' will restore effects and set version $args->{original_version}\n));
-		}
-}
-sub update_cache_map_bus {
-	my $args = shift;
+			my $act = $args->{bus} ? 'reactivate bus' 
+										: "set version $args->{original_version}";
+	pagers(qq(Saving effects for cached $obj "$track->name"));
+	pagers(qq('uncache' will $act, and restore effects, fades, and inserts));
+
+		
 	my $track = $args->{track};
+
 	my $filename = $track->targets->{$args->{cached_version}};
 
 	# system version comment with git tag
@@ -268,6 +267,7 @@ sub update_cache_map_bus {
 	pagers(qq(To return this track to the state prior to caching,
 say "$track->{name} mon" The state of the project is saved 
 and available through the tag $tagname));
+		}
 }
 
 sub post_cache_processing {
