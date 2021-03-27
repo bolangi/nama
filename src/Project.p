@@ -145,11 +145,11 @@ sub load_project {
 	refresh_wav_cache();
 	initialize_project_repository();
 	restore_state($args{settings}) unless $config->{opts}->{M} ;
-	process_tempo_map() unless $config->{opts}->{T};
 
 	$config->{opts}->{M} = 0; # enable 
 	
 	initialize_mixer();
+	process_tempo_map() unless $config->{opts}->{T};
 
 	# possible null if Text mode
 	
