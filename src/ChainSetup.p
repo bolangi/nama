@@ -85,9 +85,8 @@ sub show_io {
 
 sub warn_missing_jack_clients {
 	for my $track (::audio_tracks()){
-		$track->send_type =~ /jack_client/ and $jack->{clients}->{$track->send_id}
+		$track->send_type =~ /jack_client/ and not $jack->{clients}->{$track->send_id}
 		 	and ::throw("Track ".$track->name. qq(: JACK client ").$track->send_id.qq(" not found. Skipping aux send));
-		#TODO Shall I start it for you?
 		$track->source_type eq 'jack_client' and not $jack->{clients}->{$track->source_id}
 			and ::throw("Track ".$track->name. qq(: JACK client ").$track->source_id.qq(" not found. Skipping source connection));
 	}
