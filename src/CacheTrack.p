@@ -217,20 +217,26 @@ sub update_cache_map {
 				join "\n","cache map", 
 				map{($_->dump)} ::EffectChain::find(track_cache => 1)
 			});
-		my @inserts_list = $args->{track}->get_inserts;
+
+		my $track = $args->{track};
+
 
 		# include all ops, include vol/pan operators 
 		# which serve as placeholders, won't overwrite
 		# the track's current vol/pan operators
 
-		my $track = $args->{track};
-		 
-		my @ops_list = @{$track->ops};
-		my @ops_remove_list = $track->user_ops;
+		my @inserts = $track->get_inserts;
+		my @all_ops = @{$track->ops};
+		my @ops_to_remove = $track->user_ops;
 		
-		if ( $args->{bus} or @inserts_list or @ops_remove_list or $track->is_region )
-		{
-			# set up arguments for effect chain constructor
+		if ( $args->{bus} 
+			or @inserts_list 
+	i		or @ops_to_remove
+			or $track->is_region
+			or $track->fades
+			#or $track->edits?
+			){
+			# arguments for effect chain constructor
 			my %args = 
 			(
 				track_cache => 1,
@@ -239,19 +245,18 @@ sub update_cache_map {
 				track_version_result => $args->{cached_version},
 				project => 1,
 				system => 1,
-				ops_list => \@ops_list,
-				inserts_data => \@inserts_list,
+				ops_list => \@all_ops,
+				inserts_data => \@inserts,
 			);
 			$args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
 			$args{fade_data} = [ map  { $_->as_hash } $track->fades ];
 			$args{track_target_original} = $track->target if $track->target; 
-			# late, because this changes after removing target field
 			map{ delete $track->{$_} } qw(target);
 			# update track settings
 			my $ec = ::EffectChain->new( %args );
 			map{ $_->remove        } $track->fades;
-			map{ remove_effect($_) } @ops_remove_list;
-			map{ $_->remove        } @inserts_list;
+			map{ remove_effect($_) } @ops_to_remove;
+			map{ $_->remove        } @inserts;
 			map{ delete $track->{$_} } qw( region_start region_end target );
 			my $obj = $args->{bus} ? 'bus' : 'track';
 
