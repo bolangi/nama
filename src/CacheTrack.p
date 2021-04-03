@@ -12,7 +12,6 @@ use ::Globals qw(:all);
 # additional_time
 # processing_time
 # original_version
-# complete_caching_ref
 # output_wav
 # orig_volume
 # orig_pan
@@ -27,8 +26,8 @@ sub cache_track { # launch subparts if conditions are met
 	$args->{track} = $track;
 	$args->{bus} = $args->{track}->is_mixing;
 	$args->{additional_time} //= 0;
-	$args->{original_version} = $args->{bus} ? 0 : $args->{track}->playback_version;
-	$args->{cached_version} = $args->{track}->last + 1;
+	$args->{original_version} = $args->{bus} ? 0 : $track->playback_version;
+	$args->{cached_version} = $track->last + 1;
 	$args->{track_rw} = $track->rw;
 	$args->{main_rw} = $tn{Main}->rw;
 	$tn{Main}->set( rw => OFF);
@@ -70,6 +69,8 @@ sub cachable_things {
 	push @cached, 'region' if $track->is_region;
 	push @cached, 'effects' if $track->user_ops;
 	push @cached, 'insert' if $track->has_insert;
+	push @cached, 'fades' if $track->fades;
+	# push @cached, 'edits' if $track->edits; # TODO
 	@cached;
 }
 
@@ -219,7 +220,6 @@ sub update_cache_map {
 			});
 
 		my $track = $args->{track};
-
 
 		# include all ops, include vol/pan operators 
 		# which serve as placeholders, won't overwrite
