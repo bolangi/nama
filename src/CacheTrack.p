@@ -37,7 +37,7 @@ sub cache_track { # launch subparts if conditions are met
 						or $track->is_region  and 'a region' 
 						or 'an ordinary track'));
 	
-	my @to_cache = cachable_things($track);
+	my @to_cache = cachable($track);
 	
 	@to_cache or throw("Nothing to cache: effect, insert or region is needed"), return;
 	pagers("Caching @to_cache");
@@ -62,7 +62,7 @@ sub cache_track { # launch subparts if conditions are met
 	}
 
 }
-sub cachable_things {
+sub cachable {
 	my $track = shift;
 	my @cached;
 	push @cached, 'bus' if $track->is_mixer;
@@ -328,7 +328,7 @@ sub uncache_track {
 
 		else{ throw($track->name, ": version $version is not cached"), return }
 	}
-	my @in_the_way = grep {$_ !~ 'bus'} cachable_things($track);
+	my @in_the_way = grep {$_ !~ 'bus'} cachable($track);
 	if (@in_the_way){
 		throw("track $track->{name}, has @in_the_way.
 You must remove them before you can uncache this version."), return;
