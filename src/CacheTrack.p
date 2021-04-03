@@ -229,13 +229,6 @@ sub update_cache_map {
 		my @all_ops = @{$track->ops};
 		my @ops_to_remove = $track->user_ops;
 		
-		if ( $args->{bus} 
-			or @inserts_list 
-	i		or @ops_to_remove
-			or $track->is_region
-			or $track->fades
-			#or $track->edits?
-			){
 			# arguments for effect chain constructor
 			my %args = 
 			(
@@ -280,7 +273,6 @@ sub update_cache_map {
 	pagers(qq(To return this track to the state prior to caching,
 say "$track->{name} mon" The state of the project is saved 
 and available through the tag $tagname));
-		}
 }
 
 sub post_cache_processing {
