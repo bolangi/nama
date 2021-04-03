@@ -258,9 +258,6 @@ sub update_cache_map {
 	pagers(qq(Saving effects for cached $obj "$track->name"));
 	pagers(qq('uncache' will $act, and restore effects, fades, and inserts));
 
-		
-	my $track = $args->{track};
-
 	my $filename = $track->targets->{$args->{cached_version}};
 
 	# system version comment with git tag
