@@ -665,9 +665,9 @@ pan: _pan sign panval {
 panval: float 
       | dd
 pan: _pan { ::pager( $::this_track->pan_level); 1}
-pan_right: _pan_right { ::pan_check($::this_track, 100 ); 1}
-pan_left:  _pan_left  { ::pan_check($::this_track,    0 ); 1}
-pan_center: _pan_center { ::pan_check($::this_track,   50 ); 1}
+pan_right: _pan_right { ::pan_set($::this_track, 100 ); 1}
+pan_left:  _pan_left  { ::pan_set($::this_track,    0 ); 1}
+pan_center: _pan_center { ::pan_set($::this_track,   50 ); 1}
 pan_back:  _pan_back { ::pan_back($::this_track); 1;}
 remove_mark: _remove_mark dd {
 	my @marks = ::Mark::all();

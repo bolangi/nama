@@ -81,7 +81,7 @@ sub cachable {
 sub deactivate_vol_pan {
 	my $args = shift;
 	unity($args->{track}, 'save_old_vol');
-	pan_check($args->{track}, 50);
+	pan_set($args->{track}, 50);
 }
 sub reactivate_vol_pan {
 	my $args = shift;

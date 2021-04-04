@@ -538,7 +538,7 @@ sub destroy_current_wav {
 	1;
 }
 
-sub pan_check {
+sub pan_set {
 	my ($track, $new_position) = @_;
 	my $current = $track->pan_o->params->[0];
 	$track->set(old_pan_level => $current)
