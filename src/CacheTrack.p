@@ -21,7 +21,11 @@ sub cache_track { # launch subparts if conditions are met
 	logsub((caller(0))[3]);
 	my $args = {};
 	(my $track, $args->{additional_time}) = @_;
-	throw("Track is OFF. Set to PLAY (MON for a bus) and try again"), return if $track->off;
+	my $bus = $track->is_mixer;
+	my $obj = $bus ? 'Bus' : 'Track';
+	my $name = $track->name;
+	my $status = $bus ? MON : PLAY;
+	throw("$obj $name is OFF. Set to track $name to $status and try again"), return if $track->off;
 	local $this_track;
 	$args->{track} = $track;
 	$args->{bus} = $args->{track}->is_mixing;
