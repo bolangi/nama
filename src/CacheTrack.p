@@ -43,8 +43,8 @@ sub cache_track { # launch subparts if conditions are met
 	
 	my @to_cache = cachable($track);
 	
-	@to_cache or throw("Nothing to cache: effect, insert or region is needed"), return;
-	pagers("Caching @to_cache");
+	@to_cache or throw("Nothing to cache, skipping."), return;
+	pagers("Caching $obj $name: @to_cache");
 	if($args->{bus})
 	{ generate_cache_bus_graph($args) }
 	else
