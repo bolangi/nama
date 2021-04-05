@@ -195,7 +195,7 @@ sub cache_engine_run {
 
 	# ensure that engine stops at completion time
 	$setup->{cache_track_args} = $args;
- 	$project->{events}->{poll_engine} = AE::timer(1, 0.5, \&poll_cache_progress);
+ 	$project->{events}->{poll_engine} = AE::timer(1, 0.5, \&poll_progress);
 }
 sub complete_caching {
 	logsub((caller(0))[3]);
@@ -282,7 +282,7 @@ sub caching_cleanup {
 		$ui->refresh();
 		revise_prompt("default"); 
 }
-sub poll_cache_progress {
+sub poll_progress {
 	my $args = $setup->{cache_track_args};
 	print ".";
 	my $status = ecasound_iam('engine-status'); 
