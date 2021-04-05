@@ -205,7 +205,7 @@ sub complete_caching {
 	if (@files ){ 
 		
 		update_cache_map($args);	
-		post_cache_processing($args);
+		caching_cleanup($args);
 
 	} else { throw("track cache operation failed!") }
 	undef $setup->{cache_track_args};
@@ -273,7 +273,7 @@ say "$track->{name} mon" The state of the project is saved
 and available through the tag $tagname));
 }
 
-sub post_cache_processing {
+sub caching_cleanup {
 	my $args = shift;
 		$args->{track}->{rw} = $args->{track_rw};
 		$tn{Main}->{rw} = $args->{main_rw}; 
