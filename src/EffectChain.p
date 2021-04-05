@@ -294,11 +294,10 @@ sub add_region {
 }
 
 sub add {
-	my ($self, $track, $successor) = @_;
+	my ($self, $track) = @_;
 	# TODO stop_do_start should take place at this level
 	# possibly reconfiguring engine
 	my $args = {};
-	$args->{before} = $successor;
 	$args->{surname} = $self->name if $self->name;
 	$self->add_ops($track, $args);
 	#$track->{ops} = dclone($self->ops_list);
@@ -401,13 +400,13 @@ sub DESTROY {}
 
 package ::;
 sub add_effect_chain {
-	my ($name, $track, $successor) = @_;
+	my ($name, $track) = @_;
 	my ($ec) = ::EffectChain::find(
 		unique => 1, 
 		user   => 1, 
 		name   => $name,
 	);
-	if( $ec ){ $ec->add($::this_track, $successor) }
+	if( $ec ){ $ec->add($::this_track) }
 	else { ::throw("$name: effect chain not found") }
 	1;
 }
