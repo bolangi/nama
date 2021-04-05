@@ -307,7 +307,7 @@ sub uncache_track {
 	my $track = shift;
 	local $this_track;
 	$track->play or 
-		throw($track->name, ": cannot uncache unless track is set to PLAY"), return;
+		throw($track->name, ": cannot uncache unless track is set to PLAY, skipping."), return;
 	my $version = $track->playback_version;
 	my ($ec) = is_cached($track, $version);
 	if (not defined $ec)
