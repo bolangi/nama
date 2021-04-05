@@ -251,7 +251,7 @@ sub update_cache_map {
 			my $obj = $args->{bus} ? 'bus' : 'track';
 
 			my $act = $args->{bus} ? 'reactivate bus' 
-										: "set version $args->{original_version}";
+										: "restore version $args->{original_version}";
 	pagers(qq(Saving attributes for cached $obj "$track->name"));
 
 	pagers(qq(The 'uncache' command on this track will $act, 
