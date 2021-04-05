@@ -30,6 +30,10 @@ sub is_mixer {
 	my $bus = $bn{$id};
 	$bus	
 }
+sub is_mixing {
+	my $track = shift;
+	$track->mon or $track->rec and $track->is_mixer 
+}
 }
 1;
 
