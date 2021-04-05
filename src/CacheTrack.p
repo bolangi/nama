@@ -252,8 +252,10 @@ sub update_cache_map {
 
 			my $act = $args->{bus} ? 'reactivate bus' 
 										: "set version $args->{original_version}";
-	pagers(qq(Saving effects for cached $obj "$track->name"));
-	pagers(qq('uncache' will $act, and restore effects, fades, and inserts));
+	pagers(qq(Saving attributes for cached $obj "$track->name"));
+
+	pagers(qq(The 'uncache' command on this track will $act, 
+and restore any effects, fades, inserts or region definition.));
 
 	my $filename = $track->targets->{$args->{cached_version}};
 
@@ -264,9 +266,6 @@ sub update_cache_map {
 	try{ git(tag => $tagname, '-a','-m',$msg) };
 	$track->add_system_version_comment($args->{cached_version}, $msg);
 	pagers($msg); 
-	pagers(qq(To return this track to the state prior to caching,
-say "$track->{name} mon" The state of the project is saved 
-and available through the tag $tagname));
 }
 
 sub caching_cleanup {
