@@ -196,9 +196,6 @@ sub cache_engine_run {
 	# ensure that engine stops at completion time
 	$setup->{cache_track_args} = $args;
  	$project->{events}->{poll_engine} = AE::timer(1, 0.5, \&poll_cache_progress);
-
-	# complete_caching() contains the remainder of the caching code.
-	# It is triggered by stop_polling_cache_progress()
 }
 sub complete_caching {
 	logsub((caller(0))[3]);
