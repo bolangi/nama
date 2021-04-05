@@ -97,7 +97,7 @@ sub new {
 		# in both cases, we clone the data structures
 		# to ensure we don't damage the original
 		
-		map { 	
+		for (@{$vals{ops_list}}){ 	
 
 			if ( $vals{ops_data}->{$_} )
 											
@@ -112,7 +112,7 @@ sub new {
 				$ops_data->{$_} = $filtered_op_data;
 			}
 
-		} @{$vals{ops_list}};
+		} ;
 		
 
 		$vals{ops_data} = $ops_data;
