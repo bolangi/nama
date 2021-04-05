@@ -201,6 +201,10 @@ sub rec_cleanup_script {
 	join_path(::project_dir(), $track->name."-rec-cleanup.sh")
 }
 sub current_edit { $_[0]->{current_edit}//={} }
+sub is_mixing {
+	my $track = shift;
+	$track->is_mixer and ($track->mon or $track->rec)
+}
 sub bus { $bn{$_[0]->group} }
 
 { my %system_track = map{ $_, 1} qw( Main Mixdown Eq Low
