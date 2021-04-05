@@ -310,25 +310,21 @@ sub uncache_track {
 		throw($track->name, ": cannot uncache unless track is set to PLAY, skipping."), return;
 	my $version = $track->playback_version;
 	my ($ec) = is_cached($track, $version);
-	if (not defined $ec)
-	{
-		if ($track->is_mixer)
-		{
-			$track->set(rw => MON);
-			pager("Enabling bus $track->{group} by setting mix track $track->{name} to MON");
-			return
-		}
-
-		else{ throw($track->name, ": version $version is not cached"), return }
-	}
+	defined $ec or throw($track->name, ": version $version is not cached, skipping"), return;
 	my @in_the_way = grep {$_ !~ 'bus'} cachable($track);
-	if (@in_the_way){
+	@in_the_way and
 		throw("track $track->{name}, has @in_the_way.
 You must remove them before you can uncache this version."), return;
-	}
-
+		
 	$ec->add($track);
-
+	if ($track->is_mixer and not $ec->original_version) {
+		$track->set(rw => MON);
+		pager("Enabling bus $track->{group} by setting mix track $track->{name} to MON");
+	} else {
+		my $v = $ec->original_version;
+		$track->set( version => $v);
+		pager("Selecting track $track->{name} version $v");
+	}
 }
 sub is_cached {
 	my ($track, $version) = @_;
