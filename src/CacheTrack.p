@@ -240,9 +240,10 @@ sub update_cache_map {
 			$constructor_args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
 			$constructor_args{fade_data} = [ map  { $_->as_hash } $track->fades ];
 			$constructor_args{track_target_original} = $track->target if $track->target; 
-			map{ delete $track->{$_} } qw(target);
-			# update track settings
 			my $ec = ::EffectChain->new( %constructor_args );
+
+			# update track settings
+			map{ delete $track->{$_} } qw(target);
 			map{ $_->remove        } $track->fades;
 			map{ remove_effect($_) } @ops_to_remove;
 			map{ $_->remove        } @inserts;
