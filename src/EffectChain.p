@@ -85,10 +85,6 @@ sub new {
 
 		logpkg('debug','constructor arguments ', sub{ json_out(\%vals) });
 
-		# we expect some effects
-		logpkg('warn',"Nether ops_list or nor insert_data is present") 
-			if ! scalar @{$vals{ops_list}} and ! scalar @{$vals{inserts_data}};
-
 		my $ops_data = {};
 		# ops data is taken preferentially 
 		# from ops_data argument, with fallback
