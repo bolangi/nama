@@ -222,10 +222,6 @@ sub update_cache_map {
 
 		my $track = $args->{track};
 
-		# include all ops, include vol/pan operators 
-		# which serve as placeholders, won't overwrite
-		# the track's current vol/pan operators
-
 		my @inserts = $track->get_inserts;
 		my @all_ops = @{$track->ops};
 		my @ops_to_remove = $track->user_ops;
