@@ -226,8 +226,7 @@ sub update_cache_map {
 		my @all_ops = @{$track->ops};
 		my @ops_to_remove = $track->user_ops;
 		
-			# arguments for effect chain constructor
-			my %args = 
+			my %constructor_args = 
 			(
 				track_cache => 1,
 				track_name	=> $track->name,
@@ -238,12 +237,12 @@ sub update_cache_map {
 				ops_list => \@all_ops,
 				inserts_data => \@inserts,
 			);
-			$args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
-			$args{fade_data} = [ map  { $_->as_hash } $track->fades ];
-			$args{track_target_original} = $track->target if $track->target; 
+			$constructor_args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
+			$constructor_args{fade_data} = [ map  { $_->as_hash } $track->fades ];
+			$constructor_args{track_target_original} = $track->target if $track->target; 
 			map{ delete $track->{$_} } qw(target);
 			# update track settings
-			my $ec = ::EffectChain->new( %args );
+			my $ec = ::EffectChain->new( %constructor_args );
 			map{ $_->remove        } $track->fades;
 			map{ remove_effect($_) } @ops_to_remove;
 			map{ $_->remove        } @inserts;
