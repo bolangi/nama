@@ -317,7 +317,7 @@ sub uncache_track {
 	my ($ec) = is_cached($track, $version);
 	if (not defined $ec)
 	{
-		if ($track->source_type eq 'bus')
+		if ($track->is_mixer)
 		{
 			$track->set(rw => MON);
 			pager("Enabling bus $track->{group} by setting mix track $track->{name} to MON");
