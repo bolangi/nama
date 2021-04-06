@@ -322,7 +322,7 @@ sub uncache_track {
 You must remove them before you can uncache this version."), return;
 		
 	$ec->add($track);
-	if ($track->is_mixer and not $ec->original_version) {
+	if ($track->is_mixer and not $ec->track_version_original) {
 		$track->set(rw => MON);
 		pager("Enabling bus $track->{group} by setting mix track $track->{name} to MON");
 	} else {
