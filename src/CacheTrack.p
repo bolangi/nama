@@ -242,7 +242,8 @@ sub update_cache_map {
 				inserts_data => \@inserts,
 			);
 			$constructor_args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
-			$constructor_args{fade_data} = [ map  { $_->as_hash } $track->fades ];
+			$constructor_args{fade_data} = [ map  { $_->as_hash } $track->fades ]
+				if $track->fades;
 			$constructor_args{track_target_original} = $track->target if $track->target; 
 			my $ec = ::EffectChain->new( %constructor_args );
 
