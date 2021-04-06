@@ -79,7 +79,8 @@ sub new {
 		$vals{ops_list} 	||= [];
 		$vals{ops_data} 	||= {};
 		$vals{fade_data}    ||= [];
-		croak "undeclared field in: @_" if grep{ ! $_is_field{$_} } keys %vals;
+		my @und = grep{ ! $_is_field{$_} } keys %vals;
+		croak "undeclared field @und in: @_" if @und;
 		croak "must have exactly one of 'global' or 'project' fields defined" 
 			unless ($vals{attrib}{global} xor $vals{attrib}{project});
 
