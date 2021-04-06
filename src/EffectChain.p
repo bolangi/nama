@@ -306,8 +306,8 @@ sub add {
 	$self->add_fades($track) if $self->fade_data;
 	$track->set(version => $self->track_version_original);
 	$track->set(target => $self->track_target_original) if $self->track_target_original;
-	pager($track->name, ": setting uncached version ", $track->version, $/);
-	pager($track->name, ": setting original region bounded by marks ", 
+	::pager($track->name, ": setting uncached version ", $track->version, $/);
+	::pager($track->name, ": setting original region bounded by marks ", 
 		$track->region_start, " and ", $track->region_end, $/)
 		if $track->is_region;
 	1 # succeeded 
