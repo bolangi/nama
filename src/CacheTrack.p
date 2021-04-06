@@ -19,33 +19,37 @@ use ::Globals qw(:all);
 
 sub cache_track { # launch subparts if conditions are met
 	logsub((caller(0))[3]);
-	my $args = {};
+	my $args = {}; # to pass params to routines involved in caching
 	(my $track, $args->{additional_time}) = @_;
-	my $bus = $track->is_mixer;
-	my $obj = $bus ? 'Bus' : 'Track';
+
+	my $bus; # are we dealing with a bus?
+	my $obj; # track or bus
 	my $name = $track->name;
-	my $status = $bus ? MON : PLAY;
-	throw("$obj $name is OFF. Set to track $name to $status and try again"), return if $track->off;
+	if( $track->off ){
+		$bus = $track->is_mixer && ! $track->playback_version;
+		my $status = $bus ? MON : PLAY;
+		throw(qq(Cannot cache track "$name" with status OFF. Set to $status and try again)); 
+		return;
+	}
+	
 	local $this_track;
+
 	$args->{track} = $track;
-	$args->{bus} = $args->{track}->is_mixing;
+	$args->{bus} = $bus;
 	$args->{additional_time} //= 0;
-	$args->{original_version} = $args->{bus} ? 0 : $track->playback_version;
+	$args->{original_version} = $bus ? 0 : $track->playback_version;
 	$args->{cached_version} = $track->last + 1;
 	$args->{track_rw} = $track->rw;
 	$args->{main_rw} = $tn{Main}->rw;
+
 	$tn{Main}->set( rw => OFF);
 	$track->set( rw => REC);	
-	pagers($track->name. ': preparing to cache '.
-		($args->{bus} and 'a bus' 
-						or $track->is_region  and 'a region' 
-						or 'an ordinary track'));
-	
-	my @to_cache = cachable($track);
-	
-	@to_cache or throw("Nothing to cache, skipping."), return;
-	pager("Caching $obj $name: @to_cache");
-	if($args->{bus})
+
+	my @to_cache = cachable($track) or throw("Nothing to cache, skipping."), return;
+
+	my $obj = $bus ? 'bus' : 'track';
+	pager("$name: Preparing to cache $obj with ",join ', ',@to_cache);
+	if($bus)
 	{ generate_cache_bus_graph($args) }
 	else
 	{ generate_cache_track_graph($args) }
@@ -183,8 +187,8 @@ sub cache_engine_run {
 
 	$args->{processing_time} = $setup->{audio_length} + $args->{additional_time};
 
-	pagers($args->{track}->name.": processing time: ". d2($args->{processing_time}). " seconds");
-	pagers("Starting cache operation. Please wait.");
+	pager($args->{track}->name.": processing time: ". d2($args->{processing_time}). " seconds");
+	pager("Starting cache operation. Please wait.");
 	
 	revise_prompt(" "); 
 
@@ -252,9 +256,9 @@ sub update_cache_map {
 
 			my $act = $args->{bus} ? 'reactivate bus' 
 										: "restore version $args->{original_version}";
-	pagers(qq(Saving attributes for cached $obj "$track->name"));
+	pager(qq(Saving attributes for cached $obj "$track->name"));
 
-	pagers(qq(The 'uncache' command on this track will $act, 
+	pager(qq(The 'uncache' command on this track will $act, 
 and restore any effects, fades, inserts or region definition.));
 
 	my $filename = $track->targets->{$args->{cached_version}};
@@ -265,7 +269,7 @@ and restore any effects, fades, inserts or region definition.));
 	$tagname =~ s/ /-/g;
 	try{ git(tag => $tagname, '-a','-m',$msg) };
 	$track->add_system_version_comment($args->{cached_version}, $msg);
-	pagers($msg); 
+	pager($msg); 
 }
 
 sub caching_cleanup {
@@ -290,7 +294,7 @@ sub poll_progress {
 		   $status =~ /finished|error|stopped/ 
 		or $here > $args->{processing_time};
 
-	pagers("Done.");
+	pager("Done.");
 	logpkg('debug', engine_status(current_position(),2,1));
 	#revise_prompt();
 	stop_polling_cache_progress($args);
