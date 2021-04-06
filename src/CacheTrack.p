@@ -47,7 +47,7 @@ sub cache_track { # launch subparts if conditions are met
 
 	my @to_cache = cachable($track) or throw("Nothing to cache, skipping."), return;
 
-	my $obj = $bus ? 'bus' : 'track';
+	$obj = $bus ? 'bus' : 'track';
 	pager("$name: Preparing to cache $obj with ",join ', ',@to_cache);
 	if($bus)
 	{ generate_cache_bus_graph($args) }
