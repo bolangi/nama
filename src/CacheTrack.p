@@ -275,7 +275,7 @@ and restore any effects, fades, inserts or region definition.));
 sub caching_cleanup {
 	my $args = shift;
 		$args->{track}->set( rw => $args->{track_rw});
-		$tn{Main}->(set => MON);
+		$tn{Main}->set(rw => MON);
 		$args->{track}->set( rw => PLAY);
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
