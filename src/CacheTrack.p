@@ -22,11 +22,11 @@ sub cache_track { # launch subparts if conditions are met
 	my $args = {}; # to pass params to routines involved in caching
 	(my $track, $args->{additional_time}) = @_;
 
-	my $bus; # are we dealing with a bus?
+	my $bus = $track->is_mixing;
 	my $obj; # track or bus
 	my $name = $track->name;
 	if( $track->off ){
-		$bus = $track->is_mixer && ! $track->playback_version;
+		my $bus = $track->is_mixer && ! $track->playback_version;
 		my $status = $bus ? MON : PLAY;
 		throw(qq(Cannot cache track "$name" with status OFF. Set to $status and try again)); 
 		return;
