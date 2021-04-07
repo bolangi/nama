@@ -245,6 +245,7 @@ sub update_cache_map {
 			$constructor_args{fade_data} = [ map  { $_->as_hash } $track->fades ]
 				if $track->fades;
 			$constructor_args{track_target_original} = $track->target if $track->target; 
+			#say "constructor args: ",Dumper \%constructor_args;
 			my $ec = ::EffectChain->new( %constructor_args );
 
 			# update track settings
