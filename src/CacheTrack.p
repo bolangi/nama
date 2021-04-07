@@ -330,10 +330,13 @@ You must remove them before you can uncache this version."), return;
 		$track->set(rw => MON);
 		pager("Enabling bus $track->{group} by setting mix track $track->{name} to MON");
 	} else {
-		my $v = $ec->original_version;
+		my $v = $ec->track_version_original;
 		$track->set( version => $v);
-		pager("Selecting track $track->{name} version $v");
-	}
+		pager("Track $track->{name}: selecting previously cached version $v");
+		$track->is_region and pager(
+			"Track $track->{name}: setting original region bounded by marks "
+				. $track->region_start. " and ". $track->region_end) 	
+		}
 }
 sub is_cached {
 	my ($track, $version) = @_;
