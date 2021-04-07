@@ -267,7 +267,10 @@ and restore any effects, fades, inserts or region definition.));
 
 	# system version comment with git tag
 	
-	my $tagname = my $msg = join " ","bus", $track->source_id, "cached as", $filename;
+	my $tagname = my $msg = join " ","Caching",
+		($args->{bus} ? "bus $track->{group}" 
+						: "track $track->{name} version $args->{original_version}"),
+		"as $filename";
 	$tagname =~ s/ /-/g;
 	try{ git(tag => $tagname, '-a','-m',$msg) };
 	$track->add_system_version_comment($args->{cached_version}, $msg);
