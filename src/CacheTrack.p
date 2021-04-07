@@ -217,47 +217,47 @@ sub complete_caching {
 sub update_cache_map {
 	logsub((caller(0))[3]);
 	my $args = shift;
-		logpkg('debug', "updating track cache_map");
-		logpkg('debug', "current track cache entries:",
-			sub {
-				join "\n","cache map", 
-				map{($_->dump)} ::EffectChain::find(track_cache => 1)
-			});
+	logpkg('debug', "updating track cache_map");
+	logpkg('debug', "current track cache entries:",
+		sub {
+			join "\n","cache map", 
+			map{($_->dump)} ::EffectChain::find(track_cache => 1)
+		});
 
-		my $track = $args->{track};
+	my $track = $args->{track};
 
-		my @inserts = $track->get_inserts;
-		my @all_ops = @{$track->ops};
-		my @ops_to_remove = $track->user_ops;
-		
-			my %constructor_args = 
-			(
-				track_cache => 1,
-				track_name	=> $track->name,
-				track_version_original => $args->{original_version},
-				track_version_result => $args->{cached_version},
-				project => 1,
-				system => 1,
-				ops_list => \@all_ops,
-				inserts_data => \@inserts,
-			);
-			$constructor_args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
-			$constructor_args{fade_data} = [ map  { $_->as_hash } $track->fades ]
-				if $track->fades;
-			$constructor_args{track_target_original} = $track->target if $track->target; 
-			#say "constructor args: ",Dumper \%constructor_args;
-			my $ec = ::EffectChain->new( %constructor_args );
+	my @inserts = $track->get_inserts;
+	my @all_ops = @{$track->ops};
+	my @ops_to_remove = $track->user_ops;
+	
+	my %constructor_args = 
+	(
+		track_cache => 1,
+		track_name	=> $track->name,
+		track_version_original => $args->{original_version},
+		track_version_result => $args->{cached_version},
+		project => 1,
+		system => 1,
+		ops_list => \@all_ops,
+		inserts_data => \@inserts,
+	);
+	$constructor_args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
+	$constructor_args{fade_data} = [ map  { $_->as_hash } $track->fades ]
+		if $track->fades;
+	$constructor_args{track_target_original} = $track->target if $track->target; 
+	#say "constructor args: ",Dumper \%constructor_args;
+	my $ec = ::EffectChain->new( %constructor_args );
 
-			# update track settings
-			map{ delete $track->{$_} } qw(target);
-			map{ $_->remove        } $track->fades;
-			map{ remove_effect($_) } @ops_to_remove;
-			map{ $_->remove        } @inserts;
-			map{ delete $track->{$_} } qw( region_start region_end target );
-			my $obj = $args->{bus} ? 'bus' : 'track';
+	# update track settings
+	map{ delete $track->{$_} } qw(target);
+	map{ $_->remove        } $track->fades;
+	map{ remove_effect($_) } @ops_to_remove;
+	map{ $_->remove        } @inserts;
+	map{ delete $track->{$_} } qw( region_start region_end target );
+	my $obj = $args->{bus} ? 'bus' : 'track';
 
-			my $act = $args->{bus} ? 'reactivate bus' 
-										: "restore version $args->{original_version}";
+	my $act = $args->{bus} ? 'reactivate bus' 
+								: "restore version $args->{original_version}";
 	pager(qq(Saving attributes for cached $obj "$track->name"));
 
 	pager(qq(The 'uncache' command on this track will $act, 
