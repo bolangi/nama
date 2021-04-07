@@ -79,15 +79,12 @@ sub new {
 		$vals{ops_list} 	||= [];
 		$vals{ops_data} 	||= {};
 		$vals{fade_data}    ||= [];
-		croak "undeclared field in: @_" if grep{ ! $_is_field{$_} } keys %vals;
+		my @und = grep{ ! $_is_field{$_} } keys %vals;
+		croak "undeclared field @und in: @_" if @und;
 		croak "must have exactly one of 'global' or 'project' fields defined" 
 			unless ($vals{attrib}{global} xor $vals{attrib}{project});
 
 		logpkg('debug','constructor arguments ', sub{ json_out(\%vals) });
-
-		# we expect some effects
-		logpkg('warn',"Nether ops_list or nor insert_data is present") 
-			if ! scalar @{$vals{ops_list}} and ! scalar @{$vals{inserts_data}};
 
 		my $ops_data = {};
 		# ops data is taken preferentially 
@@ -97,7 +94,7 @@ sub new {
 		# in both cases, we clone the data structures
 		# to ensure we don't damage the original
 		
-		map { 	
+		for (@{$vals{ops_list}}){ 	
 
 			if ( $vals{ops_data}->{$_} )
 											
@@ -112,7 +109,7 @@ sub new {
 				$ops_data->{$_} = $filtered_op_data;
 			}
 
-		} @{$vals{ops_list}};
+		} ;
 		
 
 		$vals{ops_data} = $ops_data;
@@ -231,7 +228,7 @@ sub add_ops {
 	} else {
 		@ops_list = @{$self->ops_list};
 	}
-	map 
+	for (@ops_list)
 	{	
 		my $args = 
 		{
@@ -266,8 +263,7 @@ sub add_ops {
 			map{ $self->parent_id($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
 		
-	} @ops_list;
-	\@added
+	}
 }
 sub add_inserts {
 	my ($self, $track) = @_;
@@ -299,17 +295,23 @@ sub add_region {
 }
 
 sub add {
-	my ($self, $track, $successor) = @_;
+	my ($self, $track) = @_;
 	# TODO stop_do_start should take place at this level
 	# possibly reconfiguring engine
 	my $args = {};
-	$args->{before} = $successor;
 	$args->{surname} = $self->name if $self->name;
-	my $added = $self->add_ops($track, $args);
+	$self->add_ops($track, $args);
+	#$track->{ops} = dclone($self->ops_list);
 	$self->add_inserts($track);
 	$self->add_region($track) if $self->region;
 	$self->add_fades($track) if $self->fade_data;
-	$added
+	$track->set(version => $self->track_version_original);
+	$track->set(target => $self->track_target_original) if $self->track_target_original;
+	::pager($track->name, ": setting uncached version ", $track->version, $/);
+	::pager($track->name, ": setting original region bounded by marks ", 
+		$track->region_start, " and ", $track->region_end, $/)
+		if $track->is_region;
+	1 # succeeded 
 
 }
 sub add_fades {
@@ -399,13 +401,13 @@ sub DESTROY {}
 
 package ::;
 sub add_effect_chain {
-	my ($name, $track, $successor) = @_;
+	my ($name, $track) = @_;
 	my ($ec) = ::EffectChain::find(
 		unique => 1, 
 		user   => 1, 
 		name   => $name,
 	);
-	if( $ec ){ $ec->add($::this_track, $successor) }
+	if( $ec ){ $ec->add($::this_track) }
 	else { ::throw("$name: effect chain not found") }
 	1;
 }

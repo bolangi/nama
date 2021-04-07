@@ -538,7 +538,7 @@ sub destroy_current_wav {
 	1;
 }
 
-sub pan_check {
+sub pan_set {
 	my ($track, $new_position) = @_;
 	my $current = $track->pan_o->params->[0];
 	$track->set(old_pan_level => $current)
@@ -562,14 +562,14 @@ sub remove_track_cmd {
 		1
 }
 sub unity {
-	my ($track, $save_level) = @_;
-	if ($save_level){
-		$track->set(old_vol_level => fxn($track->vol)->params->[0]);
+	my ($track, $save) = @_;
+	if ($save){
+		$track->set(old_vol_level => $track->vol_o->params->[0]);
 	}
 	update_effect( 
 		$track->vol, 
 		0, 
-		$config->{unity_level}->{fxn($track->vol)->type}
+		$config->{unity_level}->{$track->vol_o->type}
 	);
 }
 sub vol_back {
