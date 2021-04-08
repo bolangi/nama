@@ -180,8 +180,7 @@ sub ports {
 	::IO::jack_multi_ports( $self->client,
 							$client_direction,
 							$self->target_channel,
-							($self->direction eq 'input' ?  $self->input_width 
-														: $self->output_width), 
+							$self->channel_count,
 							try{$self->name} 
 	) if $self->client
 }
@@ -200,8 +199,8 @@ sub ecs_string {
 
 sub _format { 
 	my $self = shift;
-	::signal_format($self->format_template, $self->width)
-		if $self->format_template and $self->width
+	::signal_format($self->format_template, $self->channel_count)
+		if $self->format_template and $self->channel_count
 }
 sub _format_template {} # the leading underscore allows override
                         # by a method without the underscore
