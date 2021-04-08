@@ -103,7 +103,7 @@ sub generate_cache_bus_graph {
 	# set WAV output format
 	$g->set_vertex_attributes(
 		$track->name, 
-		{ format => signal_format($config->{cache_to_disk_format},$track->width),
+		{ format => signal_format($config->{cache_to_disk_format},$track->output_width),
 			version => ($args->{track_result_version}),
 		}
 	); 
@@ -142,7 +142,7 @@ sub generate_cache_track_graph {
 	my $to_path = join_path($args->{track}->dir, $to_name);
 	$g->set_vertex_attributes(
 		$cooked->name, 
-		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
+		{ format => signal_format($config->{cache_to_disk_format},$cooked->output_width),
 			full_version => $to_path,
 		}
 	); 
