@@ -229,12 +229,12 @@ sub apply {
 		my @input_path = $_->input_path;
 		$::g->add_edge(@input_path);
 		$::g->set_edge_attributes( @input_path, 
-			{ width => $::tn{$_->target}->width });
+			{ output_width => $::tn{$_->target}->output_width });
 		my @edge = ($_->name, ::output_node($bus->send_type));
 		$::g->add_edge(@edge);
 		$::g->set_edge_attributes( @edge, { 
 			send_id => $bus->send_id,
-			width => 2 }); # force to stereo 
+			output_width => 2 }); # force to stereo 
 	} grep{ $_->input_path } $bus->track_o;
 }
 sub remove {
