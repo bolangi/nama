@@ -290,11 +290,10 @@ our @ISA = '::SlaveTrack';
 sub destination {
 	my $track = shift;
 	my $bus = $track->bus;
-	dest_string($bus->send_type,$bus->send_id, $track->width);
+	dest_string($bus->send_type,$bus->send_id, $track->output_width);
 }
 sub source_status { $tn{$_[0]->target}->source_status }
 sub rec_status { $_[0]->{rw} }
-sub width { $_[0]->{width} }
 }
 {
 package ::SlaveTrack;
@@ -302,7 +301,9 @@ use ::Globals qw(:all);
 use Modern::Perl; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub width { $tn{$_[0]->target}->width }
+sub input_width { $tn{$_[0]->target}->input_width }
+sub output_width { $tn{$_[0]->target}->output_width }
+
 sub rec_status { $tn{$_[0]->target}->rec_status }
 sub full_path { $tn{$_[0]->target}->full_path} 
 sub playback_version { $tn{$_[0]->target}->playback_version} 
