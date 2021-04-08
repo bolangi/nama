@@ -112,15 +112,16 @@ sub set_io {
 		}
 		elsif( $type eq 'jack_client'){
 			my $client_direction = $direction eq 'source' ? 'output' : 'input';
+			my $track_direction = $direction eq 'source' ?  'input' : 'output';
 
 			my $name = $track->name;
-			my $width = scalar @{ ::jack_client_array($id, $client_direction) };
-			$width or ::pagers(
+			my $client_width = scalar @{ ::jack_client_array($id, $client_direction) };
+			$client_width or ::pager(
 				qq(Track $name: $direction port for JACK client "$id" not found.));
-			$width or return;
-			$width ne $track->width and ::pagers(
-				"Track $name set to ", ::width_in_words($track->width),
-				qq(, but JACK source "$id" is ), ::width_in_words($width), '.');
+			my $track_width = $direction eq 'source' ?  $track->input_width : $track->output_width;
+			$client_width ne $track->width and ::pager(
+				"Track $name $direction width is ". ::width_in_words($track_width).
+				qq(, but JACK  "$id" is ). ::width_in_words($client_width). '.');
 		}
 		elsif( $type eq 'jack_ports_list' ){
 			$id =~ /(\w+)\.ports/;
