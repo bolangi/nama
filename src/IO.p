@@ -169,6 +169,11 @@ sub target_channel {
 	my $self = shift;
 	$self->target_id =~ /^(\d+)$/ ? $1 : 1
 }
+sub channel_count {
+	my $self = shift;
+	$self->direction eq 'input' ?  $self->input_width : $self->output_width
+}
+
 sub ports {
 	my $self = shift;
 	my $client_direction = $self->direction eq 'input' ? 'output' : 'input';
