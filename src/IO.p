@@ -109,7 +109,7 @@ sub new {
 
 	# join IO objects to graph
 	my $name;
-	try{ $name  = $self->name }
+	try { $name = $self->name }
 	catch {};  # we do nothing
 
 	{ no warnings 'uninitialized';
