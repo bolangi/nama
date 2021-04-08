@@ -252,12 +252,11 @@ sub _mono_to_stereo{
 	my $status = $self->rec_status();
 	my $copy   = "-chcopy:1,2";
 	my $nocopy = "";
-	my $is_mono_track = sub { $self->width == 1 };
+	my $is_mono_input = sub { $self->input_width == 1 };
 	my $is_mono_wav   = sub { ::channels($self->wav_format) == 1};
 	if  ( 
-			($self->track and $tn{$self->track}->pan)
-			and
-		  (	$status =~ /REC|MON/ and $is_mono_track->() 
+			$self->track and $tn{$self->track}->pan 
+			and (	$status =~ /REC|MON/ and $is_mono_input->() 
 			or $status eq PLAY and $is_mono_wav->() )
 	)
 	{ $copy } else { $nocopy }
