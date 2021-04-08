@@ -119,7 +119,7 @@ sub set_io {
 			$client_width or ::pager(
 				qq(Track $name: $direction port for JACK client "$id" not found.));
 			my $track_width = $direction eq 'source' ?  $track->input_width : $track->output_width;
-			$client_width ne $track->width and ::pager(
+			$client_width ne $track_width and ::pager(
 				"Track $name $direction width is ". ::width_in_words($track_width).
 				qq(, but JACK  "$id" is ). ::width_in_words($client_width). '.');
 		}
@@ -241,7 +241,7 @@ sub source_status {
 	{
 		my $ch = $track->source_id;
 		my @channels;
-		push @channels, $_ for $ch .. ($ch + $track->width - 1);
+		push @channels, $_ for $ch .. ($ch + $track->input_width - 1);
 		return 'CH '. join '/', @channels
 	}
 	"type: $track->{source_type} id: $track->{source_id}" 
@@ -265,8 +265,8 @@ sub destination {
 	my $send_type = $track->send_type;
 	return $out if ! $send_type;
 	$out .=	', ' if $out;
-	$out .= dest_string($send_type, $send_id, $track->width);
-	$out
+	$out .= dest_string($send_type, $send_id, $track->output_width);
+ 	$out
 }
 sub set_rec {
 	my $track = shift;
