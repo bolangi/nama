@@ -10,7 +10,8 @@ package ::;
 	my @relevant_track_fields = qw(
 		name
 		n
-		width
+		input_width
+		output_width
 		group 
 		playat
 		region_start	

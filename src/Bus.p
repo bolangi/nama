@@ -262,7 +262,7 @@ sub apply {
 		 $g->set_edge_attributes( @edge, { 
 				send_type => $bus->send_type,
 				send_id => $bus->send_id,
-				width => 2})
+				output_width => 2})
 	} $bus->track_o;
 }
 
@@ -345,7 +345,7 @@ sub add_bus {
 
 	$tn{$name} and pager_newline( qq($name: setting as mix track for bus "$name"));
 
-	my $track = $tn{$name}// add_track($name, width => 2);
+	my $track = $tn{$name}// add_track($name, output_width => 2);
 
 	$track->set( @args );
 }

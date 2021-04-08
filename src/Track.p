@@ -90,7 +90,7 @@ sub new {
 					group	=> 'Main', 
 					n    	=> $n,
 					ops     => [],
-					width => 1,
+					input_width => 1,
 					vol  	=> undef,
 					pan 	=> undef,
 					rw		=> 'MON',

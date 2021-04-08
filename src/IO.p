@@ -175,7 +175,8 @@ sub ports {
 	::IO::jack_multi_ports( $self->client,
 							$client_direction,
 							$self->target_channel,
-							$self->width, 
+							($self->direction eq 'input' ?  $self->input_width 
+														: $self->output_width), 
 							try{$self->name} 
 	) if $self->client
 }
@@ -517,9 +518,6 @@ use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { $config->{devices}->{$config->{alsa_playback_device}}{ecasound_id} }
 sub ecs_extra {route($_[0]->width,$_[0]->output_channel) }
 sub output_channel { $_[0]->send_id }
-sub route2 {
-	my ($from, $to, $width) = @_;
-}
 sub route {
 	# routes signals (1..$width) to ($dest..$dest+$width-1 )
 	

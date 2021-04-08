@@ -179,7 +179,7 @@ sub initialize_mixer {
 			name => 'Main',
 			send_type => 'soundcard',
 			send_id => 1,
-			width => 2,
+			output_width => 2,
 			rw => MON,
 			source_type => 'bus',
 			source_id => 'Main',
@@ -188,7 +188,7 @@ sub initialize_mixer {
 		my $mixdown = ::MixDownTrack->new( 
 			group => 'Mixdown', 
 			name => 'Mixdown', 
-			width => 2,
+			output_width => 2,
 			rw => OFF,
 			source_type => 'track',
 			source_id => 'Main',

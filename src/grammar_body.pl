@@ -590,12 +590,12 @@ remove_send: _remove_send {
 					$::this_track->set(send_id => undef); 1
 }
 stereo: _stereo { 
-	$::this_track->set(width => 2); 
+	$::this_track->set(input_width => 2); 
 	::pager($::this_track->name, ": setting to stereo\n");
 	1;
 }
 mono: _mono { 
-	$::this_track->set(width => 1); 
+	$::this_track->set(input_width => 1); 
 	::pager($::this_track->name, ": setting to mono\n");
 	1; }
 
