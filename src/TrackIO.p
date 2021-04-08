@@ -119,8 +119,8 @@ sub set_io {
 				qq(Track $name: $direction port for JACK client "$id" not found.));
 			$width or return;
 			$width ne $track->width and ::pagers(
-				"Track $name set to ", ::width($track->width),
-				qq(, but JACK source "$id" is ), ::width($width), '.');
+				"Track $name set to ", ::width_in_words($track->width),
+				qq(, but JACK source "$id" is ), ::width_in_words($width), '.');
 		}
 		elsif( $type eq 'jack_ports_list' ){
 			$id =~ /(\w+)\.ports/;

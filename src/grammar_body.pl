@@ -530,7 +530,7 @@ show_track: _show_track {
 	$output .= ::show_send();
 	$output .= ::show_bus();
 	$output .= ::show_modifiers();
-	$output .= join "", "Signal width: ", ::width($::this_track->width), "\n";
+	$output .= join "", "Signal width: ", ::width_in_words($::this_track->width), "\n";
 	$output .= ::show_inserts();
 	$output .= ::show_effects();
 	::pager( $output );

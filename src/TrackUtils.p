@@ -103,7 +103,7 @@ sub need_vol_pan {
 
 # track width in words
 
-sub width {
+sub width_in_words {
 	my $count = shift;
 	return 'mono' if $count == 1;
 	return 'stereo' if $count == 2;
