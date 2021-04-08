@@ -129,13 +129,6 @@ sub generate_setup_try {
 
 	logpkg('debug',"Graph with inserts:\n$g");
 
-	# Mix tracks to mono if Main is mono
-	# (instead of just throwing away right channel)
-
-	if ($g->has_vertex('Main') and $tn{Main}->width == 1)
-	{
-		$g->set_vertex_attribute('Main', 'ecs_extra' => '-chmix:1')
-	}
 	#logpkg('info',sub{"Graph object dump:\n",Dumper($g)});
 
 	# create IO lists %inputs and %outputs
