@@ -102,7 +102,7 @@ sub add_mastering_tracks {
 		name 		=> 'Boost', 
 		rw 			=> MON,
 		group 		=> 'Mastering', 
-		width		=> 2,
+		output_width	=> 2,
 		source_type => undef,
 		source_id	=> undef,
 	);
