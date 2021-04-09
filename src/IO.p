@@ -502,14 +502,14 @@ sub ecs_extra { join ' ', $_[0]->rec_route, $_[0]->mono_to_stereo }
 sub device_id { $config->{devices}->{$config->{alsa_capture_device}}->{ecasound_id} }
 sub input_channel { $_[0]->source_id }
 sub rec_route {
-	# works for mono/stereo only!
+	# works for mono/stereo only! TODO: fix for all widths
 	no warnings qw(uninitialized);
 	my $self = shift;
 	# needed only if input channel is greater than 1
 	return '' if ! $self->input_channel or $self->input_channel == 1; 
 	
 	my $route = "-chmove:" . $self->input_channel . ",1"; 
-	if ( $self->width == 2){
+	if ( $self->input_width == 2){
 		$route .= " -chmove:" . ($self->input_channel + 1) . ",2";
 	}
 	return $route;
@@ -519,7 +519,7 @@ sub rec_route {
 package ::IO::to_alsa_soundcard_device;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { $config->{devices}->{$config->{alsa_playback_device}}{ecasound_id} }
-sub ecs_extra {route($_[0]->width,$_[0]->output_channel) }
+sub ecs_extra {route($_[0]->channel_count,$_[0]->output_channel) }
 sub output_channel { $_[0]->send_id }
 sub route {
 	# routes signals (1..$width) to ($dest..$dest+$width-1 )
