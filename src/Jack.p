@@ -331,7 +331,6 @@ sub make_connections {
 			# $external_port is the source port name
 			chomp $external_port;
 			logpkg('debug', "port file $file, line $line_number, port $external_port");
-			# setup shell command
 			
 			if(! $jack->{clients}->{$external_port}){
 				throw($track->name, 
