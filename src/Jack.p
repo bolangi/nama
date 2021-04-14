@@ -55,7 +55,8 @@ $1, $2
 
 sub jack_client_array {
 
-	# returns array of ports if client and direction exist
+	# returns an array of ports if client exists and there are
+	# ports in the requested I/O direction
 	
 	my ($name, $direction)  = @_;
 	$jack->{clients}->{$name}{$direction} // []
