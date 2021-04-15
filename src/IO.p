@@ -249,15 +249,14 @@ sub _mono_to_stereo{
 	#Higher channel count (WAV or Track): null
 
 	my $self   = shift;
+	defined $self->track or return;
 	my $status = $self->rec_status();
 	my $copy   = "-chcopy:1,2";
 	my $nocopy = "";
 	my $is_mono_input = $self->input_width == 1;
 	my $is_mono_wav   = ::channels($self->wav_format) == 1;
-	if  ( 
-			$self->track and $tn{$self->track}->pan 
-			and (	$status =~ /REC|MON/ and $is_mono_input 
-			or $status eq PLAY and $is_mono_wav )
+	if  ( 	$status =~ /REC|MON/ and $is_mono_input 
+			or $status eq PLAY and $is_mono_wav 
 	)
 	{ $copy } else { $nocopy }
 }
