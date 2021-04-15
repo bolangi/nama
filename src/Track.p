@@ -91,6 +91,7 @@ sub new {
 					n    	=> $n,
 					ops     => [],
 					input_width => 1,
+					output_width => 2,
 					vol  	=> undef,
 					pan 	=> undef,
 					rw		=> 'MON',
