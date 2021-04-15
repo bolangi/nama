@@ -108,6 +108,7 @@ sub need_vol_pan {
 
 sub width_in_words {
 	my $count = shift;
+	return 'undefined channel count' if not defined $count;
 	return 'mono' if $count == 1;
 	return 'stereo' if $count == 2;
 	return "$count channels";

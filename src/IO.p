@@ -525,6 +525,7 @@ sub route {
 	
 	my ($width, $dest) = @_;
 	return '' if ! $dest or $dest == 1;
+	$width //= 1;
 	# print "route: width: $width, destination: $dest\n\n";
 	my $offset = $dest - 1;
 	my $route ;
