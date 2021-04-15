@@ -184,7 +184,7 @@ for (@test) {
 
 force_alsa();
 
-nama_cmd('add sax');
+nama_cmd('add_track sax');
 
 like(ref $this_track, qr/Track/, "track creation"); 
 
@@ -559,8 +559,8 @@ check_setup('pianoteq feeding crossover network' );
 
 load_project(name => "$test_project-sendbus-cooked", create => 1);
 
-do_script(' add mic
-            add guitar
+do_script(' add_track mic
+            add_track guitar
             for 3 4; mon
             add_submix_cooked ear 7
 ');
@@ -685,7 +685,7 @@ check_setup('Send Bus, Raw - ALSA');
 force_jack();
 load_project(name => "$test_project-add_insert_post", create => 1);
 
-nama_cmd("add sax; mon; gen");
+nama_cmd("add_track sax; mon; gen");
 nama_cmd("add_insert post jconvolver; gen");
 $expected_setup_lines = <<EXPECTED;
 
@@ -715,7 +715,7 @@ EXPECTED
 check_setup('JACK client as postfader insert');
 
 load_project(name => "add_insert_pre", create => 1);
-nama_cmd("add sax; mon; add_insert pre jconvolver; gen");
+nama_cmd("add_track sax; mon; add_insert pre jconvolver; gen");
 $expected_setup_lines = <<EXPECTED;
 
 # general
@@ -740,7 +740,7 @@ EXPECTED
 check_setup('JACK client as pre-fader insert');
 
 load_project(name => "add_insert_via_soundcard-postfader", create => 1);
-nama_cmd("add sax; mon; source 2; add_insert post 5; gen");
+nama_cmd("add_track sax; mon; source 2; add_insert post 5; gen");
 $expected_setup_lines = <<EXPECTED;
 -a:1 -i:loop,Main_in
 -a:3 -i:jack_multi,system:capture_2
@@ -793,7 +793,7 @@ EXPECTED
 check_setup('Insert via soundcard, postfader - ALSA');
 
 load_project(name => "add_insert_via_soundcard_pre", create => 1);
-nama_cmd("add sax; mon; source 2; add_insert pre 5; gen");
+nama_cmd("add_track sax; mon; source 2; add_insert pre 5; gen");
 $expected_setup_lines = <<EXPECTED;
 
 # general
