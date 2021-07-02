@@ -185,6 +185,7 @@ for (@test) {
 force_alsa();
 
 nama_cmd('add_track sax');
+$this_track->set( output_width => 1);
 
 like(ref $this_track, qr/Track/, "track creation"); 
 
