@@ -469,7 +469,6 @@ shift_track: _shift_track start_position {
 	0;
 	}
 }
-
 start_position:  float | samples | markname
 
 unshift_track: _unshift_track {
@@ -597,6 +596,16 @@ stereo: _stereo {
 mono: _mono { 
 	$::this_track->set(input_width => 1); 
 	::pager($::this_track->name, ": setting to mono\n");
+	1; }
+
+set_output_width: _set_output_width dd { 
+	$::this_track->set(output_width => $item{dd}); 
+	::pager($::this_track->name, ": setting output width to $item{dd}\n");
+	1; }
+
+set_input_width: _set_input_width dd { 
+	$::this_track->set(input_width => $item{dd}); 
+	::pager($::this_track->name, ": setting input width to $item{dd}\n");
 	1; }
 
 # dummy defs to avoid warnings from command.yml entries

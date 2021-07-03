@@ -366,6 +366,16 @@ mono:
   type: track
   what: Configure the current track to record one channel of audio
   parameters: none
+set_input_width:
+  type: track
+  what: Set number of input channels for current track
+  parameters: count
+  short: siw
+set_output_width:
+  type: track
+  what: Set number of output channels for current track
+  parameters: count
+  short: sow
 set_version:
   type: track
   what: |
