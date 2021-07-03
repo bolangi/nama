@@ -185,7 +185,6 @@ for (@test) {
 force_alsa();
 
 nama_cmd('add_track sax');
-$this_track->set( output_width => 1);
 
 like(ref $this_track, qr/Track/, "track creation"); 
 
@@ -244,12 +243,12 @@ like( ref $io, qr/IO$/, 'IO base class object');
 $io = ::IO::to_alsa_soundcard_device->new(track => 'sax'); 
 
 is($io->ecs_string, '-o:alsa,default', 'IO to_alsa_soundcard_device 1');
-is($io->ecs_extra,  ' -chmove:1,5', 'IO to_alsa_soundcard_device 2');
+is($io->ecs_extra,  ' -chmove:2,6 -chmove:1,5', 'IO to_alsa_soundcard_device 2');
 
 $io = ::IO::to_soundcard->new(track => 'sax'); 
 
 is($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
-is($io->ecs_extra, ' -chmove:1,5', 'IO to_soundcard 2');
+is($io->ecs_extra, ' -chmove:2,6 -chmove:1,5', 'IO to_soundcard 2');
 
 force_jack();
 
@@ -263,7 +262,7 @@ is($io->ecs_extra, '-chcopy:1,2', 'IO from_soundcard: jack 2');
 $io = ::IO::to_soundcard->new(track => 'sax'); 
 like (ref $io, qr/to_jack_multi/, 'sound system ALSA/JACK detection: output');
 
-is($io->ecs_string, '-o:jack_multi,system:playback_5', 'IO to_soundcard: jack 1');
+is($io->ecs_string, '-o:jack_multi,system:playback_5,system:playback_6', 'IO to_soundcard: jack 1');
 ok(! $io->ecs_extra, 'IO to_soundcard: jack 2');
 
 $io = ::IO::to_null->new(track => 'sax', device_id => 'alsa,default');
