@@ -53,6 +53,7 @@ sub add_path_for_rec {
 			# (override IO class default)
 
 			mono_to_stereo => '', 
+			output_width => $track->input_width,
 		});
 
 	} 
