@@ -6,18 +6,18 @@ our (%tn, $jack, $config);
 # 
 # IO objects for writing Ecasound chain setup file
 #
-# Object values can come from three sources:
+# Object attributes can come from three sources:
 # 
 # 1. As arguments to the constructor new() while walking the
 #    routing graph:
 #      + assigned by dispatch: chain_id, loop_id, track, etc.
 #      + override by graph node (higher priority)
 #      + override by graph edge (highest priority)
-# 2. (sub)class methods called as $object->method_name
+# 2. methods called as $object->method_name
 #      + defined as _method_name (access via AUTOLOAD, overrideable by constructor)
 #      + defined as method_name  (not overrideable)
 # 3. AUTOLOAD
-#      + any other method calls are passed to the the associated track
+#      + other method calls are tested then executed on the associated track
 #      + illegal track method call generate an exception
 
 package ::IO;
