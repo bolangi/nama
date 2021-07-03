@@ -14,14 +14,15 @@
 
 add-tracks pre1 pre2 woofer center rear mid tweeter
 for        pre1 pre2 woofer center rear mid tweeter; move-to-bus Aux
+for        woofer rear mid tweeter; set-output-width 2
+center set-output-width 1
 
-pre1 set-track width 5 
+pre1 set-input-width 5 
 
 for pre2 woofer center rear; source track pre1
 
 select-track woofer 
 add-effect chmove 3 2
-stereo
 send 1 # send output to soundcard starting at channel 1
 
 for mid tweeter; source track pre2
