@@ -342,8 +342,8 @@ min_sec: /\d+/ ':' /\d+/ { $item[1] * 60 + $item[3] }
 
 to_start: _to_start { ::to_start(); 1 }
 to_end: _to_end { ::to_end(); 1 }
-add_track: _add_track new_track_name {
-	::add_track($item{new_track_name});
+add_track: _add_track new_track_name arg(s?) {
+	::add_track($item{new_track_name}, @{ $item{'arg(s?)'} });
     1
 }
 add_midi_track: _add_midi_track new_track_name {

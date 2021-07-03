@@ -205,7 +205,7 @@ add_track:
   type: track
   what: Create a new audio track.
   short: add new
-  parameters: <string:name>
+  parameters: <string:name> [<key> <val>...  ]
   example: |
     add-track clarinet 
     ! create a mono track called clarinet with input 
