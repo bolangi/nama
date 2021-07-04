@@ -300,7 +300,18 @@ sub wet_send_name {
 	my $self = shift;
 	join('-', $self->track, $self->n, 'wet-send'); 
 }
-	
+sub send_width {
+	my $self = shift;
+	$self->{send_width}
+	or (ref $self) =~ /pre/i ? $::tn{$self->track}->input_width // 1
+							 :  $::tn{$self->track}->output_width // 2
+}
+sub return_width {
+	my $self = shift;
+	$self->{return_width}
+	or (ref $self) =~ /pre/i ?  $::tn{$self->track}->input_width // 1
+							 : $::tn{$self->track}->output_width // 2
+}
 	
 
 sub add_paths {
