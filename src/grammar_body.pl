@@ -1085,10 +1085,32 @@ add_insert: _add_insert 'local' {
 	::Insert::add_insert( $::this_track,'postfader_insert');
 	1;
 }
-add_insert: _add_insert prepost send_id return_id(?) {
-	my $return_id = $item{'return_id(?)'}->[0];
-	my $send_id = $item{send_id};
-	::Insert::add_insert($::this_track, "$item{prepost}fader_insert",$send_id, $return_id);
+send_info: send_id send_width(?) {
+	my %result = (send_id => $item{send_id});
+	$result{send_width} = $item{'send_width(?)'}->[0] if $item{'send_width(?)'};
+	\%result
+}
+return_info: return_id return_width(?) { 
+	my %result = (return_id => $item{return_id});
+	$result{return_width} = $item{'return_width(?)'}->[0] if $item{'return_width(?)'};
+	\%result
+}
+
+send_width: dd
+return_width: dd
+add_insert: _add_insert prepost send_info return_info {
+	my $send_width   = $item{send_info  }->{send_width};
+	my $send_id      = $item{send_info  }->{send_id};
+	my $return_width = $item{return_info}->{return_width};
+	my $return_id    = $item{return_info}->{return_id};
+	::Insert::add_insert(
+			track => $::this_track, 
+			prepost => "$item{prepost}fader_insert",
+			send_id => $send_id,
+			send_width => $send_width,
+			return_id => $return_id,
+			return_width => $return_width
+	);
 	1;
 }
 prepost: 'pre' | 'post'

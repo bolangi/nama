@@ -931,7 +931,7 @@ add_insert:
   what: Add an external send/return insert to current track.
   short: ain
   parameters: |
-      External: ( pre | post ) <string:send_id> [ <string:return_id> ]
+      External: ( pre | post ) <string:send_id> [<integer:send_width>] [ <string:return_id>  [ <integer:return_width> ]]
       Local wet/dry: local
   example: |
     add-insert pre jconvolver 
