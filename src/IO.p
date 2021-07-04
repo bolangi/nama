@@ -242,10 +242,10 @@ sub _mono_to_stereo{
 	# copy mono track to stereo if we have a pan control and a mono source
 
 	# Truth table
-	#REC status, Track width stereo: null
-	#REC status, Track width mono:   chcopy
-	#PLAY status, WAV width mono:   chcopy
-	#PLAY status, WAV width stereo: null
+	#REC/MON, input width stereo: null
+	#REC/MON, input width mono, output width stereo: chcopy
+	#PLAY status, WAV width mono, output width stereo: chcopy
+	#PLAY status, WAV width stereo, output width stereo: null
 	#Higher channel count (WAV or Track): null
 
 	my $self   = shift;
