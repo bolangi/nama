@@ -231,14 +231,14 @@ sub add_paths {
 		$g->set_vertex_attributes($loop, {n => $t->n});
 		$g->set_edge_attributes(@edge, { 
 			send_id => $self->{send_id},
-			width => 2,
+			output_width => $t->output_width // 2,
 		});
 		# wet return path: input -> wet_track (slave) -> successor
 		
 		# we override the input with the insert's return source
 
 		$g->set_vertex_attributes($wet->name, {
-					width => 2, # default for cooked
+					output_width => $t->output_width, # default for cooked
 					mono_to_stereo => '', # override
 					source_type => $self->{return_type},
 					source_id => $self->{return_id},
@@ -342,7 +342,7 @@ sub add_paths {
 		# we override the input with the insert's return source
 
 		$g->set_vertex_attributes($wet->name, {
-				width => $t->width, 
+				input_width => $t->input_width, 
 				mono_to_stereo => '', # override
 				source_type => $self->{return_type},
 				source_id => $self->{return_id},
