@@ -90,7 +90,10 @@ sub type { (ref $_[0]) =~ /Pre/ ? 'prefader_insert' : 'postfader_insert' }
 # subroutine
 #
 sub add_insert {
-	my ($track, $type, $send_id, $return_id) = @_;
+	my %args = @_;
+	my @fields = qw(track   prepost  send_id   send_width   return_id  return_width);
+	my             ($track, $type,  $send_id, $send_width, $return_id, $return_width ) = @args{@fields};
+
 	local $::this_track;
 	# $type : prefader_insert | postfader_insert
 	::pager("\n",$track->name , ": adding $type\n");
