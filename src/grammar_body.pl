@@ -1082,7 +1082,7 @@ set_bus: _set_bus key someval { $::bn{$::this_bus}->set($item{key} => $item{some
 
 list_buses: _list_buses { ::list_buses() ; 1}
 add_insert: _add_insert 'local' {
-	::Insert::add_insert( $::this_track,'postfader_insert');
+	::Insert::add_insert( track => $::this_track, prepost => 'postfader_insert');
 	1;
 }
 send_info: send_id send_width(?) {
