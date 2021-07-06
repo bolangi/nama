@@ -857,8 +857,7 @@ add_effect: _add_effect add_target parameter_value(s?) before(?) {
 			   ::fxn($::this_track->pan) && $::this_track->pan
 			|| ::fxn($::this_track->vol) && $::this_track->vol;
 	{ no warnings 'uninitialized';
-	::logpkg('debug',$::this_track->name,": effect insert point is $fader", 
-	::Dumper($args));
+	::logpkg('debug',$::this_track->name,": effect insert point is $fader"); 
 	}
 	my $predecessor = $item{'before(?)'}->[0] || $fader;
 	$args->{before} = $predecessor if $predecessor; 
