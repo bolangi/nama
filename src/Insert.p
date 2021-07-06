@@ -117,8 +117,7 @@ sub add_insert {
 	if (! $i->{return_id}){
 		$i->{return_type} = $i->{send_type};
 		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
-		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
-			# TODO adjust to suit track channel width?
+		$i->{return_id} =  $i->{send_id} + $i->send_width if $i->{return_type} eq 'soundcard';
 	}
 }
 sub get_id {
@@ -234,14 +233,14 @@ sub add_paths {
 		$g->set_vertex_attributes($loop, {n => $t->n});
 		$g->set_edge_attributes(@edge, { 
 			send_id => $self->{send_id},
-			output_width => $t->output_width // 2,
+			output_width => $self->send_width,
 		});
 		# wet return path: input -> wet_track (slave) -> successor
 		
 		# we override the input with the insert's return source
 
 		$g->set_vertex_attributes($wet->name, {
-					output_width => $t->output_width, # default for cooked
+					output_width => $self->send_width,
 					mono_to_stereo => '', # override
 					source_type => $self->{return_type},
 					source_id => $self->{return_id},
@@ -347,6 +346,7 @@ sub add_paths {
 		$g->set_vertex_attributes($self->wet_send_name, { 
 			send_id => $self->{send_id},
 			send_type => $self->{send_type},
+			output_width => $self->send_width,
 			mono_to_stereo => '', # disable for prefader send path 
 		});
 
@@ -356,7 +356,7 @@ sub add_paths {
 		# we override the input with the insert's return source
 
 		$g->set_vertex_attributes($wet->name, {
-				input_width => $t->input_width, 
+				input_width => $self->return_width,
 				mono_to_stereo => '', # override
 				source_type => $self->{return_type},
 				source_id => $self->{return_id},
