@@ -590,12 +590,12 @@ remove_send: _remove_send {
 }
 stereo: _stereo { 
 	$::this_track->set(input_width => 2); 
-	::pager($::this_track->name, ": setting to stereo\n");
+	::pager($::this_track->name, ": setting input to stereo\n");
 	1;
 }
 mono: _mono { 
 	$::this_track->set(input_width => 1); 
-	::pager($::this_track->name, ": setting to mono\n");
+	::pager($::this_track->name, ": setting input to mono\n");
 	1; }
 
 set_output_width: _set_output_width dd { 
