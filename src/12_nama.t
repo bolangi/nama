@@ -837,17 +837,13 @@ sub force_jack{ $config->{opts}->{A} = 0; $config->{opts}->{J} = 1; $jack->{jack
 sub setup_content {
 	my @lines = split "\n", shift;
 	my %setup;
-	for (@lines){
-		next unless /^-a:/;
-		s/\s*$//;
-		$setup{$_}++;
-	}
-	\%setup;
+	my @wanted = sort map { s/\s+$//; $_ } grep { /^-a:/ } @lines;
+	return @wanted;
 }
 sub check_setup {
 	my $test_name = shift;
-	is( json_out(setup_content(::ChainSetup::ecasound_chain_setup())), 
-		json_out(setup_content($expected_setup_lines)), 
+	is( join($/, setup_content(::ChainSetup::ecasound_chain_setup())), 
+		join($/, setup_content($expected_setup_lines)), 
 		$test_name);
 }
 sub check_tempo_conversions {
