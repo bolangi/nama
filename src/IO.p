@@ -256,7 +256,7 @@ sub _mono_to_stereo{
 	$self->{output_width_} //= 2;
 	return $nocopy if $self->output_width != 2;
 	my $is_mono_input = $self->input_width == 1;
-	my $is_mono_wav   = ::channels($self->wav_format) == 1;
+	my $is_mono_wav   = defined $self->wav_format ?  (::channels($self->wav_format) == 1) : 0;
 	if  ( 	$status =~ /REC|MON/ and $is_mono_input 
 			or $status eq PLAY and $is_mono_wav 
 	)
