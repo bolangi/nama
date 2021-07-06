@@ -682,7 +682,7 @@ check_setup('Send Bus, Raw - ALSA');
 force_jack();
 load_project(name => "$test_project-add_insert_post", create => 1);
 
-my $script = <<"INSERT";
+$script = <<"INSERT";
 [% qx(cat ./postfader-insert-to-jack-client.nms) %]
 INSERT
 do_script($script);
