@@ -3,6 +3,7 @@ use ::;
 use Test2::Bundle::More;
 use File::Path qw(make_path remove_tree);
 use File::Slurp;
+use Text::Diff;
 use Cwd;
 
 use strict;
@@ -834,26 +835,21 @@ sub gen_alsa { force_alsa(); nama_cmd('gen')}
 sub gen_jack { force_jack(); nama_cmd('gen')}
 sub force_alsa { $config->{opts}->{A} = 1; $config->{opts}->{J} = 0; $jack->{jackd_running} = 0; }
 sub force_jack{ $config->{opts}->{A} = 0; $config->{opts}->{J} = 1; $jack->{jackd_running} = 1; }
-sub setup_content {
+sub comparable {
 	my @lines = split "\n", shift;
-	my %setup;
 	my @wanted = sort map { s/\s+$//; $_ } grep { /^-a:/ } @lines;
-	return @wanted;
+	return join "\n",@wanted;
 }
 sub check_setup {
 	my $test_name = shift;
-	is( join($/, setup_content(::ChainSetup::ecasound_chain_setup())), 
-		join($/, setup_content($expected_setup_lines)), 
-		$test_name);
+	my $got    = comparable(::ChainSetup::ecasound_chain_setup());
+	my $wanted = comparable($expected_setup_lines);
+	$_ =~ s/\s+$// for $got, $wanted;
+	is($got, $wanted, $test_name) or diag(diff \$got, \$wanted)
 }
 sub check_tempo_conversions {
 	# make objects
 	# run tests
-
-
-
-
-
 
 }
 
