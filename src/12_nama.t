@@ -682,34 +682,18 @@ check_setup('Send Bus, Raw - ALSA');
 force_jack();
 load_project(name => "$test_project-add_insert_post", create => 1);
 
-nama_cmd("add_track sax; mon; gen");
-nama_cmd("add_insert post jconvolver; gen");
+my $script = <<"INSERT";
+[% qx(cat ./postfader-insert-to-jack-client.nms) %]
+INSERT
+do_script($script);
+
 $expected_setup_lines = <<EXPECTED;
-
-# general
-
--z:mixmode,sum -G:jack,NamaEcasound,send -b 8192 -z:nodb -z:intbuf -f:f32_le,2,44100
-
-# audio inputs
-
--a:1 -i:loop,Main_in
--a:3 -i:jack_multi,system:capture_1
--a:4 -i:jack_multi,jconvolver:out_1,jconvolver:out_2
--a:J3,5 -i:loop,sax_insert_post
-
-# post-input processing
-
--a:3 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,sax_insert_post
--a:4,5 -o:loop,Main_in
--a:J3 -o:jack_multi,jconvolver:in_1,jconvolver:in_2
+[% qx(cat ./postfader-insert-to-jack-client.te ) %]
+EXPECTED
+$expected_setup_lines = <<EXPECTED;
 EXPECTED
 
-check_setup('JACK client as postfader insert');
+check_setup('Postfader insert to JACK client');
 
 load_project(name => "add_insert_pre", create => 1);
 nama_cmd("add_track sax; mon; add_insert pre jconvolver; gen");
