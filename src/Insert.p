@@ -284,7 +284,7 @@ sub new {
 				hide => 1,
 				rw => REC
 	);
-	if ($wet_send->width == 1){
+	if ($wet_send->input_width == 1){
 		::add_effect({
 			track  => $wet_send, 
 			type   => 'chcopy',
