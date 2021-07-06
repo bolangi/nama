@@ -1098,11 +1098,11 @@ return_info: return_id return_width(?) {
 
 send_width: dd
 return_width: dd
-add_insert: _add_insert prepost send_info return_info {
+add_insert: _add_insert prepost send_info return_info(?) {
 	my $send_width   = $item{send_info  }->{send_width};
 	my $send_id      = $item{send_info  }->{send_id};
-	my $return_width = $item{return_info}->{return_width};
-	my $return_id    = $item{return_info}->{return_id};
+	my $return_width = $item{'return_info(?)'}->[0]->{return_width};
+	my $return_id    = $item{'return_info(?)'}->[0]->{return_id};
 	::Insert::add_insert(
 			track => $::this_track, 
 			prepost => "$item{prepost}fader_insert",
