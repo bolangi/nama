@@ -730,54 +730,12 @@ check_setup('Insert via soundcard, postfader - ALSA');
 load_project(name => "add_insert_via_soundcard_pre", create => 1);
 nama_cmd("add_track sax; mon; source 2; add_insert pre 5; gen");
 $expected_setup_lines = <<EXPECTED;
-
-# general
-
--z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf
-
-# audio inputs
-
--a:1 -i:loop,Main_in
--a:3 -i:loop,sax_insert_pre
--a:4,5,6 -i:alsa,default
-
-# post-input processing
-
--a:4 -chmove:6,1 
--a:5 -chmove:2,1 
--a:6 -chmove:2,1 -chcopy:1,2
-
-# pre-output processing
-
--a:6  -chmove:1,5
-
-# audio outputs
-
--a:1,6 -o:alsa,default
--a:3 -o:loop,Main_in
--a:4,5 -o:loop,sax_insert_pre
+[% qx(cat ./insert-via-alsa-soundcard.te) %]
 EXPECTED
 check_setup('Hardware insert via soundcard, prefader  - ALSA');
 gen_jack();
 $expected_setup_lines = <<EXPECTED;
-# general
-
--z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
-
-# audio inputs
-
--a:1 -i:loop,Main_in
--a:3 -i:loop,sax_insert_pre
--a:4 -i:jack_multi,system:capture_7
--a:5,6 -i:jack_multi,system:capture_2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,Main_in
--a:4,5 -o:loop,sax_insert_pre
--a:6 -chcopy:1,2
--a:6 -o:jack_multi,system:playback_5
+[% qx(cat ./insert-via-jack-soundcard.te) %]
 EXPECTED
 check_setup('Hardware insert via soundcard, prefader  - JACK');
 
