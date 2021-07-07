@@ -842,7 +842,6 @@ sub check_setup {
 	my $test_name = shift;
 	my $got    = comparable(::ChainSetup::ecasound_chain_setup());
 	my $wanted = comparable($expected_setup_lines);
-	$_ =~ s/\s+$// for $got, $wanted;
 	is($got, $wanted, $test_name) or diag(diff \$got, \$wanted)
 }
 sub check_tempo_conversions {
