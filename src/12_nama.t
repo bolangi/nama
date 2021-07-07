@@ -623,6 +623,7 @@ $script = <<SCRIPT;
 	add_insert post 5
 	gen
 SCRIPT
+do_script($script);
 $expected_setup_lines = <<EXPECTED;
 [% qx(cat ./postfader-insert-via-jack-soundcard.te) %]
 EXPECTED
