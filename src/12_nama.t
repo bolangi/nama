@@ -691,8 +691,6 @@ do_script($script);
 $expected_setup_lines = <<EXPECTED;
 [% qx(cat ./postfader-insert-to-jack-client.te ) %]
 EXPECTED
-$expected_setup_lines = <<EXPECTED;
-EXPECTED
 
 check_setup('Postfader insert to JACK client');
 
