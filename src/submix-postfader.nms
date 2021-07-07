@@ -1,0 +1,4 @@
+add_track mic
+add_track guitar
+for 3 4; mon
+add_submix_cooked ear 7

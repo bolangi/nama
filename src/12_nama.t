@@ -555,43 +555,18 @@ nama_cmd('gen');
 check_setup('pianoteq feeding crossover network' );
 
 
-load_project(name => "$test_project-sendbus-cooked", create => 1);
+load_project(name => "$test_project-submix-postfader", create => 1);
 
-do_script(' add_track mic
-            add_track guitar
-            for 3 4; mon
-            add_submix_cooked ear 7
-');
+$script = <<SCRIPT;
+[% qx(cat ./submix-postfader.nms ) %]
+SCRIPT
+do_script($script);
 $expected_setup_lines = <<EXPECTED;
-# general
-
--z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf
-
-# audio inputs
-
--a:1,5 -i:loop,mic_out
--a:1,6 -i:loop,guitar_out
--a:3,4 -i:alsa,default
-
-# post-input processing
-
--a:3  -chcopy:1,2
--a:4  -chcopy:1,2
-
-# pre-output processing
-
--a:5  -chmove:2,8 -chmove:1,7
--a:6  -chmove:2,8 -chmove:1,7
-
-# audio outputs
-
--a:1,5,6 -o:alsa,default
--a:3 -o:loop,mic_out
--a:4 -o:loop,guitar_out
+[% qx(cat ./submix-postfader.te) %]
 EXPECTED
 force_alsa();
 nama_cmd('gen');
-check_setup('Submix - ALSA');
+check_setup('Submix postfader - ALSA');
 
 force_jack();
 nama_cmd('gen');
