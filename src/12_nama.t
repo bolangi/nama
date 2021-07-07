@@ -665,12 +665,12 @@ nama_cmd("add_track sax; mon; source 2; add_insert pre 5; gen");
 $expected_setup_lines = <<EXPECTED;
 [% qx(cat ./prefader-insert-via-alsa-soundcard.te) %]
 EXPECTED
-check_setup('Hardware insert via soundcard, prefader  - ALSA');
+check_setup('Prefader insert via ALSA soundcard');
 gen_jack();
 $expected_setup_lines = <<EXPECTED;
 [% qx(cat ./prefader-insert-via-jack-soundcard.te) %]
 EXPECTED
-check_setup('Hardware insert via soundcard, prefader  - JACK');
+check_setup('Prefader insert via JACK soundcard.');
 
 #load_project(name => "midi", create => 1);
 #add_midi_track('synth');
