@@ -580,60 +580,19 @@ load_project(name => "add_submix_raw", create => 1);
 
 nama_cmd("add_tracks mic guitar; for 3 4; mon;; 4 source 2; stereo; add_submix_raw raw-user 7"); 
 $expected_setup_lines = <<EXPECTED;
-
-
-# general
-
--z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
-
-# audio inputs
-
--a:1 -i:loop,Main_in
--a:3,5 -i:jack_multi,system:capture_1
--a:4,6 -i:jack_multi,system:capture_2,system:capture_3
-
-# post-input processing
-
--a:3 -chcopy:1,2
--a:5 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3,4 -o:loop,Main_in
--a:5,6 -o:jack_multi,system:playback_7,system:playback_8
+[% qx(cat ./prefader-submix-via-jack.te) %]
 EXPECTED
 
 force_jack();
 nama_cmd('gen');
-check_setup('Submix, raw - JACK');
+check_setup('Prefader submix via JACK');
 
 force_alsa();
 nama_cmd('gen');
 $expected_setup_lines = <<EXPECTED;
-# audio inputs
-
--a:1 -i:loop,Main_in
--a:3,4,5,6 -i:alsa,default
-
-# post-input processing
-
--a:3  -chcopy:1,2
--a:4 -chmove:2,1 -chmove:3,2
--a:5  -chcopy:1,2
--a:6 -chmove:2,1 -chmove:3,2
-
-# pre-output processing
-
--a:5  -chmove:2,8 -chmove:1,7
--a:6  -chmove:2,8 -chmove:1,7
-
-# audio outputs
-
--a:1,5,6 -o:alsa,default
--a:3,4 -o:loop,Main_in
+[% qx(cat ./prefader-submix-via-alsa.te) %]
 EXPECTED
-check_setup('Send Bus, Raw - ALSA');
+check_setup('Prefader submix via ALSA');
 
 force_jack();
 load_project(name => "$test_project-add_insert_post", create => 1);

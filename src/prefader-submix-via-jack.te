@@ -1,0 +1,20 @@
+# general
+
+-z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+
+# audio inputs
+
+-a:1 -i:loop,Main_in
+-a:3,5 -i:jack_multi,system:capture_1
+-a:4,6 -i:jack_multi,system:capture_2,system:capture_3
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+-a:5 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3,4 -o:loop,Main_in
+-a:5,6 -o:jack_multi,system:playback_7,system:playback_8
