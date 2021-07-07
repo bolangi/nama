@@ -675,26 +675,17 @@ EXPECTED
 check_setup('JACK client as pre-fader insert');
 
 load_project(name => "add_insert_via_soundcard-postfader", create => 1);
-nama_cmd("add_track sax; mon; source 2; add_insert post 5; gen");
+$script = <<SCRIPT;
+    add_track sax
+	mon
+	source 2
+	add_insert post 5
+	gen
+SCRIPT
 $expected_setup_lines = <<EXPECTED;
--a:1 -i:loop,Main_in
--a:3 -i:jack_multi,system:capture_2
--a:4 -i:jack_multi,system:capture_7,system:capture_8
--a:J3,5 -i:loop,sax_insert_post
-
-# post-input processing
-
--a:3 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,sax_insert_post
--a:4,5 -o:loop,Main_in
--a:J3 -o:jack_multi,system:playback_5,system:playback_6
-
+[% qx(cat ./postfader-insert-via-jack-soundcard.te) %]
 EXPECTED
-check_setup('Insert via soundcard, postfader - JACK');
+check_setup('Postfader insert via JACK soundcard');
 
 force_alsa();
 nama_cmd("gen");
@@ -755,7 +746,7 @@ sub check_setup {
 	my $test_name = shift;
 	my $got    = comparable(::ChainSetup::ecasound_chain_setup());
 	my $wanted = comparable($expected_setup_lines);
-	is($got, $wanted, $test_name) or diag(diff \$got, \$wanted)
+	is($got, $wanted, $test_name) or diag($script) and diag(diff \$got, \$wanted)
 }
 sub check_tempo_conversions {
 	# make objects
