@@ -572,27 +572,7 @@ force_jack();
 nama_cmd('gen');
 
 $expected_setup_lines = <<EXPECTED;
-# general
-
--z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
-
-# audio inputs
-
--a:1,5 -i:loop,mic_out
--a:1,6 -i:loop,guitar_out
--a:3,4 -i:jack_multi,system:capture_1
-
-# post-input processing
-
--a:3 -chcopy:1,2
--a:4 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,mic_out
--a:4 -o:loop,guitar_out
--a:5,6 -o:jack_multi,system:playback_7,system:playback_8
+[% qx(cat ./submix-postfader-jack.te) %]
 EXPECTED
 check_setup('Submix, AKA add_submix_cooked - JACK');
 
