@@ -562,7 +562,7 @@ $script = <<SCRIPT;
 SCRIPT
 do_script($script);
 $expected_setup_lines = <<EXPECTED;
-[% qx(cat ./submix-postfader.te) %]
+[% qx(cat ./submix-postfader-alsa.te) %]
 EXPECTED
 force_alsa();
 nama_cmd('gen');
