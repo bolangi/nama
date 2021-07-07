@@ -743,7 +743,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # post-input processing
 
--a:4 -chmove:7,1 
+-a:4 -chmove:6,1 
 -a:5 -chmove:2,1 
 -a:6 -chmove:2,1 -chcopy:1,2
 
