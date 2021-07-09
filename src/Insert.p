@@ -206,17 +206,23 @@ sub add_paths {
 
 	# if no insert target, our insert will 
 	# a parallel effects host with wet/dry dry branches
+
+	# for a synth track that is a member of the Main bus 
 	
-	# --- track ---insert_post--+--- wet ---+-- successor 
-	#                           |           |
-	#                           +--- dry ---+
+	# --- synth --- synth-insert_post--+--- synth-wet-send ----- Main 
+	#                                  |     input_width: insert send_width: synth output_width, output_width: insert return_width//send_width
+	#                                  +--- synth-dry ----- Main
+    #                                        input_width: insert send_width, output_width: insert return_width//send_width
 
 	# otherwise a conventional wet path with send and receive arms
 	
-	# --- track ---insert_post--+-- wet-send    wet-return ---+-- successor
-	#                           |                             |
-	#                           +-------------- dry ----------+
-	
+	# --- synth--- synth-insert_post--+-- synth-wet-send    synth-wet-return ----- Main
+	#                                 |                     input_width: insert return_width, output_width: insert return_width
+	#                                 +-------- synth-dry ------------------------ Main
+
+		
+
+
 	if ( $self->is_local_effects_host )
 	{
 		$g->add_path($name, $loop, $wet->name, $successor);
@@ -268,10 +274,14 @@ use ::Util qw(input_node output_node dest_type);
 use ::Log qw(logpkg);
 use ::Globals qw(:trackrw);
 
+#                                                                                                  /insert return_width // send_width    
+# --- synth-source ----- synth-wet-send -- send-port     return-port  -- synth-wet-return  --+-- synth-insert-pre -- synth
+#                        input_width = output_width = insert send_width = synth input width                      
+#                                                                                            |
+# --- synth-source -------------------------------  synth-dry-send --------------------------+
+#                                                   send_width
 
-# --- source ---------- wet_send_track  wet_return_track -+-- insert_pre -- track
-#                                                         |
-# --- source ------------------ dry track ----------------+
+
 
 sub new {
 	my ($class, %args) = @_;
