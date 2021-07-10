@@ -302,8 +302,6 @@ $expected_setup_lines = <<EXPECTED;
 [% qx(cat ./jack-monitoring.te) %]
 
 EXPECTED
-diag "expected", $expected_setup_lines;
-diag "comparable", comparable($expected_setup_lines);
 check_setup('JACK mon setup' );
 
 force_alsa(); nama_cmd('gen');
