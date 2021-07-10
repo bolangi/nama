@@ -1,0 +1,15 @@
+# audio inputs
+
+-a:1 -i:loop,Main_in
+-a:3,R3 -i:jack_multi,system:capture_2
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,Main_in
+-a:R3 -f:s16_le,1,44100,i -o:/tmp/nama-test/test/.wav/sax_1.wav
+

@@ -1,0 +1,13 @@
+-a:1 -i:loop,Main_in
+-a:3 -i:alsa,default
+-a:4 -i:loop,sax_out
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chmove:3,2
+
+# audio outputs
+
+-a:1 -o:alsa,default
+-a:3 -o:loop,sax_out
+-a:4 -o:loop,Main_in

@@ -1,0 +1,9 @@
+-a:1 -i:loop,Main_in
+-a:3 -i:jack_multi,system:capture_2,system:capture_3
+-a:4 -i:loop,sax_out
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,sax_out
+-a:4 -o:loop,Main_in

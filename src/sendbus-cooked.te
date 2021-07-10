@@ -1,0 +1,25 @@
+# general
+
+-z:mixmode,sum -G:jack,NamaEcasound,send -b 1024 -z:nodb -z:intbuf
+
+# audio inputs
+
+-a:1,5 -i:loop,mic_out
+-a:1,6 -i:loop,guitar_out
+-a:3,4 -i:alsa,default
+
+# post-input processing
+
+-a:3  -chcopy:1,2
+-a:4  -chcopy:1,2
+
+# pre-output processing
+
+-a:5  -chmove:2,8 -chmove:1,7
+-a:6  -chmove:2,8 -chmove:1,7
+
+# audio outputs
+
+-a:1,5,6 -o:alsa,default
+-a:3 -o:loop,mic_out
+-a:4 -o:loop,guitar_out

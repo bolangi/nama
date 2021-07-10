@@ -6,7 +6,7 @@
 
 -a:1 -i:loop,Main_in
 -a:3 -i:loop,sax_insert_pre
--a:4 -i:jack_multi,system:capture_7
+-a:4 -i:jack_multi,system:capture_6
 -a:5,6 -i:jack_multi,system:capture_2
 
 # audio outputs

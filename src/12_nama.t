@@ -283,174 +283,72 @@ force_alsa();
 nama_cmd('3; nosend; gen');
 
 $expected_setup_lines = <<EXPECTED;
-
--a:1 -i:loop,Main_in
--a:3,R3 -i:alsa,default
-
-# post-input processing
-
--a:R3 -chmove:2,1
--a:3 -chmove:2,1 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:alsa,default
--a:3 -o:loop,Main_in
--a:R3 -f:s16_le,1,44100,i -o:/tmp/nama-test/test/.wav/sax_1.wav
+[% qx(cat ./alsa-recording.te) %]
 EXPECTED
 
-check_setup('ALSA basic setup' );
+check_setup('ALSA recording' );
 
 force_jack();
 nama_cmd('gen');
 $expected_setup_lines = <<EXPECTED;
-
-# audio inputs
-
--a:1 -i:loop,Main_in
--a:3,R3 -i:jack_multi,system:capture_2
-
-# post-input processing
-
--a:3 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,Main_in
--a:R3 -f:s16_le,1,44100,i -o:/tmp/nama-test/test/.wav/sax_1.wav
-
+[% qx(cat ./jack-recording.te) %]
 EXPECTED
 
-check_setup('JACK basic setup' );
+check_setup('JACK recording' );
 
 nama_cmd('3; mon; gen');
 $expected_setup_lines = <<EXPECTED;
 
--a:1 -i:loop,Main_in
--a:3 -i:jack_multi,system:capture_2
+[% qx(cat ./jack-monitoring.te) %]
 
-# post-input processing
-
--a:3 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,Main_in
 EXPECTED
-
+diag "expected", $expected_setup_lines;
+diag "comparable", comparable($expected_setup_lines);
 check_setup('JACK mon setup' );
 
 force_alsa(); nama_cmd('gen');
 $expected_setup_lines = <<EXPECTED;
-
--a:1 -i:loop,Main_in
--a:3 -i:alsa,default
-
-# post-input processing
-
--a:3 -chmove:2,1 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:alsa,default
--a:3 -o:loop,Main_in
-
+[% qx(cat ./alsa-monitoring.te) %]
 EXPECTED
 
 check_setup('ALSA mon setup' );
 nama_cmd('Main; send 5;gen');
 
 $expected_setup_lines = <<EXPECTED;
-
--a:1 -i:loop,Main_in
--a:3 -i:alsa,default
-
-# post-input processing
-
--a:3 -chmove:2,1 -chcopy:1,2
-
-# pre-output processing
-
--a:1  -chmove:2,6 -chmove:1,5
-
-# audio outputs
-
--a:1 -o:alsa,default
--a:3 -o:loop,Main_in
+[% qx(cat ./main-to-alsa-soundcard-channels-5-and-6.te) %]
 EXPECTED
 
-check_setup('ALSA send-Main-to-alternate-channel setup' );
+check_setup('Main output to ALSA soundcard channels 5+6');
 force_jack(); nama_cmd('gen');
 
 $expected_setup_lines = <<EXPECTED;
--a:1 -i:loop,Main_in
--a:3 -i:jack_multi,system:capture_2
-
-# post-input processing
-
--a:3 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_5,system:playback_6
--a:3 -o:loop,Main_in
+[% qx(cat ./main-to-jack-soundcard-channels-5-and-6.te) %]
 EXPECTED
-check_setup('JACK send-Main-to-alternate-channel setup' );
+check_setup('Main output to JACK soundcard channels 5+6');
 
 nama_cmd('for 4 5 6 7 8; remove_track quiet');
 nama_cmd('Main; send 1');
 nama_cmd('add_bus Horns; sax move_to_bus Horns; sax stereo');
 
 $expected_setup_lines = <<EXPECTED;
-
--a:1 -i:loop,Main_in
--a:3 -i:alsa,default
--a:4 -i:loop,sax_out
-
-# post-input processing
-
--a:3 -chmove:2,1 -chmove:3,2
-
-# audio outputs
-
--a:1 -o:alsa,default
--a:3 -o:loop,sax_out
--a:4 -o:loop,Main_in
+[% qx(cat ./bus-routing-with-alsa.te) %]
 EXPECTED
 gen_alsa();
 check_setup('Bus - ALSA');
 gen_jack();
 
 $expected_setup_lines = <<EXPECTED;
--a:1 -i:loop,Main_in
--a:3 -i:jack_multi,system:capture_2,system:capture_3
--a:4 -i:loop,sax_out
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,sax_out
--a:4 -o:loop,Main_in
+[% qx(cat ./bus-routing-with-jack.te) %]
 EXPECTED
 check_setup('Bus - JACK');
 
 nama_cmd('remove_bus Horns');
 nama_cmd('add_submix_cooked Vo 5');
 $expected_setup_lines = <<EXPECTED;
-
--a:1,4 -i:loop,sax_out
--a:3 -i:jack_multi,system:capture_2,system:capture_3
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,sax_out
--a:4 -o:jack_multi,system:playback_5,system:playback_6
+[% qx(cat ./create-submix-using-jack.te) %]
 EXPECTED
 gen_jack();
-check_setup('Create submix with output at soundcard - JACK');
+check_setup('Submix using JACK');
 nama_cmd('remove_bus Vo');
 nama_cmd('sax mono');
 
@@ -531,6 +429,7 @@ load_project(name => "test_project-convert51", create => 1);
 my $script = <<CONVERT51;
 [% qx(cat ./stereo51.nms ) %]
 CONVERT51
+
 
 do_script($script);
 $expected_setup_lines = <<EXPECTED;
