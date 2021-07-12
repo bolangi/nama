@@ -54,11 +54,13 @@ sub new {
 
 	# this is the wet return track
 	
-	my $wet = ::SlaveTrack->new( 
-				name => $self->wet_name,
+	my $wet_return = ::SlaveTrack->new( 
+				name => $self->wet_return_name,
 				target => $name,
 				group => 'Insert',
 				rw => MON,
+				input_width => $self->return_width,
+				output_width => $self->return_width,
 	
 				# don't hide wet track if used for hosting effects
 				
