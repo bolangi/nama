@@ -220,10 +220,10 @@ sub add_paths {
 	# a parallel effects host with wet/dry dry branches
 
 	# for a synth track that is a member of the Main bus 
-	
-	# --- synth --- synth-insert_post--+--- synth-wet-send ----- Main 
-	#                                  |     input_width: insert send_width: synth output_width, output_width: insert return_width//send_width
-	#                                  +--- synth-dry ----- Main
+    
+    # --- synth --- synth-insert_post--+--- synth-wet-send ----- Main 
+    #                                  |     input_width: insert send_width: synth output_width, output_width: insert return_width//send_width
+    #                                  +--- synth-dry ---------- Main
     #                                        input_width: insert send_width, output_width: insert return_width//send_width
 
 	# otherwise a conventional wet path with send and receive arms
