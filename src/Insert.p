@@ -243,7 +243,7 @@ sub add_paths {
 	else
 
 	{	
-		# wet send path (no extra track): track -> loop -> output
+		# wet_send path (no extra track): track -> loop -> output
 
 		my @edge = ($loop, output_node($self->{send_type}));
 		::logpkg('debug', "edge: @edge");
