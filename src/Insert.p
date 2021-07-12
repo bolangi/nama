@@ -251,7 +251,6 @@ sub add_paths {
 		$g->set_vertex_attributes($loop, {n => $t->n});
 		$g->set_edge_attributes(@edge, { 
 			send_id => $self->{send_id},
-			output_width => $self->send_width,
 		});
 		# wet return path: input -> wet_track (slave) -> successor
 		
@@ -365,7 +364,6 @@ sub add_paths {
 		$g->set_vertex_attributes($self->wet_send_name, { 
 			send_id => $self->{send_id},
 			send_type => $self->{send_type},
-			output_width => $self->send_width,
 			mono_to_stereo => '', # disable for prefader send path 
 		});
 
