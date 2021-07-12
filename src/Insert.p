@@ -79,7 +79,7 @@ sub new {
 		params => [0]
 	});
 	$self->{wet_vol} = ::add_effect({
-		track  => $wet, 
+		track  => $wet_return, 
 		type   => 'ea',
 		params => [100],
 	});
@@ -171,7 +171,7 @@ sub is_via_soundcard {
 }
 sub soundcard_delay {
 	my $track_name = shift;
-	my ($insert) = grep{ $_->wet_name eq $track_name } values %by_index;
+	my ($insert) = grep{ $_->wet_return_name eq $track_name } values %by_index;
 	my $delta = 0;
 	$delta = $config->{soundcard_loopback_delay} 
 		if defined $insert and $insert->is_via_soundcard;
@@ -205,7 +205,7 @@ sub add_paths {
 
 	$g->delete_edge($name, $successor);
 	my $loop = "$name\_insert_post";
-	my $wet = $::tn{$self->wet_name};
+	my $wet = $::tn{$self->wet_return_name};
 	my $dry = $::tn{$self->dry_name};
 
 	::logpkg('debug', "found wet: ", $wet->name, " dry: ",$dry->name);
@@ -268,7 +268,7 @@ sub add_paths {
 	
 sub remove {
 	my $self = shift;
-	$::tn{ $self->wet_name }->remove;
+	$::tn{ $self->wet_return_name }->remove;
 	$::tn{ $self->dry_name }->remove;
 	delete $::Insert::by_index{$self->n};
 }
@@ -344,7 +344,7 @@ sub add_paths {
 		$g->delete_edge($predecessor, $name);
 		my $loop = "$name\_insert_pre";
 
-		my $wet 		= $::tn{$self->wet_name};
+		my $wet 		= $::tn{$self->wet_return_name};
 		my $dry 		= $::tn{$self->dry_name};
 		my $wet_send 	= $::tn{$self->wet_send_name};
 
@@ -390,7 +390,7 @@ sub remove {
 	my $self = shift;
 	$::tn{ $self->wet_send_name }->remove;
 	$::tn{ $self->dry_name }->remove;
-	$::tn{ $self->wet_name }->remove;
+	$::tn{ $self->wet_return_name }->remove;
 	delete $::Insert::by_index{$self->n};
 }
 }
