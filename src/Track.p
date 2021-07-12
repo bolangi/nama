@@ -302,8 +302,6 @@ use ::Globals qw(:all);
 use Modern::Perl; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub input_width { $tn{$_[0]->target}->input_width }
-sub output_width { $tn{$_[0]->target}->output_width }
 
 sub rec_status { $tn{$_[0]->target}->rec_status }
 sub full_path { $tn{$_[0]->target}->full_path} 
