@@ -303,7 +303,9 @@ sub new {
 				target => $self->track,
 				group => 'Insert',
 				hide => 1,
-				rw => REC
+				rw => REC,
+				input_width  => $self->send_width,
+				output_width => $self->send_width,
 	);
 	if ($wet_send->input_width == 1){
 		::add_effect({
