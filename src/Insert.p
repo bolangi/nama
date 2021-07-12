@@ -25,14 +25,20 @@ sub idx { # return first free index
 	}
 }
 
-sub wet_name {
+sub wet_send_name {
 	my $self = shift;
-	join('-', $self->track, $self->n, 'wet'); 
+	join('-', $self->track, $self->n, 'wet-send'); 
+}
+sub wet_return_name {
+	my $self = shift;
+	join('-', $self->track, $self->n, 'wet-return'); 
 }
 sub dry_name {
 	my $self = shift;
 	join('-', $self->track, $self->n, 'dry'); 
 }
+
+
 sub new {
 	my $class = shift;
 	my %vals = @_;
@@ -305,10 +311,6 @@ sub new {
 	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet_send;
 	$self
 } 
-sub wet_send_name {
-	my $self = shift;
-	join('-', $self->track, $self->n, 'wet-send'); 
-}
 sub send_width {
 	my $self = shift;
 	$self->{send_width}
