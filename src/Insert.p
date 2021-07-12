@@ -27,15 +27,15 @@ sub idx { # return first free index
 
 sub wet_send_name {
 	my $self = shift;
-	join('-', $self->track, $self->n, 'wet-send'); 
+	join('-', $self->track, 'wet-send'); 
 }
 sub wet_return_name {
 	my $self = shift;
-	join('-', $self->track, $self->n, 'wet-return'); 
+	join('-', $self->track, 'wet-return'); 
 }
 sub dry_name {
 	my $self = shift;
-	join('-', $self->track, $self->n, 'dry'); 
+	join('-', $self->track, 'dry'); 
 }
 
 
