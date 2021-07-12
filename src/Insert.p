@@ -71,9 +71,13 @@ sub new {
 				target => $name,
 				group => 'Insert',
 				hide => 1,
-				rw => MON);
-	map{ ::remove_effect($_)} $wet->vol, $wet->pan, $dry->vol, $dry->pan;
-	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet, $dry;
+				rw => MON,
+				input_width  => $self->send_width,
+				output_width => $self->send_width
+				);
+
+	map{ ::remove_effect($_)} $wet_return->vol, $wet_return->pan, $dry->vol, $dry->pan;
+	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet_return, $dry;
 
 	$self->{dry_vol} = ::add_effect({
 		track  => $dry, 
@@ -207,10 +211,10 @@ sub add_paths {
 
 	$g->delete_edge($name, $successor);
 	my $loop = "$name\_insert_post";
-	my $wet = $::tn{$self->wet_return_name};
+	my $wet_return = $::tn{$self->wet_return_name};
 	my $dry = $::tn{$self->dry_name};
 
-	::logpkg('debug', "found wet: ", $wet->name, " dry: ",$dry->name);
+	::logpkg('debug', "found wet return: ", $wet_return->name, " dry: ",$dry->name);
 
 	# if no insert target, our insert will 
 	# a parallel effects host with wet/dry dry branches
@@ -233,7 +237,7 @@ sub add_paths {
 
 	if ( $self->is_local_effects_host )
 	{
-		$g->add_path($name, $loop, $wet->name, $successor);
+		$g->add_path($name, $loop, $wet_return->name, $successor);
 
 	}
 	else
@@ -253,13 +257,12 @@ sub add_paths {
 		
 		# we override the input with the insert's return source
 
-		$g->set_vertex_attributes($wet->name, {
-					output_width => $self->send_width,
+		$g->set_vertex_attributes($wet_return->name, {
 					mono_to_stereo => '', # override
 					source_type => $self->{return_type},
 					source_id => $self->{return_id},
 		});
-		$g->add_path(input_node($self->{return_type}), $wet->name, $successor);
+		$g->add_path(input_node($self->{return_type}), $wet_return->name, $successor);
 
 	}
 
@@ -346,11 +349,11 @@ sub add_paths {
 		$g->delete_edge($predecessor, $name);
 		my $loop = "$name\_insert_pre";
 
-		my $wet 		= $::tn{$self->wet_return_name};
+		my $wet_return	= $::tn{$self->wet_return_name};
 		my $dry 		= $::tn{$self->dry_name};
 		my $wet_send 	= $::tn{$self->wet_send_name};
 
-		::logpkg('debug', "found wet: ", $wet->name, " dry: ",$dry->name);
+		::logpkg('debug', "found wet return track: ", $wet_return->name, " wet send: ", $wet_send->name, " dry: ",$dry->name);
 
 		#pre:  wet send path: wet_send_name (slave) -> output
 
@@ -369,8 +372,7 @@ sub add_paths {
 		
 		# we override the input with the insert's return source
 
-		$g->set_vertex_attributes($wet->name, {
-				input_width => $self->return_width,
+		$g->set_vertex_attributes($wet_return->name, {
 				mono_to_stereo => '', # override
 				source_type => $self->{return_type},
 				source_id => $self->{return_id},
@@ -378,7 +380,7 @@ sub add_paths {
 		$g->set_vertex_attributes($dry->name, {
 				mono_to_stereo => '', # override
 		});
-		$g->add_path(input_node($self->{return_type}), $wet->name, $loop);
+		$g->add_path(input_node($self->{return_type}), $wet_return->name, $loop);
 
 		# connect dry track to graph
 		#
