@@ -141,20 +141,20 @@ sub do_user_command {
 
 sub do_script {
 
-	my $name = shift;
+	my $input = shift;
 	my $script;
-	if ($name =~ / /){
-		$script = $name
+	if ($input =~ / /){
+		$script = $input;
 	}
 	else {
 		my $filename;
 		# look in project_dir() and project_root()
 		# if filename provided does not contain slash
-		if( $name =~ m!/!){ $filename = $name }
+		if( $input =~ m!/!){ $filename = $input }
 		else {
-			$filename = join_path(project_dir(),$name);
+			$filename = join_path(project_dir(),$input);
 			if(-e $filename){}
-			else{ $filename = join_path(project_root(),$name) }
+			else{ $filename = join_path(project_root(),$input) }
 		}
 		-e $filename or throw("$filename: file not found. Skipping"), return;
 		$script = read_file($filename)
