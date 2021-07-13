@@ -1,0 +1,4 @@
+add_tracks mic guitar
+for 3 4; mon
+4 source 2; stereo; 
+add_submix_raw raw-user 7

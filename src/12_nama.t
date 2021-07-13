@@ -475,7 +475,11 @@ check_setup('Submix, AKA add_submix_cooked - JACK');
 
 load_project(name => "add_submix_raw", create => 1);
 
-nama_cmd("add_tracks mic guitar; for 3 4; mon;; 4 source 2; stereo; add_submix_raw raw-user 7"); 
+$script = <<SCRIPT;
+[% qx(cat ./prefader-submix-via-jack.nms ) %]
+SCRIPT
+do_script($script);
+
 $expected_setup_lines = <<EXPECTED;
 [% qx(cat ./prefader-submix-via-jack.te) %]
 EXPECTED
