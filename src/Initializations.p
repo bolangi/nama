@@ -42,8 +42,6 @@ sub definitions {
 
 	$| = 1;     # flush STDOUT buffer on every write
 
-	$ui eq 'bullwinkle' or die "no \$ui, bullwinkle";
-
 	[% qx(./strip_all ./var_lists) %]
 
 	$text->{wrap} = new Text::Format {
