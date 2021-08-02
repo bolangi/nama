@@ -27,7 +27,29 @@ sub initialize_project_repository {
 		init_repo_obj();
 		#git_commit('committing prior changes') if git_diff();
 	}
+	#suppress_git_warnings();
 }
+
+sub suppress_git_warnings {
+	my @warning_types = qw(
+							advice.pushUpdateRejected
+							advice.pushNonFFCurrent
+							advice.pushNonFFMatching
+							advice.pushAlreadyExists
+							advice.pushFetchFirst
+							advice.pushNeedsForce
+							advice.statusHints
+							advice.statusUoption
+							advice.commitBeforeMerge
+							advice.resolveConflict
+							advice.implicitIdentity
+							advice.detachedHead
+							advice.amWorkDir
+							advice.rmHints
+						);
+	for my $w (@warning_types) {  git( 'config', $w, 'false') }
+}
+
 sub git_diff { 
 	my @files = @_; 
 	my $diff = git('diff', @files); 
