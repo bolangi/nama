@@ -341,7 +341,7 @@ sub add_paths {
 
 	::logpkg('debug', "insert structure:", sub{$self->dump});
 
-		# get track source
+		# get track source from graph
 		
 		my ($predecessor) = $g->predecessors($name);
 
