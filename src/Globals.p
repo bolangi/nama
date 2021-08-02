@@ -55,7 +55,7 @@ our %EXPORT_TAGS =
 
 	)],
 );
-our $ui;
+our $ui = 'bullwinkle';  # for testing
 {
 	my %seen;
 	push @{$EXPORT_TAGS{all}}, grep {!$seen{$_}++} @{$EXPORT_TAGS{$_}} foreach
