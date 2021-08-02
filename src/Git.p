@@ -27,11 +27,11 @@ sub initialize_project_repository {
 		init_repo_obj();
 		#git_commit('committing prior changes') if git_diff();
 	}
-	suppress_git_warnings();
+	suppress_git_advice();
 }
 
-sub suppress_git_warnings {
-	my @warning_types = qw(
+sub suppress_git_advice {
+	my @advice_types = qw(
 							advice.pushUpdateRejected
 							advice.pushNonFFCurrent
 							advice.pushNonFFMatching
@@ -47,7 +47,7 @@ sub suppress_git_warnings {
 							advice.amWorkDir
 							advice.rmHints
 						);
-	for my $w (@warning_types) {  git( 'config', $w, 'false') }
+	for my $w (@advice_types) {  git( 'config', $w, 'false') }
 }
 
 sub git_diff { 
