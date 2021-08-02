@@ -222,16 +222,20 @@ sub add_paths {
 	# for a synth track that is a member of the Main bus 
     
     # --- synth --- synth-insert_post--+--- synth-wet-send ----- Main 
-    #                                  |     input_width: insert send_width: synth output_width, output_width: insert return_width//send_width
+    #                                  |    (1) 
     #                                  +--- synth-dry ---------- Main
-    #                                        input_width: insert send_width, output_width: insert return_width//send_width
+    #                                       (2)
+
+    # 1. input_width: insert send_width: synth output_width, output_width: insert return_width//send_width
+	# 2. input_width: insert send_width, output_width: insert return_width//send_width
 
 	# otherwise a conventional wet path with send and receive arms
 	
 	# --- synth--- synth-insert_post--+-- synth-wet-send    synth-wet-return ----- Main
-	#                                 |                     input_width: insert return_width, output_width: insert return_width
+	#                                 |                    (3) 
 	#                                 +-------- synth-dry ------------------------ Main
 
+	# 3. input_width: insert return_width, output_width: insert return_width
 		
 
 
@@ -284,14 +288,17 @@ use ::Util qw(input_node output_node dest_type);
 use ::Log qw(logpkg);
 use ::Globals qw(:trackrw);
 
-#                                                                                                  /insert return_width // send_width    
+#                                                                                                  (4)
 # --- synth-source ----- synth-wet-send -- send-port     return-port  -- synth-wet-return  --+-- synth-insert-pre -- synth
-#                        input_width = output_width = insert send_width = synth input width                      
+#                        (5)
 #                                                                                            |
 # --- synth-source -------------------------------  synth-dry-send --------------------------+
-#                                                   send_width
+#                                                   (6)
+# 4. insert return_width // send_width    
 
+# 5. input_width = output_width = insert send_width = synth input width                      
 
+# 6. send_width
 
 sub new {
 	my ($class, %args) = @_;
