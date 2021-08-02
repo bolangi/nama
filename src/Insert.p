@@ -337,15 +337,17 @@ sub new {
 } 
 sub send_width {
 	my $self = shift;
+	my $source_track = $::tn{$self->track};
 	$self->{send_width}
-	or (ref $self) =~ /pre/i ? $::tn{$self->track}->input_width
-							 :  $::tn{$self->track}->output_width
+	or (ref $self) =~ /pre/i ? $source_track->input_width
+							 :  $source_track->output_width
 }
 sub return_width {
 	my $self = shift;
+	my $source_track = $::tn{$self->track};
 	$self->{return_width}
-	or (ref $self) =~ /pre/i ?  $::tn{$self->track}->input_width
-							 : $::tn{$self->track}->output_width
+	or (ref $self) =~ /pre/i ?  $source_track->input_width
+							 : $source_track->output_width
 }
 	
 
