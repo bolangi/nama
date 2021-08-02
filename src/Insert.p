@@ -362,8 +362,8 @@ sub add_paths {
 		$g->add_path($predecessor, @edge);
 		::logpkg('debug', "edge: @edge");
 		$g->set_vertex_attributes($self->wet_send_name, { 
-			send_id => $self->{send_id},
-			send_type => $self->{send_type},
+			send_id => $self->send_id,
+			send_type => $self->send_type,
 			mono_to_stereo => '', # disable for prefader send path 
 		});
 
@@ -374,13 +374,13 @@ sub add_paths {
 
 		$g->set_vertex_attributes($wet_return->name, {
 				mono_to_stereo => '', # override
-				source_type => $self->{return_type},
-				source_id => $self->{return_id},
+				source_type => $self->return_type,
+				source_id => $self->return_id,
 		});
 		$g->set_vertex_attributes($dry->name, {
 				mono_to_stereo => '', # override
 		});
-		$g->add_path(input_node($self->{return_type}), $wet_return->name, $loop);
+		$g->add_path(input_node($self->return_type), $wet_return->name, $loop);
 
 		# connect dry track to graph
 		#
