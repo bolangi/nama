@@ -27,7 +27,7 @@ sub initialize_project_repository {
 		init_repo_obj();
 		#git_commit('committing prior changes') if git_diff();
 	}
-	#suppress_git_warnings();
+	suppress_git_warnings();
 }
 
 sub suppress_git_warnings {
