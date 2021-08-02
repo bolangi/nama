@@ -155,8 +155,16 @@ sub main {
 	load_project(name => shift @ARGV,
 				 create => delete $config->{opts}->{c}); 
 				 		 # remove option for next project load
-	nama_cmd($config->{execute_on_project_load});
-	nama_cmd($config->{opts}->{X});
+	my $script = $config->{execute_on_project_load};
+	if ($script){
+		pager("executing command/script from " . config_file() . ": $script");
+		do_script($script);
+	}
+	$script = $config->{opts}->{X};
+	if ($script){
+		pager("executing command/script from command line: $script");
+		do_script($script);
+	}
 	reconfigure_engine();
 	$ui->loop();
 }
