@@ -226,16 +226,27 @@ sub add_paths {
     #                                  +--- synth-dry ---------- Main
     #                                       (2)
 
-    # 1. input_width: insert send_width: synth output_width, output_width: insert return_width//send_width
-	# 2. input_width: insert send_width, output_width: insert return_width//send_width
+    # 1. wet-send:
+	#      	input_width: insert send_width: synth output_width, 
+	#   	output_width: insert return_width//send_width
+	# 2. dry:
+	#     	input_width: insert send_width, 
+	#		output_width: insert return_width//send_width
 
 	# otherwise a conventional wet path with send and receive arms
 	
 	# --- synth--- synth-insert_post--+-- synth-wet-send    synth-wet-return ----- Main
-	#                                 |                    (3) 
+	#                                 |         (3)           (4)
 	#                                 +-------- synth-dry ------------------------ Main
+	#                                           (5)
 
-	# 3. input_width: insert return_width, output_width: insert return_width
+	# 3. input_width: insert return_width, 
+	#	output_width: insert return_width
+
+	# 4. wet-return:
+	# 		
+		
+	# 5. dry:
 		
 
 
