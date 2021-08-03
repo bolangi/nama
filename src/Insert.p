@@ -239,14 +239,13 @@ sub add_paths {
 	#                                 |         (3)           (4)
 	#                                 +-------- synth-dry ------------------------ Main
 	#                                           (5)
-
-	# 3. input_width: insert return_width, 
-	#	output_width: insert return_width
+	# 3. wet-send (same as 1)
 
 	# 4. wet-return:
-	# 		
-		
-	# 5. dry:
+	#  input_width: insert return_width, 
+	#	output_width: insert return_width
+
+	# 5. dry (same as 2)
 		
 
 
