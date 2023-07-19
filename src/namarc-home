@@ -104,6 +104,8 @@ hotkey_beep: beep -f 250 -l 200
 
 new_track_rw: MON
 
+use_metronome: 0
+
 alias:
   command:
     mbs: move_to_bus
