@@ -13,7 +13,7 @@ our $VERSION = 1.0;
 use Carp;
 no warnings qw(uninitialized);
 our @ISA;
-use vars qw($n %by_index %by_name );
+our($n, %by_index, %by_name);
 use ::Object qw( 
 				n
 				play_start_mark_name
