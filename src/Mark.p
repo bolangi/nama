@@ -292,7 +292,7 @@ sub jump_backward { jump_forward( - shift()) }
 	
 } # end package
 { package ::HereMark;
-use parent '::Mark';
+our @ISA = '::Mark';
 our $last_time;
 sub name { 'Here' }
 sub time { ::ecasound_iam('cs-connected') ? ($last_time = ::ecasound_iam('getpos')) : $last_time } 
@@ -300,7 +300,7 @@ sub time { ::ecasound_iam('cs-connected') ? ($last_time = ::ecasound_iam('getpos
 
 { package ::ClipMark;
 use Modern::Perl;
-use parent '::Mark';
+our @ISA = '::Mark';
 
 
 }
@@ -311,7 +311,7 @@ use parent '::Mark';
 	use Modern::Perl;
 	use ::Log qw(logpkg);
 	use ::Globals qw(:all);
-	use parent '::Mark';
+	our @ISA = '::Mark';
 	use SUPER; 
 	use ::Object qw( 
 					 name 
