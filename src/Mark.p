@@ -7,7 +7,7 @@ use Carp;
 use warnings;
 no warnings qw(uninitialized);
 our @ISA;
-use vars qw($n %by_name @all);
+our($n, %by_name, @all);
 use ::Log qw(logpkg);
 use ::Globals qw(:all);
 use ::Object qw( 
