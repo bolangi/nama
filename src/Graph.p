@@ -5,7 +5,7 @@ use Graph;
 use ::Util qw(input_node output_node);
 use ::Log qw(logsub logpkg);
 use ::Globals qw(:trackrw);
-use vars qw(%reserved);
+our(%reserved);
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.
 *reserved = \%::IO::io_class;
