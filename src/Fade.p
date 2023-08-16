@@ -7,7 +7,7 @@ use Carp;
 use warnings;
 no warnings qw(uninitialized);
 our @ISA;
-use vars qw($n %by_index);
+our($n, %by_index);
 use ::Globals qw(:singletons %tn @fade_data); 
 use ::Log qw(logsub logpkg);
 use ::Effect  qw(remove_effect add_effect update_effect);
