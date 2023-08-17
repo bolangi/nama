@@ -222,10 +222,10 @@ track_io => <<'TRACKIO',
  
      * unconnected JACK port    source manual
      
-       note: the port for mono track 'piano' would be ecasound:piano_in_1 XX
+       note: the port for mono track 'piano' would be ecasound:piano_in_1
 
-     * A list of JACK ports     source drum.ports (ports list from drums.ports)
-                                source ports (ports list from <trackname>.ports)
+     * A list of JACK ports     source drum.ports (ports list from file drums.ports)
+                                source ports (ports list from file <trackname>.ports)
 
      * from another track (after effects processing)
                                 source track Strings
