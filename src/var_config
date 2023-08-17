@@ -109,5 +109,7 @@
 
 	$ticks_per_quarter_note 		$config->{ticks_per_quarter_note}
 
+	$use_metronome					$config->{use_metronome}
+	
 	# end
 

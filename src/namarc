@@ -80,6 +80,8 @@ sample_rate: frequency
 
 realtime_profile: nonrealtime # other choices: realtime or auto
 
+use_metronome: 0
+
 # The buffer size settings below apply only when JACK is *not* used
 ecasound_buffersize:
   realtime:

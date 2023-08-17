@@ -12,7 +12,7 @@ sub reconfigure_engine {
 	return if $config->{opts}->{R};
 	refresh_wav_cache();
 	update_jack_client_list();
-	refresh_tempo_map();
+	refresh_tempo_map() if $config->{use_metronome};
 	project_snapshot();
 	::Engine::sync_action('configure');
 }

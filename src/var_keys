@@ -25,6 +25,7 @@ $config->{loop_chain_channel_width}
 $config->{soundcard_loopback_delay}
 $config->{display_waveform}
 $config->{use_effects_bugfix}
+$config->{use_metronome}
 
 
 $jack->{seek_delay}				# extra time for stop-seek-start process
