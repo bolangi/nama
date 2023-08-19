@@ -43,7 +43,7 @@ sub setup_hotkeys {
 	say "\nHotkeys on!";
 	destroy_readline(); 
 	setup_termkey(); 
-	1
+	1 # needed by grammar, apparently
 }
 sub list_hotkeys { 
 	my $hots 		= dclone($config->{hotkeys});
