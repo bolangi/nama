@@ -195,7 +195,7 @@ sub detect_spacebar {
 	# received in column one
 	
 	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub {
-		&{$text->{term_attribs}->{'callback_read_char'}}();
+		$text->{term_attribs}->{'callback_read_char'}->();
 		my $buffer = $text->{term_attribs}->{line_buffer};
 		my $trigger = ' ';
 		if ( $config->{press_space_to_start} 
