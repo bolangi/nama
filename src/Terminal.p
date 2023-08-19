@@ -11,7 +11,7 @@ use List::MoreUtils qw(first_index);
 
 sub initialize_prompt {
 	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
-	&{$text->{term_attribs}->{'callback_read_char'}}();
+	$text->{term_attribs}->{'callback_read_char'}->();
 	set_current_bus();
 	print prompt();
 	$text->{term_attribs}->{already_prompted} = 0;
@@ -210,7 +210,7 @@ sub detect_spacebar {
 			$text->{term_attribs}->{point} 		= 0;
 			$text->{term_attribs}->{end}   		= 0;
 			$text->{term}->stuff_char(10);
-			&{$text->{term_attribs}->{'callback_read_char'}}();
+			$text->{term_attribs}->{'callback_read_char'}->();
 
 			
 		}
