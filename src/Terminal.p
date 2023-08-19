@@ -74,13 +74,13 @@ sub setup_termkey {
 			# execute callback if we have one keystroke 
 			# and it has an "instant" mapping
 			 
-			my $suppress_status;
+			my $dont_display;
 			$key_string =~ s/ /Space/; # to suit our mapping file
 			if ( my $command = $config->{hotkeys}->{$key_string} 
 				and ! length $text->{hotkey_buffer}) {
 
 
-				$suppress_status++ if $key_string eq 'Escape'
+				$dont_display++ if $key_string eq 'Escape'
 									or $key_string eq 'Space';
 
 
@@ -95,7 +95,6 @@ sub setup_termkey {
 			$key_string =~ s/Space/ /; # back to the character
 			$text->{hotkey_buffer} .= $key_string;
 			print $key_string if length $key_string == 1;
-#			push $text->{hotkey_object_buffer}, $key;
 			$text->{hotkey_parser}->command($text->{hotkey_buffer})
  				and reset_hotkey_buffers();
  			}
@@ -103,7 +102,7 @@ sub setup_termkey {
 				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
 				"\x1b[2K",  # erase line
 				hotkey_status_bar(), 
-			) if $text->{hotkey_buffer} eq undef and ! $suppress_status;
+			) if $text->{hotkey_buffer} eq undef and ! $dont_display;
 		},
 	);
 }
@@ -119,7 +118,6 @@ sub hotkey_status_bar {
 }
 sub reset_hotkey_buffers {
 	$text->{hotkey_buffer} = "";
-	$text->{hotkey_object_buffer} = [];
 }
 sub exit_hotkey_mode {
 	teardown_hotkeys();
