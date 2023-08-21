@@ -228,34 +228,34 @@ sub previous_mark {
 
 ## jump recording head position
 
-sub to_start { 
+sub jump_to_start { 
 	logsub((caller(0))[3]);
 	return if ::ChainSetup::really_recording();
-	set_position( 0 );
+	jump( 0 );
 }
-sub to_end { 
+sub jump_to_end { 
 	logsub((caller(0))[3]);
 	# ten seconds shy of end
 	return if ::ChainSetup::really_recording();
 	my $end = ecasound_iam('cs-get-length') - 10 ;  
-	set_position( $end);
+	jump($end);
 } 
 sub jump {
 	return if ::ChainSetup::really_recording();
 	my $delta = shift;
 	logsub((caller(0))[3]);
 	my $here = ecasound_iam('getpos');
-	logpkg('debug', "delta: $delta, here: $here, unit: $gui->{_seek_unit}");
-	my $new_pos = $here + $delta * $gui->{_seek_unit};
+	logpkg('debug', "delta: $delta, here: $here");
+	my $new_pos = $here + $delta;
 	if ( $setup->{audio_length} )
 	{
 		$new_pos = $new_pos < $setup->{audio_length} 
 			? $new_pos 
 			: $setup->{audio_length} - 10
 	}
-	set_position( $new_pos );
+	set_position_with_fade( $new_pos );
 }
-sub set_position { fade_around(\&_set_position, @_) }
+sub set_position_with_fade { fade_around(\&_set_position, @_) }
 
 sub _set_position {
 	logsub((caller(0))[3]);
