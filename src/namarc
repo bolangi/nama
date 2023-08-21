@@ -125,18 +125,18 @@ hotkeys:
   Right: next_param
   Up: increment_param
   Down: decrement_param
-  j: decrement_param
-  k: increment_param
-  h: previous_param
-  l: next_param
-  a: previous_track
-  s: previous_effect
-  d: next_effect
-  f: next_track
-  i: previous_track
-  o: next_track
-  I: previous_effect
-  O: next_effect
+  a: jump_minus_60
+  s: jump_minus_30
+  d: jump_minus_10
+  f: jump_minus_5
+  g: jump_minus_1
+  h: jump_plus_60
+  j: jump_plus_30
+  k: jump_plus_10
+  h: jump_plus_5
+  l: jump_plus_1
+  r: jump_beginning
+  u: jump_end
   Space: toggle_transport
 
 alias:
