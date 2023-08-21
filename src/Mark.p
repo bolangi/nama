@@ -285,7 +285,7 @@ sub rewind {
 }
 sub jump_forward {
 	my $multiplier = shift;
-	forward( $multiplier * $text->{hotkey_playback_jumpsize})
+	forward( $multiplier * $config->{hotkey_playback_jumpsize_seconds})
 	}
 sub jump_backward { jump_forward( - shift()) }
 

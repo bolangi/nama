@@ -73,6 +73,7 @@
 ### the following variables may also be set 
 
 	$hotkeys_always					$config->{hotkeys_always}
+	$hotkey_playback_jumpsize_seconds   $config->{hotkey_playback_jumpsize_seconds}
 
 	$use_pager     					$config->{use_pager}
 	$use_placeholders  				$config->{use_placeholders}
