@@ -313,21 +313,21 @@ sub time_gui {
 	my @minuses = map{ - $_ } reverse @pluses;
 	my @fw = map{ my $d = $_; $gui->{seek_frame}->Button(
 			-text => $d,
-			-command => sub { jump($d) },
+			-command => sub { jump($d * $gui->{_seek_unit} ) },
 			)
 		}  @pluses ;
 	my @rew = map{ my $d = $_; $gui->{seek_frame}->Button(
 			-text => $d,
-			-command => sub { jump($d) },
+			-command => sub { jump($d * $gui->{_seek_unit} ) },
 			)
 		}  @minuses ;
 	my $beg = $gui->{seek_frame}->Button(
 			-text => 'Beg',
-			-command => \&to_start,
+			-command => \&jump_to_start,
 			);
 	my $end = $gui->{seek_frame}->Button(
 			-text => 'End',
-			-command => \&to_end,
+			-command => \&jump_to_end,
 			);
 
 	$gui->{seek_unit} = $gui->{seek_frame}->Button( 

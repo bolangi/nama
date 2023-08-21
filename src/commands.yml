@@ -85,12 +85,12 @@ rewind:
   short: rw
   parameters: <float:decrement_seconds>
   example: rewind 6.5 # Move backwards 6.5 seconds from the current position.
-to_start:
+jump_to_start:
   type: transport
   what: Set the playback head to the start. A synonym for setpos 0.
   short: beg
   parameters: none
-to_end:
+jump_to_end:
   type: transport
   what: Set the playback head to end minus 10 seconds.
   short: end
