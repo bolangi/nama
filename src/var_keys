@@ -106,7 +106,6 @@ $text->{parser}					# Parse::RecDescent parser
 $text->{hotkey_grammar} 		# hotkeys grammar source
 $text->{hotkey_parser} 			# 
 $text->{hotkey_buffer} 			#
-$text->{hotkey_object_buffer} 	# 
 $text->{hotkey_callback}		#
 $text->{wrap}					# Text::Format object for wrapping text
 $text->{format_fields}			# ??
