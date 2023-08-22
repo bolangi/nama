@@ -226,7 +226,7 @@ sub previous_mark {
 }
 	
 
-## jump recording head position
+## jump playback head position
 
 sub jump_to_start { 
 	logsub((caller(0))[3]);
@@ -271,6 +271,19 @@ sub _set_position {
 
 	update_clock_display();
 }
+
+# used by hotkeys
+
+sub jump_minus_60 { jump( -60 ) }
+sub jump_minus_30 { jump( -30 ) }
+sub jump_minus_10 { jump( -10 ) }
+sub jump_minus_5  { jump(  -5 ) }
+sub jump_minus_1  { jump(  -1 ) }
+sub jump_plus_1   { jump(  60 ) }
+sub jump_plus_5   { jump(  30 ) }
+sub jump_plus_10  { jump(  10 ) }
+sub jump_plus_30  { jump(  30 ) }
+sub jump_plus_60  { jump(  60 ) }
 
 sub forward {
 	my $delta = shift;
