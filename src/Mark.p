@@ -253,9 +253,9 @@ sub jump {
 			? $new_pos 
 			: $setup->{audio_length} - 10
 	}
-	set_position_with_fade( $new_pos );
+	set_position( $new_pos );
 }
-sub set_position_with_fade { fade_around(\&_set_position, @_) }
+sub set_position { fade_around(\&_set_position, @_) }
 
 sub _set_position {
 	logsub((caller(0))[3]);
