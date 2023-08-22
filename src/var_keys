@@ -106,7 +106,6 @@ $text->{parser}					# Parse::RecDescent parser
 $text->{hotkey_grammar} 		# hotkeys grammar source
 $text->{hotkey_parser} 			# 
 $text->{hotkey_buffer} 			#
-$text->{hotkey_object_buffer} 	# 
 $text->{hotkey_callback}		#
 $text->{wrap}					# Text::Format object for wrapping text
 $text->{format_fields}			# ??
@@ -125,7 +124,6 @@ $text->{user_alias}				# user defined command aliases
 $text->{command_history}		# terminal command history
 $text->{screen_lines}			# 
 $text->{screen_columns}			#
-$text->{hotkey_playback_jumpsize}
 $text->{hyphenated_commands}	# remove-track => remove_track
 $text->{eval_result}			# buffer for result of eval_perl() 
 $text->{output_buffer}			# buffer for output of OSC commands

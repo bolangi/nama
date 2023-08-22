@@ -123,8 +123,8 @@ transport => <<TRANSPORT,
    forward, fw        -  Forward some number of seconds, i.e. fw 75
    setpos, sp         -  Set the playback head position, i.e. setpos 49.2
    getpos, gp         -  Get the current head position 
-   to-start, beg      - set playback head to start
-   to-end, end        - set playback head to end
+   jump-to-start, beg   - set playback head to beginning of audio file(s)
+   jump-to-end, end     - set playback head to end
 TRANSPORT
 track_fader => <<'TRACKFADER',
    Track volume/pan fader can be used to change settings for the current track.
