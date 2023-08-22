@@ -237,7 +237,7 @@ sub jump_to_end {
 	logsub((caller(0))[3]);
 	# ten seconds shy of end
 	return if ::ChainSetup::really_recording();
-	my $end = ecasound_iam('cs-get-length') - 10 ;  
+	my $end = ecasound_iam('cs-get-length') - $config->{seek_end_margin} ;  
 	jump($end);
 } 
 sub jump {
