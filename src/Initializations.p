@@ -182,6 +182,7 @@ sub definitions {
 	#	this causes beeping during make test
 	#	beep_command					=> 'beep -f 350 -l 700',
 		hotkey_playback_jumpsize_seconds => 1,
+		seek_end_margin	=>10,
 		midi_record_buffer => 'midi_record',
 		midi_default_input_channel => 'keyboard',
 		ecasound_channel_ops 		=> {map{$_,1} qw(chcopy chmove chorder chmix chmute)},
