@@ -130,13 +130,13 @@ hotkeys:
   d: jump_minus_10
   f: jump_minus_5
   g: jump_minus_1
-  h: jump_plus_60
-  j: jump_plus_30
+  h: jump_plus_1
+  j: jump_plus_5
   k: jump_plus_10
-  h: jump_plus_5
-  l: jump_plus_1
-  r: jump_beginning
-  u: jump_end
+  l: jump_plus_30
+  ;: jump_plus_60
+  r: jump_to_start
+  u: jump_to_end
   Space: toggle_transport
 
 alias:
