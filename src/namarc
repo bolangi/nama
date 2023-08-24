@@ -146,6 +146,10 @@ hotkeys:
   p: jump_to_end
   D: delete_current_mark
 
+# m2: set parameter stepsize to 10**2 (100)
+# m-2: set stepsize to 10**-2 (0.01)
+# =123: set parameter to 123
+
 alias:
   command:
     mbs: move_to_bus
