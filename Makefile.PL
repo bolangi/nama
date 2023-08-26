@@ -40,6 +40,7 @@ use inc::Module::Install;
 			IO::Select  0
 			JSON::XS	0
 			IPC::Open3  0
+			IPC::System::Simple 0
 			List::Util 0
 			List::MoreUtils 0
 			Log::Log4perl 0
@@ -48,6 +49,7 @@ use inc::Module::Install;
 			Parse::RecDescent  0
 			Role::Tiny 0
 			SUPER 0
+			
 			Term::ReadLine::Gnu  0
 			Term::TermKey 0
 			Test2::Bundle::More 0

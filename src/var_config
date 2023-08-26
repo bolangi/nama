@@ -74,6 +74,8 @@
 
 	$hotkeys_always					$config->{hotkeys_always}
 	$hotkey_playback_jumpsize_seconds   $config->{hotkey_playback_jumpsize_seconds}
+	$seek_end_margin			   $config->{seek_end_margin}
+    
 
 	$use_pager     					$config->{use_pager}
 	$use_placeholders  				$config->{use_placeholders}
