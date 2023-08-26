@@ -153,7 +153,6 @@ sub mark_time {
 }
 
 
-
 # ---------- Mark and jump routines --------
 {
 package ::;
@@ -225,6 +224,16 @@ sub previous_mark {
 	}
 }
 	
+sub modify_mark {
+	my ($mark, $newtime) = @_;
+	$mark->set( time => $newtime );
+	pager($mark->name, ": set to ", d2( $newtime), "\n");
+	pager("adjusted to ",$mark->time, "\n") 
+		if $mark->time != $newtime;
+	set_position($mark->time);
+	request_setup();
+}
+
 
 ## jump playback head position
 
