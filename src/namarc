@@ -138,13 +138,20 @@ hotkeys:
   Space: toggle_transport
   q: jump_to_start
 # w:
-  e: drop_snip_mark
+# e: 
   r: previous_mark
   u: next_mark
 # i: 
 # o:
   p: jump_to_end
   D: delete_current_mark
+  .: drop_snip_mark
+  {: bump_mark_minus_1
+  }: bump_mark_plus_1
+  [: bump_mark_minus_point_1
+  ]: bump_mark_plus_point_1
+  (: bump_mark_minus_point_01
+  ): bump_mark_plus_point_01
 
 # m2: set parameter stepsize to 10**2 (100)
 # m-2: set stepsize to 10**-2 (0.01)
