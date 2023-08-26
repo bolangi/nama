@@ -715,24 +715,11 @@ to_mark: _to_mark ident {
 	1;}
 modify_mark: _modify_mark sign value {
 	my $newtime = eval($::this_mark->{time} . $item{sign} . $item{value});
-	$::this_mark->set( time => $newtime );
-	::pager($::this_mark->name, ": set to ", ::d2( $newtime), "\n");
-	::pager("adjusted to ",$::this_mark->time, "\n") 
-		if $::this_mark->time != $newtime;
-	::set_position($::this_mark->time);
-	::request_setup();
-	1;
-	}
+	::modify_mark($::this_mark, $newtime); 1
+}
 modify_mark: _modify_mark value {
-	$::this_mark->set( time => $item{value} );
-	my $newtime = $item{value};
-	::pager($::this_mark->name, ": set to ", ::d2($newtime),"\n");
-	::pager("adjusted to ",$::this_mark->time, "\n")
-		if $::this_mark->time != $newtime;
-	::set_position($::this_mark->time);
-	::request_setup();
-	1;
-	}		
+	::modify_mark($::this_mark, $item{value} ); 1
+}		
 remove_effect: _remove_effect remove_target(s) {
 	#print join $/, @{ $item{"remove_target(s)"} }; 
 	::mute();
