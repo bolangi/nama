@@ -225,11 +225,13 @@ sub previous_mark {
 }
 	
 sub modify_mark {
-	my ($mark, $newtime) = @_;
+	my ($mark, $newtime, $quiet) = @_;
 	$mark->set( time => $newtime );
+	! $quiet && do {
 	pager($mark->name, ": set to ", d2( $newtime), "\n");
 	pager("adjusted to ",$mark->time, "\n") 
 		if $mark->time != $newtime;
+	};
 	set_position($mark->time);
 	request_setup();
 }
