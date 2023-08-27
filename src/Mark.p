@@ -196,32 +196,34 @@ sub mark { # GUI_CODE
 
 sub next_mark {
 	logsub((caller(0))[3]);
-	my $jumps = shift || 0;
-	$jumps and $jumps--;
-	my $here = ecasound_iam("cs-get-position");
+	my $mark = next_mark_object();
+	set_position($mark->time);
+	$this_mark = $mark;
+}
+sub next_mark_object {
 	my @marks = ::Mark::all();
+	my $here = ecasound_iam("cs-get-position");
 	for my $i ( 0..$#marks ){
 		if ($marks[$i]->time - $here > 0.001 ){
 			logpkg('debug', "here: $here, future time: ", $marks[$i]->time);
-			set_position($marks[$i+$jumps]->time);
-			$this_mark = $marks[$i];
-			return;
+			return $marks[$i];
+		}
+	}
+}
+sub previous_mark_object {
+	my @marks = ::Mark::all();
+	my $here = ecasound_iam("cs-get-position");
+	for my $i ( reverse 0..$#marks ){
+		if ($marks[$i]->time < $here ){
+			return $marks[$i];
 		}
 	}
 }
 sub previous_mark {
 	logsub((caller(0))[3]);
-	my $jumps = shift || 0;
-	$jumps and $jumps--;
-	my $here = ecasound_iam("getpos");
-	my @marks = ::Mark::all();
-	for my $i ( reverse 0..$#marks ){
-		if ($marks[$i]->time < $here ){
-			set_position($marks[$i+$jumps]->time);
-			$this_mark = $marks[$i];
-			return;
-		}
-	}
+	my $mark = previous_mark_object();
+	set_position($mark->time);
+	$this_mark = $mark;
 }
 	
 sub modify_mark {
@@ -235,6 +237,14 @@ sub modify_mark {
 	set_position($mark->time);
 	request_setup();
 }
+#  D: delete_current_mark
+#  .: drop_snip_mark
+sub bump_mark_minus_1 { }
+sub bump_mark_plus_1 { }
+sub bump_mark_minus_point_1 { }
+sub bump_mark_plus_point_1 { }
+sub bump_mark_minus_point_01 { }
+sub bump_mark_plus_point_01 { }
 
 
 ## jump playback head position
