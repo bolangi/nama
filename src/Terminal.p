@@ -65,8 +65,10 @@ sub setup_termkey {
 			logpkg('debug',"got key: $key_string");
 			# remove angle brackets around multi-character
 			# sequences, e.g. <PageUp> -> PageUp
+			# but leave a lone '<' or '>' 
 			$key_string =~ s/[<>]//g if length $key_string > 1;
 
+			# exit on Ctrl-C
 			exit_hotkey_mode(), cleanup_exit() if $key->type_is_unicode 
 						and $key->utf8 eq "C" 
 						and $key->modifiers & KEYMOD_CTRL;
