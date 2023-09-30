@@ -108,6 +108,12 @@ sub setup_termkey {
 		},
 	);
 }
+sub set_key_bindings_for_hotkey_mode {
+	my $mode = shift;
+	
+
+
+}
 sub hotkey_status_bar {
 	my $name = "[".$this_track->name."]"; 
 	return "$name has no selected effect" unless $this_track->op;
