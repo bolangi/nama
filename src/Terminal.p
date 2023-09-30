@@ -110,9 +110,13 @@ sub setup_termkey {
 }
 sub set_key_bindings_for_hotkey_mode {
 	my $mode = shift;
-	
 
 
+}
+sub set_stepsize {
+	my $size = shift;
+	set_jump_stepsize($size) if $mode =~ /jm/ ;
+	set_param_stepsize($size) if $mode eq 'p';
 }
 sub hotkey_status_bar {
 	my $name = "[".$this_track->name."]"; 
