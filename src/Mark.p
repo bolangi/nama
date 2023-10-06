@@ -303,8 +303,8 @@ sub bump_mark_forward_1 {}
 sub bump_mark_forward_10 {}
 sub bump_mark_back_1 {}
 sub bump_mark_back_10 {}
-sub jump_to_start {}
-sub jump_to_end {}
+#sub jump_to_start {}
+#sub jump_to_end {}
 sub jump_pos_forward_1 {}
 sub jump_pos_forward_10 {}
 sub jump_pos_back_1 {}
