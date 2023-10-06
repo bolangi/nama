@@ -295,16 +295,21 @@ sub _set_position {
 
 # used by hotkeys
 
-sub jump_minus_60 { jump( -60 ) }
-sub jump_minus_30 { jump( -30 ) }
-sub jump_minus_10 { jump( -10 ) }
-sub jump_minus_5  { jump(  -5 ) }
-sub jump_minus_1  { jump(  -1 ) }
-sub jump_plus_1   { jump(  60 ) }
-sub jump_plus_5   { jump(  30 ) }
-sub jump_plus_10  { jump(  10 ) }
-sub jump_plus_30  { jump(  30 ) }
-sub jump_plus_60  { jump(  60 ) }
+#sub previous_mark {}
+#sub next_mark {}
+sub delete_current_mark {}
+#sub drop_mark {}
+sub bump_mark_forward_1 {}
+sub bump_mark_forward_10 {}
+sub bump_mark_back_1 {}
+sub bump_mark_back_10 {}
+sub jump_to_start {}
+sub jump_to_end {}
+sub jump_pos_forward_1 {}
+sub jump_pos_forward_10 {}
+sub jump_pos_back_1 {}
+sub jump_pos_back_10 {}
+sub jump_replay {}
 
 sub forward {
 	my $delta = shift;
