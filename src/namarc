@@ -121,37 +121,26 @@ hotkeys:
   End: next_effect
   PageUp: previous_param
   PageDown: next_param
-  Left: previous_param
-  Right: next_param
-  Up: increment_param
-  Down: decrement_param
-  a: jump_minus_60
-  s: jump_minus_30
-  d: jump_minus_10
-  f: jump_minus_5
-  g: jump_minus_1
-  h: jump_plus_1
-  j: jump_plus_5
-  k: jump_plus_10
-  l: jump_plus_30
-  ;: jump_plus_60
-  Space: toggle_transport
-  q: jump_to_start
-# w:
-# e: 
-  r: previous_mark
-  u: next_mark
-# i: 
-# o:
-  p: jump_to_end
-  D: delete_current_mark
-  .: drop_snip_mark
-  {: bump_mark_minus_1
-  }: bump_mark_plus_1
-  [: bump_mark_minus_point_1
-  ]: bump_mark_plus_point_1
-  (: bump_mark_minus_point_01
-  ): bump_mark_plus_point_01
+  Left: decrement_param_1
+  Right: increment_param_1
+  Up: increment_param_10
+  Down: decrement_param_10
+  SomeKey: previous_mark
+  SomeKey: next_mark
+  SomeKey: delete_current_mark
+  SomeKey: drop_mark
+  SomeKey: bump_mark_forward_1
+  SomeKey: bump_mark_forward_10
+  SomeKey: bump_mark_back_1
+  SomeKey: bump_mark_back_10
+  SomeKey: jump_to_start
+  SomeKey: jump_to_end
+  SomeKey: jump_pos_forward_1
+  SomeKey: jump_pos_forward_10
+  SomeKey: jump_pos_back_1
+  SomeKey: jump_pos_back_10
+  SomeKey: jump_replay
+
 
 # m2: set parameter stepsize to 10**2 (100)
 # m-2: set stepsize to 10**-2 (0.01)
