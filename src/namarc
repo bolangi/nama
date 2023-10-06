@@ -114,33 +114,44 @@ spatialiser: matrixSpatialiser 0
 limiter: tap_limiter 0 0
 
 hotkeys:
-  Escape: exit_hotkey_mode
-  Insert: previous_track
-  Delete: next_track
-  Home: previous_effect
-  End: next_effect
-  PageUp: previous_param
-  PageDown: next_param
-  Left: decrement_param_1
-  Right: increment_param_1
-  Up: increment_param_10
-  Down: decrement_param_10
-  SomeKey: previous_mark
-  SomeKey: next_mark
-  SomeKey: delete_current_mark
-  SomeKey: drop_mark
-  SomeKey: bump_mark_forward_1
-  SomeKey: bump_mark_forward_10
-  SomeKey: bump_mark_back_1
-  SomeKey: bump_mark_back_10
-  SomeKey: jump_to_start
-  SomeKey: jump_to_end
-  SomeKey: jump_pos_forward_1
-  SomeKey: jump_pos_forward_10
-  SomeKey: jump_pos_back_1
-  SomeKey: jump_pos_back_10
-  SomeKey: jump_replay
+  common: 
+    Insert: previous_track
+    Delete: next_track
+    KeypadInsert: jump_replay
+    
+  jump_mode:
+    Home: jump_to_start
+    End: jump_to_end
+    PageUp: previous_mark
+    PageDown: next_mark
+    Right: jump_pos_forward_1
+    Up: jump_pos_forward_10
+    Left: jump_pos_back_1
+    Down: jump_pos_back_10
 
+  bump_mode:
+    Home: jump_to_start
+    End: jump_to_end
+    PageUp: previous_mark
+    PageDown: next_mark
+    Right: bump_mark_forward_1
+    Up: bump_mark_forward_10
+    Left: bump_mark_back_1
+    Down: bump_mark_back_10
+
+  param_mode:
+	Home: previous_effect
+    End: next_effect
+    PageUp: previous_param
+    PageDown: next_param
+
+    Left: decrement_param_1
+    Right: increment_param_1
+    Up: increment_param_10
+    Down: decrement_param_10
+
+  
+  
 
 # m2: set parameter stepsize to 10**2 (100)
 # m-2: set stepsize to 10**-2 (0.01)
