@@ -310,5 +310,36 @@ sub keyword {
         };
         return undef;
 };
+
+our %escape_code = qw(
+
+  Escape  	^[
+
+  Insert  	^[[2~
+  Home  	^[[1~
+  PageUp  	^[[5~
+
+  Delete  	^[[3~
+  End  		^[[4~
+  PageDown  ^[[6~
+
+  Up  		^[[A~
+  Left  	^[[D~
+  Down  	^[[B~
+  Right  	^[[C~
+
+  F1		^[OP
+  F2		^[OQ
+  F3		^[OR
+  F4		^[OS
+  F5		^[[15~ 
+  F6		^[[17~ 
+  F7		^[[18~ 
+  F8		^[[19~ 
+  F9		^[[20~ 
+  F10		^[[21~ 
+  F11		^[[23~ 
+  F12		^[[24~ 
+);
 1;
 __END__
