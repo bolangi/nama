@@ -896,18 +896,18 @@ list_effects:
   parameters: none
 hotkeys_param:
   type: general
-  what: Setup hotkeys for adjusting effect parameters
+  what: Enable hotkeys for adjusting effect parameters
   short: hkp
   parameters: none
 hotkeys_jump:
   type: general
-  what: Setup hotkeys for adjusting effect parameters
+  what: Enable hotkeys for changing the playback position (default)
   short: hkj 
   parameters: none
-hotkeys_off:
+hotkeys_bump:
   type: general
-  what: disable hotkeys always mode
-  short: hko
+  what: Enable hotkeys for re-positioning marks 
+  short: hkb 
   parameters: none
 hotkeys_list:
   type: general
