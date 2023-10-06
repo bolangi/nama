@@ -41,8 +41,7 @@ sub initialize_terminal {
 
 sub setup_hotkeys {
 	say "\nHotkeys on!";
-	destroy_readline(); 
-	setup_termkey(); 
+	# read in key bindings TODO
 	1 # needed by grammar, apparently
 }
 sub list_hotkeys { 
@@ -54,60 +53,6 @@ sub list_hotkeys {
 	pager("Hotkeys\n",Dumper \%hots)
 }
 
-
-sub setup_termkey {
-	$project->{events}->{termkey} = AnyEvent::TermKey->new(
-		term => \*STDIN,
-
-		on_key => sub {
-			my $key = shift;
-			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
-			logpkg('debug',"got key: $key_string");
-			# remove angle brackets around multi-character
-			# sequences, e.g. <PageUp> -> PageUp
-			# but leave a lone '<' or '>' 
-			$key_string =~ s/[<>]//g if length $key_string > 1;
-
-			# exit on Ctrl-C
-			exit_hotkey_mode(), cleanup_exit() if $key->type_is_unicode 
-						and $key->utf8 eq "C" 
-						and $key->modifiers & KEYMOD_CTRL;
-			 
-			# execute callback if we have one keystroke 
-			# and it has an "instant" mapping
-			 
-			my $dont_display;
-			$key_string =~ s/ /Space/; # to suit our mapping file
-			if ( my $command = $config->{hotkeys}->{$key_string} 
-				and ! length $text->{hotkey_buffer}) {
-
-
-				$dont_display++ if $key_string eq 'Escape'
-									or $key_string eq 'Space';
-
-
-				try { eval "$command()" }
-				catch { throw( qq(cannot execute subroutine "$command" for key "$key_string": $_") ) }
-			}
-
-			# otherwise assemble keystrokes and check
-			# them against the grammar
-			 
-			else {
-			$key_string =~ s/Space/ /; # back to the character
-			$text->{hotkey_buffer} .= $key_string;
-			print $key_string if length $key_string == 1;
-			$text->{hotkey_parser}->command($text->{hotkey_buffer})
- 				and reset_hotkey_buffers();
- 			}
-			print(
-				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
-				"\x1b[2K",  # erase line
-				hotkey_status_bar(), 
-			) if $text->{hotkey_buffer} eq undef and ! $dont_display;
-		},
-	);
-}
 sub set_key_bindings_for_hotkey_mode {
 	my $mode = shift;
 
@@ -130,15 +75,6 @@ sub hotkey_status_bar {
 }
 sub reset_hotkey_buffers {
 	$text->{hotkey_buffer} = "";
-}
-sub exit_hotkey_mode {
-	teardown_hotkeys();
-	initialize_terminal(); 
-	initialize_prompt();
-};
-sub teardown_hotkeys {
-	$project->{events}->{termkey}->termkey->stop(),
-		delete $project->{events}->{termkey} if $project->{events}->{termkey}
 }
 sub destroy_readline {
 	$text->{term}->rl_deprep_terminal() if $text->{term};
