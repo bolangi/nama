@@ -19,6 +19,8 @@ sub initialize_prompt {
 
 sub initialize_terminal {
 	$text->{term} = Term::ReadLine->new("Ecasound/Nama");
+	$text->{default_keymap} = $text->{term}->get_keymap;
+	new_keymap();
 	$text->{term_attribs} = $text->{term}->Attribs;
 	$text->{term_attribs}->{attempted_completion_function} = \&complete;
 	$text->{term_attribs}->{already_prompted} = 1;
@@ -30,13 +32,15 @@ sub initialize_terminal {
 	revise_prompt();
 
 	# handle Control-C from terminal
-
-	
-
 	$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
 	# responds in a more timely way than $SIG{INT} = \&cleanup_exit; 
 
 	$SIG{USR1} = sub { project_snapshot() };
+}
+sub new_keymap {
+	$text->{nama_keymap} = $text->{term}->copy_keymap($text->{default_keymap});
+	$text->{term}->set_keymap($text->{nama_keymap});
+	say $text->{term}->get_keymap_name($text->{term}->get_keymap);
 }
 
 sub setup_hotkeys {
