@@ -40,8 +40,19 @@ sub initialize_terminal {
 }
 
 sub setup_hotkeys {
-	say "\nHotkeys on!";
-	# read in key bindings TODO
+	my $map = shift;
+	my %bindings = ($config->{hotkeys}->{common}->%*, 
+					$config->{hotkeys}->{$map}->%*);
+	while( my($key,$function) = each %bindings ){
+		my $seq = escape_code($key);
+		say "key: $key, function: $function, escape code: $seq";
+		no strict 'refs';
+		my $coderef = \&$function;
+		if ( length $seq == 1 )
+			 {  $text->{term}->bind_key(   $seq, $coderef); say "key" }
+		else {  $text->{term}->bind_keyseq($seq, $coderef); say "key sequence" }
+	}
+	say "\nHotkeys set for $map!";
 	1 # needed by grammar, apparently
 }
 sub list_hotkeys { 
@@ -57,11 +68,6 @@ sub set_key_bindings_for_hotkey_mode {
 	my $mode = shift;
 
 
-}
-sub set_stepsize {
-	my $size = shift;
-	set_jump_stepsize($size) if $mode =~ /jm/ ;
-	set_param_stepsize($size) if $mode eq 'p';
 }
 sub hotkey_status_bar {
 	my $name = "[".$this_track->name."]"; 
