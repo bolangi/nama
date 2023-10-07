@@ -1574,10 +1574,10 @@ remove_fader_effect: _remove_fader_effect fader_role {
 	1
 }
 fader_role: 'vol'|'pan'|'fader'
-hotkeys_jump: _hotkeys_jump { ::setup_hotkeys_for_jumping_playback_position()}
-hotkeys_param: _hotkeys_param { ::setup_hotkeys_for_adjusting_effect_params()}
-hotkeys_off: _hotkeys_off { undef $::config->{hotkeys_always}; 1 }
-hotkeys_list: _hotkeys_list { ::list_hotkeys() ; 1 } 
+hotkeys_bump:    _hotkeys_bump  { ::setup_hotkeys('bump' )}
+hotkeys_jump:    _hotkeys_jump  { ::setup_hotkeys('jump' )}
+hotkeys_param:   _hotkeys_param { ::setup_hotkeys('param')}
+hotkeys_list:    _hotkeys_list  { ::list_hotkeys() ; 1 } 
 
 select_sequence: _select_sequence existing_sequence_name { 
 	$::this_sequence = $::bn{$item{existing_sequence_name}}
@@ -1767,3 +1767,13 @@ bus_off: _bus_off
 	$::bn{$bus_name}->tracks_off 
 }
 
+
+set_param_increment: _set_param_increment value {::set_param_stepize($item{value}    )} 
+set_param_exp:       _set_param_exp       exp   {::set_param_stepize(10**$item{exp});1} 
+
+set_playback_jumpsize: _set_playback_jumpsize seconds {::set_playback_jumpsize($item{seconds})} 
+seconds: value
+exp: /[-+]?\d/ 
+# hours:   value 'h' {$item{value}*3600} 
+# minutes: value 'm' {$item{value}*60  } 
+# seconds: value 's' {$item{value}     }
