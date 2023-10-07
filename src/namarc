@@ -150,12 +150,9 @@ hotkeys:
     Up: increment_param_10
     Down: decrement_param_10
 
-  
-  
-
 # m2: set parameter stepsize to 10**2 (100)
 # m-2: set stepsize to 10**-2 (0.01)
-# =123: set parameter to 123
+# m=123: set parameter to 123
 
 alias:
   command:
