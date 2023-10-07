@@ -47,7 +47,8 @@ sub setup_hotkeys {
 		my $seq = escape_code($key);
 		say "key: $key, function: $function, escape code: $seq";
 		no strict 'refs';
-		my $coderef = \&$function;
+		my $coderef = sub{ &$function; display_status() };
+
 		if ( length $seq == 1 )
 			 {  $text->{term}->bind_key(   $seq, $coderef); say "key" }
 		else {  $text->{term}->bind_keyseq($seq, $coderef); say "key sequence" }
