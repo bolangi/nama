@@ -322,33 +322,35 @@ sub keyword {
 
 our %escape_code = qw(
 
-  Escape  	^[
+  Escape  	\\e
 
-  Insert  	^[[2~
-  Home  	^[[1~
-  PageUp  	^[[5~
+  Insert  	\\e[2~
+  Home  	\\e[1~
+  PageUp  	\\e[5~
 
-  Delete  	^[[3~
-  End  		^[[4~
-  PageDown  ^[[6~
+  Delete  	\\e[3~
+  End  		\\e[4~
+  PageDown  \\e[6~
 
-  Up  		^[[A~
-  Left  	^[[D~
-  Down  	^[[B~
-  Right  	^[[C~
+  Up  		\\e[A
+  Left  	\\e[D
+  Down  	\\e[B
+  Right  	\\e[C
 
-  F1		^[OP
-  F2		^[OQ
-  F3		^[OR
-  F4		^[OS
-  F5		^[[15~ 
-  F6		^[[17~ 
-  F7		^[[18~ 
-  F8		^[[19~ 
-  F9		^[[20~ 
-  F10		^[[21~ 
-  F11		^[[23~ 
-  F12		^[[24~ 
+  F1		\\eOP
+  F2		\\eOQ
+  F3		\\eOR
+  F4		\\eOS
+  F5		\\e[15~ 
+  F6		\\e[17~ 
+  F7		\\e[18~ 
+  F8		\\e[19~ 
+  F9		\\e[20~ 
+  F10		\\e[21~ 
+  F11		\\e[23~ 
+  F12		\\e[24~ 
+
+  KeypadInsert  \\eOp
 );
 1;
 __END__
