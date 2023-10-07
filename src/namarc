@@ -140,7 +140,7 @@ hotkeys:
     Down: bump_mark_back_10
 
   param_mode:
-	Home: previous_effect
+    Home: previous_effect
     End: next_effect
     PageUp: previous_param
     PageDown: next_param
