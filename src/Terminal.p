@@ -69,6 +69,13 @@ sub set_key_bindings_for_hotkey_mode {
 
 
 }
+sub display_status {
+			print(
+				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
+				"\x1b[2K",  # erase line
+				hotkey_status_bar() 
+			) ;
+}
 sub hotkey_status_bar {
 	my $name = "[".$this_track->name."]"; 
 	return "$name has no selected effect" unless $this_track->op;
