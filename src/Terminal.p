@@ -45,13 +45,12 @@ sub setup_hotkeys {
 					%{$config->{hotkeys}->{$map}} );
 	while( my($key,$function) = each %bindings ){
 		my $seq = escape_code($key);
+		my $func_name = $key;
 		say "key: $key, function: $function, escape code: $seq";
 		no strict 'refs';
 		my $coderef = sub{ &$function; display_status() };
-
-		if ( length $seq == 1 )
-			 {  $text->{term}->bind_key(   $seq, $coderef); say "key" }
-		else {  $text->{term}->bind_keyseq($seq, $coderef); say "key sequence" }
+		$text->{term}->add_defun($func_name, $coderef);
+		$text->{term}->bind_keyseq($seq, $func_name); 
 	}
 	say "\nHotkeys set for $map!";
 	1 # needed by grammar, apparently
