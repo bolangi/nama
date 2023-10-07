@@ -65,11 +65,6 @@ sub list_hotkeys {
 	pager("Hotkeys\n",Dumper \%hots)
 }
 
-sub set_key_bindings_for_hotkey_mode {
-	my $mode = shift;
-
-
-}
 sub display_status {
 			print(
 				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
