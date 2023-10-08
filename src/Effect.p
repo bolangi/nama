@@ -1,6 +1,6 @@
 { 
 package ::Effect;
-use Modern::Perl;
+use Modern::Perl '2020';
 use List::MoreUtils qw(first_index insert_after_string);
 use Carp qw(carp cluck croak confess);
 use Data::Dumper::Concise;

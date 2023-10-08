@@ -1,7 +1,7 @@
 # ----------- Logging ------------
 
 package ::Log;
-use Modern::Perl;
+use Modern::Perl '2020';
 use Log::Log4perl qw(get_logger :levels);
 use Exporter;
 use Carp qw(carp cluck confess croak);

@@ -1,5 +1,5 @@
 package ::Sequence;
-use Modern::Perl; use Carp; 
+use Modern::Perl '2020'; use Carp; 
 use ::Assign qw(json_out);
 use ::Log qw(logsub logpkg);
 use ::Effect  qw(fxn modify_effect);

@@ -19,7 +19,7 @@ use ::Log qw(logpkg logsub);
 use ::Effect  qw(fxn);
 use List::MoreUtils qw(first_index);
 use Try::Tiny;
-use Modern::Perl;
+use Modern::Perl '2020';
 use Carp qw(carp cluck croak);
 use File::Copy qw(copy);
 use File::Slurp;
@@ -247,7 +247,7 @@ sub fades { grep { $_->{track} eq $_[0]->name } values %::Fade::by_index  }
 {
 package ::SimpleTrack; # used for Main track
 use ::Globals qw(:all);
-use Modern::Perl; use Carp; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use Carp; use ::Log qw(logpkg);
 use SUPER;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
@@ -266,7 +266,7 @@ sub activate_bus {}
 {
 package ::MasteringTrack; # used for mastering chains 
 use ::Globals qw(:all);
-use Modern::Perl; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::SimpleTrack';
 
@@ -283,7 +283,7 @@ sub version {0}
 package ::EarTrack; # for submix helper tracks
 use ::Globals qw(:all);
 use ::Util qw(dest_string);
-use Modern::Perl; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use ::Log qw(logpkg);
 use SUPER;
 no warnings qw(uninitialized redefine);
 our @ISA = '::SlaveTrack';
@@ -299,7 +299,7 @@ sub width { $_[0]->{width} }
 {
 package ::SlaveTrack;
 use ::Globals qw(:all);
-use Modern::Perl; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub width { $tn{$_[0]->target}->width }
@@ -317,7 +317,7 @@ sub dir { $tn{$_[0]->target}->dir }
 {
 package ::BoostTrack; 
 use ::Globals qw(:all);
-use Modern::Perl; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub rec_status{
@@ -493,14 +493,14 @@ sub new {
 { 
 package ::WetTrack; # for inserts
 use ::Globals qw(:all);
-use Modern::Perl; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use ::Log qw(logpkg);
 our @ISA = '::SlaveTrack';
 }
 
 {
 package ::MidiTrack; 
 use ::Globals qw(:all);
-use Modern::Perl;
+use Modern::Perl '2020';
 use SUPER;
 use ::Log qw(logpkg);
 our @ISA = qw(::Track);

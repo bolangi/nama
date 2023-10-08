@@ -1,6 +1,6 @@
 # -------- CacheTrack ------
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 use Storable 'dclone';
 use Try::Tiny;
 use ::Globals qw(:all);

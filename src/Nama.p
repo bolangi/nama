@@ -1,7 +1,7 @@
 package ::;
 use vars qw($VERSION);
 $VERSION = "1.218";
-use Modern::Perl;
+use Modern::Perl '2020';
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
 

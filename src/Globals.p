@@ -1,5 +1,5 @@
 package ::Globals;
-use Modern::Perl;
+use Modern::Perl '2020';
 
 # set aliases for common indices
 *bn = \%::Bus::by_name;

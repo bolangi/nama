@@ -1,5 +1,5 @@
 package ::Object;
-use Modern::Perl;
+use Modern::Perl '2020';
 use Carp;
 use ::Assign qw(json_out); 
 use Storable qw(dclone);

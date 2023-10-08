@@ -1,6 +1,6 @@
 # ---------- Git Support ----------
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 sub git { 
 	return if is_test_script();
 	$config->{use_git} or warn("@_: git command, but git is not enabled.

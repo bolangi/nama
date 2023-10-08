@@ -1,6 +1,6 @@
 package ::TrackLatency;
 use Role::Tiny;
-use Modern::Perl;
+use Modern::Perl '2020';
 use ::Globals qw($setup);
 
 sub latency_offset {

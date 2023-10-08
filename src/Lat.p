@@ -1,5 +1,5 @@
 package ::Lat;
-use Modern::Perl;
+use Modern::Perl '2020';
 our @ISA;
 use Data::Dumper::Concise;
 use overload '+' => \&add_latency,

@@ -6,7 +6,7 @@
 #
 
 package ::;
-use Modern::Perl; use Carp;
+use Modern::Perl '2020'; use Carp;
 use Socket qw(getnameinfo NI_NUMERICHOST) ;
 
 sub is_test_script { $config->{opts}->{J} }
@@ -200,7 +200,7 @@ sub definitions {
 	{ package ::Config;
 	use Carp;
 	use ::Globals qw(:singletons);
-	use Modern::Perl;
+	use Modern::Perl '2020';
 	our @ISA = '::Object'; #  for ->dump and ->as_hash methods
 
 	sub serialize_formats { split " ", $_[0]->{serialize_formats} }

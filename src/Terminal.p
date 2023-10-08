@@ -1,7 +1,7 @@
 # ----------- Terminal related subroutines ---------
 
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 no warnings 'uninitialized';
 use Carp;
 use ::Globals qw(:singletons $this_bus $this_track);

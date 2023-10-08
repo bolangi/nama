@@ -1,6 +1,6 @@
 {
 package ::Insert;
-use Modern::Perl;
+use Modern::Perl '2020';
 use Carp;
 no warnings qw(uninitialized redefine);
 our $VERSION = 0.1;
@@ -172,7 +172,7 @@ sub soundcard_delay {
 }
 {
 package ::PostFaderInsert;
-use Modern::Perl; use Carp; our @ISA = qw(::Insert);
+use Modern::Perl '2020'; use Carp; our @ISA = qw(::Insert);
 use ::Util qw(input_node output_node dest_type);
 use ::Log qw(logpkg);
 sub add_paths {
@@ -261,7 +261,7 @@ sub remove {
 }
 {
 package ::PreFaderInsert;
-use Modern::Perl; use Carp; our @ISA = qw(::Insert);
+use Modern::Perl '2020'; use Carp; our @ISA = qw(::Insert);
 use ::Util qw(input_node output_node dest_type);
 use ::Log qw(logpkg);
 use ::Globals qw(:trackrw);
