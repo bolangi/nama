@@ -1,5 +1,4 @@
 package ::;
-require 5.14.4;
 use vars qw($VERSION);
 $VERSION = "1.218";
 use Modern::Perl;
