@@ -4,10 +4,10 @@ use Carp;
 use ::Assign qw(json_out); 
 use Storable qw(dclone);
 use Data::Dumper::Concise;
+no strict 'refs';
+no strict 'subs';
 
-no strict; # Enable during dev and testing
 BEGIN {
-	require 5.004;
 	$::Object::VERSION = '1.04';
 }
 
