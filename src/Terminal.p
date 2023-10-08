@@ -45,8 +45,8 @@ sub new_keymap {
 
 sub setup_hotkeys {
 	my $map = shift;
-	my %bindings = (%{$config->{hotkeys}->{common}}, 
-					%{$config->{hotkeys}->{$map}} );
+	my %bindings = ($config->{hotkeys}->{common}->%*, 
+					$config->{hotkeys}->{$map}->%*);
 	while( my($key,$function) = each %bindings ){
 		my $seq = escape_code($key);
 		my $func_name = $key;
