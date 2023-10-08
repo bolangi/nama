@@ -1,6 +1,6 @@
 # ------- Jack port connect routines -------
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 use File::Slurp;
 no warnings 'uninitialized';
 

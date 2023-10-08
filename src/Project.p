@@ -1,12 +1,12 @@
 # --------- Project related subroutines ---------
 {
 package ::Project;
-use Modern::Perl; use Carp;
+use Modern::Perl '2020'; use Carp;
 sub hello { my $self = shift; say "hello $self: ",::Dumper $::project}
 }
 {
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 use Carp;
 use File::Slurp;
 

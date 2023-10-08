@@ -1,7 +1,7 @@
 {
 package ::BusUtil;
 use Role::Tiny;
-use Modern::Perl;
+use Modern::Perl '2020';
 use ::Globals qw(%tn %bn PLAY OFF MON);
 
 sub version_has_edits { 

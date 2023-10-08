@@ -1,8 +1,7 @@
 package ::;
-require 5.14.4;
 use vars qw($VERSION);
-$VERSION = "1.500";
-use Modern::Perl;
+$VERSION = "1.501";
+use Modern::Perl '2020';
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
 

@@ -1,7 +1,7 @@
 # ---------------- User Customization ---------------
 
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 
 sub setup_user_customization {
 	my $filename = $file->user_customization();

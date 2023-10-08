@@ -1,7 +1,7 @@
 {
 package ::Engine;
 our $VERSION = 1.0;
-use Modern::Perl;
+use Modern::Perl '2020';
 use Carp;
 our @ISA;
 our %by_name;
@@ -128,7 +128,7 @@ sub sync_action {
 {
 package ::NetEngine;
 our $VERSION = 1.0;
-use Modern::Perl;
+use Modern::Perl '2020';
 use ::Log qw(logpkg logit);
 use ::Globals qw(:all);
 use Carp qw(carp);
@@ -283,7 +283,7 @@ sub configure {
 {
 package ::LibEngine;
 our $VERSION = 1.0;
-use Modern::Perl;
+use Modern::Perl '2020';
 use ::Globals qw(:all);
 use ::Log qw(logit);
 our @ISA = '::Engine';
@@ -317,7 +317,7 @@ sub configure { ::NetEngine::configure(@_) }
 } # end package
 { 
 package ::MidiEngine;
-use Modern::Perl;
+use Modern::Perl '2020';
 use SUPER;
 use ::Globals qw($config %tn);
 our @ISA = '::Engine';
