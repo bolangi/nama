@@ -909,6 +909,11 @@ hotkeys_bump:
   what: Enable hotkeys for re-positioning marks 
   short: hkb 
   parameters: none
+hotkeys_off:
+  type: general
+  what: restore default key bindings
+  short: hko
+  parameters: none
 hotkeys_list:
   type: general
   what: list hotkey bindings
