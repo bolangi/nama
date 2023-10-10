@@ -1,10 +1,9 @@
 #!/usr/bin/env perl
 # 
-# This script provides templating functions for building
-# a perl module from sources.
+# Run 'myproc' to preprocess Nama sources and generate Audio::Nama distribution
 #
-# Run 'myproc' to provide preprocessing for Audio::Nama
-#
+#  - source filtering to change ::foo to Audio::Nama::foo
+#  - include files and the output of scripts 
 #
 # special cases: 
 # Do NOT convert the following:
