@@ -128,6 +128,8 @@ $text->{hyphenated_commands}	# remove-track => remove_track
 $text->{eval_result}			# buffer for result of eval_perl() 
 $text->{output_buffer}			# buffer for output of OSC commands
 $text->{midi_cmd} 				# list of Midish commands for the parser to recognize
+$text->{default_keymap}			# store readline's default bindings for restoring later
+$text->{nama_keymap}			# default keymap with additional bindings 
 
 $project->{events}				# timers used during engine run
 $project->{name}				# project name
