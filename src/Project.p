@@ -128,10 +128,8 @@ sub load_project {
 	if (not $project->{name} or not -d project_dir() and not $args{create})
 	{
 		no warnings 'uninitialized';
-		my $bad_name = $project->{name};
-		my $default_name = 'Untitled';
-		::pager_newline(qq(Project "$bad_name" not found.  Loading project "$default_name".)); 
-		load_project(name => $default_name, create => 1);
+		::pager_newline(qq(Project "$project->{name}" not found. Loading project "untitled".)); 
+		load_project(name => 'Untitled', create => 1);
 
 	}
 	create_project_dirs() if $args{create};
@@ -146,7 +144,7 @@ sub load_project {
 	cache_wav_info();
 	refresh_wav_cache();
 	initialize_project_repository();
-	restore_state($project->{name}) unless $config->{opts}->{M} ;
+	restore_state($args{settings}) unless $config->{opts}->{M} ;
 
 	$config->{opts}->{M} = 0; # enable 
 	
