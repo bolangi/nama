@@ -93,11 +93,6 @@ sub destroy_readline {
 	delete $text->{term}; 
 	delete $project->{events}->{stdin};
 }
-sub setup_hotkey_grammar {
-	$text->{hotkey_grammar} = get_data_section('hotkey_grammar');
-	$text->{hotkey_parser} = Parse::RecDescent->new($text->{hotkey_grammar})
-		or croak "Bad grammar!\n";
-}
 sub end_of_list_sound { system( $config->{hotkey_beep} ) }
 
 sub previous_track {

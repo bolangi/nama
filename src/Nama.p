@@ -165,7 +165,6 @@ sub bootstrap_environment {
 	process_command_line_options();
 	start_logging();
 	setup_grammar();
-	setup_hotkey_grammar();
 	initialize_interfaces();
 }
 sub kill_and_reap {
