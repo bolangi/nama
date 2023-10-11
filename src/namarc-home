@@ -115,5 +115,38 @@ alias:
     reverb: gverb
 
 display_waveform: 1
+
+hotkeys:
+  common: 
+    Insert: previous_track
+    Delete: next_track
+    KeypadInsert: jump_replay
+  jump_mode:
+    Home: jump_to_start
+    End: jump_to_end
+    PageUp: previous_mark
+    PageDown: next_mark
+    Right: jump_pos_forward_1
+    Up: jump_pos_forward_10
+    Left: jump_pos_back_1
+    Down: jump_pos_back_10
+  bump_mode:
+    Home: jump_to_start
+    End: jump_to_end
+    PageUp: previous_mark
+    PageDown: next_mark
+    Right: bump_mark_forward_1
+    Up: bump_mark_forward_10
+    Left: bump_mark_back_1
+    Down: bump_mark_back_10
+  param_mode:
+    Home: previous_effect
+    End: next_effect
+    PageUp: previous_param
+    PageDown: next_param
+    Left: decrement_param_1
+    Right: increment_param_1
+    Up: increment_param_10
+    Down: decrement_param_10
 # end
 
