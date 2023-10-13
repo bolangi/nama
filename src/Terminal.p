@@ -80,9 +80,16 @@ sub display_status {
 			print(
 				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
 				"\x1b[2K",  # erase line
-				param_status_bar() 
+				status_bar()
 			) ;
 }
+sub status_bar { 
+	my %bar = (param => \&param_status_bar,
+	           jump  => \&jump_status_bar,
+			   bump  => \&bump_status_bar );
+	$bar{$text->{hotkey_mode}}
+}
+	
 sub param_status_bar {
 	my $name = "[".$this_track->name."]"; 
 	return "$name has no selected effect" unless $this_track->op;
@@ -90,8 +97,22 @@ sub param_status_bar {
 				"Stepsize: ",$this_track->stepsize,
 				fxn($this_track->op)->fxname,
 				parameter_info($this_track->op, $this_track->param - 1);
-				
-;
+}
+sub jump_status_bar {
+	my $name = "[".$this_track->name."]"; 
+	return "$name has no selected effect" unless $this_track->op;
+	join " ", $name,
+				"Stepsize: ",$this_track->stepsize,
+				fxn($this_track->op)->fxname,
+				parameter_info($this_track->op, $this_track->param - 1);
+}
+sub bump_status_bar {
+	my $name = "[".$this_track->name."]"; 
+	return "$name has no selected effect" unless $this_track->op;
+	join " ", $name,
+				"Stepsize: ",$this_track->stepsize,
+				fxn($this_track->op)->fxname,
+				parameter_info($this_track->op, $this_track->param - 1);
 }
 sub reset_hotkey_buffers {
 	$text->{hotkey_buffer} = "";
