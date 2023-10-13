@@ -99,20 +99,10 @@ sub param_status_bar {
 				parameter_info($this_track->op, $this_track->param - 1);
 }
 sub jump_status_bar {
-	my $name = "[".$this_track->name."]"; 
-	return "$name has no selected effect" unless $this_track->op;
-	join " ", $name,
-				"Stepsize: ",$this_track->stepsize,
-				fxn($this_track->op)->fxname,
-				parameter_info($this_track->op, $this_track->param - 1);
+	# current playback pos, # jump size
 }
 sub bump_status_bar {
-	my $name = "[".$this_track->name."]"; 
-	return "$name has no selected effect" unless $this_track->op;
-	join " ", $name,
-				"Stepsize: ",$this_track->stepsize,
-				fxn($this_track->op)->fxname,
-				parameter_info($this_track->op, $this_track->param - 1);
+	# current playback pos, previous current and next mark pos
 }
 sub reset_hotkey_buffers {
 	$text->{hotkey_buffer} = "";
