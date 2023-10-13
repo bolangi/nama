@@ -364,7 +364,23 @@ sub keyword {
   F11		\\e[23~ 
   F12		\\e[24~ 
 
-  KeypadInsert  \\eOp
+  Keypad/			\\eOo
+  Keypad*			\\eOj
+  Keypad-   		\\eOm
+  Keypad+   		\\eOk
+  Keypad7Home 		\\eOw
+  Keypad8Up   		\\eOx
+  Keypad9Up   		\\eOy
+  Keypad4Right 		\\eOt
+  Keypad5     		\\eOu
+  Keypad6Right 		\\eOv
+  Keypad1End 		\\eOq
+  Keypad2Down   	\\eOr
+  Keypad3PageDown 	\\eOs
+  Keypad0Insert   	\\eOp
+  Keypad.Delete   	\\eOn
+  KeypadEnter     	\\eOM
+  
 );
 1;
 __END__
