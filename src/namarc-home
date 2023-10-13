@@ -127,9 +127,9 @@ hotkeys:
     PageUp: previous_mark
     PageDown: next_mark
     Right: jump_pos_forward_1
-    Up: jump_pos_forward_10
+    #Up: jump_pos_forward_10
     Left: jump_pos_back_1
-    Down: jump_pos_back_10
+    #Down: jump_pos_back_10
   bump_mode:
     Home: jump_to_start
     End: jump_to_end
