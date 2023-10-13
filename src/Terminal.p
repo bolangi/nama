@@ -8,6 +8,7 @@ use ::Globals qw(:singletons $this_bus $this_track);
 use ::Log qw(logpkg logsub);
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
+our %escape_code;
 
 sub initialize_prompt {
 	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
@@ -19,8 +20,8 @@ sub initialize_prompt {
 
 sub initialize_terminal {
 	$text->{term} = Term::ReadLine->new("Ecasound/Nama");
-	$text->{default_keymap} = $text->{term}->get_keymap;
 	new_keymap();
+	setup_hotkeys('jump_mode');
 	$text->{term_attribs} = $text->{term}->Attribs;
 	$text->{term_attribs}->{attempted_completion_function} = \&complete;
 	$text->{term_attribs}->{already_prompted} = 1;
@@ -38,17 +39,24 @@ sub initialize_terminal {
 	$SIG{USR1} = sub { project_snapshot() };
 }
 sub new_keymap {
+	# backup default bindings, we will modify a copy
+	$text->{default_keymap} = $text->{term}->get_keymap;
 	$text->{nama_keymap} = $text->{term}->copy_keymap($text->{default_keymap});
+	$text->{term}->set_keymap_name('nama', $text->{nama_keymap});
 	$text->{term}->set_keymap($text->{nama_keymap});
-	say $text->{term}->get_keymap_name($text->{term}->get_keymap);
+}
+sub keymap_name {
+	$text->{term}->get_keymap_name($text->{term}->get_keymap);
 }
 
 sub setup_hotkeys {
 	my $map = shift;
+	#use DDP;
+	#p $config->{hotkeys};
 	my %bindings = ($config->{hotkeys}->{common}->%*, 
 					$config->{hotkeys}->{$map}->%*);
 	while( my($key,$function) = each %bindings ){
-		my $seq = escape_code($key);
+		my $seq = $escape_code{$key};
 		my $func_name = $key;
 		say "key: $key, function: $function, escape code: $seq";
 		no strict 'refs';
@@ -168,9 +176,6 @@ sub detect_spacebar {
 			$text->{term_attribs}->{'callback_read_char'}->();
 
 			
-		}
-		elsif (  $text->{term_attribs}->{line_buffer} eq "#" ){
-			setup_hotkeys();
 		}
 	});
 }
@@ -318,7 +323,7 @@ sub keyword {
         return undef;
 };
 
-our %escape_code = qw(
+%escape_code = qw(
 
   Escape  	\\e
 
