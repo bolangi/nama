@@ -119,7 +119,7 @@ hotkeys:
     Delete: next_track
     KeypadInsert: jump_replay
     
-  jump_mode:
+  jump:
     Home: jump_to_start
     End: jump_to_end
     PageUp: previous_mark
@@ -129,7 +129,7 @@ hotkeys:
     Left: jump_pos_back_1
     Down: jump_pos_back_10
 
-  bump_mode:
+  bump:
     Home: jump_to_start
     End: jump_to_end
     PageUp: previous_mark
@@ -139,7 +139,7 @@ hotkeys:
     Left: bump_mark_back_1
     Down: bump_mark_back_10
 
-  param_mode:
+  param:
     Home: previous_effect
     End: next_effect
     PageUp: previous_param
