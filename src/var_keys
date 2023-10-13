@@ -130,6 +130,7 @@ $text->{output_buffer}			# buffer for output of OSC commands
 $text->{midi_cmd} 				# list of Midish commands for the parser to recognize
 $text->{default_keymap}			# store readline's default bindings for restoring later
 $text->{nama_keymap}			# default keymap with additional bindings 
+$text->{hotkey_mode}			# "jump" playhead, "bump" mark position or tweak effect "param"
 
 $project->{events}				# timers used during engine run
 $project->{name}				# project name
