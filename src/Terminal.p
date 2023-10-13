@@ -21,7 +21,7 @@ sub initialize_prompt {
 sub initialize_terminal {
 	$text->{term} = Term::ReadLine->new("Ecasound/Nama");
 	new_keymap();
-	setup_hotkeys('jump_mode');
+	setup_hotkeys('jump_mode', 'quiet');
 	$text->{term_attribs} = $text->{term}->Attribs;
 	$text->{term_attribs}->{attempted_completion_function} = \&complete;
 	$text->{term_attribs}->{already_prompted} = 1;
@@ -50,7 +50,7 @@ sub keymap_name {
 }
 
 sub setup_hotkeys {
-	my $map = shift;
+	my ($map, $quiet) = @_;
 	#use DDP;
 	#p $config->{hotkeys};
 	my %bindings = ($config->{hotkeys}->{common}->%*, 
@@ -58,13 +58,13 @@ sub setup_hotkeys {
 	while( my($key,$function) = each %bindings ){
 		my $seq = $escape_code{$key};
 		my $func_name = $key;
-		say "key: $key, function: $function, escape code: $seq";
+		#say "key: $key, function: $function, escape code: $seq";
 		no strict 'refs';
 		my $coderef = sub{ &$function; display_status() };
 		$text->{term}->add_defun($func_name, $coderef);
 		$text->{term}->bind_keyseq($seq, $func_name); 
 	}
-	say "\nHotkeys set for $map!";
+	pager("\nHotkeys set for $map!") unless $quiet;
 	1 # needed by grammar, apparently
 }
 sub list_hotkeys { 
