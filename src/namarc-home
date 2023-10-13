@@ -118,35 +118,34 @@ display_waveform: 1
 
 hotkeys:
   common: 
-    Insert: previous_track
-    Delete: next_track
-    KeypadInsert: jump_replay
+    Keypad7: previous_track
+    Keypad4: next_track
   jump:
-    Home: jump_to_start
-    End: jump_to_end
-    PageUp: previous_mark
-    PageDown: next_mark
-    Right: jump_pos_forward_1
-    #Up: jump_pos_forward_10
-    Left: jump_pos_back_1
-    #Down: jump_pos_back_10
+    Keypad8: jump_to_start
+    Keypad5: jump_to_end
+    Keypad9: previous_mark
+    Keypad6: next_mark
+    Keypad3: jump_pos_forward_1
+    Keypad2: jump_pos_forward_10
+    Keypad1: jump_pos_back_1
+    Keypad0: jump_pos_back_10
   bump:
-    Home: jump_to_start
-    End: jump_to_end
-    PageUp: previous_mark
-    PageDown: next_mark
-    Right: bump_mark_forward_1
-    Up: bump_mark_forward_10
-    Left: bump_mark_back_1
-    Down: bump_mark_back_10
+    Keypad8: jump_to_start
+    Keypad5: jump_to_end
+    Keypad9: previous_mark
+    Keypad6: next_mark
+    Keypad3: bump_mark_forward_1
+    Keypad2: bump_mark_forward_10
+    Keypad1: bump_mark_back_1
+    Keypad0: bump_mark_back_10
   param:
-    Home: previous_effect
-    End: next_effect
-    PageUp: previous_param
-    PageDown: next_param
-    Left: decrement_param_1
-    Right: increment_param_1
-    Up: increment_param_10
-    Down: decrement_param_10
+    Keypad8: previous_effect
+    Keypad5: next_effect
+    Keypad9: previous_param
+    Keypad6: next_param
+    Keypad3: decrement_param_1
+    Keypad2: increment_param_1
+    Keypad1: increment_param_10
+    Keypad0: decrement_param_10
 # end
 
