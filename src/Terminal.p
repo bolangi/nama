@@ -53,6 +53,8 @@ sub setup_hotkeys {
 	my ($map, $quiet) = @_;
 	#use DDP;
 	#p $config->{hotkeys};
+	new_keymap();
+	$text->{hotkey_mode} = $map;
 	my %bindings = ($config->{hotkeys}->{common}->%*, 
 					$config->{hotkeys}->{$map}->%*);
 	while( my($key,$function) = each %bindings ){
@@ -65,14 +67,10 @@ sub setup_hotkeys {
 		$text->{term}->bind_keyseq($seq, $func_name); 
 	}
 	pager("\nHotkeys set for $map!") unless $quiet;
-	1 # needed by grammar, apparently
 }
 sub list_hotkeys { 
-	my $hots 		= dclone($config->{hotkeys});
-	my %hots = %$hots;
-	$hots{'='} 		= 'Enter numeric value';
-	$hots{ 'mN' } 	= 'Change step size to 10 raised to the Nth power';
-	$hots{ '#' }	= 'Engage hotkey mode (must be typed in column 1)';
+	my %hots 		= ( $config->{hotkeys}->{common}->%*, 
+						$config->{hotkeys}->{$text->{hotkey_mode}->%*} );
 	pager("Hotkeys\n",Dumper \%hots)
 }
 
