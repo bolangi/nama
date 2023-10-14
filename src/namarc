@@ -124,10 +124,10 @@ hotkeys:
     End: jump_to_end
     PageUp: previous_mark
     PageDown: next_mark
-    Right: jump_pos_forward_1
-    Up: jump_pos_forward_10
-    Left: jump_pos_back_1
-    Down: jump_pos_back_10
+    Right: jump_forward_1
+    Up: jump_forward_10
+    Left: jump_back_1
+    Down: jump_back_10
 
   bump:
     Home: jump_to_start
@@ -150,9 +150,6 @@ hotkeys:
     Up: increment_param_10
     Down: decrement_param_10
 
-# m2: set parameter stepsize to 10**2 (100)
-# m-2: set stepsize to 10**-2 (0.01)
-# m=123: set parameter to 123
 
 alias:
   command:

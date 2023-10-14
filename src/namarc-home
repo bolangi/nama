@@ -125,10 +125,10 @@ hotkeys:
     Keypad5: jump_to_end
     Keypad9: previous_mark
     Keypad6: next_mark
-    Keypad3: jump_pos_forward_1
-    Keypad2: jump_pos_forward_10
-    Keypad1: jump_pos_back_1
-    Keypad0: jump_pos_back_10
+    Keypad3: jump_forward_1
+    Keypad2: jump_forward_10
+    Keypad1: jump_back_1
+    Keypad0: jump_back_10
   bump:
     Keypad8: jump_to_start
     Keypad5: jump_to_end
