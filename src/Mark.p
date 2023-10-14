@@ -237,15 +237,6 @@ sub modify_mark {
 	set_position($mark->time);
 	request_setup();
 }
-#  D: delete_current_mark
-#  .: drop_snip_mark
-sub bump_mark_minus_1 { }
-sub bump_mark_plus_1 { }
-sub bump_mark_minus_point_1 { }
-sub bump_mark_plus_point_1 { }
-sub bump_mark_minus_point_01 { }
-sub bump_mark_plus_point_01 { }
-
 
 ## jump playback head position
 
@@ -293,23 +284,13 @@ sub _set_position {
 	update_clock_display();
 }
 
-# used by hotkeys
 
-#sub previous_mark {}
-#sub next_mark {}
 sub delete_current_mark {}
-#sub drop_mark {}
 sub bump_mark_forward_1 {}
 sub bump_mark_forward_10 {}
 sub bump_mark_back_1 {}
 sub bump_mark_back_10 {}
-#sub jump_to_start {}
-#sub jump_to_end {}
-sub jump_pos_forward_1 {}
-sub jump_pos_forward_10 {}
-sub jump_pos_back_1 {}
-sub jump_pos_back_10 {}
-sub jump_replay {}
+
 
 sub forward {
 	my $delta = shift;
@@ -326,8 +307,10 @@ sub jump_forward {
 	my $multiplier = shift;
 	forward( $multiplier * $config->{hotkey_playback_jumpsize_seconds})
 	}
-sub jump_backward { jump_forward( - shift()) }
-
+sub jump_forward_1   { jump_forward(  1) }
+sub jump_forward_10  { jump_forward( 10) }
+sub jump_backward_1  { jump_forward( -1) }
+sub jump_backward_10 { jump_forward(-10) }
 	
 } # end package
 { package ::HereMark;
