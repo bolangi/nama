@@ -1726,8 +1726,13 @@ set_sample_rate:
   parameters: <integer:sample-rate>
 set_playback_jump:
   type: transport
-  short: spj
+  short: spj j=
   what: Set the jump size for transport hotkeys
+  parameters: <float:seconds>
+set_mark_bump:
+  type: mark 
+  short: smb b=
+  what: Set the size of the mark bump
   parameters: <float:seconds>
 set_param_increment:
   type: effect
@@ -1736,8 +1741,8 @@ set_param_increment:
   parameters: <float:time>
 set_param_exp:
   type: effect
-  short: spe m
-  what: Set the parameter increment as an exponent, e.g. "m-2" sets 0.01
+  short: spe m x=
+  what: Set the parameter increment as an exponent, e.g. "x=-2" sets 0.01
   parameters: <integer:exponent>
 
 ...

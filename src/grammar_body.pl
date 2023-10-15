@@ -1773,6 +1773,7 @@ set_param_increment: _set_param_increment value {::set_param_stepsize($item{valu
 set_param_exp:       _set_param_exp       exp   {::set_param_stepsize(10**$item{exp});1} 
 
 set_playback_jump: _set_playback_jump seconds {::set_playback_jump($item{seconds})} 
+set_mark_bump: _set_mark_bump seconds {        ::set_mark_bump(    $item{seconds})} 
 seconds: value
 exp: /[-+]?\d/ 
 # hours:   value 'h' {$item{value}*3600} 
