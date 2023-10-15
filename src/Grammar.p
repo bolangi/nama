@@ -75,7 +75,6 @@ sub process_line {
 		# from the index
 		$this_track = $tn{Main} if ! $this_track or
 			(ref $this_track and ! $tn{$this_track->name});
-		setup_hotkeys() if $config->{hotkeys_always};
 	}
 	if (! $this_engine->started() ){
 		my $result = check_fx_consistency();
