@@ -309,7 +309,7 @@ sub jump_forward {
 	}
 
 sub set_playback_jump { $config->{playback_jump_seconds} = shift }
-sub set_mark_bump         { $config->{mark_bump_seconds}          = shift }
+sub set_mark_bump     { $config->{mark_bump_seconds}     = shift }
 sub jump_forward_1   { jump_forward(  1) }
 sub jump_forward_10  { jump_forward( 10) }
 sub jump_backward_1  { jump_forward( -1) }
