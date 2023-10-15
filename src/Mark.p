@@ -305,8 +305,11 @@ sub rewind {
 }
 sub jump_forward {
 	my $multiplier = shift;
-	forward( $multiplier * $config->{hotkey_playback_jumpsize_seconds})
+	forward( $multiplier * $config->{playback_jumpsize_seconds})
 	}
+
+sub set_playback_jumpsize { $config->{playback_jumpsize_seconds} = shift }
+sub set_mark_bump         { $config->{bumpsize_seconds}          = shift }
 sub jump_forward_1   { jump_forward(  1) }
 sub jump_forward_10  { jump_forward( 10) }
 sub jump_backward_1  { jump_forward( -1) }

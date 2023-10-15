@@ -72,8 +72,7 @@
 
 ### the following variables may also be set 
 
-	$hotkeys_always					$config->{hotkeys_always}
-	$hotkey_playback_jumpsize_seconds   $config->{hotkey_playback_jumpsize_seconds}
+	$playback_jumpsize_seconds		$config->{playback_jumpsize_seconds}
 	$seek_end_margin			   $config->{seek_end_margin}
     
 
