@@ -72,7 +72,8 @@
 
 ### the following variables may also be set 
 
-	$playback_jumpsize_seconds		$config->{playback_jumpsize_seconds}
+	$playback_jump_seconds		$config->{playback_jump_seconds}
+	$mark_bump_seconds				$config->{mark_bump_seconds}
 	$seek_end_margin			   $config->{seek_end_margin}
     
 

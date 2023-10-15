@@ -181,7 +181,8 @@ sub definitions {
 		hotkey_beep					=> 'beep -f 250 -l 200',
 	#	this causes beeping during make test
 	#	beep_command					=> 'beep -f 350 -l 700',
-		hotkey_playback_jumpsize_seconds => 1,
+		playback_jump_seconds => 1,
+		mark_bump_seconds => 0.1,
 		seek_end_margin	=>10,
 		midi_record_buffer => 'midi_record',
 		midi_default_input_channel => 'keyboard',

@@ -1724,7 +1724,7 @@ set_sample_rate:
   short: ssr
   what: configure the sample rate for the current project or report sample rate if no parameter
   parameters: <integer:sample-rate>
-set_playback_jumpsize:
+set_playback_jump:
   type: transport
   short: spj
   what: Set the jump size for transport hotkeys
