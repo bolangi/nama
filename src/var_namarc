@@ -113,6 +113,12 @@
 	$ticks_per_quarter_note 		$config->{ticks_per_quarter_note}
 
 	$use_metronome					$config->{use_metronome}
+	$mark_replay_seconds			$config->{mark_replay_seconds}
+	$mark_replay_seconds			$config->{mark_replay_seconds}
+	$playback_jump_seconds			$config->{playback_jump_seconds}
+	$mark_bump_seconds				$config->{mark_bump_seconds}
+	$mark_replay_seconds			$config->{mark_replay_seconds}
+
 	
 	# end
 
