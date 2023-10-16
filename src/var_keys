@@ -1,7 +1,6 @@
 $config->{memoize} 				# method caching
 $config->{hires_timer}			# indicates if we are capable
 $config->{opts}					# command line arguments
-$config->{soundcard_channels}	# a constant needed for GUI - can we discover this?
 $config->{disable_auto_reconfigure} # -R option
 $config->{engine_muting_time} 	# interval for engine to smoothly mute/unmute
 $config->{engine_command_output_buffer_size}
@@ -15,18 +14,10 @@ $config->{latency_op}			# operator for latency compensation
 $config->{latency_op_init}		# initial values
 $config->{latency_op_set}		# subroutine for setting latency compensation
 $config->{_is_system_bus}		# a hash
-$config->{osc_listener_port}
-$config->{remote_control_port}
-$config->{use_midi}
-$config->{default_waveform_height}
 $config->{waveform_canvas_x}
 $config->{waveform_canvas_y}
-$config->{loop_chain_channel_width}
 $config->{soundcard_loopback_delay}
-$config->{display_waveform}
 $config->{use_effects_bugfix}
-$config->{use_metronome}
-
 
 $jack->{seek_delay}				# extra time for stop-seek-start process
 $jack->{jackd_running}			# jackd status, but this should be a subroutine
