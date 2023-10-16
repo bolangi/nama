@@ -105,10 +105,10 @@
 	$remote_control_port 			$config->{remote_control_port}
 	$engines						$config->{engines}
 
-	$default_waveform_height 			$config->{default_waveform_height}
-	$loop_chain_channel_width 	$config->{loop_chain_channel_width}
+	$default_waveform_height 		$config->{default_waveform_height}
+	$loop_chain_channel_width 		$config->{loop_chain_channel_width}
 	$waveform_pixels_per_second		$config->{waveform_pixels_per_second}
-	$display_waveform					$config->{display_waveform}
+	$display_waveform				$config->{display_waveform}
 
 	$ticks_per_quarter_note 		$config->{ticks_per_quarter_note}
 
