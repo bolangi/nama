@@ -1734,6 +1734,11 @@ set_mark_bump:
   short: smb b=
   what: Set the size of the mark bump
   parameters: <float:seconds>
+set_mark_replay:
+  type: mark 
+  short: smr
+  what: Set how far to jump back playhead for review after setting or bumping a mark 
+  parameters: <float:seconds>
 set_param_increment:
   type: effect
   short: spi m=

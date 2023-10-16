@@ -1776,6 +1776,7 @@ set_playback_jump: _set_playback_jump seconds {::set_playback_jump($item{seconds
 set_mark_bump: _set_mark_bump seconds {        ::set_mark_bump(    $item{seconds})} 
 seconds: value
 exp: /[-+]?\d/ 
+set_mark_replay: _set_mark_replay seconds { ::set_mark_replay($item{seconds})}
 # hours:   value 'h' {$item{value}*3600} 
 # minutes: value 'm' {$item{value}*60  } 
 # seconds: value 's' {$item{value}     }
