@@ -12,7 +12,9 @@ use ::Globals qw(:all);
 use ::Object qw( 
 				 name 
                  time
+				 attrib
 				 );
+# attrib is a hash reference
 
 sub initialize {
 	map{ $_->remove} ::Mark::all();
