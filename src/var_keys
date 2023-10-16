@@ -1,3 +1,6 @@
+# var_keys: keys to all nama singleton hashes except for namarc variables
+# which appear in var_namarc
+
 $config->{memoize} 				# method caching
 $config->{hires_timer}			# indicates if we are capable
 $config->{opts}					# command line arguments
