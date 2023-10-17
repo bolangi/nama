@@ -103,8 +103,8 @@ sub jump_status_bar {
 		my $mark = join ' ', 'Mark', qq("$this_mark->name"), 'at', $this_mark->time;
 		$bar .= $mark;
 	}
-	$bar .= "jump size: $config->{playback_jump_seconds}s, "
-	$bar .= "mark bump: $config->{mark_bump_seconds}s, " 
+	$bar .= "jump size: $config->{playback_jump_seconds}s, ";
+	$bar .= "mark bump: $config->{mark_bump_seconds}s " ;
 	$bar
 }
 sub bump_status_bar {
