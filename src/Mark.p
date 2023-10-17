@@ -290,8 +290,8 @@ sub _set_position {
 sub delete_current_mark {}
 sub bump_mark_forward_1  { $this_mark->{time} += $config->{mark_bump_seconds}    }
 sub bump_mark_forward_10 { $this_mark->{time} += $config->{mark_bump_seconds}*10 }
-sub bump_mark_forward_1  { $this_mark->{time} -= $config->{mark_bump_seconds}    }
-sub bump_mark_forward_10 { $this_mark->{time} -= $config->{mark_bump_seconds}*10 }
+sub bump_mark_back_1     { $this_mark->{time} -= $config->{mark_bump_seconds}    }
+sub bump_mark_back_10    { $this_mark->{time} -= $config->{mark_bump_seconds}*10 }
 
 
 sub forward {
