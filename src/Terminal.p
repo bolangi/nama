@@ -97,7 +97,13 @@ sub param_status_bar {
 				parameter_info($this_track->op, $this_track->param - 1);
 }
 sub jump_status_bar {
-	# current playback pos, # jump size
+	my $pos = ::ecasound_iam("getpos");
+	my $bar = "Head at $pos. ";
+	if (defined $this_mark){
+	my $mark = join ' ', 'mark', qq("$this_mark->name"), 'at', $this_mark->time;
+	$bar .= $mark;
+	}
+	$bar
 }
 sub bump_status_bar {
 	# current playback pos, previous current and next mark pos
