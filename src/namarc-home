@@ -116,6 +116,9 @@ alias:
 
 display_waveform: 1
 
+mark_replay_seconds: 2.5
+playback_jump_seconds: 10
+
 hotkeys:
   common: 
     Keypad7: previous_track
