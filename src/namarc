@@ -113,6 +113,10 @@ spatialiser: matrixSpatialiser 0
 
 limiter: tap_limiter 0 0
 
+mark_replay_seconds: 2.5
+
+playback_jump_seconds: 10
+
 hotkeys:
   common: 
     Insert: previous_track
