@@ -102,9 +102,6 @@ sub jump_status_bar {
 sub bump_status_bar {
 	# current playback pos, previous current and next mark pos
 }
-sub reset_hotkey_buffers {
-	$text->{hotkey_buffer} = "";
-}
 sub destroy_readline {
 	$text->{term}->rl_deprep_terminal() if $text->{term};
 	delete $text->{term}; 
