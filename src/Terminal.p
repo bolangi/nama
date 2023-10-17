@@ -98,11 +98,13 @@ sub param_status_bar {
 }
 sub jump_status_bar {
 	my $pos = ::ecasound_iam("getpos");
-	my $bar = "Head at $pos. ";
+	my $bar = "Playback at ${pos}s, ";
 	if (defined $this_mark) {
-		my $mark = join ' ', 'mark', qq("$this_mark->name"), 'at', $this_mark->time;
+		my $mark = join ' ', 'Mark', qq("$this_mark->name"), 'at', $this_mark->time;
 		$bar .= $mark;
 	}
+	$bar .= "jump size: $config->{playback_jump_seconds}s, "
+	$bar .= "mark bump: $config->{mark_bump_seconds}s, " 
 	$bar
 }
 sub bump_status_bar {
