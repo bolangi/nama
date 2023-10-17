@@ -495,8 +495,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					set_current_op
 					set_current_param
 					set_param_stepsize
-					increment_param
-					decrement_param
 					set_parameter_value
 
 ) ] );
@@ -1120,8 +1118,6 @@ sub set_param_stepsize {
 	my $stepsize = shift;
 	$project->{current_stepsize}->{::this_op()}->[this_param()] = $stepsize;
 }
-sub increment_param { modify_effect(::this_op(), this_param(),'+',this_stepsize())}
-sub decrement_param { modify_effect(::this_op(), this_param(),'-',this_stepsize())}
 sub set_parameter_value {
 	my $value = shift;
 	modify_effect(::this_op(), this_param(), undef, $value)
