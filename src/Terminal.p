@@ -107,6 +107,14 @@ sub jump_status_bar {
 	$bar .= "mark bump: $config->{mark_bump_seconds}s " ;
 	$bar
 }
+sub beep_high { beep(880,0.25,1)}
+sub beep_low  { beep(440,0.25,1)}
+sub beep { 
+	my($freq, $duration, $vol_percent) = @_; 
+	system("ecasound", "-i:tone,sine,$freq,$duration", "-ea:$vol_percent")
+}
+sub beep_trim_start { beep_high() }
+sub beep_trim_end   { beep_low()  }
 sub bump_status_bar {
 	# current playback pos, previous current and next mark pos
 }
