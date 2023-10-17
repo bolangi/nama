@@ -99,9 +99,9 @@ sub param_status_bar {
 sub jump_status_bar {
 	my $pos = ::ecasound_iam("getpos");
 	my $bar = "Head at $pos. ";
-	if (defined $this_mark){
-	my $mark = join ' ', 'mark', qq("$this_mark->name"), 'at', $this_mark->time;
-	$bar .= $mark;
+	if (defined $this_mark) {
+		my $mark = join ' ', 'mark', qq("$this_mark->name"), 'at', $this_mark->time;
+		$bar .= $mark;
 	}
 	$bar
 }
