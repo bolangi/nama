@@ -288,10 +288,23 @@ sub _set_position {
 
 
 sub delete_current_mark {}
-sub bump_mark_forward_1  { $this_mark->{time} += $config->{mark_bump_seconds}    }
-sub bump_mark_forward_10 { $this_mark->{time} += $config->{mark_bump_seconds}*10 }
-sub bump_mark_back_1     { $this_mark->{time} -= $config->{mark_bump_seconds}    }
-sub bump_mark_back_10    { $this_mark->{time} -= $config->{mark_bump_seconds}*10 }
+sub bump_mark_forward  { 
+	my $multiple = shift;
+	# play mark_replay_seconds before mark, stop at mark
+	$this_mark->{time} += $config->{mark_bump_seconds} * $multiple;
+	my $rp = $config->{mark_replay_seconds};
+	if ($rp) {
+		stop_transport();
+		::ecasound_iam("setpos ".$this_mark->time - $rp);
+		limit_processing_time($rp);
+		request_setup();		
+		start_transport();
+	}
+}
+sub bump_mark_forward_1  { bump_mark_forward(1)   }
+sub bump_mark_forward_10 { bump_mark_forward(10)  }
+sub bump_mark_back_1     { bump_mark_forward(-1)  }
+sub bump_mark_back_10    { bump_mark_forward(-10) }
 
 
 sub forward {
