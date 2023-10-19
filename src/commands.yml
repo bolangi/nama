@@ -901,17 +901,12 @@ hotkeys_param:
   parameters: none
 hotkeys_jump:
   type: general
-  what: Enable hotkeys for changing the playback position (default)
+  what: Enable hotkeys for seeking, marking (default)
   short: hkj 
-  parameters: none
-hotkeys_bump:
-  type: general
-  what: Enable hotkeys for re-positioning marks 
-  short: hkb 
   parameters: none
 hotkeys_off:
   type: general
-  what: restore default key bindings
+  what: restore default key bindings without any Nama hotkeys
   short: hko
   parameters: none
 hotkeys_list:
