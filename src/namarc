@@ -117,6 +117,15 @@ mark_replay_seconds: 2.5
 
 playback_jump_seconds: 10
 
+beep:
+  command: beep # or ecasound
+# percent volume is for ecasound only
+#                Hz  sec vol %
+  trim_start:    880 0.1 5
+  trim_end:      440 0.1 5
+  end_of_list:   250 0.2 5
+  command_error: 350 0.7 5
+
 hotkeys:
   common: 
     Insert: previous_track

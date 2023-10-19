@@ -107,7 +107,7 @@ sub nama_cmd {
 			{
 				throw("bad command: $input_was\n"); 
 				$was_error++;
-				system($config->{beep_command}) if $config->{beep_command};
+				beep_command_error();
 				last;
 			};
 		}

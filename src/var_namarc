@@ -61,8 +61,6 @@
 	$volume_control_operator 		$config->{volume_control_operator}
 	$serialize_formats  	        $config->{serialize_formats}
 	$use_git						$config->{use_git}
-	$beep_command 					$config->{beep_command}
-	$hotkey_beep					$config->{hotkey_beep}
 	$eager							$mode->{eager}
 	$waveform_height 				$config->{waveform_height}
 
@@ -115,6 +113,7 @@
 
 	$use_metronome					$config->{use_metronome}
 	
+	%beep							$config->{beep}
 
 	
 	# end

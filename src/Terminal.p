@@ -106,56 +106,63 @@ sub jump_status_bar {
 	$bar .= "mark bump: $config->{mark_bump_seconds}s " ;
 	$bar
 }
-sub beep_high { beep(880,0.25,1)}
-sub beep_low  { beep(440,0.25,1)}
+sub beep_trim_start 	{ beep( $config->{beep}->{trim_start   }->@* )}
+sub beep_trim_end   	{ beep( $config->{beep}->{trim_end     }->@* )}
+sub beep_command_error 	{ beep( $config->{beep}->{command_error}->@* )}
+sub beep_end_of_list    { beep( $config->{beep}->{end_of_list  }->@* )}
+
 sub beep { 
 	my($freq, $duration, $vol_percent) = @_; 
-	system("ecasound", "-i:tone,sine,$freq,$duration", "-ea:$vol_percent")
+	my $cmd;
+	if ($config->{beep}->{command} eq 'beep') {
+		$duration *= 1000; # convert to milliseconds 
+		$duration //= 200;
+		$cmd = "beep -f $freq -l $duration";
+	} else {
+		$vol_percent //= 10;
+		$cmd = "ecasound -i:tone,sine,$freq,$duration -ea $vol_percent";
+	}
+	my @cmd = split ' ',$cmd;
+	system(@cmd);
 }
-sub beep_trim_start { beep_high() }
-sub beep_trim_end   { beep_low()  }
-sub bump_status_bar {
-	# current playback pos, previous current and next mark pos
-}
+
 sub destroy_readline {
 	$text->{term}->rl_deprep_terminal() if $text->{term};
 	delete $text->{term}; 
 	delete $project->{events}->{stdin};
 }
-sub end_of_list_sound { system( $config->{hotkey_beep} ) }
-
 sub previous_track {
-	end_of_list_sound(), return if $this_track->n == 1;
+	beep_end_of_list(), return if $this_track->n == 1;
 	do{ $this_track = $ti{$this_track->n - 1} } until !  $this_track->hide;
 }
 sub next_track {
-	end_of_list_sound(), return if ! $ti{ $this_track->n + 1 };
+	beep_end_of_list(), return if ! $ti{ $this_track->n + 1 };
 	do{ $this_track = $ti{$this_track->n + 1} } until ! $this_track->hide;
 }
 sub previous_effect {
 	my $op = $this_track->op;
 	my $pos = $this_track->pos;
-	end_of_list_sound(), return if $pos == 0;
+	beep_end_of_list(), return if $pos == 0;
 	$pos--;
 	set_current_op($this_track->ops->[$pos]);
 }
 sub next_effect {
 	my $op = $this_track->op;
 	my $pos = $this_track->pos;
-	end_of_list_sound(),return if $pos == scalar @{ $this_track->ops } - 1;
+	beep_end_of_list(),return if $pos == scalar @{ $this_track->ops } - 1;
 	$pos++;
 	set_current_op($this_track->ops->[$pos]);
 }
 sub previous_param {
 	my $param = $this_track->param;
 	$param > 1  ? set_current_param($this_track->param - 1)
-				: end_of_list_sound()
+				: beep_end_of_list()
 }
 sub next_param {
 	my $param = $this_track->param;
 	$param < scalar @{ fxn($this_track->op)->params }
 		? $project->{current_param}->{$this_track->op}++ 
-		: end_of_list_sound()
+		: beep_end_of_list()
 }
 {my $override;
 sub revise_prompt {

@@ -98,9 +98,14 @@ serialize_formats: json
 
 enforce_channel_bounds: 0
 
-beep_command: beep -f 350 -l 700
-
-hotkey_beep: beep -f 250 -l 200
+beep:
+  command: beep # or ecasound
+# percent volume is for ecasound only
+#                Hz  sec vol %
+  start_trim:    880 0.1 5
+  end_trim:      440 0.1 5
+  end_of_list:   250 0.2 5
+  command_error: 350 0.7 5
 
 new_track_rw: MON
 
