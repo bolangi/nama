@@ -715,24 +715,11 @@ to_mark: _to_mark ident {
 	1;}
 modify_mark: _modify_mark sign value {
 	my $newtime = eval($::this_mark->{time} . $item{sign} . $item{value});
-	$::this_mark->set( time => $newtime );
-	::pager($::this_mark->name, ": set to ", ::d2( $newtime), "\n");
-	::pager("adjusted to ",$::this_mark->time, "\n") 
-		if $::this_mark->time != $newtime;
-	::set_position($::this_mark->time);
-	::request_setup();
-	1;
-	}
+	::modify_mark($::this_mark, $newtime); 1
+}
 modify_mark: _modify_mark value {
-	$::this_mark->set( time => $item{value} );
-	my $newtime = $item{value};
-	::pager($::this_mark->name, ": set to ", ::d2($newtime),"\n");
-	::pager("adjusted to ",$::this_mark->time, "\n")
-		if $::this_mark->time != $newtime;
-	::set_position($::this_mark->time);
-	::request_setup();
-	1;
-	}		
+	::modify_mark($::this_mark, $item{value} ); 1
+}		
 remove_effect: _remove_effect remove_target(s) {
 	#print join $/, @{ $item{"remove_target(s)"} }; 
 	::mute();
@@ -1587,10 +1574,10 @@ remove_fader_effect: _remove_fader_effect fader_role {
 	1
 }
 fader_role: 'vol'|'pan'|'fader'
-hotkeys: _hotkeys { ::setup_hotkeys()}
-hotkeys_always: _hotkeys_always { $::config->{hotkeys_always}++; ::setup_hotkeys(); }
-hotkeys_off: _hotkeys_off { undef $::config->{hotkeys_always}; 1 }
-hotkeys_list: _hotkeys_list { ::list_hotkeys() ; 1 } 
+hotkeys_jump:    _hotkeys_jump  { ::setup_hotkeys('jump' ); 1}
+hotkeys_param:   _hotkeys_param { ::setup_hotkeys('param'); 1}
+hotkeys_list:    _hotkeys_list  { ::list_hotkeys() ; 1 } 
+hotkeys_off:     _hotkeys_off   { ::restore_default_keymap() }
 
 select_sequence: _select_sequence existing_sequence_name { 
 	$::this_sequence = $::bn{$item{existing_sequence_name}}
@@ -1780,3 +1767,15 @@ bus_off: _bus_off
 	$::bn{$bus_name}->tracks_off 
 }
 
+
+set_param_increment: _set_param_increment value {::set_param_stepsize($item{value}    )} 
+set_param_exp:       _set_param_exp       exp   {::set_param_stepsize(10**$item{exp});1} 
+
+set_playback_jump: _set_playback_jump seconds {::set_playback_jump($item{seconds})} 
+set_mark_bump: _set_mark_bump seconds {        ::set_mark_bump(    $item{seconds})} 
+seconds: value
+exp: /[-+]?\d/ 
+set_mark_replay: _set_mark_replay seconds { ::set_mark_replay($item{seconds})}
+# hours:   value 'h' {$item{value}*3600} 
+# minutes: value 'm' {$item{value}*60  } 
+# seconds: value 's' {$item{value}     }

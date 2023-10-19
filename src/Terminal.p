@@ -1,13 +1,14 @@
 # ----------- Terminal related subroutines ---------
 
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 no warnings 'uninitialized';
 use Carp;
 use ::Globals qw(:singletons $this_bus $this_track);
 use ::Log qw(logpkg logsub);
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
+our %escape_code;
 
 sub initialize_prompt {
 	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
@@ -18,7 +19,9 @@ sub initialize_prompt {
 }
 
 sub initialize_terminal {
-	$text->{term} = new Term::ReadLine("Ecasound/Nama");
+	$text->{term} = Term::ReadLine->new("Ecasound/Nama");
+	new_keymap();
+	setup_hotkeys('jump', 'quiet');
 	$text->{term_attribs} = $text->{term}->Attribs;
 	$text->{term_attribs}->{attempted_completion_function} = \&complete;
 	$text->{term_attribs}->{already_prompted} = 1;
@@ -30,113 +33,94 @@ sub initialize_terminal {
 	revise_prompt();
 
 	# handle Control-C from terminal
-
-	
-
 	$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
 	# responds in a more timely way than $SIG{INT} = \&cleanup_exit; 
 
 	$SIG{USR1} = sub { project_snapshot() };
 }
+sub new_keymap {
+	# backup default bindings, we will modify a copy
+	$text->{default_keymap} = $text->{term}->get_keymap;
+	$text->{nama_keymap} = $text->{term}->copy_keymap($text->{default_keymap});
+	$text->{term}->set_keymap_name('nama', $text->{nama_keymap});
+	$text->{term}->set_keymap($text->{nama_keymap});
+}
+sub keymap_name {
+	$text->{term}->get_keymap_name($text->{term}->get_keymap);
+}
 
 sub setup_hotkeys {
-	say "\nHotkeys on!";
-	destroy_readline(); 
-	setup_termkey(); 
-	1 # needed by grammar, apparently
+	my ($map, $quiet) = @_;
+	#use DDP;
+	#p $config->{hotkeys};
+	new_keymap();
+	$text->{hotkey_mode} = $map;
+	my %bindings = ($config->{hotkeys}->{common}->%*, 
+					$config->{hotkeys}->{$map}->%*);
+	while( my($key,$function) = each %bindings ){
+		my $seq = $escape_code{$key};
+		my $func_name = $key;
+		#say "key: $key, function: $function, escape code: $seq";
+		no strict 'refs';
+		my $coderef = sub{ &$function; display_status() };
+		$text->{term}->add_defun($func_name, $coderef);
+		$text->{term}->bind_keyseq($seq, $func_name); 
+	}
+	pager("\nHotkeys set for $map!") unless $quiet;
 }
 sub list_hotkeys { 
-	my $hots 		= dclone($config->{hotkeys});
-	my %hots = %$hots;
-	$hots{'='} 		= 'Enter numeric value';
-	$hots{ 'mN' } 	= 'Change step size to 10 raised to the Nth power';
-	$hots{ '#' }	= 'Engage hotkey mode (must be typed in column 1)';
+	my %hots 		= ( $config->{hotkeys}->{common}->%*, 
+						$config->{hotkeys}->{$text->{hotkey_mode}->%*} );
 	pager("Hotkeys\n",Dumper \%hots)
 }
 
-
-sub setup_termkey {
-	$project->{events}->{termkey} = AnyEvent::TermKey->new(
-		term => \*STDIN,
-
-		on_key => sub {
-			my $key = shift;
-			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
-			logpkg('debug',"got key: $key_string");
-			# remove angle brackets around multi-character
-			# sequences, e.g. <PageUp> -> PageUp
-			$key_string =~ s/[<>]//g if length $key_string > 1;
-
-			exit_hotkey_mode(), cleanup_exit() if $key->type_is_unicode 
-						and $key->utf8 eq "C" 
-						and $key->modifiers & KEYMOD_CTRL;
-			 
-			# execute callback if we have one keystroke 
-			# and it has an "instant" mapping
-			 
-			my $dont_display;
-			$key_string =~ s/ /Space/; # to suit our mapping file
-			if ( my $command = $config->{hotkeys}->{$key_string} 
-				and ! length $text->{hotkey_buffer}) {
-
-
-				$dont_display++ if $key_string eq 'Escape'
-									or $key_string eq 'Space';
-
-
-				try { eval "$command()" }
-				catch { throw( qq(cannot execute subroutine "$command" for key "$key_string": $_") ) }
-			}
-
-			# otherwise assemble keystrokes and check
-			# them against the grammar
-			 
-			else {
-			$key_string =~ s/Space/ /; # back to the character
-			$text->{hotkey_buffer} .= $key_string;
-			print $key_string if length $key_string == 1;
-			$text->{hotkey_parser}->command($text->{hotkey_buffer})
- 				and reset_hotkey_buffers();
- 			}
+sub display_status {
 			print(
 				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
 				"\x1b[2K",  # erase line
-				hotkey_status_bar(), 
-			) if $text->{hotkey_buffer} eq undef and ! $dont_display;
-		},
-	);
+				status_bar()
+			) ;
 }
-sub hotkey_status_bar {
+sub status_bar { 
+	my %bar = (param => \&param_status_bar,
+	           jump  => \&jump_status_bar);
+	$bar{$text->{hotkey_mode}}
+}
+	
+sub param_status_bar {
 	my $name = "[".$this_track->name."]"; 
 	return "$name has no selected effect" unless $this_track->op;
 	join " ", $name,
 				"Stepsize: ",$this_track->stepsize,
 				fxn($this_track->op)->fxname,
 				parameter_info($this_track->op, $this_track->param - 1);
-				
-;
 }
-sub reset_hotkey_buffers {
-	$text->{hotkey_buffer} = "";
+sub jump_status_bar {
+	my $pos = ::ecasound_iam("getpos");
+	my $bar = "Playback at ${pos}s, ";
+	if (defined $this_mark) {
+		my $mark = join ' ', 'Mark', qq("$this_mark->name"), 'at', $this_mark->time;
+		$bar .= $mark;
+	}
+	$bar .= "jump size: $config->{playback_jump_seconds}s, ";
+	$bar .= "mark bump: $config->{mark_bump_seconds}s " ;
+	$bar
 }
-sub exit_hotkey_mode {
-	teardown_hotkeys();
-	initialize_terminal(); 
-	initialize_prompt();
-};
-sub teardown_hotkeys {
-	$project->{events}->{termkey}->termkey->stop(),
-		delete $project->{events}->{termkey} if $project->{events}->{termkey}
+sub beep_high { beep(880,0.25,1)}
+sub beep_low  { beep(440,0.25,1)}
+sub beep { 
+	my($freq, $duration, $vol_percent) = @_; 
+	system("ecasound", "-i:tone,sine,$freq,$duration", "-ea:$vol_percent")
+}
+sub beep_trim_start { beep_high() }
+sub beep_trim_end   { beep_low()  }
+sub bump_status_bar {
+	# current playback pos, previous current and next mark pos
 }
 sub destroy_readline {
 	$text->{term}->rl_deprep_terminal() if $text->{term};
 	delete $text->{term}; 
 	delete $project->{events}->{stdin};
-}
-sub setup_hotkey_grammar {
-	$text->{hotkey_grammar} = get_data_section('hotkey_grammar');
-	$text->{hotkey_parser} = Parse::RecDescent->new($text->{hotkey_grammar})
-		or croak "Bad grammar!\n";
 }
 sub end_of_list_sound { system( $config->{hotkey_beep} ) }
 
@@ -213,9 +197,6 @@ sub detect_spacebar {
 			$text->{term_attribs}->{'callback_read_char'}->();
 
 			
-		}
-		elsif (  $text->{term_attribs}->{line_buffer} eq "#" ){
-			setup_hotkeys();
 		}
 	});
 }
@@ -362,5 +343,54 @@ sub keyword {
         };
         return undef;
 };
+
+%escape_code = qw(
+
+  Escape  	\\e
+
+  Insert  	\\e[2~
+  Home  	\\e[1~
+  PageUp  	\\e[5~
+
+  Delete  	\\e[3~
+  End  		\\e[4~
+  PageDown  \\e[6~
+
+  Up  		\\e[A
+  Left  	\\e[D
+  Down  	\\e[B
+  Right  	\\e[C
+
+  F1		\\eOP
+  F2		\\eOQ
+  F3		\\eOR
+  F4		\\eOS
+  F5		\\e[15~ 
+  F6		\\e[17~ 
+  F7		\\e[18~ 
+  F8		\\e[19~ 
+  F9		\\e[20~ 
+  F10		\\e[21~ 
+  F11		\\e[23~ 
+  F12		\\e[24~ 
+
+  Keypad/	\\eOo
+  Keypad*	\\eOj
+  Keypad-   \\eOm
+  Keypad+   \\eOk
+  Keypad7   \\eOw
+  Keypad8   \\eOx
+  Keypad9   \\eOy
+  Keypad4   \\eOt
+  Keypad5   \\eOu
+  Keypad6   \\eOv
+  Keypad1   \\eOq
+  Keypad2   \\eOr
+  Keypad3   \\eOs
+  Keypad0   \\eOp
+  Keypad.   \\eOn
+  KeypadEnter   \\eOM
+  
+);
 1;
 __END__

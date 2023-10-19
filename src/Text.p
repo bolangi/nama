@@ -4,7 +4,7 @@
 # grammar_body.pl with subroutines in Grammar.p
 
 package ::Text;
-use Modern::Perl; use Carp;
+use Modern::Perl '2020'; use Carp;
 no warnings 'uninitialized';
 use ::Globals qw(:all);
 use ::Assign qw(:all);

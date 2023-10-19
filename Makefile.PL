@@ -24,7 +24,6 @@ use inc::Module::Install;
 		qw(
 			autodie  0
 			AnyEvent  5.0
-			AnyEvent::TermKey 0
 			Data::Dumper::Concise 0
 			Data::Section::Simple 0
 			Event  0
@@ -51,7 +50,6 @@ use inc::Module::Install;
 			SUPER 0
 			
 			Term::ReadLine::Gnu  0
-			Term::TermKey 0
 			Test2::Bundle::More 0
 			Text::Diff  0
 			Text::Format  0

@@ -12,7 +12,9 @@ use ::Globals qw(:all);
 use ::Object qw( 
 				 name 
                  time
+				 attrib
 				 );
+# attrib is a hash reference
 
 sub initialize {
 	map{ $_->remove} ::Mark::all();
@@ -153,11 +155,10 @@ sub mark_time {
 }
 
 
-
 # ---------- Mark and jump routines --------
 {
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 use ::Globals qw(:all);
 
 sub drop_mark {
@@ -197,34 +198,47 @@ sub mark { # GUI_CODE
 
 sub next_mark {
 	logsub((caller(0))[3]);
-	my $jumps = shift || 0;
-	$jumps and $jumps--;
-	my $here = ecasound_iam("cs-get-position");
+	my $mark = next_mark_object();
+	set_position($mark->time);
+	$this_mark = $mark;
+}
+sub next_mark_object {
 	my @marks = ::Mark::all();
+	my $here = ecasound_iam("cs-get-position");
 	for my $i ( 0..$#marks ){
 		if ($marks[$i]->time - $here > 0.001 ){
 			logpkg('debug', "here: $here, future time: ", $marks[$i]->time);
-			set_position($marks[$i+$jumps]->time);
-			$this_mark = $marks[$i];
-			return;
+			return $marks[$i];
+		}
+	}
+}
+sub previous_mark_object {
+	my @marks = ::Mark::all();
+	my $here = ecasound_iam("cs-get-position");
+	for my $i ( reverse 0..$#marks ){
+		if ($marks[$i]->time < $here ){
+			return $marks[$i];
 		}
 	}
 }
 sub previous_mark {
 	logsub((caller(0))[3]);
-	my $jumps = shift || 0;
-	$jumps and $jumps--;
-	my $here = ecasound_iam("getpos");
-	my @marks = ::Mark::all();
-	for my $i ( reverse 0..$#marks ){
-		if ($marks[$i]->time < $here ){
-			set_position($marks[$i+$jumps]->time);
-			$this_mark = $marks[$i];
-			return;
-		}
-	}
+	my $mark = previous_mark_object();
+	set_position($mark->time);
+	$this_mark = $mark;
 }
 	
+sub modify_mark {
+	my ($mark, $newtime, $quiet) = @_;
+	$mark->set( time => $newtime );
+	! $quiet && do {
+	pager($mark->name, ": set to ", d2( $newtime), "\n");
+	pager("adjusted to ",$mark->time, "\n") 
+		if $mark->time != $newtime;
+	};
+	set_position($mark->time);
+	request_setup();
+}
 
 ## jump playback head position
 
@@ -272,18 +286,26 @@ sub _set_position {
 	update_clock_display();
 }
 
-# used by hotkeys
 
-sub jump_minus_60 { jump( -60 ) }
-sub jump_minus_30 { jump( -30 ) }
-sub jump_minus_10 { jump( -10 ) }
-sub jump_minus_5  { jump(  -5 ) }
-sub jump_minus_1  { jump(  -1 ) }
-sub jump_plus_1   { jump(  60 ) }
-sub jump_plus_5   { jump(  30 ) }
-sub jump_plus_10  { jump(  10 ) }
-sub jump_plus_30  { jump(  30 ) }
-sub jump_plus_60  { jump(  60 ) }
+sub delete_current_mark {}
+sub bump_mark_forward  { 
+	my $multiple = shift;
+	# play mark_replay_seconds before mark, stop at mark
+	$this_mark->{time} += $config->{mark_bump_seconds} * $multiple;
+	my $rp = $config->{mark_replay_seconds};
+	if ($rp) {
+		stop_transport();
+		::ecasound_iam("setpos ".$this_mark->time - $rp);
+		limit_processing_time($rp);
+		request_setup();		
+		start_transport();
+	}
+}
+sub bump_mark_forward_1  { bump_mark_forward(1)   }
+sub bump_mark_forward_10 { bump_mark_forward(10)  }
+sub bump_mark_back_1     { bump_mark_forward(-1)  }
+sub bump_mark_back_10    { bump_mark_forward(-10) }
+
 
 sub forward {
 	my $delta = shift;
@@ -298,10 +320,16 @@ sub rewind {
 }
 sub jump_forward {
 	my $multiplier = shift;
-	forward( $multiplier * $config->{hotkey_playback_jumpsize_seconds})
+	forward( $multiplier * $config->{playback_jump_seconds})
 	}
-sub jump_backward { jump_forward( - shift()) }
 
+sub set_playback_jump { $config->{playback_jump_seconds} = shift }
+sub set_mark_bump     { $config->{mark_bump_seconds}     = shift }
+sub set_mark_replay   { $config->{mark_replay_seconds}   = shift }
+sub jump_forward_1    { jump_forward(  1) }
+sub jump_forward_10   { jump_forward( 10) }
+sub jump_backward_1   { jump_forward( -1) }
+sub jump_backward_10  { jump_forward(-10) }
 	
 } # end package
 { package ::HereMark;
@@ -312,7 +340,7 @@ sub time { ::ecasound_iam('cs-connected') ? ($last_time = ::ecasound_iam('getpos
 }
 
 { package ::ClipMark;
-use Modern::Perl;
+use Modern::Perl '2020';
 our @ISA = '::Mark';
 
 
@@ -321,7 +349,7 @@ our @ISA = '::Mark';
 { package ::TempoMark;
 
 	our $VERSION = 1.0;
-	use Modern::Perl;
+	use Modern::Perl '2020';
 	use ::Log qw(logpkg);
 	use ::Globals qw(:all);
 	our @ISA = '::Mark';

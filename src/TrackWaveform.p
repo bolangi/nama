@@ -1,6 +1,6 @@
 package ::TrackWaveform;
 use ::Globals qw($project $config $gui %ti);
-use Modern::Perl;
+use Modern::Perl '2020';
 use Role::Tiny;
 use Try::Tiny;
 

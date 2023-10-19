@@ -894,21 +894,19 @@ list_effects:
   what: Print a short list of all effects on the current track, only including unique ID and effect name.
   short: lfx
   parameters: none
-hotkeys:
+hotkeys_param:
   type: general
-  what: |
-    Use this command to set the hotkey mode. (You may also use the hash symbol '#'.)
-    Hit the Escape key to return to command mode.
-  short: hk 
+  what: Enable hotkeys for adjusting effect parameters
+  short: hkp
   parameters: none
-hotkeys_always:
-  type: general 
-  what: Activate hotkeys mode after each command.
-  short: hka 
+hotkeys_jump:
+  type: general
+  what: Enable hotkeys for seeking, marking (default)
+  short: hkj 
   parameters: none
 hotkeys_off:
   type: general
-  what: disable hotkeys always mode
+  what: restore default key bindings without any Nama hotkeys
   short: hko
   parameters: none
 hotkeys_list:
@@ -1721,4 +1719,30 @@ set_sample_rate:
   short: ssr
   what: configure the sample rate for the current project or report sample rate if no parameter
   parameters: <integer:sample-rate>
+set_playback_jump:
+  type: transport
+  short: spj j=
+  what: Set the jump size for transport hotkeys
+  parameters: <float:seconds>
+set_mark_bump:
+  type: mark 
+  short: smb b=
+  what: Set the size of the mark bump
+  parameters: <float:seconds>
+set_mark_replay:
+  type: mark 
+  short: smr
+  what: Set how far to jump back playhead for review after setting or bumping a mark 
+  parameters: <float:seconds>
+set_param_increment:
+  type: effect
+  short: spi m=
+  what: Set the parameter increment as a value, e.g. "m=0.2"
+  parameters: <float:time>
+set_param_exp:
+  type: effect
+  short: spe m x=
+  what: Set the parameter increment as an exponent, e.g. "x=-2" sets 0.01
+  parameters: <integer:exponent>
+
 ...

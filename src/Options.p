@@ -1,7 +1,7 @@
 # --------- Command line options ----------
 
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 
 sub process_command_line_options {
 

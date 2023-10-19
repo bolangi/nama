@@ -70,10 +70,11 @@
 	$hotkeys						$config->{hotkeys}
 	$new_track_rw					$config->{new_track_rw}
 
-### the following variables may also be set 
+### other
 
-	$hotkeys_always					$config->{hotkeys_always}
-	$hotkey_playback_jumpsize_seconds   $config->{hotkey_playback_jumpsize_seconds}
+	$playback_jump_seconds		$config->{playback_jump_seconds}
+	$mark_bump_seconds				$config->{mark_bump_seconds}
+	$mark_replay_seconds			$config->{mark_replay_seconds}
 	$seek_end_margin			   $config->{seek_end_margin}
     
 
@@ -105,14 +106,16 @@
 	$remote_control_port 			$config->{remote_control_port}
 	$engines						$config->{engines}
 
-	$default_waveform_height 			$config->{default_waveform_height}
-	$loop_chain_channel_width 	$config->{loop_chain_channel_width}
+	$default_waveform_height 		$config->{default_waveform_height}
+	$loop_chain_channel_width 		$config->{loop_chain_channel_width}
 	$waveform_pixels_per_second		$config->{waveform_pixels_per_second}
-	$display_waveform					$config->{display_waveform}
+	$display_waveform				$config->{display_waveform}
 
 	$ticks_per_quarter_note 		$config->{ticks_per_quarter_note}
 
 	$use_metronome					$config->{use_metronome}
+	
+
 	
 	# end
 

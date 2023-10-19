@@ -1,7 +1,9 @@
+# var_keys: keys to all nama singleton hashes except for namarc variables
+# which appear in var_namarc
+
 $config->{memoize} 				# method caching
 $config->{hires_timer}			# indicates if we are capable
 $config->{opts}					# command line arguments
-$config->{soundcard_channels}	# a constant needed for GUI - can we discover this?
 $config->{disable_auto_reconfigure} # -R option
 $config->{engine_muting_time} 	# interval for engine to smoothly mute/unmute
 $config->{engine_command_output_buffer_size}
@@ -15,18 +17,10 @@ $config->{latency_op}			# operator for latency compensation
 $config->{latency_op_init}		# initial values
 $config->{latency_op_set}		# subroutine for setting latency compensation
 $config->{_is_system_bus}		# a hash
-$config->{osc_listener_port}
-$config->{remote_control_port}
-$config->{use_midi}
-$config->{default_waveform_height}
 $config->{waveform_canvas_x}
 $config->{waveform_canvas_y}
-$config->{loop_chain_channel_width}
 $config->{soundcard_loopback_delay}
-$config->{display_waveform}
 $config->{use_effects_bugfix}
-$config->{use_metronome}
-
 
 $jack->{seek_delay}				# extra time for stop-seek-start process
 $jack->{jackd_running}			# jackd status, but this should be a subroutine
@@ -103,8 +97,6 @@ $fx->{last}						# last assigned effect ID
 
 $text->{grammar}				# grammar source
 $text->{parser}					# Parse::RecDescent parser
-$text->{hotkey_grammar} 		# hotkeys grammar source
-$text->{hotkey_parser} 			# 
 $text->{hotkey_buffer} 			#
 $text->{hotkey_callback}		#
 $text->{wrap}					# Text::Format object for wrapping text
@@ -128,6 +120,9 @@ $text->{hyphenated_commands}	# remove-track => remove_track
 $text->{eval_result}			# buffer for result of eval_perl() 
 $text->{output_buffer}			# buffer for output of OSC commands
 $text->{midi_cmd} 				# list of Midish commands for the parser to recognize
+$text->{default_keymap}			# store readline's default bindings for restoring later
+$text->{nama_keymap}			# default keymap with additional bindings 
+$text->{hotkey_mode}			# "jump" playhead, "bump" mark position or tweak effect "param"
 
 $project->{events}				# timers used during engine run
 $project->{name}				# project name

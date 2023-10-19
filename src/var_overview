@@ -13,7 +13,7 @@ var_singletons  Objects and simple hashes that contain
                 is necessary for Tk slider widgets.
 
                 Hash keys of all variables in var_singletons must be
-                declared in var_keys or in var_config. This is checked
+                declared in var_keys or in var_namarc. This is checked
                 during build
 
 var_keys        List of allowed singleton hash keys

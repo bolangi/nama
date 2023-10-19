@@ -113,38 +113,42 @@ spatialiser: matrixSpatialiser 0
 
 limiter: tap_limiter 0 0
 
+mark_replay_seconds: 2.5
+
+playback_jump_seconds: 10
+
 hotkeys:
-  Escape: exit_hotkey_mode
-  Insert: previous_track
-  Delete: next_track
-  Home: previous_effect
-  End: next_effect
-  PageUp: previous_param
-  PageDown: next_param
-  Left: previous_param
-  Right: next_param
-  Up: increment_param
-  Down: decrement_param
-  a: jump_minus_60
-  s: jump_minus_30
-  d: jump_minus_10
-  f: jump_minus_5
-  g: jump_minus_1
-  h: jump_plus_1
-  j: jump_plus_5
-  k: jump_plus_10
-  l: jump_plus_30
-  ;: jump_plus_60
-  Space: toggle_transport
-  q: jump_to_start
-# w:
-  e: drop_snip_mark
-  r: previous_mark
-  u: next_mark
-# i: 
-# o:
-  p: jump_to_end
-  D: delete_current_mark
+  common: 
+    Insert: previous_track
+    Delete: next_track
+    KeypadInsert: replay
+    F12: bump_mark_forward_1
+    F11: bump_mark_forward_10
+    F9: bump_mark_back_1
+    F10: bump_mark_back_10
+    F8: drop_mark_for_trim
+    
+  jump:
+    Home: jump_to_start
+    End: jump_to_end
+    PageUp: previous_mark
+    PageDown: next_mark
+    Right: jump_forward_1
+    Up: jump_forward_10
+    Left: jump_back_1
+    Down: jump_back_10
+
+  param:
+    Home: previous_effect
+    End: next_effect
+    PageUp: previous_param
+    PageDown: next_param
+
+    Left: decrement_param_1
+    Right: increment_param_1
+    Up: increment_param_10
+    Down: decrement_param_10
+
 
 alias:
   command:

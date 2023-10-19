@@ -1,12 +1,12 @@
 # --------- Project related subroutines ---------
 {
 package ::Project;
-use Modern::Perl; use Carp;
+use Modern::Perl '2020'; use Carp;
 sub hello { my $self = shift; say "hello $self: ",::Dumper $::project}
 }
 {
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 use Carp;
 use File::Slurp;
 
@@ -105,7 +105,6 @@ sub initialize_project_data {
 	}
 
 	::ChainSetup::initialize();
-	reset_hotkey_buffers();
 	reset_command_buffer();
 	$this_engine->reset_ecasound_selections_cache();
 

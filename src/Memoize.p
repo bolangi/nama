@@ -1,6 +1,6 @@
 # ------ Memoize subroutines ------
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 use Memoize qw(memoize unmemoize);
 
 BEGIN { # OPTMIZATION

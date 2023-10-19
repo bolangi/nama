@@ -7,7 +7,7 @@
 
 {
 package ::EffectChain;
-use Modern::Perl;
+use Modern::Perl '2020';
 use Data::Dumper::Concise;
 use Carp;
 use Exporter qw(import);
