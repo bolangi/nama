@@ -323,6 +323,7 @@ sub jump_forward {
 	forward( $multiplier * $config->{playback_jump_seconds})
 	}
 
+sub replay { foward($config->{mark_replay_seconds}) }
 sub set_playback_jump { $config->{playback_jump_seconds} = shift }
 sub set_mark_bump     { $config->{mark_bump_seconds}     = shift }
 sub set_mark_replay   { $config->{mark_replay_seconds}   = shift }
