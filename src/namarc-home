@@ -99,7 +99,7 @@ serialize_formats: json
 enforce_channel_bounds: 0
 
 beep:
-  command: beep # or ecasound
+  command: ecasound
 # percent volume is for ecasound only
 #                Hz  sec vol %
   start_trim:    880 0.1 5
