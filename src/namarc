@@ -130,12 +130,7 @@ hotkeys:
   common: 
     Insert: previous_track
     Delete: next_track
-    KeypadInsert: replay
-    F12: bump_mark_forward_1
-    F11: bump_mark_forward_10
-    F9: bump_mark_back_1
-    F10: bump_mark_back_10
-    F8: drop_mark_for_trim
+    KeypadInsert: jump_replay
     
   jump:
     Home: jump_to_start
@@ -146,6 +141,16 @@ hotkeys:
     Up: jump_forward_10
     Left: jump_back_1
     Down: jump_back_10
+
+  bump:
+    Home: jump_to_start
+    End: jump_to_end
+    PageUp: previous_mark
+    PageDown: next_mark
+    Right: bump_mark_forward_1
+    Up: bump_mark_forward_10
+    Left: bump_mark_back_1
+    Down: bump_mark_back_10
 
   param:
     Home: previous_effect

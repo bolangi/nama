@@ -83,7 +83,8 @@ sub display_status {
 }
 sub status_bar { 
 	my %bar = (param => \&param_status_bar,
-	           jump  => \&jump_status_bar);
+	           jump  => \&jump_status_bar,
+			   bump  => \&bump_status_bar );
 	$bar{$text->{hotkey_mode}}
 }
 	
