@@ -130,7 +130,7 @@ hotkeys:
   common: 
     Insert: previous_track
     Delete: next_track
-    KeypadInsert: replay
+    Keypad0: replay
     
   jump:
     Home: jump_to_start
