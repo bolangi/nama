@@ -129,24 +129,25 @@ hotkeys:
     Keypad7: previous_track
     Keypad4: next_track
 	KeypadEnter: replay
+    Insert: previous_track
+    Delete: next_track
+    Keypad0: replay
+    F12: bump_mark_forward_1
+    F9: bump_mark_back_1
+    F11: bump_mark_forward_10
+    F10: bump_mark_back_10
+    F8: drop_mark_for_trim
+    
   jump:
-    Keypad8: jump_to_start
-    Keypad5: jump_to_end
-    Keypad9: previous_mark
-    Keypad6: next_mark
-    Keypad3: jump_forward_1
-    Keypad2: jump_forward_10
-    Keypad1: jump_back_1
-    Keypad0: jump_back_10
-  bump:
-    Keypad8: jump_to_start
-    Keypad5: jump_to_end
-    Keypad9: previous_mark
-    Keypad6: next_mark
-    Keypad3: bump_mark_forward_1
-    Keypad2: bump_mark_forward_10
-    Keypad1: bump_mark_back_1
-    Keypad0: bump_mark_back_10
+    Home: jump_to_start
+    End: jump_to_end
+    PageUp: previous_mark
+    PageDown: next_mark
+    Right: jump_forward_1
+    Up: jump_forward_10
+    Left: jump_back_1
+    Down: jump_back_10
+
   param:
     Keypad8: previous_effect
     Keypad5: next_effect
