@@ -1732,7 +1732,7 @@ set_mark_bump:
 set_mark_replay:
   type: mark 
   short: smr
-  what: Set how far to jump back playhead for review after setting or bumping a mark 
+  what: Set how far to rewind playhead for review after setting or bumping a mark 
   parameters: <float:seconds>
 set_param_increment:
   type: effect
