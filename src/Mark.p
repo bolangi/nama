@@ -329,8 +329,8 @@ sub set_mark_bump     { $config->{mark_bump_seconds}     = shift }
 sub set_mark_replay   { $config->{mark_replay_seconds}   = shift }
 sub jump_forward_1    { jump_forward(  1) }
 sub jump_forward_10   { jump_forward( 10) }
-sub jump_backward_1   { jump_forward( -1) }
-sub jump_backward_10  { jump_forward(-10) }
+sub jump_back_1   { jump_forward( -1) }
+sub jump_back_10  { jump_forward(-10) }
 	
 } # end package
 { package ::HereMark;
