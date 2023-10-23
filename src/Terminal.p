@@ -57,6 +57,11 @@ sub setup_hotkeys {
 	$text->{hotkey_mode} = $map;
 	my %bindings = ($config->{hotkeys}->{common}->%*, 
 					$config->{hotkeys}->{$map}->%*);
+	my %bindings_lc;
+	while( my($key,$function) = each %bindings ){
+		$bindings_lc{lc $key} = $function
+	}
+	%bindings = %bindings_lc;
 	while( my($key,$function) = each %bindings ){
 		my $seq = $escape_code{$key};
 		my $func_name = $key;
@@ -399,5 +404,10 @@ sub keyword {
   KeypadEnter   \\eOM
   
 );
+my %escape_code_lc;
+while( my($key,$seq) = each %escape_code ){
+	$escape_code_lc{lc $key} = $seq;
+}
+%escape_code = %escape_code_lc;
 1;
 __END__
