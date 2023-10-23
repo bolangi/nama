@@ -373,18 +373,6 @@ sub keyword {
   Down  	\\e[B
   Right  	\\e[C
 
-  F1		\\eOP
-  F2		\\eOQ
-  F3		\\eOR
-  F4		\\eOS
-  F5		\\e[15~ 
-  F6		\\e[17~ 
-  F7		\\e[18~ 
-  F8		\\e[19~ 
-  F9		\\e[20~ 
-  F10		\\e[21~ 
-  F11		\\e[23~ 
-  F12		\\e[24~ 
 
   Keypad/	\\eOo
   Keypad*	\\eOj
@@ -402,6 +390,33 @@ sub keyword {
   Keypad0   \\eOp
   Keypad.   \\eOn
   KeypadEnter   \\eOM
+
+
+  F1		\\eOP
+  F2		\\eOQ
+  F3		\\eOR
+  F4		\\eOS
+  F5		\\e[15~ 
+  F6		\\e[17~ 
+  F7		\\e[18~ 
+  F8		\\e[19~ 
+  F9		\\e[20~ 
+  F10		\\e[21~ 
+  F11		\\e[23~ 
+  F12		\\e[24~ 
+  
+  ShiftF1	^[[23~
+  ShiftF2 ^[[24~
+  ShiftF3 ^[[25~
+  ShiftF4 ^[[26~
+  ShiftF5 ^[[28~
+  ShiftF6 ^[[29~
+  ShiftF7 ^[[31~
+  ShiftF8 ^[[32~
+  ShiftF9 ^[[33~
+  ShiftF10 ^[[34~
+  ShiftF11 ^[[23$
+  ShiftF12 ^[[24$
   
 );
 my %escape_code_lc;
