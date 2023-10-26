@@ -8,7 +8,9 @@ use ::Globals qw(:singletons $this_bus $this_track);
 use ::Log qw(logpkg logsub);
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
-our %escape_code;
+our %escape_code; # key name -> escape code
+our %keyname;     # escape code -> key name
+our %bindings;    # key name -> nama function (from namarc hotkeys)
 
 sub initialize_prompt {
 	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
@@ -51,28 +53,44 @@ sub keymap_name {
 
 sub setup_hotkeys {
 	my ($map, $quiet) = @_;
-	#use DDP;
-	#p $config->{hotkeys};
 	new_keymap();
 	$text->{hotkey_mode} = $map;
-	my %bindings = ($config->{hotkeys}->{common}->%*, 
+	%bindings = ($config->{hotkeys}->{common}->%*, 
 					$config->{hotkeys}->{$map}->%*);
 	my %bindings_lc;
 	while( my($key,$function) = each %bindings ){
 		$bindings_lc{lc $key} = $function
 	}
 	%bindings = %bindings_lc;
-	while( my($key,$function) = each %bindings ){
-		my $seq = $escape_code{$key};
-		my $func_name = $key;
-		#say "key: $key, function: $function, escape code: $seq";
-		no strict 'refs';
-		my $coderef = sub{ &$function; display_status() };
-		$text->{term}->add_defun($func_name, $coderef);
-		$text->{term}->bind_keyseq($seq, $func_name); 
+
+	my $func_name = 'hotkey_dispatch';
+	my $coderef = \&hotkey_dispatch;
+	$text->{term}->add_defun($func_name, $coderef);
+	while ( my ($keyname,$seq) = each %escape_code) {
+	$text->{term}->bind_keyseq($seq, $func_name);
 	}
 	pager("\nHotkeys set for $map!") unless $quiet;
 }
+sub hotkey_dispatch {                                                                          
+	my ($seq) = string_to_escape_code($text->{term}->Attribs->{executing_keyseq});
+	my $name = $keyname{$seq};
+	my $func_name = $bindings{$name};
+	say "Special key: $name, escape sequence: $seq, triggers $func_name";
+	no strict 'refs';
+	$func_name->();
+	#display_status();
+}                                                                                              
+sub string_to_escape_code {
+    my ($string) = @_;                                                                         
+    my $esc = '';
+    for my $char (split //, $string) {
+		my $ord = ord($char);
+        $char = '\e' if $ord == 27; 
+        $esc .= $char;
+    }
+    $esc
+} 
+
 sub list_hotkeys { 
 	my %hots 		= ( $config->{hotkeys}->{common}->%*, 
 						$config->{hotkeys}->{$text->{hotkey_mode}->%*} );
@@ -425,5 +443,10 @@ while( my($key,$seq) = each %escape_code ){
 	$escape_code_lc{lc $key} = $seq;
 }
 %escape_code = %escape_code_lc;
+
+%keyname = ( reverse %escape_code );
+
+
+
 1;
 __END__
