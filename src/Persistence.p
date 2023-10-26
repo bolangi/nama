@@ -116,7 +116,7 @@ sub save_system_state {
 	# save history -- 50 entries, maximum
 
 	my @history;
-	@history = $text->{term}->GetHistory if $text->{term};
+	@history = $term->GetHistory if $text->{term};
 	my %seen;
 	$text->{command_history} = [];
 	map { push @{$text->{command_history}}, $_ 
@@ -446,7 +446,7 @@ sub restore_state_from_file {
 
 	# restore command history
 	
-	$text->{term}->SetHistory(@{$text->{command_history}})
+	$term->SetHistory(@{$text->{command_history}})
 		if (ref $text->{command_history}) =~ /ARRAY/;
 
 ;

@@ -1019,7 +1019,7 @@ import_audio: _import_audio path {
 }
 frequency: value
 list_history: _list_history {
-	my @history = $::text->{term}->GetHistory;
+	my @history = $::term->GetHistory;
 	my %seen;
 	::pager( grep{ ! $seen{$_} and $seen{$_}++ } @history );
 }

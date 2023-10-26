@@ -13,22 +13,21 @@ our %keyname;     # escape code -> key name
 our %bindings;    # key name -> nama function (from namarc hotkeys)
 
 sub initialize_prompt {
-	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
-	$text->{term_attribs}->{'callback_read_char'}->();
+	$term->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
+	$term->Attribs->{'callback_read_char'}->();
 	set_current_bus();
 	print prompt();
-	$text->{term_attribs}->{already_prompted} = 0;
+	$term->Attribs->{already_prompted} = 0;
 }
 
 sub initialize_terminal {
-	$text->{term} = Term::ReadLine->new("Ecasound/Nama");
+	$term = Term::ReadLine->new("Ecasound/Nama");
 	new_keymap();
 	setup_hotkeys('jump', 'quiet');
-	$text->{term_attribs} = $text->{term}->Attribs;
-	$text->{term_attribs}->{attempted_completion_function} = \&complete;
-	$text->{term_attribs}->{already_prompted} = 1;
+	$term->Attribs->{attempted_completion_function} = \&complete;
+	$term->Attribs->{already_prompted} = 1;
 	($text->{screen_lines}, $text->{screen_columns}) 
-		= $text->{term}->get_screen_size();
+		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
 	detect_spacebar(); 
 
@@ -42,13 +41,13 @@ sub initialize_terminal {
 }
 sub new_keymap {
 	# backup default bindings, we will modify a copy
-	$text->{default_keymap} = $text->{term}->get_keymap;
-	$text->{nama_keymap} = $text->{term}->copy_keymap($text->{default_keymap});
-	$text->{term}->set_keymap_name('nama', $text->{nama_keymap});
-	$text->{term}->set_keymap($text->{nama_keymap});
+	$text->{default_keymap} = $term->get_keymap;
+	$text->{nama_keymap} = $term->copy_keymap($text->{default_keymap});
+	$term->set_keymap_name('nama', $text->{nama_keymap});
+	$term->set_keymap($text->{nama_keymap});
 }
 sub keymap_name {
-	$text->{term}->get_keymap_name($text->{term}->get_keymap);
+	$term->get_keymap_name($term->get_keymap);
 }
 
 sub setup_hotkeys {
@@ -65,14 +64,14 @@ sub setup_hotkeys {
 
 	my $func_name = 'hotkey_dispatch';
 	my $coderef = \&hotkey_dispatch;
-	$text->{term}->add_defun($func_name, $coderef);
+	$term->add_defun($func_name, $coderef);
 	while ( my ($keyname,$seq) = each %escape_code) {
-	$text->{term}->bind_keyseq($seq, $func_name);
+	$term->bind_keyseq($seq, $func_name);
 	}
 	pager("\nHotkeys set for $map!") unless $quiet;
 }
 sub hotkey_dispatch {                                                                          
-	my ($seq) = string_to_escape_code($text->{term}->Attribs->{executing_keyseq});
+	my ($seq) = string_to_escape_code($term->Attribs->{executing_keyseq});
 	my $name = $keyname{$seq};
 	my $func_name = $bindings{$name};
 	say "Special key: $name, escape sequence: $seq, triggers $func_name";
@@ -151,8 +150,8 @@ sub beep {
 }
 
 sub destroy_readline {
-	$text->{term}->rl_deprep_terminal() if $text->{term};
-	delete $text->{term}; 
+	$term->rl_deprep_terminal() if $term;
+	undef $term; 
 	delete $project->{events}->{stdin};
 }
 sub previous_track {
@@ -193,8 +192,8 @@ sub revise_prompt {
 	logsub((caller(0))[3]);
 	# hack to allow suppressing prompt
 	$override = ($_[0] eq "default" ? undef : $_[0]) if defined $_[0];
-    $text->{term}->callback_handler_install($override//prompt(), \&process_line)
-		if $text->{term}
+    $term->callback_handler_install($override//prompt(), \&process_line)
+		if $term
 }
 }
 
@@ -210,8 +209,8 @@ sub detect_spacebar {
 	# received in column one
 	
 	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub {
-		$text->{term_attribs}->{'callback_read_char'}->();
-		my $buffer = $text->{term_attribs}->{line_buffer};
+		$term->Attribs->{'callback_read_char'}->();
+		my $buffer = $term->Attribs->{line_buffer};
 		my $trigger = ' ';
 		if ( $config->{press_space_to_start} 
 				and ($buffer eq $trigger)
@@ -221,11 +220,11 @@ sub detect_spacebar {
 
 			# reset command line, read next char
 			
-			$text->{term_attribs}->{line_buffer} = q();
-			$text->{term_attribs}->{point} 		= 0;
-			$text->{term_attribs}->{end}   		= 0;
-			$text->{term}->stuff_char(10);
-			$text->{term_attribs}->{'callback_read_char'}->();
+			$term->Attribs->{line_buffer} = q();
+			$term->Attribs->{point} 		= 0;
+			$term->Attribs->{end}   		= 0;
+			$term->stuff_char(10);
+			$term->Attribs->{'callback_read_char'}->();
 
 			
 		}
@@ -354,7 +353,6 @@ sub load_keywords {
 sub complete {
     my ($string, $line, $start, $end) = @_;
 	#print join $/, $string, $line, $start, $end, $/;
-	my $term = $text->{term};
     return $term->completion_matches($string,\&keyword);
 };
 

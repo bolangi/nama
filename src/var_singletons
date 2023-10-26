@@ -12,6 +12,7 @@ $jack
 $fx
 $fx_cache
 $text
+$term
 $gui
 $midi
 $help

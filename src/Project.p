@@ -312,7 +312,7 @@ sub new_project_template {
 
 	# Throw away command history
 	
-	$text->{term}->SetHistory();
+	$term->SetHistory();
 	
 	# Buses needn't set version info either
 	
