@@ -13,8 +13,6 @@ our %keyname;     # escape code -> key name
 our %bindings;    # key name -> nama function (from namarc hotkeys)
 
 sub initialize_prompt {
-	$term->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
-	$term->Attribs->{'callback_read_char'}->();
 	set_current_bus();
 	print prompt();
 	$term->Attribs->{already_prompted} = 0;
