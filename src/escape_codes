@@ -1,0 +1,133 @@
+  Escape  	\\e
+
+  F1		\\eOP
+  F2		\\eOQ
+  F3		\\eOR
+  F4		\\eOS
+  F5		\\e[15~ 
+  F6		\\e[17~ 
+  F7		\\e[18~ 
+  F8		\\e[19~ 
+  F9		\\e[20~ 
+  F10		\\e[21~ 
+  F11		\\e[23~ 
+  F12		\\e[24~ 
+
+  Insert  	\\e[2~
+  Delete  	\\e[3~
+  Home  	\\e[1~
+  End  		\\e[4~
+  PageUp  	\\e[5~
+  PageDown  \\e[6~
+
+  Up  		\\e[A
+  Left  	\\e[D
+  Down  	\\e[B
+  Right  	\\e[C
+
+
+  Keypad/	\\eOo
+  Keypad*	\\eOj
+  Keypad-   \\eOm
+  Keypad+   \\eOk
+  Keypad7   \\eOw
+  Keypad8   \\eOx
+  Keypad9   \\eOy
+  Keypad4   \\eOt
+  Keypad5   \\eOu
+  Keypad6   \\eOv
+  Keypad1   \\eOq
+  Keypad2   \\eOr
+  Keypad3   \\eOs
+  Keypad0   \\eOp
+  Keypad.   \\eOn
+  KeypadEnter   \\eOM
+  
+  ShiftF1	\\e[23~
+  ShiftF2 \\e[24~
+  ShiftF3 \\e[25~
+  ShiftF4 \\e[26~
+  ShiftF5 \\e[28~
+  ShiftF6 \\e[29~
+  ShiftF7 \\e[31~
+  ShiftF8 \\e[32~
+  ShiftF9 \\e[33~
+  ShiftF10 \\e[34~
+  ShiftF11 \\e[23$
+  ShiftF12 \\e[24$
+
+  ShiftInsert [11^
+  ShiftDelete \\e[3$
+  ShiftHome	  \\e[7$
+  ShiftEnd	  \\e[8$ 
+  ShiftUp	\\e[a
+  ShiftDown \\e[b
+  ShiftLeft \\e[d
+  ShiftRight \\e[c
+
+  ControlF1	\\e[11^
+  ControlF2 \\e[12^
+  ControlF3 \\e[13^
+  ControlF4 \\e[14^
+  ControlF5 \\e[15^
+  ControlF6 \\e[17^
+  ControlF7 \\e[18^
+  ControlF8 \\e[19^
+  ControlF9 \\e[20^
+  ControlF10 \\e[21^
+  ControlF11 \\e[23^
+  ControlF12 \\e[24^
+
+  ControlInsert \\e[2^
+  ControlDelete \\e[3^
+  ControlHome	 \\e[7^
+  ControlEnd   \\e[8^
+  ControlPageUp \\e[5^
+  ControlPageDown \\e[6^
+  ControlUp      \\eOa
+  ControlDown    \\eOb
+  ControlLeft    \\eOd
+  ControlRight   \\eOc
+
+  AltInsert  	\\e\\e[2~
+  AltDelete  	\\e\\e[3~
+  AltHome  	\\e\\e[1~
+  AltEnd  		\\e\\e[4~
+  AltPageUp  	\\e\\e[5~
+  AltPageDown  \\e\\e[6~
+
+  AltUp  		\\e\\e[A
+  AltLeft  	\\e\\e[D
+  AltDown  	\\e\\e[B
+  AltRight  	\\e\\e[C
+
+  AltKeypad/	\\e\\eOo
+  AltKeypad*	\\e\\eOj
+  AltKeypad-   \\e\\eOm
+  AltKeypad+   \\e\\eOk
+  AltKeypad7   \\e\\eOw
+  AltKeypad8   \\e\\eOx
+  AltKeypad9   \\e\\eOy
+  AltKeypad4   \\e\\eOt
+  AltKeypad5   \\e\\eOu
+  AltKeypad6   \\e\\eOv
+  AltKeypad1   \\e\\eOq
+  AltKeypad2   \\e\\eOr
+  AltKeypad3   \\e\\eOs
+  AltKeypad0   \\e\\eOp
+  AltKeypad.   \\e\\eOn
+  AltKeypadEnter   \\e\\eOM
+  
+  AltF1		\\e\\eOP
+  AltF2		\\e\\eOQ
+  AltF3		\\e\\eOR
+  AltF4		\\e\\eOS
+  AltF5		\\e\\e[15~ 
+  AltF6		\\e\\e[17~ 
+  AltF7		\\e\\e[18~ 
+  AltF8		\\e\\e[19~ 
+  AltF9		\\e\\e[20~ 
+  AltF10		\\e\\e[21~ 
+  AltF11		\\e\\e[23~ 
+  AltF12		\\e\\e[24~ 
+  
