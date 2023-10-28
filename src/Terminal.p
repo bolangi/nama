@@ -72,10 +72,10 @@ sub hotkey_dispatch {
 	my ($seq) = string_to_escape_code($term->Attribs->{executing_keyseq});
 	my $name = $keyname{$seq};
 	my $func_name = $bindings{$name};
-	say "Special key: $name, escape sequence: $seq, triggers $func_name";
+	pager("Special key: $name, has no defined function."), return if not $func_name;
 	no strict 'refs';
 	$func_name->();
-	#display_status();
+	display_status();
 }                                                                                              
 sub string_to_escape_code {
     my ($string) = @_;                                                                         
@@ -104,8 +104,8 @@ sub display_status {
 sub status_bar { 
 	my %bar = (param => \&param_status_bar,
 	           jump  => \&jump_status_bar,
-			   bump  => \&bump_status_bar );
-	$bar{$text->{hotkey_mode}}
+			   bump  => \&jump_status_bar );
+	$bar{$text->{hotkey_mode}}->();
 }
 	
 sub param_status_bar {
