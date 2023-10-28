@@ -127,10 +127,10 @@ sub jump_status_bar {
 	$bar .= "mark bump: $config->{mark_bump_seconds}s " ;
 	$bar
 }
-sub beep_trim_start 	{ beep( $config->{beep}->{trim_start   }->@* )}
-sub beep_trim_end   	{ beep( $config->{beep}->{trim_end     }->@* )}
-sub beep_command_error 	{ beep( $config->{beep}->{command_error}->@* )}
-sub beep_end_of_list    { beep( $config->{beep}->{end_of_list  }->@* )}
+sub beep_trim_start 	{ beep( $config->{beep}->{trim_start   })}
+sub beep_trim_end   	{ beep( $config->{beep}->{trim_end     })}
+sub beep_command_error 	{ beep( $config->{beep}->{command_error})}
+sub beep_end_of_list    { beep( $config->{beep}->{end_of_list  })}
 
 sub beep { 
 	my $args = shift;
