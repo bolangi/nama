@@ -46,12 +46,12 @@ sub initializations {
 
 	[% qx(./strip_all ./var_lists) %]
 
-	$text->{wrap} = new Text::Format {
+	$text->{wrap} = Text::Format->new( {
 		columns 		=> 75,
 		firstIndent 	=> 0,
 		bodyIndent		=> 0,
 		tabstop			=> 4,
-	};
+	});
 
 	####### Initialize singletons #######
 
