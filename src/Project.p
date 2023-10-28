@@ -127,7 +127,7 @@ sub load_project {
 	if (not $project->{name} or not -d project_dir() and not $args{create})
 	{
 		no warnings 'uninitialized';
-		::pager_newline(qq(Project "$project->{name}" not found. Loading project "untitled".)); 
+		::pager_newline(qq(Project "$project->{name}" not found. Loading project "Untitled".)); 
 		load_project(name => 'Untitled', create => 1);
 
 	}
