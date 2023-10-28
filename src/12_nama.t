@@ -29,7 +29,7 @@ $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag( qx(find $test_dir) );
 apply_test_args();
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "options: @ARGV";
-bootstrap_environment();
+startup();
 $config->{use_git} = 0;
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "Check representative variable from default .namarc";

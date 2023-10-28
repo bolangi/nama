@@ -38,7 +38,7 @@ sub apply_ecasound_test_args {
 	@ARGV = grep { $_ ne q(-E) } @ARGV
 }
 
-sub definitions {
+sub initializations {
 
 	$| = 1;     # flush STDOUT buffer on every write
 

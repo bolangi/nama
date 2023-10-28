@@ -150,7 +150,7 @@ use ::Tempo ();
 
 sub main { 
 	say eval join(get_data_section('banner'), qw(" "));
-	bootstrap_environment() ;
+	startup();
 	load_project(name => shift @ARGV,
 				 create => delete $config->{opts}->{c}); 
 				 		 # remove option for next project load
@@ -160,8 +160,8 @@ sub main {
 	$ui->loop();
 }
 
-sub bootstrap_environment {
-	definitions();
+sub startup {
+	initializations();
 	process_command_line_options();
 	start_logging();
 	setup_grammar();
