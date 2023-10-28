@@ -120,11 +120,11 @@ sub jump_status_bar {
 	my $pos = ::ecasound_iam("getpos");
 	my $bar = "Playback at ${pos}s, ";
 	if (defined $this_mark) {
-		my $mark = join ' ', 'Mark', qq("$this_mark->name"), 'at', $this_mark->time;
+		my $mark = join ' ', 'Current mark:', qq("$this_mark->name"), 'at', $this_mark->time;
 		$bar .= $mark;
 	}
-	$bar .= "jump size: $config->{playback_jump_seconds}s, ";
-	$bar .= "mark bump: $config->{mark_bump_seconds}s " ;
+	$bar .= "Jump size: $config->{playback_jump_seconds}s, ";
+	$bar .= "Mark bump: $config->{mark_bump_seconds}s " ;
 	$bar
 }
 sub beep_trim_start 	{ beep( $config->{beep}->{trim_start   })}
