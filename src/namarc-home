@@ -128,7 +128,7 @@ hotkeys:
   common: 
     Keypad7: previous_track
     Keypad4: next_track
-	KeypadEnter: replay
+    KeypadEnter: replay
   jump:
     Keypad8: jump_to_start
     Keypad5: jump_to_end
