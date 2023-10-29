@@ -44,26 +44,25 @@
   KeypadEnter   \\eOM
   
   ShiftF1	\\e[23~
-  ShiftF2 \\e[24~
-  ShiftF3 \\e[25~
-  ShiftF4 \\e[26~
-  ShiftF5 \\e[28~
-  ShiftF6 \\e[29~
-  ShiftF7 \\e[31~
-  ShiftF8 \\e[32~
-  ShiftF9 \\e[33~
-  ShiftF10 \\e[34~
-  ShiftF11 \\e[23$
-  ShiftF12 \\e[24$
+  ShiftF2 	\\e[24~
+  ShiftF3 	\\e[25~
+  ShiftF4 	\\e[26~
+  ShiftF5 	\\e[28~
+  ShiftF6 	\\e[29~
+  ShiftF7 	\\e[31~
+  ShiftF8 	\\e[32~
+  ShiftF9 	\\e[33~
+  ShiftF10 	\\e[34~
+  ShiftF11 	\\e[23$
+  ShiftF12 	\\e[24$
 
-  ShiftInsert [11^
-  ShiftDelete \\e[3$
-  ShiftHome	  \\e[7$
-  ShiftEnd	  \\e[8$ 
-  ShiftUp	\\e[a
-  ShiftDown \\e[b
-  ShiftLeft \\e[d
-  ShiftRight \\e[c
+  ShiftDelete 	\\e[3$
+  ShiftHome	  	\\e[7$
+  ShiftEnd	  	\\e[8$ 
+  ShiftUp		\\e[a
+  ShiftDown 	\\e[b
+  ShiftLeft 	\\e[d
+  ShiftRight 	\\e[c
 
   ControlF1	\\e[11^
   ControlF2 \\e[12^
@@ -78,23 +77,23 @@
   ControlF11 \\e[23^
   ControlF12 \\e[24^
 
-  ControlInsert \\e[2^
-  ControlDelete \\e[3^
-  ControlHome	 \\e[7^
-  ControlEnd   \\e[8^
-  ControlPageUp \\e[5^
-  ControlPageDown \\e[6^
-  ControlUp      \\eOa
-  ControlDown    \\eOb
-  ControlLeft    \\eOd
-  ControlRight   \\eOc
+  ControlInsert 	\\e[2^
+  ControlDelete 	\\e[3^
+  ControlHome		\\e[7^
+  ControlEnd   		\\e[8^
+  ControlPageUp 	\\e[5^
+  ControlPageDown 	\\e[6^
+  ControlUp      	\\eOa
+  ControlDown    	\\eOb
+  ControlLeft    	\\eOd
+  ControlRight   	\\eOc
 
   AltInsert  	\\e\\e[2~
   AltDelete  	\\e\\e[3~
-  AltHome  	\\e\\e[1~
+  AltHome  		\\e\\e[1~
   AltEnd  		\\e\\e[4~
   AltPageUp  	\\e\\e[5~
-  AltPageDown  \\e\\e[6~
+  AltPageDown  	\\e\\e[6~
 
   AltUp  		\\e\\e[A
   AltLeft  	\\e\\e[D
