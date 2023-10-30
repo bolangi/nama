@@ -63,18 +63,19 @@ sub setup_hotkeys {
 	my $func_name = 'hotkey_dispatch';
 	my $coderef = \&hotkey_dispatch;
 	$term->add_defun($func_name, $coderef);
-	while ( my ($keyname,$seq) = each %escape_code) {
-	$term->bind_keyseq($seq, $func_name);
+	for my $key (keys %bindings) {
+		my $seq = (length $key == 1 ? $key : $escape_code{$key});
+		$term->bind_keyseq($seq, $func_name);
 	}
 	pager("\nHotkeys set for $map!") unless $quiet;
 }
 sub hotkey_dispatch {                                                                          
 	my ($seq) = string_to_escape_code($term->Attribs->{executing_keyseq});
-	my $name = $keyname{$seq};
-	my $func_name = $bindings{$name};
-	pager("Special key: $name, has no defined function."), return if not $func_name;
+	my $name = length $seq == 1 ? $seq : $keyname{$seq};
+	my $function = $bindings{$name};
+	throw(qq("$name": key has no defined function.)), return if not $function;
 	no strict 'refs';
-	$func_name->();
+	$function->();
 	display_status();
 }                                                                                              
 sub string_to_escape_code {
