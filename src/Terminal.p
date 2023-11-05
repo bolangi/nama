@@ -27,16 +27,10 @@ sub initialize_terminal {
 	($text->{screen_lines}, $text->{screen_columns}) 
 		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
-	setup_event_loop(); 
 	$term->add_defun('spacebar_action', \&spacebar_action);
 	$term->bind_keyseq(' ','spacebar_action');
 	revise_prompt();
-
-	# handle Control-C from terminal
-	$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
-	# responds in a more timely way than $SIG{INT} = \&cleanup_exit; 
-
-	$SIG{USR1} = sub { project_snapshot() };
+	setup_event_loop(); 
 }
 sub spacebar_action {
 		my $buffer = $term->Attribs->{line_buffer};
@@ -216,6 +210,10 @@ sub prompt {
 }
 sub setup_event_loop {
 	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub { $term->Attribs->{'callback_read_char'}->() });
+	# handle Control-C from terminal
+	$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
+	# responds in a more timely way than $SIG{INT} = \&cleanup_exit; 
+	$SIG{USR1} = sub { project_snapshot() };
 }
 sub throw {
 	logsub((caller(0))[3]);
