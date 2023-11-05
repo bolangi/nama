@@ -28,7 +28,8 @@ sub initialize_terminal {
 		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
 	detect_spacebar(); 
-
+	$term->add_defun('spacebar_action', \&spacebar_action);
+	$term->bind_keyseq(' ','spacebar_action');
 	revise_prompt();
 
 	# handle Control-C from terminal
@@ -36,6 +37,16 @@ sub initialize_terminal {
 	# responds in a more timely way than $SIG{INT} = \&cleanup_exit; 
 
 	$SIG{USR1} = sub { project_snapshot() };
+}
+sub spacebar_action {
+		my $buffer = $term->Attribs->{line_buffer};
+		if ( length $buffer == 0 ) { 
+			toggle_transport() 
+		}
+		else {  
+			$term->Attribs->{line_buffer} .= ' '; 
+			$term->Attribs->{point} += 1;
+		}
 }
 sub new_keymap {
 	# backup default bindings, we will modify a copy
