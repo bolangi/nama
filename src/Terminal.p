@@ -204,31 +204,7 @@ sub prompt {
 						bus_track_display() ," ('h' for help)> "
 }
 sub detect_spacebar {
-
-	# create a STDIN watcher to intervene when space
-	# received in column one
-	
-	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub {
-		$term->Attribs->{'callback_read_char'}->();
-		my $buffer = $term->Attribs->{line_buffer};
-		my $trigger = ' ';
-		if ( $config->{press_space_to_start} 
-				and ($buffer eq $trigger)
-				and ! ($mode->song or $mode->live) )
-		{ 	
-			toggle_transport();	
-
-			# reset command line, read next char
-			
-			$term->Attribs->{line_buffer} = q();
-			$term->Attribs->{point} 		= 0;
-			$term->Attribs->{end}   		= 0;
-			$term->stuff_char(10);
-			$term->Attribs->{'callback_read_char'}->();
-
-			
-		}
-	});
+	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub { $term->Attribs->{'callback_read_char'}->() });
 }
 sub throw {
 	logsub((caller(0))[3]);
