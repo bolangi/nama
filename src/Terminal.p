@@ -27,8 +27,9 @@ sub initialize_terminal {
 	($text->{screen_lines}, $text->{screen_columns}) 
 		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
-	detect_spacebar(); 
-
+	setup_event_loop(); 
+	$term->add_defun('spacebar_action', \&spacebar_action);
+	$term->bind_keyseq(' ','spacebar_action');
 	revise_prompt();
 
 	# handle Control-C from terminal
@@ -36,6 +37,16 @@ sub initialize_terminal {
 	# responds in a more timely way than $SIG{INT} = \&cleanup_exit; 
 
 	$SIG{USR1} = sub { project_snapshot() };
+}
+sub spacebar_action {
+		my $buffer = $term->Attribs->{line_buffer};
+		if ( length $buffer == 0 ) { 
+			toggle_transport() 
+		}
+		else {  
+			$term->Attribs->{line_buffer} .= ' '; 
+			$term->Attribs->{point} += 1;
+		}
 }
 sub new_keymap {
 	# backup default bindings, we will modify a copy
@@ -63,18 +74,19 @@ sub setup_hotkeys {
 	my $func_name = 'hotkey_dispatch';
 	my $coderef = \&hotkey_dispatch;
 	$term->add_defun($func_name, $coderef);
-	while ( my ($keyname,$seq) = each %escape_code) {
-	$term->bind_keyseq($seq, $func_name);
+	for my $key (keys %bindings) {
+		my $seq = (length $key == 1 ? $key : $escape_code{$key});
+		$term->bind_keyseq($seq, $func_name);
 	}
 	pager("\nHotkeys set for $map!") unless $quiet;
 }
 sub hotkey_dispatch {                                                                          
 	my ($seq) = string_to_escape_code($term->Attribs->{executing_keyseq});
-	my $name = $keyname{$seq};
-	my $func_name = $bindings{$name};
-	pager("Special key: $name, has no defined function."), return if not $func_name;
+	my $name = length $seq == 1 ? $seq : $keyname{$seq};
+	my $function = $bindings{$name};
+	throw(qq("$name": key has no defined function.)), return if not $function;
 	no strict 'refs';
-	$func_name->();
+	$function->();
 	display_status();
 }                                                                                              
 sub string_to_escape_code {
@@ -202,32 +214,8 @@ sub prompt {
 	join ' ', 'nama', git_branch_display(), 
 						bus_track_display() ," ('h' for help)> "
 }
-sub detect_spacebar {
-
-	# create a STDIN watcher to intervene when space
-	# received in column one
-	
-	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub {
-		$term->Attribs->{'callback_read_char'}->();
-		my $buffer = $term->Attribs->{line_buffer};
-		my $trigger = ' ';
-		if ( $config->{press_space_to_start} 
-				and ($buffer eq $trigger)
-				and ! ($mode->song or $mode->live) )
-		{ 	
-			toggle_transport();	
-
-			# reset command line, read next char
-			
-			$term->Attribs->{line_buffer} = q();
-			$term->Attribs->{point} 		= 0;
-			$term->Attribs->{end}   		= 0;
-			$term->stuff_char(10);
-			$term->Attribs->{'callback_read_char'}->();
-
-			
-		}
-	});
+sub setup_event_loop {
+	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub { $term->Attribs->{'callback_read_char'}->() });
 }
 sub throw {
 	logsub((caller(0))[3]);
