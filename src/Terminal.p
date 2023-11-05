@@ -27,7 +27,7 @@ sub initialize_terminal {
 	($text->{screen_lines}, $text->{screen_columns}) 
 		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
-	detect_spacebar(); 
+	setup_event_loop(); 
 	$term->add_defun('spacebar_action', \&spacebar_action);
 	$term->bind_keyseq(' ','spacebar_action');
 	revise_prompt();
@@ -214,7 +214,7 @@ sub prompt {
 	join ' ', 'nama', git_branch_display(), 
 						bus_track_display() ," ('h' for help)> "
 }
-sub detect_spacebar {
+sub setup_event_loop {
 	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub { $term->Attribs->{'callback_read_char'}->() });
 }
 sub throw {
