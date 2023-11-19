@@ -35,7 +35,7 @@
 	$project->{bunch}
 	$project->{current_op}
 	$project->{current_param}
-	$project->{current_stepsize}
+	$project->{param_stepsize}
 	$project->{playback_position}
 	$project->{sample_rate}
 	$project->{waveform}

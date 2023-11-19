@@ -1116,7 +1116,7 @@ sub set_current_param {
 }
 sub set_param_stepsize {
 	my $stepsize = shift;
-	$project->{current_stepsize}->{::this_op()}->[this_param()] = $stepsize;
+	$project->{param_stepsize}->{::this_op()}->[this_param()] = $stepsize;
 }
 sub set_parameter_value {
 	my $value = shift;
