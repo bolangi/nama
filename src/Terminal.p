@@ -365,12 +365,10 @@ sub keyword {
         return undef;
 };
 
-%escape_code = qw(
+%escape_code = @keynames = qw(
 [% qx(cat ./escape_codes) %]
 );
-@keynames = qw(
-[% qx(cat ./escape_codes) %]
-);
+
 my @i = reverse(1..@keynames/2);
 for my $i (@i){ splice @keynames, 2 * $i - 1, 1 }
 
