@@ -11,6 +11,7 @@ use List::MoreUtils qw(first_index);
 our %escape_code; # key name -> escape code
 our %keyname;     # escape code -> key name
 our %bindings;    # key name -> nama function (from namarc hotkeys)
+our @keynames;
 
 sub initialize_prompt {
 	set_current_bus();
@@ -95,9 +96,15 @@ sub string_to_escape_code {
 } 
 
 sub list_hotkeys { 
-	my %hots 		= ( $config->{hotkeys}->{common}->%*, 
-						$config->{hotkeys}->{$text->{hotkey_mode}->%*} );
-	pager("Hotkeys\n",Dumper \%hots)
+
+	pager("Current hotkey mode: $text->{hotkey_mode}");
+ 	my %hots 		= ( $config->{hotkeys}->{common}->%*, 
+ 						$config->{hotkeys}->{$text->{hotkey_mode}}->%* );
+	my @list;
+	for (@keynames){
+		push @list, "$_: $hots{$_}" if $hots{$_};
+	}
+ 	pager_newline("Hotkeys",@list);
 }
 
 sub display_status {
@@ -361,6 +368,12 @@ sub keyword {
 %escape_code = qw(
 [% qx(cat ./escape_codes) %]
 );
+@keynames = qw(
+[% qx(cat ./escape_codes) %]
+);
+my @i = reverse(1..@keynames/2);
+for my $i (@i){ splice @keynames, 2 * $i - 1, 1 }
+
 my %escape_code_lc;
 while( my($key,$seq) = each %escape_code ){
 	$escape_code_lc{lc $key} = $seq;
