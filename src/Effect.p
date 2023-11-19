@@ -497,6 +497,12 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					set_param_stepsize
 					set_parameter_value
 
+					increment_param
+					increment_param_1
+					increment_param_10
+					decrement_param_1
+					decrement_param_10
+
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -1110,19 +1116,22 @@ sub set_current_op {
 	return unless $FX;
 	$project->{current_op}->{$FX->trackname} = $op_id;
 }
-sub set_current_param {
-	my $parameter = shift;
-	$project->{current_param}->{::this_op()} = $parameter;
-}
-sub set_param_stepsize {
-	my $stepsize = shift;
-	$project->{param_stepsize}->{::this_op()}->[this_param()] = $stepsize;
-}
+sub current_param  : lvalue { $project->{current_param }->{this_op()} }
+sub param_stepsize : lvalue { $project->{param_stepsize}->{this_op()}->[this_param()] }
+
 sub set_parameter_value {
 	my $value = shift;
 	modify_effect(this_op(), this_param(), undef, $value)
 }
 
+sub increment_param {
+	my $multiplier = shift;
+	modify_effect(this_op(), this_param(), '+', $multiplier * param_stepsize())
+}
+sub increment_param_1    { increment_param(  1) }
+sub increment_param_10   { increment_param( 10) }
+sub decrement_param_1    { increment_param( -1) }
+sub decrement_param_10   { increment_param(-10) }
 
 sub check_fx_consistency {
 
