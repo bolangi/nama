@@ -163,7 +163,7 @@ sub remove_name { my $self = shift; delete $self->{name} }
 sub set_name    { my $self = shift; $self->{name} = shift }
 sub set_surname { my $self = shift; $self->{surname} = shift}
 sub is_controller { my $self = shift; $self->parent } 
-sub is_channel_op { my $self = shift; $::config->{ecasound_channel_ops}->{$self->type} }
+sub is_channel_op { my $self = shift; $config->{ecasound_channel_ops}->{$self->type} }
 
 
 sub has_read_only_param {
@@ -261,7 +261,7 @@ sub trackname { $_[0]->track->name }
 
 sub ladspa_id {
 	my $self = shift;
-	$::fx_cache->{ladspa_label_to_unique_id}->{$self->type} 
+	$fx_cache->{ladspa_label_to_unique_id}->{$self->type} 
 }
 sub nameline {
 	my $self = shift;
