@@ -1120,7 +1120,7 @@ sub set_param_stepsize {
 }
 sub set_parameter_value {
 	my $value = shift;
-	modify_effect(::this_op(), this_param(), undef, $value)
+	modify_effect(this_op(), this_param(), undef, $value)
 }
 
 
