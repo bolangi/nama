@@ -21,6 +21,7 @@ $config->{waveform_canvas_x}
 $config->{waveform_canvas_y}
 $config->{soundcard_loopback_delay}
 $config->{use_effects_bugfix}
+$config->{ecasound_channel_ops}
 
 $jack->{seek_delay}				# extra time for stop-seek-start process
 $jack->{jackd_running}			# jackd status, but this should be a subroutine
