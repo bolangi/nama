@@ -310,6 +310,7 @@ sub bump_mark_back_10    { bump_mark_forward(-10) }
 sub forward {
 	my $delta = shift;
 	my $here = ecasound_iam('getpos');
+	return unless $here;
 	my $new = $here + $delta;
 	set_position( $new );
 }
