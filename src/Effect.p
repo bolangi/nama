@@ -493,8 +493,8 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					fxn
 
 					set_current_op
-					set_current_param
-					set_param_stepsize
+					current_param
+					param_stepsize
 					set_parameter_value
 
 					increment_param
@@ -739,7 +739,7 @@ sub modify_multiple_effects {
 		map{ 	my $parameter = $_;
 				modify_effect($op_id, $parameter, $sign, $value);
 				set_current_op($op_id);
-				set_current_param($parameter);	
+				current_param() = $parameter;	
 		} @$parameters;
 	} @$op_ids;
 }
