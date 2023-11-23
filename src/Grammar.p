@@ -56,8 +56,8 @@ sub process_line {
 	my ($user_input) = @_;
 	logpkg('debug',"user input: $user_input");
 	if (defined $user_input and $user_input !~ /^\s*$/) {
-		$text->{term}->addhistory($user_input) 
-			unless $user_input eq $text->{previous_cmd} or ! $text->{term};
+		$term->addhistory($user_input) 
+			unless $user_input eq $text->{previous_cmd} or ! $term;
 		$text->{previous_cmd} = $user_input;
 		
 		# convert hyphenated commands to underscore form
@@ -425,9 +425,9 @@ sub showlist {
 	my @list = grep{ ! $_->hide } ::all_tracks();
 	my $section = [undef,undef,@list];
 	my ($screen_lines, $columns);
-	if( $text->{term} )
+	if( $term )
 	{
-		($screen_lines, $columns) = $text->{term}->get_screen_size();
+		($screen_lines, $columns) = $term->get_screen_size();
 	}
 
 	return $section if scalar @list <= $screen_lines - 5
@@ -523,8 +523,8 @@ sub destroy_current_wav {
 		throw($this_track->name, 
 			": No current version (track set to OFF?) Skipping."), return;
 	my $wav = $this_track->full_path;
-	my $reply = $text->{term}->readline("delete WAV file $wav? [n] ");
-	#my $reply = chr($text->{term}->read_key()); 
+	my $reply = $term->readline("delete WAV file $wav? [n] ");
+	#my $reply = chr($term->read_key()); 
 	if ( $reply =~ /y/i ){
 		# remove version comments, if any
 		delete $project->{track_version_comments}{$this_track->name}{$this_track->version};
@@ -532,7 +532,7 @@ sub destroy_current_wav {
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		refresh_wav_cache();
 	}
-	$text->{term}->remove_history($text->{term}->where_history);
+	$term->remove_history($term->where_history);
 	$this_track->set(version => $this_track->last); 
 	1;
 }

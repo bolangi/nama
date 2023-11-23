@@ -165,7 +165,7 @@ sub init_gui {
 				stop_transport() if $this_engine->started;
 				save_state($gui->{_save_id});
 				pager("Exiting... \n");
-				#$text->{term}->tkRunning(0);
+				#$term->tkRunning(0);
 				#$gui->{ew}->destroy;
 				#$gui->{mw}->destroy;
 				#::nama_cmd('quit');

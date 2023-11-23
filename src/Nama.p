@@ -191,7 +191,7 @@ sub cleanup_exit {
 	delete $project->{events};
 	#project_snapshot(); 
 	::Engine::sync_action('kill_and_reap');
-	$text->{term}->rl_deprep_terminal() if defined $text->{term};
+	$term->rl_deprep_terminal() if defined $term;
 	exit;
 }
 END { }

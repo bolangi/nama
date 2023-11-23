@@ -21,9 +21,9 @@ sub loop {
 		my ($event, $errmsg) = @_;
 		throw($errmsg);
 		$text->{term_attribs}->{line_buffer} = q();
-		if($text->{term}){
-			$text->{term}->clear_message();
-			$text->{term}->rl_reset_line_state();
+		if($term){
+			$term->clear_message();
+			$term->rl_reset_line_state();
 		}
 	};
 	use Data::Dumper::Concise;

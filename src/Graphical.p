@@ -3,7 +3,7 @@
 package ::Graphical;  ## gui routines
 use Modern::Perl '2020'; use Carp;
 our $VERSION = 1.071;
-use ::Globals qw($text $prompt);
+use ::Globals qw($term $prompt);
 
 use Module::Load::Conditional qw(can_load);
 use ::Assign qw(:all);
@@ -19,10 +19,10 @@ our @ISA = '::';      ## default to root namespace, e.g.  Refresh_subs, Graphica
 
 sub hello {"make a window";}
 sub loop {
-	$text->{term_attribs}->{already_prompted} = 0;
-	$text->{term}->tkRunning(1);
+	$term->Attribs->{already_prompted} = 0;
+	$term->tkRunning(1);
   	while (1) {
-  		my ($user_input) = $text->{term}->readline($prompt) ;
+  		my ($user_input) = $term->readline($prompt) ;
   		::process_line( $user_input );
   	}
 }
