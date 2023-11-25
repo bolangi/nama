@@ -157,10 +157,10 @@ sub beep {
 		$cmd = "beep -f $freq -l $duration";
 	} else {
 		$vol_percent //= 10;
-		$cmd = "ecasound -i:tone,sine,$freq,$duration -ea $vol_percent";
+		my $output_device = ::IO::to_alsa_soundcard_device::device_id;
+		$cmd = "ecasound -i:tone,sine,$freq,$duration -ea $vol_percent -o:$output_device 2>&1 > /dev/null";
 	}
-	my @cmd = split ' ',$cmd;
-	system(@cmd);
+	system($cmd);
 }
 
 sub destroy_readline {
