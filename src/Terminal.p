@@ -39,8 +39,7 @@ sub spacebar_action {
 			toggle_transport() 
 		}
 		else {  
-			$term->Attribs->{line_buffer} .= ' '; 
-			$term->Attribs->{point} += 1;
+			$term->insert_text(' '); 
 		}
 }
 sub new_keymap {
