@@ -123,14 +123,23 @@ sub status_bar {
 sub param_status_bar {
 	my $name = "[".$this_track->name."]"; 
 	return "$name has no selected effect" unless $this_track->op;
-	join " ", $name,
+	my $effect_info = join " ", $name,
 				this_op(), 
-				this_op_o()->fxname,
-				"Stepsize:",param_stepsize(),
-				parameter_info(this_op(), current_param() - 1);
+				this_op_o()->fxname;
+	if (this_op()->no_params) {
+		return "$effect_info (no parameters to adjust)";
+	}
+	my $param_pos = current_param() - 1;
+	my $param_info = parameter_info(this_op(), $param_pos);
+	if (this_op()->is_read_only ){
+		return "$effect_info $param_info - no adjustment possible";
+	}
+	$param_info .= " Stepsize: ".param_stepsize();
+	return "$effect_info $param_info";
 }
 sub jump_status_bar {
-	my $name = "[".$this_track->name."]"; 
+	return unless $this_track; 
+	my $name = "[".$this_track->name."]";
 	my $pos = ::ecasound_iam("getpos") // 0;
 	my $bar = "$name: Playback at ${pos}s, ";
 	if (defined $this_mark) {
