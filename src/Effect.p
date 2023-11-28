@@ -1304,6 +1304,10 @@ sub ecasound_format {
 	$cmd .= ':'.join ',' ,@{$self->{params}} if $self->{params} and @{$self->{params}} > 0;
 	$cmd
 }
+sub no_params {
+	my $self = shift;
+	$self->about->{count} == 0
+}
 
 } # end package Effect
 
