@@ -562,7 +562,17 @@ sub add_effect {
 	#logsub((caller(0))[3]);
 	my $args = shift;
 	my $added = _add_effect($args);
+	initialize_current_param_and_stepsize(@$added);
 	$added->[0]->id
+}
+sub initialize_current_param_and_stepsize {
+	for my $FX (@_){
+		my $param_count = $FX->about->{count};
+		$project->{current_param}->{$FX->id} //=  $param_count ? 1 : 0;
+		for (1..$param_count){
+			$project->{param_stepsize}->{$FX->id}->{$_} //= 1;
+		}
+	}
 }
 sub _add_effect {
 	my $p = shift;
