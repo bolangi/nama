@@ -1769,8 +1769,8 @@ bus_off: _bus_off
 }
 
 
-set_param_increment: _set_param_increment value {::set_param_stepsize($item{value}    )} 
-set_param_exp:       _set_param_exp       exp   {::set_param_stepsize(10**$item{exp});1} 
+set_param_increment: _set_param_increment value {::_param_stepsize()=$item{value}} 
+set_param_exp:       _set_param_exp       exp   {::param_stepsize()=10**$item{exp}} 
 
 set_playback_jump: _set_playback_jump seconds {::set_playback_jump($item{seconds})} 
 set_mark_bump: _set_mark_bump seconds {        ::set_mark_bump(    $item{seconds})} 
