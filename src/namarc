@@ -33,7 +33,7 @@ project_root: ~                  # replaced during first run
 
 devices: 
   jack:
-    signal_format: f32_le,N,frequency
+    signal_format: f32_le,N,frequency # don't change this
   consumer:
     ecasound_id: alsa,default
     input_format: cd-stereo
@@ -61,8 +61,8 @@ abbreviations:
 # audio formats 
 
 mix_to_disk_format: cd-stereo
-mixer_out_format: s16_le,N,frequency,i # don't change the "N"
-raw_to_disk_format: s16_le,N,frequency,i
+mixer_out_format: cd-stereo
+raw_to_disk_format: s16_le,N,frequency,i    # the "N" is required
 cache_to_disk_format: s16_le,N,frequency,i
 
 mixdown_encodings: mp3 ogg
