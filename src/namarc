@@ -60,8 +60,8 @@ abbreviations:
 
 # audio formats 
 
-mixer_out_format: cd-stereo
-mix_to_disk_format: s16_le,N,frequency,i
+mix_to_disk_format: cd-stereo
+mixer_out_format: s16_le,N,frequency,i # don't change the "N"
 raw_to_disk_format: s16_le,N,frequency,i
 cache_to_disk_format: s16_le,N,frequency,i
 
