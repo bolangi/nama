@@ -25,9 +25,7 @@
 #         - This file is distinct from .ecasoundrc (not used by Nama.)
 
 
-# project root directory
-
-# all project directories (or their symlinks) will live here
+# project root directory, all project files stored here
 
 project_root: ~                  # replaced during first run
 
