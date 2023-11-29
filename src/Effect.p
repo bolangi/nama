@@ -1130,11 +1130,12 @@ sub current_param  : lvalue { $project->{current_param }->{this_op()} }
 sub param_stepsize : lvalue { $project->{param_stepsize}->{this_op()}->[this_param()] }
 
 sub set_parameter_value {
+	return if cannot_modify_parameter();
 	my $value = shift;
 	modify_effect(this_op(), this_param(), undef, $value)
 }
-
 sub increment_param {
+	return if cannot_modify_parameter();
 	my $multiplier = shift;
 	modify_effect(this_op(), this_param(), '+', $multiplier * param_stepsize())
 }
@@ -1308,6 +1309,10 @@ sub no_params {
 	my $self = shift;
 	$self->about->{count} == 0
 }
+sub cannot_modify_parameter {
+	this_op()->no_params or this_op()->is_read_only(current_param())
+}
+
 
 } # end package Effect
 
