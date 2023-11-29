@@ -22,8 +22,7 @@
 #        - You may use the tilde symbol '~' to represent a null (undef) value
 #          For example "execute_on_project_load: ~"
 #
-#         - This file is distinct from .ecasoundrc (which in
-#           general you will not need to run Nama.)
+#         - This file is distinct from .ecasoundrc (not used by Nama.)
 
 
 # project root directory
@@ -32,7 +31,27 @@
 
 project_root: ~                  # replaced during first run
 
-# define abbreviations
+# audio devices
+
+devices: 
+  jack:
+    signal_format: f32_le,N,frequency
+  consumer:
+    ecasound_id: alsa,default
+    input_format: cd-stereo
+    output_format: cd-stereo
+    hardware_latency: 0 # don't change this
+  multi:
+    ecasound_id: alsa,ice1712
+    input_format: s32_le,12,frequency
+    output_format: s32_le,10,frequency
+    hardware_latency: 0 # don't change this
+  null:
+    ecasound_id: null
+    output_format: ~
+
+alsa_capture_device: consumer
+alsa_playback_device: consumer
 
 abbreviations:  
   24-mono: s24_le,1,frequency
@@ -41,35 +60,9 @@ abbreviations:
   cd-stereo: s16_le,2,44100,i
   frequency: 44100
 
-# define audio devices
+# audio formats 
 
-devices: 
-  jack:
-    signal_format: f32_le,N,frequency # do not change this
-  consumer:
-    ecasound_id: alsa,default
-    input_format: cd-stereo
-    output_format: cd-stereo
-    hardware_latency: 0
-  multi:
-    ecasound_id: alsa,ice1712
-    input_format: s32_le,12,frequency
-    output_format: s32_le,10,frequency
-    hardware_latency: 0
-  null:
-    ecasound_id: null
-    output_format: ~
-
-# ALSA soundcard device assignments and formats
-
-alsa_capture_device: consumer       # for ALSA/OSS
-alsa_playback_device: consumer      # for ALSA/OSS
-mixer_out_format: cd-stereo         # for ALSA/OSS
-
-# soundcard_channels: 10            # GUI input/output channel selection range
-
-# audio file format templates
-
+mixer_out_format: cd-stereo
 mix_to_disk_format: s16_le,N,frequency,i
 raw_to_disk_format: s16_le,N,frequency,i
 cache_to_disk_format: s16_le,N,frequency,i
