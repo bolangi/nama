@@ -190,6 +190,7 @@ alias:
     pcv: promote_current_version
     djp: disable_jack_polling
   effect:
-    reverb: gverb
+    reverb: gverb # now superseded by nicknames, see 'h nick'
+
 
 # end
