@@ -51,8 +51,8 @@ alsa_playback_device: consumer
 # syntax: bit_configuration,channel_count,frequency
 # example: s16_le,2,44100 (16-bits little-endian, two channels, 44.1 kHz)
 # example: s16_le,2,frequency
-# You may use the 'frequency' token, defined in "abbreviations" section below.
-
+# You may use the 'frequency' token, defined in the "abbreviations" section below.
+# Set 'frequency' to specify the sample rate for your project. 
 
 # onboard soundcard, card number 0
 
