@@ -48,6 +48,10 @@ sub new_keymap {
 	$term->set_keymap_name('nama', $text->{nama_keymap});
 	$term->set_keymap($text->{nama_keymap});
 }
+sub restore_default_keymap { 
+	$term->set_keymap($text->{default_keymap})
+}
+
 sub keymap_name {
 	$term->get_keymap_name($term->get_keymap);
 }
