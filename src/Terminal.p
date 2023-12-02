@@ -22,7 +22,6 @@ sub initialize_prompt {
 sub initialize_terminal {
 	$term = Term::ReadLine->new("Ecasound/Nama");
 	new_keymap();
-	setup_hotkeys('jump', 'quiet');
 	$term->Attribs->{attempted_completion_function} = \&complete;
 	$term->Attribs->{already_prompted} = 1;
 	($text->{screen_lines}, $text->{screen_columns}) 
