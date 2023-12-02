@@ -126,12 +126,12 @@ sub param_status_bar {
 	my $effect_info = join " ", $name,
 				this_op(), 
 				this_op_o()->fxname;
-	if (this_op()->no_params) {
+	if (this_op_o()->no_params) {
 		return "$effect_info (no parameters to adjust)";
 	}
 	my $param_pos = current_param() - 1;
 	my $param_info = parameter_info(this_op(), $param_pos);
-	if (this_op()->is_read_only ){
+	if (this_op_o()->is_read_only ){
 		return "$effect_info $param_info - no adjustment possible";
 	}
 	$param_info .= " Stepsize: ".param_stepsize();

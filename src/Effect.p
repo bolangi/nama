@@ -1310,7 +1310,7 @@ sub no_params {
 	$self->about->{count} == 0
 }
 sub cannot_modify_parameter {
-	this_op()->no_params or this_op()->is_read_only(current_param())
+	this_op_o()->no_params or this_op_o()->is_read_only(current_param())
 }
 
 
