@@ -24,8 +24,6 @@ use ::Globals qw(
 use ::Object qw(  
 [% qx( cat ./effect_fields ) %]
 );
-*this_op			= \&::this_op;
-*this_param			= \&::this_param;
 our %by_id;
 our $AUTOLOAD;
 import_engine_subs();
@@ -355,7 +353,7 @@ sub _remove_effect {
 		$track->{ops} =   [ @new_list ];
 	}
 	#set_current_op($this_track->ops->[0]);
-	#set_current_param(1);
+	_param(1);
 	delete $by_id{$self->id};
 	return(); 
 }
@@ -455,8 +453,7 @@ sub import_engine_subs {
 	*sleeper			= \&::sleeper;
 	*nama_cmd    = \&::nama_cmd;
 	*pager				= \&::pager;
-	*this_op			= \&::this_op;
-	*this_param			= \&::this_param;
+
 }
 
 use Exporter qw(import);
@@ -491,7 +488,9 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					fxn
 
 					set_current_op
-					current_param
+					this_param
+					this_op
+					this_op_o
 					param_stepsize
 					set_parameter_value
 
@@ -732,6 +731,7 @@ sub insert_effect {
 sub modify_effect {
 	logsub((caller(0))[3]);
 	my ($op_id, $parameter, $sign, $value) = @_;
+	say join " ","modify fx" , @_;
 		# $parameter: one-based
 	
 	my $FX = fxn($op_id)
@@ -1118,22 +1118,28 @@ sub fxn {
 	my $id = shift;
  	$by_id{$id};
 }
+
+## External routines, act on current effect
+
+# 
 sub set_current_op {
 	my $op_id = shift;
 	my $FX = fxn($op_id);
 	return unless $FX;
 	$project->{current_op}->{$FX->trackname} = $op_id;
 }
-sub current_param  : lvalue { $project->{current_param }->{this_op()} }
-sub param_stepsize : lvalue { $project->{param_stepsize}->{this_op()}->[this_param()] }
+sub this_op    				{ $this_track and $this_track->op }
+sub this_op_o  				{ $this_track and $this_track->op and fxn($this_track->op) or croak "no current track or no current track op"}
+sub this_param     : lvalue { $project->{current_param}->{ this_op() } }
+sub param_stepsize : lvalue { $project->{param_stepsize}->{this_op() }->[ this_param() ] } 
 
 sub set_parameter_value {
-	return if cannot_modify_parameter();
 	my $value = shift;
+	#return if this_op()->cannot_modify_parameter();
 	modify_effect(this_op(), this_param(), undef, $value)
 }
 sub increment_param {
-	return if cannot_modify_parameter();
+	#::throw("cannot modify parameter, is read-only"), return if cannot_modify_parameter();
 	my $multiplier = shift;
 	modify_effect(this_op(), this_param(), '+', $multiplier * param_stepsize())
 }
