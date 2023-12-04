@@ -457,7 +457,6 @@ sub import_engine_subs {
 	*pager				= \&::pager;
 	*this_op			= \&::this_op;
 	*this_param			= \&::this_param;
-	*this_stepsize		= \&::this_stepsize;
 }
 
 use Exporter qw(import);
@@ -1304,13 +1303,13 @@ sub ecasound_format {
 	$cmd .= ':'.join ',' ,@{$self->{params}} if $self->{params} and @{$self->{params}} > 0;
 	$cmd
 }
-sub no_params {
-	my $self = shift;
-	$self->about->{count} == 0
-}
-sub cannot_modify_parameter {
-	this_op_o()->no_params or this_op_o()->is_read_only(current_param())
-}
+# sub no_params {
+# 	my $self = shift;
+# 	$self->about->{count} == 0
+# }
+# sub cannot_modify_parameter {
+# 	$self->no_params or $self->is_read_only(current_param())
+# }
 
 
 } # end package Effect
