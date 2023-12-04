@@ -109,10 +109,10 @@ sub setup_hotkeys {
 	$text->{hotkey_mode} = $map;
 	initialize_nama_keymap();
 	%bindings = hotkey_map($map);
-	say "bindings: " ;
-	while( my($k,$v) = each %bindings){
-		say "$k: $v";
-	}
+# 	say "bindings: " ;
+# 	while( my($k,$v) = each %bindings){
+# 		say "$k: $v";
+# 	}
 	for my $key (keys %bindings) {
 		my $seq = (length $key == 1 ? $key : $escape_code{$key});
 		$term->bind_keyseq($seq, 'hotkey_dispatch');
