@@ -458,7 +458,6 @@ sub t_load_project {
 	return if $this_engine->started() and ::ChainSetup::really_recording();
 	my $name = shift;
 	my %args = @_;
-	pager("input name: $name\n");
 	$name = sanitize($name);
 	throw("Project $name does not exist\n"), return
 		unless -d join_path(project_root(), $name) or $args{create};
