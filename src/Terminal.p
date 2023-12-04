@@ -35,7 +35,7 @@ sub initialize_terminal {
 
 =comment
 	# store default bindings, just in case
- 	$text->{default_bindings} = {};
+ 	$text->{default _bindings} = {};
  	for my $k (@keynames) {
  		my $str = $escape_code{$k};
 		my $esc = eval qq("$str");
@@ -44,7 +44,7 @@ sub initialize_terminal {
 		(ref \@function) =~ /ARRAY/ and scalar @function or next;
 		#say "ref: ",ref \@function;
 		#say "func: @function";
- 		my $func_name = $text->{default_bindings}->{$k} = $term->get_function_name($function[0]);
+ 		my $func_name = $text->{default _bindings}->{$k} = $term->get_function_name($function[0]);
 		say "key $k, seq: $str, func: $func_name";
  	}
 =cut
@@ -80,6 +80,13 @@ sub initialize_nama_keymap {
 	# always enable spacebar toggle
 	$term->bind_keyseq(' ','spacebar_action');
 	
+}
+sub toggle_hotkeys {
+	state $mode = 0; # 0: spacebar_only, 1: current_hotkey_set
+	initialize_nama_keymap(), 
+	$mode = 0, return if $mode == 1; # we've reset the keymap, standard cursor commands
+	$mode = 1;
+	setup_hotkeys($text->{hotkey_mode}, 'quiet');# we've activated the hotkeys again.
 }
 sub spacebar_action {
 		my $buffer = $term->Attribs->{line_buffer};
