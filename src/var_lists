@@ -48,6 +48,7 @@
 	$mode->{midi_transport_sync}
 	$gui->{_seek_unit}
 	$text->{command_history}
+	$text->{hotkey_mode}
 	$this_track_name
 	$this_op
 );
