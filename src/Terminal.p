@@ -8,9 +8,10 @@ use ::Globals qw(:singletons $this_bus $this_track);
 use ::Log qw(logpkg logsub);
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
-our %escape_code; # key name -> escape code
-our %keyname;     # escape code -> key name
-our %bindings;    # key name -> nama function (from namarc hotkeys)
+# all keynames in vars defined below are lower case
+our %escape_code; # keyname -> escape code
+our %keyname;     # escape code -> keyname
+our %bindings;    # keyname -> function e.g. right -> inrc_param_by_1 (from namarc hotkeys)
 our @keynames;
 
 sub initialize_prompt {
@@ -21,16 +22,64 @@ sub initialize_prompt {
 
 sub initialize_terminal {
 	$term = Term::ReadLine->new("Ecasound/Nama");
-	new_keymap();
+	
+	# keymap independent
+	$term->add_defun('spacebar_action', \&spacebar_action);
+	$term->add_defun('hotkey_dispatch', \&hotkey_dispatch);
 	$term->Attribs->{attempted_completion_function} = \&complete;
 	$term->Attribs->{already_prompted} = 1;
+
+
+	initialize_nama_keymap();
+	
+
+=comment
+	# store default bindings, just in case
+ 	$text->{default_bindings} = {};
+ 	for my $k (@keynames) {
+ 		my $str = $escape_code{$k};
+		my $esc = eval qq("$str");
+		#say "key $k, str: $str";
+		my @function = ($term->function_of_keyseq($esc));
+		(ref \@function) =~ /ARRAY/ and scalar @function or next;
+		#say "ref: ",ref \@function;
+		#say "func: @function";
+ 		my $func_name = $text->{default_bindings}->{$k} = $term->get_function_name($function[0]);
+		say "key $k, seq: $str, func: $func_name";
+ 	}
+=cut
+
 	($text->{screen_lines}, $text->{screen_columns}) 
 		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
-	$term->add_defun('spacebar_action', \&spacebar_action);
-	$term->bind_keyseq(' ','spacebar_action');
+
 	revise_prompt();
 	setup_event_loop(); 
+}
+sub restore_default_keymap {
+	set_keymap('emacs');
+}
+sub initialize_nama_keymap {
+	state $first_time = 1;
+	my $nama;
+	# delete old one
+	if (not $first_time){
+		$nama = $term->get_keymap_by_name('nama');
+		$term->free_keymap($nama) if defined $nama;
+		$first_time = 0;
+	}
+	
+	# create new one
+	$text->{nama_keymap} = $nama = $term->copy_keymap(get_keymap('emacs'));
+	$term->set_keymap_name('nama',$nama);
+	
+	# activate it
+	set_keymap('nama');
+
+	
+	# always enable spacebar toggle
+	$term->bind_keyseq(' ','spacebar_action');
+	
 }
 sub spacebar_action {
 		my $buffer = $term->Attribs->{line_buffer};
@@ -41,16 +90,8 @@ sub spacebar_action {
 			$term->insert_text(' '); 
 		}
 }
-sub new_keymap {
-	# backup default bindings, we will modify a copy
-	$text->{default_keymap} = $term->get_keymap;
-	$text->{nama_keymap} = $term->copy_keymap($text->{default_keymap});
-	$term->set_keymap_name('nama', $text->{nama_keymap});
-	$term->set_keymap($text->{nama_keymap});
-}
-sub restore_default_keymap { 
-	$term->set_keymap($text->{default_keymap})
-}
+sub set_keymap { $term->set_keymap($term->get_keymap_by_name($_[0]))}
+sub get_keymap { $term->get_keymap_by_name($_[0]) }
 
 sub keymap_name {
 	$term->get_keymap_name($term->get_keymap);
@@ -58,24 +99,20 @@ sub keymap_name {
 
 sub setup_hotkeys {
 	my ($map, $quiet) = @_;
-	new_keymap();
 	$text->{hotkey_mode} = $map;
-	%bindings = ($config->{hotkeys}->{common}->%*, 
-					$config->{hotkeys}->{$map}->%*);
-	my %bindings_lc;
-	while( my($key,$function) = each %bindings ){
-		$bindings_lc{lc $key} = $function
+	initialize_nama_keymap();
+	%bindings = hotkey_map($map);
+	say "bindings: " ;
+	while( my($k,$v) = each %bindings){
+		say "$k: $v";
 	}
-	%bindings = %bindings_lc;
-
-	my $func_name = 'hotkey_dispatch';
-	my $coderef = \&hotkey_dispatch;
-	$term->add_defun($func_name, $coderef);
 	for my $key (keys %bindings) {
 		my $seq = (length $key == 1 ? $key : $escape_code{$key});
-		$term->bind_keyseq($seq, $func_name);
+		$term->bind_keyseq($seq, 'hotkey_dispatch');
 	}
 	pager("\nHotkeys set for $map!") unless $quiet;
+	list_hotkeys();
+	display_status();
 }
 sub hotkey_dispatch {                                                                          
 	my ($seq) = string_to_escape_code($term->Attribs->{executing_keyseq});
@@ -97,11 +134,20 @@ sub string_to_escape_code {
     $esc
 } 
 
-sub list_hotkeys { 
+sub hotkey_map {
+	my $mode = shift;
+ 	%bindings		= ( $config->{hotkeys}->{common}->%*, 
+ 							$config->{hotkeys}->{$text->{hotkey_mode}}->%* );
+	my %bindings_lc;
+	while( my($key,$function) = each %bindings ){
+		$bindings_lc{lc $key} = $function
+	}
+	%bindings = %bindings_lc;
+}
 
-	pager("Current hotkey mode: $text->{hotkey_mode}");
- 	my %hots 		= ( $config->{hotkeys}->{common}->%*, 
- 						$config->{hotkeys}->{$text->{hotkey_mode}}->%* );
+sub list_hotkeys { 
+	pager_newline("Current hotkey mode: $text->{hotkey_mode}");
+ 	my %hots = hotkey_map($text->{hotkey_mode});
 	my @list;
 	for (@keynames){
 		push @list, "$_: $hots{$_}" if $hots{$_};
@@ -382,8 +428,12 @@ sub keyword {
 [% qx(cat ./escape_codes) %]
 );
 
+# get them in order
 my @i = reverse(1..@keynames/2);
 for my $i (@i){ splice @keynames, 2 * $i - 1, 1 }
+
+my @keynames_lc = map lc, @keynames;
+@keynames = @keynames_lc;
 
 my %escape_code_lc;
 while( my($key,$seq) = each %escape_code ){
@@ -392,8 +442,6 @@ while( my($key,$seq) = each %escape_code ){
 %escape_code = %escape_code_lc;
 
 %keyname = ( reverse %escape_code );
-
-
 
 1;
 __END__
