@@ -255,14 +255,12 @@ sub next_effect {
 	set_current_op($this_track->ops->[$pos]);
 }
 sub previous_param {
-	my $param = $this_track->param;
-	$param > 1  ? set_current_param($this_track->param - 1)
-				: beep_end_of_list()
+	this_param() > 1 ? this_param()--
+						: beep_end_of_list()
 }
 sub next_param {
-	my $param = $this_track->param;
-	$param < scalar @{ fxn($this_track->op)->params }
-		? $project->{current_param}->{$this_track->op}++ 
+	this_param()  < scalar this_op_o()->params->@* 
+		? this_param()++ 
 		: beep_end_of_list()
 }
 {my $override;
