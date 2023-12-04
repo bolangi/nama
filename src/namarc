@@ -100,7 +100,7 @@ abbreviations:
 
 mixdown_encodings: mp3 ogg  # files are automatically generated on mixdown
                             # lame required for mp3
-							# oggenc required for ogg
+                            # oggenc required for ogg
 
 sample_rate: frequency
 
@@ -156,6 +156,8 @@ beep:
 
 hotkeys:
   common: 
+    #Space: toggle_transport
+    F1: toggle_hotkeys
     Insert: previous_track
     Delete: next_track
     Keypad0: replay
