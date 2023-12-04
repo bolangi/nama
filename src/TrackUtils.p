@@ -198,6 +198,5 @@ sub system_tracks { grep { $_->is_system_track } all_tracks() }
 sub this_op { $this_track and $this_track->op }
 sub this_op_o { $this_track and $this_track->op and fxn($this_track->op) }
 sub this_param { $this_track ? $this_track->param : ""}
-sub this_stepsize { $this_track ? $this_track->stepsize : ""}
 sub this_track_name { $this_track ? $this_track->name : "" }
 

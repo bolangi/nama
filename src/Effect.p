@@ -26,7 +26,6 @@ use ::Object qw(
 );
 *this_op			= \&::this_op;
 *this_param			= \&::this_param;
-*this_stepsize		= \&::this_stepsize;
 our %by_id;
 our $AUTOLOAD;
 import_engine_subs();
@@ -43,7 +42,7 @@ sub initialize {
 }
 sub AUTOLOAD {
 	my $self = shift;
-	#say "got self: $self", ::Dumper $self;
+	say "got self: $self", ::Dumper $self;
 	die 'not object' unless ref $self;
 	# get tail of method call
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
