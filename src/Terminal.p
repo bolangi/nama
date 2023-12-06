@@ -13,6 +13,8 @@ our %escape_code; # keyname -> escape code
 our %keyname;     # escape code -> keyname
 our %bindings;    # keyname -> function e.g. right -> inrc_param_by_1 (from namarc hotkeys)
 our @keynames;
+our ($nama_keymap, $emacs_keymap, $nama_meta, $emacs_meta);
+
 
 sub initialize_prompt {
 	set_current_bus();
@@ -70,15 +72,20 @@ sub initialize_nama_keymap {
 	}
 	
 	# create new one
-	$text->{nama_keymap} = $nama = $term->copy_keymap(get_keymap('emacs'));
+	$nama_keymap 	  = $term->copy_keymap(get_keymap('emacs'));
+	$nama_meta = $term->copy_keymap(get_keymap('emacs-meta'));
+	
 	$term->set_keymap_name('nama',$nama);
+	$term->set_keymap_name('nama_meta',$nama_meta);
 	
 	# activate it
 	set_keymap('nama');
-
 	
 	# always enable spacebar toggle
 	$term->bind_keyseq(' ','spacebar_action');
+
+	# meta key
+	$term->generic_bind("\e", $nama_meta);
 	
 }
 sub toggle_hotkeys {
