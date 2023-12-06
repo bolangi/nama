@@ -63,20 +63,19 @@ sub restore_default_keymap {
 }
 sub initialize_nama_keymap {
 	state $first_time = 1;
-	my $nama;
 	# delete old one
 	if (not $first_time){
-		$nama = $term->get_keymap_by_name('nama');
+		my $nama = $term->get_keymap_by_name('nama');
 		$term->free_keymap($nama) if defined $nama;
 		$first_time = 0;
 	}
 	
 	# create new one
 	$nama_keymap 	  = $term->copy_keymap(get_keymap('emacs'));
-	$nama_meta = $term->copy_keymap(get_keymap('emacs-meta'));
+	#$nama_meta = $term->copy_keymap(get_keymap('emacs-meta'));
 	
-	$term->set_keymap_name('nama',$nama);
-	$term->set_keymap_name('nama_meta',$nama_meta);
+	$term->set_keymap_name('nama',$nama_keymap);
+	#$term->set_keymap_name('nama_meta',$nama_meta);
 	
 	# activate it
 	set_keymap('nama');
@@ -85,7 +84,7 @@ sub initialize_nama_keymap {
 	$term->bind_keyseq(' ','spacebar_action');
 
 	# meta key
-	$term->generic_bind("\e", $nama_meta);
+	#$term->generic_bind("\e", $nama_meta);
 	
 }
 sub toggle_hotkeys {
