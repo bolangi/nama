@@ -1130,8 +1130,8 @@ sub set_current_op {
 }
 sub this_op    				{ $this_track and $this_track->op }
 sub this_op_o  				{ $this_track and $this_track->op and fxn($this_track->op) or croak "no current track or no current track op"}
-sub this_param     : lvalue { $project->{current_param}->{ this_op() } }
-sub param_stepsize : lvalue { $project->{param_stepsize}->{this_op() }->[ this_param() ] } 
+sub this_param              { $project->{current_param}->{ this_op() } }
+sub param_stepsize          { $project->{param_stepsize}->{this_op() }->[ this_param() ] } 
 
 sub set_parameter_value {
 	my $value = shift;
