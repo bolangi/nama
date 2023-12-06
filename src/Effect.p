@@ -24,8 +24,6 @@ use ::Globals qw(
 use ::Object qw(  
 [% qx( cat ./effect_fields ) %]
 );
-*this_op			= \&::this_op;
-*this_param			= \&::this_param;
 our %by_id;
 our $AUTOLOAD;
 import_engine_subs();
@@ -455,8 +453,6 @@ sub import_engine_subs {
 	*sleeper			= \&::sleeper;
 	*nama_cmd    = \&::nama_cmd;
 	*pager				= \&::pager;
-	*this_op			= \&::this_op;
-	*this_param			= \&::this_param;
 }
 
 use Exporter qw(import);
@@ -1129,10 +1125,10 @@ sub set_current_op {
 }
 sub set_current_param { $project->{current_param}->{this_op()} = $_[0] }
 
-sub this_op    				{ $this_track and $this_track->op }
-sub this_op_o  				{ $this_track and $this_track->op and fxn($this_track->op) or croak "no current track or no current track op"}
-sub this_param              { $project->{current_param}->{ this_op() } }
-sub param_stepsize          { $project->{param_stepsize}->{this_op() }->[ this_param() ] } 
+sub this_op    	   { $this_track and $this_track->op }
+sub this_op_o 	   { $this_track and $this_track->op and fxn($this_track->op) }
+sub this_param     { $project->{current_param}->{ this_op() } }
+sub param_stepsize { $project->{param_stepsize}->{this_op() }->[ this_param() ] } 
 
 sub set_param_value {
 	#return if cannot_modify_parameter();
