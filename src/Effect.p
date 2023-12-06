@@ -488,11 +488,12 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					fxn
 
 					set_current_op
+					set_current_param
 					this_param
 					this_op
 					this_op_o
 					param_stepsize
-					set_parameter_value
+					set_param_value
 
 					increment_param
 					increment_param_1
@@ -1128,12 +1129,14 @@ sub set_current_op {
 	return unless $FX;
 	$project->{current_op}->{$FX->trackname} = $op_id;
 }
+sub set_current_param { $project->{current_param}->{this_op()} = $_[0] }
+
 sub this_op    				{ $this_track and $this_track->op }
 sub this_op_o  				{ $this_track and $this_track->op and fxn($this_track->op) or croak "no current track or no current track op"}
 sub this_param              { $project->{current_param}->{ this_op() } }
 sub param_stepsize          { $project->{param_stepsize}->{this_op() }->[ this_param() ] } 
 
-sub set_parameter_value {
+sub set_param_value {
 	my $value = shift;
 	#return if this_op()->cannot_modify_parameter();
 	modify_effect(this_op(), this_param(), undef, $value)
