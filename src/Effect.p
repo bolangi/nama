@@ -40,7 +40,7 @@ sub initialize {
 }
 sub AUTOLOAD {
 	my $self = shift;
-	say "got self: $self", ::Dumper $self;
+	#say "got self: $self", ::Dumper $self;
 	confess 'not object' unless ref $self;
 	# get tail of method call
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
