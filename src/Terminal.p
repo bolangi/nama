@@ -262,12 +262,12 @@ sub next_effect {
 	set_current_op($this_track->ops->[$pos]);
 }
 sub previous_param {
-	this_param() > 1 ? set_current_parameter( this_param() - 1)
+	this_param() > 1 ? set_current_param( this_param() - 1)
 						: beep_end_of_list()
 }
 sub next_param {
 	this_param()  < scalar this_op_o()->params->@* 
-		? set_current_parameter( this_param() + 1)
+		? set_current_param( this_param() + 1)
 		: beep_end_of_list()
 }
 {my $override;

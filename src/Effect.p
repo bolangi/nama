@@ -750,7 +750,7 @@ sub modify_multiple_effects {
 		map{ 	my $parameter = $_;
 				modify_effect($op_id, $parameter, $sign, $value);
 				set_current_op($op_id);
-				current_param() = $parameter;	
+				set_current_param($parameter);
 		} @$parameters;
 	} @$op_ids;
 }
@@ -1127,7 +1127,6 @@ sub set_current_op {
 	return unless $FX;
 	$project->{current_op}->{$FX->trackname} = $op_id;
 }
-<<<<<<< HEAD
 sub set_current_param { $project->{current_param}->{this_op()} = $_[0] }
 
 sub this_op    				{ $this_track and $this_track->op }
@@ -1136,13 +1135,7 @@ sub this_param              { $project->{current_param}->{ this_op() } }
 sub param_stepsize          { $project->{param_stepsize}->{this_op() }->[ this_param() ] } 
 
 sub set_param_value {
-=======
-sub current_param  : lvalue { $project->{current_param }->{this_op()} }
-sub param_stepsize : lvalue { $project->{param_stepsize}->{this_op()}->[this_param()] }
-
-sub set_parameter_value {
-	return if cannot_modify_parameter();
->>>>>>> parent of f321bb389 (partially unify this_param() current_param())
+	#return if cannot_modify_parameter();
 	my $value = shift;
 	modify_effect(this_op(), this_param(), undef, $value)
 }
