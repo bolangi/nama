@@ -20,8 +20,16 @@ sub wav_format{
 	my $track = shift;
 	::wav_format($track->full_path)
 }
-
-	
+sub wav_width {
+	my $track = shift;
+ 	my ($depth,$width,$freq) = split ',', $track->wav_format;
+	$width
+}
+sub wav_frequency {
+	my $track = shift;
+ 	my ($depth,$width,$freq) = split ',', $track->wav_format;
+	$freq
+}
 sub dir {
 	my $self = shift;
 	 $self->project  
