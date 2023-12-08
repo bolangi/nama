@@ -564,9 +564,13 @@ add_region:
   parameters: <string:start_mark_name> | <float:start_time> <string:end_mark_name> | <float:end_time> [ <string:region_name> ]
   example: |
     sax # Select "sax" as the current track.
-    add-region sax_start 66.7 trimmed_sax 
-    ! Create "trimmed_sax", a copy of "sax" with a region defined
-    ! from mark "sax_start" to 66.7 seconds. 
+    add-region 24.4 66.7 solo 
+    ! Clone the "sax" track as "solo"
+    ! selecting the region from 24.4 to 66.7 seconds.
+    ! Decimals are required, integers are interpreted as mark indices
+    add-region solo-start solo-end
+    ! Clone track, selecting the region defined from solo-start 
+    ! mark to solo-end mark. 
 remove_region:
   type: track
   what: |
