@@ -237,10 +237,12 @@ sub initialize_interfaces {
 	
 	logsub((caller(0))[3]);
 	
-	if ( ! $config->{opts}->{t} and ::Graphical::initialize_tk() ){ 
+	if ( $config->{opts}->{g} and ::Graphical::initialize_tk() ){ 
+ 		say("Starting in graphical mode, terminal is also available.");
 		$ui = ::Graphical->new();
 	} else {
-		pager_newline( "Unable to load perl Tk module. Starting in console mode.") if $config->{opts}->{g};
+		say( "Unable to load perl Tk module.") if $config->{opts}->{g};
+ 		say("Starting in console mode.");
 		$ui = ::Text->new();
 		can_load( modules =>{ Event => undef})
 			or die "Perl Module 'Event' not found. Please install it and try again. Stopping.";

@@ -58,7 +58,7 @@ $help->{usage} = <<HELP;
 USAGE: nama [options] [project_name]
 
 --gui, -g                        Start Nama in GUI mode
---text, -t                       Start Nama in text mode
+--text, -t                       Start Nama in text mode (default)
 --create-project, -c             Create project if it doesn't exist
 --help, -h                       This help display
 
