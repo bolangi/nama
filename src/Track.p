@@ -238,6 +238,11 @@ sub off  { $_[0]->rec_status eq OFF }
 sub current_midi {}
 sub fades { grep { $_->{track} eq $_[0]->name } values %::Fade::by_index  }
 
+sub width { 
+	return $_[0]->{width} if $_[0]->{width} > 2 or not $_[0]->wav_width() or $_[0]->{rw} eq MON;
+	return $_[0]->wav_width // $_[0]->{width}
+}
+
 } # end package
 
 
