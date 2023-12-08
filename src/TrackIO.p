@@ -321,7 +321,7 @@ sub import_audio  {
 		return;
 	}
 	my ($depth,$width,$freq) = split ',', ::wav_format($path);
-	::pager_newline("format: ", ::wav_format($path));
+	::pager_newline("format: ". ::wav_format($path));
 	$frequency ||= $freq;
 	if ( ! $frequency ){
 		::throw("Cannot detect sample rate of $path. Skipping.",
