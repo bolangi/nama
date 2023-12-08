@@ -454,14 +454,14 @@ add_region: _add_region beginning ending track_name(?) {
 shift_track: _shift_track start_position {
 	my $pos = $item{start_position};
 	if ( $pos =~ /\d+\.\d+/ ){
-		::pager($::this_track->name, ": Shifting start time to $pos seconds");
+		::pager($::this_track->name. ": Shifting start time to $pos seconds");
 		$::this_track->set(playat => $pos);
 		1;
 	}
 	# elsif ( pos =~ /^\d+$/ ) { # skip the mark index case
 	elsif ( $::Mark::by_name{$pos} ){
 		my $time = ::Mark::mark_time( $pos );
-		::pager($::this_track->name, qq(: Shifting start time to mark "$pos", $time seconds));
+		::pager($::this_track->name. qq(: Shifting start time to mark "$pos", $time seconds));
 		$::this_track->set(playat => $pos);
 		1;
 	} else { 
