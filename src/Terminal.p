@@ -35,6 +35,7 @@ sub setup_termkey {
 			# but leave a lone '<' or '>' 
 			$key_string =~ s/[<>]//g if length $key_string > 1;
 
+			#say "got $key_string";
 			# exit on Ctrl-C
 			exit_hotkey_mode(), cleanup_exit() if $key->type_is_unicode 
 						and $key->utf8 eq "C" 
@@ -45,7 +46,8 @@ sub setup_termkey {
 			 
 			my $dont_display;
 			$key_string =~ s/ /Space/; # to suit our mapping file
-			if ( 0 and my $command = $config->{hotkeys}->{$key_string} 
+			process_line($text->{hotkey_buffer}), reset_hotkey_buffers(), return if $key_string eq 'Enter';
+			if (my $command = $config->{hotkeys}->{$key_string} 
 				and ! length $text->{hotkey_buffer}) {
 
 
@@ -64,7 +66,7 @@ sub setup_termkey {
 			$key_string =~ s/Space/ /; # back to the character
 			$text->{hotkey_buffer} .= $key_string;
 			print $key_string if length $key_string == 1;
-			#$text->{hotkey_parser}->command($text->{hotkey_buffer}) and reset_hotkey_buffers();
+			$text->{hotkey_parser}->command($text->{hotkey_buffer}) and reset_hotkey_buffers();
  			}
 			print(
 				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
@@ -78,17 +80,17 @@ sub reset_hotkey_buffers {
 	$text->{hotkey_buffer} = "";
 }
 sub exit_hotkey_mode {
-	teardown_hotkeys();
-	initialize_readline(); 
-	initialize_prompt();
+	teardown_termkey();
+	initialize_terminal(); 
+	revise_prompt();
 };
-sub teardown_hotkeys {
+sub teardown_termkey {
 	$project->{events}->{termkey}->termkey->stop(),
 		delete $project->{events}->{termkey} if $project->{events}->{termkey}
 }
 sub destroy_readline {
 	$term->deprep_terminal() if defined $term;
-	undef $term;
+	#undef $term; # leave it alive 
 	delete $project->{events}->{stdin};
 }
 sub setup_hotkey_grammar {
@@ -101,22 +103,21 @@ sub initialize_terminal {
 	initialize_readline();	
 }
 sub initialize_readline {
-	# keymap independent
+	$term->prep_terminal(1); # eight bit
+	#$term->initialize();
 	$term->Attribs->{attempted_completion_function} = \&complete;
 	$term->Attribs->{already_prompted} = 1;
-
 	$term->add_defun('spacebar_action', \&spacebar_action);
 	$term->bind_keyseq(' ','spacebar_action');
 	($text->{screen_lines}, $text->{screen_columns}) 
 		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
-
 	revise_prompt();
 	setup_readline_event_loop(); 
 }
 sub restore_default_keymap {
-	teardown_hotkeys();
-	initialize_terminal();
+	teardown_termkey();
+	initialize_readline();
 }
 sub toggle_hotkeys {
 	state $mode = 0; # 0: spacebar_only, 1: current_hotkey_set
@@ -305,10 +306,13 @@ sub revise_prompt {
 	# hack to allow suppressing prompt
 	$override = ($_[0] eq "default" ? undef : $_[0]) if defined $_[0];
     $term->callback_handler_install($override//prompt(), \&process_line)
-		if $term
+		if $term;
+	initialize_prompt();
 }
 }
 
+sub reset_terminal { $term->reset_terminal() }
+sub stty { system('stty 6006:5:bf:a39:3:0:7f:15:4:0:1:0:11:13:0:0:12:f:17:16:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0') }
 	
 sub prompt { 
 	logsub((caller(0))[3]);
