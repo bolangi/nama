@@ -156,7 +156,7 @@ beep:
 
 hotkeys:
   common: 
-    #Space: toggle_transport
+    Space: toggle_transport
     F1: toggle_hotkeys
     Insert: previous_track
     Delete: next_track
