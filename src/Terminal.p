@@ -306,7 +306,7 @@ sub revise_prompt {
 	$override = ($_[0] eq "default" ? undef : $_[0]) if defined $_[0];
     $term->callback_handler_install($override//prompt(), \&process_line)
 		if $term;
-	initialize_prompt();
+	initialize_prompt() if $term;
 }
 }
 
