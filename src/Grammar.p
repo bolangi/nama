@@ -120,6 +120,7 @@ sub nama_cmd {
 	# select chain operator if appropriate
 	# and there is a current track
 
+	stty(); # try to fix terminal echo
 	$this_engine->valid_setup() or return;
 	if ($this_track){
 		my $FX = fxn($this_track->op);
