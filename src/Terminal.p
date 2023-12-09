@@ -22,74 +22,105 @@ sub initialize_prompt {
 	$term->Attribs->{already_prompted} = 0;
 }
 
+sub setup_termkey {
+	$project->{events}->{termkey} = AnyEvent::TermKey->new(
+		term => \*STDIN,
+
+		on_key => sub {
+			my $key = shift;
+			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
+			logpkg('debug',"got key: $key_string");
+			# remove angle brackets around multi-character
+			# sequences, e.g. <PageUp> -> PageUp
+			# but leave a lone '<' or '>' 
+			$key_string =~ s/[<>]//g if length $key_string > 1;
+
+			# exit on Ctrl-C
+			exit_hotkey_mode(), cleanup_exit() if $key->type_is_unicode 
+						and $key->utf8 eq "C" 
+						and $key->modifiers & KEYMOD_CTRL;
+			 
+			# execute callback if we have one keystroke 
+			# and it has an "instant" mapping
+			 
+			my $dont_display;
+			$key_string =~ s/ /Space/; # to suit our mapping file
+			if ( 0 and my $command = $config->{hotkeys}->{$key_string} 
+				and ! length $text->{hotkey_buffer}) {
+
+
+				$dont_display++ if $key_string eq 'Escape'
+									or $key_string eq 'Space';
+
+
+				try { eval "$command()" }
+				catch { throw( qq(cannot execute subroutine "$command" for key "$key_string": $_") ) }
+			}
+
+			# otherwise assemble keystrokes and check
+			# them against the grammar
+			 
+			else {
+			$key_string =~ s/Space/ /; # back to the character
+			$text->{hotkey_buffer} .= $key_string;
+			print $key_string if length $key_string == 1;
+			#$text->{hotkey_parser}->command($text->{hotkey_buffer}) and reset_hotkey_buffers();
+ 			}
+			print(
+				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
+				"\x1b[2K",  # erase line
+				hotkey_status_bar(), 
+			) if $text->{hotkey_buffer} eq undef and ! $dont_display;
+		},
+	);
+}
+sub reset_hotkey_buffers {
+	$text->{hotkey_buffer} = "";
+}
+sub exit_hotkey_mode {
+	teardown_hotkeys();
+	initialize_readline(); 
+	initialize_prompt();
+};
+sub teardown_hotkeys {
+	$project->{events}->{termkey}->termkey->stop(),
+		delete $project->{events}->{termkey} if $project->{events}->{termkey}
+}
+sub destroy_readline {
+	#$term->deprep_terminal() if defined $term;
+	undef $term;
+	delete $project->{events}->{stdin};
+}
+sub setup_hotkey_grammar {
+	$text->{hotkey_grammar} = get_data_section('hotkey_grammar');
+	$text->{hotkey_parser} = Parse::RecDescent->new($text->{hotkey_grammar})
+		or croak "Bad grammar!\n";
+}
 sub initialize_terminal {
 	$term = Term::ReadLine->new("Ecasound/Nama");
-	
+	initialize_readline();	
+}
+sub initialize_readline {
 	# keymap independent
-	$term->add_defun('spacebar_action', \&spacebar_action);
-	$term->add_defun('hotkey_dispatch', \&hotkey_dispatch);
 	$term->Attribs->{attempted_completion_function} = \&complete;
 	$term->Attribs->{already_prompted} = 1;
 
-
-	initialize_nama_keymap();
-	
-
-=comment
-	# store default bindings, just in case
- 	$text->{default _bindings} = {};
- 	for my $k (@keynames) {
- 		my $str = $escape_code{$k};
-		my $esc = eval qq("$str");
-		#say "key $k, str: $str";
-		my @function = ($term->function_of_keyseq($esc));
-		(ref \@function) =~ /ARRAY/ and scalar @function or next;
-		#say "ref: ",ref \@function;
-		#say "func: @function";
- 		my $func_name = $text->{default _bindings}->{$k} = $term->get_function_name($function[0]);
-		say "key $k, seq: $str, func: $func_name";
- 	}
-=cut
-
+	$term->add_defun('spacebar_action', \&spacebar_action);
+	$term->bind_keyseq(' ','spacebar_action');
 	($text->{screen_lines}, $text->{screen_columns}) 
 		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
 
 	revise_prompt();
-	setup_event_loop(); 
+	setup_readline_event_loop(); 
 }
 sub restore_default_keymap {
-	set_keymap('emacs');
-}
-sub initialize_nama_keymap {
-	state $first_time = 1;
-	# delete old one
-	if (not $first_time){
-		my $nama = $term->get_keymap_by_name('nama');
-		$term->free_keymap($nama) if defined $nama;
-		$first_time = 0;
-	}
-	
-	# create new one
-	$nama_keymap 	  = $term->copy_keymap(get_keymap('emacs'));
-	#$nama_meta = $term->copy_keymap(get_keymap('emacs-meta'));
-	
-	$term->set_keymap_name('nama',$nama_keymap);
-	#$term->set_keymap_name('nama_meta',$nama_meta);
-	
-	# activate it
-	set_keymap('nama');
-	
-	# always enable spacebar toggle
-	$term->bind_keyseq(' ','spacebar_action');
-
-	# meta key
-	#$term->generic_bind("\e", $nama_meta);
-	
+	teardown_hotkeys();
+	initialize_terminal();
 }
 sub toggle_hotkeys {
 	state $mode = 0; # 0: spacebar_only, 1: current_hotkey_set
-	initialize_nama_keymap(), 
+	# restore readline initialize_nama_keymap(), 
 	$mode = 0, return if $mode == 1; # we've reset the keymap, standard cursor commands
 	$mode = 1;
 	setup_hotkeys($text->{hotkey_mode}, 'quiet');# we've activated the hotkeys again.
@@ -109,20 +140,16 @@ sub get_keymap { $term->get_keymap_by_name($_[0]) }
 sub keymap_name {
 	$term->get_keymap_name($term->get_keymap);
 }
-
 sub setup_hotkeys {
 	my ($map, $quiet) = @_;
 	$text->{hotkey_mode} = $map;
-	initialize_nama_keymap();
+	destroy_readline(); 
+	setup_termkey(); 
 	%bindings = hotkey_map($map);
-# 	say "bindings: " ;
-# 	while( my($k,$v) = each %bindings){
-# 		say "$k: $v";
-# 	}
-	for my $key (keys %bindings) {
-		my $seq = (length $key == 1 ? $key : $escape_code{$key});
-		$term->bind_keyseq($seq, 'hotkey_dispatch');
-	}
+ 	say "bindings: " ;
+ 	while( my($k,$v) = each %bindings){
+ 		say "$k: $v";
+ 	}
 	pager("\nHotkeys set for $map!") unless $quiet;
 	list_hotkeys();
 	display_status();
@@ -166,6 +193,14 @@ sub list_hotkeys {
 		push @list, "$_: $hots{$_}" if $hots{$_};
 	}
  	pager_newline("Hotkeys",@list);
+}
+sub termkey_list_hotkeys { 
+	my $hots 		= dclone($config->{hotkeys});
+	my %hots = %$hots;
+	$hots{'='} 		= 'Enter numeric value';
+	$hots{ 'mN' } 	= 'Change step size to 10 raised to the Nth power';
+	$hots{ '#' }	= 'Engage hotkey mode (must be typed in column 1)';
+	pager("Hotkeys\n",Dumper \%hots)
 }
 
 sub display_status {
@@ -285,7 +320,7 @@ sub prompt {
 	join ' ', 'nama', git_branch_display(), 
 						bus_track_display() ," ('h' for help)> "
 }
-sub setup_event_loop {
+sub setup_readline_event_loop {
 	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub { $term->Attribs->{'callback_read_char'}->() });
 	# handle Control-C from terminal
 	$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 

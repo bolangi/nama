@@ -227,3 +227,6 @@ __DATA__
 [% qx(cat ./fs_midish) %]
 @@ test_tempo_map
 [% qx(cat ./tempo_map) %]
+@@ hotkey_grammar
+[% qx(cat ./hotkey_grammar.pl) %]
+
