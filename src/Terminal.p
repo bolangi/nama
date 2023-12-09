@@ -87,7 +87,7 @@ sub teardown_hotkeys {
 		delete $project->{events}->{termkey} if $project->{events}->{termkey}
 }
 sub destroy_readline {
-	#$term->deprep_terminal() if defined $term;
+	$term->deprep_terminal() if defined $term;
 	undef $term;
 	delete $project->{events}->{stdin};
 }
@@ -268,11 +268,6 @@ sub beep {
 	system($cmd);
 }
 
-sub destroy_readline {
-	$term->rl_deprep_terminal() if $term;
-	undef $term; 
-	delete $project->{events}->{stdin};
-}
 sub previous_track {
 	beep_end_of_list(), return if $this_track->n == 1;
 	do{ $this_track = $ti{$this_track->n - 1} } until !  $this_track->hide;
