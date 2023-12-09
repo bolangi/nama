@@ -35,7 +35,6 @@ sub setup_termkey {
 			# but leave a lone '<' or '>' 
 			$key_string =~ s/[<>]//g if length $key_string > 1;
 
-			#say "got $key_string";
 			# exit on Ctrl-C
 			exit_hotkey_mode(), cleanup_exit() if $key->type_is_unicode 
 						and $key->utf8 eq "C" 
