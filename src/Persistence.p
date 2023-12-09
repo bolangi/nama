@@ -460,6 +460,8 @@ sub restore_state_from_file {
 	my $fname = $file->midi_store;
 	midish_cmd(qq<load "$fname">);
 	
+	# disable hotkeys
+	delete $text->{hotkey_mode};
 } 
 sub convert_rw {
 	my $h = shift;
