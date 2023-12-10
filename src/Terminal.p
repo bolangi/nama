@@ -11,7 +11,7 @@ use List::MoreUtils qw(first_index);
 # all keynames in vars defined below are lower case
 our %escape_code; # keyname -> escape code
 our %keyname;     # escape code -> keyname
-our %bindings;    # keyname -> function e.g. right -> inrc_param_by_1 (from namarc hotkeys)
+our %bindings;    # keyname -> function e.g. right -> incr_param_by_1 (from namarc hotkeys)
 our @keynames;
 our ($nama_keymap, $emacs_keymap, $nama_meta, $emacs_meta);
 
