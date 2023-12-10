@@ -28,6 +28,10 @@ sub setup_termkey {
 
 		on_key => sub {
 			my $key = shift;
+			# exit on Ctrl-C
+			exit_hotkey_mode(), cleanup_exit() if $key->type_is_unicode 
+						and $key->utf8 eq "C" 
+						and $key->modifiers & KEYMOD_CTRL;
 			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
 			logpkg('debug',"got key: $key_string");
 			# remove angle brackets around multi-character
@@ -35,13 +39,6 @@ sub setup_termkey {
 			# but leave a lone '<' or '>' 
 			$key_string =~ s/[<>]//g if length $key_string > 1;
 
-			# exit on Ctrl-C
-			exit_hotkey_mode(), cleanup_exit() if $key->type_is_unicode 
-						and $key->utf8 eq "C" 
-						and $key->modifiers & KEYMOD_CTRL;
-			 
-			# execute callback if we have one keystroke 
-			# and it has an "instant" mapping
 			 
 			my $dont_display;
 			$key_string =~ s/ /Space/; # to suit our mapping file
