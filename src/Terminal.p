@@ -58,25 +58,30 @@ sub setup_termkey {
 
 
 				try { eval $command }
-				catch { throw( qq(cannot execute "$command" for key "$key_string": $_") ) }
-				return
+				catch { throw( qq(cannot execute "$command" for key "$key_string": $_") );  
+						return;
+				}
+				
 
 			print(
 				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
 				"\x1b[2K",  # erase line
 				hotkey_status_bar(), 
 			) unless $dont_display;
+
+			return;
 			}
 
 			# assemble keystrokes and check them against the grammar
 			 
 			$key_string =~ s/Space/ /; # back to the character
-			$text->{hotkey_buffer} .= $key_string;
-			print $key_string if length $key_string == 1;
-			#no warnings '
-			$text->{hotkey_parser}->command($text->{hotkey_buffer}) and reset_hotkey_buffer();
-			#use 'warnings';
-		},
+			if ( length $key_string == 1) {
+				$text->{hotkey_buffer} .= $key_string;
+				print $key_string; 
+				no warnings;
+				#$text->{hotkey_parser}->command($text->{hotkey_buffer}) and reset_hotkey_buffer();
+			}
+		}
 	);
 }
 sub reset_hotkey_buffer {
