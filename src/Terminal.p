@@ -33,37 +33,43 @@ sub setup_termkey {
 						and $key->utf8 eq "C" 
 						and $key->modifiers & KEYMOD_CTRL;
 			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
+
 			logpkg('debug',"got key: $key_string");
+			#say "string: $key_string, length: ", length $key_string, "length key: ", length $key;
+
 			# remove angle brackets around multi-character
 			# sequences, e.g. <PageUp> -> PageUp
 			# but leave a lone '<' or '>' 
-			$key_string =~ s/[<>]//g if length $key_string > 1;
 
+			$key_string =~ s/[<>]//g if length $key_string > 1;
 			 
+			# Execute command if we get Enter
+
+			process_line($text->{hotkey_buffer}), reset_hotkey_buffer(), return if $key_string eq 'Enter';
+
 			my $dont_display;
 			$key_string =~ s/ /Space/; # to suit our mapping file
-			process_line($text->{hotkey_buffer}), reset_hotkey_buffer(), return if $key_string eq 'Enter';
-			if (my $command = $config->{hotkeys}->{$key_string} 
-				and ! length $text->{hotkey_buffer}) {
+			
+			# we have a mapping for this key *and* cursor is in column one
 
-
+			if (my $command = $bindings{$key_string} and !  length $text->{hotkey_buffer}){
 				$dont_display++ if $key_string eq 'Escape'
 									or $key_string eq 'Space';
 
 
-				try { eval "$command()" }
-				catch { throw( qq(cannot execute subroutine "$command" for key "$key_string": $_") ) }
+				try { eval $command }
+				catch { throw( qq(cannot execute "$command" for key "$key_string": $_") ) }
+				return
 			}
 
-			# otherwise assemble keystrokes and check
-			# them against the grammar
+			# assemble keystrokes and check them against the grammar
 			 
-			else {
 			$key_string =~ s/Space/ /; # back to the character
 			$text->{hotkey_buffer} .= $key_string;
 			print $key_string if length $key_string == 1;
+			#no warnings '
 			$text->{hotkey_parser}->command($text->{hotkey_buffer}) and reset_hotkey_buffer();
- 			}
+			#use 'warnings';
 			print(
 				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
 				"\x1b[2K",  # erase line
