@@ -19,7 +19,7 @@ our ($nama_keymap, $emacs_keymap, $nama_meta, $emacs_meta);
 sub initialize_prompt {
 	set_current_bus();
 	print prompt();
-	$term->Attribs->{already_prompted} = 0;
+	$term->Attribs->{already_prompted} = 1;
 }
 
 sub setup_termkey {
@@ -80,7 +80,7 @@ sub reset_hotkey_buffers {
 }
 sub exit_hotkey_mode {
 	teardown_termkey();
-	initialize_terminal(); 
+	initialize_readline(); 
 	revise_prompt();
 };
 sub teardown_termkey {
