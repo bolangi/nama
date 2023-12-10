@@ -99,10 +99,7 @@ sub initialize_terminal {
 	initialize_readline();	
 }
 sub initialize_readline {
-	state $first = 1;
-	$text->{readline_state} = $term->save_state();
 	$term->prep_terminal(1); # eight bit
-	if ($first){
 	#$term->initialize();
 	$term->Attribs->{attempted_completion_function} = \&complete;
 	$term->Attribs->{already_prompted} = 1;
@@ -111,16 +108,11 @@ sub initialize_readline {
 	($text->{screen_lines}, $text->{screen_columns}) 
 		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
+	revise_prompt();
 	# none of below eliminate double echo
 	#reset_terminal();
 	#stty();                
 	#qx('reset');
-	$first and $first = 0;
-	}
-	else {
-	$term->restore_state($text->{readline_state});
-	}
-	revise_prompt();
 	setup_readline_event_loop(); 
 	
 }
