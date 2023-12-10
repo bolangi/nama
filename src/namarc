@@ -161,7 +161,12 @@ hotkeys:
     Insert: previous_track
     Delete: next_track
     Keypad0: replay
-    
+    [: back(30)
+    ]: forward(30)
+    {: back(120)
+    }: forward(120)
+    (: backward(300)
+    ): forward(300)
   jump:
     Home: jump_to_start
     End: jump_to_end
