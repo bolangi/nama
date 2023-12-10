@@ -66,6 +66,19 @@ sub set_name {
 		$by_name{ $name } = $mark;
 	}
 }
+sub set_attribute {
+	my $mark = shift;
+	my ($attr, $val) = @_;
+	$val = 1 if not $val;
+	pager("attr: $attr\n");
+	if ( defined $mark->{attrib}->{$attr} ){
+		pager("redefining attribute $attr from '$mark->{attrib}->{$attr}' to '$val'");
+	}
+	else {
+		$mark->{attrib}->{$attr} = $val;
+		pager("assigning attribute $attr: $val");
+	}
+}
 
 sub jump_here {
 	my $mark = shift;
