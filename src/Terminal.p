@@ -112,7 +112,12 @@ sub initialize_readline {
 		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
 	revise_prompt();
+	# none of below eliminate double echo
+	#reset_terminal();
+	#stty();                
+	#qx('reset');
 	setup_readline_event_loop(); 
+	
 }
 sub restore_default_keymap {
 	teardown_termkey();
