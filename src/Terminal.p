@@ -60,6 +60,12 @@ sub setup_termkey {
 				try { eval $command }
 				catch { throw( qq(cannot execute "$command" for key "$key_string": $_") ) }
 				return
+
+			print(
+				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
+				"\x1b[2K",  # erase line
+				hotkey_status_bar(), 
+			) unless $dont_display;
 			}
 
 			# assemble keystrokes and check them against the grammar
@@ -70,11 +76,6 @@ sub setup_termkey {
 			#no warnings '
 			$text->{hotkey_parser}->command($text->{hotkey_buffer}) and reset_hotkey_buffer();
 			#use 'warnings';
-			print(
-				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
-				"\x1b[2K",  # erase line
-				hotkey_status_bar(), 
-			) if $text->{hotkey_buffer} eq undef and ! $dont_display;
 		},
 	);
 }
