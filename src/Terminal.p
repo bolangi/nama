@@ -45,7 +45,7 @@ sub setup_termkey {
 			 
 			my $dont_display;
 			$key_string =~ s/ /Space/; # to suit our mapping file
-			process_line($text->{hotkey_buffer}), reset_hotkey_buffers(), return if $key_string eq 'Enter';
+			process_line($text->{hotkey_buffer}), reset_hotkey_buffer(), return if $key_string eq 'Enter';
 			if (my $command = $config->{hotkeys}->{$key_string} 
 				and ! length $text->{hotkey_buffer}) {
 
@@ -65,7 +65,7 @@ sub setup_termkey {
 			$key_string =~ s/Space/ /; # back to the character
 			$text->{hotkey_buffer} .= $key_string;
 			print $key_string if length $key_string == 1;
-			$text->{hotkey_parser}->command($text->{hotkey_buffer}) and reset_hotkey_buffers();
+			$text->{hotkey_parser}->command($text->{hotkey_buffer}) and reset_hotkey_buffer();
  			}
 			print(
 				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
@@ -75,7 +75,7 @@ sub setup_termkey {
 		},
 	);
 }
-sub reset_hotkey_buffers {
+sub reset_hotkey_buffer {
 	$text->{hotkey_buffer} = "";
 }
 sub exit_hotkey_mode {
