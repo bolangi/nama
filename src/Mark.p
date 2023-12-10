@@ -6,7 +6,7 @@ our $VERSION = 1.0;
 use Carp;
 use warnings;
 no warnings qw(uninitialized);
-our($n, %by_name, @all);
+our($n, %by_name, @all, @attributes, %is_attribute, $AUTOLOAD);
 use ::Log qw(logpkg);
 use ::Globals qw(:all);
 use ::Object qw( 
@@ -38,6 +38,7 @@ sub new {
 	#	 if $by_name{$vals{name}}; # null name returns false
 	
 	my $self = bless { @_ }, $class;
+	$self->{attrib} //= {}; # attributes hash
 
 	#print "self class: $class, self type: ", ref $self, $/;
 	if ($self->name) {
@@ -66,7 +67,15 @@ sub set_name {
 		$by_name{ $name } = $mark;
 	}
 }
-sub set_attribute {
+
+no warnings 'redefine'; # replacing the default accessor
+sub attrib { 
+	my ($mark, $attr) = @_;
+	$mark->{attrib}->{$attr}
+}
+use warnings 'redefine';
+
+sub set_attrib {
 	my $mark = shift;
 	my ($attr, $val) = @_;
 	$val = 1 if not $val;
@@ -78,6 +87,10 @@ sub set_attribute {
 		$mark->{attrib}->{$attr} = $val;
 		pager("assigning attribute $attr: $val");
 	}
+}
+sub delete_attrib {
+	my ($mark, $attr) = @_;
+	delete $mark->{attrib}->{$attr}
 }
 
 sub jump_here {
@@ -167,6 +180,11 @@ sub mark_time {
 	$time
 }
 
+sub AUTOLOAD {
+	my $self = shift;
+	my ($attr) = $AUTOLOAD =~ /([^:]+)$/;
+	return $self->{attrib}->{$attr}
+}
 
 # ---------- Mark and jump routines --------
 {
@@ -174,6 +192,16 @@ package ::;
 use Modern::Perl '2020';
 use ::Globals qw(:all);
 
+sub mark_snip_start {
+	my $mark = drop_mark(name => "snip-start-".next_id());
+	$mark->set_attrib("snip");
+	$mark->set_attrib("start");
+}
+sub mark_snip_end {
+	my $mark = drop_mark(name => "snip-end-".next_id());
+	$mark->set_attrib("snip");
+	$mark->set_attrib("end")
+}
 sub drop_mark {
 	logsub((caller(0))[3]);
 	my $name = shift;
@@ -193,6 +221,7 @@ sub drop_mark {
 							name => $name);
 
 	$ui->marker($mark); # for GUI
+	$mark
 }
 sub mark { # GUI_CODE
 	logsub((caller(0))[3]);
