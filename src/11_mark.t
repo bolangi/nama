@@ -8,7 +8,7 @@ my $mark  = ::Mark->new( name => 'thebeginning');
 is(  ref $mark , '::Mark', "Object creation");
 $mark->set_attrib( "gabble", "babble");
 is( $mark->attrib("gabble"), 'babble', "attribute store and read");
-is( $mark->gabble, 'babble', "attribute store and read");
+is( $mark->gabble, 'babble', "access attribute as method");
 
 done_testing();
 __END__
