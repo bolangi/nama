@@ -118,13 +118,15 @@ sub initialize_readline {
 	revise_prompt();
 	# none of below eliminate double echo
 	#reset_terminal();
-	stty();                
 	#qx('reset');
 	setup_readline_event_loop(); 
+	stty();
 	
 }
 sub exit_hotkey_mode {
+	pager("\narrow keys reset, hotkeys off.");
 	teardown_termkey();
+	stty();                
 	initialize_readline();
 }
 sub toggle_hotkeys {
@@ -161,6 +163,7 @@ sub setup_hotkeys {
 	pager("\nHotkeys set for $map!") unless $quiet;
 	list_hotkeys();
 	display_status();
+	print "\n"; # prompt
 }
 sub string_to_escape_code {
     my ($string) = @_;                                                                         

@@ -1580,7 +1580,6 @@ hotkeys_param:   _hotkeys_param { ::setup_hotkeys('param'); 1}
 hotkeys_list:    _hotkeys_list  { ::list_hotkeys() ; 1 } 
 hotkeys_off:     _hotkeys_off   {
    	::exit_hotkey_mode();
-	::pager("arrow keys reset, hotkeys off");
 }
 
 select_sequence: _select_sequence existing_sequence_name { 
