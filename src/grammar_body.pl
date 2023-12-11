@@ -1669,6 +1669,7 @@ add_spacer: _add_spacer value {
 	::request_setup();
 	1
 }
+toggle_snip: _toggle_snip {::toggle_snip }
 snip: _snip track_identifier mark_pair(s) { 
 	# convert this track to sequence, removing regions
 	my $track = $item{track_identifier};

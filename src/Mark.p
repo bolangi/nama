@@ -192,15 +192,24 @@ package ::;
 use Modern::Perl '2020';
 use ::Globals qw(:all);
 
+sub toggle_snip {
+	state $retaining = 1;
+	$retaining ? mark_snip_start() : mark_snip_end();
+	$retaining = ! $retaining;
+}
 sub mark_snip_start {
 	my $mark = drop_mark(name => "snip-start-".next_id());
+	pager("discarding content from ".ecasound_iam('getpos'));
 	$mark->set_attrib("snip");
 	$mark->set_attrib("start");
+	beep_trim_start();
 }
 sub mark_snip_end {
 	my $mark = drop_mark(name => "snip-end-".next_id());
+	pager("retaining content from ".ecasound_iam('getpos'));
 	$mark->set_attrib("snip");
-	$mark->set_attrib("end")
+	$mark->set_attrib("end");
+	beep_trim_end();
 }
 sub drop_mark {
 	logsub((caller(0))[3]);
