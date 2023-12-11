@@ -241,7 +241,7 @@ sub jump_status_bar {
 	my $pos = ::ecasound_iam("getpos") // 0;
 	my $bar = "$name: Playback at ${pos}s, ";
 	if (defined $this_mark) {
-		my $mark = join ' ', 'Current mark:', qq("$this_mark->name"), 'at', $this_mark->time;
+		my $mark = join ' ', 'Current mark:', $this_mark->name, 'at', $this_mark->time;
 		$bar .= $mark;
 	}
 	$bar .= "Jump size: $config->{playback_jump_seconds}s, ";
