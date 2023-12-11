@@ -123,7 +123,7 @@ sub initialize_readline {
 	revise_prompt();
 	# none of below eliminate double echo
 	#reset_terminal();
-	#stty();                
+	stty();                
 	#qx('reset');
 	setup_readline_event_loop(); 
 	
@@ -133,9 +133,8 @@ sub restore_default_keymap {
 	initialize_readline();
 }
 sub toggle_hotkeys {
-	state $mode = 0; # 0: spacebar_only, 1: current_hotkey_set
-	# restore readline initialize_nama_keymap(), 
-	$mode = 0, return if $mode == 1; # we've reset the keymap, standard cursor commands
+	state $mode = 0; # 0: readline 1: termkey with current hotkey bindings
+	exit_hotkey_mode(), $mode = 0, return if $mode == 1; # we've reset the keymap, standard cursor commands
 	$mode = 1;
 	setup_hotkeys($text->{hotkey_mode}, 'quiet');# we've activated the hotkeys again.
 }
@@ -168,15 +167,6 @@ sub setup_hotkeys {
 	list_hotkeys();
 	display_status();
 }
-sub hotkey_dispatch {                                                                          
-	my ($seq) = string_to_escape_code($term->Attribs->{executing_keyseq});
-	my $name = length $seq == 1 ? $seq : $keyname{$seq};
-	my $function = $bindings{$name};
-	throw(qq("$name": key has no defined function.)), return if not $function;
-	no strict 'refs';
-	$function->();
-	display_status();
-}                                                                                              
 sub string_to_escape_code {
     my ($string) = @_;                                                                         
     my $esc = '';
