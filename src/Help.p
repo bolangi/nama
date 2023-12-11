@@ -12,7 +12,7 @@ sub helpline {
 			if $text->{commands}->{$cmd}->{short};	
 	$out .=  "Category: $text->{commands}->{$cmd}->{type}\n";
 	my $what = munge_help($text->{commands}->{$cmd}->{what});
-	$out .=  "Description: $what\n";
+	$out .=  "Description: $what";
 	$out .=  "Usage: $cmd "; 
 
 	if ( $text->{commands}->{$cmd}->{parameters} 

@@ -98,8 +98,9 @@ $fx->{last}						# last assigned effect ID
 
 $text->{grammar}				# grammar source
 $text->{parser}					# Parse::RecDescent parser
+$text->{hotkey_grammar}
+$text->{hotkey_parser}
 $text->{hotkey_buffer} 			#
-$text->{hotkey_callback}		#
 $text->{wrap}					# Text::Format object for wrapping text
 $text->{format_fields}			# ??
 $text->{commands_yml}			# command description YAML source

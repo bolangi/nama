@@ -918,6 +918,15 @@ hotkeys_off:
   what: restore default key bindings
   short: hko
   parameters: none
+hotkeys_on:
+  type: general
+  what: restore hotkey mode
+  short: hk
+  parameters: none
+toggle_hotkeys:
+  type: general
+  what: flipflop hotkey mode
+  short: th
 hotkeys_list:
   type: general
   what: list hotkey bindings
@@ -1581,6 +1590,12 @@ snip:
     This removes cut1 and cut2 regions from the current track
     by creating a sequence. 
   parameters: <mark_pair1> [<mark_pair2>...]
+toggle_snip:
+  type: sequence
+  short: ts
+  what: |
+    drop mark at the current position toggling the snip state from retaining
+    to discarding and vis versa. 
 compose:
   type: sequence
   short: compose_sequence compose_into_sequence

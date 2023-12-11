@@ -11,7 +11,7 @@ use List::MoreUtils qw(first_index);
 # all keynames in vars defined below are lower case
 our %escape_code; # keyname -> escape code
 our %keyname;     # escape code -> keyname
-our %bindings;    # keyname -> function e.g. right -> inrc_param_by_1 (from namarc hotkeys)
+our %bindings;    # keyname -> function e.g. right -> incr_param_by_1 (from namarc hotkeys)
 our @keynames;
 our ($nama_keymap, $emacs_keymap, $nama_meta, $emacs_meta);
 
@@ -19,80 +19,123 @@ our ($nama_keymap, $emacs_keymap, $nama_meta, $emacs_meta);
 sub initialize_prompt {
 	set_current_bus();
 	print prompt();
-	$term->Attribs->{already_prompted} = 0;
+	$term->Attribs->{already_prompted} = 1;
 }
 
+sub setup_termkey {
+	$project->{events}->{termkey} = AnyEvent::TermKey->new(
+		term => \*STDIN,
+
+		on_key => sub {
+			my $key = shift;
+			# exit on Ctrl-C
+			exit_hotkey_mode(), cleanup_exit() if $key->type_is_unicode 
+						and $key->utf8 eq "C" 
+						and $key->modifiers & KEYMOD_CTRL;
+			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
+
+			logpkg('debug',"got key: $key_string");
+
+			# remove angle brackets around multi-character
+			# sequences, e.g. <PageUp> -> PageUp
+			# but leave a lone '<' or '>' 
+
+			$key_string =~ s/[<>]//g if length $key_string > 1;
+			 
+			# Execute command if we get Enter
+
+			process_line($text->{hotkey_buffer}), reset_hotkey_buffer(), print("\n"),return if $key_string eq 'Enter';
+
+			my $dont_display;
+			$key_string =~ s/ /Space/; # to suit our mapping file
+			
+			# we have a mapping for this key *and* cursor is in column one
+
+			if (my $command = $bindings{$key_string}){
+				 return if length $text->{hotkey_buffer} > 1; # skip printable characters
+				$dont_display++ if $key_string eq 'Escape'
+									or $key_string eq 'Space';
+
+				say "command: $command";
+				eval $command;
+				$@ and throw("error was $@");
+				undef $@;
+				#try { $command->() }
+				#catch { throw( qq(cannot execute "$command" for key "$key_string": $_") );  
+				#		return; }
+				
+
+			print(
+				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
+				"\x1b[2K",  # erase line
+				status_bar(), 
+			) unless $dont_display;
+
+			return;
+			}
+
+			# assemble keystrokes and check them against the grammar
+			 
+			$key_string =~ s/Space/ /; # back to the character
+			if ( length $key_string == 1) {
+				$text->{hotkey_buffer} .= $key_string;
+				print $key_string; 
+				no warnings;
+				#$text->{hotkey_parser}->command($text->{hotkey_buffer}) and reset_hotkey_buffer();
+			}
+		}
+	);
+}
+sub reset_hotkey_buffer {
+	$text->{hotkey_buffer} = "";
+}
+sub teardown_termkey {
+	$project->{events}->{termkey}->termkey->stop(),
+		delete $project->{events}->{termkey} if $project->{events}->{termkey}
+}
+sub destroy_readline {
+	$term->deprep_terminal() if defined $term;
+	#undef $term; # leave it alive 
+	delete $project->{events}->{stdin};
+}
+sub setup_hotkey_grammar {
+	$text->{hotkey_grammar} = get_data_section('hotkey_grammar');
+	$text->{hotkey_parser} = Parse::RecDescent->new($text->{hotkey_grammar})
+		or croak "Bad grammar!\n";
+}
 sub initialize_terminal {
 	$term = Term::ReadLine->new("Ecasound/Nama");
-	
-	# keymap independent
-	$term->add_defun('spacebar_action', \&spacebar_action);
-	$term->add_defun('hotkey_dispatch', \&hotkey_dispatch);
+	initialize_readline();	
+}
+sub initialize_readline {
+	$term->prep_terminal(1); # eight bit
+	#$term->initialize();
 	$term->Attribs->{attempted_completion_function} = \&complete;
 	$term->Attribs->{already_prompted} = 1;
-
-
-	initialize_nama_keymap();
-	
-
-=comment
-	# store default bindings, just in case
- 	$text->{default _bindings} = {};
- 	for my $k (@keynames) {
- 		my $str = $escape_code{$k};
-		my $esc = eval qq("$str");
-		#say "key $k, str: $str";
-		my @function = ($term->function_of_keyseq($esc));
-		(ref \@function) =~ /ARRAY/ and scalar @function or next;
-		#say "ref: ",ref \@function;
-		#say "func: @function";
- 		my $func_name = $text->{default _bindings}->{$k} = $term->get_function_name($function[0]);
-		say "key $k, seq: $str, func: $func_name";
- 	}
-=cut
-
+	$term->add_defun('spacebar_action', \&spacebar_action);
+	$term->bind_keyseq(' ','spacebar_action');
 	($text->{screen_lines}, $text->{screen_columns}) 
 		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
-
 	revise_prompt();
-	setup_event_loop(); 
+	# none of below eliminate double echo
+	#reset_terminal();
+	#qx('reset');
+	setup_readline_event_loop(); 
+	#stty();
+	
 }
-sub restore_default_keymap {
-	set_keymap('emacs');
-}
-sub initialize_nama_keymap {
-	state $first_time = 1;
-	# delete old one
-	if (not $first_time){
-		my $nama = $term->get_keymap_by_name('nama');
-		$term->free_keymap($nama) if defined $nama;
-		$first_time = 0;
-	}
-	
-	# create new one
-	$nama_keymap 	  = $term->copy_keymap(get_keymap('emacs'));
-	#$nama_meta = $term->copy_keymap(get_keymap('emacs-meta'));
-	
-	$term->set_keymap_name('nama',$nama_keymap);
-	#$term->set_keymap_name('nama_meta',$nama_meta);
-	
-	# activate it
-	set_keymap('nama');
-	
-	# always enable spacebar toggle
-	$term->bind_keyseq(' ','spacebar_action');
-
-	# meta key
-	#$term->generic_bind("\e", $nama_meta);
-	
+sub exit_hotkey_mode {
+	pager("\narrow keys reset, hotkeys off.");
+	teardown_termkey();
+	#stty();                
+	initialize_readline();
 }
 sub toggle_hotkeys {
-	state $mode = 0; # 0: spacebar_only, 1: current_hotkey_set
-	initialize_nama_keymap(), 
-	$mode = 0, return if $mode == 1; # we've reset the keymap, standard cursor commands
+	state $mode = 0; # 0: readline 1: termkey with current hotkey bindings
+	exit_hotkey_mode(), $mode = 0, return if $mode == 1; # we've reset the keymap, standard cursor commands
 	$mode = 1;
-	setup_hotkeys($text->{hotkey_mode}, 'quiet');# we've activated the hotkeys again.
+	setup_hotkeys($text->{hotkey_mode});# we've activated the hotkeys again.
 }
 sub spacebar_action {
 		my $buffer = $term->Attribs->{line_buffer};
@@ -109,33 +152,17 @@ sub get_keymap { $term->get_keymap_by_name($_[0]) }
 sub keymap_name {
 	$term->get_keymap_name($term->get_keymap);
 }
-
 sub setup_hotkeys {
 	my ($map, $quiet) = @_;
-	$text->{hotkey_mode} = $map;
-	initialize_nama_keymap();
+	$text->{hotkey_mode} = $map if defined $map;
+	destroy_readline(); 
+	setup_termkey(); 
 	%bindings = hotkey_map($map);
-# 	say "bindings: " ;
-# 	while( my($k,$v) = each %bindings){
-# 		say "$k: $v";
-# 	}
-	for my $key (keys %bindings) {
-		my $seq = (length $key == 1 ? $key : $escape_code{$key});
-		$term->bind_keyseq($seq, 'hotkey_dispatch');
-	}
 	pager("\nHotkeys set for $map!") unless $quiet;
 	list_hotkeys();
 	display_status();
+	print "\n"; # prompt
 }
-sub hotkey_dispatch {                                                                          
-	my ($seq) = string_to_escape_code($term->Attribs->{executing_keyseq});
-	my $name = length $seq == 1 ? $seq : $keyname{$seq};
-	my $function = $bindings{$name};
-	throw(qq("$name": key has no defined function.)), return if not $function;
-	no strict 'refs';
-	$function->();
-	display_status();
-}                                                                                              
 sub string_to_escape_code {
     my ($string) = @_;                                                                         
     my $esc = '';
@@ -151,11 +178,6 @@ sub hotkey_map {
 	my $mode = shift;
  	%bindings		= ( $config->{hotkeys}->{common}->%*, 
  							$config->{hotkeys}->{$text->{hotkey_mode}}->%* );
-	my %bindings_lc;
-	while( my($key,$function) = each %bindings ){
-		$bindings_lc{lc $key} = $function
-	}
-	%bindings = %bindings_lc;
 }
 
 sub list_hotkeys { 
@@ -166,6 +188,14 @@ sub list_hotkeys {
 		push @list, "$_: $hots{$_}" if $hots{$_};
 	}
  	pager_newline("Hotkeys",@list);
+}
+sub termkey_list_hotkeys { 
+	my $hots 		= dclone($config->{hotkeys});
+	my %hots = %$hots;
+	$hots{'='} 		= 'Enter numeric value';
+	$hots{ 'mN' } 	= 'Change step size to 10 raised to the Nth power';
+	$hots{ '#' }	= 'Engage hotkey mode (must be typed in column 1)';
+	pager("Hotkeys\n",Dumper \%hots)
 }
 
 sub display_status {
@@ -205,7 +235,7 @@ sub jump_status_bar {
 	my $pos = ::ecasound_iam("getpos") // 0;
 	my $bar = "$name: Playback at ${pos}s, ";
 	if (defined $this_mark) {
-		my $mark = join ' ', 'Current mark:', qq("$this_mark->name"), 'at', $this_mark->time;
+		my $mark = join ' ', 'Current mark:', $this_mark->name, 'at', $this_mark->time;
 		$bar .= $mark;
 	}
 	$bar .= "Jump size: $config->{playback_jump_seconds}s, ";
@@ -233,11 +263,6 @@ sub beep {
 	system($cmd);
 }
 
-sub destroy_readline {
-	$term->rl_deprep_terminal() if $term;
-	undef $term; 
-	delete $project->{events}->{stdin};
-}
 sub previous_track {
 	beep_end_of_list(), return if $this_track->n == 1;
 	do{ $this_track = $ti{$this_track->n - 1} } until !  $this_track->hide;
@@ -275,17 +300,20 @@ sub revise_prompt {
 	# hack to allow suppressing prompt
 	$override = ($_[0] eq "default" ? undef : $_[0]) if defined $_[0];
     $term->callback_handler_install($override//prompt(), \&process_line)
-		if $term
+		if $term;
+	initialize_prompt() if $term;
 }
 }
 
+sub reset_terminal { $term->reset_terminal() }
+sub stty { system('stty 6006:5:bf:a39:3:0:7f:15:4:0:1:0:11:13:0:0:12:f:17:16:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0') }
 	
 sub prompt { 
 	logsub((caller(0))[3]);
 	join ' ', 'nama', git_branch_display(), 
 						bus_track_display() ," ('h' for help)> "
 }
-sub setup_event_loop {
+sub setup_readline_event_loop {
 	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub { $term->Attribs->{'callback_read_char'}->() });
 	# handle Control-C from terminal
 	$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
@@ -442,15 +470,8 @@ sub keyword {
 # get them in order
 my @i = reverse(1..@keynames/2);
 for my $i (@i){ splice @keynames, 2 * $i - 1, 1 }
-
-my @keynames_lc = map lc, @keynames;
-@keynames = @keynames_lc;
-
-my %escape_code_lc;
-while( my($key,$seq) = each %escape_code ){
-	$escape_code_lc{lc $key} = $seq;
-}
-%escape_code = %escape_code_lc;
+my @printable = map{chr $_} 33..126;
+@keynames = (@printable, @keynames);
 
 %keyname = ( reverse %escape_code );
 
