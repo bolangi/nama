@@ -1595,7 +1595,7 @@ toggle_snip:
   short: ts
   what: |
     drop mark at the current position toggling the snip state from retaining
-    to discarding and vis versa. 
+    to discarding and vice versa. 
 compose:
   type: sequence
   short: compose_sequence compose_into_sequence
