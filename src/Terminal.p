@@ -35,7 +35,6 @@ sub setup_termkey {
 			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
 
 			logpkg('debug',"got key: $key_string");
-			#say "string: $key_string, length: ", length $key_string, "length key: ", length $key;
 
 			# remove angle brackets around multi-character
 			# sequences, e.g. <PageUp> -> PageUp
