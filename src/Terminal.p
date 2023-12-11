@@ -87,11 +87,6 @@ sub setup_termkey {
 sub reset_hotkey_buffer {
 	$text->{hotkey_buffer} = "";
 }
-sub exit_hotkey_mode {
-	teardown_termkey();
-	initialize_readline(); 
-	revise_prompt();
-};
 sub teardown_termkey {
 	$project->{events}->{termkey}->termkey->stop(),
 		delete $project->{events}->{termkey} if $project->{events}->{termkey}
@@ -128,7 +123,7 @@ sub initialize_readline {
 	setup_readline_event_loop(); 
 	
 }
-sub restore_default_keymap {
+sub exit_hotkey_mode {
 	teardown_termkey();
 	initialize_readline();
 }
@@ -136,7 +131,7 @@ sub toggle_hotkeys {
 	state $mode = 0; # 0: readline 1: termkey with current hotkey bindings
 	exit_hotkey_mode(), $mode = 0, return if $mode == 1; # we've reset the keymap, standard cursor commands
 	$mode = 1;
-	setup_hotkeys($text->{hotkey_mode}, 'quiet');# we've activated the hotkeys again.
+	setup_hotkeys($text->{hotkey_mode});# we've activated the hotkeys again.
 }
 sub spacebar_action {
 		my $buffer = $term->Attribs->{line_buffer};

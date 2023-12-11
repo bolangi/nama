@@ -1579,7 +1579,7 @@ hotkeys_jump:    _hotkeys_jump  { ::setup_hotkeys('jump' ); 1}
 hotkeys_param:   _hotkeys_param { ::setup_hotkeys('param'); 1}
 hotkeys_list:    _hotkeys_list  { ::list_hotkeys() ; 1 } 
 hotkeys_off:     _hotkeys_off   {
-   	::restore_default_keymap();
+   	::exit_hotkey_mode();
 	::pager("arrow keys reset, hotkeys off");
 }
 
