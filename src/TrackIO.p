@@ -231,7 +231,8 @@ sub output_object_text {   # text for user display
 sub source_status {
 	my $track = shift;
 	no warnings 'uninitialized';
-	return $track->current_wav if $track->play;
+	return $track->current_wav if $track->rw eq PLAY 
+								or $track->rw eq OFF and scalar $track->versions->@*; # files to play
 	my $bus = $bn{$track->source_id}; 
 	return join " ", $bus->name, $bus->display_type if $track->source_type eq 'bus';
 	return "track ".$track->source_id  if $track->source_type eq 'track';
