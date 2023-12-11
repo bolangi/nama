@@ -65,7 +65,7 @@ sub setup_termkey {
 			print(
 				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
 				"\x1b[2K",  # erase line
-				hotkey_status_bar(), 
+				status_bar(), 
 			) unless $dont_display;
 
 			return;
