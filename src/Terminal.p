@@ -471,8 +471,8 @@ sub keyword {
 # get them in order
 my @i = reverse(1..@keynames/2);
 for my $i (@i){ splice @keynames, 2 * $i - 1, 1 }
-my @printable = map{chr} (33..126);
-	@keynames = @printable, @keynames;
+my @printable = map{chr $_} 33..126;
+@keynames = (@printable, @keynames);
 
 %keyname = ( reverse %escape_code );
 
