@@ -44,7 +44,7 @@ sub setup_termkey {
 			 
 			# Execute command if we get Enter
 
-			process_line($text->{hotkey_buffer}), reset_hotkey_buffer(), return if $key_string eq 'Enter';
+			process_line($text->{hotkey_buffer}), reset_hotkey_buffer(), print("\n"),return if $key_string eq 'Enter';
 
 			my $dont_display;
 			$key_string =~ s/ /Space/; # to suit our mapping file
