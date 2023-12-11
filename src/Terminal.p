@@ -58,7 +58,7 @@ sub setup_termkey {
 
 				say "command: $command";
 				eval $command;
-				$@ and "say error was $@";
+				$@ and throw("error was $@");
 				undef $@;
 				#try { $command->() }
 				#catch { throw( qq(cannot execute "$command" for key "$key_string": $_") );  
@@ -154,7 +154,7 @@ sub keymap_name {
 }
 sub setup_hotkeys {
 	my ($map, $quiet) = @_;
-	$text->{hotkey_mode} = $map;
+	$text->{hotkey_mode} = $map if defined $map;
 	destroy_readline(); 
 	setup_termkey(); 
 	%bindings = hotkey_map($map);
