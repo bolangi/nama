@@ -155,10 +155,6 @@ sub setup_hotkeys {
 	destroy_readline(); 
 	setup_termkey(); 
 	%bindings = hotkey_map($map);
- 	say "bindings: " ;
- 	while( my($k,$v) = each %bindings){
- 		say "$k: $v";
- 	}
 	pager("\nHotkeys set for $map!") unless $quiet;
 	list_hotkeys();
 	display_status();
