@@ -1584,6 +1584,9 @@ hotkeys_off:     _hotkeys_off   {
 hotkeys_on:     _hotkeys_on   {
    	::setup_hotkeys(); 1
 }
+toggle_hotkeys:     _toggle_hotkeys   {
+   	::toggle_hotkeys(); 1
+}
 
 select_sequence: _select_sequence existing_sequence_name { 
 	$::this_sequence = $::bn{$item{existing_sequence_name}}

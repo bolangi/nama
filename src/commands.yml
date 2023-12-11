@@ -923,6 +923,10 @@ hotkeys_on:
   what: restore hotkey mode
   short: hk
   parameters: none
+toggle_hotkeys:
+  type: general
+  what: flipflop hotkey mode
+  short: th
 hotkeys_list:
   type: general
   what: list hotkey bindings
