@@ -179,11 +179,6 @@ sub hotkey_map {
 	my $mode = shift;
  	%bindings		= ( $config->{hotkeys}->{common}->%*, 
  							$config->{hotkeys}->{$text->{hotkey_mode}}->%* );
-	my %bindings_lc;
-	while( my($key,$function) = each %bindings ){
-		$bindings_lc{lc $key} = $function
-	}
-	%bindings = %bindings_lc;
 }
 
 sub list_hotkeys { 
