@@ -51,15 +51,18 @@ sub setup_termkey {
 			
 			# we have a mapping for this key *and* cursor is in column one
 
-			if (my $command = $bindings{$key_string} and !  length $text->{hotkey_buffer}){
+			if (my $command = $bindings{$key_string}){
+				 return if length $text->{hotkey_buffer} > 1; # skip printable characters
 				$dont_display++ if $key_string eq 'Escape'
 									or $key_string eq 'Space';
 
-
-				try { eval $command }
-				catch { throw( qq(cannot execute "$command" for key "$key_string": $_") );  
-						return;
-				}
+				say "command: $command";
+				eval $command;
+				$@ and "say error was $@";
+				undef $@;
+				#try { $command->() }
+				#catch { throw( qq(cannot execute "$command" for key "$key_string": $_") );  
+				#		return; }
 				
 
 			print(
