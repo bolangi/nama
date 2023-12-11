@@ -119,13 +119,13 @@ sub initialize_readline {
 	#reset_terminal();
 	#qx('reset');
 	setup_readline_event_loop(); 
-	stty();
+	#stty();
 	
 }
 sub exit_hotkey_mode {
 	pager("\narrow keys reset, hotkeys off.");
 	teardown_termkey();
-	stty();                
+	#stty();                
 	initialize_readline();
 }
 sub toggle_hotkeys {
