@@ -476,15 +476,8 @@ sub keyword {
 # get them in order
 my @i = reverse(1..@keynames/2);
 for my $i (@i){ splice @keynames, 2 * $i - 1, 1 }
-
-my @keynames_lc = map lc, @keynames;
-@keynames = @keynames_lc;
-
-my %escape_code_lc;
-while( my($key,$seq) = each %escape_code ){
-	$escape_code_lc{lc $key} = $seq;
-}
-%escape_code = %escape_code_lc;
+my @printable = map{chr} (33..126);
+	@keynames = @printable, @keynames;
 
 %keyname = ( reverse %escape_code );
 
