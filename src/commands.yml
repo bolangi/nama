@@ -918,6 +918,11 @@ hotkeys_off:
   what: restore default key bindings
   short: hko
   parameters: none
+hotkeys_on:
+  type: general
+  what: restore hotkey mode
+  short: hk
+  parameters: none
 hotkeys_list:
   type: general
   what: list hotkey bindings
