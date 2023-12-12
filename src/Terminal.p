@@ -105,9 +105,9 @@ sub setup_hotkey_grammar {
 }
 sub initialize_terminal {
 	$term = Term::ReadLine->new("Ecasound/Nama");
-	initialize_readline();	
+	setup_readline();	
 }
-sub initialize_readline {
+sub setup_readline {
 	$term->prep_terminal(1); # eight bit
 	#$term->initialize();
 	$term->Attribs->{attempted_completion_function} = \&complete;
@@ -129,7 +129,7 @@ sub exit_hotkey_mode {
 	pager("\narrow keys reset, hotkeys off.");
 	teardown_termkey();
 	#stty();                
-	initialize_readline();
+	setup_readline();
 }
 sub toggle_hotkeys {
 	state $mode = 0; # 0: readline 1: termkey with current hotkey bindings
