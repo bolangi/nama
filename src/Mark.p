@@ -192,6 +192,35 @@ package ::;
 use Modern::Perl '2020';
 use ::Globals qw(:all);
 
+sub get_marks {
+	my @marks = all(); 	
+	my %rules = @_;
+	my @want;
+MARK: for my $m (@marks){
+		for my $k (keys %rules){
+			next MARK if not $m->$k
+		}
+		push @want, $m
+	}
+	@want;
+}
+sub snip_marks {
+=comment
+	# convert this track to sequence, removing regions
+	my @marks = $this_track->snip_marks();
+	lint_snip_marks(@marks);
+	my $track = $item{track_identifier};
+	my @pairs = $item{'mark_pair(s)'};
+	my @list = map{ @$_ } @pairs;	
+	@list = (0, @list, $track->length);
+	@pairs = ();
+	while ( scalar @list ){ push @pairs, [splice( @list, 0, 2)] }
+	::compose_sequence($track->name, $track, \@pairs);
+=cut
+}
+sub lint_snip_marks {
+
+}
 sub toggle_snip {
 	state $retaining = 1;
 	$retaining ? mark_snip_start() : mark_snip_end();
