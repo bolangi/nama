@@ -108,7 +108,7 @@ sub initialize_terminal {
 	setup_readline();	
 }
 sub setup_readline {
-	$term->prep_terminal(1); # eight bit
+	#$term->prep_terminal(1); # eight bit
 	#$term->initialize();
 	$term->Attribs->{attempted_completion_function} = \&complete;
 	$term->Attribs->{already_prompted} = 1;
