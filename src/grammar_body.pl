@@ -1683,6 +1683,7 @@ snip: _snip track_identifier mark_pair(s) {
 	while ( scalar @list ){ push @pairs, [splice( @list, 0, 2)] }
 	::compose_sequence($track->name, $track, \@pairs);
 }
+snip_marks: _snip_marks {::snip_marks() }
 compose: _compose ident track_identifier mark_pair(s) {
 	::compose_sequence(@item{qw/ident track_identifier mark_pair(s)/});
 }

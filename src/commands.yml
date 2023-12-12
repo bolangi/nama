@@ -1590,6 +1590,10 @@ snip:
     This removes cut1 and cut2 regions from the current track
     by creating a sequence. 
   parameters: <mark_pair1> [<mark_pair2>...]
+snip_marks:
+  type: sequence
+  what: |
+    create a sequence from the current track snip marks, after linting them
 toggle_snip:
   type: sequence
   short: ts
