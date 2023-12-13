@@ -224,14 +224,14 @@ sub toggle_snip {
 	$retaining = ! $retaining;
 }
 sub discard {
-	my $mark = drop_mark(name => "skipping-".next_id());
+	my $mark = drop_mark("skipping-".::Mark::next_id());
 	pager("discarding content from ".ecasound_iam('getpos'));
 	$mark->set_attrib("snip");
 	$mark->set_attrib("discard");
 	start_discard_beep();
 }
 sub retain {
-	my $mark = drop_mark(name => "keeping-".next_id());
+	my $mark = drop_mark("keeping-".::Mark::next_id());
 	pager("retaining content from ".ecasound_iam('getpos'));
 	$mark->set_attrib("snip");
 	$mark->set_attrib("retain");
