@@ -310,8 +310,7 @@ sub stty { system('stty 6006:5:bf:a39:3:0:7f:15:4:0:1:0:11:13:0:0:12:f:17:16:0:0
 	
 sub prompt { 
 	logsub((caller(0))[3]);
-	join ' ', 'nama', git_branch_display(), 
-						bus_track_display() ," ('h' for help)> "
+	join ' ', 'nama', git_branch_display(), bus_track_display(),'> '
 }
 sub setup_readline_event_loop {
 	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub { $term->Attribs->{'callback_read_char'}->() });
