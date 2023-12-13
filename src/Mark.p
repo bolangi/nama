@@ -6,7 +6,7 @@ our $VERSION = 1.0;
 use Carp;
 use warnings;
 no warnings qw(uninitialized);
-our($n, %by_name, @all, @attributes, %is_attribute, $AUTOLOAD);
+our($n, %by_name, @all, @attributes, %is_attribute, $AUTOLOAD, $retaining);
 use ::Log qw(logpkg);
 use ::Globals qw(:all);
 use ::Object qw( 
@@ -74,6 +74,13 @@ sub attrib {
 	$mark->{attrib}->{$attr}
 }
 use warnings 'redefine';
+sub matches {
+	my ($mark, %rules) = @_;
+	while( my($k,$v) = each %rules){
+		return 0 unless $mark->$k eq $v
+	}
+	return 1
+}
 
 sub set_attrib {
 	my $mark = shift;
@@ -204,7 +211,22 @@ MARK: for my $m (@marks){
 	}
 	@want;
 }
-sub snip_marks {
+#    s k s k
+# k s k s
+sub gather {
+	my @snip = grep{ $_->snip } all(); 
+	my $first = $snip[0];
+	if ($first->start){
+		
+
+	}		
+	else {
+
+
+
+	}
+}
+	
 =comment
 	# convert this track to sequence, removing regions
 	my @marks = $this_track->snip_marks();
@@ -217,28 +239,32 @@ sub snip_marks {
 	while ( scalar @list ){ push @pairs, [splice( @list, 0, 2)] }
 	::compose_sequence($track->name, $track, \@pairs);
 =cut
-}
+
 sub lint_snip_marks {
+	# do i sstart with snip retain or snip discard
+	# retain command
+    # next toggle discards
+    # snip discard
 
 }
+$retaining = 1;
 sub toggle_snip {
-	state $retaining = 1;
-	$retaining ? mark_snip_start() : mark_snip_end();
+	$retaining ? discard() : retain(); # discard if you've been retaining 
 	$retaining = ! $retaining;
 }
-sub mark_snip_start {
-	my $mark = drop_mark(name => "snip-start-".next_id());
+sub discard {
+	my $mark = drop_mark(name => "skipping-".next_id());
 	pager("discarding content from ".ecasound_iam('getpos'));
 	$mark->set_attrib("snip");
-	$mark->set_attrib("start");
-	beep_trim_start();
+	$mark->set_attrib("discard");
+	start_discard_beep();
 }
-sub mark_snip_end {
-	my $mark = drop_mark(name => "snip-end-".next_id());
+sub retain {
+	my $mark = drop_mark(name => "keeping-".next_id());
 	pager("retaining content from ".ecasound_iam('getpos'));
 	$mark->set_attrib("snip");
-	$mark->set_attrib("end");
-	beep_trim_end();
+	$mark->set_attrib("retain");
+	start_retain_beep();
 }
 sub drop_mark {
 	logsub((caller(0))[3]);
