@@ -1593,11 +1593,11 @@ snip:
   parameters: <mark_pair1> [<mark_pair2>...]
 retain:
   type: mark
-  short: keep
+  short: clip-start cls keep
   what:  Use current position to mark start of a clip
 discard:
   type: mark
-  short: till skip
+  short: clip-end cle skip
   what: Use current position to mark end of a clip 
 gather:
   short: gth
