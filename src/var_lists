@@ -28,6 +28,7 @@
 
 	$project->{nama_version}
 	$project->{save_file_version_number}
+	$project->{mark_sequence_counter}
 	$project->{timebase}
 	$project->{command_buffer}
 	$project->{track_version_comments}
