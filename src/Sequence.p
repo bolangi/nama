@@ -179,5 +179,16 @@ sub compose_sequence {
 	map{ $sequence->append_item($_) } @clips;
 	$sequence
 }
+sub gather {
+	my @list = grep{ $_->snip } ::Mark::all(); 
+	my $track = $this_track;
+	my $first = $list[0];
+	if ($first->discard){ @list = (0, @list, $track->length) }
+	my @pairs;
+	# assuming we're keeping from beginning, first mark is # discard
+	while ( scalar @list ){ push @pairs, [splice( @list, 0, 2)] }
+	::compose_sequence($track->name, $track, \@pairs);
+}
+
 1
 __END__

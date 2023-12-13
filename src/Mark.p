@@ -211,16 +211,6 @@ MARK: for my $m (@marks){
 	}
 	@want;
 }
-sub gather {
-	my @list = grep{ $_->snip } all(); 
-	my $track = $this_track;
-	@list = (0, @list, $track->length);
-	my @pairs;
-	# assuming we're keeping from beginning, first mark is # discard
-	while ( scalar @list ){ push @pairs, [splice( @list, 0, 2)] }
-	::compose_sequence($track->name, $track, \@pairs);
-}
-
 sub lint_snip_marks {
 	# do i sstart with snip retain or snip discard
 	# retain command
