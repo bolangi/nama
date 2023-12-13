@@ -544,18 +544,19 @@ show_latency_all:
 set_region:
   type: track
   what: |
-    Specify a playback region for the current track using marks. 
+    Specify a playback region for the current track using marks or time positions
     Can be reversed with remove-region.
   short: srg
   parameters: <string:start_mark_name> <string:end_mark_name>
   example: |
     sax            # Select "sax" as the current track.
+    set_region 2.5 120.5 # Play the audio from 2.5 to 120.5 seconds. **Must be decimal notation**
+    ! or you can use marks:
     setpos 2.5     # Move the playhead to 2.5 seconds.
     mark sax_start # Create a mark
     sp 120.5       # Move playhead to 120.5 seconds.
     mark sax_end   # Create another mark
     set-region sax_start sax_end 
-    !  Play only the audio from 2.5 to 120.5 seconds.
 add_region:
   type: track
   what: |
