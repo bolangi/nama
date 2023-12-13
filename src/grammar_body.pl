@@ -684,7 +684,7 @@ remove_mark: _remove_mark {
 	1;}
 discard: _discard { ::discard() }
 retain:  _retain  { ::retain()  }
-gather:  _gather  { ::gather_clips() }
+gather:  _gather  { ::gather() }
 add_mark: _add_mark ident { ::drop_mark $item{ident}; 1}
 add_mark: _add_mark {  ::drop_mark(); 1}
 next_mark: _next_mark { ::next_mark(); 1}

@@ -705,7 +705,7 @@ new_branch:
 save_state:
   type: project
   what: Save the project settings as file or git snapshot
-  short: keep save
+  short: save
   parameters: [ <string:settings_target> [ <string:message> ] ]
 get_state:
   type: project
@@ -1004,8 +1004,6 @@ add_mark:
   parameters: [ <string:mark_id> ] [<string:attr>]...
   example: |
     mark start # create a mark named "start" at the current position.
-    mark skip  # discard audio after this mark
-    mark keep  # keep audio after this mark
 remove_mark:
   type: mark
   what: Remove a mark
@@ -1603,13 +1601,13 @@ discard:
 gather:
   short: gth
   type: sequence
-  what: assemble a sequence from the current track clip marks
+  what: compose a sequence from the current track clip marks
 toggle_snip:
   type: sequence
-  short: ts
+  short: tgs
   what: |
-    drop mark at the current position toggling the snip state from retaining
-    to discarding and vice versa. 
+    drop clip mark at the current position to toggle snip state 
+    from 'skip' to 'keep' and vice versa
 compose:
   type: sequence
   short: compose_sequence compose_into_sequence
