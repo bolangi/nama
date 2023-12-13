@@ -1654,9 +1654,7 @@ remove_from_sequence: _remove_from_sequence position(s) {
 		: ::throw("skipping index $_: out of bounds")
 	for reverse @positions
 }
-delete_sequence: _delete_sequence existing_sequence_name {
-	$::bn{$item{existing_sequence_name}}->remove
-}
+delete_sequence: _delete_sequence existing_sequence_name { ::delete_sequence($item{existing_sequence_name}) }
 position: dd { $::this_sequence->verify_item($item{dd}) and $item{dd} }
 add_spacer: _add_spacer value position {
 	$::this_sequence->new_spacer(

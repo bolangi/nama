@@ -191,6 +191,13 @@ sub gather {
 	::compose_sequence($track->name, $track, \@pairs);
 	nama_cmd($old);
 }
+sub delete_sequence {
+	my $sequence_name = shift;
+	$bn{$sequence_name}->remove;
+	my @affected = grep{$_->source_type eq 'bus' and $_->source_id eq $sequence_name } all_tracks();
+	nama_cmd($_->name. ' source 1; play') for @affected;
+		
+}
 
 1
 __END__
