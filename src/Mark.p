@@ -228,14 +228,14 @@ sub discard {
 	pager("discarding content from ".ecasound_iam('getpos'));
 	$mark->set_attrib("snip");
 	$mark->set_attrib("discard");
-	start_discard_beep();
+	till_beep();
 }
 sub retain {
 	my $mark = drop_mark("keeping-".::Mark::next_id());
 	pager("retaining content from ".ecasound_iam('getpos'));
 	$mark->set_attrib("snip");
 	$mark->set_attrib("retain");
-	start_retain_beep();
+	keep_beep();
 }
 sub drop_mark {
 	logsub((caller(0))[3]);

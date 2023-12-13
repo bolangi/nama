@@ -242,10 +242,10 @@ sub jump_status_bar {
 	$bar .= "Mark bump: $config->{mark_bump_seconds}s " ;
 	$bar
 }
-sub beep_trim_start 	{ beep( $config->{beep}->{trim_start   })}
-sub beep_trim_end   	{ beep( $config->{beep}->{trim_end     })}
-sub beep_command_error 	{ beep( $config->{beep}->{command_error})}
-sub beep_end_of_list    { beep( $config->{beep}->{end_of_list  })}
+sub till_beep 	{ beep( $config->{beep}->{till})}
+sub keep_beep 	{ beep( $config->{beep}->{keep })}
+sub command_error_beep 	{ beep( $config->{beep}->{command_error})}
+sub end_of_list_beep    { beep( $config->{beep}->{end_of_list  })}
 
 sub beep { 
 	my $args = shift;
@@ -264,35 +264,35 @@ sub beep {
 }
 
 sub previous_track {
-	beep_end_of_list(), return if $this_track->n == 1;
+	end_of_list_beep(), return if $this_track->n == 1;
 	do{ $this_track = $ti{$this_track->n - 1} } until !  $this_track->hide;
 }
 sub next_track {
-	beep_end_of_list(), return if ! $ti{ $this_track->n + 1 };
+	end_of_list_beep(), return if ! $ti{ $this_track->n + 1 };
 	do{ $this_track = $ti{$this_track->n + 1} } until ! $this_track->hide;
 }
 sub previous_effect {
 	my $op = $this_track->op;
 	my $pos = $this_track->pos;
-	beep_end_of_list(), return if $pos == 0;
+	end_of_list_beep(), return if $pos == 0;
 	$pos--;
 	set_current_op($this_track->ops->[$pos]);
 }
 sub next_effect {
 	my $op = $this_track->op;
 	my $pos = $this_track->pos;
-	beep_end_of_list(),return if $pos == scalar @{ $this_track->ops } - 1;
+	end_of_list_beep(),return if $pos == scalar @{ $this_track->ops } - 1;
 	$pos++;
 	set_current_op($this_track->ops->[$pos]);
 }
 sub previous_param {
 	this_param() > 1 ? set_current_param( this_param() - 1)
-						: beep_end_of_list()
+						: end_of_list_beep()
 }
 sub next_param {
 	this_param()  < scalar this_op_o()->params->@* 
 		? set_current_param( this_param() + 1)
-		: beep_end_of_list()
+		: end_of_list_beep()
 }
 {my $override;
 sub revise_prompt {
