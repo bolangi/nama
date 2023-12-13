@@ -1596,7 +1596,7 @@ retain:
   what:  Use current position to mark start of a clip
 discard:
   type: mark
-  short: skip
+  short: till skip
   what: Use current position to mark end of a clip 
 gather:
   short: gth
