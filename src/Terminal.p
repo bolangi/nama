@@ -188,8 +188,7 @@ sub revise_prompt {
 	
 sub prompt { 
 	logsub((caller(0))[3]);
-	join ' ', 'nama', git_branch_display(), 
-						bus_track_display() ," ('h' for help)> "
+	join ' ', 'nama', git_branch_display(), bus_track_display(),'> '
 }
 sub detect_spacebar {
 
