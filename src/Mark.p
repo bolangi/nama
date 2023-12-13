@@ -211,34 +211,15 @@ MARK: for my $m (@marks){
 	}
 	@want;
 }
-#    s k s k
-# k s k s
 sub gather {
-	my @snip = grep{ $_->snip } all(); 
-	my $first = $snip[0];
-	if ($first->start){
-		
-
-	}		
-	else {
-
-
-
-	}
-}
-	
-=comment
-	# convert this track to sequence, removing regions
-	my @marks = $this_track->snip_marks();
-	lint_snip_marks(@marks);
-	my $track = $item{track_identifier};
-	my @pairs = $item{'mark_pair(s)'};
-	my @list = map{ @$_ } @pairs;	
+	my @list = grep{ $_->snip } all(); 
+	my $track = $this_track;
 	@list = (0, @list, $track->length);
-	@pairs = ();
+	my @pairs;
+	# assuming we're keeping from beginning, first mark is # discard
 	while ( scalar @list ){ push @pairs, [splice( @list, 0, 2)] }
 	::compose_sequence($track->name, $track, \@pairs);
-=cut
+}
 
 sub lint_snip_marks {
 	# do i sstart with snip retain or snip discard
