@@ -999,11 +999,13 @@ to_mark:
     tmk 2 # Move to the mark with the index 2.
 add_mark:
   type: mark
-  what: Drop a new mark at the current playback position. this will fail, if a mark is already placed on that exact position.
+  what: Drop a new mark at the current playback position. This will fail, if a mark is already placed on that exact position.
   short: mark amk k
-  parameters: [ <string:mark_id> ]
+  parameters: [ <string:mark_id> ] [<string:attr>]...
   example: |
-    mark start # Create a mark named "start" at the current position.
+    mark start # create a mark named "start" at the current position.
+    mark skip  # discard audio after this mark
+    mark keep  # keep audio after this mark
 remove_mark:
   type: mark
   what: Remove a mark
@@ -1590,10 +1592,18 @@ snip:
     This removes cut1 and cut2 regions from the current track
     by creating a sequence. 
   parameters: <mark_pair1> [<mark_pair2>...]
-snip_marks:
+retain:
+  type: mark
+  short: keep
+  what:  Use current position to mark start of a clip
+discard:
+  type: mark
+  short: skip
+  what: Use current position to mark end of a clip 
+gather:
+  short: gth
   type: sequence
-  what: |
-    create a sequence from the current track snip marks, after linting them
+  what: assemble a sequence from the current track clip marks
 toggle_snip:
   type: sequence
   short: ts
