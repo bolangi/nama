@@ -218,20 +218,20 @@ sub lint_snip_marks {
     # snip discard
 
 }
-$retaining = 1;
+$retaining = 0;
 sub toggle_snip {
-	$retaining ? discard() : retain(); # discard if you've been retaining 
+	$retaining ? discard() : retain(); # our first mark is retaining
 	$retaining = ! $retaining;
 }
 sub discard {
-	my $mark = drop_mark("skipping-".::Mark::next_id());
+	my $mark = drop_mark("clip-start-".::Mark::next_id());
 	pager("discarding content from ".ecasound_iam('getpos'));
 	$mark->set_attrib("snip");
 	$mark->set_attrib("discard");
 	till_beep();
 }
 sub retain {
-	my $mark = drop_mark("keeping-".::Mark::next_id());
+	my $mark = drop_mark("clip-end-".::Mark::next_id());
 	pager("retaining content from ".ecasound_iam('getpos'));
 	$mark->set_attrib("snip");
 	$mark->set_attrib("retain");
