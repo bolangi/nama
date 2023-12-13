@@ -682,6 +682,9 @@ remove_mark: _remove_mark {
 	return unless (ref $::this_mark) =~ /Mark/;
 	$::this_mark->remove;
 	1;}
+discard: _discard { ::discard() }
+retain:  _retain  { ::retain()  }
+gather:  _gather  { ::gather_clips() }
 add_mark: _add_mark ident { ::drop_mark $item{ident}; 1}
 add_mark: _add_mark {  ::drop_mark(); 1}
 next_mark: _next_mark { ::next_mark(); 1}
@@ -1683,7 +1686,6 @@ snip: _snip track_identifier mark_pair(s) {
 	while ( scalar @list ){ push @pairs, [splice( @list, 0, 2)] }
 	::compose_sequence($track->name, $track, \@pairs);
 }
-snip_marks: _snip_marks {::snip_marks() }
 compose: _compose ident track_identifier mark_pair(s) {
 	::compose_sequence(@item{qw/ident track_identifier mark_pair(s)/});
 }
