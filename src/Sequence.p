@@ -181,6 +181,7 @@ sub compose_sequence {
 }
 sub gather {
 	my @list = grep{ $_->snip } ::Mark::all(); 
+	my $old = $this_track->name;
 	my $track = $this_track;
 	my $first = $list[0];
 	if ($first->discard){ @list = (0, @list, $track->length) }
@@ -188,6 +189,7 @@ sub gather {
 	# assuming we're keeping from beginning, first mark is # discard
 	while ( scalar @list ){ push @pairs, [splice( @list, 0, 2)] }
 	::compose_sequence($track->name, $track, \@pairs);
+	nama_cmd($old);
 }
 
 1
