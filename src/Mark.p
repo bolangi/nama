@@ -24,7 +24,7 @@ sub initialize {
 	@::marks_data = (); # for save/restore
 }
 sub next_id { # returns incremented 4-digit 
-	$project->{mark_sequence_counter} ||= '0000';
+	$project->{mark_sequence_counter} //= '0000';
 	$project->{mark_sequence_counter}++
 }
 sub new {
