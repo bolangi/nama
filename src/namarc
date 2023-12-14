@@ -149,8 +149,8 @@ beep:
   command: beep # or ecasound
 # percent volume is for ecasound only
 #                Hz  sec vol %
-  clip:          880 0.1 5
-  clop:          440 0.1 5 
+  clip_start:    880 0.1 5
+  clip_end:      440 0.1 5 
   end_of_list:   250 0.2 5
   command_error: 350 0.7 5
 

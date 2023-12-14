@@ -242,8 +242,8 @@ sub jump_status_bar {
 	$bar .= "Mark bump: $config->{mark_bump_seconds}s " ;
 	$bar
 }
-sub keep_beep 			{ beep( $config->{beep}->{clip})}
-sub till_beep 			{ beep( $config->{beep}->{clop})}
+sub clip_start_beep 	{ beep( $config->{beep}->{clip_start})}
+sub clip_end_beep       { beep( $config->{beep}->{clip_end})}
 sub command_error_beep 	{ beep( $config->{beep}->{command_error})}
 sub end_of_list_beep    { beep( $config->{beep}->{end_of_list  })}
 
