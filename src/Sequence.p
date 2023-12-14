@@ -180,7 +180,7 @@ sub compose_sequence {
 	$sequence
 }
 sub gather {
-	my @list = grep{ $_->snip } ::Mark::all(); 
+	my @list = grep{ $_->clip } ::Mark::all(); 
 	my $old = $this_track->name;
 	my $track = $this_track;
 	my $first = $list[0];
