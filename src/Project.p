@@ -37,8 +37,10 @@ sub project_dir {
 }
 # we prepend a slash 
 sub bus_track_display { 
-	my ($busname, $trackname) = ($this_bus, $this_track && $this_track->name || '');
-	($busname eq "Main" or $busname eq $trackname) ? "": "$busname/" . $trackname
+	my ($busname, $trackname) = ($this_bus, $this_track ? $this_track->name : '');
+	my $out = ($busname eq "Main" or $busname eq $trackname) ? "": "$busname/";
+	$out .= $trackname;
+	$out
 }
 sub list_projects {
 	my $projects = join "\n", sort map{
