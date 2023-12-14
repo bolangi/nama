@@ -6,7 +6,7 @@ our $VERSION = 1.0;
 use Carp;
 use warnings;
 no warnings qw(uninitialized);
-our($n, %by_name, @all, @attributes, %is_attribute, $AUTOLOAD, $retaining);
+our($n, %by_name, @all, @attributes, %is_attribute, $AUTOLOAD);
 use ::Log qw(logpkg);
 use ::Globals qw(:all);
 use ::Object qw( 
@@ -218,24 +218,24 @@ sub lint_snip_marks {
     # snip discard
 
 }
-$retaining = 0;
 sub toggle_snip {
-	$retaining ? discard() : retain(); # our first mark is retaining
-	$retaining = ! $retaining;
+	my @clip = grep{$_->clip} ::Mark::all();
+	retain(), return if (scalar @clip) == 0;
+	$clip[-1]->start ? retain() : discard ();
 }
 sub discard {
-	my $mark = drop_mark("clip-start-".::Mark::next_id());
+	my $mark = drop_mark("clip-end-".::Mark::next_id());
 	pager("discarding content from ".ecasound_iam('getpos'));
-	$mark->set_attrib("snip");
-	$mark->set_attrib("discard");
-	till_beep();
+	$mark->set_attrib("clip");
+	$mark->set_attrib("end");
+	clip_end_beep();
 }
 sub retain {
-	my $mark = drop_mark("clip-end-".::Mark::next_id());
+	my $mark = drop_mark("clip-start-".::Mark::next_id());
 	pager("retaining content from ".ecasound_iam('getpos'));
-	$mark->set_attrib("snip");
-	$mark->set_attrib("retain");
-	keep_beep();
+	$mark->set_attrib("clip");
+	$mark->set_attrib("start");
+	clip_start_beep();
 }
 sub drop_mark {
 	logsub((caller(0))[3]);
