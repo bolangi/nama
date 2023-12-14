@@ -547,7 +547,7 @@ set_region:
     Specify a playback region for the current track using marks or time positions
     Can be reversed with remove-region.
   short: srg
-  parameters: <string:start_mark_name> <string:end_mark_name>
+  parameters: <string:start-mark-name|decimal:time> <string:end-mark-name|decimal:time>
   example: |
     sax            # Select "sax" as the current track.
     set_region 2.5 120.5 # Play the audio from 2.5 to 120.5 seconds. **Must be decimal notation**
