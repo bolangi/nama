@@ -117,6 +117,10 @@ sub setup_readline {
 	($text->{screen_lines}, $text->{screen_columns}) 
 		= $term->get_screen_size();
 	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
+	my $f1 = $escape_code{'F1'};
+	$term->add_defun('clip_here', \&toggle_snip);
+	$term->bind_keyseq($f1, 'clip_here');
+	
 	revise_prompt();
 	# none of below eliminate double echo
 	#reset_terminal();
