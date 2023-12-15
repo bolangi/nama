@@ -1,5 +1,13 @@
 Changes to Audio::Nama
 
+1.301 Dec 14, 2023
+
+   * hotkey development
+   * attributes for marks
+   * toggle-clip and gather commands for trimming audio files
+   * metronome development
+   * many bug fixes
+
 1.214 Sep 26, 2019
 
     * numerous updates (1,040 commits since 1.205)
