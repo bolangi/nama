@@ -56,7 +56,6 @@ sub setup_termkey {
 				$dont_display++ if $key_string eq 'Escape'
 									or $key_string eq 'Space';
 
-				say "command: $command";
 				eval $command;
 				$@ and throw("error was $@");
 				undef $@;
@@ -65,11 +64,7 @@ sub setup_termkey {
 				#		return; }
 				
 
-			print(
-				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
-				"\x1b[2K",  # erase line
-				status_bar(), 
-			) unless $dont_display;
+			display_status($command) unless $dont_display;
 
 			return;
 			}
@@ -85,6 +80,12 @@ sub setup_termkey {
 			}
 		}
 	);
+}
+
+sub backspace {
+      return unless length $text->{hotkey_buffer};
+      substr( $text->{hotkey_buffer}, -1, 1 ) = "";
+      print "\cH \cH"; # erase it
 }
 sub reset_hotkey_buffer {
 	$text->{hotkey_buffer} = "";
@@ -202,7 +203,10 @@ sub termkey_list_hotkeys {
 	pager("Hotkeys\n",Dumper \%hots)
 }
 
+{
+my $cmd;
 sub display_status {
+			$cmd = shift;
 			print(
 				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
 				"\x1b[2K",  # erase line
@@ -213,13 +217,15 @@ sub status_bar {
 	my %bar = (param => \&param_status_bar,
 	           jump  => \&jump_status_bar,
 			   bump  => \&jump_status_bar );
-	$bar{$text->{hotkey_mode}}->();
+	my $status = $bar{$text->{hotkey_mode}}->();
+	my $name  = "[".$this_track->name."]"; 
+	$status =  "$name cmd: $cmd $status";
+}
 }
 	
 sub param_status_bar {
-	my $name = "[".$this_track->name."]"; 
-	return "$name has no selected effect" unless $this_track->op;
-	my $effect_info = join " ", $name,
+	return " no selected effect" unless $this_track->op;
+	my $effect_info = join " ",
 				this_op(), 
 				this_op_o()->fxname;
 # 	if (this_op_o()->no_params) {
@@ -235,9 +241,8 @@ sub param_status_bar {
 }
 sub jump_status_bar {
 	return unless $this_track; 
-	my $name = "[".$this_track->name."]";
 	my $pos = ::ecasound_iam("getpos") // 0;
-	my $bar = "$name: Playback at ${pos}s, ";
+	my $bar = "playback at ${pos}s, ";
 	if (defined $this_mark) {
 		my $mark = join ' ', 'Current mark:', $this_mark->name, 'at', $this_mark->time;
 		$bar .= $mark;
