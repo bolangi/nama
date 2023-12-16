@@ -198,6 +198,15 @@ END { }
 
 1;
 __DATA__
+
+=head1 NAME
+
+=encoding UTF-8
+
+B<Nama> - multitrack recorder and digital audio workstation
+
+See `man nama` for details.
+
 @@ commands_yml
 [% qx(cat ./commands.yml ) %]
 @@ grammar
