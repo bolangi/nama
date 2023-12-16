@@ -157,7 +157,8 @@ beep:
 hotkeys:
   common: 
     Space: toggle_transport
-    F1: toggle_hotkeys
+    Backspace: backspace
+    F1: clip_here
     Insert: previous_track
     Delete: next_track
     Keypad0: replay
