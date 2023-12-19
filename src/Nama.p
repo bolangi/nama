@@ -239,3 +239,4 @@ See `man nama` for details.
 @@ hotkey_grammar
 [% qx(cat ./hotkey_grammar.pl) %]
 
+=cut
