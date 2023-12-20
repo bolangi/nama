@@ -1,6 +1,6 @@
 Changes to Audio::Nama
 
-1.306 Dec 14, 2023
+1.307 Dec 14, 2023
    
    * Replace Module::Install with Module::Build
 
