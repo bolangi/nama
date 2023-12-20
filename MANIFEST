@@ -4,7 +4,7 @@ COPYING
 MANIFEST			This list of files
 META.yml
 README
-script/nama
+bin/nama
 t/01_symbols.t
 t/02_assign.t
 t/04_object.t

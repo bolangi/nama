@@ -1,2 +1,2 @@
-pod2man --section=1 ../script/nama nama.1 --name=nama
-pod2html --title="nama(1)" --infile=../script/nama --outfile=nama.html
+pod2man --section=1 ../bin/nama nama.1 --name=nama
+pod2html --title="nama(1)" --infile=../bin/nama --outfile=nama.html

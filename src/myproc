@@ -12,7 +12,7 @@ MD=..
 LIBPATH=$MD/lib/Audio/Nama
 LD=$MD/lib
 TD=$MD/t
-SD=$MD/script
+SD=$MD/bin
 
 ./missing_files_list
 
