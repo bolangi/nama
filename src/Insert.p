@@ -3,7 +3,6 @@ package ::Insert;
 use Modern::Perl '2020';
 use Carp;
 no warnings qw(uninitialized redefine);
-our $VERSION = 0.1;
 our %by_index;
 use ::Log qw(logpkg);
 use ::Log qw(logpkg);
