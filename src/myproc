@@ -5,8 +5,7 @@
 
 CUR_DIR=`dirname $0`
 cd "$CUR_DIR"
-# make sure this directory is accessible
-chmod a+x .
+
 ./check_hash_keys
 
 MD=..
@@ -37,6 +36,3 @@ mv $LIBPATH/Nama.pm $LIBPATH/../Nama.pm
 ./generate_executable_stub
 ./makeman
 rm *.tmp
-
-# we don't want M:B to see files in src/
-chmod a-x .
