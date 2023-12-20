@@ -26,7 +26,6 @@ use File::Copy qw(copy);
 use File::Slurp;
 use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
-our $VERSION = 1.0;
 
 use ::Util qw(freq input_node dest_type dest_string join_path);
 use ::Assign qw(json_out);

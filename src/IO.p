@@ -22,7 +22,6 @@ our (%tn, $jack, $config);
 
 package ::IO;
 use Modern::Perl '2020';
-our $VERSION = 1.0;
 use Carp;
 use Data::Dumper::Concise;
 our $VERSION = 1.0;
