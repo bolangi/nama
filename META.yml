@@ -1,0 +1,68 @@
+---
+abstract: ~
+author:
+  - 'Joel Roth, <joelz@pobox.com>'
+build_requires:
+  ExtUtils::MakeMaker: 6.59
+configure_requires:
+  ExtUtils::MakeMaker: 6.59
+distribution_type: module
+dynamic_config: 1
+generated_by: 'Module::Install version 1.21'
+keywords:
+  - audio
+  - recording
+  - mixing
+  - digital
+  - workstation
+  - effects
+  - editing
+license: gpl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Audio-Nama
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  AnyEvent: '5.0'
+  Data::Dumper::Concise: 0
+  Data::Section::Simple: 0
+  Event: 0
+  File::Copy: 0
+  File::Copy::Link: 0
+  File::Find::Rule: 0
+  File::HomeDir: 0
+  File::Slurp: 0
+  File::Temp: 0
+  Git::Repository: 0
+  Graph: 0
+  IO::Select: 0
+  IO::Socket: 0
+  IPC::Open3: 0
+  IPC::System::Simple: 0
+  JSON::XS: 0
+  List::MoreUtils: 0
+  List::Util: 0
+  Log::Log4perl: 0
+  Modern::Perl: 0
+  Module::Load::Conditional: 0
+  Parse::RecDescent: 0
+  Role::Tiny: 0
+  SUPER: 0
+  Term::ReadLine::Gnu: 0
+  Test2::Bundle::More: 0
+  Text::Diff: 0
+  Text::Format: 0
+  Text::Template: 0
+  Time::HiRes: 0
+  Try::Tiny: 0
+  YAML::Tiny: 0
+  autodie: 0
+  perl: 5.10.1
+resources:
+  license: http://opensource.org/licenses/gpl-license.php
+  repository: https://github.com/bolangi/nama
+version: '1.303'
