@@ -2,7 +2,6 @@
 {
 package ::Bus;
 use Modern::Perl '2020'; use Carp; 
-our $VERSION = 1.0;
 use ::Log qw(logsub logpkg);
 use ::Globals qw(:trackrw $setup); 
 our @ISA = qw( ::Object );
