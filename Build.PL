@@ -8,6 +8,7 @@ use Module::Build;
 my $build = Module::Build->new(
    module_name => 'Audio::Nama',
    dist_abstract => "multitrack recorder and digital audio workstation",
+   dist_author => 'Joel Roth <joelz@pobox.com>'
    configure_requires => {
       'Module::Build' => '0.4004', # test_requires
    },
@@ -52,8 +53,8 @@ my $build = Module::Build->new(
 	  'Test2::Bundle::More' => 0,
    },
    license => 'perl',
-   create_license => 1,
-   create_readme  => 1,
+   create_license => 0,
+   create_readme  => 0,
 );
  
 $build->create_build_script;
