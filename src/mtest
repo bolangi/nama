@@ -1,2 +1,2 @@
-./myproc; cd .. ;perl *.PL; make; make test; cd src
+./myproc; cd .. ;src/build; ./Build.PL; ./Build test
 
