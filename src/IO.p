@@ -389,6 +389,7 @@ sub _device_id { 'rtnull' }
 {
 package ::IO::from_wav;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 our @ISA = '::IO';
 sub device_id { 
 	my $self = shift;

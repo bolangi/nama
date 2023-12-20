@@ -173,6 +173,7 @@ sub soundcard_delay {
 {
 package ::PostFaderInsert;
 use Modern::Perl '2020'; use Carp; our @ISA = qw(::Insert);
+our $VERSION = 1.0;
 use ::Util qw(input_node output_node dest_type);
 use ::Log qw(logpkg);
 sub add_paths {
@@ -262,6 +263,7 @@ sub remove {
 {
 package ::PreFaderInsert;
 use Modern::Perl '2020'; use Carp; our @ISA = qw(::Insert);
+our $VERSION = 1.0;
 use ::Util qw(input_node output_node dest_type);
 use ::Log qw(logpkg);
 use ::Globals qw(:trackrw);

@@ -412,6 +412,7 @@ sub jump_back_10  { jump_forward(-10) }
 	
 } # end package
 { package ::HereMark;
+our $VERSION = 1.0;
 our @ISA = '::Mark';
 our $last_time;
 sub name { 'Here' }
@@ -420,6 +421,7 @@ sub time { ::ecasound_iam('cs-connected') ? ($last_time = ::ecasound_iam('getpos
 
 { package ::ClipMark;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 our @ISA = '::Mark';
 
 
