@@ -1,68 +1,251 @@
 ---
-abstract: ~
+abstract: 'multitrack recorder and digital audio workstation'
 author:
-  - 'Joel Roth, <joelz@pobox.com>'
+  - 'Joel Roth <joelz@pobox.com>'
 build_requires:
-  ExtUtils::MakeMaker: 6.59
+  Test2::Bundle::More: '0'
 configure_requires:
-  ExtUtils::MakeMaker: 6.59
-distribution_type: module
+  Module::Build: '0.4004'
 dynamic_config: 1
-generated_by: 'Module::Install version 1.21'
-keywords:
-  - audio
-  - recording
-  - mixing
-  - digital
-  - workstation
-  - effects
-  - editing
-license: gpl
+generated_by: 'Module::Build version 0.4234, CPAN::Meta::Converter version 2.150010'
+license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
-  version: 1.4
+  version: '1.4'
 name: Audio-Nama
-no_index:
-  directory:
-    - inc
-    - t
+provides:
+  Audio::Nama:
+    file: lib/Audio/Nama.pm
+    version: '1.303'
+  Audio::Nama::AnalyseLV2:
+    file: lib/Audio/Nama/AnalyseLV2.pm
+  Audio::Nama::Assign:
+    file: lib/Audio/Nama/Assign.pm
+    version: '1'
+  Audio::Nama::BoostTrack:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::Bus:
+    file: lib/Audio/Nama/Bus.pm
+    version: '1'
+  Audio::Nama::BusUtil:
+    file: lib/Audio/Nama/BusUtil.pm
+  Audio::Nama::CacheRecTrack:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::ChainSetup:
+    file: lib/Audio/Nama/ChainSetup.pm
+  Audio::Nama::Clip:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::ClipMark:
+    file: lib/Audio/Nama/Mark.pm
+  Audio::Nama::Config:
+    file: lib/Audio/Nama/Initializations.pm
+  Audio::Nama::EarTrack:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::EcasoundCleanup:
+    file: lib/Audio/Nama/EcasoundCleanup.pm
+  Audio::Nama::EcasoundRun:
+    file: lib/Audio/Nama/EcasoundRun.pm
+  Audio::Nama::EcasoundSetup:
+    file: lib/Audio/Nama/EcasoundSetup.pm
+  Audio::Nama::Edit:
+    file: lib/Audio/Nama/Edit.pm
+    version: '1'
+  Audio::Nama::EditTrack:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::Effect:
+    file: lib/Audio/Nama/Effect.pm
+  Audio::Nama::EffectChain:
+    file: lib/Audio/Nama/EffectChain.pm
+    version: '0.001'
+  Audio::Nama::EffectNickname:
+    file: lib/Audio/Nama/EffectNickname.pm
+  Audio::Nama::Engine:
+    file: lib/Audio/Nama/Engine.pm
+    version: '1'
+  Audio::Nama::Fade:
+    file: lib/Audio/Nama/Fade.pm
+    version: '1'
+  Audio::Nama::File:
+    file: lib/Audio/Nama/Initializations.pm
+  Audio::Nama::Globals:
+    file: lib/Audio/Nama/Globals.pm
+  Audio::Nama::Graph:
+    file: lib/Audio/Nama/Graph.pm
+  Audio::Nama::Graphical:
+    file: lib/Audio/Nama/Graphical.pm
+    version: '1.071'
+  Audio::Nama::HereMark:
+    file: lib/Audio/Nama/Mark.pm
+  Audio::Nama::IO:
+    file: lib/Audio/Nama/IO.pm
+    version: '1'
+  Audio::Nama::IO::any:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::from_alsa_soundcard_device:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::from_bus:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::from_jack_client:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::from_jack_multi:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::from_jack_port:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::from_loop:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::from_null:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::from_rtnull:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::from_soundcard:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::from_wav:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::to_alsa_soundcard_device:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::to_jack_client:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::to_jack_multi:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::to_jack_port:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::to_loop:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::to_null:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::to_rtnull:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::to_soundcard:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::IO::to_wav:
+    file: lib/Audio/Nama/IO.pm
+  Audio::Nama::Insert:
+    file: lib/Audio/Nama/Insert.pm
+    version: '0.1'
+  Audio::Nama::Lat:
+    file: lib/Audio/Nama/Lat.pm
+  Audio::Nama::LibEngine:
+    file: lib/Audio/Nama/Engine.pm
+    version: '1'
+  Audio::Nama::Log:
+    file: lib/Audio/Nama/Log.pm
+  Audio::Nama::Mark:
+    file: lib/Audio/Nama/Mark.pm
+    version: '1'
+  Audio::Nama::MasteringTrack:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::MidiBus:
+    file: lib/Audio/Nama/Bus.pm
+  Audio::Nama::MidiEngine:
+    file: lib/Audio/Nama/Engine.pm
+  Audio::Nama::MidiTrack:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::MixDownTrack:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::Mode:
+    file: lib/Audio/Nama/Initializations.pm
+  Audio::Nama::NetEngine:
+    file: lib/Audio/Nama/Engine.pm
+    version: '1'
+  Audio::Nama::Object:
+    file: lib/Audio/Nama/Object.pm
+    version: '1.04'
+  Audio::Nama::PostFaderInsert:
+    file: lib/Audio/Nama/Insert.pm
+  Audio::Nama::PreFaderInsert:
+    file: lib/Audio/Nama/Insert.pm
+  Audio::Nama::Project:
+    file: lib/Audio/Nama/Project.pm
+  Audio::Nama::SendBusCooked:
+    file: lib/Audio/Nama/Bus.pm
+  Audio::Nama::SendBusRaw:
+    file: lib/Audio/Nama/Bus.pm
+  Audio::Nama::Sequence:
+    file: lib/Audio/Nama/Sequence.pm
+    version: '1'
+  Audio::Nama::SimpleTrack:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::SlaveTrack:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::Spacer:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::StatusSnapshot:
+    file: lib/Audio/Nama/StatusSnapshot.pm
+  Audio::Nama::SubBus:
+    file: lib/Audio/Nama/Bus.pm
+  Audio::Nama::Tempo:
+    file: lib/Audio/Nama/Tempo.pm
+  Audio::Nama::TempoMark:
+    file: lib/Audio/Nama/Mark.pm
+    version: '1'
+  Audio::Nama::Text:
+    file: lib/Audio/Nama/Text.pm
+    version: '1.071'
+  Audio::Nama::Track:
+    file: lib/Audio/Nama/Track.pm
+    version: '1'
+  Audio::Nama::TrackComment:
+    file: lib/Audio/Nama/TrackComment.pm
+  Audio::Nama::TrackEffect:
+    file: lib/Audio/Nama/TrackEffect.pm
+  Audio::Nama::TrackIO:
+    file: lib/Audio/Nama/TrackIO.pm
+  Audio::Nama::TrackLatency:
+    file: lib/Audio/Nama/TrackLatency.pm
+  Audio::Nama::TrackRegion:
+    file: lib/Audio/Nama/TrackRegion.pm
+  Audio::Nama::TrackWaveform:
+    file: lib/Audio/Nama/TrackWaveform.pm
+  Audio::Nama::Util:
+    file: lib/Audio/Nama/Util.pm
+  Audio::Nama::VersionTrack:
+    file: lib/Audio/Nama/Track.pm
+  Audio::Nama::Wav:
+    file: lib/Audio/Nama/Wav.pm
+    version: '1.001'
+  Audio::Nama::WavModify:
+    file: lib/Audio/Nama/WavModify.pm
+  Audio::Nama::Waveform:
+    file: lib/Audio/Nama/Waveform.pm
+  Audio::Nama::WetTrack:
+    file: lib/Audio/Nama/Track.pm
 requires:
-  AnyEvent: '5.0'
-  Data::Dumper::Concise: 0
-  Data::Section::Simple: 0
-  Event: 0
-  File::Copy: 0
-  File::Copy::Link: 0
-  File::Find::Rule: 0
-  File::HomeDir: 0
-  File::Slurp: 0
-  File::Temp: 0
-  Git::Repository: 0
-  Graph: 0
-  IO::Select: 0
-  IO::Socket: 0
-  IPC::Open3: 0
-  IPC::System::Simple: 0
-  JSON::XS: 0
-  List::MoreUtils: 0
-  List::Util: 0
-  Log::Log4perl: 0
-  Modern::Perl: 0
-  Module::Load::Conditional: 0
-  Parse::RecDescent: 0
-  Role::Tiny: 0
-  SUPER: 0
-  Term::ReadLine::Gnu: 0
-  Test2::Bundle::More: 0
-  Text::Diff: 0
-  Text::Format: 0
-  Text::Template: 0
-  Time::HiRes: 0
-  Try::Tiny: 0
-  YAML::Tiny: 0
-  autodie: 0
-  perl: 5.10.1
+  AnyEvent: '5'
+  Data::Dumper::Concise: '0'
+  Data::Section::Simple: '0'
+  Event: '0'
+  File::Copy: '0'
+  File::Copy::Link: '0'
+  File::Find::Rule: '0'
+  File::HomeDir: '0'
+  File::Slurp: '0'
+  File::Temp: '0'
+  Git::Repository: '0'
+  Graph: '0'
+  IO::Select: '0'
+  IO::Socket: '0'
+  IPC::Open3: '0'
+  IPC::System::Simple: '0'
+  JSON::XS: '0'
+  List::MoreUtils: '0'
+  List::Util: '0'
+  Log::Log4perl: '0'
+  Modern::Perl: '0'
+  Module::Load::Conditional: '0'
+  Parse::RecDescent: '0'
+  Role::Tiny: '0'
+  SUPER: '0'
+  Term::ReadLine::Gnu: '0'
+  Test2::Bundle::More: '0'
+  Text::Diff: '0'
+  Text::Format: '0'
+  Text::Template: '0'
+  Time::HiRes: '0'
+  Try::Tiny: '0'
+  YAML::Tiny: '0'
+  autodie: '0'
+  perl: '5.030'
 resources:
-  license: http://opensource.org/licenses/gpl-license.php
-  repository: https://github.com/bolangi/nama
+  license: http://dev.perl.org/licenses/
 version: '1.303'
+x_serialization_backend: 'CPAN::Meta::YAML version 0.018'
