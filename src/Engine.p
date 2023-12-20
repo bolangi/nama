@@ -320,6 +320,7 @@ package ::MidiEngine;
 use Modern::Perl '2020';
 use SUPER;
 use ::Globals qw($config %tn);
+our $VERSION = 1.0;
 our @ISA = '::Engine';
 
 sub new {
