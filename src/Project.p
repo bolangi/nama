@@ -2,6 +2,7 @@
 {
 package ::Project;
 use Modern::Perl '2020'; use Carp;
+our $VERSION = 1.0;
 sub hello { my $self = shift; say "hello $self: ",::Dumper $::project}
 }
 {

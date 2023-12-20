@@ -1,6 +1,7 @@
 package ::EcasoundSetup;
 use Role::Tiny;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
 sub setup { 

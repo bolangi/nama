@@ -2,6 +2,7 @@
 package ::Engine;
 our $VERSION = 1.0;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 use Carp;
 our @ISA;
 our %by_name;

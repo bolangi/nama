@@ -2,6 +2,7 @@
 package ::EcasoundCleanup;
 use Role::Tiny;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 sub cleanup {
 	my $self = shift;
 	::rec_cleanup();

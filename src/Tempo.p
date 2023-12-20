@@ -3,6 +3,7 @@
 
 package ::Tempo;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 use ::Globals qw($config);
 use ::Object qw( label bars meter tempo ticks);
 use List::Util qw(sum);
