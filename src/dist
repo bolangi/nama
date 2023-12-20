@@ -1,0 +1,1 @@
+cd $MD; ./Build.PL && ./Build test && ./Build dist
