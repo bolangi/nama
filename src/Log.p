@@ -2,6 +2,7 @@
 
 package ::Log;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 use Log::Log4perl qw(get_logger :levels);
 use Exporter;
 use Carp qw(carp cluck confess croak);

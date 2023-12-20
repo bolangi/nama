@@ -1,6 +1,7 @@
 package ::TrackIO;
 use Role::Tiny;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 use ::Globals qw(:all);
 use File::Slurp qw(write_file);
 use File::Copy;

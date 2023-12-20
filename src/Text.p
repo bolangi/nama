@@ -5,6 +5,7 @@
 
 package ::Text;
 use Modern::Perl '2020'; use Carp;
+our $VERSION = 1.0;
 no warnings 'uninitialized';
 use ::Globals qw(:all);
 use ::Assign qw(:all);

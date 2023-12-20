@@ -1,5 +1,6 @@
 package ::EffectNickname;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 use Role::Tiny;
 
 sub effect_nickname_count {

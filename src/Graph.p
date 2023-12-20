@@ -1,5 +1,6 @@
 package ::Graph;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 use Carp;
 use Graph;
 use ::Util qw(input_node output_node);

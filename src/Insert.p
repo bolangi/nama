@@ -1,6 +1,7 @@
 {
 package ::Insert;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 use Carp;
 no warnings qw(uninitialized redefine);
 our $VERSION = 0.1;

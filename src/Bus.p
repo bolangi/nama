@@ -2,6 +2,7 @@
 {
 package ::Bus;
 use Modern::Perl '2020'; use Carp; 
+our $VERSION = 1.0;
 use ::Log qw(logsub logpkg);
 use ::Globals qw(:trackrw $setup); 
 our @ISA = qw( ::Object );
@@ -158,6 +159,7 @@ sub list {
 {
 package ::SubBus; # with magic for Main bus
 use Modern::Perl '2020'; use Carp; our @ISA = '::Bus';
+our $VERSION = 1.0;
 use ::Log qw(logsub logpkg);
 use ::Util qw(input_node);
 use ::Globals qw(:trackrw %tn);
@@ -222,6 +224,7 @@ sub wantme {
 {
 package ::SendBusRaw;
 use Modern::Perl '2020'; use Carp; our @ISA = '::Bus';
+our $VERSION = 1.0;
 use ::Log qw(logsub logpkg);
 sub apply {
 	my $bus = shift;
@@ -251,6 +254,7 @@ sub remove {
 package ::SendBusCooked;
 use ::Log qw(logsub logpkg);
 use Modern::Perl '2020'; use Carp; our @ISA = '::SendBusRaw';
+our $VERSION = 1.0;
 
 # graphic routing: target -> slave -> bus_send_type
 
@@ -270,6 +274,7 @@ sub apply {
 {
 package ::MidiBus;
 use Modern::Perl '2020'; use Carp; our @ISA = '::Bus';
+our $VERSION = 1.0;
 use ::Log qw(logsub logpkg);
 use ::Util qw(input_node);
 use ::Globals qw(:trackrw);

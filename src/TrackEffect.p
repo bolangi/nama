@@ -1,5 +1,6 @@
 package ::TrackEffect;
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 use Role::Tiny;
 use ::Effect qw(fxn);
 use ::Globals qw($project);
