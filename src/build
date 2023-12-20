@@ -6,11 +6,11 @@ if [ $IS_TOP_LEVEL ]; then
 fi
 ./myproc
 cd ..
-perl Makefile.PL
+./Build.PL
 echo "Now you can go to the nama toplevel directory and type:"
-echo "\tmake; make test"
+echo "\t./Build test"
 echo "If you're happy with the result you can do:"
-echo "\tmake install"
+echo "\t./Build install"
 echo "****************************************"
 if [ ! $IS_TOP_LEVEL ]; then
 	cd src 
