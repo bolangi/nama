@@ -1,5 +1,1 @@
-#!/usr/bin/env perl
-use warnings;
-use lib "../lib";
-use Audio::Nama;
-Audio::Nama::main();
+../bin/nama
