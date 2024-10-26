@@ -894,28 +894,6 @@ list_effects:
   what: Print a short list of all effects on the current track, only including unique ID and effect name.
   short: lfx
   parameters: none
-hotkeys:
-  type: general
-  what: |
-    Use this command to set the hotkey mode. (You may also use the hash symbol '#'.)
-    Hit the Escape key to return to command mode.
-  short: hk 
-  parameters: none
-hotkeys_always:
-  type: general 
-  what: Activate hotkeys mode after each command.
-  short: hka 
-  parameters: none
-hotkeys_off:
-  type: general
-  what: disable hotkeys always mode
-  short: hko
-  parameters: none
-hotkeys_list:
-  type: general
-  what: list hotkey bindings
-  short: hkl lhk
-  parameters: none
 add_insert:
   type: effect 
   what: Add an external send/return insert to current track.
