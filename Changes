@@ -1,5 +1,12 @@
 Changes to Audio::Nama
 
+1.500 Oct 29, 2024
+
+    * fix aux send failure
+    * merge development code (tempo)
+    * revert development dead end (hotkeys)
+    * new starting point for maintenance and development
+
 1.214 Sep 26, 2019
 
     * numerous updates (1,040 commits since 1.205)
