@@ -9,3 +9,5 @@ Audio-Nama-*
 try/*
 .git/*
 src/*
+^MYMETA\.yml$
+^MYMETA\.json$
