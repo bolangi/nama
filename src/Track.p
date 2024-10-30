@@ -19,13 +19,13 @@ use ::Log qw(logpkg logsub);
 use ::Effect  qw(fxn);
 use List::MoreUtils qw(first_index);
 use Try::Tiny;
-use Modern::Perl;
+use Modern::Perl '2020';
+our $VERSION = 1.0;
 use Carp qw(carp cluck croak);
 use File::Copy qw(copy);
 use File::Slurp;
 use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
-our $VERSION = 1.0;
 
 use ::Util qw(freq input_node dest_type dest_string join_path);
 use ::Assign qw(json_out);
@@ -247,7 +247,8 @@ sub fades { grep { $_->{track} eq $_[0]->name } values %::Fade::by_index  }
 {
 package ::SimpleTrack; # used for Main track
 use ::Globals qw(:all);
-use Modern::Perl; use Carp; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use Carp; use ::Log qw(logpkg);
+our $VERSION = 1.0;
 use SUPER;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
@@ -266,7 +267,8 @@ sub activate_bus {}
 {
 package ::MasteringTrack; # used for mastering chains 
 use ::Globals qw(:all);
-use Modern::Perl; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use ::Log qw(logpkg);
+our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::SimpleTrack';
 
@@ -283,7 +285,8 @@ sub version {0}
 package ::EarTrack; # for submix helper tracks
 use ::Globals qw(:all);
 use ::Util qw(dest_string);
-use Modern::Perl; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use ::Log qw(logpkg);
+our $VERSION = 1.0;
 use SUPER;
 no warnings qw(uninitialized redefine);
 our @ISA = '::SlaveTrack';
@@ -299,7 +302,8 @@ sub width { $_[0]->{width} }
 {
 package ::SlaveTrack;
 use ::Globals qw(:all);
-use Modern::Perl; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use ::Log qw(logpkg);
+our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub width { $tn{$_[0]->target}->width }
@@ -317,7 +321,8 @@ sub dir { $tn{$_[0]->target}->dir }
 {
 package ::BoostTrack; 
 use ::Globals qw(:all);
-use Modern::Perl; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use ::Log qw(logpkg);
+our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub rec_status{
@@ -329,6 +334,7 @@ sub send_id { $tn{Main}->send_id }
 }
 {
 package ::CacheRecTrack;
+our $VERSION = 1.0;
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
 our @ISA = qw(::SlaveTrack);
@@ -345,6 +351,7 @@ sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav
 }
 {
 package ::MixDownTrack; 
+our $VERSION = 1.0;
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
 use SUPER;
@@ -380,6 +387,7 @@ sub forbid_user_ops { 1 }
 package ::EditTrack; use Carp qw(carp cluck);
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
+our $VERSION = 1.0;
 our @ISA = '::Track';
 our $AUTOLOAD;
 sub AUTOLOAD {
@@ -408,6 +416,7 @@ sub playat_time {
 package ::VersionTrack;
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
+our $VERSION = 1.0;
 our @ISA ='::Track';
 sub set_version {}
 sub versions { [$_[0]->version] }
@@ -429,6 +438,7 @@ package ::Clip;
 
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
+our $VERSION = 1.0;
 our @ISA = qw( ::VersionTrack ::Track );
 
 sub sequence { my $self = shift; $::bn{$self->group} };
@@ -469,6 +479,7 @@ sub rec_status { $_[0]->version ? PLAY : OFF }
 } # end package
 { 
 package ::Spacer;
+our $VERSION = 1.0;
 our @ISA = '::Clip';
 use SUPER;
 use ::Object qw(duration);
@@ -493,14 +504,16 @@ sub new {
 { 
 package ::WetTrack; # for inserts
 use ::Globals qw(:all);
-use Modern::Perl; use ::Log qw(logpkg);
+use Modern::Perl '2020'; use ::Log qw(logpkg);
+our $VERSION = 1.0;
 our @ISA = '::SlaveTrack';
 }
 
 {
 package ::MidiTrack; 
 use ::Globals qw(:all);
-use Modern::Perl;
+use Modern::Perl '2020';
+our $VERSION = 1.0;
 use SUPER;
 use ::Log qw(logpkg);
 our @ISA = qw(::Track);

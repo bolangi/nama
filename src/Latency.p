@@ -1,7 +1,7 @@
 # ----------- Latency Compensation -----------
 
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 no warnings 'uninitialized';
 use ::Globals qw(:all);
 use Storable qw(dclone);

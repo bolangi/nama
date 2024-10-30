@@ -8,7 +8,7 @@
 #
 #     perl -I ~/build/nama/lib customize.pl
 
-use Modern::Perl;
+use Modern::Perl '2020';
 use Audio::Nama::Globals qw(:all);
 
 my @user_customization = (

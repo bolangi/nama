@@ -1,5 +1,5 @@
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 
 sub add_track {
 

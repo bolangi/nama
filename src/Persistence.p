@@ -3,7 +3,9 @@
 
 package ::;
 use File::Copy;
-use Modern::Perl; no warnings 'uninitialized';
+use Modern::Perl '2020'; no warnings 'uninitialized';
+use vars '$VERSION';
+
 
 sub save_state {
 	logsub((caller(0))[3]);

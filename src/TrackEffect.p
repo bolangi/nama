@@ -1,9 +1,11 @@
 package ::TrackEffect;
-use Modern::Perl;
+use Modern::Perl '2020';
+our $VERSION = 1.0;
 use Role::Tiny;
 use ::Effect qw(fxn);
 use ::Globals qw($project);
 use Try::Tiny;
+use List::MoreUtils qw(first_index);
 
 # current operator and current parameter for the track
 sub op { $project->{current_op}->{$_[0]->name} //= $_[0]->{ops}->[-1] }
@@ -16,7 +18,9 @@ sub stepsize {
 }
 sub pos {
 	my $track = shift;
-	first_index{$_ eq $track->op} @{$track->ops};
+	my $op = $track->op;
+	my $index = first_index {$_ eq $op } @{$track->ops};
+	return($index || 0);
 }
 sub user_ops_o {
 	my $track = shift;

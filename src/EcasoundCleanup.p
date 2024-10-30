@@ -1,7 +1,8 @@
 # ----------- Ecasound cleanup (post-recording) -----------
 package ::EcasoundCleanup;
 use Role::Tiny;
-use Modern::Perl;
+use Modern::Perl '2020';
+our $VERSION = 1.0;
 sub cleanup {
 	my $self = shift;
 	::rec_cleanup();
@@ -9,7 +10,7 @@ sub cleanup {
 
 
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 use Cwd;
 use File::Spec::Functions qw(splitpath);
 use ::Globals qw(:all);

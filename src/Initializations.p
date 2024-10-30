@@ -6,7 +6,8 @@
 #
 
 package ::;
-use Modern::Perl; use Carp;
+use Modern::Perl '2020'; use Carp;
+use vars '$VERSION';
 use Socket qw(getnameinfo NI_NUMERICHOST) ;
 
 sub is_test_script { $config->{opts}->{J} }
@@ -181,6 +182,8 @@ sub definitions {
 		hotkey_beep					=> 'beep -f 250 -l 200',
 	#	this causes beeping during make test
 	#	beep_command					=> 'beep -f 350 -l 700',
+		hotkey_playback_jumpsize_seconds => 1,
+		seek_end_margin	=>10,
 		midi_record_buffer => 'midi_record',
 		midi_default_input_channel => 'keyboard',
 		ecasound_channel_ops 		=> {map{$_,1} qw(chcopy chmove chorder chmix chmute)},
@@ -198,7 +201,7 @@ sub definitions {
 	{ package ::Config;
 	use Carp;
 	use ::Globals qw(:singletons);
-	use Modern::Perl;
+	use Modern::Perl '2020';
 	our @ISA = '::Object'; #  for ->dump and ->as_hash methods
 
 	sub serialize_formats { split " ", $_[0]->{serialize_formats} }

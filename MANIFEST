@@ -1,21 +1,11 @@
 BUILD
+Build.PL
 Changes
 COPYING
-inc/Module/Install.pm
-inc/Module/Install/Base.pm
-inc/Module/Install/Can.pm
-inc/Module/Install/Fetch.pm
-inc/Module/Install/Makefile.pm
-inc/Module/Install/Metadata.pm
-inc/Module/Install/Scripts.pm
-inc/Module/Install/Win32.pm
-inc/Module/Install/WriteAll.pm
-Makefile.PL
 MANIFEST			This list of files
-MYMETA.yml
-MYMETA.json
+META.yml
 README
-script/nama
+bin/nama
 t/01_symbols.t
 t/02_assign.t
 t/04_object.t
@@ -86,3 +76,4 @@ lib/Audio/Nama/Graphical.pm
 lib/Audio/Nama/EffectsRegistry.pm
 lib/Audio/Nama/IO.pm
 lib/Audio/Nama/Tempo.pm
+META.json

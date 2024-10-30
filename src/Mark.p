@@ -153,11 +153,10 @@ sub mark_time {
 }
 
 
-
 # ---------- Mark and jump routines --------
 {
 package ::;
-use Modern::Perl;
+use Modern::Perl '2020';
 use ::Globals qw(:all);
 
 sub drop_mark {
@@ -197,65 +196,87 @@ sub mark { # GUI_CODE
 
 sub next_mark {
 	logsub((caller(0))[3]);
-	my $jumps = shift || 0;
-	$jumps and $jumps--;
-	my $here = ecasound_iam("cs-get-position");
+	my $mark = next_mark_object();
+	set_position($mark->time);
+	$this_mark = $mark;
+}
+sub next_mark_object {
 	my @marks = ::Mark::all();
+	my $here = ecasound_iam("cs-get-position");
 	for my $i ( 0..$#marks ){
 		if ($marks[$i]->time - $here > 0.001 ){
 			logpkg('debug', "here: $here, future time: ", $marks[$i]->time);
-			set_position($marks[$i+$jumps]->time);
-			$this_mark = $marks[$i];
-			return;
+			return $marks[$i];
+		}
+	}
+}
+sub previous_mark_object {
+	my @marks = ::Mark::all();
+	my $here = ecasound_iam("cs-get-position");
+	for my $i ( reverse 0..$#marks ){
+		if ($marks[$i]->time < $here ){
+			return $marks[$i];
 		}
 	}
 }
 sub previous_mark {
 	logsub((caller(0))[3]);
-	my $jumps = shift || 0;
-	$jumps and $jumps--;
-	my $here = ecasound_iam("getpos");
-	my @marks = ::Mark::all();
-	for my $i ( reverse 0..$#marks ){
-		if ($marks[$i]->time < $here ){
-			set_position($marks[$i+$jumps]->time);
-			$this_mark = $marks[$i];
-			return;
-		}
-	}
+	my $mark = previous_mark_object();
+	set_position($mark->time);
+	$this_mark = $mark;
 }
 	
+sub modify_mark {
+	my ($mark, $newtime, $quiet) = @_;
+	$mark->set( time => $newtime );
+	! $quiet && do {
+	pager($mark->name, ": set to ", d2( $newtime), "\n");
+	pager("adjusted to ",$mark->time, "\n") 
+		if $mark->time != $newtime;
+	};
+	set_position($mark->time);
+	request_setup();
+}
+#  D: delete_current_mark
+#  .: drop_snip_mark
+sub bump_mark_minus_1 { }
+sub bump_mark_plus_1 { }
+sub bump_mark_minus_point_1 { }
+sub bump_mark_plus_point_1 { }
+sub bump_mark_minus_point_01 { }
+sub bump_mark_plus_point_01 { }
 
-## jump recording head position
 
-sub to_start { 
+## jump playback head position
+
+sub jump_to_start { 
 	logsub((caller(0))[3]);
 	return if ::ChainSetup::really_recording();
-	set_position( 0 );
+	jump( 0 );
 }
-sub to_end { 
+sub jump_to_end { 
 	logsub((caller(0))[3]);
 	# ten seconds shy of end
 	return if ::ChainSetup::really_recording();
-	my $end = ecasound_iam('cs-get-length') - 10 ;  
-	set_position( $end);
+	my $end = ecasound_iam('cs-get-length') - $config->{seek_end_margin} ;  
+	jump($end);
 } 
 sub jump {
 	return if ::ChainSetup::really_recording();
 	my $delta = shift;
 	logsub((caller(0))[3]);
 	my $here = ecasound_iam('getpos');
-	logpkg('debug', "delta: $delta, here: $here, unit: $gui->{_seek_unit}");
-	my $new_pos = $here + $delta * $gui->{_seek_unit};
+	logpkg('debug', "delta: $delta, here: $here");
+	my $new_pos = $here + $delta;
 	if ( $setup->{audio_length} )
 	{
 		$new_pos = $new_pos < $setup->{audio_length} 
 			? $new_pos 
 			: $setup->{audio_length} - 10
 	}
-	set_position( $new_pos );
+	set_position_with_fade( $new_pos );
 }
-sub set_position { fade_around(\&_set_position, @_) }
+sub set_position_with_fade { fade_around(\&_set_position, @_) }
 
 sub _set_position {
 	logsub((caller(0))[3]);
@@ -271,6 +292,24 @@ sub _set_position {
 
 	update_clock_display();
 }
+
+# used by hotkeys
+
+#sub previous_mark {}
+#sub next_mark {}
+sub delete_current_mark {}
+#sub drop_mark {}
+sub bump_mark_forward_1 {}
+sub bump_mark_forward_10 {}
+sub bump_mark_back_1 {}
+sub bump_mark_back_10 {}
+#sub jump_to_start {}
+#sub jump_to_end {}
+sub jump_pos_forward_1 {}
+sub jump_pos_forward_10 {}
+sub jump_pos_back_1 {}
+sub jump_pos_back_10 {}
+sub jump_replay {}
 
 sub forward {
 	my $delta = shift;
@@ -292,6 +331,7 @@ sub jump_backward { jump_forward( - shift()) }
 	
 } # end package
 { package ::HereMark;
+our $VERSION = 1.0;
 our @ISA = '::Mark';
 our $last_time;
 sub name { 'Here' }
@@ -299,7 +339,8 @@ sub time { ::ecasound_iam('cs-connected') ? ($last_time = ::ecasound_iam('getpos
 }
 
 { package ::ClipMark;
-use Modern::Perl;
+use Modern::Perl '2020';
+our $VERSION = 1.0;
 our @ISA = '::Mark';
 
 
@@ -308,7 +349,7 @@ our @ISA = '::Mark';
 { package ::TempoMark;
 
 	our $VERSION = 1.0;
-	use Modern::Perl;
+	use Modern::Perl '2020';
 	use ::Log qw(logpkg);
 	use ::Globals qw(:all);
 	our @ISA = '::Mark';

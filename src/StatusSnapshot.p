@@ -1,7 +1,8 @@
 package ::StatusSnapshot;
 
 use Role::Tiny;
-use Modern::Perl;
+use Modern::Perl '2020';
+our $VERSION = 1.0;
 {
 package ::;
 
