@@ -4,7 +4,7 @@
 package ::;
 use File::Copy;
 use Modern::Perl '2020'; no warnings 'uninitialized';
-our $VERSION = 1.0;
+use vars '$VERSION';
 
 
 sub save_state {

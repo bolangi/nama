@@ -7,7 +7,7 @@
 
 package ::;
 use Modern::Perl '2020'; use Carp;
-our $VERSION = 1.0;
+use vars '$VERSION';
 use Socket qw(getnameinfo NI_NUMERICHOST) ;
 
 sub is_test_script { $config->{opts}->{J} }
