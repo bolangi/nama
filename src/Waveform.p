@@ -2,6 +2,7 @@ package ::Waveform;
 use ::Globals qw($project $config $gui %ti);
 use ::Util qw(join_path);
 use Modern::Perl '2020';
+our $VERSION = 1.0;
 use Try::Tiny;
 use vars qw(%by_name);
 use ::Object qw(wav track project start end);

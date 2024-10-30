@@ -5,6 +5,7 @@
 
 package ::Util;
 use Modern::Perl '2020'; 
+our $VERSION = 1.0;
 use Carp;
 use Data::Dumper::Concise;
 use ::Assign qw(json_out);
