@@ -1772,10 +1772,10 @@ bus_off: _bus_off
 }
 
 
-set_param_increment: _set_param_increment value {::set_param_stepize($item{value}    )} 
-set_param_exp:       _set_param_exp       exp   {::set_param_stepize(10**$item{exp});1} 
+#set_param_increment: _set_param_increment value {::set_param_stepize($item{value}    )} 
+#set_param_exp:       _set_param_exp       exp   {::set_param_stepize(10**$item{exp});1} 
 
-set_playback_jumpsize: _set_playback_jumpsize seconds {::set_playback_jumpsize($item{seconds})} 
+#set_playback_jumpsize: _set_playback_jumpsize seconds {::set_playback_jumpsize($item{seconds})} 
 seconds: value
 exp: /[-+]?\d/ 
 # hours:   value 'h' {$item{value}*3600} 
