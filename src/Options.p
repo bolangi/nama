@@ -58,20 +58,20 @@ $help->{usage} = <<HELP;
 USAGE: nama [options] [project_name]
 
 --gui, -g                        Start Nama in GUI mode
---text, -t                       Start Nama in text mode
+--text, -t                       Start Nama in text mode (default)
+--create-project, -c             Create project if it doesn't exist
+--help, -h                       This help display
+
+Advanced options
+
+--regenerate-effects-cache, -r   Regenerate the effects data cache
+--sample-rate, -z                use this sample rate, and set as default for session
 --config, -f                     Specify configuration file (default: ~/.namarc)
 --project-root, -d               Specify project root directory
 --use-pwd, -p                    Use current dir for all WAV and project files
---create-project, -c             Create project if it doesn't exist
---net-eci, -n                    Use Ecasound's Net-ECI interface
---libecasoundc, -l               Use Ecasound's libecasoundc interface
 --save-alsa, -a                  Save/restore alsa state with project data
---help, -h                       This help display
---regenerate-effects-cache, -r   Regenerate the effects data cache
---sample-rate, -z                use this sample rate, and set as default for session
-
-Debugging options (for developers)
-
+--net-eci, -n                    Use Ecasound's Net-ECI interface (default)
+--libecasoundc, -l               Use Ecasound's libecasoundc interface
 --no-state, -M                   Don't load project state
 --no-static-effects-data, -S     Don't load effects data
 --no-static-effects-cache, -C    Don't load effects data cache
