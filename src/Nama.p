@@ -1,5 +1,5 @@
 package ::;
-our $VERSION = "1.504";
+our $VERSION = "1.505";
 use Modern::Perl '2020';
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
