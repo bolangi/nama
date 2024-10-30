@@ -1,5 +1,9 @@
 Changes to Audio::Nama
 
+1.502 Oct 29, 2024
+
+    * generate distribution with Module::Build (replacing Module::Install)
+
 1.500 Oct 29, 2024
 
     * fix aux send failure
