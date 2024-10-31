@@ -1,6 +1,7 @@
 # ---------- Git Support ----------
 package ::;
 use Modern::Perl '2020';
+use Carp;
 sub git { 
 	return if is_test_script();
 	$config->{use_git} or warn("@_: git command, but git is not enabled.
@@ -92,7 +93,7 @@ sub project_snapshot {
 	  	   or not $project->{name} 
 		   or not $project->{repo};
 
-	my $commit_message = shift() || "";
+	my $commit_message = shift() || "empty message";
 	git_commit($commit_message);
 }
 
