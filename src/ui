@@ -1,1 +1,1 @@
-../bin/nama
+ perl -I ../lib ../bin/nama
