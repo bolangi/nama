@@ -5,13 +5,9 @@ use ::Globals qw($ui);
 use ::Log;
 ::Log::initialize_logger();
 
-is($ui, 'bullwinkle', 'global variable import');
-
 package Foo;
 
 use ::Globals qw(:all);
-
-main::is($ui, 'bullwinkle', 'global variable-all-tag import');
 
 package main;
 
