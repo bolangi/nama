@@ -215,9 +215,6 @@ sub detect_spacebar {
 
 			
 		}
-		elsif (  $text->{term_attribs}->{line_buffer} eq "#" ){
-			setup_hotkeys();
-		}
 	});
 }
 sub throw {
