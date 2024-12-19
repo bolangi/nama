@@ -1574,15 +1574,6 @@ remove_fader_effect: _remove_fader_effect fader_role {
 	1
 }
 fader_role: 'vol'|'pan'|'fader'
-hotkeys: _hotkeys { ::setup_hotkeys()}
-hotkeys_always: _hotkeys_always { $::config->{hotkeys_always}++; ::setup_hotkeys(); }
-hotkeys_off: _hotkeys_off { undef $::config->{hotkeys_always}; 1 }
-hotkeys_list: _hotkeys_list { ::list_hotkeys() ; 1 } 
-# hotkeys_bump:    _hotkeys_bump  { ::setup_hotkeys('bump' )}
-# hotkeys_jump:    _hotkeys_jump  { ::setup_hotkeys('jump' )}
-# hotkeys_param:   _hotkeys_param { ::setup_hotkeys('param')}
-# hotkeys_list:    _hotkeys_list  { ::list_hotkeys() ; 1 } 
-# 
 select_sequence: _select_sequence existing_sequence_name { 
 	$::this_sequence = $::bn{$item{existing_sequence_name}}
 } 

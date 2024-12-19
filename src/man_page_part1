@@ -64,9 +64,6 @@ The help system provides documentation and keyword search
 covering Nama commands and effects-processing
 plugins.
 
-The hotkey mode provides a convenient way to select, view,
-and modify effect parameters.
-
 =head1 OPTIONS
 
 =over 12
