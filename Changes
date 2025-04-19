@@ -1,5 +1,10 @@
 Changes to Audio::Nama
 
+1.506 Apr 18, 2025
+
+    * remove hotkey functionality
+    * fix dependencies
+
 1.505 Oct 29, 2024
 
     * generate distribution with Module::Build (replacing Module::Install)
