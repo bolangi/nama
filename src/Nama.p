@@ -164,7 +164,6 @@ sub bootstrap_environment {
 	process_command_line_options();
 	start_logging();
 	setup_grammar();
-	setup_hotkey_grammar();
 	initialize_interfaces();
 }
 sub kill_and_reap {
@@ -203,8 +202,6 @@ __DATA__
 @@ grammar
 [% qx(./strip_all  ./grammar_body.pl) %]
 [% qx(./emit_command_headers headers) %]
-@@ hotkey_grammar
-[% qx(./strip_all  ./hotkey_grammar.pl) %]
 @@ ecasound_chain_operator_hints_yml
 [% qx(cat ./ecasound_chain_operator_hints.yml) %];
 @@ default_namarc
