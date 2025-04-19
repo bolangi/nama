@@ -177,10 +177,8 @@ sub definitions {
 				my $delay = shift();
 				modify_effect($id,2,undef,$delay)
 			},
-		hotkey_beep					=> 'beep -f 250 -l 200',
 	#	this causes beeping during make test
 	#	beep_command					=> 'beep -f 350 -l 700',
-		hotkey_playback_jumpsize_seconds => 1,
 		seek_end_margin	=>10,
 		midi_record_buffer => 'midi_record',
 		midi_default_input_channel => 'keyboard',
@@ -251,7 +249,6 @@ sub initialize_interfaces {
 	
 	can_load( modules => {AnyEvent => undef})
 			or die "Perl Module 'AnyEvent' not found. Please install it and try again. Stopping.";
-	use AnyEvent::TermKey qw( FORMAT_VIM KEYMOD_CTRL ); 
 	can_load( modules => {jacks => undef})
 		and $jack->{use_jacks}++;
 	choose_sleep_routine();

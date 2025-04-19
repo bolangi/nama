@@ -15,7 +15,6 @@ my $build = Module::Build->new(
    requires => {
 		'autodie'  => 0,
 		'AnyEvent' => 5.0,
-		'AnyEvent::TermKey' => 0,
 		'Data::Dumper::Concise' => 0,
 		'Data::Section::Simple' => 0,
 		'Event'  => 0,
