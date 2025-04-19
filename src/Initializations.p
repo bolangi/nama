@@ -249,7 +249,6 @@ sub initialize_interfaces {
 	
 	can_load( modules => {AnyEvent => undef})
 			or die "Perl Module 'AnyEvent' not found. Please install it and try again. Stopping.";
-	use AnyEvent::TermKey qw( FORMAT_VIM KEYMOD_CTRL ); 
 	can_load( modules => {jacks => undef})
 		and $jack->{use_jacks}++;
 	choose_sleep_routine();
