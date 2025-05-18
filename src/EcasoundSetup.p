@@ -159,7 +159,7 @@ sub connect_transport {
 	transport_status() unless $quiet;
 	something_to_run() or throw("Neither audio nor MIDI tracks active. Nothing to run."), return; 
 	$ui->flash_ready();
-	#print ecasound_iam("fs");
+	# plintcomment ecasound_iam("fs");
 	1;
 	
 }
@@ -173,10 +173,10 @@ sub transport_status {
 
 
 	# assume transport is stopped
-	# print looping status, setup length, current position
+	#  plintcomment looping status, setup length, current position
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
-	#print "start: $start, end: $end, loop_enable: $mode->{loop_enable}\n";
+	# plintcomment "start: $start, end: $end, loop_enable: $mode->{loop_enable}\n";
 	if (ref $setup->{record_midi} and %{$setup->{record_midi}}){
 		pager(join(" ", keys %{$setup->{record_midi}}), ": ready for caching");
 	}

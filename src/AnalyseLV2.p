@@ -273,8 +273,8 @@ sub lv2_help {
 	print_lv2();
 }
 
-#print lv2_help('http://plugin.org.uk/swh-plugins/zm1');
-#print lv2_help('urn:50m30n3:plugins:SO-404');
+# plintcomment lv2_help('http://plugin.org.uk/swh-plugins/zm1');
+# plintcomment lv2_help('urn:50m30n3:plugins:SO-404');
 
 sub proc_datafile {
 	my ($file) = @_;

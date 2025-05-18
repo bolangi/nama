@@ -37,7 +37,7 @@ sub new {
 	
 	my $self = bless { @_ }, $class;
 
-	#print "self class: $class, self type: ", ref $self, $/;
+	# plintcomment "self class: $class, self type: ", ref $self, $/;
 	if ($self->name) {
 		if ( my $old = delete $by_name{$self->name} ) {
 			::pager("replacing previous mark at " .  $old->time);
@@ -101,7 +101,7 @@ sub all { sort { $a->{time} <=> $b->{time} }@all }
 sub loop_start { 
 	my @points = sort { $a <=> $b } 
 	grep{ $_ } map{ mark_time($_)} @{$setup->{loop_endpoints}}[0,1];
-	#print "points @points\n";
+	# plintcomment "points @points\n";
 	$points[0];
 }
 sub loop_end {
@@ -112,36 +112,36 @@ sub loop_end {
 sub time_from_tag {
 	my $tag = shift;
 	$tag or $tag = '';
-	#print "tag: $tag\n";
+	# plintcomment "tag: $tag\n";
 	my $mark;
 	if ($tag =~ /\./) { # we assume raw time if decimal
-		#print "mark time: ", $tag, $/;
+		# plintcomment "mark time: ", $tag, $/;
 		return $tag;
 	} elsif ($tag =~ /^\d+$/){
-		#print "mark index found\n";
+		# plintcomment "mark index found\n";
 		$mark = $::Mark::all[$tag];
 	} else {
-		#print "mark name found\n";
+		# plintcomment "mark name found\n";
 		$mark = $::Mark::by_name{$tag};
 	}
 	return undef if ! defined $mark;
-	#print "mark time: ", $mark->time, $/;
+	# plintcomment "mark time: ", $mark->time, $/;
 	return $mark->time;
 }
 sub duration_from_tag {
 	my $tag = shift;
 	$tag or $tag = '';
-	#print "tag: $tag\n";
+	# plintcomment "tag: $tag\n";
 	my $mark;
 	if ($tag =~ /[\d.-]+/) { # we assume time 
-		#print "mark time: ", $tag, $/;
+		# plintcomment "mark time: ", $tag, $/;
 		return $tag;
 	} else {
-		#print "mark name found\n";
+		# plintcomment "mark name found\n";
 		$mark = $::Mark::by_name{$tag};
 	}
 	return undef if ! defined $mark;
-	#print "mark time: ", $mark->time, $/;
+	# plintcomment "mark time: ", $mark->time, $/;
 	return $mark->time;
 }
 sub mark_time {

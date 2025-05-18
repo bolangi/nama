@@ -61,7 +61,7 @@ sub help {
 	my $name = shift;
 	$name =~ s/-/_/g;  # help indices require underscores
 	chomp $name;
-	#print "seeking help for argument: $name\n";
+	# plintcomment "seeking help for argument: $name\n";
 	$text->{iam}->{$name} and pager(<<IAM);
 
 $name is an Ecasound command.  See 'man ecasound-iam'.
@@ -144,7 +144,7 @@ sub help_effect {
 
 sub find_effect {
 	my @keys = @_;
-	#print "keys: @keys\n";
+	# plintcomment "keys: @keys\n";
 	#my @output;
 	my @matches = grep{ 
 		my $_help = $_; 

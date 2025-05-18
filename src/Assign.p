@@ -61,7 +61,7 @@ sub assign {
 	my $class;
 	logpkg('logcarp',"didn't expect scalar here") if ref $h{data} eq 'SCALAR';
 	logpkg('logcarp',"didn't expect code here") if ref $h{data} eq 'CODE';
-	# print "data: $h{data}, ", ref $h{data}, $/;
+	#  plintcomment "data: $h{data}, ", ref $h{data}, $/;
 
 	if ( ref $h{data} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
 		# we guess object
@@ -107,7 +107,7 @@ ASSIGN
 	}
 	logpkg('debug',sub{"IDENT\n". json_out(\%ident2)});
 	
-	#print join " ", "Variables:\n", @vars, $/ ;
+	# plintcomment join " ", "Variables:\n", @vars, $/ ;
 	croak "expected hash" if ref $ref !~ /HASH/;
 	my @keys =  keys %{ $ref }; # identifiers, *no* sigils
 	logpkg('debug',sub{ join " ","found keys: ", keys %{ $ref },"\n---\n"});

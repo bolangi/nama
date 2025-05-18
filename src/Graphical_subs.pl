@@ -281,7 +281,7 @@ sub time_gui {
 	my $time_label = $gui->{clock_frame}->Label(
 		-text => 'TIME', 
 		-width => 12);
-	#print "bg: $gui->{_nama_palette}->{ClockBackground}, fg:$gui->{_nama_palette}->{ClockForeground}\n";
+	# plintcomment "bg: $gui->{_nama_palette}->{ClockBackground}, fg:$gui->{_nama_palette}->{ClockForeground}\n";
 	$gui->{clock} = $gui->{clock_frame}->Label(
 		-text => '0:00', 
 		-width => 8,
@@ -1194,7 +1194,7 @@ sub get_saved_colors {
 	$gui->{_old_bg} = $gui->{_palette}{mw}{background};
 	$gui->{_old_abg} = $gui->{_palette}{mw}{activeBackground};
 	$gui->{_old_bg} //= '#d915cc1bc3cf';
-	#print "pb: $gui->{_palette}{mw}{background}\n";
+	# plintcomment "pb: $gui->{_palette}{mw}{background}\n";
 
 
 	my $pal = $file->gui_palette;
@@ -1210,19 +1210,19 @@ sub get_saved_colors {
 	
 	$gui->{_old_abg} = $gui->{_palette}->{mw}{activeBackground};
 	$gui->{_old_abg} = $gui->{project_head}->cget('-activebackground') unless $gui->{_old_abg};
-	#print "1palette: \n", json_out( $gui->{_palette} );
-	#print "\n1namapalette: \n", json_out($gui->{_nama_palette});
+	# plintcomment "1palette: \n", json_out( $gui->{_palette} );
+	# plintcomment "\n1namapalette: \n", json_out($gui->{_nama_palette});
 	my %setformat;
 	map{ $setformat{$_} = $gui->{_palette}->{mw}{$_} if $gui->{_palette}->{mw}{$_}  } 
 		keys %{$gui->{_palette}->{mw}};	
-	#print "\nsetformat: \n", json_out(\%setformat);
+	# plintcomment "\nsetformat: \n", json_out(\%setformat);
 	$gui->{mw}->setPalette( %setformat );
 }
 sub colorset {
 	my ($widgetid, $field) = @_;
 	sub { 
 			my $widget = $gui->{$widgetid};
-			#print "ancestor: $widgetid\n";
+			# plintcomment "ancestor: $widgetid\n";
 			my $new_color = colorchooser($field,$widget->cget("-$field"));
 			if( defined $new_color ){
 				
@@ -1233,7 +1233,7 @@ sub colorset {
 				my @fields =  ($field => $new_color);
 				push (@fields, 'background', $widget->cget('-background'))
 					unless $field eq 'background';
-				#print "fields: @fields\n";
+				# plintcomment "fields: @fields\n";
 				$widget->setPalette( @fields );
 			}
  	};
@@ -1242,7 +1242,7 @@ sub colorset {
 sub namaset {
 	my ($field) = @_;
 	sub { 	
-			#print "f: $field np: $gui->{_nama_palette}->{$field}\n";
+			# plintcomment "f: $field np: $gui->{_nama_palette}->{$field}\n";
 			my $color = colorchooser($field,$gui->{_nama_palette}->{$field});
 			if ($color){ 
 				# install color in palette listing
@@ -1276,7 +1276,7 @@ sub colorchooser {
 							-title => $field,
 							-initialcolor => $initialcolor,
 							);
-	#print "new color: $new_color\n";
+	# plintcomment "new color: $new_color\n";
 	$new_color;
 }
 sub init_palettefields {

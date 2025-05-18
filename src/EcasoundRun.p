@@ -130,7 +130,7 @@ sub stop_heartbeat {
 }
 sub heartbeat {
 
-	#	print "heartbeat fired\n";
+	#	 plintcomment "heartbeat fired\n";
 
 	my $here   = $this_engine->ecasound_iam("getpos");
 	my $status = $this_engine->ecasound_iam('engine-status');
@@ -142,7 +142,7 @@ sub heartbeat {
 		delete $this_engine->{started};
 		set_position(0);
 	}
-	#print join " ", $status, colonize($here), $/;
+	# plintcomment join " ", $status, colonize($here), $/;
 	my ($start, $end);
 	$start  = ::Mark::loop_start();
 	$end    = ::Mark::loop_end();
@@ -188,7 +188,7 @@ sub disable_length_timer {
 }
 sub wraparound {
 	my ($diff, $start) = @_;
-	#print "diff: $diff, start: $start\n";
+	# plintcomment "diff: $diff, start: $start\n";
 	$project->{events}->{wraparound} = undef;
 	$project->{events}->{wraparound} = AE::timer($diff,0, sub{set_position($start)});
 }

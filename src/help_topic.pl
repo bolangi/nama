@@ -475,7 +475,7 @@ ADVANCED
 
    
 );
-# print values %{$help->{topic}};
+#  plintcomment values %{$help->{topic}};
 
 $help->{screen} = <<HELP.
 

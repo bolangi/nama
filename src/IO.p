@@ -562,7 +562,7 @@ sub route {
 	
 	my ($width, $dest) = @_;
 	return '' if ! $dest or $dest == 1;
-	# print "route: width: $width, destination: $dest\n\n";
+	#  plintcomment "route: width: $width, destination: $dest\n\n";
 	my $offset = $dest - 1;
 	my $route ;
 	for my $c ( map{$width - $_ + 1} 1..$width ) {
