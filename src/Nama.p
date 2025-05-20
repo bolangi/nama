@@ -9,6 +9,7 @@ no warnings qw(uninitialized syntax);
 use Carp qw(carp cluck confess croak);
 use Cwd;
 use Data::Section::Simple qw(get_data_section);
+use Data::Dumper::Concise;
 use File::Find::Rule;
 use File::Path;
 use File::Spec;
