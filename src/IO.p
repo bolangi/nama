@@ -115,7 +115,7 @@ sub new {
 
 	{ no warnings 'uninitialized';
 	::logpkg('debug',"I belong to track $name\n",
-		sub{Dumper($self)} );
+		sub{::Dumper($self)} );
 	}
 	
 	if($name){
