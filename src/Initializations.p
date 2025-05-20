@@ -348,6 +348,18 @@ exit;
 
 	1;	
 }
+
+our ($command_output, $output_fh, $old_output_fh);
+sub redirect_stdout {
+	open($output_fh, '>', \$command_output) or die; 
+	$old_output_fh = select $output_fh;
+	$project->{events}->{command_output} = AE::timer(0.1, 0.1, sub{ print STDOUT $command_output; $command_output = "" });
+}
+sub restore_stdout {
+	select $old_output_fh;
+	close $output_fh;
+}
+
 { my $is_connected_remote;
 sub start_remote_listener {
     my $port = shift;

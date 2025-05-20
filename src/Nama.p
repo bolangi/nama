@@ -164,6 +164,7 @@ sub bootstrap_environment {
 	start_logging();
 	setup_grammar();
 	initialize_interfaces();
+    redirect_stdout();
 }
 sub kill_and_reap {
 	my @pids = @_;
@@ -189,7 +190,7 @@ sub cleanup_exit {
 	delete $project->{events};
 	#project_snapshot(); 
 	::Engine::sync_action('kill_and_reap');
-	$text->{term}->rl_deprep_terminal() if defined $text->{term};
+	restore_stdout();
 	exit;
 }
 END { }
