@@ -19,8 +19,6 @@ our @ISA = '::';      ## default to root namespace, e.g.  Refresh_subs, Graphica
 
 sub hello {"make a window";}
 sub loop {
-	$text->{term_attribs}->{already_prompted} = 0;
-	$text->{term}->tkRunning(1);
   	while (1) {
   		my ($user_input) = $text->{term}->readline($prompt) ;
   		::process_line( $user_input );
