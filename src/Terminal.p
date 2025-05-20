@@ -180,9 +180,15 @@ sub load_keywords {
 	push @keywords, keys %{$fx_cache->{partial_label_to_full}};
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
 	push @keywords, "Audio::Nama::";
+	push @keywords, pwd_files();
 	@{$text->{keywords}} = @keywords
+	
 }
-
+sub pwd_files {
+	my $dir = '.';
+	my $pwd = path($dir);
+	grep{-f} $pwd->children;
+}
 sub complete {
     my ($string, $line, $start, $end) = @_;
 	#print join $/, $string, $line, $start, $end, $/;
