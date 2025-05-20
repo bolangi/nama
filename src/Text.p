@@ -16,18 +16,9 @@ sub hello {"hello world!";}
 
 sub loop {
 	package ::;
+	$text->{loop} = IO::Async::Loop->new;
 	initialize_prompt();
-	$Event::DIED = sub {
-		my ($event, $errmsg) = @_;
-		throw($errmsg);
-		$text->{term_attribs}->{line_buffer} = q();
-		if($text->{term}){
-			$text->{term}->clear_message();
-			$text->{term}->rl_reset_line_state();
-		}
-	};
-	use Data::Dumper::Concise;
-	Event::loop();
+	$text->{loop}->run;
 }
 
 ## NO-OP GRAPHIC METHODS 
