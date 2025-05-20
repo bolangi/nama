@@ -1,11 +1,13 @@
 #!/usr/bin/env perl
 =comment
 
-vbox contains
-    scrollbox contains
+vbox - root
+	scrollbox 
 		vbox 
+		   static
+		   static
+		   ...
 	entry
-
 
 =cut
 use Tickit;
