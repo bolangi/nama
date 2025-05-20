@@ -187,7 +187,7 @@ sub load_keywords {
 sub pwd_files {
 	my $dir = '.';
 	my $pwd = path($dir);
-	grep{-f} $pwd->children;
+	grep {-f} $pwd->children;
 }
 sub complete {
     my ($string, $line, $start, $end) = @_;
