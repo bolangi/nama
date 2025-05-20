@@ -41,7 +41,7 @@ sub apply_ecasound_test_args {
 
 sub definitions {
 
-	$| = 1;     # flush STDOUT buffer on every write
+	STDOUT->autoflush;
 
 	[% qx(./strip_all ./var_lists) %]
 
