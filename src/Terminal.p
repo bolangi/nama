@@ -172,32 +172,9 @@ sub page_or_print {
 	my (@output) = @_;
 	@output = map{"$_\n"} map{ split "\n"} @output;
 	return unless scalar @output;
-	print(@output), return if !paging_allowed() or scalar(@output) <= $text->{screen_lines} - 2;
-	write_to_temp_file_and_view(@output)
+	print(@output);
 }
-sub write_to_temp_file_and_view {
-	my @output = @_;
-	my $fh = File::Temp->new();
-	my $fname = $fh->filename;
-	print $fh @output;
-	file_pager($fname);
-}
-sub file_pager {
-
-	# given a filename, run the pager on it
-	
-	logsub((caller(0))[3]);
-	my $fname = shift;
-	if (! -e $fname or ! -r $fname ){
-		carp "file not found or not readable: $fname\n" ;
-		return;
-    }
-	my $pager = $ENV{PAGER} || "/usr/bin/less";
-	$pager =~ /less/ and $pager .= qq( -M -i -PM"q=quit pager, /=search, PgUp/PgDown=scroll (line %lt/%L)");
-	my $cmd = qq($pager $fname); 
-	system $cmd;
-}
-
+sub file_pager {};
 1;
 # command line processing routines
 
