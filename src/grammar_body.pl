@@ -133,19 +133,19 @@ command: iam_cmd predicate {
 	1 }
 
 command: user_command predicate {
-	# plintcomment "user command: $item{user_command}\n";
-	# plintcomment "predicate: $item{predicate}\n";
+	#print "user command: $item{user_command}\n";
+	#print "predicate: $item{predicate}\n";
 	# why does command name get into predicate ??
 	#::do_user_command($item{user_command}, split " ",$item{predicate});
 	::do_user_command(split " ",$item{predicate});
 	1;
 }
 command: user_alias predicate {
-	# plintcomment "alias: $item{user_alias}\n";
+	#print "alias: $item{user_alias}\n";
 	$::text->{parser}->do_part("$item{user_alias} $item{predicate}"); 1
 }
 user_alias: ident { 
-	# plintcomment "alias: $item{ident}\n";
+	#print "alias: $item{ident}\n";
 		$::config->{alias}->{command}->{$item{ident}} }
 user_command: ident { return $item{ident} if $::text->{user_command}->{$item{ident}} }
 
@@ -335,7 +335,7 @@ seconds: samples  # samples returns seconds
 seconds: /\d+/
 samples: /\d+sa/ {
 	my ($samples) = $item[1] =~ /(\d+)/;
- 	# plintcomment "found $samples samples\n";
+ 	#print "found $samples samples\n";
  	$return = $samples/$::project->{sample_rate}
 }
 min_sec: /\d+/ ':' /\d+/ { $item[1] * 60 + $item[3] }
@@ -721,7 +721,7 @@ modify_mark: _modify_mark value {
 	::modify_mark($::this_mark, $item{value} ); 1
 }		
 remove_effect: _remove_effect remove_target(s) {
-	# plintcomment join $/, @{ $item{"remove_target(s)"} }; 
+	#print join $/, @{ $item{"remove_target(s)"} }; 
 	::mute();
 	map{ 
 		my $id = $_;
@@ -746,8 +746,8 @@ add_controller: _add_controller parent effect value(s?) {
 	my $parent_o = ::fxn($parent);
 	print "parent: ", $parent_o, " chain: ", $parent_o->chain;
 	my $values = $item{"value(s?)"};
-	# plintcomment "values: " , ref $values, $/;
-	# plintcomment join ", ", @{$values} if $values;
+	#print "values: " , ref $values, $/;
+	#print join ", ", @{$values} if $values;
 	my $id = ::add_effect({
 		parent	=> $parent, 
 		chain	=> $parent_o->chain,
@@ -855,7 +855,7 @@ add_effect: _add_effect ('first'  | 'f')  add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}},
 		$::this_track->{ops}->[0];
-		# plintcomment "command is $command\n";
+		#print "command is $command\n";
 	::nama_cmd($command)
 }
 add_effect: _add_effect ('last'   | 'l')  add_target value(s?) { 
@@ -864,7 +864,7 @@ add_effect: _add_effect ('last'   | 'l')  add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}},
 		qw(ZZZ);
-		# plintcomment "command is $command\n";
+		#print "command is $command\n";
 	::nama_cmd($command)
 }
 add_effect: _add_effect ('before' | 'b')  before add_target value(s?) {
@@ -873,7 +873,7 @@ add_effect: _add_effect ('before' | 'b')  before add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}},
 		$item{before};
-		# plintcomment "command is $command\n";
+		#print "command is $command\n";
 	::nama_cmd($command)
 }
 add_effect_first: _add_effect_first add_target value(s?) {
@@ -882,7 +882,7 @@ add_effect_first: _add_effect_first add_target value(s?) {
 		"last",
 		$item{add_target},
 		@{$item{'value(s?)'}};
-		# plintcomment "command is $command\n";
+		#print "command is $command\n";
 	::nama_cmd($command)
 }
 add_effect_last: _add_effect_last add_target value(s?) {
@@ -891,7 +891,7 @@ add_effect_last: _add_effect_last add_target value(s?) {
 		"last",
 		$item{add_target},
 		@{$item{'value(s?)'}};
-		# plintcomment "command is $command\n";
+		#print "command is $command\n";
 	::nama_cmd($command)
 }
 add_effect_before: _add_effect_before before add_target value(s?) {
@@ -901,7 +901,7 @@ add_effect_before: _add_effect_before before add_target value(s?) {
 		$item{before},		
 		$item{add_target},
 		@{$item{'value(s?)'}};
-		# plintcomment "command is $command\n";
+		#print "command is $command\n";
 	::nama_cmd($command)
 }
 

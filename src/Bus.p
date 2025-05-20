@@ -61,7 +61,7 @@ sub last {
 		my $track = $_;
 		my $last;
 		$last = $track->last || 0;
-		# plintcomment "track: ", $track->name, ", last: $last\n";
+		#print "track: ", $track->name, ", last: $last\n";
 
 		$max = $last if $last > $max;
 

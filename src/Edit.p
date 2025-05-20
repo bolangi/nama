@@ -49,7 +49,7 @@ sub new {
 	$by_name{ $self->edit_name } = $self;
 	$by_index{ $self->n } = $self;
 
-	# plintcomment "self class: $class, self type: ", ref $self, $/;
+	#print "self class: $class, self type: ", ref $self, $/;
 
 	my $name = $self->host_track;
 	my $host = $::tn{$name};

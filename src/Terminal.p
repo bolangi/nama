@@ -126,7 +126,7 @@ sub pager_newline {
 
 	# Add a newline if necessary to each line
 	# push them onto the output buffer
-	#  plintcomment them to the screen
+	# print them to the screen
 	
 	my @lines = @_;
 	for (@lines){ $_ .= "\n" if  ! /\n$/ }
@@ -215,7 +215,7 @@ sub load_keywords {
 
 sub complete {
     my ($string, $line, $start, $end) = @_;
-	# plintcomment join $/, $string, $line, $start, $end, $/;
+	#print join $/, $string, $line, $start, $end, $/;
 	my $term = $text->{term};
     return $term->completion_matches($string,\&keyword);
 };

@@ -60,7 +60,7 @@ sub is_legal_key {
 sub set {
 	my $self = shift;
 	my $class = ref $self;
-	# plintcomment "class: $class, args: @_\n";
+	#print "class: $class, args: @_\n";
  	croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
 	my %new_vals = @_;
 	map{ 

@@ -112,7 +112,7 @@ sub new_plugins {
 sub modified_stamp {
 	# timestamp that file was modified
 	my $filename = shift;
-	# plintcomment "file: $filename\n";
+	#print "file: $filename\n";
 	my @s = stat $filename;
 	$s[9];
 }
@@ -138,7 +138,7 @@ sub generate_mappings_for_shortcuts {
 		}
 		$fx_cache->{partial_label_to_full}->{$code} = $code;
 	} keys %{$fx_cache->{full_label_to_index}};
-	# plintcomment json_out $fx_cache->{partial_label_to_full};
+	#print json_out $fx_cache->{partial_label_to_full};
 }
 { my %dispatch =
 		(
@@ -186,10 +186,10 @@ sub extract_effects_data {
 }
 sub sort_ladspa_effects {
 	logsub((caller(0))[3]);
-#	 plintcomment json_out($fx_cache->{split}); 
+#	print json_out($fx_cache->{split}); 
 	my $aa = $fx_cache->{split}->{ladspa}{a};
 	my $zz = $fx_cache->{split}->{ladspa}{z};
-#	 plintcomment "start: $aa end $zz\n";
+#	print "start: $aa end $zz\n";
 	map{push @{$fx_cache->{ladspa_sorted}}, 0} ( 1 .. $aa ); # fills array slice [0..$aa-1]
 	splice @{$fx_cache->{ladspa_sorted}}, $aa, 0,
 		 sort { $fx_cache->{registry}->[$a]->{name} cmp $fx_cache->{registry}->[$b]->{name} } ($aa .. $zz) ;
@@ -399,7 +399,7 @@ sub integrate_cop_hints {
 
 	my @cop_hints =  @{ yaml_in( get_data_section('ecasound_chain_operator_hints_yml')) };
 	for my $hashref ( @cop_hints ){
-		# plintcomment "cop hints ref type is: ",ref $hashref, $/;
+		#print "cop hints ref type is: ",ref $hashref, $/;
 		my $code = $hashref->{code};
 		$fx_cache->{registry}->[ $fx_cache->{full_label_to_index}->{ $code } ] = $hashref;
 	}
@@ -555,7 +555,7 @@ sub integrate_ladspa_hints {
 	logsub((caller(0))[3]);
 	map{ 
 		my $i = $fx_cache->{full_label_to_index}->{$_};
-		#  plintcomment("$_ not found\n"), 
+		# print("$_ not found\n"), 
 		if ($i) {
 			$fx_cache->{registry}->[$i]->{params} = $fx_cache->{ladspa}->{$_}->{params};
 			# we revise the number of parameters read in from ladspa-register
@@ -582,7 +582,7 @@ logpkg('debug', sub {join "\n", sort keys %{$fx_cache->{ladspa}}});
 logpkg('debug', '-' x 60);
 logpkg('debug', sub{join "\n", grep {/el:/} sort keys %{$fx_cache->{full_label_to_index}}});
 
-# plintcomment json_out $fx_cache->{registry}; exit;
+#print json_out $fx_cache->{registry}; exit;
 
 }
 

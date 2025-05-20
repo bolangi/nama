@@ -246,7 +246,7 @@ sub route_output_channels {
 		
 	my ($width, $dest) = @_;
 	return '' if ! $dest or $dest == 1;
-	#  plintcomment "route: width: $width, destination: $dest\n\n";
+	# print "route: width: $width, destination: $dest\n\n";
 	my $offset = $dest - 1;
 	my @route;
 	for my $channel ( map{$width - $_ + 1} 1..$width ) {

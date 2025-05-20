@@ -80,7 +80,7 @@ sub save_system_state {
 
 	map { push @tracks_data, $_->as_hash } all_tracks();
 
-	#  plintcomment "found ", scalar @tracks_data, "tracks\n";
+	# print "found ", scalar @tracks_data, "tracks\n";
 
 	# delete obsolete fields
 	map { my $t = $_;
@@ -406,8 +406,8 @@ sub restore_state_from_file {
 
 	$this_track = $tn{$this_track_name}, set_current_bus() if $this_track_name;
 	
-	# plintcomment "\n---\n", $main->dump;  
-	# plintcomment "\n---\n", map{$_->dump} ::audio_tracks();# exit; 
+	#print "\n---\n", $main->dump;  
+	#print "\n---\n", map{$_->dump} ::audio_tracks();# exit; 
 	$ui->manifest;
 	logpkg('debug', sub{ join " ", map{ ref $_, $/ } all_tracks() });
 

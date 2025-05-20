@@ -24,7 +24,7 @@ sub new {
 	::pager_newline("$vals{name}: returning existing engine"), 
 		return $by_name{$vals{name}} if $by_name{$vals{name}};
 	my $self = bless { name => 'default', %vals }, $class;
-	# plintcomment "object class: $class, object type: ", ref $self, $/;
+	#print "object class: $class, object type: ", ref $self, $/;
 	$by_name{ $self->name } = $self;
 	$self->initialize_ecasound();
 	$this_engine = $self;
