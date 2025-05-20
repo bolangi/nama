@@ -144,15 +144,6 @@ sub pager {
 	1
 }
 
-sub init_output_buffer { $text->{output_buffer} //= [] };
-
-sub linecount {
-	my @output = @_;
-	my $linecount = 0;
-	for (@output){ $linecount += $_ =~ tr(\n)(\n) }
-	$linecount
-}
-
 sub page_or_print {
 	my (@output) = @_;
 	@output = map{"$_\n"} map{ split "\n"} @output;
