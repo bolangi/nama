@@ -1,0 +1,56 @@
+#!/usr/bin/env perl
+=comment
+
+vbox contains
+    scrollbox contains
+		vbox 
+	entry
+
+
+=cut
+use Tickit;
+use Tickit::Widgets qw(ScrollBox Static VBox Entry);
+#use Tickit::Widget::Entry::Plugin::History;
+use Tickit::Widget::Entry::Plugin::Completion;
+
+my $root = 		Tickit::Widget::VBox->new; 
+my $vbox = 		Tickit::Widget::VBox->new; # contains multiple items to scroll through
+my $scrollbox = Tickit::Widget::ScrollBox->new->set_child( $vbox );
+for (1..1000){
+my $a = 1000 - $_;
+$vbox->add( Tickit::Widget::Static->new( text   => "a thousand bottles minus $_ is $a \n" ))
+}
+
+my $tickit = Tickit->new( root => $root);
+my $term = $tickit->term;
+my $lines = $term->lines;
+
+ 
+$root->add($scrollbox, force_size => $lines - 1); # , expand => 1);
+my $entry = 	Tickit::Widget::Entry->new( 
+	text 	 => $prompt,
+	on_enter => sub {
+      	my ( $self, $line ) = @_;
+		prompt();
+	}
+	);
+$root->add($entry);
+ 
+my $win = $tickit->rootwin;
+$win->bind_key('M-Home', 
+	sub{ 	my($console,$key) = @_;
+			$scroller->scroll_to_top;
+		} );
+$win->bind_key('M-End', 
+	sub{ 	my($console,$key) = @_;
+			$scroller->scroll_to_bottom;
+		} );
+
+prompt();
+$tickit->run;
+
+sub prompt {
+	my $prompt = 'enter command > ';
+	$entry->set_text($prompt);
+	$entry->set_position(99);
+}
