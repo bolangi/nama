@@ -140,12 +140,6 @@ sub pager {
 	chomp $output[-1];
 	$output[-1] .= "\n\n";
 	push @{$text->{output_buffer}}, @output;
-	page_or_print(@output);
-	1
-}
-
-sub page_or_print {
-	my (@output) = @_;
 	@output = map{"$_\n"} map{ split "\n"} @output;
 	return unless scalar @output;
 	print(@output);
