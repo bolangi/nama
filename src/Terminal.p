@@ -10,29 +10,14 @@ use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
 
 sub initialize_prompt {
-	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
-	&{$text->{term_attribs}->{'callback_read_char'}}();
-	set_current_bus();
 	print prompt();
-	$text->{term_attribs}->{already_prompted} = 0;
 }
 
 sub initialize_terminal {
-	$text->{term} = new Term::ReadLine("Ecasound/Nama");
-	$text->{term_attribs} = $text->{term}->Attribs;
-	$text->{term_attribs}->{attempted_completion_function} = \&complete;
-	$text->{term_attribs}->{already_prompted} = 1;
-	($text->{screen_lines}, $text->{screen_columns}) 
-		= $text->{term}->get_screen_size();
-	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
-	detect_spacebar(); 
-
-	revise_prompt();
 
 	# handle Control-C from terminal
 
 	
-
 	$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
 	# responds in a more timely way than $SIG{INT} = \&cleanup_exit; 
 
