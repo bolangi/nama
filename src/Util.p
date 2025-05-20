@@ -4,10 +4,13 @@
 # well-defined interfaces
 
 package ::Util;
-use Modern::Perl '2020'; 
+use v5.38;
 our $VERSION = 1.0;
 use Carp;
 use Data::Dumper::Concise;
+use IO::Async::Timer::Periodic;
+use IO::Async::Timer::Countdown;
+use IO::Async::Loop;
 use ::Assign qw(json_out);
 use ::Globals qw(:all);
 use ::Log qw(logit logsub logpkg);
@@ -47,6 +50,8 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	resolve_path
 	dumper
 	route_output_channels
+
+	timer
 
 ) ] );
 
@@ -253,6 +258,26 @@ sub route_output_channels {
 		push @route,[$channel,($channel + $offset)];
 	}
 	@route;
+}
+
+
+sub timer ($delay, $interval, $coderef ) {
+	my $timer;
+	if ($interval == 0){
+		$timer = IO::Async::Timer::Countdown->new(
+			delay => $delay,
+			on_expire => $coderef, 
+		);
+	}
+	else {
+		$timer = IO::Async::Timer::Periodic->new(
+			interval => $interval,
+			on_tick => $coderef,
+		);
+	}
+	$timer->start;
+	$text->{loop}->add($timer);
+	$timer
 }
 
 1;
