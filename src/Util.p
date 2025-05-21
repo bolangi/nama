@@ -52,6 +52,8 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	route_output_channels
 
 	timer
+	start_event
+	stop_event
 
 ) ] );
 
@@ -278,6 +280,13 @@ sub timer ($delay, $interval, $coderef ) {
 	$timer->start;
 	$text->{loop}->add($timer);
 	$timer
+}
+sub stop_event ($label) {
+	my $event = $::project->{events}->{$label};
+	$event->stop if defined $event 
+}
+sub start_event ($label, $async) {
+	$::project->{events}->{$label} = $async
 }
 
 1;
