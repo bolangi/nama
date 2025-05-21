@@ -16,7 +16,7 @@ sub hello {"hello world!";}
 
 sub loop {
 	package ::;
-	#$text->{loop}->run;
+	$text->{tickit}->run;
 }
 
 ## NO-OP GRAPHIC METHODS 

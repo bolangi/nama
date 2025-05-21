@@ -49,6 +49,7 @@ $vbox->add( Tickit::Widget::Static->new( text   => "a thousand bottles minus $_ 
 $tickit = Tickit->new( root => $root);
 use DDP;
 #p $tickit; exit;
+$text->{tickit} = $tickit;
 $term = $tickit->term;
 my $lines = $term->lines;
 
@@ -75,7 +76,6 @@ $root->add($entry);
 #$label = Tickit::Widget::Static->new(text => "got this:");
 #$root->add($label);
 #prompt();
-$tickit->run;
 }
  
 sub print_to_terminal ($txt) {
