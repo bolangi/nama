@@ -4,74 +4,98 @@ package ::;
 use v5.36;
 no warnings 'uninitialized';
 use Carp;
-use ::Globals qw(:singletons $this_bus $this_track);
+use ::Globals qw(:singletons $this_bus $this_track $text);
 use ::Log qw(logpkg logsub);
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
 
-sub initialize_prompt {
-	print prompt();
-}
 
-sub initialize_terminal {
+=comment - widgets
 
-=comment
+Tree:
 
-vbox - root
+tickit
+	term
+vbox (root)
 	scrollbox 
 		vbox 
 		   static
 		   static
 		   ...
-	entry
+entry
 
+Names:
+
+$text->{tickit} 
+$text->{root} 
+$text->{vbox} 
+$text->{scrollbox} 
+$text->{term} 
+$text->{entry} 
 =cut
 
-my $root = 		Tickit::Widget::VBox->new; 
-my $vbox = 		Tickit::Widget::VBox->new; # contains multiple items to scroll through
-my $scrollbox = Tickit::Widget::ScrollBox->new->set_child( $vbox );
+{
+my ($root, $vbox, $tickit, $term, $scrollbox, $entry);
+
+sub initialize_terminal {
+$root = 		Tickit::Widget::VBox->new; 
+$vbox = 		Tickit::Widget::VBox->new; # contains multiple items to scroll through
+$scrollbox = Tickit::Widget::ScrollBox->new->set_child( $vbox );
 for (1..100){
 my $a = 100 - $_;
 $vbox->add( Tickit::Widget::Static->new( text   => "a thousand bottles minus $_ is $a \n" ))
 }
 
-my $tickit = Tickit->new( root => $root);
-my $term = $tickit->term;
+$tickit = Tickit->new( root => $root);
+use DDP;
+#p $tickit; exit;
+$term = $tickit->term;
 my $lines = $term->lines;
+
  
-$root->add($scrollbox, force_size => $lines - 1); # , expand => 1);
-my $entry = 	Tickit::Widget::Entry->new( 
-	text 	 => $prompt,
+$root->add($scrollbox, force_size => $lines - 1);
+my $label;
+$entry = 	Tickit::Widget::Entry->new( 
+	text 	 => 'enter command > ',
 	on_enter => sub {
       	my ( $self, $line ) = @_;
-		prompt();
+		print_to_terminal($line);
+		$line =~ s/^.+?>\s*//;
+		$self->set_text('');
+		my $prompt = 'enter command > ';
+		$self->set_text($prompt);
+		$self->set_position(99);
 	}
 	);
+my $prompt = 'enter command > ';
+$entry->set_text($prompt);
+$entry->set_position(99);
 $root->add($entry);
- 
-=comment - doesn't work except on console - use event bindings
-my $win = $tickit->rootwin;
-
-$win->bind_key('M-Home', 
-	sub{ 	my($console,$key) = @_;
-			$scroller->scroll_to_top;
-		} );
-$win->bind_key('M-End', 
-	sub{ 	my($console,$key) = @_;
-			$scroller->scroll_to_bottom;
-		} );
-
-=cut
-prompt();
+#$label->set_text($line);
+#$label = Tickit::Widget::Static->new(text => "got this:");
+#$root->add($label);
+#prompt();
 $tickit->run;
-	# handle Control-C from terminal
-
-	
-	start_event(sigint => AE::signal('INT', \&cleanup_exit)); 
-	# responds in a more timely way than $SIG{INT} = \&cleanup_exit; 
-
-	$SIG{USR1} = sub { project_snapshot() };
 }
+ 
+sub print_to_terminal ($txt) {
+	$vbox->add( Tickit::Widget::Static->new( text => $txt ));
+	$scrollbox->scroll_to(1e5);
+}
+
+sub prompt {
+		my $obj = shift;
+		my $prompt = 'enter command > ';
+		$obj->set_text($prompt);
+		$obj->set_position(99);
+}
+}
+=comment
+sub prompt { 
+	logsub((caller(0))[3]);
+	join ' ', 'nama', git_branch_display(), bus_track_display(),'> '
+}
+=cut
 
 sub end_of_list_sound { system( $config->{hotkey_beep} ) }
 
@@ -113,16 +137,11 @@ sub revise_prompt {
 	logsub((caller(0))[3]);
 	# hack to allow suppressing prompt
 	$override = ($_[0] eq "default" ? undef : $_[0]) if defined $_[0];
-    $text->{term}->callback_handler_install($override//prompt(), \&process_line)
-		if $text->{term}
+    $override//prompt()
 }
 }
 
 	
-sub prompt { 
-	logsub((caller(0))[3]);
-	join ' ', 'nama', git_branch_display(), bus_track_display(),'> '
-}
 sub detect_spacebar {
 
 	# create a STDIN watcher to intervene when space
@@ -262,4 +281,3 @@ sub keyword {
         return undef;
 };
 1;
-__END__
