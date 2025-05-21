@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+use v5.36;
 =comment
 
 vbox - root
@@ -10,40 +11,97 @@ vbox - root
 	entry
 
 =cut
-use Tickit;
+use Tickit::Async;
 use Tickit::Widgets qw(ScrollBox Static VBox Entry);
 #use Tickit::Widget::Entry::Plugin::History;
 use Tickit::Widget::Entry::Plugin::Completion;
+use IO::Async::Loop;
+use IO::Async::Timer::Periodic;
+use IO::Async::Timer::Countdown;
+use IO::Async::Loop::Select;
+STDOUT->autoflush;
+my $text = {};
+
+$text->{loop} = IO::Async::Loop->new;
 
 my $root = 		Tickit::Widget::VBox->new; 
 my $vbox = 		Tickit::Widget::VBox->new; # contains multiple items to scroll through
 my $scrollbox = Tickit::Widget::ScrollBox->new->set_child( $vbox );
-for (1..1000){
-my $a = 1000 - $_;
-$vbox->add( Tickit::Widget::Static->new( text   => "a thousand bottles minus $_ is $a \n" ))
+for (1..100){
+my $a = 100 - $_;
+$vbox->add( Tickit::Widget::Static->new( text   => "a hundred bottles minus $_ is $a \n" ))
 }
 
-my $tickit = Tickit->new( root => $root);
+my $tickit = Tickit::Async->new( root => $root);
 my $term = $tickit->term;
 my $lines = $term->lines;
 
  
 $root->add($scrollbox, force_size => $lines - 1); # , expand => 1);
 my $entry = 	Tickit::Widget::Entry->new( 
-	text 	 => $prompt,
+	text 	 => "enter command > ",
 	on_enter => sub {
       	my ( $self, $line ) = @_;
-		prompt();
+		print_to_terminal($line);
+		$scrollbox->scroll_to(1e5);
+		$line =~ s/^.+?>\s*//;
+		$self->set_text('');
+		my $prompt = 'enter command > ';
+		$self->set_text($prompt);
+		$self->set_position(99);
 	}
 	);
+my $prompt = 'enter command > ';
+$entry->set_text($prompt);
+$entry->set_position(99);
 $root->add($entry);
- 
+my $i;
+redirect_stdout();
+timer(0.5,0.5, sub{ ++$i; say(join'',$i,'-','X'x40)});
+#timer(2,1, sub{ print( join '',1..40)  });
 
-prompt();
 $tickit->run;
 
 sub prompt {
 	my $prompt = 'enter command > ';
 	$entry->set_text($prompt);
 	$entry->set_position(99);
+}
+our ($command_output, $output_fh, $old_output_fh);
+sub redirect_stdout {
+	open($output_fh, '>', \$command_output) or die; 
+	$output_fh->autoflush;
+	$old_output_fh = select $output_fh;
+	my $j;
+	timer(1, 1, sub{
+		return unless $command_output;
+		print_to_terminal($command_output); 
+		$command_output = "" 
+	});
+}
+sub restore_stdout {
+	select $old_output_fh;
+	close $output_fh;
+}
+sub print_to_terminal ($txt) {
+	$vbox->add( Tickit::Widget::Static->new( text => $txt ));
+	$scrollbox->scroll_to(1e5);
+}
+sub timer ($delay, $interval, $coderef ) {
+	my $timer;
+	if ($interval == 0){
+		$timer = IO::Async::Timer::Countdown->new(
+			delay => $delay,
+			on_expire => $coderef, 
+		);
+	}
+	else {
+		$timer = IO::Async::Timer::Periodic->new(
+			interval => $interval,
+			on_tick => $coderef,
+		);
+	}
+	$timer->start;
+	$text->{loop}->add($timer);
+	$timer
 }
