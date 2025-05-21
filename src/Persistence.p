@@ -448,8 +448,8 @@ sub restore_state_from_file {
 
 	# restore command history
 	
-	$text->{term}->SetHistory(@{$text->{command_history}})
-		if (ref $text->{command_history}) =~ /ARRAY/;
+	#$text->{term}->SetHistory(@{$text->{command_history}})
+	#	if (ref $text->{command_history}) =~ /ARRAY/;
 
 ;
 	# restore effect chains and profiles
