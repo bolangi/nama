@@ -35,7 +35,6 @@ my $build = Module::Build->new(
 		'List::Util' => 0,
 		'List::MoreUtils' => 0,
 		'Log::Log4perl' => 0,
-		'Modern::Perl'  => 0,
 		'Module::Load::Conditional'  => 0, 
 		'Parse::RecDescent'  => 0,
 		'Path::Tiny' => 0,
@@ -56,7 +55,7 @@ my $build = Module::Build->new(
 		'Time::HiRes'  => 0,
 		'Try::Tiny'  => 0,
 		'YAML::Tiny'  => 0,
-      'perl' => '5.030', # incl experimental.pm; postderef;;  equivalent to use Modern::Perl '2020'
+      'perl' => '5.036', 
    },
    test_requires => {
 	  'Test2::Bundle::More' => 0,
