@@ -269,6 +269,7 @@ my @events = qw(
 	processing_time
 	remote_control
 	jack_polling
+	command_output
 );
 my %events = map{ $_ => 1} @events;
 sub check_event_type ($type) {
