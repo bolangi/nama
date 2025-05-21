@@ -1,7 +1,7 @@
 # ------------ Graphical User Interface ------------
 
 package ::Graphical;  ## gui routines
-use Modern::Perl '2020'; use Carp;
+use v5.36; use Carp;
 our $VERSION = 1.071;
 use ::Globals qw($text $prompt);
 

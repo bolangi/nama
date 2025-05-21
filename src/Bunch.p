@@ -3,7 +3,7 @@
 # operate on a list of tracks 
 
 package ::;
-use Modern::Perl '2020';
+use v5.36;
 
 sub is_bunch {
 	my $name = shift;

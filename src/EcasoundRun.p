@@ -1,6 +1,6 @@
 package ::EcasoundRun;
 use Role::Tiny;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
@@ -80,7 +80,7 @@ sub start_command { $_[0]->ecasound_iam('start') }
 ### routines defined in the root namespace
 
 package ::;
-use Modern::Perl '2020'; use Carp;
+use v5.36; use Carp;
 no warnings 'uninitialized';
 use ::Util qw(process_is_running);
 

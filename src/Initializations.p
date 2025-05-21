@@ -6,7 +6,7 @@
 #
 
 package ::;
-use Modern::Perl '2020'; use Carp;
+use v5.36; use Carp;
 use vars '$VERSION';
 use Socket qw(getnameinfo NI_NUMERICHOST) ;
 use ::Util qw(timer start_event stop_event);
@@ -46,12 +46,12 @@ sub definitions {
 
 	[% qx(./strip_all ./var_lists) %]
 
-	$text->{wrap} = new Text::Format {
+	$text->{wrap} = Text::Format->new( {
 		columns 		=> 75,
 		firstIndent 	=> 0,
 		bodyIndent		=> 0,
 		tabstop			=> 4,
-	};
+	});
 
 	####### Initialize singletons #######
 
@@ -198,7 +198,7 @@ sub definitions {
 	{ package ::Config;
 	use Carp;
 	use ::Globals qw(:singletons);
-	use Modern::Perl '2020';
+	use v5.36;
 	our @ISA = '::Object'; #  for ->dump and ->as_hash methods
 
 	sub serialize_formats { split " ", $_[0]->{serialize_formats} }

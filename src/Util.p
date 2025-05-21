@@ -4,7 +4,7 @@
 # well-defined interfaces
 
 package ::Util;
-use v5.38;
+use v5.36;
 our $VERSION = 1.0;
 use Carp;
 use Data::Dumper::Concise;

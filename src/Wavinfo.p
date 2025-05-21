@@ -1,7 +1,7 @@
 # ------- WAV file info routines ---------
 
 package ::;
-use Modern::Perl '2020';
+use v5.36;
 
 ### WAV file length/format/modify_time are cached in $setup->{wav_info} 
 
