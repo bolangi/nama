@@ -38,15 +38,6 @@ my $entry = 	Tickit::Widget::Entry->new(
 	);
 $root->add($entry);
  
-my $win = $tickit->rootwin;
-$win->bind_key('M-Home', 
-	sub{ 	my($console,$key) = @_;
-			$scroller->scroll_to_top;
-		} );
-$win->bind_key('M-End', 
-	sub{ 	my($console,$key) = @_;
-			$scroller->scroll_to_bottom;
-		} );
 
 prompt();
 $tickit->run;
