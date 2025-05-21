@@ -1256,7 +1256,7 @@ sub plan_fade {
 		schedule_fade($advance, sub { $self->_modify_effect($param, $to) } );
 		sub schedule_fade {
 			my ($after, $sub) = @_;
-			$project->{events}->{"fade_".$setup->{fade_counter}++} = timer( $after, 0, $sub );
+			start_event("fade_".$setup->{fade_counter}++ => timer( $after, 0, $sub ));
 		}
 	}
 }

@@ -117,7 +117,7 @@ sub current_position {
 	colonize(int($pos || 0)) 
 }
 sub start_heartbeat {
- 	$project->{events}->{poll_engine} = timer(0, 1, \&::heartbeat);
+ 	start_event(poll_engine => timer(0, 1, \&::heartbeat));
 	$ui->setup_playback_indicator();
 }
 sub stop_heartbeat {
@@ -180,8 +180,7 @@ sub cancel_wraparound {
 }
 sub limit_processing_time {
 	my $length = shift;
- 	$project->{events}->{processing_time} 
-		= timer($length, 0, sub { ::stop_transport(); print prompt() });
+ 	start_event(processing_time => timer($length, 0, sub { ::stop_transport(); print prompt() }));
 }
 sub disable_length_timer {
 	stop_event('processing_time');
@@ -191,7 +190,7 @@ sub wraparound {
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
 	stop_event('wraparound');
-	start_event('wraparound', timer($diff,0, sub{set_position($start)}));
+	start_event(wraparound => timer($diff,0, sub{set_position($start)}));
 }
 sub stop_do_start {
 	my ($coderef, $delay) = @_;

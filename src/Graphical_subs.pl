@@ -403,7 +403,7 @@ sub flash_ready {
 	$ui->length_display(-background => $color);
 	$ui->project_label_configure(-background => $color) unless $mode->{preview};
 	# TODO update for preview mode
- 	$project->{events}->{heartbeat} = timer(5, 0, \&reset_engine_mode_color_display);
+ 	start_event(heartbeat =>  timer(5, 0, \&reset_engine_mode_color_display));
 }
 sub reset_engine_mode_color_display { $ui->project_label_configure(
 	-background => $gui->{_nama_palette}->{OffBackground} )
@@ -1171,7 +1171,7 @@ sub destroy_marker {
 
 sub setup_playback_indicator {
 	my $ui = shift;
-	$project->{events}->{update_playback_position_display} = timer(0, 0.1, \&update_indicator);
+	start_event(update_playback_position_display => timer(0, 0.1, \&update_indicator));
 } 	
 sub update_indicator {
 	$gui->{wwcanvas}->delete('playback-indicator');

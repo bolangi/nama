@@ -198,7 +198,6 @@ sub cleanup_exit {
 	# - SIGINT (2nd time)
 	# - allow time to close down
 	# - SIGKILL
-	delete $project->{events};
 	#project_snapshot(); 
 	::Engine::sync_action('kill_and_reap');
 	restore_stdout();

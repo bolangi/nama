@@ -200,7 +200,7 @@ sub cache_engine_run {
 
 	# ensure that engine stops at completion time
 	$setup->{cache_track_args} = $args;
- 	$project->{events}->{poll_engine} = timer(1, 0.5, \&poll_progress);
+ 	start_event(poll_engine => timer(1, 0.5, \&poll_progress));
 }
 sub complete_caching {
 	logsub((caller(0))[3]);
