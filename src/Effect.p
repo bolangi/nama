@@ -7,7 +7,7 @@ use Carp qw(carp cluck croak confess);
 use Data::Dumper::Concise;
 use ::Assign qw(json_out);
 use ::Log qw(logsub logpkg);
-use ::Util qw(timer);
+use ::Util qw(timer start_event stop_event);
 use ::Globals qw(
 					$fx 
 					$fx_cache 

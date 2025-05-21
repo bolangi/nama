@@ -4,7 +4,7 @@ use Modern::Perl '2020';
 our $VERSION = 1.0;
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
-use ::Util qw(timer);
+use ::Util qw(timer start_event stop_event);
 sub start { 
 	package ::;
 	my $self = shift; 
@@ -124,8 +124,8 @@ sub stop_heartbeat {
 	# the following test avoids double-tripping rec_cleanup()
 	# following manual stop
 	return unless $project->{events}->{poll_engine};
-	undef $project->{events}->{poll_engine};
-	undef $project->{events}->{update_playback_position_display};
+	stop_event('poll_engine');
+	stop_event('update_playback_position_display');
 	$ui->reset_engine_mode_color_display();
 	rec_cleanup() 
 }
@@ -176,7 +176,7 @@ sub schedule_wraparound {
 	}
 }
 sub cancel_wraparound {
-	$project->{events}->{wraparound} = undef;
+	stop_event('wraparound');
 }
 sub limit_processing_time {
 	my $length = shift;
@@ -184,14 +184,14 @@ sub limit_processing_time {
 		= timer($length, 0, sub { ::stop_transport(); print prompt() });
 }
 sub disable_length_timer {
-	$project->{events}->{processing_time} = undef; 
+	stop_event('processing_time');
 	undef $setup->{runtime_limit};
 }
 sub wraparound {
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
-	$project->{events}->{wraparound} = undef;
-	$project->{events}->{wraparound} = timer($diff,0, sub{set_position($start)});
+	stop_event('wraparound');
+	start_event('wraparound', timer($diff,0, sub{set_position($start)}));
 }
 sub stop_do_start {
 	my ($coderef, $delay) = @_;

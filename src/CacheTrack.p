@@ -4,7 +4,7 @@ use Modern::Perl '2020';
 use Storable 'dclone';
 use Try::Tiny;
 use ::Globals qw(:all);
-use ::Util qw(timer);
+use ::Util qw(timer start_event stop_event);
 
 # The $args hashref passed among the subroutines in this file
 # has these fields:
@@ -307,7 +307,7 @@ sub poll_progress {
 }
 sub stop_polling_cache_progress {
 	my $args = shift;
-	$project->{events}->{poll_engine} = undef; 
+	stop_event('poll_engine');
 	$ui->reset_engine_mode_color_display();
 	complete_caching($args);
 

@@ -9,7 +9,7 @@ package ::;
 use Modern::Perl '2020'; use Carp;
 use vars '$VERSION';
 use Socket qw(getnameinfo NI_NUMERICHOST) ;
-use ::Util qw(timer);
+use ::Util qw(timer start_event stop_event);
 
 sub is_test_script { $config->{opts}->{J} }
 	# if we are using fake JACK client data, 
@@ -371,7 +371,7 @@ sub start_remote_watcher {
         $project->{remote_control_socket}, 0, \&process_remote_command )
 }
 sub remove_remote_watcher {
-    undef $project->{events}->{remote_control};
+    stop_event('remote_control');
 }
 sub process_remote_command {
     if ( ! $is_connected_remote++ ){

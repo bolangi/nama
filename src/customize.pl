@@ -27,7 +27,7 @@ commands =>
 				my ($name,$adjective) = @_;
 				pager("Hello $name! You look $adjective today!!");
 		},
-		disable_jack_polling => sub{ $project->{events}->{poll_jack} = undef },
+		disable_jack_polling => sub{ stop_event('poll_jack')},
 
 		promote_current_version => sub {
 				my $v = $this_track->playback_version;
