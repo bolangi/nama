@@ -262,6 +262,19 @@ sub route_output_channels {
 	@route;
 }
 
+my @events = qw(
+	poll_engine
+	update_playback_position_display
+	wraparound
+	processing_time
+	remote_control
+	jack_polling
+);
+my %events = map{ $_ => 1} @events;
+sub check_event_type ($type) {
+	confess "illegal event type: $type"
+	unless $events{$type}
+}
 
 sub timer ($delay, $interval, $coderef ) {
 	my $timer;
@@ -282,12 +295,15 @@ sub timer ($delay, $interval, $coderef ) {
 	$timer
 }
 sub stop_event ($label) {
+	check_event_type($label);
 	my $event = $::project->{events}->{$label};
 	$event->stop if defined $event 
 }
 sub start_event ($label, $async) {
+	check_event_type($label);
 	$::project->{events}->{$label} = $async
 }
+
 
 1;
 __END__
