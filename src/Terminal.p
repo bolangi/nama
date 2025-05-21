@@ -134,40 +134,23 @@ sub next_param {
 }
 {my $override;
 sub revise_prompt {
+}
+=comment
 	logsub((caller(0))[3]);
 	# hack to allow suppressing prompt
 	$override = ($_[0] eq "default" ? undef : $_[0]) if defined $_[0];
     $override//prompt()
-}
+=cut
 }
 
-	
 sub detect_spacebar {
-
-	# create a STDIN watcher to intervene when space
-	# received in column one
-	
-	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub {
-		&{$text->{term_attribs}->{'callback_read_char'}}();
-		my $buffer = $text->{term_attribs}->{line_buffer};
-		my $trigger = ' ';
+=comment
 		if ( $config->{press_space_to_start} 
 				and ($buffer eq $trigger)
 				and ! ($mode->song or $mode->live) )
-		{ 	
 			toggle_transport();	
-
-			# reset command line, read next char
-			
-			$text->{term_attribs}->{line_buffer} = q();
-			$text->{term_attribs}->{point} 		= 0;
-			$text->{term_attribs}->{end}   		= 0;
-			$text->{term}->stuff_char(10);
-			&{$text->{term_attribs}->{'callback_read_char'}}();
-
-			
-		}
-	});
+=cut
+warn ("not implemented");
 }
 sub throw {
 	logsub((caller(0))[3]);
