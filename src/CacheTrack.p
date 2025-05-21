@@ -4,6 +4,7 @@ use Modern::Perl '2020';
 use Storable 'dclone';
 use Try::Tiny;
 use ::Globals qw(:all);
+use ::Util qw(timer);
 
 # The $args hashref passed among the subroutines in this file
 # has these fields:
@@ -199,7 +200,7 @@ sub cache_engine_run {
 
 	# ensure that engine stops at completion time
 	$setup->{cache_track_args} = $args;
- 	$project->{events}->{poll_engine} = AE::timer(1, 0.5, \&poll_progress);
+ 	$project->{events}->{poll_engine} = timer(1, 0.5, \&poll_progress);
 }
 sub complete_caching {
 	logsub((caller(0))[3]);

@@ -334,7 +334,7 @@ Press "Q" to quit.
 
 Engine will start in 2 seconds.));
 	initialize_edit_points();
- 	$project->{events}->{set_edit_points} = AE::timer(2, 0, 
+ 	$project->{events}->{set_edit_points} = timer(2, 0, 
 	sub {
 		reset_input_line();
 		detect_keystroke_p();

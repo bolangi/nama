@@ -9,6 +9,7 @@ package ::;
 use Modern::Perl '2020'; use Carp;
 use vars '$VERSION';
 use Socket qw(getnameinfo NI_NUMERICHOST) ;
+use ::Util qw(timer);
 
 sub is_test_script { $config->{opts}->{J} }
 	# if we are using fake JACK client data, 
@@ -345,7 +346,7 @@ our ($command_output, $output_fh, $old_output_fh);
 sub redirect_stdout {
 	open($output_fh, '>', \$command_output) or die; 
 	$old_output_fh = select $output_fh;
-	$project->{events}->{command_output} = AE::timer(0.1, 0.1, sub{ print STDOUT $command_output; $command_output = "" });
+	$project->{events}->{command_output} = timer(0.1, 0.1, sub{ print STDOUT $command_output; $command_output = "" });
 }
 sub restore_stdout {
 	select $old_output_fh;

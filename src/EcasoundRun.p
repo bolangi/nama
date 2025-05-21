@@ -4,6 +4,7 @@ use Modern::Perl '2020';
 our $VERSION = 1.0;
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
+use ::Util qw(timer);
 sub start { 
 	package ::;
 	my $self = shift; 
@@ -39,7 +40,7 @@ sub start {
 		or edit_mode() 
 		or defined $setup->{runtime_limit};
 		# TODO and live processing
- 	#$project->{events}->{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
+ 	#$project->{events}->{post_start_unmute} = timer(0.5, 0, sub{unmute()});
 	sleeper(0.5);
 	unmute();
 	sleeper(0.5);
@@ -116,7 +117,7 @@ sub current_position {
 	colonize(int($pos || 0)) 
 }
 sub start_heartbeat {
- 	$project->{events}->{poll_engine} = AE::timer(0, 1, \&::heartbeat);
+ 	$project->{events}->{poll_engine} = timer(0, 1, \&::heartbeat);
 	$ui->setup_playback_indicator();
 }
 sub stop_heartbeat {
@@ -180,7 +181,7 @@ sub cancel_wraparound {
 sub limit_processing_time {
 	my $length = shift;
  	$project->{events}->{processing_time} 
-		= AE::timer($length, 0, sub { ::stop_transport(); print prompt() });
+		= timer($length, 0, sub { ::stop_transport(); print prompt() });
 }
 sub disable_length_timer {
 	$project->{events}->{processing_time} = undef; 
@@ -190,7 +191,7 @@ sub wraparound {
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
 	$project->{events}->{wraparound} = undef;
-	$project->{events}->{wraparound} = AE::timer($diff,0, sub{set_position($start)});
+	$project->{events}->{wraparound} = timer($diff,0, sub{set_position($start)});
 }
 sub stop_do_start {
 	my ($coderef, $delay) = @_;

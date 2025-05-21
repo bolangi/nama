@@ -7,6 +7,7 @@ use Carp qw(carp cluck croak confess);
 use Data::Dumper::Concise;
 use ::Assign qw(json_out);
 use ::Log qw(logsub logpkg);
+use ::Util qw(timer);
 use ::Globals qw(
 					$fx 
 					$fx_cache 
@@ -1255,7 +1256,7 @@ sub plan_fade {
 		schedule_fade($advance, sub { $self->_modify_effect($param, $to) } );
 		sub schedule_fade {
 			my ($after, $sub) = @_;
-			$project->{events}->{"fade_".$setup->{fade_counter}++} = AE::timer( $after, 0, $sub );
+			$project->{events}->{"fade_".$setup->{fade_counter}++} = timer( $after, 0, $sub );
 		}
 	}
 }
