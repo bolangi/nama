@@ -85,6 +85,7 @@ sub process_line {
 	revise_prompt();
 }
 sub context {
+	return unless $this_track;
 	my $context = {};
 	$context->{track} = $this_track->name;
 	$context->{bus}   = $this_bus;
