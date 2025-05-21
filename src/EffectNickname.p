@@ -1,5 +1,5 @@
 package ::EffectNickname;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 use Role::Tiny;
 

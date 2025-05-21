@@ -3,7 +3,7 @@
 
 package ::;
 use File::Copy;
-use Modern::Perl '2020'; no warnings 'uninitialized';
+use v5.36; no warnings 'uninitialized';
 use vars '$VERSION';
 
 

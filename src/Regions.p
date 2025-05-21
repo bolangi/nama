@@ -1,7 +1,7 @@
 # ------------ Set region for current track ----------
 
 package ::;
-use Modern::Perl '2020'; use Carp;
+use v5.36; use Carp;
 
 sub set_region {
 	my ($beg, $end) = @_;

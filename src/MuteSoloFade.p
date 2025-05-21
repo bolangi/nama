@@ -1,7 +1,7 @@
 # ------------- Mute and Solo routines -----------
 
 package ::;
-use Modern::Perl '2020';
+use v5.36;
 
 sub mute {
 	return if $config->{opts}->{F};

@@ -1,7 +1,7 @@
 ## -------------- Effects registry ---------------
 
 package ::;
-use Modern::Perl '2020';
+use v5.36;
 use ::Util qw(round);
 no warnings 'uninitialized';
 

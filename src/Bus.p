@@ -1,7 +1,7 @@
 # ------------  Bus --------------------
 {
 package ::Bus;
-use Modern::Perl '2020'; use Carp; 
+use v5.36; use Carp; 
 use ::Log qw(logsub logpkg);
 use ::Globals qw(:trackrw $setup); 
 our @ISA = qw( ::Object );
@@ -157,7 +157,7 @@ sub list {
 ### subclasses
 {
 package ::SubBus; # with magic for Main bus
-use Modern::Perl '2020'; use Carp; our @ISA = '::Bus';
+use v5.36; use Carp; our @ISA = '::Bus';
 our $VERSION = 1.0;
 use ::Log qw(logsub logpkg);
 use ::Util qw(input_node);
@@ -222,7 +222,7 @@ sub wantme {
 }
 {
 package ::SendBusRaw;
-use Modern::Perl '2020'; use Carp; our @ISA = '::Bus';
+use v5.36; use Carp; our @ISA = '::Bus';
 our $VERSION = 1.0;
 use ::Log qw(logsub logpkg);
 sub apply {
@@ -252,7 +252,7 @@ sub remove {
 {
 package ::SendBusCooked;
 use ::Log qw(logsub logpkg);
-use Modern::Perl '2020'; use Carp; our @ISA = '::SendBusRaw';
+use v5.36; use Carp; our @ISA = '::SendBusRaw';
 our $VERSION = 1.0;
 
 # graphic routing: target -> slave -> bus_send_type
@@ -272,7 +272,7 @@ sub apply {
 }
 {
 package ::MidiBus;
-use Modern::Perl '2020'; use Carp; our @ISA = '::Bus';
+use v5.36; use Carp; our @ISA = '::Bus';
 our $VERSION = 1.0;
 use ::Log qw(logsub logpkg);
 use ::Util qw(input_node);
@@ -289,7 +289,7 @@ sub remove { }  # We never remove the Midi bus
 # ---------- Bus routines --------
 {
 package ::;
-use Modern::Perl '2020'; use Carp;
+use v5.36; use Carp;
 use ::Util qw(dest_type);
 our (
 	$this_track,

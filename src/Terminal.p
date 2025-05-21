@@ -1,7 +1,7 @@
 # ----------- Terminal related subroutines ---------
 
 package ::;
-use Modern::Perl '2020';
+use v5.36;
 no warnings 'uninitialized';
 use Carp;
 use ::Globals qw(:singletons $this_bus $this_track);
@@ -15,10 +15,59 @@ sub initialize_prompt {
 
 sub initialize_terminal {
 
+=comment
+
+vbox - root
+	scrollbox 
+		vbox 
+		   static
+		   static
+		   ...
+	entry
+
+=cut
+
+my $root = 		Tickit::Widget::VBox->new; 
+my $vbox = 		Tickit::Widget::VBox->new; # contains multiple items to scroll through
+my $scrollbox = Tickit::Widget::ScrollBox->new->set_child( $vbox );
+for (1..100){
+my $a = 100 - $_;
+$vbox->add( Tickit::Widget::Static->new( text   => "a thousand bottles minus $_ is $a \n" ))
+}
+
+my $tickit = Tickit->new( root => $root);
+my $term = $tickit->term;
+my $lines = $term->lines;
+ 
+$root->add($scrollbox, force_size => $lines - 1); # , expand => 1);
+my $entry = 	Tickit::Widget::Entry->new( 
+	text 	 => $prompt,
+	on_enter => sub {
+      	my ( $self, $line ) = @_;
+		prompt();
+	}
+	);
+$root->add($entry);
+ 
+=comment - doesn't work except on console - use event bindings
+my $win = $tickit->rootwin;
+
+$win->bind_key('M-Home', 
+	sub{ 	my($console,$key) = @_;
+			$scroller->scroll_to_top;
+		} );
+$win->bind_key('M-End', 
+	sub{ 	my($console,$key) = @_;
+			$scroller->scroll_to_bottom;
+		} );
+
+=cut
+prompt();
+$tickit->run;
 	# handle Control-C from terminal
 
 	
-	$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
+	start_event(sigint => AE::signal('INT', \&cleanup_exit)); 
 	# responds in a more timely way than $SIG{INT} = \&cleanup_exit; 
 
 	$SIG{USR1} = sub { project_snapshot() };

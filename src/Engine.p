@@ -1,7 +1,7 @@
 {
 package ::Engine;
 our $VERSION = 1.0;
-use Modern::Perl '2020';
+use v5.36;
 use Carp;
 our @ISA;
 our %by_name;
@@ -128,7 +128,7 @@ sub sync_action {
 {
 package ::NetEngine;
 our $VERSION = 1.0;
-use Modern::Perl '2020';
+use v5.36;
 use ::Log qw(logpkg logit);
 use ::Globals qw(:all);
 use Carp qw(carp);
@@ -142,7 +142,7 @@ sub init_ecasound_socket {
 	my $self = shift;
 	my $port = $self->port;
 	::pager_newline("Creating socket on port $port.");
-	$self->{socket} = new IO::Socket::INET (
+	$self->{socket} = IO::Socket::INET->new (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 
 		Proto => 'tcp', 
@@ -283,7 +283,7 @@ sub configure {
 {
 package ::LibEngine;
 our $VERSION = 1.0;
-use Modern::Perl '2020';
+use v5.36;
 use ::Globals qw(:all);
 use ::Log qw(logit);
 our @ISA = '::Engine';
@@ -317,7 +317,7 @@ sub configure { ::NetEngine::configure(@_) }
 } # end package
 { 
 package ::MidiEngine;
-use Modern::Perl '2020';
+use v5.36;
 use SUPER;
 use ::Globals qw($config %tn);
 our $VERSION = 1.0;

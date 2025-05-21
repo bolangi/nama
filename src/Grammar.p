@@ -2,7 +2,7 @@
 
 package ::;
 use ::Effect  qw(:all);
-use Modern::Perl '2020';
+use v5.36;
 
 sub setup_grammar {
 

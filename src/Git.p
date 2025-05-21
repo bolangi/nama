@@ -1,6 +1,6 @@
 # ---------- Git Support ----------
 package ::;
-use Modern::Perl '2020';
+use v5.36;
 use Carp;
 sub git { 
 	return if is_test_script();

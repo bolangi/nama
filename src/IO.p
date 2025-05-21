@@ -21,7 +21,7 @@ our (%tn, $jack, $config);
 #      + illegal track method call generate an exception
 
 package ::IO;
-use Modern::Perl '2020';
+use v5.36;
 use Carp;
 use Data::Dumper::Concise;
 our $VERSION = 1.0;
@@ -115,7 +115,7 @@ sub new {
 
 	{ no warnings 'uninitialized';
 	::logpkg('debug',"I belong to track $name\n",
-		sub{Dumper($self)} );
+		sub{::Dumper($self)} );
 	}
 	
 	if($name){
@@ -356,7 +356,7 @@ sub rectified { # client name from number
 
 {
 package ::IO::from_null;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub _device_id { 'null' }  
@@ -364,7 +364,7 @@ sub _device_id { 'null' }
 
 {
 package ::IO::to_null;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub _device_id { 'null' }
@@ -372,7 +372,7 @@ sub _device_id { 'null' }
 
 {
 package ::IO::from_rtnull;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub _device_id { 'rtnull' }  
@@ -380,7 +380,7 @@ sub _device_id { 'rtnull' }
 
 {
 package ::IO::to_rtnull;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub _device_id { 'rtnull' }  
@@ -388,7 +388,7 @@ sub _device_id { 'rtnull' }
 
 {
 package ::IO::from_wav;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub device_id { 
@@ -407,7 +407,7 @@ sub ports { 'system:capture_1' }
 }
 {
 package ::IO::to_wav;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub device_id { $_[0]->full_path }
@@ -416,7 +416,7 @@ sub _format_template { $config->{raw_to_disk_format} }
 
 {
 package ::IO::from_loop;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub new {
@@ -433,14 +433,14 @@ sub _format_template { $config->{cache_to_disk_format} }
 }
 {
 package ::IO::to_loop;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO::from_loop';
 }
 
 {
 package ::IO::from_soundcard;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub new {
@@ -451,7 +451,7 @@ sub new {
 }
 {
 package ::IO::to_soundcard;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub new {
@@ -462,7 +462,7 @@ sub new {
 }
 {
 package ::IO::to_jack_multi;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub client { 
@@ -479,7 +479,7 @@ sub device_id {
 
 {
 package ::IO::from_jack_multi;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO::to_jack_multi';
 sub ecs_extra { $_[0]->mono_to_stereo }
@@ -487,7 +487,7 @@ sub ecs_extra { $_[0]->mono_to_stereo }
 
 {
 package ::IO::to_jack_port;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub format_template { $config->{devices}->{jack}->{signal_format} }
@@ -497,7 +497,7 @@ sub ports { $config->{ecasound_jack_client_name}. ":".$_[0]->port_name. '_out_1'
 
 {
 package ::IO::from_jack_port;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO::to_jack_port';
 sub device_id { 'jack,,'.$_[0]->port_name.'_in' }
@@ -507,7 +507,7 @@ sub ports { $config->{ecasound_jack_client_name}.":".$_[0]->port_name. '_in_1' }
 
 {
 package ::IO::to_jack_client;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub device_id { "jack," . ::IO::quote_jack_port($_[0]->send_id); }
@@ -516,7 +516,7 @@ sub client { ::IO::rectified($_[0]->send_id) }
 
 {
 package ::IO::from_jack_client;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub device_id { 'jack,'.  ::IO::quote_jack_port($_[0]->source_id); }
@@ -526,7 +526,7 @@ sub client { ::IO::rectified($_[0]->source_id) }
 
 {
 package ::IO::from_alsa_soundcard_device;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub ecs_extra { join ' ', $_[0]->rec_route, $_[0]->mono_to_stereo }
@@ -548,7 +548,7 @@ sub rec_route {
 }
 {
 package ::IO::to_alsa_soundcard_device;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub device_id { $config->{devices}->{$config->{alsa_playback_device}}{ecasound_id} }
@@ -573,7 +573,7 @@ sub route {
 }
 {
 package ::IO::from_bus;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub new {
@@ -585,7 +585,7 @@ sub new {
 }
 {
 package ::IO::any;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 }
