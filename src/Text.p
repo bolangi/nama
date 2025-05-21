@@ -16,8 +16,7 @@ sub hello {"hello world!";}
 
 sub loop {
 	package ::;
-	initialize_prompt();
-	$text->{loop}->run;
+	#$text->{loop}->run;
 }
 
 ## NO-OP GRAPHIC METHODS 
