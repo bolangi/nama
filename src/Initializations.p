@@ -243,6 +243,7 @@ sub initialize_interfaces {
 	}
 	if ( not defined $ui ){
 		$ui = ::Text->new();
+		$text->{loop} = IO::Async::Loop->new;
 	}
 	choose_sleep_routine();
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});

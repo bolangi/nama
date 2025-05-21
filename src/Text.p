@@ -16,7 +16,6 @@ sub hello {"hello world!";}
 
 sub loop {
 	package ::;
-	$text->{loop} = IO::Async::Loop->new;
 	initialize_prompt();
 	$text->{loop}->run;
 }
