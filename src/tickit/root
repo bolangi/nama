@@ -11,6 +11,7 @@ vbox - root
 	entry
 
 =cut
+use Tie::Simple;
 use Tickit::Async;
 use Tickit::Widgets qw(ScrollBox Static VBox Entry);
 #use Tickit::Widget::Entry::Plugin::History;
@@ -20,9 +21,8 @@ use IO::Async::Timer::Periodic;
 use IO::Async::Timer::Countdown;
 use IO::Async::Loop::Select;
 STDOUT->autoflush;
-my $text = {};
 
-$text->{loop} = IO::Async::Loop->new;
+my $loop = IO::Async::Loop->new;
 
 my $root = 		Tickit::Widget::VBox->new; 
 my $vbox = 		Tickit::Widget::VBox->new; # contains multiple items to scroll through
@@ -58,7 +58,6 @@ $root->add($entry);
 my $i;
 redirect_stdout();
 timer(0.5,0.5, sub{ ++$i; say(join'',$i,'-','X'x40)});
-#timer(2,1, sub{ print( join '',1..40)  });
 
 $tickit->run;
 
@@ -72,12 +71,10 @@ sub redirect_stdout {
 	open($output_fh, '>', \$command_output) or die; 
 	$output_fh->autoflush;
 	$old_output_fh = select $output_fh;
-	my $j;
-	timer(1, 1, sub{
-		return unless $command_output;
-		print_to_terminal($command_output); 
-		$command_output = "" 
-	});
+	tie $command_output, 'Tie::Simple', '', 
+		FETCH => sub {},
+		STORE => sub { my $text = $_[1]; print_to_terminal($text) };
+			
 }
 sub restore_stdout {
 	select $old_output_fh;
@@ -102,6 +99,6 @@ sub timer ($delay, $interval, $coderef ) {
 		);
 	}
 	$timer->start;
-	$text->{loop}->add($timer);
+	$loop->add($timer);
 	$timer
 }
