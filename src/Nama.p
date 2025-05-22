@@ -177,7 +177,7 @@ sub bootstrap_environment {
 	start_logging();
 	setup_grammar();
 	initialize_interfaces();
-    redirect_stdout();
+    redirect_stdout() unless  $config->{opts}->{T};
 }
 sub kill_and_reap {
 	my @pids = @_;
