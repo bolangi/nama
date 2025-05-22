@@ -54,7 +54,7 @@ $term = $tickit->term;
 my $lines = $term->lines;
 
  
-$root->add($scrollbox, force_size => $lines - 1);
+$root->add($scrollbox, valign => 'top', force_size => $lines - 2);
 my $label;
 $entry = 	Tickit::Widget::Entry->new( 
 	text 	 => 'enter command > ',
@@ -71,10 +71,11 @@ $entry = 	Tickit::Widget::Entry->new(
 my $prompt = 'enter command > ';
 $entry->set_text($prompt);
 $entry->set_position(99);
-$root->add($entry);
-#$label->set_text($line);
-#$label = Tickit::Widget::Static->new(text => "got this:");
-#$root->add($label);
+$root->add($entry, valign => 'bottom');
+# add status line at bottom
+# $label = Tickit::Widget::Static->new(text => "got this:");
+# $root->add($label, valign => 'bottom');
+# $label->set_text("lehho");
 #prompt();
 }
  
