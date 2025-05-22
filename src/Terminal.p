@@ -212,7 +212,7 @@ sub pager {
 	push @{$text->{output_buffer}}, @output;
 	@output = map{"$_\n"} map{ split "\n"} @output;
 	return unless scalar @output;
-	print(@output);
+	print for @output;
 }
 sub file_pager {};
 1;
