@@ -36,7 +36,7 @@ $text->{entry}
 
 {
 my ($root, $vbox, $tickit, $term, $scrollbox, $entry);
-
+$text->{loop} = IO::Async::Loop->new;
 sub initialize_terminal {
 $root = 		Tickit::Widget::VBox->new; 
 $vbox = 		Tickit::Widget::VBox->new; # contains multiple items to scroll through
@@ -46,7 +46,7 @@ my $a = 100 - $_;
 $vbox->add( Tickit::Widget::Static->new( text   => "a thousand bottles minus $_ is $a \n" ))
 }
 
-$tickit = Tickit->new( root => $root);
+$tickit = Tickit::Async->new( root => $root);
 use DDP;
 #p $tickit; exit;
 $text->{tickit} = $tickit;
@@ -62,7 +62,7 @@ $entry = 	Tickit::Widget::Entry->new(
       	my ( $self, $line ) = @_;
 		print_to_terminal($line);
 		$line =~ s/^.+?>\s*//;
-		$self->set_text('');
+		process_line($line);
 		my $prompt = 'enter command > ';
 		$self->set_text($prompt);
 		$self->set_position(99);
@@ -89,6 +89,25 @@ sub prompt {
 		$obj->set_text($prompt);
 		$obj->set_position(99);
 }
+}
+our ($old_output_fh);
+sub redirect_stdout {
+	open(FH, '>', '/dev/null') or die; 
+	FH->autoflush;
+	$old_output_fh = select FH;
+   	tie *FH, 'Tie::Simple', '', 
+     		WRITE     => sub {  },
+			PRINT 		=> sub { my $text = $_[1]; print_to_terminal($text) };
+             PRINTF    => sub {  },
+             READ      => sub {  },
+             READLINE  => sub {  },
+             GETC      => sub {  },
+             CLOSE     => sub {  };
+			
+}
+sub restore_stdout {
+	select $old_output_fh;
+	close FH;
 }
 =comment
 sub prompt { 
