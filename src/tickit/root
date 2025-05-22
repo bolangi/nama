@@ -66,19 +66,24 @@ sub prompt {
 	$entry->set_text($prompt);
 	$entry->set_position(99);
 }
-our ($command_output, $output_fh, $old_output_fh);
+our ($old_output_fh);
 sub redirect_stdout {
-	open($output_fh, '>', \$command_output) or die; 
-	$output_fh->autoflush;
-	$old_output_fh = select $output_fh;
-	tie $command_output, 'Tie::Simple', '', 
-		FETCH => sub {},
-		STORE => sub { my $text = $_[1]; print_to_terminal($text) };
+	open(FH, '>', '/dev/null') or die; 
+	FH->autoflush;
+	$old_output_fh = select FH;
+   	tie *FH, 'Tie::Simple', '', 
+     		WRITE     => sub {  },
+			PRINT 		=> sub { my $text = $_[1]; print_to_terminal($text) };
+             PRINTF    => sub {  },
+             READ      => sub {  },
+             READLINE  => sub {  },
+             GETC      => sub {  },
+             CLOSE     => sub {  };
 			
 }
 sub restore_stdout {
 	select $old_output_fh;
-	close $output_fh;
+	close FH;
 }
 sub print_to_terminal ($txt) {
 	$vbox->add( Tickit::Widget::Static->new( text => $txt ));
