@@ -90,6 +90,17 @@ sub prompt {
 		$obj->set_text($prompt);
 		$obj->set_position(99);
 }
+sub next_command_from_history {
+	$text->{command_index}++;
+	print_command();
+}
+sub previous_command_from_history {
+	$text->{command_index}--;
+	print_command();
+}
+sub print_command {
+	$entry->set_text(join " ",prompt(),$text->{command_history}->[$text->{command_index}])
+}
 }
 our ($old_output_fh);
 sub redirect_stdout {
