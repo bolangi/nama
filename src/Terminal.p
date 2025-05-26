@@ -56,9 +56,7 @@ my $lines = $term->lines;
  
 $root->add($scrollbox, valign => 'top', force_size => $lines - 2);
 my $label;
-$entry = 	Tickit::Widget::Entry->new( 
-	text 	 => 'enter command > ',
-	on_enter => sub {
+my $do_command = sub { 
       	my ( $self, $line ) = @_;
 		print_to_terminal($line);
 		$line =~ s/^.+?>\s*//;
@@ -66,8 +64,12 @@ $entry = 	Tickit::Widget::Entry->new(
 		my $prompt = 'enter command > ';
 		$self->set_text($prompt);
 		$self->set_position(99);
-	}
+	};
+$entry = 	Tickit::Widget::Entry->new( 
+	text 	 => 'enter command > ',
+	on_enter => $do_command,
 	);
+Tickit::Widget::Entry::Plugin::Completion->apply($entry, words => $text->{keywords} );
 my $prompt = 'enter command > ';
 $entry->set_text($prompt);
 $entry->set_position(99);
