@@ -54,31 +54,30 @@ $term = $tickit->term;
 my $lines = $term->lines;
 
  
-$root->add($scrollbox, valign => 'top', force_size => $lines - 2);
-my $label;
-my $do_command = sub { 
-      	my ( $self, $line ) = @_;
-		print_to_terminal($line);
-		$line =~ s/^.+?>\s*//;
-		process_line($line);
-		my $prompt = 'enter command > ';
-		$self->set_text($prompt);
-		$self->set_position(99);
-	};
-$entry = 	Tickit::Widget::Entry->new( 
-	text 	 => 'enter command > ',
-	on_enter => $do_command,
-	);
-Tickit::Widget::Entry::Plugin::Completion->apply($entry, words => $text->{keywords} );
-my $prompt = 'enter command > ';
-$entry->set_text($prompt);
+$root->add($scrollbox, valign => 'top', force_size => $lines - 2); 
+my $label; 
+my $do_command = sub { my ( $self, $line ) = @_; 
+						print_to_terminal($line); 
+						$line =~ s/^.+?>\s*//;
+						process_line($line); 
+						$self->set_text(prompt());
+						$self->set_position(99); 
+					}; 
+$entry = Tickit::Widget::Entry->new( text 	 => 'enter command > ', on_enter => $do_command,);
+Tickit::Widget::Entry::Plugin::Completion->apply($entry, words => $text->{keywords} ); 
+#$tickit->bind_key( $key, $code ) # invoked as $code->( $tickit, $key )
+$entry->bind_keys( 'Up' 	=> sub { previous_command_from_history() }, 
+					'Down'	=> sub { next_command_from_history()     }, 
+); 
+#$entry->set_style( '<Up>' => ""); # not needed 
+$entry->set_text(prompt()); 
 $entry->set_position(99);
 $root->add($entry, valign => 'bottom');
-# add status line at bottom
-# $label = Tickit::Widget::Static->new(text => "got this:");
+# add status line at bottom $label =
+# Tickit::Widget::Static->new(text => "got this:");
 # $root->add($label, valign => 'bottom');
 # $label->set_text("lehho");
-#prompt();
+#prompt(); 
 }
  
 sub print_to_terminal ($txt) {
@@ -86,11 +85,12 @@ sub print_to_terminal ($txt) {
 	$scrollbox->scroll_to(1e5);
 }
 
-sub prompt {
+sub prompt { 
+	logsub((caller(0))[3]);
 		my $obj = shift;
-		my $prompt = 'enter command > ';
-		$obj->set_text($prompt);
-		$obj->set_position(99);
+		my $prompt = join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
+		#$obj->set_text($prompt);
+		#$obj->set_position(99);
 }
 sub next_command_from_history {
 	$text->{command_index}++;
