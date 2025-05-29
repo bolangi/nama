@@ -118,6 +118,13 @@ $text->{format_divider}			#
 $text->{user_command}			# user defined commands
 $text->{user_alias}				# user defined command aliases
 $text->{command_history}		# terminal command history
+$text->{command_index}
+$text->{tickit}
+$text->{vbox}
+$text->{entry}
+$text->{scrollbox}
+$text->{loop}
+$text->{root}
 $text->{screen_lines}			# 
 $text->{screen_columns}			#
 $text->{hotkey_playback_jumpsize}
