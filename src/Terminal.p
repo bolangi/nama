@@ -201,7 +201,6 @@ sub pager_newline {
 	
 	my @lines = @_;
 	for (@lines){ $_ .= "\n" if  ! /\n$/ }
-	push @{$text->{output_buffer}}, @lines;
 	print(@lines);
 }
 
@@ -225,7 +224,6 @@ sub pager {
 	@output or return;
 	chomp $output[-1];
 	$output[-1] .= "\n\n";
-	push @{$text->{output_buffer}}, @output;
 	@output = map{"$_\n"} map{ split "\n"} @output;
 	return unless scalar @output;
 	print for @output;
