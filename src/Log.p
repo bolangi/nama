@@ -1,7 +1,7 @@
 # ----------- Logging ------------
 
 package ::Log;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 use Log::Log4perl qw(get_logger :levels);
 use Exporter;

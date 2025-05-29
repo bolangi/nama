@@ -1,9 +1,10 @@
 # -------- CacheTrack ------
 package ::;
-use Modern::Perl '2020';
+use v5.36;
 use Storable 'dclone';
 use Try::Tiny;
 use ::Globals qw(:all);
+use ::Util qw(timer start_event stop_event);
 
 # The $args hashref passed among the subroutines in this file
 # has these fields:
@@ -199,7 +200,7 @@ sub cache_engine_run {
 
 	# ensure that engine stops at completion time
 	$setup->{cache_track_args} = $args;
- 	$project->{events}->{poll_engine} = AE::timer(1, 0.5, \&poll_progress);
+ 	start_event(poll_engine => timer(1, 0.5, \&poll_progress));
 }
 sub complete_caching {
 	logsub((caller(0))[3]);
@@ -306,7 +307,7 @@ sub poll_progress {
 }
 sub stop_polling_cache_progress {
 	my $args = shift;
-	$project->{events}->{poll_engine} = undef; 
+	stop_event('poll_engine');
 	$ui->reset_engine_mode_color_display();
 	complete_caching($args);
 

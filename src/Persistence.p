@@ -3,7 +3,7 @@
 
 package ::;
 use File::Copy;
-use Modern::Perl '2020'; no warnings 'uninitialized';
+use v5.36; no warnings 'uninitialized';
 use vars '$VERSION';
 
 
@@ -57,7 +57,6 @@ sub initialize_marshalling_arrays {
 	@edit_data = ();
 	@project_effect_chain_data = ();
 	@global_effect_chain_data = ();
-	$text->{command_history} = {};
 
 }
 
@@ -118,14 +117,15 @@ sub save_system_state {
 	# save history -- 50 entries, maximum
 
 	my @history;
-	@history = $text->{term}->GetHistory if $text->{term};
-	my %seen;
-	$text->{command_history} = [];
-	map { push @{$text->{command_history}}, $_ 
-			unless $seen{$_}; $seen{$_}++ } @history;
+# 	@history = $text->{term}->GetHistory if $text->{term};
+# 	my %seen;
+# 	$text->{command_history} = [];
+# 	map { push @{$text->{command_history}}, $_ 
+# 			unless $seen{$_}; $seen{$_}++ } @history;
 	my $max = scalar @{$text->{command_history}};
 	$max = 50 if $max > 50;
-	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
+	my $hist = $text->{command_history}; 
+	@$hist = @$hist[-$max..-1];
 	logpkg('debug', "serializing");
 
 	my @formats = $output_format || $config->serialize_formats;
@@ -448,8 +448,8 @@ sub restore_state_from_file {
 
 	# restore command history
 	
-	$text->{term}->SetHistory(@{$text->{command_history}})
-		if (ref $text->{command_history}) =~ /ARRAY/;
+	#$text->{term}->SetHistory(@{$text->{command_history}})
+	#	if (ref $text->{command_history}) =~ /ARRAY/;
 
 ;
 	# restore effect chains and profiles

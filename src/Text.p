@@ -4,7 +4,7 @@
 # grammar_body.pl with subroutines in Grammar.p
 
 package ::Text;
-use Modern::Perl '2020'; use Carp;
+use v5.36; use Carp;
 no warnings 'uninitialized';
 use ::Globals qw(:all);
 use ::Assign qw(:all);
@@ -16,18 +16,7 @@ sub hello {"hello world!";}
 
 sub loop {
 	package ::;
-	initialize_prompt();
-	$Event::DIED = sub {
-		my ($event, $errmsg) = @_;
-		throw($errmsg);
-		$text->{term_attribs}->{line_buffer} = q();
-		if($text->{term}){
-			$text->{term}->clear_message();
-			$text->{term}->rl_reset_line_state();
-		}
-	};
-	use Data::Dumper::Concise;
-	Event::loop();
+	$text->{tickit}->run;
 }
 
 ## NO-OP GRAPHIC METHODS 

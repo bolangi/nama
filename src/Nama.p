@@ -1,6 +1,6 @@
 package ::;
 our $VERSION = "1.506";
-use Modern::Perl '2020';
+use v5.36;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
 
@@ -9,6 +9,7 @@ no warnings qw(uninitialized syntax);
 use Carp qw(carp cluck confess croak);
 use Cwd;
 use Data::Section::Simple qw(get_data_section);
+use Data::Dumper::Concise;
 use File::Find::Rule;
 use File::Path;
 use File::Spec;
@@ -17,6 +18,10 @@ use File::Temp;
 use Getopt::Long;
 use Git::Repository;
 use Graph;
+use IO::Async::Timer::Periodic;
+use IO::Async::Timer::Countdown;
+use IO::Async::Loop;
+use IO::Async::Loop::Select;
 use IO::Socket; 
 use IO::Select;
 use IPC::Open3;
@@ -28,7 +33,15 @@ use Storable qw(thaw);
 use Term::ReadLine;
 use Text::Diff;
 use Text::Format;
+use Tickit;
+use Tickit::Async;
+use Tickit::Console;
+use Tickit::Widgets qw(Static Entry ScrollBox VBox);
+use Tickit::Widget::Entry::Plugin::History;
+use Tickit::Widget::Entry::Plugin::Completion;
+use Tie::Simple;
 use Try::Tiny;
+use Path::Tiny;
 # use File::HomeDir;# Assign.pm
 # use File::Slurp;  # several
 # use List::Util;   # Fade.pm
@@ -36,8 +49,8 @@ use Try::Tiny;
 # use Time::HiRes; # automatically detected
 # use Tk;           # loaded conditionally
 # use Event;		# loaded conditionally
-# use AnyEvent;		# loaded after Tk or Event
-# use jacks;		# JACK server API
+# use AnyEvent;		   # loaded after Tk or Event
+# use AnyEvent::Tickit # loaded after Tk or Event
 # use Protocol::OSC;
 
 ########## Nama modules ###########
@@ -164,6 +177,7 @@ sub bootstrap_environment {
 	start_logging();
 	setup_grammar();
 	initialize_interfaces();
+    redirect_stdout() unless  $config->{opts}->{T};
 }
 sub kill_and_reap {
 	my @pids = @_;
@@ -186,10 +200,9 @@ sub cleanup_exit {
 	# - SIGINT (2nd time)
 	# - allow time to close down
 	# - SIGKILL
-	delete $project->{events};
 	#project_snapshot(); 
 	::Engine::sync_action('kill_and_reap');
-	$text->{term}->rl_deprep_terminal() if defined $text->{term};
+	restore_stdout();
 	exit;
 }
 END { }

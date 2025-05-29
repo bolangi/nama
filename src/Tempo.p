@@ -2,7 +2,7 @@
 # support for beats and bars
 
 package ::Tempo;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 use ::Globals qw($config);
 use ::Object qw( label bars meter tempo ticks);
@@ -248,7 +248,7 @@ sub notation_to_time {
 }
 
 package ::;
-use Modern::Perl '2020';
+use v5.36;
 use Data::Dumper::Concise;
 use ::Log qw(logsub logpkg);
 use ::Util qw(strip_comments);

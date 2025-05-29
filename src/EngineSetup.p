@@ -1,7 +1,7 @@
 # ----------- Engine Setup and Teardown -----------
 
 package ::;
-use Modern::Perl '2020'; use Carp;
+use v5.36; use Carp;
 
 sub reconfigure_engine {
 

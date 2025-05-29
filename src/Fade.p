@@ -1,6 +1,6 @@
 # ----------- Fade ------------
 package ::Fade;
-use Modern::Perl '2020';
+use v5.36;
 use List::Util qw(min);
 our $VERSION = 1.0;
 use Carp;

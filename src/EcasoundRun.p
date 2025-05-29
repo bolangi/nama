@@ -1,9 +1,10 @@
 package ::EcasoundRun;
 use Role::Tiny;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
+use ::Util qw(timer start_event stop_event);
 sub start { 
 	package ::;
 	my $self = shift; 
@@ -39,7 +40,7 @@ sub start {
 		or edit_mode() 
 		or defined $setup->{runtime_limit};
 		# TODO and live processing
- 	#$project->{events}->{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
+ 	#$project->{events}->{post_start_unmute} = timer(0.5, 0, sub{unmute()});
 	sleeper(0.5);
 	unmute();
 	sleeper(0.5);
@@ -79,7 +80,7 @@ sub start_command { $_[0]->ecasound_iam('start') }
 ### routines defined in the root namespace
 
 package ::;
-use Modern::Perl '2020'; use Carp;
+use v5.36; use Carp;
 no warnings 'uninitialized';
 use ::Util qw(process_is_running);
 
@@ -116,15 +117,15 @@ sub current_position {
 	colonize(int($pos || 0)) 
 }
 sub start_heartbeat {
- 	$project->{events}->{poll_engine} = AE::timer(0, 1, \&::heartbeat);
+ 	start_event(poll_engine => timer(0, 1, \&::heartbeat));
 	$ui->setup_playback_indicator();
 }
 sub stop_heartbeat {
 	# the following test avoids double-tripping rec_cleanup()
 	# following manual stop
 	return unless $project->{events}->{poll_engine};
-	undef $project->{events}->{poll_engine};
-	undef $project->{events}->{update_playback_position_display};
+	stop_event('poll_engine');
+	stop_event('update_playback_position_display');
 	$ui->reset_engine_mode_color_display();
 	rec_cleanup() 
 }
@@ -175,22 +176,21 @@ sub schedule_wraparound {
 	}
 }
 sub cancel_wraparound {
-	$project->{events}->{wraparound} = undef;
+	stop_event('wraparound');
 }
 sub limit_processing_time {
 	my $length = shift;
- 	$project->{events}->{processing_time} 
-		= AE::timer($length, 0, sub { ::stop_transport(); print prompt() });
+ 	start_event(processing_time => timer($length, 0, sub { ::stop_transport(); print prompt() }));
 }
 sub disable_length_timer {
-	$project->{events}->{processing_time} = undef; 
+	stop_event('processing_time');
 	undef $setup->{runtime_limit};
 }
 sub wraparound {
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
-	$project->{events}->{wraparound} = undef;
-	$project->{events}->{wraparound} = AE::timer($diff,0, sub{set_position($start)});
+	stop_event('wraparound');
+	start_event(wraparound => timer($diff,0, sub{set_position($start)}));
 }
 sub stop_do_start {
 	my ($coderef, $delay) = @_;

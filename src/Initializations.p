@@ -6,9 +6,10 @@
 #
 
 package ::;
-use Modern::Perl '2020'; use Carp;
+use v5.36; use Carp;
 use vars '$VERSION';
 use Socket qw(getnameinfo NI_NUMERICHOST) ;
+use ::Util qw(timer start_event stop_event);
 
 sub is_test_script { $config->{opts}->{J} }
 	# if we are using fake JACK client data, 
@@ -41,16 +42,16 @@ sub apply_ecasound_test_args {
 
 sub definitions {
 
-	$| = 1;     # flush STDOUT buffer on every write
+	STDOUT->autoflush;
 
 	[% qx(./strip_all ./var_lists) %]
 
-	$text->{wrap} = new Text::Format {
+	$text->{wrap} = Text::Format->new( {
 		columns 		=> 75,
 		firstIndent 	=> 0,
 		bodyIndent		=> 0,
 		tabstop			=> 4,
-	};
+	});
 
 	####### Initialize singletons #######
 
@@ -197,7 +198,7 @@ sub definitions {
 	{ package ::Config;
 	use Carp;
 	use ::Globals qw(:singletons);
-	use Modern::Perl '2020';
+	use v5.36;
 	our @ISA = '::Object'; #  for ->dump and ->as_hash methods
 
 	sub serialize_formats { split " ", $_[0]->{serialize_formats} }
@@ -242,15 +243,8 @@ sub initialize_interfaces {
 	}
 	if ( not defined $ui ){
 		$ui = ::Text->new();
-		can_load( modules =>{ Event => undef})
-			or die "Perl Module 'Event' not found. Please install it and try again. Stopping.";
-		import Event qw(loop unloop unloop_all);
+		$text->{loop} = IO::Async::Loop->new;
 	}
-	
-	can_load( modules => {AnyEvent => undef})
-			or die "Perl Module 'AnyEvent' not found. Please install it and try again. Stopping.";
-	can_load( modules => {jacks => undef})
-		and $jack->{use_jacks}++;
 	choose_sleep_routine();
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
@@ -348,6 +342,7 @@ exit;
 
 	1;	
 }
+
 { my $is_connected_remote;
 sub start_remote_listener {
     my $port = shift;
@@ -362,11 +357,11 @@ sub start_remote_listener {
     start_remote_watcher();
 }
 sub start_remote_watcher {
-    $project->{events}->{remote_control} = AE::io(
-        $project->{remote_control_socket}, 0, \&process_remote_command )
+    start_event(remote_control => AE::io(
+        $project->{remote_control_socket}, 0, \&process_remote_command ))
 }
 sub remove_remote_watcher {
-    undef $project->{events}->{remote_control};
+    stop_event('remote_control');
 }
 sub process_remote_command {
     if ( ! $is_connected_remote++ ){
@@ -374,8 +369,8 @@ sub process_remote_command {
         $project->{remote_control_socket} =
             $project->{remote_control_socket}->accept();
 		remove_remote_watcher();
-        $project->{events}->{remote_control} = AE::io(
-            $project->{remote_control_socket}, 0, \&process_remote_command );
+        start_event(remote_control => AE::io(
+            $project->{remote_control_socket}, 0, \&process_remote_command ));
     }
     my $input;
     eval {     
@@ -402,44 +397,6 @@ sub reset_remote_control_socket {
     remove_remote_watcher();
 	start_remote_listener($config->{remote_control_port});
 }
-}
-
-sub start_osc_listener {
-	my $port = shift;
-	pager_newline("Starting OSC listener on port $port");
-	my $osc_in = $project->{osc_socket} = IO::Socket::INET->new(
-		LocalAddr => 'localhost',
-		LocalPort => $port,
-		Proto	  => 'udp',
-		Type	  =>  SOCK_DGRAM) || die $!;
-	$project->{events}->{osc} = AE::io( $osc_in, 0, \&process_osc_command );
-	$project->{osc} = Protocol::OSC->new;
-}
-sub process_osc_command {
-	my $in = $project->{osc_socket};
-	my $osc = $project->{osc};
-	my $source_ip = $in->recv(my $packet, $in->sockopt(SO_RCVBUF));
-	my($err, $hostname, $servicename) = getnameinfo($source_ip, NI_NUMERICHOST);
-	my $p = $osc->parse($packet);
-	my @args = @$p;
-	my ($path, $template, $command, @vals) = @args;
-	$path =~ s(^/)();
-	$path =~ s(/$)();
-	my ($trackname, $fx, $param) = split '/', $path;
-	nama_cmd($trackname);
-	nama_cmd("$command @vals") if $command;
-	nama_cmd("show_effect $fx") if $fx; # select
-	nama_cmd("show_track") if $trackname and not $fx;
-	nama_cmd("show_tracks") if ! $trackname;
-	say "got OSC: ", Dumper $p;
-	say "got args: @args";
- 	my $osc_out = IO::Socket::INET->new(
- 		PeerAddr => $hostname,
- 		PeerPort => $config->{osc_reply_port},
- 		Proto	  => 'udp',
- 		Type	  =>  SOCK_DGRAM) || die $!;
-	$osc_out->send(join "",@{$text->{output_buffer}});
-	delete $text->{output_buffer};
 }
 
 sub sanitize_remote_input {

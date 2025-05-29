@@ -1,7 +1,7 @@
 # ------------ Graphical User Interface ------------
 
 package ::Graphical;  ## gui routines
-use Modern::Perl '2020'; use Carp;
+use v5.36; use Carp;
 our $VERSION = 1.071;
 use ::Globals qw($text $prompt);
 
@@ -19,8 +19,6 @@ our @ISA = '::';      ## default to root namespace, e.g.  Refresh_subs, Graphica
 
 sub hello {"make a window";}
 sub loop {
-	$text->{term_attribs}->{already_prompted} = 0;
-	$text->{term}->tkRunning(1);
   	while (1) {
   		my ($user_input) = $text->{term}->readline($prompt) ;
   		::process_line( $user_input );

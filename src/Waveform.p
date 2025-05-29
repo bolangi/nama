@@ -1,7 +1,7 @@
 package ::Waveform;
 use ::Globals qw($project $config $gui %ti);
 use ::Util qw(join_path);
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 use Try::Tiny;
 use vars qw(%by_name);

@@ -3,7 +3,7 @@
 package ::ChainSetup;
 use ::Globals qw($file $config $jack $setup %tn %bn %en $mode :trackrw $this_engine);
 use ::Log qw(logsub logpkg);
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 use Data::Dumper::Concise;
 use Storable qw(dclone);

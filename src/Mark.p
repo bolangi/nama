@@ -156,7 +156,7 @@ sub mark_time {
 # ---------- Mark and jump routines --------
 {
 package ::;
-use Modern::Perl '2020';
+use v5.36;
 use ::Globals qw(:all);
 
 sub drop_mark {
@@ -339,7 +339,7 @@ sub time { ::ecasound_iam('cs-connected') ? ($last_time = ::ecasound_iam('getpos
 }
 
 { package ::ClipMark;
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::Mark';
 
@@ -349,7 +349,7 @@ our @ISA = '::Mark';
 { package ::TempoMark;
 
 	our $VERSION = 1.0;
-	use Modern::Perl '2020';
+	use v5.36;
 	use ::Log qw(logpkg);
 	use ::Globals qw(:all);
 	our @ISA = '::Mark';

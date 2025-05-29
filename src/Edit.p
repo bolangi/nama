@@ -8,7 +8,7 @@ use ::Globals qw(:singletons :trackrw);
 #  -  edit name (i.e. sax-v1) used as key in %by_name
 #
 
-use Modern::Perl '2020';
+use v5.36;
 our $VERSION = 1.0;
 use Carp;
 no warnings qw(uninitialized);
@@ -246,7 +246,7 @@ sub edit_track 		{ $::tn{$_[0]->edit_name} }             # in version_bus
 # -------- Edit routines; Main Namespace ------
 {
 package ::;
-use Modern::Perl '2020'; use Carp;
+use v5.36; use Carp;
 no warnings 'uninitialized';
 
 our (
@@ -334,7 +334,7 @@ Press "Q" to quit.
 
 Engine will start in 2 seconds.));
 	initialize_edit_points();
- 	$project->{events}->{set_edit_points} = AE::timer(2, 0, 
+ 	$project->{events}->{set_edit_points} = timer(2, 0, 
 	sub {
 		reset_input_line();
 		detect_keystroke_p();
