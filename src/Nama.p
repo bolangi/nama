@@ -48,10 +48,6 @@ use Path::Tiny;
 # use List::MoreUtils; # Effects.pm
 # use Time::HiRes; # automatically detected
 # use Tk;           # loaded conditionally
-# use Event;		# loaded conditionally
-# use AnyEvent;		   # loaded after Tk or Event
-# use AnyEvent::Tickit # loaded after Tk or Event
-# use Protocol::OSC;
 
 ########## Nama modules ###########
 #
