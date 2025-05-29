@@ -93,13 +93,11 @@ sub prompt {
 		#$obj->set_position(99);
 }
 sub next_command {
-	return if $text->{command_index} == scalar $text->{command_history}->@*;
-	$text->{command_index}++;
+	$text->{command_index}++ unless $text->{command_index} == scalar $text->{command_history}->@*;
 	print_command();
 }
 sub previous_command {
-	return if $text->{command_index} == 0;
-	$text->{command_index}--;
+	$text->{command_index}-- unless $text->{command_index} == 0;
 	print_command();
 }
 sub print_command {
