@@ -66,8 +66,8 @@ my $do_command = sub { my ( $self, $line ) = @_;
 $entry = Tickit::Widget::Entry->new( text 	 => 'enter command > ', on_enter => $do_command,);
 Tickit::Widget::Entry::Plugin::Completion->apply($entry, words => $text->{keywords} ); 
 #$tickit->bind_key( $key, $code ) # invoked as $code->( $tickit, $key )
-$entry->bind_keys( 'Up' 	=> sub { previous_command_from_history() }, 
-					'Down'	=> sub { next_command_from_history()     }, 
+$entry->bind_keys( 'Up' 	=> sub { previous_command() }, 
+					'Down'	=> sub { next_command()     }, 
 ); 
 #$entry->set_style( '<Up>' => ""); # not needed 
 $entry->set_text(prompt()); 
@@ -92,11 +92,13 @@ sub prompt {
 		#$obj->set_text($prompt);
 		#$obj->set_position(99);
 }
-sub next_command_from_history {
+sub next_command {
+	return if $text->{command_index} == scalar $text->{command_history}->@*;
 	$text->{command_index}++;
 	print_command();
 }
-sub previous_command_from_history {
+sub previous_command {
+	return if $text->{command_index} == 0;
 	$text->{command_index}--;
 	print_command();
 }
