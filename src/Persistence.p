@@ -126,6 +126,7 @@ sub save_system_state {
 	$max = 50 if $max > 50;
 	my $hist = $text->{command_history}; 
 	@$hist = @$hist[-$max..-1];
+	$text->{command_index} = $max;
 	logpkg('debug', "serializing");
 
 	my @formats = $output_format || $config->serialize_formats;
