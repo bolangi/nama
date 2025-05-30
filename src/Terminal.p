@@ -41,18 +41,10 @@ sub initialize_terminal {
 $root = 		Tickit::Widget::VBox->new; 
 $vbox = 		Tickit::Widget::VBox->new; # contains multiple items to scroll through
 $scrollbox = Tickit::Widget::ScrollBox->new->set_child( $vbox );
-for (1..100){
-my $a = 100 - $_;
-$vbox->add( Tickit::Widget::Static->new( text   => "a thousand bottles minus $_ is $a \n" ))
-}
-
 $tickit = Tickit::Async->new( root => $root);
-use DDP;
-#p $tickit; exit;
 $text->{tickit} = $tickit;
 $term = $tickit->term;
 my $lines = $term->lines;
-
  
 $root->add($scrollbox, valign => 'top', force_size => $lines - 2); 
 my $label; 
