@@ -1,5 +1,8 @@
 Changes to Audio::Nama
 
+1.600 May 29, 2025
+    * convert terminal library from readline to tickit
+
 1.506 Apr 18, 2025
 
     * remove hotkey functionality
