@@ -65,6 +65,7 @@ $entry->bind_keys( 'Up' 	=> sub { previous_command() },
 $entry->set_text(prompt()); 
 $entry->set_position(99);
 $root->add($entry, valign => 'bottom');
+for (1..10){ print_to_terminal('--') }
 # add status line at bottom $label =
 # Tickit::Widget::Static->new(text => "got this:");
 # $root->add($label, valign => 'bottom');
@@ -79,10 +80,7 @@ sub print_to_terminal ($txt) {
 
 sub prompt { 
 	logsub((caller(0))[3]);
-		my $obj = shift;
 		my $prompt = join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
-		#$obj->set_text($prompt);
-		#$obj->set_position(99);
 }
 sub next_command {
 	$text->{command_index}++ unless $text->{command_index} == scalar $text->{command_history}->@*;
