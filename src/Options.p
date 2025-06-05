@@ -12,7 +12,6 @@ sub process_command_line_options {
 		use-pwd			p
 		create-project  c
 		config=s		f
-		gui			  	g
 		text			t
 		no-state		M
 		net-eci			n
@@ -57,7 +56,6 @@ $help->{usage} = <<HELP;
 
 USAGE: nama [options] [project_name]
 
---gui, -g                        Start Nama in GUI mode
 --text, -t                       Start Nama in text mode (default)
 --create-project, -c             Create project if it doesn't exist
 --help, -h                       This help display
