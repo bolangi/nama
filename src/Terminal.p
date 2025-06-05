@@ -63,7 +63,7 @@ $entry->bind_keys( 'Up' 	=> sub { previous_command() },
 $entry->set_text(prompt()); 
 $entry->set_position(99);
 $root->add($entry, valign => 'bottom');
-for (1..10){ print_to_terminal('--') }
+for (1..$tickit->lines - 15){ print_to_terminal('--') }
 }
  
 sub print_to_terminal ($txt) {
