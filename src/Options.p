@@ -63,7 +63,7 @@ USAGE: nama [options] [project_name]
 
 Advanced options
 
---regenerate-effects-cache, -r   Regenerate the effects data cache
+--regenerate-effects-cache, -r   Regenerate effects data cache
 --project-root, -d               Specify project root directory
 --config, -f                     Specify configuration file (default: ~/.namarc)
 --use-pwd, -p                    Use current dir for all WAV and project files
