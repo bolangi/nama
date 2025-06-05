@@ -57,20 +57,13 @@ my $do_command = sub { my ( $self, $line ) = @_;
 					}; 
 $entry = Tickit::Widget::Entry->new( text 	 => 'enter command > ', on_enter => $do_command,);
 Tickit::Widget::Entry::Plugin::Completion->apply($entry, words => $text->{keywords} ); 
-#$tickit->bind_key( $key, $code ) # invoked as $code->( $tickit, $key )
 $entry->bind_keys( 'Up' 	=> sub { previous_command() }, 
 					'Down'	=> sub { next_command()     }, 
 ); 
-#$entry->set_style( '<Up>' => ""); # not needed 
 $entry->set_text(prompt()); 
 $entry->set_position(99);
 $root->add($entry, valign => 'bottom');
 for (1..10){ print_to_terminal('--') }
-# add status line at bottom $label =
-# Tickit::Widget::Static->new(text => "got this:");
-# $root->add($label, valign => 'bottom');
-# $label->set_text("lehho");
-#prompt(); 
 }
  
 sub print_to_terminal ($txt) {
