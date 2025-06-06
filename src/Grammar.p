@@ -423,14 +423,10 @@ sub showlist {
 
 	my @list = grep{ ! $_->hide } ::all_tracks();
 	my $section = [undef,undef,@list];
-	my ($screen_lines, $columns);
-	if( $text->{term} )
-	{
-		($screen_lines, $columns) = $text->{term}->get_screen_size();
-	}
 
-	return $section if scalar @list <= $screen_lines - 5
-					or ! $screen_lines; 
+	return $section ;
+=comment 
+	if scalar @list <= $screen_lines - 5 or ! $screen_lines; 
 
 	my @sections;
 
@@ -447,6 +443,7 @@ sub showlist {
 					map $tn{$_}, $this_bus, $bn{$this_bus}->tracks]
 	}
 	@sections
+=cut
 }
 
 
