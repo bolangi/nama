@@ -35,7 +35,6 @@ use Text::Diff;
 use Text::Format;
 use Tickit;
 use Tickit::Async;
-use Tickit::Console;
 use Tickit::Widgets qw(Static Entry ScrollBox VBox);
 use Tickit::Widget::Entry::Plugin::History;
 use Tickit::Widget::Entry::Plugin::Completion;
