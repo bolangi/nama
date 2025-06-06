@@ -304,8 +304,8 @@ sub get_edit_mark {
 		reset_input_line();
 		if( $p == 3){ complete_edit_points() }
 		else{
-			$text->{term}->stuff_char(10);
-			&{$text->{term_attribs}->{'callback_read_char'}}();
+		#$text->{term}->stuff_char(10);
+		#	&{$text->{term_attribs}->{'callback_read_char'}}();
 		}
 	}
 }
@@ -470,13 +470,14 @@ sub end_edit_mode  	{
 }
 sub destroy_edit {
 	::throw("no edit selected"), return unless $this_edit;
-	my $reply = $text->{term}->readline('destroy edit "'.$this_edit->edit_name.
-		qq(" and all its WAV files?? [n] ));
+	my $reply;
+   	#	= $text->{term}->readline('destroy edit "'.$this_edit->edit_name.
+	# qq(" and all its WAV files?? [n] ));
 	if ( $reply =~ /y/i ){
 		::pager("permanently removing edit");
 		$this_edit->destroy;
 	}
-	$text->{term}->remove_history($text->{term}->where_history);
+	#$text->{term}->remove_history($text->{term}->where_history);
 	$this_track = $this_edit->host;
 	end_edit_mode();
 }

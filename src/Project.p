@@ -311,9 +311,6 @@ sub new_project_template {
 			);
 	} @tracks;
 
-	# Throw away command history
-	
-	$text->{term}->SetHistory();
 	
 	# Buses needn't set version info either
 	

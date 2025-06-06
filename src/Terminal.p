@@ -43,7 +43,7 @@ $vbox = 		Tickit::Widget::VBox->new; # contains multiple items to scroll through
 $scrollbox = Tickit::Widget::ScrollBox->new->set_child( $vbox );
 $tickit = Tickit::Async->new( root => $root);
 $text->{tickit} = $tickit;
-$term = $tickit->term;
+$text->{term} = $term = $tickit->term;
 my $lines = $term->lines;
  
 $root->add($scrollbox, valign => 'top', force_size => $lines - 2); 
