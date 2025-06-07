@@ -94,7 +94,7 @@ sub redirect_stdout {
 	$old_output_fh = select FH;
    	tie *FH, 'Tie::Simple', '', 
      		WRITE     => sub {  },
-			PRINT 		=> sub { my $text = $_[1]; print_to_terminal($text) };
+			PRINT 		=> sub { my $text = $_[1]; print_to_terminal($text) },
              PRINTF    => sub {  },
              READ      => sub {  },
              READLINE  => sub {  },
