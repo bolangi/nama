@@ -55,12 +55,12 @@ my $do_command = sub { my ( $self, $line ) = @_;
 						$self->set_text(prompt());
 						$self->set_position(99); 
 					}; 
-$entry = Tickit::Widget::Entry->new( text 	 => 'enter command > ', on_enter => $do_command,);
+$entry = Tickit::Widget::Entry->new( text 	 => 'enter nama command (h for help) > ', on_enter => $do_command,);
 Tickit::Widget::Entry::Plugin::Completion->apply($entry, words => $text->{keywords} ); 
 $entry->bind_keys( 'Up' 	=> sub { previous_command() }, 
 					'Down'	=> sub { next_command()     }, 
 ); 
-$entry->set_text(prompt()); 
+#$entry->set_text(prompt()); 
 $entry->set_position(99);
 $root->add($entry, valign => 'bottom');
 for (1..$tickit->lines){ print_to_terminal(' ') }
