@@ -112,12 +112,6 @@ sub restore_stdout {
 	select $old_output_fh;
 	close FH;
 }
-=comment
-sub prompt { 
-	logsub((caller(0))[3]);
-	join ' ', 'nama', git_branch_display(), bus_track_display(),'> '
-}
-=cut
 
 sub end_of_list_sound { system( $config->{hotkey_beep} ) }
 
