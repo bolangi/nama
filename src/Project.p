@@ -85,6 +85,11 @@ sub initialize_project_data {
 
 	$project->{track_comments} = {};
 	$project->{track_version_comments} = {};
+	$project->{nama_version} = $VERSION;
+	( $project->{nama_commit} ) = 
+	qw( 
+		[% qx(git rev-parse --short HEAD) %]
+	);
 	$project->{repo} = undef;
 	$project->{artist} = undef;
 	$project->{bunch} = {};	
