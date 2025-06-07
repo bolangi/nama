@@ -197,7 +197,9 @@ sub cleanup_exit {
 	# - SIGKILL
 	#project_snapshot(); 
 	::Engine::sync_action('kill_and_reap');
+	$text->{term}->teardown;
 	restore_stdout();
+	say;
 	exit;
 }
 END { }
