@@ -102,6 +102,12 @@ sub redirect_stdout {
              CLOSE     => sub {  };
 			
 }
+BEGIN { $SIG{__WARN__} = \&filter_print_to_terminal }
+$SIG{INT} = \&cleanup_exit;
+sub filter_print_to_terminal {
+	print_to_terminal(@_) unless $_[0] =~ /ScrollBox/;
+}
+
 sub restore_stdout {
 	select $old_output_fh;
 	close FH;
