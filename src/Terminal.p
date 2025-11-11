@@ -56,7 +56,7 @@ my $do_command = sub { my ( $self, $line ) = @_;
 						$self->set_position(99); 
 					}; 
 $entry = Tickit::Widget::Entry->new( text 	 => 'enter nama command (h for help) > ', on_enter => $do_command,);
-Tickit::Widget::Entry::Plugin::Completion->apply($entry, words => $text->{keywords} ); 
+Tickit::Widget::Entry::Plugin::Completion->apply($entry, gen_words => \&gen_words, use_popup => 1 ); 
 $entry->bind_keys( 'Up' 	=> sub { previous_command() }, 
 					'Down'	=> sub { next_command()     }, 
 ); 
@@ -240,41 +240,30 @@ sub load_keywords {
  	my %hyphenated = map{my $h = $_; $h =~ s/_/-/g; $h => $_ }grep{ /_/ } @keywords;
 	$text->{hyphenated_commands} = \%hyphenated;
 	push @keywords, keys %hyphenated;
-	push @keywords, grep{$_} map{split " ", $text->{commands}->{$_}->{short}} @keywords;
+	#push @keywords, grep{$_} map{split " ", $text->{commands}->{$_}->{short}} @keywords;
 	push @keywords, keys %{$text->{iam}};
 	push @keywords, keys %{$fx_cache->{partial_label_to_full}};
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
 	push @keywords, "Audio::Nama::";
 	push @keywords, pwd_files();
-	@{$text->{keywords}} = @keywords
+	@{$text->{keywords}} = sort {lc $a cmp lc $b} @keywords
 	
+}
+sub gen_words {
+	my %args = @_;
+	my $word = $args{word};
+	my $keywords = $text->{keywords};
+	my $first = 0;
+	my $last = scalar @$keywords - 1;
+	for (my $i = 0;      $i <= $last; $i++)  { $first = $i,     last if @$keywords[$i] =~ /^$word/i }
+	return unless $first;
+	for (my $i = $first; $i <= $last; $i++)  { $last  = $i - 1, last if @$keywords[$i] !~ /^$word/i }
+	@$keywords[$first .. $last]
 }
 sub pwd_files {
 	my $dir = '.';
 	my $pwd = path($dir);
 	grep {-f} $pwd->children;
 }
-sub complete {
-    my ($string, $line, $start, $end) = @_;
-	#print join $/, $string, $line, $start, $end, $/;
-	my $term = $text->{term};
-    return $term->completion_matches($string,\&keyword);
-};
 
-sub keyword {
-		state $i;	
-        my ($string, $state) = @_;
-        return unless $text;
-        if($state) {
-            $i++;
-        }
-        else { # first call
-            $i = 0;
-        }
-        for (; $i<=$#{$text->{keywords}}; $i++) {
-            return $text->{keywords}->[$i] 
-				if $text->{keywords}->[$i] =~ /^\Q$string/;
-        };
-        return undef;
-};
 1;
