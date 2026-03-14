@@ -114,6 +114,8 @@ sub initialize_project_data {
 	reset_command_buffer();
 	$this_engine->reset_ecasound_selections_cache();
 
+	$text->{command_history} //= [];
+
 }
 
 sub create_project_dirs {
