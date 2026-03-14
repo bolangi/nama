@@ -486,7 +486,6 @@ The help command ('help', 'h') can take several arguments.
 help <command>          - show help for <command>
 help <fragment>         - show help for all commands matching /<fragment>/
 help <topic_number>     - list commands under topic <topic_number> below
-help yml                - browse the YAML command source
 
 help is available for the following topics:
 
