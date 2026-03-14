@@ -56,7 +56,7 @@ my $do_command = sub { my ( $self, $line ) = @_;
 						$self->set_position(99); 
 					}; 
 $entry = Tickit::Widget::Entry->new( text 	 => 'enter nama command (h for help) > ', on_enter => $do_command,);
-Tickit::Widget::Entry::Plugin::Completion->apply($entry, gen_words => \&gen_words, use_popup => 0 ); 
+Tickit::Widget::Entry::Plugin::Completion->apply($entry, gen_words => \&gen_words, use_popup => 1 ); 
 $entry->bind_keys( 'Up' 	=> sub { previous_command() }, 
 					'Down'	=> sub { next_command()     }, 
 ); 
