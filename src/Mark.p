@@ -278,7 +278,7 @@ sub jump {
 }
 sub set_position_with_fade { fade_around(\&_set_position, @_) }
 
-sub _set_position {
+sub set_position {
 	logsub((caller(0))[3]);
 
     return if ::ChainSetup::really_recording(); # don't allow seek while recording
