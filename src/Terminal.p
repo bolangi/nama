@@ -67,8 +67,12 @@ my $backspace  = sub {
 $entry->bind_keys( 
 'Up' 		=> sub { previous_command() }, 
 'Down'		=> sub { next_command()     }, 
-'Home'  	=> sub { $term->goto( undef, $text->{prompt_length} ) },
-'C-u'   	=> sub { $entry->set_text(prompt()) },
+'C-a'	  	=> sub { $entry->set_position( length prompt() ) },
+'Home'  	=> sub { $entry->set_position( length prompt() ) },
+'C-k'		=> sub { $entry->text_delete(  $entry->position, 999) },
+'C-u'   	=> sub { $entry->text_delete(  
+						length prompt(), 
+						$entry->position - length prompt() ) },
 'C-h'   	=> $backspace,
 'Backspace' => $backspace,
 ); 
