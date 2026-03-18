@@ -943,7 +943,7 @@ preset_register:
   parameters: none
 ladspa_register:
   type: effect
-  what: List all LADSPA plugins, that Ecasound/Nama can find.
+  what: List installed LADSPA plugins
   short: lrg
   parameters: none
 list_marks:
