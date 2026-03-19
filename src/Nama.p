@@ -149,7 +149,7 @@ use ::Bunch ();
 use ::Wavinfo ();
 use ::Midi ();
 use ::Latency ();
-use ::Log qw(logit loggit logpkg logsub initialize_logger);
+use ::Log qw(logit logpkg logsub initialize_logger);
 use ::TrackUtils ();
 
 use ::Tempo ();
