@@ -22,7 +22,7 @@ vbox (root)
 		   static
 		   static
 		   ...
-entry
+    entry
 
 Names:
 
