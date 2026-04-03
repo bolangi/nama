@@ -66,7 +66,6 @@ $text->{term} = $term = $tickit->term;
 my $lines = $term->lines;
  
 $root->add($scrollbox, valign => 'top', force_size => $lines - 2); 
-my $label; 
 my $do_command = sub { my ( $self, $line ) = @_; 
 						print_to_terminal($line); 
 						$line =~ s/^.+?>\s*//;
