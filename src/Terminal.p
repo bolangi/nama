@@ -72,39 +72,42 @@ create_entry_widget();
 
 sub create_entry_widget {
 
-my $do_command = sub { my ( $self, $line ) = @_; 
-						print_to_terminal($line); 
-						$line =~ s/^.+?>\s*//;
-						process_line($line); 
-						$self->set_text(prompt());
-						$self->set_position(99); 
-					}; 
-$entry = Tickit::Widget::Entry->new( text 	 => 'enter nama command (h for help) > ', on_enter => $do_command,);
-Tickit::Widget::Entry::Plugin::Completion->apply($entry, gen_words => \&gen_words, use_popup => $config->{use_autocomplete_popup}); 
+	my $do_command = sub { my ( $self, $line ) = @_; 
+							print_to_terminal($line); 
+							$line =~ s/^.+?>\s*//;
+							process_line($line); 
+							$self->set_text(prompt());
+							$self->set_position(99); 
+						}; 
+	$entry = Tickit::Widget::Entry->new( 
+		text 	 => 'enter nama command (h for help) > ', 
+		on_enter => $do_command,
+	);
+	Tickit::Widget::Entry::Plugin::Completion->apply($entry, gen_words => \&gen_words, use_popup => $config->{use_autocomplete_popup}); 
 
-my $backspace  = sub { 
-	my $stop_pos = length prompt();
-	$entry->text_delete( $entry->position - 1, 1 ) 
-		unless $entry->position <= $stop_pos 
-};
+	my $backspace  = sub { 
+		my $stop_pos = length prompt();
+		$entry->text_delete( $entry->position - 1, 1 ) 
+			unless $entry->position <= $stop_pos 
+	};
 
-$entry->bind_keys( 
-'Up' 		=> sub { previous_command() }, 
-'Down'		=> sub { next_command()     }, 
-'C-a'	  	=> sub { $entry->set_position( length prompt() ) },
-'Home'  	=> sub { $entry->set_position( length prompt() ) },
-'C-k'		=> sub { $entry->text_delete(  $entry->position, 999) },
-'C-u'   	=> sub { $entry->text_delete(  
-						length prompt(), 
-						$entry->position - length prompt() ) },
-'C-h'   	=> $backspace,
-'Backspace' => $backspace,
-); 
+	$entry->bind_keys( 
+	'Up' 		=> sub { previous_command() }, 
+	'Down'		=> sub { next_command()     }, 
+	'C-a'	  	=> sub { $entry->set_position( length prompt() ) },
+	'Home'  	=> sub { $entry->set_position( length prompt() ) },
+	'C-k'		=> sub { $entry->text_delete(  $entry->position, 999) },
+	'C-u'   	=> sub { $entry->text_delete(  
+							length prompt(), 
+							$entry->position - length prompt() ) },
+	'C-h'   	=> $backspace,
+	'Backspace' => $backspace,
+	); 
 
-#$entry->set_text(prompt()); 
-$entry->set_position(99);
-$root->add($entry, valign => 'bottom');
-for (1..$tickit->lines){ print_to_terminal(' ') }
+	#$entry->set_text(prompt()); 
+	$entry->set_position(99);
+	$root->add($entry, valign => 'bottom');
+	for (1..$tickit->lines){ print_to_terminal(' ') }
 
 
 }
