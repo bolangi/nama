@@ -66,6 +66,12 @@ $text->{term} = $term = $tickit->term;
 my $lines = $term->lines;
  
 $root->add($scrollbox, valign => 'top', force_size => $lines - 2); 
+
+create_entry_widget();
+}
+
+sub create_entry_widget {
+
 my $do_command = sub { my ( $self, $line ) = @_; 
 						print_to_terminal($line); 
 						$line =~ s/^.+?>\s*//;
@@ -99,6 +105,8 @@ $entry->bind_keys(
 $entry->set_position(99);
 $root->add($entry, valign => 'bottom');
 for (1..$tickit->lines){ print_to_terminal(' ') }
+
+
 }
  
 sub print_to_terminal ($txt) {
