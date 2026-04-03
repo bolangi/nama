@@ -57,7 +57,7 @@ sub process_line {
 	logpkg('debug',"user input: $user_input");
 	if (defined $user_input and $user_input !~ /^\s*$/) {
 		push $text->{command_history}->@*, $user_input;
-		$text->{command_index}++;
+		$text->{command_index} = scalar $text->{command_history}->@*;
 		# convert hyphenated commands to underscore form
 		while( my($from, $to) = each %{$text->{hyphenated_commands}} ){ $user_input =~ s/$from/$to/g }
 			my $context = context();
