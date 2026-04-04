@@ -48,7 +48,6 @@ my $build = Module::Build->new(
 		'Text::Template' => 0,
 		'Tickit::Async' => 0,
 		'Tickit::Widget::Static' => 0,
-		'Tickit::Widget::Entry' => 0,
 		'Tickit::Widget::ScrollBox' => 0,
 		'Tickit::Widget::VBox' => 0,
 		'Tickit::Widget::Entry::Plugin::Completion' => 0,
