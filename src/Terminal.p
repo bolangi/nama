@@ -24,25 +24,6 @@ vbox (root)
 		   ...
     entry
 
-proposed:
-
-tickit
-	term
-vbox (root)
-	window1-normal
-		scrollbox 
-			vbox 
-			   static
-			   static
-			   ...
-		entry
-	window2-pager
-		scrollbox 
-			vbox 
-			   static
-			   static
-			   ...
-
 Names:
 
 $text->{tickit} 
