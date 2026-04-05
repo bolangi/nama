@@ -88,7 +88,6 @@ sub create_entry_widget {
 	#$entry->set_text(prompt()); 
 	$entry->set_position(99);
 	$root->add($entry, valign => 'bottom');
-	for (1..$tickit->lines){ print_to_terminal(' ') };
 
 	$entry
 }
