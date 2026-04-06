@@ -48,7 +48,6 @@ my $lines = $term->lines;
  
 $root->add($scrollbox, valign => 'top', force_size => $lines - 2); 
 
-create_entry_widget();
 }
 
 sub create_entry_widget {
@@ -61,7 +60,7 @@ sub create_entry_widget {
 							$self->set_position(99); 
 						}; 
 	$entry = Tickit::Widget::Entry->new( 
-		text 	 => 'enter nama command (h for help) > ', 
+		text 	 => prompt(),
 		on_enter => $do_command,
 	);
 	Tickit::Widget::Entry::Plugin::Completion->apply($entry, gen_words => \&gen_words, use_popup => $config->{use_autocomplete_popup}); 
