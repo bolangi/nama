@@ -71,6 +71,10 @@ sub create_entry_widget {
 		$entry->text_delete( $entry->position - 1, 1 ) 
 			unless $entry->position <= $stop_pos 
 	};
+	my $spacebar = sub {
+		if ( $entry->position == length prompt() ) { toggle_transport() }
+		else { $entry->on_text(' ') }
+	};
 
 	$entry->bind_keys( 
 	'Up' 		=> sub { previous_command() }, 
@@ -83,6 +87,7 @@ sub create_entry_widget {
 							$entry->position - length prompt() ) },
 	'C-h'   	=> $backspace,
 	'Backspace' => $backspace,
+    ' '			=> $spacebar,
 	); 
 
 	#$entry->set_text(prompt()); 
