@@ -416,8 +416,7 @@ method on_key
    my $type = $args->type;
    my $str  = $args->str;
 
-   if( ($type eq "key" or $type eq "text" )
-		and my $code = $_keybindings{$str} ) {
+   if( ($type eq "key" or $type eq "text" ) and my $code = $_keybindings{$str} ) {
       $self->$code( $str );
       return 1;
    }
