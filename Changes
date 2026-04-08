@@ -1,5 +1,8 @@
 Changes to Audio::Nama
 
+1.601 Apr 8, 2026
+    * conversion to tickit completed, basic functioning
+
 1.600 May 29, 2025
     * convert terminal library from readline to tickit
 
