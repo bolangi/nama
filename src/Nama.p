@@ -37,7 +37,6 @@ use Tickit;
 use Tickit::Async;
 use Tickit::Widgets qw(Static ScrollBox VBox);
 use ::Entry; # modified Tickit::Widget::Entry to bind printable keys
-use Tickit::Widget::Entry::Plugin::History;
 use Tickit::Widget::Entry::Plugin::Completion;
 use Tie::Simple;
 use Try::Tiny;
