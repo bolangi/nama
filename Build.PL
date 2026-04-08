@@ -51,6 +51,7 @@ my $build = Module::Build->new(
 		'Tickit::Widget::ScrollBox' => 0,
 		'Tickit::Widget::VBox' => 0,
 		'Tickit::Widget::Entry::Plugin::Completion' => 0,
+		'Tie::Simple' => 0,
 		'Time::HiRes'  => 0,
 		'Try::Tiny'  => 0,
 		'YAML::Tiny'  => 0,
