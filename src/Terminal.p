@@ -97,6 +97,7 @@ sub create_entry_widget {
 }
  
 sub print_to_terminal ($txt) {
+	return if not defined $vbox;
 	$vbox->add( Tickit::Widget::Static->new( text => $txt ));
 	$scrollbox->scroll_to(1e5);
 }
