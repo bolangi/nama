@@ -50,6 +50,12 @@ $root->add($scrollbox, valign => 'top', force_size => $lines - 2);
 
 }
 
+sub suspend
+{
+	$term->pause;
+	kill STOP => $$;
+	$term->resume;
+}
 sub create_entry_widget {
 
 	my $do_command = sub { my ( $self, $line ) = @_; 
@@ -282,8 +288,18 @@ sub load_keywords {
 	push @keywords, "Audio::Nama::";
 	@{$text->{keywords}} = sort {lc $a cmp lc $b} @keywords;
 	$text->{executables} = [sort {lc $a cmp lc $b} executables(), pwd_listing()];
-	$text->{pwdlist} 	 = [sort {lc $a cmp lc $b} pwd_listing() ];
+	$text->{pwd_list} 	 = [sort {lc $a cmp lc $b} pwd_listing() ];
+	$text->{project_list} = project_list();
 }
+
+sub project_list { 
+	my $root = path(project_root());
+	[ sort { lc $a cmp lc $b }
+	 	map { $_-> stringify} 
+		grep { -d } 
+		$root->children ]; 
+}
+
 sub gen_words {
 	my %args = @_;
 	my $word = $args{word};
@@ -294,9 +310,13 @@ sub gen_words {
 	# if directory add trailing slash
 
 	# import or load commands
-	if (command() =~ /^ \s* ( import | load(.project)? ) \s /x )
+	if (command() =~ /^ \s*  load(.project)? \s /x )
 	{
-		$keywords = $text->{pwdlist};
+		$keywords = $text->{project_list};
+	}
+	elsif (command() =~ /^ \s*  import  \s /x )
+	{
+		$keywords = $text->{pwd_list};
 		#chdir $word  if $word =~ m{/$} and -d $word;
 		#append_slash(), chdir $ENV{HOME} if $word eq '~' or $word eq '~/';;
 	}
@@ -307,6 +327,7 @@ sub gen_words {
 	else {
 		$keywords = $text->{keywords};
 	}
+		
 	my $first = 0;
 	my $last = scalar @$keywords - 1;
 	for (my $i = 0;      $i <= $last; $i++)  { $first = $i,     last if @$keywords[$i] =~ /^$word/i }
