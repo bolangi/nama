@@ -59,7 +59,7 @@ sub create_entry_widget {
 							$self->set_text(prompt());
 							$self->set_position(99); 
 						}; 
-	$entry = Tickit::Widget::Entry->new( 
+	$text->{entry} = $entry = Tickit::Widget::Entry->new( 
 		text 	 => prompt(),
 		on_enter => $do_command,
 	);
@@ -96,6 +96,10 @@ sub create_entry_widget {
 	$entry
 }
  
+sub command {
+	substr( $entry->text, length prompt() )
+}
+
 sub print_to_terminal ($txt) {
 	return if not defined $vbox;
 	$vbox->add( Tickit::Widget::Static->new( text => $txt ));
@@ -276,25 +280,56 @@ sub load_keywords {
 	push @keywords, keys %{$fx_cache->{partial_label_to_full}};
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
 	push @keywords, "Audio::Nama::";
-	push @keywords, pwd_files();
-	@{$text->{keywords}} = sort {lc $a cmp lc $b} @keywords
-	
+	@{$text->{keywords}} = sort {lc $a cmp lc $b} @keywords;
+	$text->{executables} = [sort {lc $a cmp lc $b} executables(), pwd_listing()];
+	$text->{pwdlist} 	 = [sort {lc $a cmp lc $b} pwd_listing() ];
 }
 sub gen_words {
 	my %args = @_;
 	my $word = $args{word};
-	my $keywords = $text->{keywords};
+	my $pwd = getcwd();
+	my $keywords;
+    # if command is import or load-project or ! 
+	# add pwd to keywords
+	# if directory add trailing slash
+
+	# import or load commands
+	if (command() =~ /^ \s* ( import | load(.project)? ) \s /x )
+	{
+		$keywords = $text->{pwdlist};
+		#chdir $word  if $word =~ m{/$} and -d $word;
+		#append_slash(), chdir $ENV{HOME} if $word eq '~' or $word eq '~/';;
+	}
+	elsif ( command() =~ /^ \s* ! /x )
+	{ 
+	   	$keywords = $text->{executables};
+	}
+	else {
+		$keywords = $text->{keywords};
+	}
 	my $first = 0;
 	my $last = scalar @$keywords - 1;
 	for (my $i = 0;      $i <= $last; $i++)  { $first = $i,     last if @$keywords[$i] =~ /^$word/i }
 	return unless $first;
 	for (my $i = $first; $i <= $last; $i++)  { $last  = $i - 1, last if @$keywords[$i] !~ /^$word/i }
+	my @result = @$keywords[$first .. $last];
+	
 	@$keywords[$first .. $last]
 }
-sub pwd_files {
+sub executables {
+	my @path = split ':', $ENV{PATH};
+	my @executables = ();
+	for my $dir	(@path)
+	{
+		my $p = path($dir);
+		push @executables, grep { -x $_ } map { $_->stringify} $p->children;
+	}
+	@executables
+}
+sub pwd_listing {
 	my $dir = '.';
 	my $pwd = path($dir);
-	grep {-f} $pwd->children;
+	map{ $_->stringify } $pwd->children;
 }
 
 1;
