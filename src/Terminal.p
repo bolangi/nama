@@ -69,7 +69,8 @@ sub create_entry_widget {
 		text 	 => prompt(),
 		on_enter => $do_command,
 	);
-	Tickit::Widget::Entry::Plugin::Completion->apply($entry, gen_words => \&gen_words, use_popup => $config->{use_autocomplete_popup}); 
+	Tickit::Widget::Entry::Plugin::Completion->apply($entry, gen_words => \&gen_words, use_popup => 0); 
+# $config->{use_autocomplete_popup})
 
 	my $backspace  = sub { 
 		my $stop_pos = length prompt();
