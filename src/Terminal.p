@@ -76,6 +76,12 @@ sub create_entry_widget {
 		$entry->text_delete( $entry->position - 1, 1 ) 
 			unless $entry->position <= $stop_pos 
 	};
+	my $left = sub { 
+		my $stop_pos = length prompt();
+		$entry->set_position( $entry->position - 1 ) 
+			unless $entry->position <= $stop_pos 
+	};
+
 	my $spacebar = sub {
 		if ( $entry->position == length prompt() ) { toggle_transport() }
 		else { $entry->on_text(' ') }
@@ -84,6 +90,7 @@ sub create_entry_widget {
 	$entry->bind_keys( 
 	'Up' 		=> sub { previous_command() }, 
 	'Down'		=> sub { next_command()     }, 
+	'Left'		=> $left,
 	'C-a'	  	=> sub { $entry->set_position( length prompt() ) },
 	'Home'  	=> sub { $entry->set_position( length prompt() ) },
 	'C-k'		=> sub { $entry->text_delete(  $entry->position, 999) },
