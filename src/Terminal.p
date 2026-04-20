@@ -313,9 +313,7 @@ sub gen_words {
 	my $word = $args{word};
 	my $pwd = getcwd();
 	my $keywords;
-    # if command is import or load-project or ! 
-	# add pwd to keywords
-	# if directory add trailing slash
+	# TODO if directory add trailing slash
 
 	# import or load commands
 	if (command() =~ /^ \s*  load(.project)? \s /x )
@@ -332,9 +330,8 @@ sub gen_words {
 	{ 
 	   	$keywords = $text->{executables};
 	}
-	else {
-		$keywords = $text->{keywords};
-	}
+
+	else { $keywords = $text->{keywords} }
 		
 	my $first = 0;
 	my $last = scalar @$keywords - 1;
@@ -342,8 +339,7 @@ sub gen_words {
 	return unless $first;
 	for (my $i = $first; $i <= $last; $i++)  { $last  = $i - 1, last if @$keywords[$i] !~ /^$word/i }
 	my @result = @$keywords[$first .. $last];
-	
-	@$keywords[$first .. $last]
+	say for @result;
 }
 sub executables {
 	# if starts with letter, return executables for that letter
