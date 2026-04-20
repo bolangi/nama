@@ -294,7 +294,7 @@ sub load_keywords {
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
 	push @keywords, "Audio::Nama::";
 	@{$text->{keywords}} = sort {lc $a cmp lc $b} @keywords;
-	$text->{executables} = [sort {lc $a cmp lc $b} executables(), pwd_listing()];
+	$text->{executables} = [sort {lc $a cmp lc $b} executables()];
 	$text->{pwd_list} 	 = [sort {lc $a cmp lc $b} pwd_listing() ];
 	$text->{project_list} = project_list();
 }
@@ -345,7 +345,10 @@ sub gen_words {
 	@$keywords[$first .. $last]
 }
 sub executables {
-	my @path = split ':', $ENV{PATH};
+	# if starts with letter, return executables for that letter
+	# if starts with ./ ../ ~/ / return the appropriate set of executables
+	my @path = "$ENV{HOME}/bin";
+	# split ':', $ENV{PATH};
 	my @executables = ();
 	for my $dir	(@path)
 	{
