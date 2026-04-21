@@ -289,21 +289,20 @@ sub load_keywords {
  	my %hyphenated = map{my $h = $_; $h =~ s/_/-/g; $h => $_ }grep{ /_/ } @keywords;
 	$text->{hyphenated_commands} = \%hyphenated;
 	push @keywords, keys %hyphenated;
-	#push @keywords, grep{$_} map{split " ", $text->{commands}->{$_}->{short}} @keywords;
 	push @keywords, keys %{$text->{iam}};
-	push @keywords, keys %{$fx_cache->{partial_label_to_full}};
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
 	push @keywords, "Audio::Nama::";
-	@{$text->{keywords}} = sort {lc $a cmp lc $b} @keywords;
+	$text->{keywords}    = [sort {lc $a cmp lc $b} @keywords ];
 	$text->{executables} = [sort {lc $a cmp lc $b} executables()];
 	$text->{pwd_list} 	 = [sort {lc $a cmp lc $b} pwd_listing() ];
 	$text->{project_list} = project_list();
+	$text->{effects}     =  [sort {lc $a cmp lc $b} keys $fx_cache->{partial_label_to_full}->%*];
 }
 
 sub project_list { 
 	my $root = path(project_root());
 	[ sort { lc $a cmp lc $b }
-	 	map { $_-> stringify} 
+	 	map { $_-> basename } 
 		grep { -d } 
 		$root->children ]; 
 }
@@ -314,13 +313,14 @@ sub gen_words {
 	my $pwd = getcwd();
 	my $keywords;
 	# TODO if directory add trailing slash
+	my $is_command;
 
 	# import or load commands
-	if (command() =~ /^ \s*  load(.project)? \s /x )
+	if (command() =~ /^ \s*  load(.project)? \s? /x )
 	{
 		$keywords = $text->{project_list};
 	}
-	elsif (command() =~ /^ \s*  import  \s /x )
+	elsif (command() =~ /^ \s* import/x )
 	{
 		$keywords = $text->{pwd_list};
 		#chdir $word  if $word =~ m{/$} and -d $word;
@@ -330,16 +330,29 @@ sub gen_words {
 	{ 
 	   	$keywords = $text->{executables};
 	}
+	elsif ( command() =~ /^ \s* ( afx | add.effect ) /x )
+	{ 
+	   	$keywords = $text->{effects};
+	}
+	else { 
+		$keywords = $text->{keywords} ;
+		$is_command++;
+	}
 
-	else { $keywords = $text->{keywords} }
-		
+	my @result;
 	my $first = 0;
 	my $last = scalar @$keywords - 1;
 	for (my $i = 0;      $i <= $last; $i++)  { $first = $i,     last if @$keywords[$i] =~ /^$word/i }
 	return unless $first;
 	for (my $i = $first; $i <= $last; $i++)  { $last  = $i - 1, last if @$keywords[$i] !~ /^$word/i }
-	my @result = @$keywords[$first .. $last];
-	say for @result;
+	@result = @$keywords[$first .. $last];
+
+	# autocomplete, but do not show underscore-separated commands
+	if ( scalar @result > 1 and not $is_command or $is_command and not /_/ )
+	{ print_to_terminal($_) for @result;
+	  print_to_terminal(' ');
+ 	}
+	@result;
 }
 sub executables {
 	# if starts with letter, return executables for that letter
