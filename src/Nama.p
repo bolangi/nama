@@ -36,8 +36,8 @@ use Text::Format;
 use Tickit;
 use Tickit::Async;
 use Tickit::Widgets qw(Static ScrollBox VBox);
-use ::Entry; # modified Tickit::Widget::Entry to bind printable keys
-use Tickit::Widget::Entry::Plugin::Completion;
+use ::Entry;      # modified Tickit::Widget::Entry to bind printable keys
+use ::Completion; # modified Tickit::Widget::Entry::Plugin::Completion for directory handling
 use Tie::Simple;
 use Try::Tiny;
 use Path::Tiny;
