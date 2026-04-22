@@ -307,23 +307,29 @@ sub project_list {
 }
 
 sub gen_words {
+	state $pwd = project_root();
 	my %args = @_;
 	my $word = $args{word};
-	my $pwd = getcwd();
-	my $keywords;
+	my $pwd = path(getcwd());
+	my $keywords = [];
 	# TODO if directory add trailing slash
 	my $is_command;
 
-	# import or load commands
 	if (command() =~ /^ \s*  load(.project)? \s? /x )
 	{
 		$keywords = $text->{project_list};
 	}
 	elsif (command() =~ /^ \s* import/x )
 	{
-		$keywords = $text->{pwd_list};
-		#chdir $word  if $word =~ m{/$} and -d $word;
-		#append_slash(), chdir $ENV{HOME} if $word eq '~' or $word eq '~/';;
+		$pwd = path($ENV{HOME}) if $word eq '~/';
+		$pwd = $pwd->parent if $word eq '../';
+		my $shellvar;
+		if(  ($shellvar) = $word =~ /^ \$ (\w+) /x and $ENV{$shellvar} )
+		{
+			$pwd = path($ENV{$shellvar});
+				 
+		}
+		@$keywords = sort { lc $a cmp lc $b } map { -d and s{$}{/}; $_ } map { $_->basename } $pwd->children;
 	}
 	elsif ( command() =~ /^ \s* ! /x )
 	{ 
