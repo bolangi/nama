@@ -100,6 +100,7 @@ sub create_entry_widget {
 	'C-h'   	=> $backspace,
 	'Backspace' => $backspace,
     ' '			=> $spacebar,
+	'C-z'		=> \&suspend,
 	); 
 
 	#$entry->set_text(prompt()); 
