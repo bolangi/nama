@@ -291,7 +291,7 @@ sub load_keywords {
 	push @keywords, keys %hyphenated;
 	push @keywords, keys %{$text->{iam}};
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
-	push @keywords, "Audio::Nama::";
+	#push @keywords, "Audio::Nama::";
 	$text->{keywords}    = [sort {lc $a cmp lc $b} @keywords ];
 	$text->{executables} = [sort {lc $a cmp lc $b} executables()];
 	$text->{pwd_list} 	 = [sort {lc $a cmp lc $b} pwd_listing() ];
