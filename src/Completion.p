@@ -188,7 +188,7 @@ method key_complete
 
    if( @completions == 1 ) {
       # No other completions, so we have a complete match
-      $add .= $_append_after_word;
+      $add .= $_append_after_word unless $add =~ m{ / $ }x;
    }
 
    $_entry->text_splice( $_entry->position - $plen, $plen, $add );
