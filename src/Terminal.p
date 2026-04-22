@@ -315,11 +315,11 @@ sub gen_words {
 	# TODO if directory add trailing slash
 	my $is_command;
 
-	if (command() =~ /^ \s*  load(.project)? \s? /x )
+	if (command() =~ / load(.project)? /x )
 	{
 		$keywords = $text->{project_list};
 	}
-	elsif (command() =~ /^ \s* import/x )
+	elsif (command() =~ /import/x )
 	{
 		$pwd = path($ENV{HOME}) if $word eq '~/';
 		$pwd = $pwd->parent if $word eq '../';
@@ -335,7 +335,7 @@ sub gen_words {
 	{ 
 	   	$keywords = $text->{executables};
 	}
-	elsif ( command() =~ /^ \s* ( afx | add.effect ) /x )
+	elsif ( command() =~ / afx | add.effect /x )
 	{ 
 	   	$keywords = $text->{effects};
 	}
