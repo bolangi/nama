@@ -133,6 +133,14 @@ $text->{eval_result}			# buffer for result of eval_perl()
 $text->{output_buffer}			# buffer for output of OSC commands
 $text->{midi_cmd} 				# list of Midish commands for the parser to recognize
 
+
+
+# lists used for autocompletion
+
+$text->{executables}
+$text->{project_list}
+$text->{effects}
+
 $project->{events}				# timers used during engine run
 $project->{name}				# project name
 $project->{bunch}				# track bunches lists

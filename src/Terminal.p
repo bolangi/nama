@@ -70,7 +70,6 @@ sub create_entry_widget {
 		on_enter => $do_command,
 	);
 	Tickit::Widget::Entry::Plugin::Completion->apply($entry, gen_words => \&gen_words, use_popup => 0); 
-# $config->{use_autocomplete_popup})
 
 	my $backspace  = sub { 
 		my $stop_pos = length prompt();
@@ -293,7 +292,6 @@ sub load_keywords {
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
 	$text->{keywords}    = [sort {lc $a cmp lc $b} @keywords ];
 	$text->{executables} = [sort {lc $a cmp lc $b} executables()];
-	$text->{pwd_list} 	 = [sort {lc $a cmp lc $b} pwd_listing() ];
 	$text->{project_list} = project_list();
 	$text->{effects}     =  [sort {lc $a cmp lc $b} keys $fx_cache->{partial_label_to_full}->%*];
 }
@@ -372,10 +370,4 @@ sub executables {
 	}
 	@executables
 }
-sub pwd_listing {
-	my $dir = '.';
-	my $pwd = path($dir);
-	map{ $_->stringify } $pwd->children;
-}
-
 1;
