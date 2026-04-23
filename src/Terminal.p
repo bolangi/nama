@@ -337,7 +337,7 @@ sub gen_words {
 	{ 
 	   	$keywords = $text->{executables};
 	}
-	elsif ( command() =~ / afx | add.effect /x )
+	elsif ( command() =~ / (afx) | (add.effect) /x )
 	{ 
 	   	$keywords = $text->{effects};
 	}
@@ -354,13 +354,23 @@ sub gen_words {
 	for (my $i = $first; $i <= $last; $i++)  { $last  = $i - 1, last if @$keywords[$i] !~ /^$word/i }
 	@result = @$keywords[$first .. $last];
 
-	# autocomplete, but do not show underscore-separated commands
-	if ( scalar @result > 1 and not $is_command or $is_command and not /_/ )
-	{ print_to_terminal($_) for @result;
-	  print_to_terminal(' ');
+	# usually show all choices
+	my $display = \@result; 
+
+	# but if it's a nama command not containing a hyphen or
+	# underscore, show only the hyphen choices
+
+	if ($is_command and $word !~ /_-/)
+	{ $display = [ grep { $_ !~ /_/ } @result ] }
+
+	if ( scalar @$display > 1)
+	{
+	 print_to_terminal($_) for @$display;
+	 print_to_terminal(' ');
  	}
 	@result;
 }
+	
 sub executables {
 	# if starts with letter, return executables for that letter
 	# if starts with ./ ../ ~/ / return the appropriate set of executables
