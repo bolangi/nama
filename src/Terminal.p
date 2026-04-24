@@ -342,28 +342,16 @@ sub gen_words {
 		$is_command++;
 	}
 
-	my @result;
 	my $first = 0;
 	my $last = scalar @$keywords - 1;
 	for (my $i = 0;      $i <= $last; $i++)  { $first = $i,     last if @$keywords[$i] =~ /^$word/i }
 	return unless $first;
 	for (my $i = $first; $i <= $last; $i++)  { $last  = $i - 1, last if @$keywords[$i] !~ /^$word/i }
-	@result = @$keywords[$first .. $last];
+	my @result = @$keywords[$first .. $last];
 
-	# usually show all choices
-	my $display = \@result; 
-
-	# but if it's a nama command not containing a hyphen or
-	# underscore, show only the hyphen choices
-
-	if ($is_command and $word !~ /_-/)
-	{ $display = [ grep { $_ !~ /_/ } @result ] }
-
-	if ( scalar @$display > 1)
-	{
-	 print_to_terminal($_) for @$display;
+	 print_to_terminal($_) for @result;
 	 print_to_terminal(' ');
- 	}
+
 	@result;
 }
 	
