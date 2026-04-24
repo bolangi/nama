@@ -287,11 +287,7 @@ sub get_ecasound_iam_keywords {
 				grep{ ! $reserved{$_} } split /[\s,]/, ecasound_iam('int-cmd-list');
 }
 sub load_keywords {
-	my @keywords = keys %{$text->{commands}};
- 	# complete hyphenated forms as well
- 	my %hyphenated = map{my $h = $_; $h =~ s/_/-/g; $h => $_ }grep{ /_/ } @keywords;
-	$text->{hyphenated_commands} = \%hyphenated;
-	push @keywords, keys %hyphenated;
+	my @keywords = map { s/_/-/g; $_ } keys %{$text->{commands}};
 	push @keywords, keys %{$text->{iam}};
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
 	$text->{keywords}    = [sort {lc $a cmp lc $b} @keywords ];
