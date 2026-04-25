@@ -310,12 +310,10 @@ sub project_list {
 }
 
 sub gen_words {
-	state $pwd = project_root();
+	my $pwd = project_root();
 	my %args = @_;
 	my $word = $args{word};
-	my $pwd = path(getcwd());
 	my $keywords = [];
-	# TODO if directory add trailing slash
 	my $is_command;
 
 	if (command() =~ / load(.project)? /x )
