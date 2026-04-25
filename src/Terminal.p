@@ -313,6 +313,9 @@ sub gen_words {
 	state $pwd = project_root();
 	my %args = @_;
 	my $word = $args{word};
+	my $entry = $args{entry};
+	my $wordpos = $args{wordpos};
+	my $plen = length $word;
 	my $keywords = [];
 	my $is_command;
 
@@ -322,14 +325,24 @@ sub gen_words {
 	}
 	elsif (command() =~ /import/x )
 	{
-		$pwd = path($ENV{HOME}) if $word eq '~/';
-		$pwd = $pwd->parent if $word eq '../';
+		print_to_terminal("word: $word");
+		if ($word eq '~/')
+		{
+			$entry->text_splice($wordpos, $plen, $ENV{HOME}) ;
+			$pwd = path "$ENV{HOME}/";
+			return $ENV{HOME};
+		}
+			
+
+		$pwd = path($word), return "$word/" if -d $word;
+=comment
 		my $shellvar;
 		if(  ($shellvar) = $word =~ /^ \$ (\w+) /x and $ENV{$shellvar} )
 		{
 			$pwd = path($ENV{$shellvar});
 				 
 		}
+=cut
 		@$keywords = sort { lc $a cmp lc $b } map { -d and s{$}{/}; $_ } map { $_->basename } $pwd->children;
 	}
 	elsif ( command() =~ /^ \s* ! /x )
