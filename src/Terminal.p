@@ -310,7 +310,7 @@ sub project_list {
 }
 
 sub gen_words {
-	my $pwd = project_root();
+	state $pwd = project_root();
 	my %args = @_;
 	my $word = $args{word};
 	my $keywords = [];
