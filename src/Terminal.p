@@ -295,6 +295,7 @@ sub load_keywords {
 	push @keywords, keys %{$text->{iam}};
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
 	$text->{keywords}    = [sort {lc $a cmp lc $b} @keywords ];
+	$text->{autocomplete_commands}->@* = grep { not /_/ } $text->{keywords}->@*;
 	$text->{executables} = [sort {lc $a cmp lc $b} executables()];
 	$text->{project_list} = project_list();
 	$text->{effects}     =  [sort {lc $a cmp lc $b} keys $fx_cache->{partial_label_to_full}->%*];
@@ -342,7 +343,7 @@ sub gen_words {
 	   	$keywords = $text->{effects};
 	}
 	else { 
-		$keywords = $text->{keywords} ;
+		$keywords = $text->{autocomplete_commands} ;
 		$is_command++;
 	}
 
