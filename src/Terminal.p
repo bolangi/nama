@@ -347,10 +347,10 @@ sub gen_words {
 		$is_command++;
 	}
 
-	my $first = 0;
+	my $first = undef;
 	my $last = scalar @$keywords - 1;
 	for (my $i = 0;      $i <= $last; $i++)  { $first = $i,     last if @$keywords[$i] =~ /^$word/i }
-	return unless $first;
+	return unless defined $first;
 	for (my $i = $first; $i <= $last; $i++)  { $last  = $i - 1, last if @$keywords[$i] !~ /^$word/i }
 	my @result = @$keywords[$first .. $last];
 
