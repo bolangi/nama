@@ -323,6 +323,7 @@ sub gen_words {
 	{
 		$keywords = $text->{project_list};
 	}
+
 	elsif (command() =~ /import/x )
 	{
 		print_to_terminal("word: $word");
@@ -340,31 +341,30 @@ sub gen_words {
 				$entry->text_splice($wordpos, $plen, $ENV{HOME}) ;
 				return $ENV{HOME};
 			}
-	}
-=comment
-
-		elsif (-d $word ) 
+		elsif (-d $word )
 		{
-
-			elsif ( $word =~ m{/$} )
+			print_to_terminal("dir: $word");
+			if ( $word =~ m{/$} )
 			{
 				$pwd = path($word);
+				print_to_terminal("trailing slash");
 				#$entry->text_splice($wordpos, $plen, $word) ;
-				#@$keywords = #sort { lc $a cmp lc $b } map { -d and s{$}{/}; $_ } 
-				#map { $_->basename } $pwd->children;
-				#return @$keywords
-				return [qw(aaaa bbbb)];
+				@$keywords = sort { lc $a cmp lc $b } 
+							map { -d $pwd->child($_) and s{$}{/}; $_ } 
+							map { $_->basename } $pwd->children;
+				print_to_terminal($_) for @$keywords;
 			}
-			else
+			else 
 			{
-				
-
+				$word =~ s{$}{/};
+				return $word;
 			}
-
-		$pwd = path($word), return "$word/" if -d $word and $word !~ m{/$};
+		}
+		elsif ( -f $word )
+		{
+			return $word
 		}
 	}
-=cut
 	elsif ( command() =~ /^ \s* ! /x )
 	{ 
 	   	$keywords = $text->{executables};
