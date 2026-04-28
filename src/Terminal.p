@@ -334,14 +334,18 @@ sub gen_words {
 			return( $pwd->stringify );
 		
 		}
-		elsif (-d $word ) 
-		{
-			if ($word eq '~/')
+		elsif ($word eq '~/')
 			{
 				$pwd = path "$ENV{HOME}";
 				$entry->text_splice($wordpos, $plen, $ENV{HOME}) ;
 				return $ENV{HOME};
 			}
+	}
+=comment
+
+		elsif (-d $word ) 
+		{
+
 			elsif ( $word =~ m{/$} )
 			{
 				$pwd = path($word);
@@ -360,6 +364,7 @@ sub gen_words {
 		$pwd = path($word), return "$word/" if -d $word and $word !~ m{/$};
 		}
 	}
+=cut
 	elsif ( command() =~ /^ \s* ! /x )
 	{ 
 	   	$keywords = $text->{executables};
