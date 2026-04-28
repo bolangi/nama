@@ -326,24 +326,39 @@ sub gen_words {
 	elsif (command() =~ /import/x )
 	{
 		print_to_terminal("word: $word");
-		if ($word eq '~/')
-		{
-			$entry->text_splice($wordpos, $plen, $ENV{HOME}) ;
-			$pwd = path "$ENV{HOME}/";
-			return $ENV{HOME};
+		my ($var);
+		if ( ($var) = $word =~ m[  \$ (\w+) $ ]x  and $ENV{$var}){
+			print_to_terminal("var: $var");
+			$pwd = path($ENV{$var});
+			$entry->text_splice($wordpos, $plen, $ENV{$var}) ;
+			return( $pwd->stringify );
+		
 		}
-			
+		elsif (-d $word ) 
+		{
+			if ($word eq '~/')
+			{
+				$pwd = path "$ENV{HOME}";
+				$entry->text_splice($wordpos, $plen, $ENV{HOME}) ;
+				return $ENV{HOME};
+			}
+			elsif ( $word =~ m{/$} )
+			{
+				$pwd = path($word);
+				#$entry->text_splice($wordpos, $plen, $word) ;
+				#@$keywords = #sort { lc $a cmp lc $b } map { -d and s{$}{/}; $_ } 
+				#map { $_->basename } $pwd->children;
+				#return @$keywords
+				return [qw(aaaa bbbb)];
+			}
+			else
+			{
+				
 
-		$pwd = path($word), return "$word/" if -d $word;
-=comment
-		my $shellvar;
-		if(  ($shellvar) = $word =~ /^ \$ (\w+) /x and $ENV{$shellvar} )
-		{
-			$pwd = path($ENV{$shellvar});
-				 
+			}
+
+		$pwd = path($word), return "$word/" if -d $word and $word !~ m{/$};
 		}
-=cut
-		@$keywords = sort { lc $a cmp lc $b } map { -d and s{$}{/}; $_ } map { $_->basename } $pwd->children;
 	}
 	elsif ( command() =~ /^ \s* ! /x )
 	{ 
