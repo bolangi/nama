@@ -8,6 +8,7 @@ use ::Globals qw(:singletons $this_bus $this_track $text);
 use ::Log qw(logpkg logsub);
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
+use File::Basename qw(fileparse);
 
 
 =comment - widgets
@@ -86,7 +87,10 @@ sub create_entry_widget {
 	};
 
 	my $spacebar = sub {
-		if ( $entry->position == length prompt() ) { toggle_transport() }
+		if ( $config->{press_space_to_start}
+				and $entry->position == length prompt()
+				and ! ($mode->song or $mode->live) )
+		{ toggle_transport() }
 		else { $entry->on_text(' ') }
 	};
 
@@ -211,15 +215,6 @@ sub revise_prompt {
 =cut
 }
 
-sub detect_spacebar {
-=comment
-		if ( $config->{press_space_to_start} 
-				and ($buffer eq $trigger)
-				and ! ($mode->song or $mode->live) )
-			toggle_transport();	
-=cut
-warn ("not implemented");
-}
 sub throw {
 	logsub((caller(0))[3]);
 	pager_newline(@_)
@@ -352,7 +347,7 @@ sub gen_words {
 				@$keywords = sort { lc $a cmp lc $b } 
 							map { -d $pwd->child($_) and s{$}{/}; $_ } 
 							map { $_->basename } $pwd->children;
-				print_to_terminal($_) for @$keywords;
+				print_to_terminal("directory contains ".scalar @$keywords. "files and directories");
 			}
 			else 
 			{
@@ -364,6 +359,15 @@ sub gen_words {
 		{
 			return $word
 		}
+		elsif ( my ($stub, $dir) =  fileparse($word) )
+		{	
+			print_to_terminal("word: $word, dir: $dir, stub: $stub");
+			$pwd = path($dir);
+			@$keywords = sort { lc $a cmp lc $b } 
+						map { -d $pwd->child($_) and s{$}{/}; $_ } 
+						map { $_->basename } $pwd->children;
+		}
+
 	}
 	elsif ( command() =~ /^ \s* ! /x )
 	{ 
@@ -378,12 +382,16 @@ sub gen_words {
 		$is_command++;
 	}
 
+	print_to_terminal("found ".scalar @$keywords. " keywords");
+	print_to_terminal($_) for @$keywords[0..10];
 	my $first = undef;
 	my $last = scalar @$keywords - 1;
 	for (my $i = 0;      $i <= $last; $i++)  { $first = $i,     last if @$keywords[$i] =~ /^$word/i }
 	return unless defined $first;
 	for (my $i = $first; $i <= $last; $i++)  { $last  = $i - 1, last if @$keywords[$i] !~ /^$word/i }
 	my @result = @$keywords[$first .. $last];
+
+	print_to_terminal(scalar @result. "words matching prefix");
 
 	 print_to_terminal($_) for @result;
 	 print_to_terminal(' ');
