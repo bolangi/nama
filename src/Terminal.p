@@ -330,11 +330,11 @@ sub gen_words {
 			return( $pwd->stringify );
 		
 		}
-		elsif ($word eq '~/')
+		elsif ($word =~  m{^ ~/ }x )
 			{
 				$pwd = path "$ENV{HOME}";
-				$entry->text_splice($wordpos, $plen, $ENV{HOME}) ;
-				return $ENV{HOME};
+				$entry->text_splice($wordpos, $plen, "$ENV{HOME}/") ;
+				return
 			}
 		elsif (-d $word )
 		{
