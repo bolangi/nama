@@ -121,9 +121,9 @@ sub command {
 	substr( $entry->text, length prompt() )
 }
 
-sub print_to_terminal ($txt) {
+sub print_to_terminal (@text) {
 	return if not defined $vbox;
-	$vbox->add( Tickit::Widget::Static->new( text => $txt ));
+	$vbox->add( Tickit::Widget::Static->new( text => join ' ', @text ));
 	$scrollbox->scroll_to(1e5);
 }
 
@@ -347,7 +347,6 @@ sub gen_words {
 				@$keywords = sort { lc $a cmp lc $b } 
 							map { -d $pwd->child($_) and s{$}{/}; $_ } 
 							map { $_->basename } $pwd->children;
-				print_to_terminal("directory contains ".scalar @$keywords. "files and directories");
 			}
 			else 
 			{
@@ -382,8 +381,8 @@ sub gen_words {
 		$is_command++;
 	}
 
-	print_to_terminal("found ".scalar @$keywords. " keywords");
-	print_to_terminal($_) for @$keywords[0..10];
+	#print_to_terminal("found ".scalar @$keywords. " keywords");
+	#print_to_terminal($_) for @$keywords[0..10];
 	my $first = undef;
 	my $last = scalar @$keywords - 1;
 	for (my $i = 0;      $i <= $last; $i++)  { $first = $i,     last if @$keywords[$i] =~ /^$word/i }
@@ -391,8 +390,7 @@ sub gen_words {
 	for (my $i = $first; $i <= $last; $i++)  { $last  = $i - 1, last if @$keywords[$i] !~ /^$word/i }
 	my @result = @$keywords[$first .. $last];
 
-	print_to_terminal(scalar @result. "words matching prefix");
-
+	 print_to_terminal("found", scalar @result, "matches") if @result > 10;
 	 print_to_terminal($_) for @result;
 	 print_to_terminal(' ');
 
