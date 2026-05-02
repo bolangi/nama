@@ -343,10 +343,17 @@ sub gen_words {
 			{
 				$pwd = path($word);
 				print_to_terminal("trailing slash");
-				#$entry->text_splice($wordpos, $plen, $word) ;
 				@$keywords = sort { lc $a cmp lc $b } 
 							map { -d $pwd->child($_) and s{$}{/}; $_ } 
 							map { $_->basename } $pwd->children;
+				# filenames won't match because they don't include full path
+				# so we print them here
+				print_to_terminal($_) for @$keywords;
+				print_to_terminal(" ");
+				@$keywords = sort { lc $a cmp lc $b } 
+							map { -d $pwd->child($_) and s{$}{/}; $_ } 
+							map { $_->stringify } $pwd->children;
+				
 			}
 			else 
 			{
@@ -390,9 +397,13 @@ sub gen_words {
 	for (my $i = $first; $i <= $last; $i++)  { $last  = $i - 1, last if @$keywords[$i] !~ /^$word/i }
 	my @result = @$keywords[$first .. $last];
 
+	# don't print if full paths;
+	#unless (grep { m(/) } @result)
+	#{
 	 print_to_terminal("found", scalar @result, "matches") if @result > 10;
 	 print_to_terminal($_) for @result;
 	 print_to_terminal(' ');
+	#}
 
 	@result;
 }
