@@ -305,7 +305,7 @@ sub project_list {
 }
 
 sub gen_words {
-	state $pwd = project_root();
+	state $pwd = getcwd;
 	my %args = @_;
 	my $word = $args{word};
 	my $entry = $args{entry};
@@ -384,10 +384,13 @@ sub gen_words {
 		elsif ( my ($stub, $dir) =  fileparse($word) )
 		{	
 			print_to_terminal("word: $word, dir: $dir, stub: $stub");
+			
 			$pwd = path($dir);
 			@$keywords = sort { lc $a cmp lc $b } 
 						map { -d $pwd->child($_) and s{$}{/}; $_ } 
 						map { $_->stringify} $pwd->children;
+			#print_to_terminal("found",scalar @$keywords , "files in this directory");
+			#print_to_terminal($_) for @$keywords; 
 		}
 
 	}
