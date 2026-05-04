@@ -285,9 +285,6 @@ sub initialize_interfaces {
 	load_keywords(); # for autocompletion
 	parse_midi_help();
 
-	chdir $config->{root_dir} # for filename autocompletion
-		or warn "$config->{root_dir}: chdir failed: $!\n";
-
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
