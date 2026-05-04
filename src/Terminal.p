@@ -314,14 +314,14 @@ sub gen_words {
 	my $keywords = [];
 	my $is_command;
 
-	if (command() =~ / load(.project)? /x )
+	if (command() =~ /load(.project)? / )
 	{
 		$keywords = $text->{project_list};
 	}
 
 	### handle file paths - import command only
 
-	elsif (command() =~ /import/x )
+	elsif (command() =~ /import(-audio|-midi)? / ) # followed by a space
 	{
 	print_to_terminal("word: $word");
 
