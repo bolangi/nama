@@ -319,9 +319,14 @@ sub gen_words {
 		$keywords = $text->{project_list};
 	}
 
+	### handle file paths - import command only
+
 	elsif (command() =~ /import/x )
 	{
-		print_to_terminal("word: $word");
+	print_to_terminal("word: $word");
+
+		## substitute environment variable 
+
 		my ($var);
 		if ( ($var) = $word =~ m[  \$ (\w+) $ ]x  and $ENV{$var}){
 			print_to_terminal("var: $var");
@@ -330,48 +335,59 @@ sub gen_words {
 			return( $pwd->stringify );
 		
 		}
+
+		## substitute tilde slash
+
 		elsif ($word =~  m{^ ~/ }x )
 			{
 				$pwd = path "$ENV{HOME}";
 				$entry->text_splice($wordpos, $plen, "$ENV{HOME}/") ;
 				return
 			}
+
+		## handle directory
+
 		elsif (-d $word )
 		{
 			print_to_terminal("dir: $word");
+
+			## list directory contents if trailing slash
+
 			if ( $word =~ m{/$} )
 			{
 				$pwd = path($word);
 				print_to_terminal("trailing slash");
 				@$keywords = sort { lc $a cmp lc $b } 
 							map { -d $pwd->child($_) and s{$}{/}; $_ } 
-							map { $_->basename } $pwd->children;
-				# filenames won't match because they don't include full path
-				# so we print them here
-				print_to_terminal($_) for @$keywords;
-				print_to_terminal(" ");
-				@$keywords = sort { lc $a cmp lc $b } 
-							map { -d $pwd->child($_) and s{$}{/}; $_ } 
 							map { $_->stringify } $pwd->children;
 				
 			}
+
+			## otherwise append slash
+
 			else 
 			{
 				$word =~ s{$}{/};
 				return $word;
 			}
 		}
+
+		## return if match to existing file
+
 		elsif ( -f $word )
 		{
 			return $word
 		}
+
+		## partial filename
+
 		elsif ( my ($stub, $dir) =  fileparse($word) )
 		{	
 			print_to_terminal("word: $word, dir: $dir, stub: $stub");
 			$pwd = path($dir);
 			@$keywords = sort { lc $a cmp lc $b } 
 						map { -d $pwd->child($_) and s{$}{/}; $_ } 
-						map { $_->basename } $pwd->children;
+						map { $_->stringify} $pwd->children;
 		}
 
 	}
