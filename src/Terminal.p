@@ -17,7 +17,11 @@ Tree:
 
 tickit
 	term
-vbox (root)
+vbox (root) ==>> becomes console containing entry 
+		and tabbed widgets containing 
+            tab widget 
+				containing scroller for commands
+			tab widget for track list ?
 	scrollbox 
 		vbox 
 		   static
