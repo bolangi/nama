@@ -16,31 +16,23 @@ Tree:
 
 tickit
 	term
-vbox (root) ==>> becomes console containing entry 
-		and tabbed widgets containing 
-            tab widget 
-				containing scroller for commands
-			tab widget for track list ?
-	scrollbox 
-		vbox 
-		   static
-		   static
-		   ...
-    entry
+	console
+		entry
+		tabbed widget
+		    tab widget for commands
+			tab widget for track list
 
 Names:
 
 $text->{tickit} 
 $text->{root} 
-$text->{vbox} 
-$text->{scrollbox} 
 $text->{term} 
 $text->{entry} 
-$text->{scroller}
+$text->{scrollers}
 =cut
 
 {
-my ($root, $vbox, $tickit, $term, $scrollbox, $entry, $scroller);
+my ($root, $tickit, $term, $entry);
 $text->{loop} = IO::Async::Loop->new;
 sub initialize_terminal {
 my $do_command;
@@ -123,9 +115,9 @@ sub command {
 }
 
 sub print_to_terminal (@text) {
-	return if not defined $vbox;
-	$vbox->add( Tickit::Widget::Static->new( text => join ' ', @text ));
-	$scrollbox->scroll_to(1e5);
+	return if not defined $text->{root};
+	my $scroller = $text->{scrollers}->[0];
+	$scroller->push();
 }
 
 sub prompt { 
