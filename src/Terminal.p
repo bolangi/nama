@@ -10,7 +10,6 @@ use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
 use File::Basename qw(fileparse);
 
-
 =comment - widgets
 
 Tree:
@@ -37,22 +36,20 @@ $text->{vbox}
 $text->{scrollbox} 
 $text->{term} 
 $text->{entry} 
+$text->{scroller}
 =cut
 
 {
-my ($root, $vbox, $tickit, $term, $scrollbox, $entry);
+my ($root, $vbox, $tickit, $term, $scrollbox, $entry, $scroller);
 $text->{loop} = IO::Async::Loop->new;
 sub initialize_terminal {
-$root = 		Tickit::Widget::VBox->new; 
-$vbox = 		Tickit::Widget::VBox->new; # contains multiple items to scroll through
-$scrollbox = Tickit::Widget::ScrollBox->new->set_child( $vbox );
+my $do_command;
+$root = 		Tickit::Console->new( on_line => $do_command );
+
 $tickit = Tickit::Async->new( root => $root);
 $text->{tickit} = $tickit;
 $text->{term} = $term = $tickit->term;
-my $lines = $term->lines;
  
-$root->add($scrollbox, valign => 'top', force_size => $lines - 2); 
-
 }
 
 sub suspend
