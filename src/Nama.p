@@ -36,6 +36,7 @@ use Text::Format;
 use Tickit;
 use Tickit::Async;
 use Tickit::Console;
+use Tickit::Widget::Scroller::Item::Text;
 use Tickit::Widgets qw(Static ScrollBox VBox);
 ### We use our versions of these modules, overwriting Tickit::Widget::Entry pulled in by Tickit::Console
 use ::Entry;      # modified Tickit::Widget::Entry to bind printable keys
