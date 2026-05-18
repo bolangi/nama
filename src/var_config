@@ -99,9 +99,6 @@
     $midi_inputs					$midi->{inputs}
 
 	
-	$osc_listener_port 				$config->{osc_listener_port}
-	$osc_reply_port 				$config->{osc_reply_port}
-	$remote_control_port 			$config->{remote_control_port}
 	$engines						$config->{engines}
 
 	$default_waveform_height 			$config->{default_waveform_height}

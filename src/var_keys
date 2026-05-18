@@ -15,8 +15,6 @@ $config->{latency_op}			# operator for latency compensation
 $config->{latency_op_init}		# initial values
 $config->{latency_op_set}		# subroutine for setting latency compensation
 $config->{_is_system_bus}		# a hash
-$config->{osc_listener_port}
-$config->{remote_control_port}
 $config->{use_midi}
 $config->{default_waveform_height}
 $config->{waveform_canvas_x}
@@ -161,9 +159,6 @@ $project->{current_waveform}->{track_name}
 $project->{playback_position}	# in order to restore position after a reconfigure
 $project->{mark_sequence_counter} # used for system assigned mark names
 $project->{redo}				# last commit removed by undo
-$project->{osc_socket}			# OSC listener socket
-$project->{osc}					# Protocol::OSC object
-$project->{remote_control_socket} # text command listener socket
 $project->{midi_history}		# all text commands sent to midish
 $project->{sample_rate}
 
