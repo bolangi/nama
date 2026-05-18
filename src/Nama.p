@@ -35,7 +35,9 @@ use Text::Diff;
 use Text::Format;
 use Tickit;
 use Tickit::Async;
+use Tickit::Console;
 use Tickit::Widgets qw(Static ScrollBox VBox);
+### We use our versions of these modules, overwriting Tickit::Widget::Entry pulled in by Tickit::Console
 use ::Entry;      # modified Tickit::Widget::Entry to bind printable keys
 use ::Completion; # modified Tickit::Widget::Entry::Plugin::Completion for directory handling
 use Tie::Simple;
@@ -167,7 +169,6 @@ sub main {
 		say "Enter command to begin or type 'h' for help.";
 		$this_track = $tn{Main};
 	}
-	create_entry_widget();
 	$ui->loop();
 }
 
