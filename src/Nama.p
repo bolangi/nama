@@ -170,7 +170,7 @@ sub main {
 		say "Enter command to begin or type 'h' for help.";
 		$this_track = $tn{Main};
 	}
-	first_prompt();
+	show_prompt();
 	$ui->loop();
 }
 

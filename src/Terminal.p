@@ -40,8 +40,7 @@ $do_command = sub { my ( $self, $line ) = @_;
 							print_to_terminal($line); 
 							$line =~ s/^.+?>\s*//;
 							process_line($line); 
-							$entry->set_text(prompt());
-							$entry->set_position(99); 
+							show_prompt();
 						}; 
 $root = 		Tickit::Console->new( on_line => $do_command );
 my $tab = $root->add_tab(name => 'Nama/Ecasound', make_widget => \&save_scroller);
@@ -62,7 +61,7 @@ $text->{term} = $term = $tickit->term;
  
 }
 
-sub first_prompt {
+sub show_prompt {
 	$entry->set_text(prompt());
 	$entry->set_position(99); 
 }
