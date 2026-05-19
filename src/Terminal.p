@@ -338,61 +338,21 @@ sub gen_words {
 			$entry->text_splice($wordpos, $plen, $word) ;
 			return
 		}
+		my ($stub, $dir) =  fileparse($word);
+		print_to_terminal("word: $word, dir: $dir, stub: $stub");
 
-		if ( my ($stub, $dir) =  fileparse($word) )
-		{	
-			print_to_terminal("word: $word, dir: $dir, stub: $stub");
-			
-			$pwd = path($dir);
-			@$keywords = sort { $a cmp $b } 
-						map { $_->stringify} $pwd->children;
-			if ($stub =~ /\S/)
-			{
-				@$keywords = grep { m(  / $stub [^/]* $ )x } @$keywords;
-			}
-			map { path($_)->is_dir and s{$}{/} } @$keywords;
-			#print_to_terminal("found",scalar @$keywords , "files in this directory");
-			#print_to_terminal($_) for @$keywords; 
-		}
-		## substitute tilde slash
-
-		## handle directory
-
-		elsif (-d $word )
+		if ($dir) { $pwd = path($dir)  } # otherwise $pwd is current dir
+		
+		@$keywords = sort { $a cmp $b } 
+					map { $_->stringify} $pwd->children;
+		if ($stub =~ /\S/)
 		{
-			print_to_terminal("dir: $word");
-
-			## list directory contents if trailing slash
-
-			if ( $word =~ m{/$} )
-			{
-				$pwd = path($word);
-				print_to_terminal("trailing slash");
-				@$keywords = sort { $a cmp $b } 
-							map { -d $pwd->child($_) and s{$}{/}; $_ } 
-							map { $_->stringify } $pwd->children;
-				
-			}
-
-			## otherwise append slash
-
-			else 
-			{
-				$word =~ s{$}{/};
-				return $word;
-			}
+			@$keywords = grep { m(  / $stub [^/]* $ )x } @$keywords;
 		}
-
-		## return if match to existing file
-
-		elsif ( -f $word )
-		{
-			return $word
-		}
-
-		## partial filename
-
-
+		map { path($_)->is_dir and s{$}{/} } @$keywords;
+		#print_to_terminal("found",scalar @$keywords , "files in this directory");
+		#print_to_terminal($_) for @$keywords; 
+		
 	}
 	elsif ( command() =~ /^ \s* ! /x )
 	{ 
