@@ -341,13 +341,22 @@ sub gen_words {
 		my ($stub, $dir) =  fileparse($word);
 		print_to_terminal("word: $word, dir: $dir, stub: $stub");
 
-		if ($dir) { $pwd = path($dir)  } # otherwise $pwd is current dir
-		
-		@$keywords = sort { $a cmp $b } 
-					map { $_->stringify} $pwd->children;
-		if ($stub =~ /\S/)
+		$pwd = path($dir);
+
+		if ( $word =~ m(/) )
 		{
-			@$keywords = grep { m(  / $stub [^/]* $ )x } @$keywords;
+			@$keywords = sort { $a cmp $b } map { $_->stringify} $pwd->children;
+			if ($stub =~ /\S/)
+			{
+				@$keywords = grep { m(  / $stub [^/]* $ )x } @$keywords;
+			}
+		}
+		else {
+			@$keywords = sort { $a cmp $b } map { $_->basename} $pwd->children;
+			if ($stub =~ /\S/)
+			{
+				@$keywords = grep { /^$stub/ } @$keywords;
+			}
 		}
 		map { path($_)->is_dir and s{$}{/} } @$keywords;
 		#print_to_terminal("found",scalar @$keywords , "files in this directory");
