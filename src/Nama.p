@@ -166,10 +166,11 @@ sub main {
 	nama_cmd($config->{execute_on_project_load});
 	nama_cmd($config->{opts}->{X});
 	reconfigure_engine();
-	if (not $ti{3}){
+	if (not $ti{3}){ # no user tracks
 		say "Enter command to begin or type 'h' for help.";
 		$this_track = $tn{Main};
 	}
+	first_prompt();
 	$ui->loop();
 }
 

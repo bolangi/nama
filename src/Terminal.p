@@ -62,6 +62,10 @@ $text->{term} = $term = $tickit->term;
  
 }
 
+sub first_prompt {
+	$entry->set_text(prompt());
+	$entry->set_position(99); 
+}
 sub suspend
 {
 	$term->pause;
