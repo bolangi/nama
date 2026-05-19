@@ -9,7 +9,7 @@ use ::Log qw(logpkg logsub);
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
 use File::Basename qw(fileparse);
-use DDP;
+#use DDP;
 
 =comment - widgets
 
