@@ -117,12 +117,7 @@ $text->{user_command}			# user defined commands
 $text->{user_alias}				# user defined command aliases
 $text->{command_history}		# terminal command history
 $text->{command_index}
-$text->{tickit}
-$text->{vbox}
-$text->{entry}
-$text->{scrollbox}
 $text->{loop}
-$text->{root}
 $text->{screen_lines}			# 
 $text->{screen_columns}			#
 $text->{hotkey_playback_jumpsize}
@@ -131,6 +126,10 @@ $text->{eval_result}			# buffer for result of eval_perl()
 $text->{output_buffer}			# buffer for output of OSC commands
 $text->{midi_cmd} 				# list of Midish commands for the parser to recognize
 
+$text->{tickit}
+$text->{command_tab}
+$text->{track_list_tab}
+$text->{autocomplete_keywords}
 
 
 # lists used for autocompletion
