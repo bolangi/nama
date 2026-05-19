@@ -1,4 +1,9 @@
 Changes to Audio::Nama
+1.603 May 19, 2026
+    * tab completion 
+    * Ctrl-Z (twice) to drop into shell
+    * Shift-mouse-drag to select text
+    * multiple windows available as tabs (one window in use)
 
 l.602 Apr 8, 2026
     * conversion to tickit completed, basic functioning
