@@ -49,7 +49,6 @@ my $build = Module::Build->new(
 		'Tickit::Console' => 0,
 		'Tickit::Async' => 0,
 		'Tickit::Widget::Scroller::Item::Text' => 0,
-		'Tickit::Widget::Entry::Plugin::Completion' => 0,
 		'Tie::Simple' => 0,
 		'Time::HiRes'  => 0,
 		'Try::Tiny'  => 0,
