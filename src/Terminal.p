@@ -33,24 +33,21 @@ $text->{scrollers}
 =cut
 
 {
-my ($root, $tickit, $term, $entry, $scroller);
+my ($root, $tickit, $term, $entry, $scroller, $do_command);
 $text->{loop} = IO::Async::Loop->new;
 sub initialize_terminal {
-$root = 		Tickit::Console->new( 
-   on_line => sub {
-      	my ( $self, $line ) = @_;
-		$text->{scrollers}->[0]->push(Tickit::Widget::Scroller::Item::Text->new($line));
-		$text->{scrollers}->[0]->scroll_to_bottom;
-		#prompt();
-   	},
-	);
-
+$do_command = sub { my ( $self, $line ) = @_; 
+							print_to_terminal($line); 
+							$line =~ s/^.+?>\s*//;
+							process_line($line); 
+							$entry->set_text(prompt());
+							$entry->set_position(99); 
+						}; 
+$root = 		Tickit::Console->new( on_line => $do_command );
 my $tab = $root->add_tab(name => 'Nama/Ecasound', make_widget => \&save_scroller);
 my $tab2 = $root->add_tab(name => 'Track Listing', make_widget => \&save_scroller);
 sub save_scroller  { my $scroller = shift; push $text->{scrollers}->@*, $scroller; return $scroller }
-#p $text->{scrollers}; exit;
 $entry = find_first($root, 'Tickit::Widget::Entry');
-#p $entry ; exit;
 
 sub find_first {
 	my ($obj, $wanted_class) = @_;
@@ -58,13 +55,6 @@ sub find_first {
 	my ($first) = grep{ $_ isa  $wanted_class } @children;
 	$first;
 }
-my $do_command = sub { my ( $self, $line ) = @_; 
-							print_to_terminal($line); 
-							$line =~ s/^.+?>\s*//;
-							process_line($line); 
-							$self->set_text(prompt());
-							$self->set_position(99); 
-						}; 
 
 $tickit = Tickit::Async->new( root => $root);
 $text->{tickit} = $tickit;
@@ -146,8 +136,6 @@ sub print_to_terminal (@text) {
 	s/\n$// for @text;
 	return if not $text->{scrollers}->[0] isa 'Tickit::Widget::Scroller';
 	$text->{scrollers}->[0]->push(Tickit::Widget::Scroller::Item::Text->new($_)) for @text; 
-	#my $scroller = $text->{scrollers}->[0];
-	#$scroller->push();
 }
 
 sub prompt { 
