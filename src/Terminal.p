@@ -323,11 +323,29 @@ sub gen_words {
 		if ( ($var) = $word =~ m[  \$ (\w+) $ ]x  and $ENV{$var}){
 			print_to_terminal("var: $var");
 			$pwd = path($ENV{$var});
-			$entry->text_splice($wordpos, $plen, $ENV{$var}) ;
-			return( $pwd->stringify );
-		
+			my $item = $pwd->stringify;
+			if ($pwd->is_dir){
+				$item =~ s(/*$)(/);
+			}
+			$entry->text_splice($wordpos, $plen, $item) ;
+			return;
 		}
 
+		if ( my ($stub, $dir) =  fileparse($word) )
+		{	
+			print_to_terminal("word: $word, dir: $dir, stub: $stub");
+			
+			$pwd = path($dir);
+			@$keywords = sort { $a cmp $b } 
+						map { $_->stringify} $pwd->children;
+			if ($stub =~ /\S/)
+			{
+				@$keywords = grep { m(  / $stub [^/]* $ )x } @$keywords;
+			}
+			map { path($_)->is_dir and s{$}{/} } @$keywords;
+			#print_to_terminal("found",scalar @$keywords , "files in this directory");
+			#print_to_terminal($_) for @$keywords; 
+		}
 		## substitute tilde slash
 
 		elsif ($word =~  m{^ ~/ }x )
@@ -373,17 +391,6 @@ sub gen_words {
 
 		## partial filename
 
-		elsif ( my ($stub, $dir) =  fileparse($word) )
-		{	
-			print_to_terminal("word: $word, dir: $dir, stub: $stub");
-			
-			$pwd = path($dir);
-			@$keywords = sort { $a cmp $b } 
-						map { -d $pwd->child($_) and s{$}{/}; $_ } 
-						map { $_->stringify} $pwd->children;
-			#print_to_terminal("found",scalar @$keywords , "files in this directory");
-			#print_to_terminal($_) for @$keywords; 
-		}
 
 	}
 	elsif ( command() =~ /^ \s* ! /x )
