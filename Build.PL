@@ -46,7 +46,6 @@ my $build = Module::Build->new(
 		'Text::Diff'  => 0,
 		'Text::Format'  => 0,
 		'Text::Template' => 0,
-		'Tickit::Console' => 0,
 		'Tickit::Async' => 0,
 		'Tickit::Widget::Scroller::Item::Text' => 0,
 		'Tie::Simple' => 0,

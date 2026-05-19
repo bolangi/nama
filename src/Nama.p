@@ -33,12 +33,12 @@ use Storable qw(thaw);
 use Term::ReadLine;
 use Text::Diff;
 use Text::Format;
-use Tickit::Console;
 use Tickit::Async;
 use Tickit::Widget::Scroller::Item::Text;
-### We use our versions of these modules, overwriting Tickit::Widget::Entry pulled in by Tickit::Console
+### We use our versions of these modules
 use ::Entry;      # modified Tickit::Widget::Entry to bind printable keys
 use ::Completion; # modified Tickit::Widget::Entry::Plugin::Completion for directory handling
+use ::Console;	  # modified Tickit::Widget::Console to avoid redefine warnings
 use Tie::Simple;
 use Try::Tiny;
 use Path::Tiny;
