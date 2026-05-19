@@ -243,7 +243,7 @@ import_audio:
     Import a sound file (wav, ogg, mp3, etc.) to the
     current track, resampling it if necessary. The 
     imported file is set as current version.
-  short: import
+  short: imp import
   parameters: <string:full_path_to_file> [ <integer:frequency> ]
   example: |
     import /home/samples/bells.flac 
