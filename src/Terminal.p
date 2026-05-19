@@ -43,22 +43,21 @@ $do_command = sub { my ( $self, $line ) = @_;
 							show_prompt();
 						}; 
 $root = 		Tickit::Console->new( on_line => $do_command );
-my $tab = $root->add_tab(name => 'Nama/Ecasound', make_widget => \&save_scroller);
-my $tab2 = $root->add_tab(name => 'Track Listing', make_widget => \&save_scroller);
+my $tab  = $text->{command_tab}    = $root->add_tab(name => 'Nama/Ecasound', make_widget => \&save_scroller);
+my $tab2 = $text->{track_list_tab} = $root->add_tab(name => 'Track Listing', make_widget => \&save_scroller);
 sub save_scroller  { my $scroller = shift; push $text->{scrollers}->@*, $scroller; return $scroller }
 $entry = find_first($root, 'Tickit::Widget::Entry');
-
+$tickit = Tickit::Async->new( root => $root);
+$text->{tickit} = $tickit;
+$text->{term} = $term = $tickit->term;
+setup_key_bindings();
+ 
+}
 sub find_first {
 	my ($obj, $wanted_class) = @_;
 	my @children = $obj->children;
 	my ($first) = grep{ $_ isa  $wanted_class } @children;
 	$first;
-}
-
-$tickit = Tickit::Async->new( root => $root);
-$text->{tickit} = $tickit;
-$text->{term} = $term = $tickit->term;
- 
 }
 
 sub show_prompt {
@@ -71,19 +70,29 @@ sub suspend
 	kill STOP => $$;
 	$term->resume;
 }
-sub create_entry_widget {
+sub print_to_terminal (@text) {
+	s/\n$// for @text;
+	return if not $text->{scrollers}->[0] isa 'Tickit::Widget::Scroller';
+	$text->{scrollers}->[0]->push(Tickit::Widget::Scroller::Item::Text->new($_)) for @text; 
+}
 
-	my $do_command = sub { my ( $self, $line ) = @_; 
-							print_to_terminal($line); 
-							$line =~ s/^.+?>\s*//;
-							process_line($line); 
-							$self->set_text(prompt());
-							$self->set_position(99); 
-						}; 
-	$text->{entry} = $entry = Tickit::Widget::Entry->new( 
-		text 	 => prompt(),
-		on_enter => $do_command,
-	);
+sub prompt { 
+	logsub((caller(0))[3]);
+		my $prompt = join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
+}
+sub next_command {
+	$text->{command_index}++ unless $text->{command_index} == scalar $text->{command_history}->@*;
+	print_command();
+}
+sub previous_command {
+	$text->{command_index}-- unless $text->{command_index} == 0;
+	print_command();
+}
+sub print_command {
+	$entry->set_text(join " ",prompt(),$text->{command_history}->[$text->{command_index}])
+}
+sub setup_key_bindings {
+
 	Tickit::Widget::Entry::Plugin::Completion->apply($entry, 
 		gen_words => \&gen_words, 
 		use_popup => 0, 
@@ -124,38 +133,12 @@ sub create_entry_widget {
 	'C-z'		=> \&suspend,
 	); 
 
-	#$entry->set_text(prompt()); 
-	$entry->set_position(99);
-	$root->add($entry, valign => 'bottom');
-
-	$entry
 }
  
 sub command {
 	substr( $entry->text, length prompt() )
 }
 
-sub print_to_terminal (@text) {
-	s/\n$// for @text;
-	return if not $text->{scrollers}->[0] isa 'Tickit::Widget::Scroller';
-	$text->{scrollers}->[0]->push(Tickit::Widget::Scroller::Item::Text->new($_)) for @text; 
-}
-
-sub prompt { 
-	logsub((caller(0))[3]);
-		my $prompt = join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
-}
-sub next_command {
-	$text->{command_index}++ unless $text->{command_index} == scalar $text->{command_history}->@*;
-	print_command();
-}
-sub previous_command {
-	$text->{command_index}-- unless $text->{command_index} == 0;
-	print_command();
-}
-sub print_command {
-	$entry->set_text(join " ",prompt(),$text->{command_history}->[$text->{command_index}])
-}
 }
 our ($old_output_fh);
 sub redirect_stdout {
@@ -304,7 +287,7 @@ sub load_keywords {
 	push @keywords, keys %{$text->{iam}};
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
 	$text->{keywords}    = [sort {lc $a cmp lc $b} @keywords ];
-	$text->{autocomplete_commands}->@* = grep { not /_/ } $text->{keywords}->@*;
+	$text->{autocomplete_keywords}->@* = grep { not /_/ } $text->{keywords}->@*;
 	$text->{executables} = [sort {lc $a cmp lc $b} executables()];
 	$text->{project_list} = project_list();
 	$text->{effects}     =  [sort {lc $a cmp lc $b} keys $fx_cache->{partial_label_to_full}->%*];
@@ -417,7 +400,7 @@ sub gen_words {
 	   	$keywords = $text->{effects};
 	}
 	else { 
-		$keywords = $text->{autocomplete_commands} ;
+		$keywords = $text->{autocomplete_keywords} ;
 		$is_command++;
 	}
 
