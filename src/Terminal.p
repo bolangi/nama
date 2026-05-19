@@ -38,7 +38,7 @@ $do_command = sub { my ( $self, $line ) = @_;
 							process_line($line); 
 							show_prompt();
 						}; 
-$root = 		Tickit::Console->new( on_line => $do_command );
+$root =	Tickit::Console->new( on_line => $do_command );
 my $tab  = $text->{command_tab}    = $root->add_tab(name => 'Nama/Ecasound', make_widget => \&save_scroller);
 my $tab2 = $text->{track_list_tab} = $root->add_tab(name => 'Track Listing', make_widget => \&save_scroller);
 sub save_scroller  { my $scroller = shift; push @scrollers, $scroller; return $scroller }
