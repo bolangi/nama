@@ -35,7 +35,10 @@ use Text::Diff;
 use Text::Format;
 use Tickit;
 use Tickit::Async;
+use Tickit::Console;
+use Tickit::Widget::Scroller::Item::Text;
 use Tickit::Widgets qw(Static ScrollBox VBox);
+### We use our versions of these modules, overwriting Tickit::Widget::Entry pulled in by Tickit::Console
 use ::Entry;      # modified Tickit::Widget::Entry to bind printable keys
 use ::Completion; # modified Tickit::Widget::Entry::Plugin::Completion for directory handling
 use Tie::Simple;
@@ -163,11 +166,11 @@ sub main {
 	nama_cmd($config->{execute_on_project_load});
 	nama_cmd($config->{opts}->{X});
 	reconfigure_engine();
-	if (not $ti{3}){
+	if (not $ti{3}){ # no user tracks
 		say "Enter command to begin or type 'h' for help.";
 		$this_track = $tn{Main};
 	}
-	create_entry_widget();
+	show_prompt();
 	$ui->loop();
 }
 

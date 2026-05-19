@@ -259,10 +259,6 @@ sub initialize_interfaces {
 	::MidiEngine->new(name => $config->{midi_engine_name}) if $config->{use_midi}; 
 	initialize_ecasound_engine();
 		
-	start_osc_listener($config->{osc_listener_port}) 
-		if $config->{osc_listener_port} 
-		and can_load(modules => {'Protocol::OSC' => undef});
-	start_remote_listener($config->{remote_control_port}) if $config->{remote_control_port};
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		pager("project_root $config->{opts}->{d} specified on command line\n");
@@ -340,70 +336,6 @@ exit;
 	1;	
 }
 
-{ my $is_connected_remote;
-sub start_remote_listener {
-    my $port = shift;
-    pager_newline("Starting remote control listener on port $port");
-    $project->{remote_control_socket} = IO::Socket::INET->new( 
-        LocalAddr   => 'localhost',
-        LocalPort   => $port, 
-        Proto       => 'tcp',
-        Type        => SOCK_STREAM,
-        Listen      => 1,
-        Reuse       => 1) || die $!;
-    start_remote_watcher();
-}
-sub start_remote_watcher {
-    start_event(remote_control => AE::io(
-        $project->{remote_control_socket}, 0, \&process_remote_command ))
-}
-sub remove_remote_watcher {
-    stop_event('remote_control');
-}
-sub process_remote_command {
-    if ( ! $is_connected_remote++ ){
-        pager_newline("making connection");
-        $project->{remote_control_socket} =
-            $project->{remote_control_socket}->accept();
-		remove_remote_watcher();
-        start_event(remote_control => AE::io(
-            $project->{remote_control_socket}, 0, \&process_remote_command ));
-    }
-    my $input;
-    eval {     
-        $project->{remote_control_socket}->recv($input, $project->{remote_control_socket}->sockopt(SO_RCVBUF));
-    };
-    $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), revise_prompt(), return;
-    logpkg('debug',"Got remote control socketput: $input");
-	nama_cmd($input);
-	my $out;
-	{ no warnings 'uninitialized';
-		$out = $text->{eval_result} . "\n";
-	}
-    eval {
-        $project->{remote_control_socket}->send($out);
-    };
-    $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), revise_prompt(), return;
-	revise_prompt();
-}
-sub reset_remote_control_socket { 
-    undef $is_connected_remote;
-    undef $@;
-    $project->{remote_control_socket}->shutdown(2);
-    undef $project->{remote_control_socket};
-    remove_remote_watcher();
-	start_remote_listener($config->{remote_control_port});
-}
-}
-
-sub sanitize_remote_input {
-	my $input = shift;
-	my $error_msg;
-	do{ $input = "" ; $error_msg = "error: perl/shell code is not allowed"}
-		if $input =~ /(^|;)\s*(!|eval\b)/;
-	throw($error_msg) if $error_msg;
-	$input
-}
 sub initialize_ecasound_engine {
 	my %args;
 	my $class;

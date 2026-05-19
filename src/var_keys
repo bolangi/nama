@@ -15,8 +15,6 @@ $config->{latency_op}			# operator for latency compensation
 $config->{latency_op_init}		# initial values
 $config->{latency_op_set}		# subroutine for setting latency compensation
 $config->{_is_system_bus}		# a hash
-$config->{osc_listener_port}
-$config->{remote_control_port}
 $config->{use_midi}
 $config->{default_waveform_height}
 $config->{waveform_canvas_x}
@@ -119,12 +117,7 @@ $text->{user_command}			# user defined commands
 $text->{user_alias}				# user defined command aliases
 $text->{command_history}		# terminal command history
 $text->{command_index}
-$text->{tickit}
-$text->{vbox}
-$text->{entry}
-$text->{scrollbox}
 $text->{loop}
-$text->{root}
 $text->{screen_lines}			# 
 $text->{screen_columns}			#
 $text->{hotkey_playback_jumpsize}
@@ -133,10 +126,12 @@ $text->{eval_result}			# buffer for result of eval_perl()
 $text->{output_buffer}			# buffer for output of OSC commands
 $text->{midi_cmd} 				# list of Midish commands for the parser to recognize
 
-
+$text->{tickit}
+$text->{command_tab}
+$text->{track_list_tab}
 
 # lists used for autocompletion
-
+$text->{autocomplete_keywords}
 $text->{executables}
 $text->{project_list}
 $text->{effects}
@@ -161,9 +156,6 @@ $project->{current_waveform}->{track_name}
 $project->{playback_position}	# in order to restore position after a reconfigure
 $project->{mark_sequence_counter} # used for system assigned mark names
 $project->{redo}				# last commit removed by undo
-$project->{osc_socket}			# OSC listener socket
-$project->{osc}					# Protocol::OSC object
-$project->{remote_control_socket} # text command listener socket
 $project->{midi_history}		# all text commands sent to midish
 $project->{sample_rate}
 

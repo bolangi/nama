@@ -9,7 +9,7 @@ use ::Log qw(logpkg logsub);
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
 use File::Basename qw(fileparse);
-
+use DDP;
 
 =comment - widgets
 
@@ -17,59 +17,77 @@ Tree:
 
 tickit
 	term
-vbox (root)
-	scrollbox 
-		vbox 
-		   static
-		   static
-		   ...
-    entry
+	console
+		entry
+		tabbed widget
+		    tab widget for commands
+			tab widget for track list
 
 Names:
 
-$text->{tickit} 
-$text->{root} 
-$text->{vbox} 
-$text->{scrollbox} 
-$text->{term} 
-$text->{entry} 
+$text->{tickit}
 =cut
 
 {
-my ($root, $vbox, $tickit, $term, $scrollbox, $entry);
+my ($root, $tickit, $term, $entry, @scrollers, $do_command);
 $text->{loop} = IO::Async::Loop->new;
 sub initialize_terminal {
-$root = 		Tickit::Widget::VBox->new; 
-$vbox = 		Tickit::Widget::VBox->new; # contains multiple items to scroll through
-$scrollbox = Tickit::Widget::ScrollBox->new->set_child( $vbox );
-$tickit = Tickit::Async->new( root => $root);
-$text->{tickit} = $tickit;
-$text->{term} = $term = $tickit->term;
-my $lines = $term->lines;
+$do_command = sub { my ( $self, $line ) = @_; 
+							print_to_terminal($line); 
+							$line =~ s/^.+?>\s*//;
+							process_line($line); 
+							show_prompt();
+						}; 
+$root =	Tickit::Console->new( on_line => $do_command );
+my $tab  = $text->{command_tab}    = $root->add_tab(name => 'Nama/Ecasound', make_widget => \&save_scroller);
+my $tab2 = $text->{track_list_tab} = $root->add_tab(name => 'Track Listing', make_widget => \&save_scroller);
+sub save_scroller  { my $scroller = shift; push @scrollers, $scroller; return $scroller }
+$entry = find_first($root, 'Tickit::Widget::Entry');
+$text->{tickit} = $tickit = Tickit::Async->new( root => $root);
+$term = $tickit->term;
+setup_key_bindings();
  
-$root->add($scrollbox, valign => 'top', force_size => $lines - 2); 
-
+}
+sub find_first {
+	my ($obj, $wanted_class) = @_;
+	my @children = $obj->children;
+	my ($first) = grep{ $_ isa  $wanted_class } @children;
+	$first;
 }
 
+sub show_prompt {
+	$entry->set_text(prompt());
+	$entry->set_position(99); 
+}
 sub suspend
 {
 	$term->pause;
 	kill STOP => $$;
 	$term->resume;
 }
-sub create_entry_widget {
+sub print_to_terminal (@text) {
+	s/\n$// for @text;
+	return if not $scrollers[0] isa 'Tickit::Widget::Scroller';
+	$scrollers[0]->push(Tickit::Widget::Scroller::Item::Text->new($_)) for @text; 
+}
 
-	my $do_command = sub { my ( $self, $line ) = @_; 
-							print_to_terminal($line); 
-							$line =~ s/^.+?>\s*//;
-							process_line($line); 
-							$self->set_text(prompt());
-							$self->set_position(99); 
-						}; 
-	$text->{entry} = $entry = Tickit::Widget::Entry->new( 
-		text 	 => prompt(),
-		on_enter => $do_command,
-	);
+sub prompt { 
+	logsub((caller(0))[3]);
+		my $prompt = join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
+}
+sub next_command {
+	$text->{command_index}++ unless $text->{command_index} == scalar $text->{command_history}->@*;
+	print_command();
+}
+sub previous_command {
+	$text->{command_index}-- unless $text->{command_index} == 0;
+	print_command();
+}
+sub print_command {
+	$entry->set_text(join " ",prompt(),$text->{command_history}->[$text->{command_index}])
+}
+sub setup_key_bindings {
+
 	Tickit::Widget::Entry::Plugin::Completion->apply($entry, 
 		gen_words => \&gen_words, 
 		use_popup => 0, 
@@ -110,38 +128,12 @@ sub create_entry_widget {
 	'C-z'		=> \&suspend,
 	); 
 
-	#$entry->set_text(prompt()); 
-	$entry->set_position(99);
-	$root->add($entry, valign => 'bottom');
-
-	$entry
 }
  
 sub command {
 	substr( $entry->text, length prompt() )
 }
 
-sub print_to_terminal (@text) {
-	return if not defined $vbox;
-	$vbox->add( Tickit::Widget::Static->new( text => join ' ', @text ));
-	$scrollbox->scroll_to(1e5);
-}
-
-sub prompt { 
-	logsub((caller(0))[3]);
-		my $prompt = join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
-}
-sub next_command {
-	$text->{command_index}++ unless $text->{command_index} == scalar $text->{command_history}->@*;
-	print_command();
-}
-sub previous_command {
-	$text->{command_index}-- unless $text->{command_index} == 0;
-	print_command();
-}
-sub print_command {
-	$entry->set_text(join " ",prompt(),$text->{command_history}->[$text->{command_index}])
-}
 }
 our ($old_output_fh);
 sub redirect_stdout {
@@ -289,23 +281,23 @@ sub load_keywords {
 	push @keywords, keys %hyphenated;
 	push @keywords, keys %{$text->{iam}};
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
-	$text->{keywords}    = [sort {lc $a cmp lc $b} @keywords ];
-	$text->{autocomplete_commands}->@* = grep { not /_/ } $text->{keywords}->@*;
-	$text->{executables} = [sort {lc $a cmp lc $b} executables()];
+	$text->{keywords}    = [sort {$a cmp $b} @keywords ];
+	$text->{autocomplete_keywords}->@* = grep { not /_/ } $text->{keywords}->@*;
+	$text->{executables} = [sort {$a cmp $b} executables()];
 	$text->{project_list} = project_list();
-	$text->{effects}     =  [sort {lc $a cmp lc $b} keys $fx_cache->{partial_label_to_full}->%*];
+	$text->{effects}     =  [sort {$a cmp $b} keys $fx_cache->{partial_label_to_full}->%*];
 }
 
 sub project_list { 
 	my $root = path(project_root());
-	[ sort { lc $a cmp lc $b }
+	[ sort { $a cmp $b }
 	 	map { $_-> basename } 
 		grep { -d } 
 		$root->children ]; 
 }
 
 sub gen_words {
-	state $pwd = getcwd;
+	state $pwd = path(getcwd);
 	my %args = @_;
 	my $word = $args{word};
 	my $entry = $args{entry};
@@ -321,78 +313,55 @@ sub gen_words {
 
 	### handle file paths - import command only
 
-	elsif (command() =~ /import(-audio|-midi)? / ) # followed by a space
+	elsif (command() =~ /imp(ort)?(-audio|-midi)? / ) # followed by a space
 	{
-	print_to_terminal("word: $word");
+	#print_to_terminal("word: $word");
 
 		## substitute environment variable 
 
 		my ($var);
 		if ( ($var) = $word =~ m[  \$ (\w+) $ ]x  and $ENV{$var}){
-			print_to_terminal("var: $var");
+			#print_to_terminal("var: $var");
 			$pwd = path($ENV{$var});
-			$entry->text_splice($wordpos, $plen, $ENV{$var}) ;
-			return( $pwd->stringify );
+			my $item = $pwd->stringify;
+			if ($pwd->is_dir){
+				$item =~ s(/*$)(/);
+			}
+			$entry->text_splice($wordpos, $plen, $item) ;
+			return;
+		}
+		if ( $word eq '~' or $word =~ m(^~/) )
+		{
+			#say "got tilde";
+			$word =~ s{~/?}{$ENV{HOME}/};
+			$pwd = path($ENV{HOME});
+			$entry->text_splice($wordpos, $plen, $word) ;
+			return
+		}
+		my ($stub, $dir) =  fileparse($word);
+		#print_to_terminal("word: $word, dir: $dir, stub: $stub");
+
+		$pwd = path($dir);
+
+		if ( $word =~ m(/) )
+		{
+			@$keywords = sort { $a cmp $b } map { $_->stringify} $pwd->children;
+			if ($stub =~ /\S/)
+			{
+				@$keywords = grep { m(  / $stub [^/]* $ )x } @$keywords;
+			}
+		}
+		else {
+			@$keywords = sort { $a cmp $b } map { $_->basename} $pwd->children;
+			if ($stub =~ /\S/)
+			{
+				@$keywords = grep { /^$stub/ } @$keywords;
+			}
+		}
+		map { path($_)->is_dir and s{$}{/} } @$keywords;
+		#print_to_terminal("found",scalar @$keywords , "files in this directory");
+		#print_to_terminal($_) for @$keywords; 
 		
-		}
-
-		## substitute tilde slash
-
-		elsif ($word =~  m{^ ~/ }x )
-			{
-				$pwd = path "$ENV{HOME}";
-				$entry->text_splice($wordpos, $plen, "$ENV{HOME}/") ;
-				return
-			}
-
-		## handle directory
-
-		elsif (-d $word )
-		{
-			print_to_terminal("dir: $word");
-
-			## list directory contents if trailing slash
-
-			if ( $word =~ m{/$} )
-			{
-				$pwd = path($word);
-				print_to_terminal("trailing slash");
-				@$keywords = sort { lc $a cmp lc $b } 
-							map { -d $pwd->child($_) and s{$}{/}; $_ } 
-							map { $_->stringify } $pwd->children;
-				
-			}
-
-			## otherwise append slash
-
-			else 
-			{
-				$word =~ s{$}{/};
-				return $word;
-			}
-		}
-
-		## return if match to existing file
-
-		elsif ( -f $word )
-		{
-			return $word
-		}
-
-		## partial filename
-
-		elsif ( my ($stub, $dir) =  fileparse($word) )
-		{	
-			print_to_terminal("word: $word, dir: $dir, stub: $stub");
-			
-			$pwd = path($dir);
-			@$keywords = sort { lc $a cmp lc $b } 
-						map { -d $pwd->child($_) and s{$}{/}; $_ } 
-						map { $_->stringify} $pwd->children;
-			#print_to_terminal("found",scalar @$keywords , "files in this directory");
-			#print_to_terminal($_) for @$keywords; 
-		}
-
 	}
 	elsif ( command() =~ /^ \s* ! /x )
 	{ 
@@ -403,7 +372,7 @@ sub gen_words {
 	   	$keywords = $text->{effects};
 	}
 	else { 
-		$keywords = $text->{autocomplete_commands} ;
+		$keywords = $text->{autocomplete_keywords} ;
 		$is_command++;
 	}
 
