@@ -315,13 +315,13 @@ sub gen_words {
 
 	elsif (command() =~ /imp(ort)?(-audio|-midi)? / ) # followed by a space
 	{
-	print_to_terminal("word: $word");
+	#print_to_terminal("word: $word");
 
 		## substitute environment variable 
 
 		my ($var);
 		if ( ($var) = $word =~ m[  \$ (\w+) $ ]x  and $ENV{$var}){
-			print_to_terminal("var: $var");
+			#print_to_terminal("var: $var");
 			$pwd = path($ENV{$var});
 			my $item = $pwd->stringify;
 			if ($pwd->is_dir){
@@ -339,7 +339,7 @@ sub gen_words {
 			return
 		}
 		my ($stub, $dir) =  fileparse($word);
-		print_to_terminal("word: $word, dir: $dir, stub: $stub");
+		#print_to_terminal("word: $word, dir: $dir, stub: $stub");
 
 		$pwd = path($dir);
 
