@@ -129,11 +129,9 @@ $text->{midi_cmd} 				# list of Midish commands for the parser to recognize
 $text->{tickit}
 $text->{command_tab}
 $text->{track_list_tab}
-$text->{autocomplete_keywords}
-
 
 # lists used for autocompletion
-
+$text->{autocomplete_keywords}
 $text->{executables}
 $text->{project_list}
 $text->{effects}
