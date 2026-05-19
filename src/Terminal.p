@@ -297,7 +297,7 @@ sub project_list {
 }
 
 sub gen_words {
-	state $pwd = getcwd;
+	state $pwd = path(getcwd);
 	my %args = @_;
 	my $word = $args{word};
 	my $entry = $args{entry};
