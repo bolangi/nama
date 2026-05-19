@@ -281,16 +281,16 @@ sub load_keywords {
 	push @keywords, keys %hyphenated;
 	push @keywords, keys %{$text->{iam}};
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
-	$text->{keywords}    = [sort {lc $a cmp lc $b} @keywords ];
+	$text->{keywords}    = [sort {$a cmp $b} @keywords ];
 	$text->{autocomplete_keywords}->@* = grep { not /_/ } $text->{keywords}->@*;
-	$text->{executables} = [sort {lc $a cmp lc $b} executables()];
+	$text->{executables} = [sort {$a cmp $b} executables()];
 	$text->{project_list} = project_list();
-	$text->{effects}     =  [sort {lc $a cmp lc $b} keys $fx_cache->{partial_label_to_full}->%*];
+	$text->{effects}     =  [sort {$a cmp $b} keys $fx_cache->{partial_label_to_full}->%*];
 }
 
 sub project_list { 
 	my $root = path(project_root());
-	[ sort { lc $a cmp lc $b }
+	[ sort { $a cmp $b }
 	 	map { $_-> basename } 
 		grep { -d } 
 		$root->children ]; 
@@ -313,7 +313,7 @@ sub gen_words {
 
 	### handle file paths - import command only
 
-	elsif (command() =~ /import(-audio|-midi)? / ) # followed by a space
+	elsif (command() =~ /imp(ort)?(-audio|-midi)? / ) # followed by a space
 	{
 	print_to_terminal("word: $word");
 
@@ -349,7 +349,7 @@ sub gen_words {
 			{
 				$pwd = path($word);
 				print_to_terminal("trailing slash");
-				@$keywords = sort { lc $a cmp lc $b } 
+				@$keywords = sort { $a cmp $b } 
 							map { -d $pwd->child($_) and s{$}{/}; $_ } 
 							map { $_->stringify } $pwd->children;
 				
@@ -378,7 +378,7 @@ sub gen_words {
 			print_to_terminal("word: $word, dir: $dir, stub: $stub");
 			
 			$pwd = path($dir);
-			@$keywords = sort { lc $a cmp lc $b } 
+			@$keywords = sort { $a cmp $b } 
 						map { -d $pwd->child($_) and s{$}{/}; $_ } 
 						map { $_->stringify} $pwd->children;
 			#print_to_terminal("found",scalar @$keywords , "files in this directory");
