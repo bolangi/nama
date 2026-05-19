@@ -330,6 +330,14 @@ sub gen_words {
 			$entry->text_splice($wordpos, $plen, $item) ;
 			return;
 		}
+		if ( $word eq '~' or $word =~ m(^~/) )
+		{
+			#say "got tilde";
+			$word =~ s{~/?}{$ENV{HOME}/};
+			$pwd = path($ENV{HOME});
+			$entry->text_splice($wordpos, $plen, $word) ;
+			return
+		}
 
 		if ( my ($stub, $dir) =  fileparse($word) )
 		{	
@@ -347,13 +355,6 @@ sub gen_words {
 			#print_to_terminal($_) for @$keywords; 
 		}
 		## substitute tilde slash
-
-		elsif ($word =~  m{^ ~/ }x )
-			{
-				$pwd = path "$ENV{HOME}";
-				$entry->text_splice($wordpos, $plen, "$ENV{HOME}/") ;
-				return
-			}
 
 		## handle directory
 
