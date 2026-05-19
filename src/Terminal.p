@@ -25,15 +25,11 @@ tickit
 
 Names:
 
-$text->{tickit} 
-$text->{root} 
-$text->{term} 
-$text->{entry} 
-$text->{scrollers}
+$text->{tickit}
 =cut
 
 {
-my ($root, $tickit, $term, $entry, $scroller, $do_command);
+my ($root, $tickit, $term, $entry, @scrollers, $do_command);
 $text->{loop} = IO::Async::Loop->new;
 sub initialize_terminal {
 $do_command = sub { my ( $self, $line ) = @_; 
@@ -45,11 +41,10 @@ $do_command = sub { my ( $self, $line ) = @_;
 $root = 		Tickit::Console->new( on_line => $do_command );
 my $tab  = $text->{command_tab}    = $root->add_tab(name => 'Nama/Ecasound', make_widget => \&save_scroller);
 my $tab2 = $text->{track_list_tab} = $root->add_tab(name => 'Track Listing', make_widget => \&save_scroller);
-sub save_scroller  { my $scroller = shift; push $text->{scrollers}->@*, $scroller; return $scroller }
+sub save_scroller  { my $scroller = shift; push @scrollers, $scroller; return $scroller }
 $entry = find_first($root, 'Tickit::Widget::Entry');
-$tickit = Tickit::Async->new( root => $root);
-$text->{tickit} = $tickit;
-$text->{term} = $term = $tickit->term;
+$text->{tickit} = $tickit = Tickit::Async->new( root => $root);
+$term = $tickit->term;
 setup_key_bindings();
  
 }
@@ -72,8 +67,8 @@ sub suspend
 }
 sub print_to_terminal (@text) {
 	s/\n$// for @text;
-	return if not $text->{scrollers}->[0] isa 'Tickit::Widget::Scroller';
-	$text->{scrollers}->[0]->push(Tickit::Widget::Scroller::Item::Text->new($_)) for @text; 
+	return if not $scrollers[0] isa 'Tickit::Widget::Scroller';
+	$scrollers[0]->push(Tickit::Widget::Scroller::Item::Text->new($_)) for @text; 
 }
 
 sub prompt { 
