@@ -116,10 +116,6 @@ sub show_prompt {
 	$entry->set_position(99); 
 }
  
-sub command {
-	substr( $entry->text, length prompt() )
-}
-
 sub print_to_terminal (@text) {
 	chomp for @text;
 	$scroller->push( Tickit::Widget::Scroller::Item::Text->new( join ' ', @text ));
