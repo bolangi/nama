@@ -117,6 +117,7 @@ sub show_prompt {
 }
  
 sub print_to_terminal (@text) {
+	return unless defined $scroller;
 	chomp for @text;
 	$scroller->push( Tickit::Widget::Scroller::Item::Text->new( join ' ', @text ));
 	$scroller->scroll_to_bottom;
