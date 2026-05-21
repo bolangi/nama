@@ -136,7 +136,8 @@ sub previous_command {
 	print_command();
 }
 sub print_command {
-	$entry->set_text(join " ",prompt(),$text->{command_history}->[$text->{command_index}])
+	$entry->set_text(prompt().$text->{command_history}->[$text->{command_index}]);
+	$entry->set_position(99);
 }
  
 sub command {
