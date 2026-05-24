@@ -1,7 +1,32 @@
+=comment
+Tempo
+Tempo::Chunk
+Tempo::Bar
+Tempo::Beat
+Tempo::Tick
+
+steps:
+move Tempo -> Tempo::Chunk
+move @chunks
+@bars @beats @ticks
+
+package ::Tempo::Chunk;
+package ::Tempo::Bar;
+package ::Tempo::Beat;
+package ::Tempo::Tick;
+
+
+
+
+
+=cut
+
+
+
 #----- Tempo.pm ------
 # support for beats and bars
 
-package ::Tempo;
+package ::Tempo::Chunk;
 use v5.36;
 our $VERSION = 1.0;
 use ::Globals qw($config);
@@ -317,7 +342,7 @@ sub process_tempo_map {
 	-e $file->tempo_map or return;
 	initialize_tempo_map();
 	read_tempo_map_file($file->tempo_map);
-	create_marks_and_beat_index();
+	#create_marks_and_beat_index();
 }
 sub metronome_track {
 	my $m = 'metronome';
