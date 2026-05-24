@@ -23,9 +23,6 @@ package ::Tempo::Tick;
 
 
 
-#----- Tempo.pm ------
-# support for beats and bars
-
 package ::Tempo::Chunk;
 use v5.36;
 our $VERSION = 1.0;
@@ -44,7 +41,10 @@ use List::Util qw(sum);
 
 no warnings 'redefine';
 
+
 our @chunks;
+sub chunks { @chunks }
+
 our @beats;
 our @bars;
 
