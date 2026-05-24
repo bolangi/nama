@@ -6,11 +6,19 @@ Tempo::Beat
 Tempo::Tick
 
 steps:
-move Tempo -> Tempo::Chunk
-move @chunks
+move Tempo -> Tempo::Chunk DONE
+move @chunks -> ::Tempo::Chunk::chunks
 @bars @beats @ticks
 
-package ::Tempo::Chunk;
+package ::Tempo::Nod;
+previous
+next
+nth
+pulses # pulses per minute
+
+       
+
+
 package ::Tempo::Bar;
 package ::Tempo::Beat;
 package ::Tempo::Tick;
@@ -22,7 +30,7 @@ package ::Tempo::Tick;
 =cut
 
 
-
+{
 package ::Tempo::Chunk;
 use v5.36;
 our $VERSION = 1.0;
@@ -414,6 +422,7 @@ sub notation_to_time {
 	}	
 	$time += $in->start_time;
 	$time += $in->notation_to_time($bars,$beats, $ticks)
+}
 }
 	
 1
