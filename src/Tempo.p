@@ -18,7 +18,7 @@ pulses # pulses per minute
 
        
 
-
+{
 package ::Tempo::Bar;
 package ::Tempo::Beat;
 package ::Tempo::Tick;
@@ -33,7 +33,7 @@ sub notation_to_time {
 	my $tick = $beat->locate($tick_index);
 	return $tick->time
 }
-	
+}	
 
 
 
@@ -57,7 +57,7 @@ use List::Util qw(sum);
 # note: denominator of time signature, e.g. 4 means quarter note, 8 means eighth
 # count: numerator of time signature
 
-no warnings 'redefine';
+#no warnings 'redefine';
 
 
 our @chunks;
@@ -65,6 +65,11 @@ sub chunks { @chunks }
 
 our @beats;
 our @bars;
+sub new ($class, %args) {
+		$args{meter} //= '4/4';
+		my $self = bless \%args, $class;
+		push @chunks, $self;
+}
 
 sub locate_bar { # returns bar object or index
 	my $relative_bar = shift;
@@ -74,24 +79,25 @@ sub locate_bar { # returns bar object or index
 			{ $relative_bar -= $chunk->bars }
 		else { $in = $chunk, last }
 	}	
-	$in->bar_($relative_bar); # underscore for objects,
+	
+	$in # $in->bar($relative_bar); 
 }
 
-sub bar_ ($self, $bar) {
-	
+sub bar ($self, $bar_index) {
+	$self->bar_length
+		
 	
 	
 
 
 }
 
-
-sub note {
+sub note {  # denominator, 4, in 2/4
 	my $self = shift;
 	my ($note) = $self->{meter} =~ m| / (\d+) |x;
 	$note;
 }
-sub count {
+sub count { # numerator, 2, in 2/4
 	my $self = shift;
 	my ($count) = $self->{meter} =~ m| (\d+) / |x;
 	$count;
@@ -108,14 +114,14 @@ sub quarter_notes {
 	my $self = shift;
 	$self->beats * $self->note_fraction
 }
-sub note_lengths {
+sub note_length ($self, $index) {
 	my $self = shift;
-	my @note_lengths;
 	if ( $self->fixed_tempo ){
 		my $beat_length = 60 / $self->tempo;
 		my $seconds_per_note =  $beat_length * $self->note_fraction;
-		@note_lengths = $seconds_per_note x $self->notes;
+		return $seconds_per_note;	
 	}	
+=comment
 	else {
 		my $nl_start = note_length($self->start_tempo, $self->note_fraction);
 		my $nl_end   = note_length($self->end_tempo,   $self->note_fraction);
@@ -124,6 +130,27 @@ sub note_lengths {
 			push @note_lengths, ($nl_start + $incr * $delta);
 		}
 	}
+	@note_lengths
+=cut;
+}
+sub note_lengths {
+	my $self = shift;
+	my @note_lengths;
+	if ( $self->fixed_tempo ){
+		my $beat_length = 60 / $self->tempo;
+		my $seconds_per_note =  $beat_length * $self->note_fraction;
+		@note_lengths = $seconds_per_note x $self->notes;
+	}	
+=comment
+	else {
+		my $nl_start = note_length($self->start_tempo, $self->note_fraction);
+		my $nl_end   = note_length($self->end_tempo,   $self->note_fraction);
+		my $delta = ($nl_end - $nl_start) / $self->notes;
+		for my $incr (0 .. $self->notes - 1){
+			push @note_lengths, ($nl_start + $incr * $delta);
+		}
+	}
+=cut;
 	@note_lengths
 }
 sub bar_lengths {
@@ -158,6 +185,7 @@ sub end_time {
 	}
 	$time
 }
+
 sub ratio {
 	my ($start_bpm, $end_bpm, $beats) = @_;
 	my $ratio = exp( log(bpm_to_length($end_bpm) / bpm_to_length($start_bpm)) / $beats );
@@ -410,10 +438,7 @@ sub read_tempo_map {
 		#say "label: $+{label} bars: $+{bars} meter: $+{meter} tempo: $+{tempo}";
 		my %chunk;
 		@chunk{ @fields } = @+{ @fields };
-		$chunk{meter} //= '4/4';
-		my $chunk = bless \%chunk, '::Tempo';
-		#say Dumper $chunk;
-		push @chunks, $chunk;
+		::Tempo::Chunk->new(%chunk);
 		# make real mark$tempo_mark{$chunk->label} = $chunk if $chunk->label;
 	}
 }
