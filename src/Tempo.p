@@ -10,7 +10,7 @@ move Tempo -> Tempo::Chunk DONE
 move @chunks -> ::Tempo::Chunk::chunks
 @bars @beats @ticks
 
-package ::Tempo::Nod;
+package ::Tempo::Base; 
 previous
 next
 nth
@@ -23,7 +23,17 @@ package ::Tempo::Bar;
 package ::Tempo::Beat;
 package ::Tempo::Tick;
 
-
+sub notation_to_time {
+	my( $bar_index, $beat_index, $tick_index) = @_;
+	my $time = 0;
+	my ($bar) = locate($bar_index);
+	return $bar->time unless $beat_index;
+	my $beat = $bar->locate($beat_index);
+	return $beat->time unless $tick_index;
+	my $tick = $beat->locate($tick_index);
+	return $tick->time
+}
+	
 
 
 
@@ -55,6 +65,26 @@ sub chunks { @chunks }
 
 our @beats;
 our @bars;
+
+sub locate_bar { # returns bar object or index
+	my $relative_bar = shift;
+	my $in;
+	for my $chunk (@chunks){
+		if ($relative_bar  > $chunk->bars) # does not appear during this chunk
+			{ $relative_bar -= $chunk->bars }
+		else { $in = $chunk, last }
+	}	
+	$in->bar_($relative_bar); # underscore for objects,
+}
+
+sub bar_ ($self, $bar) {
+	
+	
+	
+
+
+}
+
 
 sub note {
 	my $self = shift;
