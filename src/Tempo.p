@@ -43,10 +43,49 @@ use ::Object qw(chunk index);
 sub new ($class, %args) {
 	bless \%args, $class
 }
-sub my_length {   }
+sub my_length ($self) {   }
+sub start_pos ($self)
+{
+	$self->chunk->start_pos + ($self->index - 1) * $self->chunk->count * $self->chunk->note_length
+}
+sub end_pos ($self)
+{
+	$self->start_pos + $self->chunk->count * $self->chunk->note_length
+}
+
+
+=comment
+sub time ($self) {
+	my $chunk = $self->chunk;
+	if ( $chunk->fixed_tempo ){
+		$chunk->start_pos + $chunk->count * $chunk->note_length * ( $self->index - 1 )
+	}
+	else { die "no support for tempo ramp" }
+
+}
+=cut
+}
+{
+package ::Tempo::Beat;
+use v5.36;
+use ::Object qw(bar index);
+
+sub new ($class, %args) {
+	bless \%args, $class
+}
+sub end_pos ($self) {
+	my $bar = $self->bar;
+	my $chunk = $self->bar->chunk;
+	if ( $chunk->fixed_tempo ){
+		$bar->end_pos + ($self->index - 1) * $chunk->note_length;
+	}
+	else { die "no support for tempo ramp" }
+
+}
 	
 
 }
+
 
 
 
