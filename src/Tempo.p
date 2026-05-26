@@ -52,6 +52,10 @@ sub end_pos ($self)
 {
 	$self->start_pos + $self->chunk->count * $self->chunk->note_length
 }
+sub beat ($self, $beat_index) {
+	::Tempo::Beat->new( bar => $self,
+						index => $beat_index);
+}
 
 
 =comment
@@ -124,7 +128,6 @@ sub locate_bar ($bar_index) {
 			{ $relative_bar -= $chunk->bars }
 		else { $in = $chunk, last }
 	}	
-	
 	$in->bar($relative_bar); 
 	
 }
