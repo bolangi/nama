@@ -45,7 +45,7 @@ package ::Tempo::Chunk;
 use v5.36;
 our $VERSION = 1.0;
 use ::Globals qw($config);
-use ::Object qw( label bars meter tempo ticks);
+use ::Object qw( label bars meter tempo tick index);
 use List::Util qw(sum);
 # we divide time in chunks specified by klick metronome tempo map
 # 
@@ -60,15 +60,31 @@ use List::Util qw(sum);
 #no warnings 'redefine';
 
 
+our $index = 0;
 our @chunks;
-sub chunks { @chunks }
-
 our @beats;
 our @bars;
+sub chunks { @chunks }
+
 sub new ($class, %args) {
 		$args{meter} //= '4/4';
+		$args{index} = $index++;
 		my $self = bless \%args, $class;
 		push @chunks, $self;
+}
+sub my_length ($self) {
+	$self->bars * $self->count * $self->note_length;
+}
+sub previous ($self) {
+	$self->index > 0 and $chunks[$self->index - 1] 
+}
+
+sub start_pos ($self) {
+	my $pos = 0; 
+	$self->previous ? $self->previous->end_pos : 0;
+}
+sub end_pos ($self) {
+	$self->start_pos + $self->my_length
 }
 
 sub locate_bar { # returns bar object or index
@@ -80,14 +96,12 @@ sub locate_bar { # returns bar object or index
 		else { $in = $chunk, last }
 	}	
 	
-	$in # $in->bar($relative_bar); 
+	$in->bar($relative_bar); 
+	
 }
 
 sub bar ($self, $bar_index) {
-	$self->bar_length
-		
-	
-	
+	$self->note_length
 
 
 }
@@ -114,12 +128,14 @@ sub quarter_notes {
 	my $self = shift;
 	$self->beats * $self->note_fraction
 }
-sub note_length ($self, $index) {
-	my $self = shift;
+sub note_fraction ($self) {
+	4 / $self->note;
+}
+
+sub note_length ($self){  #$index
 	if ( $self->fixed_tempo ){
 		my $beat_length = 60 / $self->tempo;
 		my $seconds_per_note =  $beat_length * $self->note_fraction;
-		return $seconds_per_note;	
 	}	
 =comment
 	else {
@@ -130,7 +146,6 @@ sub note_length ($self, $index) {
 			push @note_lengths, ($nl_start + $incr * $delta);
 		}
 	}
-	@note_lengths
 =cut;
 }
 sub note_lengths {
@@ -216,7 +231,6 @@ sub bpm_to_length {
 	60 / $bpm 
 }
 
-sub note_length { }
 sub note_position {
 	
 
@@ -316,11 +330,6 @@ sub end_tempo {
 	my $self = shift;
 	my ($end_bpm) = $self->fixed_tempo ? $self->tempo
 										 : $self->tempo =~ / - (\d+) /x;
-}
-
-sub note_fraction {
-	my $self = shift;
-	4 / $self->note;
 }
 
 	
