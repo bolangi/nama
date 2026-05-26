@@ -18,8 +18,6 @@ pulses # pulses per minute
 
        
 
-{
-package ::Tempo::Bar;
 package ::Tempo::Beat;
 package ::Tempo::Tick;
 
@@ -33,11 +31,24 @@ sub notation_to_time {
 	my $tick = $beat->locate($tick_index);
 	return $tick->time
 }
-}	
-
 
 
 =cut
+
+{
+package ::Tempo::Bar;
+use v5.36;
+use ::Object qw(chunk index);
+
+sub new ($class, %args) {
+	bless \%args, $class
+}
+sub my_length {   }
+	
+
+}
+
+
 
 
 {
@@ -66,6 +77,18 @@ our @beats;
 our @bars;
 sub chunks { @chunks }
 
+sub locate_bar ($bar_index) { 
+	my $relative_bar = $bar_index;
+	my $in;
+	for my $chunk (@chunks){
+		if ($relative_bar  > $chunk->bars) # does not appear during this chunk
+			{ $relative_bar -= $chunk->bars }
+		else { $in = $chunk, last }
+	}	
+	
+	$in->bar($relative_bar); 
+	
+}
 sub new ($class, %args) {
 		$args{meter} //= '4/4';
 		$args{index} = $index++;
@@ -87,45 +110,28 @@ sub end_pos ($self) {
 	$self->start_pos + $self->my_length
 }
 
-sub locate_bar { # returns bar object or index
-	my $relative_bar = shift;
-	my $in;
-	for my $chunk (@chunks){
-		if ($relative_bar  > $chunk->bars) # does not appear during this chunk
-			{ $relative_bar -= $chunk->bars }
-		else { $in = $chunk, last }
-	}	
-	
-	$in->bar($relative_bar); 
-	
-}
 
 sub bar ($self, $bar_index) {
-	$self->note_length
-
-
+	::Tempo::Bar->new( chunk => $self,
+						index => $bar_index);
 }
 
-sub note {  # denominator, 4, in 2/4
-	my $self = shift;
+
+sub note ($self) {  # denominator, 4, in 2/4
 	my ($note) = $self->{meter} =~ m| / (\d+) |x;
 	$note;
 }
-sub count { # numerator, 2, in 2/4
-	my $self = shift;
+sub count ($self) { # numerator, 2, in 2/4
 	my ($count) = $self->{meter} =~ m| (\d+) / |x;
 	$count;
 }
-sub beats {
-	my $self = shift;
+sub beats ($self) {
 	$self->bars * $self->count
 }
-sub ticks { 
-	my $self = shift;
+sub ticks ($self) { 
 	$self->quarter_notes * $config->{ticks_per_quarter_note}
 }
-sub quarter_notes {
-	my $self = shift;
+sub quarter_notes ($self) {
 	$self->beats * $self->note_fraction
 }
 sub note_fraction ($self) {
@@ -347,6 +353,8 @@ sub notation_to_time {
 
 }
 
+}
+
 package ::;
 use v5.36;
 use Data::Dumper::Concise;
@@ -363,18 +371,6 @@ my $chunks = qr| (?<tempo> \d+ ( - \d+)? )    |x;
 
 my @fields = qw( label bars meter tempo );
 
-sub beat {  
-	my $nth = shift;
-	sum @beats[0..$nth-1]
-}
-sub bar  {
-	my $nth = shift;
-	sum @bars[0..$nth-1]
-}
-sub barbeat { 					# position in time of nth bar, mth beat 
-	# advance bars
-	# 
-}
 sub change_in_tempo_map{ $config->{use_git} and git_diff($file->tempo_map) }
 sub refresh_tempo_map {
 		return; # XX disabled
@@ -425,7 +421,7 @@ sub metronome_track {
 }
 
 sub initialize_tempo_map { 
-	@chunks = @bars = @beats = ();	
+	@::Tempo::Chunk::chunks = ();
 	delete_tempo_marks();
 }
 sub delete_tempo_marks { for( ::Mark::all() ){ $_->remove if ref $_ =~ /Tempo/  } }
@@ -452,14 +448,6 @@ sub read_tempo_map {
 	}
 }
 
-sub create_marks_and_beat_index {
-	for my $chunk (@chunks){
-		push @bars, $chunk->bar_lengths;
-		push @beats, $chunk->beat_lengths;
-		::TempoMark->new(name => $chunk->label, time => $chunk->start_time);
-	}
-}
-
 sub render_metronome_track {
 	throw qq(metronome program not found, please install "klick"), return if not `which klick`;
 	local $this_track = metronome_track();
@@ -477,20 +465,17 @@ sub render_metronome_track {
 
 sub notation_to_time {
 	my( $bars, $beats, $ticks) = @_;
-	my $time = 0;
-	my $in;
-	for (@chunks){
-		if ($bars > $_->bars) # does not appear during this chunk
-			{ $bars -= $_->bars }
-		else { $in = $_, last }
-	}	
-	$time += $in->start_time;
-	$time += $in->notation_to_time($bars,$beats, $ticks)
-}
 }
 	
 1
 __END__
+sub create_marks_and_beat_index {
+	for my $chunk (@chunks){
+		push @bars, $chunk->bar_lengths;
+		push @beats, $chunk->beat_lengths;
+		::TempoMark->new(name => $chunk->label, time => $chunk->start_time);
+	}
+}
 
 #  [label:] bars [meter] tempo [pattern] [volume]
 
