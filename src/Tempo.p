@@ -1,99 +1,5 @@
-=comment
-Tempo
-Tempo::Chunk
-Tempo::Bar
-Tempo::Beat
-Tempo::Tick
-
-steps:
-move Tempo -> Tempo::Chunk DONE
-move @chunks -> ::Tempo::Chunk::chunks
-@bars @beats @ticks
-
-package ::Tempo::Base; 
-previous
-next
-nth
-pulses # pulses per minute
-
-       
-
-package ::Tempo::Beat;
-package ::Tempo::Tick;
-
-sub notation_to_time {
-	my( $bar_index, $beat_index, $tick_index) = @_;
-	my $time = 0;
-	my ($bar) = locate($bar_index);
-	return $bar->time unless $beat_index;
-	my $beat = $bar->locate($beat_index);
-	return $beat->time unless $tick_index;
-	my $tick = $beat->locate($tick_index);
-	return $tick->time
-}
-
-
-=cut
-
-{
-package ::Tempo::Bar;
-use v5.36;
-use ::Object qw(chunk index);
-
-sub new ($class, %args) {
-	bless \%args, $class
-}
-sub my_length ($self) {   }
-sub start_pos ($self)
-{
-	$self->chunk->start_pos + ($self->index - 1) * $self->chunk->count * $self->chunk->note_length
-}
-sub end_pos ($self)
-{
-	$self->start_pos + $self->chunk->count * $self->chunk->note_length
-}
-sub beat ($self, $beat_index) {
-	::Tempo::Beat->new( bar => $self,
-						index => $beat_index);
-}
-
-
-=comment
-sub time ($self) {
-	my $chunk = $self->chunk;
-	if ( $chunk->fixed_tempo ){
-		$chunk->start_pos + $chunk->count * $chunk->note_length * ( $self->index - 1 )
-	}
-	else { die "no support for tempo ramp" }
-
-}
-=cut
-}
-{
-package ::Tempo::Beat;
-use v5.36;
-use ::Object qw(bar index);
-
-sub new ($class, %args) {
-	bless \%args, $class
-}
-sub end_pos ($self) {
-	my $bar = $self->bar;
-	my $chunk = $self->bar->chunk;
-	if ( $chunk->fixed_tempo ){
-		$bar->end_pos + ($self->index - 1) * $chunk->note_length;
-	}
-	else { die "no support for tempo ramp" }
-
-}
-	
-
-}
-
-
-
-
-
+# contains Tempo::Chunk, Tempo::Bar, Tempo::Beat, Tempo::Tick 
+# routines for reading tempo map are in the root namespace
 {
 package ::Tempo::Chunk;
 use v5.36;
@@ -180,11 +86,12 @@ sub note_fraction ($self) {
 	4 / $self->note;
 }
 
-sub note_length ($self){  #$index
+sub note_length ($self){
 	if ( $self->fixed_tempo ){
 		my $beat_length = 60 / $self->tempo;
 		my $seconds_per_note =  $beat_length * $self->note_fraction;
 	}	
+}
 =comment
 	else {
 		my $nl_start = note_length($self->start_tempo, $self->note_fraction);
@@ -195,82 +102,10 @@ sub note_length ($self){  #$index
 		}
 	}
 =cut;
-}
-sub note_lengths {
-	my $self = shift;
-	my @note_lengths;
-	if ( $self->fixed_tempo ){
-		my $beat_length = 60 / $self->tempo;
-		my $seconds_per_note =  $beat_length * $self->note_fraction;
-		@note_lengths = $seconds_per_note x $self->notes;
-	}	
-=comment
-	else {
-		my $nl_start = note_length($self->start_tempo, $self->note_fraction);
-		my $nl_end   = note_length($self->end_tempo,   $self->note_fraction);
-		my $delta = ($nl_end - $nl_start) / $self->notes;
-		for my $incr (0 .. $self->notes - 1){
-			push @note_lengths, ($nl_start + $incr * $delta);
-		}
-	}
-=cut;
-	@note_lengths
-}
-sub bar_lengths {
-	my $self = shift;
-	my @beats = $self->beat_lengths;
-	my @bars;
-	while (scalar @beats){
-		push @bars, sum splice @beats, 0, $self->count; 
-	}
-	@bars
-}
-sub length {
-	my $self = shift;
-	my $length = sum $self->bar_lengths();
-}
-
-sub start_time {
-	my $self = shift;
-	my $time = 0;
-	for (@chunks){
-		last if $_ == $self; # exit before final increment
-		$time += $_->length;
-	}
-	$time
-}
-sub end_time {
-	my $self = shift;
-	my $time = 0;
-	for (@chunks){
-		$time += $_->length; # increment before exit
-		last if $_ == $self;
-	}
-	$time
-}
 
 sub ratio {
 	my ($start_bpm, $end_bpm, $beats) = @_;
 	my $ratio = exp( log(bpm_to_length($end_bpm) / bpm_to_length($start_bpm)) / $beats );
-
-	# To calculate the factor for multiplying by beat length of note n 
-	# to get beat length of note n+1
-	#
-	# t final / t initial = r^n
-	#
-	# where
-	# t final is the final beat interval
-	# t initial is the initial beat interval
-	# r is the ratio
-	# n is the number of beats for the transition
-	#
-	# Taking the natural logarithm of both sides,
-	#
-	# ln( t final / t initial ) = n ln r
-	#
-	# Hence
-	#
-	# r = exp [ ln( t final / t initial )  / n ]
 
 }
 
@@ -279,10 +114,6 @@ sub bpm_to_length {
 	60 / $bpm 
 }
 
-sub note_position {
-	
-
-}
 sub note_position_during_tempo_ramp {
 
 =comment
@@ -379,22 +210,72 @@ sub end_tempo {
 	my ($end_bpm) = $self->fixed_tempo ? $self->tempo
 										 : $self->tempo =~ / - (\d+) /x;
 }
+}
 
-	
-sub notation_to_time {
-	my $self = shift;
-	my ($bars, $beats, $ticks) = @_;
-	$beats-- unless ! $beats; # first beat is time zero
-	$bars--  unless ! $bars;  # first bar is time zero;
-	$ticks-- unless ! $ticks; # first tick is time zero;
-	my $position_in_ticks = ($bars * $self->count + $beats) * $self->note_fraction * $config->{ticks_per_quarter_note} + $ticks;
+{
+package ::Tempo::Bar;
+use v5.36;
+use ::Object qw(chunk index);
 
-	$self->fixed_tempo ? bpm_to_length($self->tempo) * $self->note_fraction / $config->{ticks_per_quarter_note}  * $position_in_ticks
-					   : linear_ramp_position_mth_of_n ( $self->start_tempo, $self->end_tempo, $self->ticks, $position_in_ticks )
+sub new ($class, %args) {
+	bless \%args, $class
+}
+sub start_pos ($self)
+{
+	$self->chunk->start_pos + ($self->index - 1) * $self->chunk->count * $self->chunk->note_length
+}
+sub end_pos ($self)
+{
+	$self->start_pos + $self->chunk->count * $self->chunk->note_length
+}
+sub beat ($self, $beat_index) {
+	::Tempo::Beat->new( bar => $self,
+						index => $beat_index);
+}
+}
+
+
+{
+package ::Tempo::Beat;
+use v5.36;
+use ::Object qw(bar index);
+
+sub new ($class, %args) {
+	bless \%args, $class
+}
+sub end_pos ($self) {
+	my $bar = $self->bar;
+	my $chunk = $self->bar->chunk;
+	if ( $chunk->fixed_tempo ){
+		$bar->end_pos + ($self->index - 1) * $chunk->note_length;
+	}
+	else { die "no support for tempo ramp" }
+
+}
+sub tick ($self, $tick_index) {
+	::Tempo::Tick->new( beat => $self, index => $tick_index)
+}
 	
 
 }
 
+{
+package ::Tempo::Tick;
+use v5.36;
+use ::Object qw(beat index);
+
+sub new ($class, %args) {
+	bless \%args, $class
+}
+sub end_pos ($self) {
+	my $beat = $self->beat;
+	my $chunk = $beat->bar->chunk;
+	if ( $chunk->fixed_tempo ){
+		$beat->end_pos + ($self->index - 1) * $chunk->note_length * 24;
+	}
+	else { die "no support for tempo ramp" }
+
+}
 }
 
 package ::;
@@ -506,18 +387,35 @@ sub render_metronome_track {
 }
 
 sub notation_to_time {
-	my( $bars, $beats, $ticks) = @_;
+	my( $bar_index, $beat_index, $tick_index) = @_;
+	my ($bar) = locate_bar($bar_index);
+	return $bar->start_pos unless $beat_index; 
+	my $beat = $bar->beat($beat_index);
+	return $beat->start_pos unless $tick_index;
+	my $tick = $beat->tick($tick_index);
+	return $tick->start_pos;
 }
+
+
+=comment
+sub notation_to_time {
+	my ($bars, $beats, $ticks) = @_;
+	$beats-- unless ! $beats; # first beat is time zero
+	$bars--  unless ! $bars;  # first bar is time zero;
+	$ticks-- unless ! $ticks; # first tick is time zero;
+	my $position_in_ticks = ($bars * $self->count + $beats) * $self->note_fraction * $config->{ticks_per_quarter_note} + $ticks;
+
+	$self->fixed_tempo ? bpm_to_length($self->tempo) * $self->note_fraction / $config->{ticks_per_quarter_note}  * $position_in_ticks
+					   : linear_ramp_position_mth_of_n ( $self->start_tempo, $self->end_tempo, $self->ticks, $position_in_ticks )
+	
+
+}
+       
+=cut
+
 	
 1
 __END__
-sub create_marks_and_beat_index {
-	for my $chunk (@chunks){
-		push @bars, $chunk->bar_lengths;
-		push @beats, $chunk->beat_lengths;
-		::TempoMark->new(name => $chunk->label, time => $chunk->start_time);
-	}
-}
 
 #  [label:] bars [meter] tempo [pattern] [volume]
 
