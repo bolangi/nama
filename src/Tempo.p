@@ -279,7 +279,17 @@ sub end_pos ($self) {
 	my $beat = $self->beat;
 	my $chunk = $beat->bar->chunk;
 	if ( $chunk->fixed_tempo ){
-		$beat->end_pos + ($self->index - 1) * $chunk->note_length * 24;
+		$beat->start_pos + $self->index * $chunk->note_length / 24;
+	}
+	else { die "no support for tempo ramp" }
+
+}
+sub start_pos ($self) {
+	my $beat = $self->beat;
+	my $bar = $beat->bar;
+	my $chunk = $bar->chunk;
+	if ( $chunk->fixed_tempo ){
+		$bar->start_pos + ($self->index - 1) * $chunk->note_length/ 24;
 	}
 	else { die "no support for tempo ramp" }
 
