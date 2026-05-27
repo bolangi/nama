@@ -51,7 +51,6 @@ sub previous ($self) {
 }
 
 sub start_pos ($self) {
-	my $pos = 0; 
 	$self->previous ? $self->previous->end_pos : 0;
 }
 sub end_pos ($self) {
@@ -247,7 +246,16 @@ sub end_pos ($self) {
 	my $bar = $self->bar;
 	my $chunk = $self->bar->chunk;
 	if ( $chunk->fixed_tempo ){
-		$bar->end_pos + ($self->index - 1) * $chunk->note_length;
+		$bar->start_pos + $self->index * $chunk->note_length;
+	}
+	else { die "no support for tempo ramp" }
+
+}
+sub start_pos ($self) {
+	my $bar = $self->bar;
+	my $chunk = $self->bar->chunk;
+	if ( $chunk->fixed_tempo ){
+		$bar->start_pos + ($self->index - 1) * $chunk->note_length;
 	}
 	else { die "no support for tempo ramp" }
 
