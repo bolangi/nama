@@ -413,24 +413,6 @@ sub notation_to_time {
 	my $tick = $beat->tick($tick_index);
 	return $tick->start_pos;
 }
-
-
-=comment
-sub notation_to_time {
-	my ($bars, $beats, $ticks) = @_;
-	$beats-- unless ! $beats; # first beat is time zero
-	$bars--  unless ! $bars;  # first bar is time zero;
-	$ticks-- unless ! $ticks; # first tick is time zero;
-	my $position_in_ticks = ($bars * $self->count + $beats) * $self->note_fraction * $config->{ticks_per_quarter_note} + $ticks;
-
-	$self->fixed_tempo ? bpm_to_length($self->tempo) * $self->note_fraction / $config->{ticks_per_quarter_note}  * $position_in_ticks
-					   : linear_ramp_position_mth_of_n ( $self->start_tempo, $self->end_tempo, $self->ticks, $position_in_ticks )
-	
-
-}
-       
-=cut
-
 	
 1
 __END__
