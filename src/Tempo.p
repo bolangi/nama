@@ -406,7 +406,7 @@ sub render_metronome_track {
 
 sub notation_to_time {
 	my( $bar_index, $beat_index, $tick_index) = @_;
-	my ($bar) = locate_bar($bar_index);
+	my ($bar) = ::Tempo::Chunk::locate_bar($bar_index);
 	return $bar->start_pos unless $beat_index; 
 	my $beat = $bar->beat($beat_index);
 	return $beat->start_pos unless $tick_index;
