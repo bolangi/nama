@@ -71,7 +71,7 @@ setpos:
   type: transport
   what: Set current playhead position (in seconds).
   short: sp
-  parameters: <float:position_seconds>
+  parameters: <float:position_seconds> | <string: bar:beat(:tick)>
   example: setpos 65.5 # set current position to 65.5 seconds.
 forward:
   type: transport
