@@ -353,7 +353,6 @@ our @ISA = '::Mark';
 	use ::Log qw(logpkg);
 	use ::Globals qw(:all);
 	our @ISA = '::Mark';
-	use SUPER; 
 	use ::Object qw( 
 					 name 
 					bar
