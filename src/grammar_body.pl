@@ -330,7 +330,7 @@ forward: _forward timevalue {
 	::forward( $item{timevalue} ); 1}
 rewind: _rewind timevalue {
 	::rewind( $item{timevalue} ); 1}
-timevalue: min_sec | decimal_seconds
+timevalue: min_sec | decimal_seconds | bar_beat_tick | bar_beat
 seconds: samples  # samples returns seconds
 seconds: /\d+/
 samples: /\d+sa/ {
@@ -339,6 +339,9 @@ samples: /\d+sa/ {
  	$return = $samples/$::project->{sample_rate}
 }
 min_sec: /\d+/ ':' /\d+/ { $item[1] * 60 + $item[3] }
+
+bar_beat_tick: dd '-' dd '-' dd { ::notation_to_time($item->@*) } 
+bar_beat:      dd '-' dd        { ::notation_to_time($item->@*) } 
 
 jump_to_start: _jump_to_start { ::jump_to_start(); 1 }
 jump_to_end: _jump_to_end { ::jump_to_end(); 1 }
