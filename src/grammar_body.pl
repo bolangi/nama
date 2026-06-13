@@ -340,8 +340,8 @@ samples: /\d+sa/ {
 }
 min_sec: /\d+/ ':' /\d+/ { $item[1] * 60 + $item[3] }
 
-bar_beat_tick: dd '-' dd '-' dd { ::notation_to_time($item->@*) } 
-bar_beat:      dd '-' dd        { ::notation_to_time($item->@*) } 
+bar_beat_tick: dd '-' dd '-' dd { ::notation_to_time(@$item[1,2,3]) } 
+bar_beat:      dd '-' dd        { ::notation_to_time(@$item[1,2  ]) } 
 
 jump_to_start: _jump_to_start { ::jump_to_start(); 1 }
 jump_to_end: _jump_to_end { ::jump_to_end(); 1 }
