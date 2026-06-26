@@ -32,7 +32,7 @@ sub locate_bar ($bar_index) {
 	for my $chunk (@chunks){
 		if ($relative_bar  > $chunk->bars) # does not appear during this chunk
 			{ $relative_bar -= $chunk->bars }
-		else { $in = $chunk, last }
+		else { $in = $chunk; last }
 	}	
 	$in->bar($relative_bar); 
 	
