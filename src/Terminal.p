@@ -11,80 +11,54 @@ use List::MoreUtils qw(first_index);
 use File::Basename qw(fileparse);
 #use DDP;
 
-=comment - widgets
 
-Tree:
+
+=comment
+
+widget tree:
 
 tickit
 	term
-	console
-		entry
-		tabbed widget
-		    tab widget for commands
-			tab widget for track list
+vbox (root) 
+	scroller
+		item
+		item
+    entry
 
-Names:
-
-$text->{tickit}
 =cut
 
 {
-my ($root, $tickit, $term, $entry, @scrollers, $do_command);
+my ($root, $tickit, $term, $scroller, $entry);
 $text->{loop} = IO::Async::Loop->new;
+
 sub initialize_terminal {
-$do_command = sub { my ( $self, $line ) = @_; 
+	$root =	Tickit::Widget::VBox->new; 
+	$scroller = Tickit::Widget::Scroller->new;
+	$tickit = Tickit::Async->new( root => $root);
+	$text->{tickit} = $tickit;
+	$text->{term} = $term = $tickit->term;
+	my $lines = $term->lines;
+	create_entry_widget();
+	setup_key_bindings();
+	$root->add($scroller, valign => 'top', force_size => $lines - 2); 
+	$root->add($entry, valign => 'top');
+}
+
+sub create_entry_widget {
+
+	my $do_command = sub { my ( $self, $line ) = @_; 
 							print_to_terminal($line); 
 							$line =~ s/^.+?>\s*//;
 							process_line($line); 
 							show_prompt();
 						}; 
-$root =	Tickit::Console->new( on_line => $do_command );
-my $tab  = $text->{command_tab}    = $root->add_tab(name => 'Nama/Ecasound', make_widget => \&save_scroller);
-my $tab2 = $text->{track_list_tab} = $root->add_tab(name => 'Track Listing', make_widget => \&save_scroller);
-sub save_scroller  { my $scroller = shift; push @scrollers, $scroller; return $scroller }
-$entry = find_first($root, 'Tickit::Widget::Entry');
-$text->{tickit} = $tickit = Tickit::Async->new( root => $root);
-$term = $tickit->term;
-setup_key_bindings();
- 
-}
-sub find_first {
-	my ($obj, $wanted_class) = @_;
-	my @children = $obj->children;
-	my ($first) = grep{ $_ isa  $wanted_class } @children;
-	$first;
-}
 
-sub show_prompt {
-	$entry->set_text(prompt());
-	$entry->set_position(99); 
-}
-sub suspend
-{
-	$term->pause;
-	kill STOP => $$;
-	$term->resume;
-}
-sub print_to_terminal (@text) {
-	s/\n$// for @text;
-	return if not $scrollers[0] isa 'Tickit::Widget::Scroller';
-	$scrollers[0]->push(Tickit::Widget::Scroller::Item::Text->new($_)) for @text; 
-}
+	$entry = Tickit::Widget::Entry->new( 
+		text 	 => prompt(),
+		on_enter => $do_command,
+	);
 
-sub prompt { 
-	logsub((caller(0))[3]);
-		my $prompt = join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
-}
-sub next_command {
-	$text->{command_index}++ unless $text->{command_index} == scalar $text->{command_history}->@*;
-	print_command();
-}
-sub previous_command {
-	$text->{command_index}-- unless $text->{command_index} == 0;
-	print_command();
-}
-sub print_command {
-	$entry->set_text(join " ",prompt(),$text->{command_history}->[$text->{command_index}])
+	show_prompt();
 }
 sub setup_key_bindings {
 
@@ -128,6 +102,42 @@ sub setup_key_bindings {
 	'C-z'		=> \&suspend,
 	); 
 
+}
+
+sub suspend
+{
+	$term->pause;
+	kill STOP => $$;
+	$term->resume;
+}
+
+sub show_prompt {
+	$entry->set_text(prompt());
+	$entry->set_position(99); 
+}
+ 
+sub print_to_terminal (@text) {
+	return unless defined $scroller;
+	chomp for @text;
+	$scroller->push( Tickit::Widget::Scroller::Item::Text->new( join ' ', @text ));
+	$scroller->scroll_to_bottom;
+}
+
+sub prompt { 
+	logsub((caller(0))[3]);
+		my $prompt = join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
+}
+sub next_command {
+	$text->{command_index}++ unless $text->{command_index} == scalar $text->{command_history}->@*;
+	print_command();
+}
+sub previous_command {
+	$text->{command_index}-- unless $text->{command_index} == 0;
+	print_command();
+}
+sub print_command {
+	$entry->set_text(prompt().$text->{command_history}->[$text->{command_index}]);
+	$entry->set_position(99);
 }
  
 sub command {

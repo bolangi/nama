@@ -71,8 +71,10 @@ setpos:
   type: transport
   what: Set current playhead position (in seconds).
   short: sp
-  parameters: <float:position_seconds>
-  example: setpos 65.5 # set current position to 65.5 seconds.
+  parameters: <float:position_seconds> | <string: minutes:seconds> | <string: bar/beat[/tick]>
+  example: |
+    setpos 65.5 # set current position to 65.5 seconds.
+    setpos 1/4  # set position to beginning of 4th beat, 1st bar
 forward:
   type: transport
   what: Move playback position forwards (in seconds).
@@ -961,11 +963,13 @@ to_mark:
     tmk 2 # Move to the mark with the index 2.
 add_mark:
   type: mark
-  what: Drop a new mark at the current playback position. this will fail, if a mark is already placed on that exact position.
+  what: create a mark, by default at the current playback position. 
   short: mark amk k
-  parameters: [ <string:mark_id> ]
+  parameters: [ <string:mark_id> ] [ <string:timevalue> ]
   example: |
-    mark start # Create a mark named "start" at the current position.
+    mark start      # create a mark named "start" at the current position.
+    mark chorus 4/1 # create a mark named "chorus" at first beat of 4th bar
+    mark end 25.4   # create a mark named "end" at 25.4 seconds
 remove_mark:
   type: mark
   what: Remove a mark
@@ -1699,4 +1703,9 @@ set_sample_rate:
   short: ssr
   what: configure the sample rate for the current project or report sample rate if no parameter
   parameters: <integer:sample-rate>
+notation_to_time:
+  type: tempo
+  short: ntt
+  what: print time value (seconds) of bar/beat/tick or other notation.
+  parameters: <string:time_value>
 ...

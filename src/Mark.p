@@ -353,13 +353,13 @@ our @ISA = '::Mark';
 	use ::Log qw(logpkg);
 	use ::Globals qw(:all);
 	our @ISA = '::Mark';
-	use SUPER; 
 	use ::Object qw( 
 					 name 
-					bars	
-					beats
-					ticks
+					bar
+					beat
+					tick
 					 );
+	sub time ($self) { notation_to_time($self->bar, $self->beat, $self->tick)  }
 }
 
 1;
