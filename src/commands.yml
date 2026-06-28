@@ -1703,4 +1703,9 @@ set_sample_rate:
   short: ssr
   what: configure the sample rate for the current project or report sample rate if no parameter
   parameters: <integer:sample-rate>
+notation_to_time:
+  type: tempo
+  short: ntt
+  what: print time value (seconds) of bar/beat/tick or other notation.
+  parameters: <string:time_value>
 ...

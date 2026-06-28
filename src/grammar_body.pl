@@ -340,8 +340,9 @@ samples: /\d+sa/ {
 }
 min_sec: /\d+/ ':' /\d+/ { $item[1] * 60 + $item[3] }
 
-bar_beat_tick: bar '-' beat '-' tick { ::notation_to_time(@item{qw(bar beat tick)}) } 
-bar_beat:      bar '-' beat          { ::notation_to_time(@item{qw(bar beat     )}) } 
+notation_to_time: _notation_to_time timevalue { ::pager_newline( $item{timevalue} );1 }
+bar_beat_tick: bar '/' beat '/' tick { ::notation_to_time(@item{qw(bar beat tick)}) } 
+bar_beat:      bar '/' beat          { ::notation_to_time(@item{qw(bar beat     )}) } 
 bar: dd
 beat: dd
 tick: dd 
