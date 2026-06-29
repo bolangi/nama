@@ -354,7 +354,6 @@ sub process_tempo_map {
 	-e $file->tempo_map or return;
 	initialize_tempo_map();
 	read_tempo_map_file($file->tempo_map);
-	#create_marks_and_beat_index();
 }
 sub metronome_track {
 	my $m = 'metronome';
