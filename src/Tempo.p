@@ -317,7 +317,6 @@ sub refresh_tempo_map {
 		return; # XX disabled
 		return unless -e $file->tempo_map or change_in_tempo_map();
 		git_commit('change in tempo map', $file->tempo_map);
-		delete_tempo_marks();
 		initialize_tempo_map();
 		read_tempo_map($file->tempo_map);
 		
@@ -353,7 +352,7 @@ sub process_tempo_map {
 	local $this_track = metronome_track();
 	-e $file->tempo_map or return;
 	initialize_tempo_map();
-	read_tempo_map_file($file->tempo_map);
+	read_tempo_map($file->tempo_map);
 }
 sub metronome_track {
 	my $m = 'metronome';
@@ -366,13 +365,13 @@ sub initialize_tempo_map {
 }
 sub delete_tempo_marks { for( ::Mark::all() ){ $_->remove if ref $_ =~ /Tempo/  } }
 
-sub read_tempo_map_file {
+sub read_tempo_map {
 	my $file = shift;
 	return unless -e $file;
 	my @lines = grep{ ! /^\s*$/ } ::strip_comments(read_file($file));
-	read_tempo_map( @lines );
+	parse_tempo_map( @lines );
 }
-sub read_tempo_map {
+sub parse_tempo_map {
 	my @lines = @_;
 	for ( @lines )
 	{
