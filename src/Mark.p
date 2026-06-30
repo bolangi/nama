@@ -161,8 +161,8 @@ use ::Globals qw(:all);
 
 sub drop_mark {
 	logsub((caller(0))[3]);
-	my $name = shift;
-	my $here = ecasound_iam("getpos");
+	my $name = shift();
+	my $here = shift() / ecasound_iam("getpos");
 
 	if( my $mark = $::Mark::by_name{$name}){
 		pager("$name: a mark with this name exists already at: ", 
