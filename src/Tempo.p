@@ -339,7 +339,7 @@ sub refresh_tempo_map {
 					render_metronome_track();
 				} else { 
 					my $msg = 'delete tempo map';
-					::pager('tempo map has been deleted, turning of metronome track');
+					::pager('tempo map has been deleted, turning off metronome track');
 					$this_track = metronome_track()->set( rw => OFF );
 					git( commit => '--quiet', '--message', $msg, $file->tempo_map);
 					initialize_tempo_map();
