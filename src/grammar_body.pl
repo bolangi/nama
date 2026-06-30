@@ -689,8 +689,8 @@ remove_mark: _remove_mark {
 	return unless (ref $::this_mark) =~ /Mark/;
 	$::this_mark->remove;
 	1;}
-add_mark: _add_mark ident timevalue { ::drop_mark($item{ident}, $item{timevalue}) ;1}
-add_mark: _add_mark ident { ::drop_mark $item{ident}; 1}
+add_mark: _add_mark ident timevalue { ::drop_mark(name => $item{ident}, time => $item{timevalue}) ;1}
+add_mark: _add_mark ident { ::drop_mark(name => $item{ident}); 1}
 add_mark: _add_mark {  ::drop_mark(); 1}
 next_mark: _next_mark { ::next_mark(); 1}
 previous_mark: _previous_mark { ::previous_mark(); 1}
