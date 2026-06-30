@@ -12,6 +12,7 @@ use ::Globals qw(:all);
 use ::Object qw( 
 				 name 
                  time
+				 type
 				 );
 
 sub initialize {
