@@ -362,9 +362,9 @@ sub metronome_track {
 
 sub initialize_tempo_map { 
 	@::Tempo::Chunk::chunks = ();
-	delete_tempo_marks();
+	remove_section_marks();
 }
-sub delete_tempo_marks { for( ::Mark::all() ){ $_->remove if $_->type eq 'song' } }
+sub remove_section_marks { for( ::Mark::all() ){ $_->remove if $_->type eq 'song' } }
 
 sub read_tempo_map {
 	my $file = shift;
