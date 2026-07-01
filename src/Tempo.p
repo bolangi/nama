@@ -319,6 +319,7 @@ sub refresh_tempo_map {
 		git_commit('change in tempo map', $file->tempo_map);
 		initialize_tempo_map();
 		read_tempo_map($file->tempo_map);
+		mark_song_sections();
 		
 	if ( -e $file->tempo_map or git( 'ls-files' => $file->tempo_map)){
 			
@@ -384,6 +385,12 @@ sub parse_tempo_map {
 		@chunk{ @fields } = @+{ @fields };
 		::Tempo::Chunk->new(%chunk);
 		# make real mark$tempo_mark{$chunk->label} = $chunk if $chunk->label;
+	}
+}
+
+sub mark_song_sections {
+	for my $chunk (@::Tempo::Chunk::chunks) {
+		$chunk->label and drop_mark( name => $chunk->label, time => $chunk->start_pos, type => 'tempo_map' );
 	}
 }
 
