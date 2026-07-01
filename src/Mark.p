@@ -165,6 +165,7 @@ sub drop_mark {
 	my %arg = @_;
 	my $name = $arg{name};
 	my $here = $arg{time} // ecasound_iam("getpos");
+	my $type = $arg{type};
 
 	if( my $mark = $::Mark::by_name{$name}){
 		pager("$name: a mark with this name exists already at: ", 
@@ -177,7 +178,8 @@ sub drop_mark {
 	}
 
 	my $mark = ::Mark->new( time => $here, 
-							name => $name);
+							name => $name,
+							type => $type);
 
 	$ui->marker($mark); # for GUI
 }

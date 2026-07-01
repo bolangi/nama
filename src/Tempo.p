@@ -364,7 +364,7 @@ sub initialize_tempo_map {
 	@::Tempo::Chunk::chunks = ();
 	delete_tempo_marks();
 }
-sub delete_tempo_marks { for( ::Mark::all() ){ $_->remove if ref $_ =~ /Tempo/  } }
+sub delete_tempo_marks { for( ::Mark::all() ){ $_->remove if $_->type eq 'song' } }
 
 sub read_tempo_map {
 	my $file = shift;
@@ -390,7 +390,7 @@ sub parse_tempo_map {
 
 sub mark_song_sections {
 	for my $chunk (@::Tempo::Chunk::chunks) {
-		$chunk->label and drop_mark( name => $chunk->label, time => $chunk->start_pos, type => 'tempo_map' );
+		$chunk->label and drop_mark( name => $chunk->label, time => $chunk->start_pos, type => 'song' );
 	}
 }
 
