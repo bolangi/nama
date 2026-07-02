@@ -124,7 +124,7 @@ sub create_project_dirs {
 sub create_file_stubs {
 		write_file($file->state_store, "{}\n") unless -e $file->state_store;
 		write_file($file->midi_store,    "\n") unless -e $file->midi_store; 
-		write_file($file->tempo_map,     "\n") unless -e $file->tempo_map;
+#		write_file($file->tempo_map,     "\n") unless -e $file->tempo_map;
 }
 sub load_project {
 	logsub((caller(0))[3]);

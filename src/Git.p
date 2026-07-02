@@ -113,7 +113,7 @@ sub command_buffer_contents {
 sub git_commit {
 	logsub((caller(0))[3]);
 	my $commit_message = shift;
-	my @defaults = ($file->state_store, $file->midi_store, $file->tempo_map);
+	my @defaults = ($file->state_store, $file->midi_store); 
 	my @files = scalar @_ ? @_ : @defaults;
 	no warnings 'uninitialized';
 	@files = @defaults if not @files;
