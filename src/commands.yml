@@ -1708,4 +1708,9 @@ notation_to_time:
   short: ntt
   what: print time value (seconds) of bar/beat/tick or other notation.
   parameters: <string:time_value>
+arm_metronome:
+  type: tempo
+  short: amm armm
+  what: set up metronome to start on next engine run
+  parameters: none
 ...

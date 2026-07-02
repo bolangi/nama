@@ -1769,7 +1769,7 @@ bus_off: _bus_off
 	print "bus_name: $bus_name\n";
 	$::bn{$bus_name}->tracks_off 
 }
-
+arm_metronome: _arm_metronome { ::arm_metronome(); 1 }
 
 #set_param_increment: _set_param_increment value {::set_param_stepize($item{value}    )} 
 #set_param_exp:       _set_param_exp       exp   {::set_param_stepize(10**$item{exp});1} 
