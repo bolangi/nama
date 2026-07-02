@@ -167,6 +167,7 @@ sub definitions {
 		fade_out_level                  => {ea => 0,    eadb => -40},
 		unity_level                     => {ea => 100,  eadb => 0},
 		enforce_channel_bounds			=> 1,
+		use_metronome					=> 1,
 
 		serialize_formats               => 'json',		# for save_system_state()
 

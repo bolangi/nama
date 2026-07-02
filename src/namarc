@@ -80,8 +80,6 @@ sample_rate: frequency
 
 realtime_profile: nonrealtime # other choices: realtime or auto
 
-use_metronome: 0
-
 press_space_to_start_transport: 1 
 
 # The buffer size settings below apply only when JACK is *not* used
