@@ -156,7 +156,7 @@ sub load_project {
 	$config->{opts}->{M} = 0; # enable 
 	
 	initialize_mixer();
-	process_tempo_map() if $config->{use_metronome} and not $config->{opts}->{T};
+	import_tempo_map() if `which klick` and -e $file->tempo_map;
 
 	# possible null if Text mode
 	

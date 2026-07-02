@@ -313,48 +313,22 @@ my $chunks = qr| (?<tempo> \d+ ( - \d+)? )    |x;
 my @fields = qw( label bars meter tempo );
 
 sub change_in_tempo_map{ $config->{use_git} and git_diff($file->tempo_map) }
-sub refresh_tempo_map {
-		return; # XX disabled
-		return unless -e $file->tempo_map or change_in_tempo_map();
-		git_commit('change in tempo map', $file->tempo_map);
+
+sub import_tempo_map {
+		my $is_update = shift;
+		local $this_track = metronome_track();
+
+		# don't process if metronome track contains audio
+		# unless we specifically request it
+
+		return if $this_track->version and not $is_update;
+
 		initialize_tempo_map();
 		read_tempo_map($file->tempo_map);
 		mark_song_sections();
-		
-	if ( -e $file->tempo_map or git( 'ls-files' => $file->tempo_map)){
-			
-			# case 1 - tempo map appears
-			if (not git( 'ls-files' => $file->tempo_map)){
-				my $msg = 'tempo map created';
-				git( add => $file->tempo_map);
-				git( commit => '--quiet', '--message', $msg, $file->tempo_map);
-				process_tempo_map();
-				render_metronome_track();
-			}
-			# case 2 - change in tempo map
-			elsif (git( diff => $file->tempo_map ) ){
-				if (-e $file->tempo_map ){
-					my $msg = 'change in tempo map';
-					git( commit => '--quiet', '--message', $msg, $file->tempo_map);
-					process_tempo_map();
-					render_metronome_track();
-				} else { 
-					my $msg = 'delete tempo map';
-					::pager('tempo map has been deleted, turning off metronome track');
-					$this_track = metronome_track()->set( rw => OFF );
-					git( commit => '--quiet', '--message', $msg, $file->tempo_map);
-					initialize_tempo_map();
-				};
-			}
-		}
+		render_metronome_track();
 }
 
-sub process_tempo_map {
-	local $this_track = metronome_track();
-	-e $file->tempo_map or return;
-	initialize_tempo_map();
-	read_tempo_map($file->tempo_map);
-}
 sub metronome_track {
 	my $m = 'metronome';
 	if ($tn{$m}){ $tn{$m} } else { add_track($m) }
