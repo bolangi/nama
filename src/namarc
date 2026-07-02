@@ -62,11 +62,9 @@ devices:
 
 # ALSA soundcard device assignments and formats
 
-alsa_capture_device: consumer       # for ALSA/OSS
-alsa_playback_device: consumer      # for ALSA/OSS
-mixer_out_format: cd-stereo         # for ALSA/OSS
-
-# soundcard_channels: 10            # GUI input/output channel selection range
+alsa_capture_device: consumer
+alsa_playback_device: consumer
+mixer_out_format: cd-stereo
 
 # audio file format templates
 
@@ -92,8 +90,6 @@ ecasound_globals:
   common: -z:mixmode,sum
   realtime: -z:db,100000 -z:nointbuf
   nonrealtime: -z:nodb -z:intbuf
-
-waveform_height: 200
 
 # ecasound_tcp_port: 2868  
 
