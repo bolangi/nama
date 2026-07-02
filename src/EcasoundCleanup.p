@@ -140,6 +140,7 @@ sub post_rec_configure {
 
 		$ui->global_version_buttons(); # recreate
 		adjust_offset_recordings();
+		$tn{Main}->set(rw => MON);
 
 		# toggle recorded tracks to PLAY for auditioning
 		
