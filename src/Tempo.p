@@ -418,6 +418,14 @@ sub notation_to_time {
 	my $tick = $beat->tick($tick_index);
 	return $tick->start_pos;
 }
+sub arm_metronome {
+	::throw(  q(tempo map ") . $file->tempo_map . q(" not found, skipping) ), return if not -e $file->tempo_map;
+	try { system('killall','klick') };
+	my $cmd = 'klick -t -f '. $file->tempo_map . '&';
+	system $cmd;
+	::pager("metronome is armed");
+}
+	
 	
 1
 __END__
