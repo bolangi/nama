@@ -74,6 +74,8 @@ cache_to_disk_format: s16_le,N,frequency,i
 
 mixdown_encodings: mp3 ogg
 
+volume_control_operator: ea   # set to 'ea' for setting as percent, 'eadb' for setting dB
+
 sample_rate: frequency
 
 realtime_profile: nonrealtime # other choices: realtime or auto
