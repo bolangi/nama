@@ -1,4 +1,8 @@
 Changes to Audio::Nama
+1.604 July 2, 2026
+    * importing tempo map automatically generates section marks
+    * edit-tempo-map now reloads tempo map
+
 1.603 May 19, 2026
     * tab completion 
     * Ctrl-Z (twice) to drop into shell
