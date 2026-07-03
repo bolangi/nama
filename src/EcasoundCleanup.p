@@ -24,6 +24,7 @@ sub rec_cleanup {
 		{
 			$project->{playback_position} = 0;
 			$setup->{_last_rec_tracks} = \@rec_tracks;
+			$setup->{_main_rw} = $tn{Main}->rw;
 		}
 
 		if( grep /Mixdown/, @files) { 
