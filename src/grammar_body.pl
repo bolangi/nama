@@ -1744,7 +1744,9 @@ select_track: _select_track track_spec
 
 set_tempo: _set_tempo dd {::midish_cmd("t $item{dd}")}
 
-edit_tempo_map: _edit_tempo_map { system("$ENV{EDITOR} ".$::file->tempo_map); 1 }
+edit_tempo_map: _edit_tempo_map { system("$ENV{EDITOR} ".$::file->tempo_map); ::import_tempo_map('update'); 1 }
+
+reload_tempo_map: _reload_tempo_map { ::import_tempo_map('update'); 1}
 
 route_track: _route_track source_id send_id { 
 	::nama_cmd("source $item{source_id}");
