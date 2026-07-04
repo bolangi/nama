@@ -37,9 +37,6 @@ use Tickit::Async;
 use Tickit::Widgets qw(Static VBox);
 use Tickit::Widget::Scroller;
 use Tickit::Widget::Scroller::Item::Text;
-use ::Entry;      # modified Tickit::Widget::Entry to bind printable keys
-use ::Completion; # modified Tickit::Widget::Entry::Plugin::Completion for directory handling
-use Tickit::Widget::Scroller::Item::Text;
 ### We use our versions of these modules
 use ::Entry;      # modified Tickit::Widget::Entry to bind printable keys
 use ::Completion; # modified Tickit::Widget::Entry::Plugin::Completion for directory handling
