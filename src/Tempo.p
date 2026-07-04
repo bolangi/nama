@@ -316,7 +316,8 @@ sub change_in_tempo_map{ $config->{use_git} and git_diff($file->tempo_map) }
 
 sub import_tempo_map {
 		my $is_update = shift;
-		local $this_track = metronome_track();
+		return unless -e $file->tempo_map;
+		local $this_track = metronome_track(); # creating it if not present
 
 		# don't process if metronome track contains audio
 		# unless we specifically request it
