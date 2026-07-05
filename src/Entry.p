@@ -7,7 +7,7 @@ use v5.20;
 use warnings;
 use Object::Pad 0.807;
 
-package Tickit::Widget::Entry 0.42;
+package Audio::Nama::Entry 0.42;
 class Tickit::Widget::Entry :strict(params);
 
 inherit Tickit::Widget;

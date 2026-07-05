@@ -6,7 +6,7 @@
 use v5.26;
 use Object::Pad 0.75 ':experimental(init_expr adjust_params)';
 
-package Tickit::Widget::Entry::Plugin::Completion 0.02;
+package Audio::Nama::Completion 0.02;
 class Tickit::Widget::Entry::Plugin::Completion
    :strict(params);
 

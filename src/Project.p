@@ -156,7 +156,7 @@ sub load_project {
 	$config->{opts}->{M} = 0; # enable 
 	
 	initialize_mixer();
-	import_tempo_map() if `which klick` and -e $file->tempo_map;
+	import_tempo_map();
 
 	# possible null if Text mode
 	
