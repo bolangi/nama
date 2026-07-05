@@ -320,20 +320,11 @@ sub import_tempo_map {
 
 		local $this_track = metronome_track(); # creating it if not present
 		
-		#say "found version ".$this_track->current_version;
-		#say "update forced: ". ($is_update ? "yes" : "no");
-
-		#say("skipping metronome update")
-
-		# render if no WAV file is present
-		# render with update argument, even if WAV file present
-
-		return unless not $this_track->current_version or $is_update;
-
 		initialize_tempo_map();
 		read_tempo_map($file->tempo_map);
 		mark_song_sections();
-		render_metronome_track();
+
+		render_metronome_track() if $is_update or not scalar $this_track->versions->@* ;
 }
 
 sub metronome_track {
