@@ -15,11 +15,11 @@
 # qw( :: ::main main:: ) # SKIP_PREPROC # directive
 #
 
+use v5.38;
 use Text::Template;
 use Getopt::Std;
-use File::Find;
+use Path::Tiny;
 use File::Slurp;
-use strict;
 use Cwd;
 use Storable qw(dclone); 
 
@@ -56,10 +56,11 @@ file:         $file
 PRINT
 die "no source directory: $source_dir" unless -d $source_dir;
 die "no target directory: $target_dir" unless -d $source_dir;
-&find_and_process($source_dir, $target_dir, $exta, $extb); 
+find_and_process($source_dir, $target_dir, $exta, $extb); 
 
 sub process {
 	my ($file_in, $file_out) = @_;
+	
 	$debug and print "dir: ", getcwd, ", in: $file_in, out: $file_out\n";
 	#return;
 
@@ -71,10 +72,10 @@ sub process {
 		SOURCE => $file_in,
 		DELIMITERS => [ qw( [% %] ) ],
 	);
-	my $template_dump = dclone($template);
-	delete $template_dump->{SOURCE};
-	use Data::Dumper::Concise;
-	$debug and print "Text::Template object (with source omitted) is:\n", Dumper $template_dump;
+	#my $template_dump = dclone($template); 
+	#delete $template_dump->{SOURCE};
+	#use Data::Dumper::Concise;
+	#$debug and print "Text::Template object (with source omitted) is:\n", Dumper $template_dump;
 	my $hash = {name => 'goblin' };
 
 #### Include files and process code in [% %] directives
@@ -110,26 +111,19 @@ sub expand_root {
 
 sub find_and_process {
 	my ($source_dir, $target_dir, $exta, $extb) = @_; 
-	find(\&wanted, $source_dir);
+	my $source = path($source_dir);
+	my @files = grep{ /\.$exta$/ } grep { -f } $source->children;
+	for my $file (@files) {
+		my ($stub) = $file =~ /(\w+)\.$exta/;
+		my $out = "$target_dir/$stub.$extb";
+		#say "file: $file: stub: $stub, out: $out";
+		process($file, $out)
+	}
+
+
 }
 
-sub wanted { 
-	return if grep { $File::Find::name =~ m(/$_/) } 
-		map{"/$_/"}qw(.git .ttree blib lib try t);
-	my $re = qr/(\w+)\.$exta$/;
-	$File::Find::name =~ /$re/ or return;
-	$stub = $1;
-	$debug and print $File::Find::name, $/; 
-	$debug and print "stub: $stub\n";
-	$debug and print "cwd: ", getcwd, $/;
-	my $input =  "$stub.$exta";
-	my $output = "$target_dir/$stub.$extb";
-
-	## now to process
 	
-	&process($input, $output);
-	
-}
 sub grammar {
 
 	$debug and print "grammar replace\n";
