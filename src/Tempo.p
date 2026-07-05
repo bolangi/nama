@@ -329,7 +329,7 @@ sub import_tempo_map {
 
 sub metronome_track {
 	my $m = 'metronome';
-	if ($tn{$m}){ $tn{$m} } else { add_track($m) }
+	if ($tn{$m}){ $tn{$m} } else { add_track($m, rw => OFF) }
 }
 
 sub initialize_tempo_map { 
@@ -341,7 +341,7 @@ sub remove_section_marks { for( ::Mark::all() ){ $_->remove if $_->type eq 'song
 sub read_tempo_map {
 	my $file = shift;
 	return unless -e $file;
-	my @lines = grep{ ! /^\s*$/ } ::strip_comments(read_file($file));
+	my @lines = grep{ ! /^\s*$/ } strip_comments(read_file($file));
 	parse_tempo_map( @lines );
 }
 sub parse_tempo_map {
@@ -375,9 +375,12 @@ sub render_metronome_track {
 	my $map = $file->tempo_map;
 	my $rate = $project->{sample_rate};
 	my $cmd = "klick -f $map -r $rate -W $output";
-	::pager("executing: $cmd");
-	system($cmd); 
-	$this_track->set(rw => PLAY);
+	pager("executing: $cmd");
+	my $ret = 
+ 	try   { system($cmd) } 
+	catch { throw("caught error: $_"); "failed" };
+
+	$this_track->set(rw => $ret ? OFF : PLAY);
 	refresh_wav_cache();
 }
 
