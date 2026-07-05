@@ -1,4 +1,8 @@
 Changes to Audio::Nama
+1.605 July 4, 2026
+    * metronome related
+    * rename packges to avoid cpan warnings
+
 1.604 July 2, 2026
     * importing tempo map automatically generates section marks
     * edit-tempo-map now reloads tempo map
