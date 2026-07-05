@@ -317,12 +317,18 @@ sub change_in_tempo_map{ $config->{use_git} and git_diff($file->tempo_map) }
 sub import_tempo_map {
 		my $is_update = shift;
 		return unless -e $file->tempo_map;
+
 		local $this_track = metronome_track(); # creating it if not present
+		
+		#say "found version ".$this_track->current_version;
+		#say "update forced: ". ($is_update ? "yes" : "no");
 
-		# don't process if metronome track contains audio
-		# unless we specifically request it
+		#say("skipping metronome update")
 
-		return if $this_track->version and not $is_update;
+		# render if no WAV file is present
+		# render with update argument, even if WAV file present
+
+		return unless not $this_track->current_version or $is_update;
 
 		initialize_tempo_map();
 		read_tempo_map($file->tempo_map);
