@@ -513,22 +513,17 @@ sub import_audio {
 
 }
 sub destroy_current_wav {
-	carp($this_track->name.": must be set to PLAY."), return
+	throw($this_track->name.": must be set to PLAY."), return
 		unless $this_track->play;
 	$this_track->current_version or
 		throw($this_track->name, 
 			": No current version (track set to OFF?) Skipping."), return;
 	my $wav = $this_track->full_path;
-	my $reply = $text->{term}->readline("delete WAV file $wav? [n] ");
-	#my $reply = chr($text->{term}->read_key()); 
-	if ( $reply =~ /y/i ){
 		# remove version comments, if any
 		delete $project->{track_version_comments}{$this_track->name}{$this_track->version};
-		pager("Unlinking.\n");
-		unlink $wav or warn "couldn't unlink $wav: $!\n";
+		pager("Unlinking $wav");
+		unlink $wav or warn "couldn't unlink: $!\n";
 		refresh_wav_cache();
-	}
-	$text->{term}->remove_history($text->{term}->where_history);
 	$this_track->set(version => $this_track->last); 
 	1;
 }
