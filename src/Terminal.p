@@ -28,20 +28,19 @@ vbox (root)
 =cut
 
 {
-my ($root, $tickit, $term, $scroller, $entry);
+my ($rootwin, $vbox, $tickit, $term, $scroller, $entry);
 $text->{loop} = IO::Async::Loop->new;
 
 sub initialize_terminal {
-	$root =	Tickit::Widget::VBox->new; 
+	$vbox =	Tickit::Widget::VBox->new; 
 	$scroller = Tickit::Widget::Scroller->new;
-	$tickit = Tickit::Async->new( root => $root);
-	$text->{tickit} = $tickit;
-	$text->{term} = $term = $tickit->term;
+	$text->{tickit} = $tickit = Tickit::Async->new( root => $vbox);
+	$text->{term}   = $term = $tickit->term;
 	my $lines = $term->lines;
 	create_entry_widget();
 	setup_key_bindings();
-	$root->add($scroller, valign => 'top', force_size => $lines - 2); 
-	$root->add($entry, valign => 'top');
+	$vbox->add($scroller, valign => 'top', force_size => $lines - 2); 
+	$vbox->add($entry, valign => 'top');
 }
 
 sub create_entry_widget {
