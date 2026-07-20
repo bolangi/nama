@@ -34,8 +34,9 @@ $text->{loop} = IO::Async::Loop->new;
 sub initialize_terminal {
 	$vbox =	Tickit::Widget::VBox->new; 
 	$scroller = Tickit::Widget::Scroller->new;
-	$text->{tickit} = $tickit = Tickit::Async->new( root => $vbox);
-	$text->{term}   = $term = $tickit->term;
+	$text->{tickit}  = $tickit  = Tickit::Async->new( root => $vbox);
+	$text->{term}    = $term    = $tickit->term;
+	$text->{rootwin} = $rootwin = $tickit->rootwin;
 	my $lines = $term->lines;
 	create_entry_widget();
 	setup_key_bindings();
