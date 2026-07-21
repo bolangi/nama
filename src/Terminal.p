@@ -410,14 +410,14 @@ sub gen_words {
 sub executables {
 	# if starts with letter, return executables for that letter
 	# if starts with ./ ../ ~/ / return the appropriate set of executables
-	my @path = "$ENV{HOME}/bin";
-	# split ':', $ENV{PATH};
+	#my @path = "$ENV{HOME}/bin";
+	my @path = split ':', $ENV{PATH};
 	my @executables = ();
 	for my $dir	(@path)
 	{
 		my $p = path($dir);
 		push @executables, grep { -x $_ } map { $_->stringify} $p->children;
 	}
-	@executables
+	sort @executables
 }
 1;
