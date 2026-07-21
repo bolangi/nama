@@ -295,7 +295,7 @@ sub load_keywords {
 	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
 	$text->{keywords}    = [sort {$a cmp $b} @keywords ];
 	$text->{autocomplete_keywords}->@* = grep { not /_/ } $text->{keywords}->@*;
-	$text->{executables} = [sort {$a cmp $b} executables()];
+	#$text->{executables} = executables(); # too many for our current algorithm
 	$text->{project_list} = project_list();
 	$text->{effects}     =  [sort {$a cmp $b} keys $fx_cache->{partial_label_to_full}->%*];
 }
@@ -318,10 +318,14 @@ sub gen_words {
 	my $keywords = [];
 	my $is_command;
 
-	if (command() =~ /load(.project)? / )
+	if (command() =~ /^load(.project)? / )
 	{
 		$keywords = $text->{project_list};
 	}
+#	elsif (command() =~ /^! / )
+#	{
+#		$keywords = $text->{executables}
+#	}
 
 	### handle file paths - import command only
 
@@ -419,6 +423,7 @@ sub executables {
 		my $p = path($dir);
 		push @executables, grep { -x $_ } map { $_->stringify} $p->children;
 	}
-	sort @executables
+	@executables = sort @executables;
+	\@executables
 }
 1;
