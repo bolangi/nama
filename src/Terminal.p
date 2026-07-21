@@ -19,10 +19,11 @@ widget tree:
 
 tickit
 	term
-vbox (root) 
-	scroller
-		item
-		item
+rootwin
+	vbox
+		scroller
+			item
+			item
     entry
 
 =cut
