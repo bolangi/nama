@@ -142,7 +142,8 @@ sub print_command {
 }
  
 sub command {
-	substr( $entry->text, length prompt() )
+	my $cmd = substr( $entry->text, length prompt() );
+	$cmd =~ s/^\s+//;
 }
 
 }
