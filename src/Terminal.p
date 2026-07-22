@@ -140,6 +140,7 @@ sub print_command {
 	$entry->set_text(prompt().$text->{command_history}->[$text->{command_index}]);
 	$entry->set_position(99);
 }
+
  
 sub command {
 	my $cmd = substr( $entry->text, length prompt() );
@@ -164,23 +165,28 @@ sub popup {
     });
    $popup->bind_event( key => sub ( $rootwin, $, $info, @ ) {
       my $str = $info->str;
-      if( $info->type eq "text" ) {
+      if( $str eq "Home" ) {
+		  $popup->close;
+		  $entry->take_focus;
+      }
+      elsif( $info->type eq "text" ) {
 		$text = "gotta printable: $str";
 		$popup->expose;
       }
       elsif( $str eq "Backspace" ) {
+		  $popup->close;
+		  $entry->take_focus;
       }
       elsif( $str eq "Escape" ) {
-         # OK, just dismiss
+		  #$popup->hide;
+		  #undef $popup;
+		  $popup->close;
+		  $entry->take_focus;
       }
       else {
          # TODO: Handle at least Enter, maybe arrows to select?
-         #print STDERR "TODO: Unsure how to handle key $str in popup menu\n";
+         print STDERR "TODO: Unsure how to handle key $str in popup menu\n";
       }
-
-      #$popup->hide;
-      #undef $popup;
-      #$entry->take_focus;
 
    } );
    $popup->take_focus;
@@ -468,4 +474,74 @@ sub executables {
 	@executables = sort @executables;
 	\@executables
 }
+=comment
+{
+my $cmd;
+sub display_status {
+			$cmd = shift;
+			print(
+				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
+				"\x1b[2K",  # erase line
+				status_bar()
+			) ;
+}
+sub status_bar { 
+	my %bar = (param => \&param_status_bar,
+	           jump  => \&jump_status_bar,
+			   bump  => \&jump_status_bar );
+	my $status = $bar{$text->{hotkey_mode}}->();
+	my $name  = "[".$this_track->name."]"; 
+	$status =  "$name cmd: $cmd $status";
+}
+}
+	
+sub param_status_bar {
+	return " no selected effect" unless $this_track->op;
+	my $effect_info = join " ",
+				this_op(), 
+				this_op_o()->fxname;
+# 	if (this_op_o()->no_params) {
+# 		return "$effect_info (no parameters to adjust)";
+# 	}
+	my $param_pos = this_param() - 1;
+	my $param_info = parameter_info(this_op(), $param_pos);
+	if (this_op_o()->is_read_only ){
+		return "$effect_info $param_info - no adjustment possible";
+	}
+	$param_info .= " Stepsize: ".param_stepsize();
+	return "$effect_info $param_info";
+}
+sub jump_status_bar {
+	return unless $this_track; 
+	my $pos = ::ecasound_iam("getpos") // 0;
+	my $bar = "playback at ${pos}s, ";
+	if (defined $this_mark) {
+		my $mark = join ' ', 'Current mark:', $this_mark->name, 'at', $this_mark->time;
+		$bar .= $mark;
+	}
+	$bar .= "Jump size: $config->{playback_jump_seconds}s, ";
+	$bar .= "Mark bump: $config->{mark_bump_seconds}s " ;
+	$bar
+}
+sub clip_start_beep 	{ beep( $config->{beep}->{clip_start})}
+sub clip_end_beep       { beep( $config->{beep}->{clip_end})}
+sub command_error_beep 	{ beep( $config->{beep}->{command_error})}
+sub end_of_list_beep    { beep( $config->{beep}->{end_of_list  })}
+
+sub beep { 
+	my $args = shift;
+	my($freq, $duration, $vol_percent) = split ' ', $args;
+	my $cmd;
+	if ($config->{beep}->{command} eq 'beep') {
+		$duration *= 1000; # convert to milliseconds 
+		$duration //= 200;
+		$cmd = "beep -f $freq -l $duration";
+	} else {
+		$vol_percent //= 10;
+		my $output_device = ::IO::to_alsa_soundcard_device::device_id;
+		$cmd = "ecasound -i:tone,sine,$freq,$duration -ea $vol_percent -o:$output_device 2>&1 > /dev/null";
+	}
+	system($cmd);
+}
+=cut
 1;
