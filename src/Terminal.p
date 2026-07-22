@@ -146,6 +146,48 @@ sub command {
 	$cmd =~ s/^\s+//;
 }
 
+
+sub popup {
+	my ($top, $left, $lines, $cols) = ($text->{rootwin}->lines - 2, 0, 1, $text->{rootwin}->cols); 
+	
+   my $popup = $rootwin->make_popup($top, $left, $lines, $cols);
+
+	$popup->pen->chattrs({ bg => 'green', fg => 'black' });
+
+	my $text = "ehllow world";
+	$popup->take_focus;
+	$popup->bind_event( expose => sub ( $win, $, $info, @ ) {
+    	 my $rb = $info->rb;
+         $rb->goto(0, 0 );
+         $rb->erase_to( $rootwin->cols );
+         $rb->text_at( 0,0,$text, $popup->pen);
+    });
+   $popup->bind_event( key => sub ( $rootwin, $, $info, @ ) {
+      my $str = $info->str;
+      if( $info->type eq "text" ) {
+		$text = "gotta printable";
+		$popup->expose;
+      }
+      elsif( $str eq "Backspace" ) {
+      }
+      elsif( $str eq "Escape" ) {
+         # OK, just dismiss
+      }
+      else {
+         # TODO: Handle at least Enter, maybe arrows to select?
+         #print STDERR "TODO: Unsure how to handle key $str in popup menu\n";
+      }
+
+      #$popup->hide;
+      #undef $popup;
+      #$entry->take_focus;
+
+   } );
+   $popup->take_focus;
+   $popup->show;
+
+
+}
 }
 our ($old_output_fh);
 sub redirect_stdout {
