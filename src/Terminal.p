@@ -152,7 +152,7 @@ sub popup {
 	
    my $popup = $rootwin->make_popup($top, $left, $lines, $cols);
 
-	$popup->pen->chattrs({ bg => 'green', fg => 'black' });
+	$popup->pen->chattrs({ bg => 'yellow', fg => 'black' });
 
 	my $text = "ehllow world";
 	$popup->take_focus;
@@ -165,7 +165,7 @@ sub popup {
    $popup->bind_event( key => sub ( $rootwin, $, $info, @ ) {
       my $str = $info->str;
       if( $info->type eq "text" ) {
-		$text = "gotta printable";
+		$text = "gotta printable: $str";
 		$popup->expose;
       }
       elsif( $str eq "Backspace" ) {
