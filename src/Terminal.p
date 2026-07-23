@@ -480,25 +480,22 @@ sub executables {
 	@executables = sort @executables;
 	\@executables
 }
-=comment
-{
-my $cmd;
 sub display_status {
-			$cmd = shift;
+			my $hotkey_mode = shift;
 			print(
 				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
 				"\x1b[2K",  # erase line
-				status_bar()
+				status_bar($hotkey_mode)
 			) ;
 }
 sub status_bar { 
+	my $hotkey_mode = shift;
 	my %bar = (param => \&param_status_bar,
 	           jump  => \&jump_status_bar,
 			   bump  => \&jump_status_bar );
 	my $status = $bar{$text->{hotkey_mode}}->();
 	my $name  = "[".$this_track->name."]"; 
-	$status =  "$name cmd: $cmd $status";
-}
+	$status =  "$name mode: $hotkey_mode $status";
 }
 	
 sub param_status_bar {
@@ -549,5 +546,4 @@ sub beep {
 	}
 	system($cmd);
 }
-=cut
 1;

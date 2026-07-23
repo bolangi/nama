@@ -1122,6 +1122,9 @@ sub set_param_stepsize {
 	my $stepsize = shift;
 	$project->{current_stepsize}->{::this_op()}->[this_param()] = $stepsize;
 }
+sub param_stepsize {
+	$project->{current_stepsize}->{::this_op()}->[this_param()] 
+}
 sub increment_param { modify_effect(::this_op(), this_param(),'+',this_stepsize())}
 sub decrement_param { modify_effect(::this_op(), this_param(),'-',this_stepsize())}
 sub set_parameter_value {
