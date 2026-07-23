@@ -161,7 +161,7 @@ someval: /[\w.+-]+/ # [word character, period, plus, minus] {1,}
 					# used in: set_track, loop_enable
 sign: '+' | '-' | '*' | '/' 
 					# [plus, minus, times, divide] {1}
-parameter_value: '*' | value
+parameter_value: '*' | value | notation
 value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
 					# used in: mark times and effect_parameter values
 					# optional sign
@@ -857,83 +857,83 @@ add_effect: _add_effect add_target parameter_value(s?) before(?) {
 	}
 }
 
-add_effect: _add_effect ('first'  | 'f')  add_target value(s?) {
+add_effect: _add_effect ('first'  | 'f')  add_target parameter_value(s?) {
 	my $command = join " ", 
 		qw(add_effect), 
 		$item{add_target},
-		@{$item{'value(s?)'}},
+		@{$item{'parameter_value(s?)'}},
 		$::this_track->{ops}->[0];
 		#print "command is $command\n";
 	::nama_cmd($command)
 }
-add_effect: _add_effect ('last'   | 'l')  add_target value(s?) { 
+add_effect: _add_effect ('last'   | 'l')  add_target parameter_value(s?) { 
 	my $command = join " ", 
 		qw(add_effect),
 		$item{add_target},
-		@{$item{'value(s?)'}},
+		@{$item{'parameter_value(s?)'}},
 		qw(ZZZ);
 		#print "command is $command\n";
 	::nama_cmd($command)
 }
-add_effect: _add_effect ('before' | 'b')  before add_target value(s?) {
+add_effect: _add_effect ('before' | 'b')  before add_target parameter_value(s?) {
 	my $command = join " ", 
 		qw(add_effect),
 		$item{add_target},
-		@{$item{'value(s?)'}},
+		@{$item{'parameter_value(s?)'}},
 		$item{before};
 		#print "command is $command\n";
 	::nama_cmd($command)
 }
-add_effect_first: _add_effect_first add_target value(s?) {
+add_effect_first: _add_effect_first add_target parameter_value(s?) {
 	my $command = join " ", 
 		qw(add_effect),
 		"last",
 		$item{add_target},
-		@{$item{'value(s?)'}};
+		@{$item{'parameter_value(s?)'}};
 		#print "command is $command\n";
 	::nama_cmd($command)
 }
-add_effect_last: _add_effect_last add_target value(s?) {
+add_effect_last: _add_effect_last add_target parameter_value(s?) {
 	my $command = join " ", 
 		qw(add_effect),
 		"last",
 		$item{add_target},
-		@{$item{'value(s?)'}};
+		@{$item{'parameter_value(s?)'}};
 		#print "command is $command\n";
 	::nama_cmd($command)
 }
-add_effect_before: _add_effect_before before add_target value(s?) {
+add_effect_before: _add_effect_before before add_target parameter_value(s?) {
 	my $command = join " ", 
 		qw(add_effect),
 		"before",
 		$item{before},		
 		$item{add_target},
-		@{$item{'value(s?)'}};
+		@{$item{'parameter_value(s?)'}};
 		#print "command is $command\n";
 	::nama_cmd($command)
 }
 
 parent: op_id
-modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) value {
-	::modify_multiple_effects( @item{qw(fx_alias(s) parameter(s) sign value)});
+modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) parameter_value {
+	::modify_multiple_effects( @item{qw(fx_alias(s) parameter(s) sign parameter_value)});
 	::pager(::show_effect(@{ $item{'fx_alias(s)'} })); 1
 }
-modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) sign value {
-	::modify_multiple_effects( @item{qw(fx_alias(s) parameter(s) sign value)});
+modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) sign parameter_value {
+	::modify_multiple_effects( @item{qw(fx_alias(s) parameter(s) sign parameter_value)});
 	::pager(::show_effect(@{ $item{'fx_alias(s)'} })); 1
 }
-modify_effect: _modify_effect parameter(s /,/) value {
+modify_effect: _modify_effect parameter(s /,/) parameter_value {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
 	::modify_multiple_effects( 
 		[::this_op()], 
 		$item{'parameter(s)'},
 		undef,
-		$item{value});
+		$item{parameter_value});
 	::pager( ::show_effect(::this_op(), "with track affiliation")); 1
 }
-modify_effect: _modify_effect parameter(s /,/) sign value {
+modify_effect: _modify_effect parameter(s /,/) sign parameter_value {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
-	::modify_multiple_effects( [::this_op()], @item{qw(parameter(s) sign value)});
+	::modify_multiple_effects( [::this_op()], @item{qw(parameter(s) sign parameter_value)});
 	::pager( ::show_effect(::this_op())); 1
 }
 fx_alias3: ident { 
@@ -1349,7 +1349,10 @@ add_fade: _add_fade in_or_out time1 time2
 time1: value
 time2: value
 in_or_out: 'in' | 'out'
-duration: value
+duration: value | notation
+notation: 'n' count '/' note {::note_duration($item{count}, $item{note}) }
+count: dd
+note: dd
 mark1: markname
 mark2: markname
 remove_fade: _remove_fade fade_index(s) { 

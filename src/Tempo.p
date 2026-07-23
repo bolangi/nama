@@ -400,6 +400,13 @@ sub arm_metronome {
 	system $cmd;
 	::pager("metronome is armed");
 }
+
+sub note_duration ($count, $note) {
+	::throw(  q(tempo map ") . $file->tempo_map . q(" not found, cannot enter note duration") ), return if not -e $file->tempo_map;
+	my $top = $::Tempo::Chunk::chunks[0];
+	my $quarter = 60 / $top->tempo; 
+	my $length = $quarter * $count * ( 4 / $note );
+}
 	
 	
 1
