@@ -147,27 +147,29 @@ sub command {
 	$cmd =~ s/^\s+//;
 }
 
-
+{
+my ($popup, $expose_ev, $key_ev);
 sub popup {
-	my ($top, $left, $lines, $cols) = ($text->{rootwin}->lines - 2, 0, 1, $text->{rootwin}->cols); 
+	my ($top, $left, $lines, $cols) = ($text->{rootwin}->lines - 1, 0, 1, $text->{rootwin}->cols); 
 	
-   my $popup = $rootwin->make_popup($top, $left, $lines, $cols);
+   $popup = $rootwin->make_popup($top, $left, $lines, $cols);
 
 	$popup->pen->chattrs({ bg => 'yellow', fg => 'black' });
 
 	my $text = "ehllow world";
 	$popup->take_focus;
-	$popup->bind_event( expose => sub ( $win, $, $info, @ ) {
+	$expose_ev = $popup->bind_event( expose => sub ( $win, $, $info, @ ) {
     	 my $rb = $info->rb;
          $rb->goto(0, 0 );
          $rb->erase_to( $rootwin->cols );
          $rb->text_at( 0,0,$text, $popup->pen);
     });
-   $popup->bind_event( key => sub ( $rootwin, $, $info, @ ) {
+   $key_ev = $popup->bind_event( key => sub ( $rootwin, $, $info, @ ) {
       my $str = $info->str;
       if( $str eq "Home" ) {
-		  $popup->close;
-		  $entry->take_focus;
+		$popup->close;
+		#disable_popup();
+		$entry->take_focus;
       }
       elsif( $info->type eq "text" ) {
 		$text = "gotta printable: $str";
@@ -194,6 +196,10 @@ sub popup {
 
 
 }
+sub disable_popup { $popup->unbind_event_id($_) for ($expose_ev, $key_ev) }
+
+}
+
 }
 our ($old_output_fh);
 sub redirect_stdout {
