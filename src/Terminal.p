@@ -147,60 +147,51 @@ sub command {
 	$cmd =~ s/^\s+//;
 }
 
+sub activate_effect_hotkeys { popup('param') }
+
 {
-my ($popup, $expose_ev, $key_ev);
-sub popup {
+my ($popup, $expose_ev, $key_ev, $status);
+sub popup ($mode) {
 	my ($top, $left, $lines, $cols) = ($text->{rootwin}->lines - 1, 0, 1, $text->{rootwin}->cols); 
 	
    $popup = $rootwin->make_popup($top, $left, $lines, $cols);
 
 	$popup->pen->chattrs({ bg => 'yellow', fg => 'black' });
 
-	my $text = "ehllow world";
+	$status = status_bar($mode);
 	$popup->take_focus;
+
+	# We use expose event to update text, because event
+	# provides render buffer. 
 	$expose_ev = $popup->bind_event( expose => sub ( $win, $, $info, @ ) {
     	 my $rb = $info->rb;
          $rb->goto(0, 0 );
          $rb->erase_to( $rootwin->cols );
-         $rb->text_at( 0,0,$text, $popup->pen);
+         $rb->text_at( 0,0,$status, $popup->pen);
     });
-   $key_ev = $popup->bind_event( key => sub ( $rootwin, $, $info, @ ) {
-      my $str = $info->str;
-      if( $str eq "Home" ) {
-		$popup->close;
-		#disable_popup();
-		$entry->take_focus;
-      }
-      elsif( $info->type eq "text" ) {
-		$text = "gotta printable: $str";
-		$popup->expose;
-      }
-      elsif( $str eq "Backspace" ) {
-		  $popup->close;
-		  $entry->take_focus;
-      }
-      elsif( $str eq "Escape" ) {
-		  #$popup->hide;
-		  #undef $popup;
-		  $popup->close;
-		  $entry->take_focus;
-      }
-      else {
-         # TODO: Handle at least Enter, maybe arrows to select?
-         print STDERR "TODO: Unsure how to handle key $str in popup menu\n";
-      }
-
-   } );
+   $key_ev = $popup->bind_event( key => sub ( $rootwin, $, $info, @ ) { process_keystrokes($mode, $info) } );
    $popup->take_focus;
    $popup->show;
 
 
 }
-sub disable_popup { $popup->unbind_event_id($_) for ($expose_ev, $key_ev) }
+sub disable_popup { $popup->close; $entry->take_focus }
+# $popup->unbind_event_id($_) for ($expose_ev, $key_ev) ; $entry->take_focus
 
+sub process_keystrokes ($mode, $info) {
+      my $str = $info->str;
+		my $action = $config->{hotkeys}->{$mode}->{$str};
+		defined $action or throw("$str: no binding found in $mode hotkey mode."), return;
+		no strict 'refs';
+		&$action();	
+		set_popup_text(status_bar($mode));
 }
 
-}
+sub set_popup_text ($str) { $status = $str; $popup->expose }
+
+} # popup 
+
+} # tickit UI
 our ($old_output_fh);
 sub redirect_stdout {
 	open(FH, '>', '/dev/null') or die; 
@@ -480,20 +471,12 @@ sub executables {
 	@executables = sort @executables;
 	\@executables
 }
-sub display_status {
-			my $hotkey_mode = shift;
-			print(
-				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
-				"\x1b[2K",  # erase line
-				status_bar($hotkey_mode)
-			) ;
-}
 sub status_bar { 
 	my $hotkey_mode = shift;
 	my %bar = (param => \&param_status_bar,
 	           jump  => \&jump_status_bar,
 			   bump  => \&jump_status_bar );
-	my $status = $bar{$text->{hotkey_mode}}->();
+	my $status = $bar{$hotkey_mode}->();
 	my $name  = "[".$this_track->name."]"; 
 	$status =  "$name mode: $hotkey_mode $status";
 }
@@ -511,7 +494,7 @@ sub param_status_bar {
 	if (this_op_o()->is_read_only ){
 		return "$effect_info $param_info - no adjustment possible";
 	}
-	$param_info .= " Stepsize: ".param_stepsize();
+	$param_info .= " Stepsize: ". ::Effect::param_stepsize();
 	return "$effect_info $param_info";
 }
 sub jump_status_bar {
