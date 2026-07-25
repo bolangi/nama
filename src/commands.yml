@@ -1717,4 +1717,9 @@ arm_metronome:
   short: amm armm
   what: set up metronome to start on next engine run
   parameters: none
+effect_hotkeys:
+  type: effect
+  short: hfx
+  what: enable hotkeys and popup for adjusting effect parameters
+  parameters: none
 ...

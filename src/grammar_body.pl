@@ -221,6 +221,7 @@ modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 					# end-of-string
 
+effect_hotkeys: _effect_hotkeys { ::activate_effect_hotkeys(); 1 }
 help_effect: _help_effect effect { ::help_effect($item{effect}) ; 1}
 find_effect: _find_effect anytag(s) { 
 	::find_effect(@{$item{"anytag(s)"}}); 1}
