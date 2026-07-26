@@ -127,8 +127,8 @@ hotkeys:
     End: next_effect
     PageUp: previous_param
     PageDown: next_param
-    Left: decrement_param_1
-    Right: increment_param_1
+    Left: decrement_param
+    Right: increment_param
     Up: increment_param_10
     Down: decrement_param_10
     Enter: disable_popup
