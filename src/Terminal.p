@@ -102,9 +102,6 @@ sub setup_key_bindings {
     ' '			=> $spacebar,
 	'C-z'		=> \&suspend,
     'F1'		=> \&enable_popup,
-	'F2'		=> \&disable_popup,
-	'F3'		=> \&toggle_popup,
-	'F4'		=> \&toggle_hotkeys,
 	); 
 
 }
@@ -159,11 +156,13 @@ sub enable_popup  {
 	popup($mode), $popup_active = 1 if defined $mode
 }
 sub disable_popup { 
+	return unless defined $expose_ev;
 	$popup->unbind_event_id($_) for ($expose_ev, $key_ev); 
 	$popup_active = 0; 
 	$entry->take_focus 
 }
-sub toggle_popup { $popup_active ? disable_popup() : enable_popup() }
+sub toggle_popup { if ($popup_active){  disable_popup() } else { enable_popup() } }
+sub popup_active { print_to_terminal("popup: $popup_active") }
 
 sub popup ($mode) {
 	my ($top, $left, $lines, $cols) = ($text->{rootwin}->lines - 1, 0, 1, $text->{rootwin}->cols); 
@@ -190,13 +189,22 @@ sub popup ($mode) {
 
 }
 
+{
+my $i = 0;
 sub process_keystrokes ($mode, $info) {
-      my $str = $info->str;
-		my $action = $config->{hotkeys}->{$mode}->{$str};
-		defined $action or throw("$str: no binding found in $mode hotkey mode."), return;
+	$i++;
+	my $str = $info->str;
+	my $action = $config->{hotkeys}->{$mode}->{$str};
+	if (defined $action){
 		no strict 'refs';
 		&$action();	
 		set_popup_text(status_bar($mode));
+	}
+	else {
+		return unless $i % 2; # hack to avoid duplicate message
+		throw("$str: no binding found in $mode hotkey mode.");
+	}
+}
 }
 
 sub set_popup_text ($str) { $status = $str; $popup->expose }
@@ -207,15 +215,6 @@ sub set_hotkey_mode ($m) {
 	$popup_active = 1;
 }
 sub activate_effect_hotkeys { set_hotkey_mode('param') }
-
-sub toggle_hotkeys { 
-	if ( $popup_active ){
-		disable_popup();
-	}
-	else { 
-		enable_popup()
-	}
-}	
 
 } # popup 
 
