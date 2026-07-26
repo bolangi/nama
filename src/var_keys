@@ -86,6 +86,7 @@ $mode->{loop_enable}			# boolean
 $mode->{mastering}				# boolean
 $mode->{midi_terminal}			# 
 $mode->{midi_transport_sync}  # sync Ecasound start/stop with midish
+$mode->{hotkeys}
 
 $fx->{ecasound_effect_hints}	# hints for ecasound effects
 $fx->{offset}					# offset to locate first user-addressable 

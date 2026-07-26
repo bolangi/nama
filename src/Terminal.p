@@ -101,6 +101,10 @@ sub setup_key_bindings {
 	'Backspace' => $backspace,
     ' '			=> $spacebar,
 	'C-z'		=> \&suspend,
+    'F1'		=> \&enable_popup,
+	'F2'		=> \&disable_popup,
+	'F3'		=> \&toggle_popup,
+	'F4'		=> \&toggle_hotkeys,
 	); 
 
 }
@@ -147,10 +151,20 @@ sub command {
 	$cmd =~ s/^\s+//;
 }
 
-sub activate_effect_hotkeys { popup('param') }
+
 
 {
-my ($popup, $expose_ev, $key_ev, $status);
+my ($popup, $expose_ev, $key_ev, $status, $mode, $popup_active);
+sub enable_popup  { 
+	popup($mode), $popup_active = 1 if defined $mode
+}
+sub disable_popup { 
+	$popup->unbind_event_id($_) for ($expose_ev, $key_ev); 
+	$popup_active = 0; 
+	$entry->take_focus 
+}
+sub toggle_popup { $popup_active ? disable_popup() : enable_popup() }
+
 sub popup ($mode) {
 	my ($top, $left, $lines, $cols) = ($text->{rootwin}->lines - 1, 0, 1, $text->{rootwin}->cols); 
 	
@@ -175,8 +189,6 @@ sub popup ($mode) {
 
 
 }
-sub disable_popup { $popup->close; $entry->take_focus }
-# $popup->unbind_event_id($_) for ($expose_ev, $key_ev) ; $entry->take_focus
 
 sub process_keystrokes ($mode, $info) {
       my $str = $info->str;
@@ -188,6 +200,22 @@ sub process_keystrokes ($mode, $info) {
 }
 
 sub set_popup_text ($str) { $status = $str; $popup->expose }
+
+sub set_hotkey_mode ($m) {
+	popup($m);
+	$mode = $m;	
+	$popup_active = 1;
+}
+sub activate_effect_hotkeys { set_hotkey_mode('param') }
+
+sub toggle_hotkeys { 
+	if ( $popup_active ){
+		disable_popup();
+	}
+	else { 
+		enable_popup()
+	}
+}	
 
 } # popup 
 
@@ -480,6 +508,10 @@ sub status_bar {
 	my $name  = "[".$this_track->name."]"; 
 	$status =  "$name mode: $hotkey_mode $status";
 }
+
+sub jump_status_bar {}
+sub bump_status_bar {}
+
 	
 sub param_status_bar {
 	return " no selected effect" unless $this_track->op;

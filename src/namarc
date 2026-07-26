@@ -132,5 +132,7 @@ hotkeys:
     Up: increment_param_10
     Down: decrement_param_10
     Enter: disable_popup
+	F1: enable_popup
+    F2: disable_popup
 
 # end
