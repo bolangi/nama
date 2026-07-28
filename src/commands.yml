@@ -1722,4 +1722,9 @@ effect_hotkeys:
   short: hkx
   what: enable hotkeys and popup for adjusting effect parameters
   parameters: none
+set_param_stepsize:
+  type: effect
+  short: sps
+  what: enter new stepsize for current effect parameter 
+  parameters: <number:stepsize>
 ...
