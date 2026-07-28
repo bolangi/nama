@@ -228,7 +228,7 @@ sub set_hotkey_mode ($m) {
 	$mode = $m;	
 	$popup_active = 1;
 }
-sub activate_effect_hotkeys { set_hotkey_mode('param') }
+sub activate_effect_hotkeys { set_hotkey_mode('effect') }
 
 } # popup 
 
@@ -514,7 +514,7 @@ sub executables {
 }
 sub status_bar { 
 	my $hotkey_mode = shift;
-	my %bar = (param => \&param_status_bar,
+	my %bar = (effect => \&param_status_bar,
 	           jump  => \&jump_status_bar,
 			   bump  => \&jump_status_bar );
 	my $status = $bar{$hotkey_mode}->();
