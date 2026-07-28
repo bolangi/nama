@@ -133,5 +133,13 @@ hotkeys:
     Down: decrement_param_10
     Enter: disable_popup
     F2: disable_popup
+    u: decrement_param_10
+    i: increment_param_10
+    j: decrement_param
+    k: increment_param
+    l: previous_track
+    ;: next_track
+    o: previous_effect
+    p: next_effect
 
 # end
