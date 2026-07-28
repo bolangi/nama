@@ -104,6 +104,7 @@ sub setup_key_bindings {
 	'C-z'		=> \&suspend,
     'F1'		=> \&enable_popup,
 	'M-Enter'	=> \&enable_popup,
+	'F8'		=> \&toggle_popup,
 };
 
 	$entry->bind_keys( $text->{entry_bindings}->%*	); 
@@ -169,8 +170,8 @@ sub disable_popup {
 	$popup_active = 0; 
 	$entry->take_focus 
 }
-sub toggle_popup { if ($popup_active){  disable_popup() } else { enable_popup() } }
-sub popup_active { print_to_terminal("popup: $popup_active") }
+sub toggle_popup { if (popup_active()){  disable_popup() } else { enable_popup() } }
+sub popup_active { defined $popup and $popup->is_focused }
 
 sub popup ($mode) {
 	my ($top, $left, $lines, $cols) = ($text->{rootwin}->lines - 1, 0, 1, $text->{rootwin}->cols); 
