@@ -1127,10 +1127,10 @@ sub set_param_stepsize {
 	$project->{current_stepsize}->{::this_op()}->[this_param()] = $stepsize;
 }
 sub increase_stepsize_10x {
-	$project->{current_stepsize}->{::this_op()}->[this_param()] *= sqrt(10); # XXX hack because this is executed twice
+	$project->{current_stepsize}->{::this_op()}->[this_param()] *= 10;
 }
 sub decrease_stepsize_10x {
-	$project->{current_stepsize}->{::this_op()}->[this_param()] /= sqrt(10); # XXX hack because this is executed twice
+	$project->{current_stepsize}->{::this_op()}->[this_param()] /= 10;
 }
 sub param_stepsize {
 	$project->{current_stepsize}->{::this_op()}->[this_param()] 
