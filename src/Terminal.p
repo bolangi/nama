@@ -87,7 +87,8 @@ sub setup_key_bindings {
 		else { $entry->on_text(' ') }
 	};
 
-my %bindings = (
+	$text->{entry_bindings} = {
+
 	'Up' 		=> sub { previous_command() }, 
 	'Down'		=> sub { next_command()     }, 
 	'Left'		=> $left,
@@ -103,10 +104,14 @@ my %bindings = (
 	'C-z'		=> \&suspend,
     'F1'		=> \&enable_popup,
 	'M-Enter'	=> \&enable_popup,
-);
+};
 
-	$entry->bind_keys( %bindings	); 
+	$entry->bind_keys( $text->{entry_bindings}->%*	); 
 
+}
+sub disable_entry_bindings {
+	$entry->bind_keys( map {$_, undef} keys $text->{entry_bindings}->%* );
+	
 }
 
 sub suspend
