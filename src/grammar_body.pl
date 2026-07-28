@@ -1778,8 +1778,8 @@ bus_off: _bus_off
 }
 arm_metronome: _arm_metronome { ::arm_metronome(); 1 }
 
-set_param_stepsize: _set_param_stepsize value {::set_param_stepsize($item{value}    )} 
-set_param_exp:      _set_param_exp      exp   {::set_param_stepsize(10**$item{exp});1} 
+set_param_stepsize: _set_param_stepsize value {::set_param_stepsize($item{value});   ::activate_effect_hotkeys();1} 
+set_param_exp:      _set_param_exp      exp   {::set_param_stepsize(10**$item{exp}); ::activate_effect_hotkeys();1} 
 
 #set_playback_jumpsize: _set_playback_jumpsize seconds {::set_playback_jumpsize($item{seconds})} 
 seconds: value
