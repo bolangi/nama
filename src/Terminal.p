@@ -177,7 +177,7 @@ sub popup ($mode) {
 	disable_entry_bindings();
 	my ($top, $left, $lines, $cols) = ($text->{rootwin}->lines - 1, 0, 1, $text->{rootwin}->cols); 
 	
-   $popup = $rootwin->make_popup($top, $left, $lines, $cols);
+   $text->{popup} = $popup = $rootwin->make_popup($top, $left, $lines, $cols);
 
 	$popup->pen->chattrs({ bg => 'yellow', fg => 'black' });
 
@@ -217,7 +217,11 @@ sub process_keystrokes ($mode, $info) {
 }
 }
 
-sub set_popup_text ($str) { $status = $str; $popup->expose }
+sub set_popup_text ($str) { 
+		return if not defined $popup; 
+		$status = $str; 
+		$popup->expose 
+}
 
 sub set_hotkey_mode ($m) {
 	popup($m);

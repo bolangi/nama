@@ -1719,7 +1719,7 @@ arm_metronome:
   parameters: none
 effect_hotkeys:
   type: effect
-  short: hfx
+  short: hkx
   what: enable hotkeys and popup for adjusting effect parameters
   parameters: none
 ...
