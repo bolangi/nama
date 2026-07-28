@@ -120,7 +120,7 @@ alias:
     reverb: gverb
 
 hotkeys:
-  param:
+  effect:
     Insert: previous_track
     Delete: next_track
     Home: previous_effect
@@ -133,6 +133,7 @@ hotkeys:
     Down: decrement_param_10
     Enter: disable_popup
     F2: disable_popup
+    F8: toggle_popup
     u: decrement_param_10
     i: increment_param_10
     j: decrement_param
@@ -141,5 +142,7 @@ hotkeys:
     ;: next_track
     o: previous_effect
     p: next_effect
+    +: increase_stepsize_10x
+    -: decrease_stepsize_10x
 
 # end
