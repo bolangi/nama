@@ -54,7 +54,7 @@ sub create_entry_widget {
 							show_prompt();
 						}; 
 
-	$entry = Tickit::Widget::Entry->new( 
+	$text->{entry} = $entry = Tickit::Widget::Entry->new( 
 		text 	 => prompt(),
 		on_enter => $do_command,
 	);
@@ -167,12 +167,14 @@ sub disable_popup {
 	return unless defined $expose_ev;
 	$popup->unbind_event_id($_) for ($expose_ev, $key_ev); 
 	$popup_active = 0; 
+	setup_key_bindings();
 	$entry->take_focus 
 }
 sub toggle_popup { if ($popup_active){  disable_popup() } else { enable_popup() } }
 sub popup_active { print_to_terminal("popup: $popup_active") }
 
 sub popup ($mode) {
+	disable_entry_bindings();
 	my ($top, $left, $lines, $cols) = ($text->{rootwin}->lines - 1, 0, 1, $text->{rootwin}->cols); 
 	
    $popup = $rootwin->make_popup($top, $left, $lines, $cols);
