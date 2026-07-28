@@ -87,7 +87,7 @@ sub setup_key_bindings {
 		else { $entry->on_text(' ') }
 	};
 
-	$entry->bind_keys( 
+my %bindings = (
 	'Up' 		=> sub { previous_command() }, 
 	'Down'		=> sub { next_command()     }, 
 	'Left'		=> $left,
@@ -102,7 +102,10 @@ sub setup_key_bindings {
     ' '			=> $spacebar,
 	'C-z'		=> \&suspend,
     'F1'		=> \&enable_popup,
-	); 
+	'M-Enter'	=> \&enable_popup,
+);
+
+	$entry->bind_keys( %bindings	); 
 
 }
 
