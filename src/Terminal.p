@@ -528,9 +528,10 @@ sub bump_status_bar {}
 	
 sub param_status_bar {
 	return " no selected effect" unless $this_track->op;
+	return " no effect found"    unless defined this_op_o();
 	my $effect_info = join " ",
 				this_op(), 
-				this_op_o()->fxname;
+				this_op_o()->fxname ? this_op_o()->fxname : '<unnamed>';
 # 	if (this_op_o()->no_params) {
 # 		return "$effect_info (no parameters to adjust)";
 # 	}

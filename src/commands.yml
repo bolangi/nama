@@ -1727,4 +1727,10 @@ set_param_stepsize:
   short: sps
   what: enter new stepsize for current effect parameter 
   parameters: <number:stepsize>
+set_param_exp:
+  type: effect
+  short: spe
+  what: set current parameter stepsize to ten to the power of this exponent
+  example: spe -2 # set stepsize to 0.01
+  parameters: <number:stepsize>
 ...
