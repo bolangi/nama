@@ -44,7 +44,7 @@ sub new ($class, %args) {
 		push @chunks, $self;
 }
 sub my_length ($self) {
-	$self->time_after_ticks($self->ticks);
+	$self->time_at_note_position($self->beats);
 }
 sub previous ($self) {
 	$self->index > 0 and $chunks[$self->index - 1] 
@@ -89,142 +89,42 @@ sub note_length ($self){
 	$self->note_length_at(0);
 }
 
-# Klick implements a tempo ramp as an arithmetic progression of lengths.
-# Apply that progression at tick resolution so tempo continues to change
-# within a beat instead of remaining constant until the next beat.
-sub tick_length_at ($self, $tick_index) {
-	my $ppqn = $config->{ticks_per_quarter_note};
-	my $start_length = bpm_to_length($self->start_tempo) / $ppqn;
-	return $start_length if $self->fixed_tempo;
+# Klick ramps BPM linearly over musical position.  Integrating reciprocal
+# tempo gives elapsed time; allowing a fractional note position extends the
+# same curve to Nama's ticks while preserving Klick's beat boundaries.
+sub time_at_note_position ($self, $position) {
+	return 0 if $position == 0;
 
-	my $end_length = bpm_to_length($self->end_tempo) / $ppqn;
-	my $delta = ($end_length - $start_length) / $self->ticks;
-	$start_length + $tick_index * $delta;
-}
+	my $start = $self->start_tempo;
+	if ($self->fixed_tempo) {
+		return $position * 240 / ($self->note * $start);
+	}
 
-sub time_after_ticks ($self, $ticks) {
-	return $ticks * $self->tick_length_at(0) if $self->fixed_tempo;
+	my $change = $self->end_tempo - $start;
+	my $tempo_at_position = $start
+		+ $change * $position / $self->beats;
 
-	my $first = $self->tick_length_at(0);
-	my $delta = ($self->tick_length_at($self->ticks) - $first)
-	          / $self->ticks;
-
-	# Sum tick lengths 0 .. $ticks - 1.
-	$ticks * ($first + $delta * ($ticks - 1) / 2);
-}
-
-sub note_length_at ($self, $note_index) {
-	my $first_tick = $note_index * $self->ticks_per_note;
-	$self->time_after_ticks($first_tick + $self->ticks_per_note)
-		- $self->time_after_ticks($first_tick);
+	240 * $self->beats
+		/ ($self->note * $change)
+		* log($tempo_at_position / $start);
 }
 
 sub time_after_notes ($self, $notes) {
-	$self->time_after_ticks($notes * $self->ticks_per_note);
-}
-=comment
-	else {
-		my $nl_start = note_length($self->start_tempo, $self->note_fraction);
-		my $nl_end   = note_length($self->end_tempo,   $self->note_fraction);
-		my $delta = ($nl_end - $nl_start) / $self->notes;
-		for my $incr (0 .. $self->notes - 1){
-			push @note_lengths, ($nl_start + $incr * $delta);
-		}
-	}
-=cut;
-
-sub ratio {
-	my ($start_bpm, $end_bpm, $beats) = @_;
-	my $ratio = exp( log(bpm_to_length($end_bpm) / bpm_to_length($start_bpm)) / $beats );
-
+	$self->time_at_note_position($notes);
 }
 
-sub bpm_to_length {
-	my $bpm = shift;
-	60 / $bpm 
+sub time_after_ticks ($self, $ticks) {
+	$self->time_at_note_position($ticks / $self->ticks_per_note);
 }
 
-sub note_position_during_tempo_ramp {
-
-=comment
-	my ($start_bpm, $end_bpm, $beats, $nth) = @_;
-
-	# start_tempo: beats per minute
-	# end_tempo: beats per minute
-	# nth: beat whose position we want
-	# beats: total beats in ramp interval
-
-	return 0 if $nth == 1;
-	::throw("$nth: zero or missing nth beat"), return if ! $nth;
-
-	# To determine the start of a beat we accumlate
-	# time through the end of the previous beat.
-
-	# we will change time by a constant delta
-
-	# delta = total change / number of steps (n)
-
-	# increment first note length by 0 delta
-	# increment second note by 1 delta
-	# increment (nth) note by (n-1) delta
-	
-	# we only increment (no. of steps - 1) times, since the measure
-	# following the ramp will presumably continue with the tempo
-	# at ramp end. 
-
-	# example: For 4 measures of 4/4, the delta is total change in beat length/16, 
-	# we then increment length of subsequent beats from beat 2 to beat 16 by
-	# delta. The first note of the next measure will be at the intended tempo
-
-	my $t1 = bpm_to_length($start_bpm);
-	my $tn = bpm_to_length($end_bpm);
-
-	my $pos = $m * ($t1 + ($tn - $t1) / $n * ($m - 1) / 2);
-    
-	# Consider this ramp. The initial time interval 
-    # 
-    # t0  = 60 s / 100 bpm = 0.6 s.  
-    # 
-    # The final time interval after 16 beats is 
-    # 
-    # t16 = 60 s / 120 bpm = 0.5 s.
-    # 
-    # There are two ways I can think of for the time interval between beats to
-    # change.  One is when the time interval changes linearly with the number of
-    # beats; the other is that the time interval changes by a constant ratio with
-    # each beat.
-    # 
-    # Let's consider the linear change first.  For your case, the time change
-    # with each beat delta ("d") is given by
-    # 
-    # d = (tn - t1) / n  Where n is the number of notes in the chunk
-    # 
-    # The time Tm when the mth note ends is
-    # Tm =  t1 + ...+ tm
-    #     = t1 + (t1 + d) + (t1 + 2 d) + ,,, (t0 + (m-1)d )
-    #     = m t1  +  (1 + ... m - 1) d
-    # 
-    # There are m - 1 terms in the sum (1 + 2 + ... m - 1), and
-    # the average term is  (m / 2)  
-    # 
-    # sum = (m - 1)(m / 2)
-    # 
-    # Plugging into T,
-    # 
-    # Tm = m t1 +  d (m-1) m / 2
-    # 
-    # substitute d to get
-    # 
-    # Tm = m t1 +  (tn - t1) / n * (m - 1) * m  / 2
-    # Tm = m (t1 + (tn - t1) / n * (m - 1) / 2 )
-
-=cut
+sub note_length_at ($self, $note_index) {
+	$self->time_at_note_position($note_index + 1)
+		- $self->time_at_note_position($note_index);
 }
 
-sub quarter_length {
-	my $bpm = shift;
-	my $bps = $bpm / 60;
-	my $seconds_per_beat = 1 / $bps
+sub tick_length_at ($self, $tick_index) {
+	$self->time_after_ticks($tick_index + 1)
+		- $self->time_after_ticks($tick_index);
 }
 sub fixed_tempo {
 	my $self = shift;
@@ -232,13 +132,15 @@ sub fixed_tempo {
 }
 sub start_tempo {
 	my $self = shift;
-	my ($start_bpm) = $self->fixed_tempo ? $self->tempo
-										   : $self->tempo =~ / (\d+) - /x;
+	return $self->tempo if $self->fixed_tempo;
+	my ($start_bpm) = $self->tempo =~ / (\d+) - /x;
+	$start_bpm;
 }
 sub end_tempo {
 	my $self = shift;
-	my ($end_bpm) = $self->fixed_tempo ? $self->tempo
-										 : $self->tempo =~ / - (\d+) /x;
+	return $self->tempo if $self->fixed_tempo;
+	my ($end_bpm) = $self->tempo =~ / - (\d+) /x;
+	$end_bpm;
 }
 sub ticks_per_note ($self) {
 	$config->{ticks_per_quarter_note} * $self->note_fraction;
