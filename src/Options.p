@@ -35,7 +35,7 @@ sub process_command_line_options {
    
 );
 
-	map{$config->{opts}->{$_} = ''} values %options;
+	$config->{opts}->{$_} = '' for values %options;
 
 	# long options
 
