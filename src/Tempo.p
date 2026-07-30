@@ -44,7 +44,7 @@ sub new ($class, %args) {
 		push @chunks, $self;
 }
 sub my_length ($self) {
-	$self->time_after_notes($self->beats);
+	$self->time_after_ticks($self->ticks);
 }
 sub previous ($self) {
 	$self->index > 0 and $chunks[$self->index - 1] 
@@ -89,26 +89,38 @@ sub note_length ($self){
 	$self->note_length_at(0);
 }
 
-# Klick implements a tempo ramp as an arithmetic progression of beat
-# lengths.  The first note has the start-tempo length; after all notes in
-# the chunk, the following note has the end-tempo length.
-sub note_length_at ($self, $note_index) {
-	my $start_length = bpm_to_length($self->start_tempo) * $self->note_fraction;
+# Klick implements a tempo ramp as an arithmetic progression of lengths.
+# Apply that progression at tick resolution so tempo continues to change
+# within a beat instead of remaining constant until the next beat.
+sub tick_length_at ($self, $tick_index) {
+	my $ppqn = $config->{ticks_per_quarter_note};
+	my $start_length = bpm_to_length($self->start_tempo) / $ppqn;
 	return $start_length if $self->fixed_tempo;
 
-	my $end_length = bpm_to_length($self->end_tempo) * $self->note_fraction;
-	my $delta = ($end_length - $start_length) / $self->beats;
-	$start_length + $note_index * $delta;
+	my $end_length = bpm_to_length($self->end_tempo) / $ppqn;
+	my $delta = ($end_length - $start_length) / $self->ticks;
+	$start_length + $tick_index * $delta;
+}
+
+sub time_after_ticks ($self, $ticks) {
+	return $ticks * $self->tick_length_at(0) if $self->fixed_tempo;
+
+	my $first = $self->tick_length_at(0);
+	my $delta = ($self->tick_length_at($self->ticks) - $first)
+	          / $self->ticks;
+
+	# Sum tick lengths 0 .. $ticks - 1.
+	$ticks * ($first + $delta * ($ticks - 1) / 2);
+}
+
+sub note_length_at ($self, $note_index) {
+	my $first_tick = $note_index * $self->ticks_per_note;
+	$self->time_after_ticks($first_tick + $self->ticks_per_note)
+		- $self->time_after_ticks($first_tick);
 }
 
 sub time_after_notes ($self, $notes) {
-	return $notes * $self->note_length if $self->fixed_tempo;
-
-	my $first = $self->note_length_at(0);
-	my $delta = ($self->note_length_at($self->beats) - $first) / $self->beats;
-
-	# Sum note lengths 0 .. $notes - 1.
-	$notes * ($first + $delta * ($notes - 1) / 2);
+	$self->time_after_ticks($notes * $self->ticks_per_note);
 }
 =comment
 	else {
@@ -299,8 +311,8 @@ sub end_pos ($self) {
 	my $chunk = $beat->bar->chunk;
 	my $note_index = ($beat->bar->index - 1) * $chunk->count
 	               + $beat->index - 1;
-	$beat->start_pos
-		+ $self->index * $chunk->note_length_at($note_index) * $chunk->ticks_per_note
+	my $ticks = $note_index * $chunk->ticks_per_note + $self->index;
+	$chunk->start_pos + $chunk->time_after_ticks($ticks);
 }
 sub start_pos ($self) {
 	my $beat = $self->beat;
@@ -308,8 +320,8 @@ sub start_pos ($self) {
 	my $chunk = $bar->chunk;
 	my $note_index = ($bar->index - 1) * $chunk->count
 	               + $beat->index - 1;
-	$beat->start_pos
-		+ ($self->index - 1) * $chunk->note_length_at($note_index) * $chunk->note_fraction / 24;
+	my $ticks = $note_index * $chunk->ticks_per_note + $self->index - 1;
+	$chunk->start_pos + $chunk->time_after_ticks($ticks);
 }
 }
 
