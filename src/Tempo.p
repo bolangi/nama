@@ -44,7 +44,7 @@ sub new ($class, %args) {
 		push @chunks, $self;
 }
 sub my_length ($self) {
-	$self->bars * $self->count * $self->note_length;
+	$self->time_after_notes($self->beats);
 }
 sub previous ($self) {
 	$self->index > 0 and $chunks[$self->index - 1] 
@@ -86,10 +86,29 @@ sub note_fraction ($self) {
 }
 
 sub note_length ($self){
-	if ( $self->fixed_tempo ){
-		my $beat_length = 60 / $self->tempo;
-		my $seconds_per_note =  $beat_length * $self->note_fraction;
-	}	
+	$self->note_length_at(0);
+}
+
+# Klick implements a tempo ramp as an arithmetic progression of beat
+# lengths.  The first note has the start-tempo length; after all notes in
+# the chunk, the following note has the end-tempo length.
+sub note_length_at ($self, $note_index) {
+	my $start_length = bpm_to_length($self->start_tempo) * $self->note_fraction;
+	return $start_length if $self->fixed_tempo;
+
+	my $end_length = bpm_to_length($self->end_tempo) * $self->note_fraction;
+	my $delta = ($end_length - $start_length) / $self->beats;
+	$start_length + $note_index * $delta;
+}
+
+sub time_after_notes ($self, $notes) {
+	return $notes * $self->note_length if $self->fixed_tempo;
+
+	my $first = $self->note_length_at(0);
+	my $delta = ($self->note_length_at($self->beats) - $first) / $self->beats;
+
+	# Sum note lengths 0 .. $notes - 1.
+	$notes * ($first + $delta * ($notes - 1) / 2);
 }
 =comment
 	else {
@@ -221,11 +240,15 @@ sub new ($class, %args) {
 }
 sub start_pos ($self)
 {
-	$self->chunk->start_pos + ($self->index - 1) * $self->chunk->count * $self->chunk->note_length
+	my $chunk = $self->chunk;
+	my $notes = ($self->index - 1) * $chunk->count;
+	$chunk->start_pos + $chunk->time_after_notes($notes);
 }
 sub end_pos ($self)
 {
-	$self->start_pos + $self->chunk->count * $self->chunk->note_length
+	my $chunk = $self->chunk;
+	my $notes = $self->index * $chunk->count;
+	$chunk->start_pos + $chunk->time_after_notes($notes);
 }
 sub beat ($self, $beat_index) {
 	::Tempo::Beat->new( bar => $self,
@@ -245,20 +268,14 @@ sub new ($class, %args) {
 sub end_pos ($self) {
 	my $bar = $self->bar;
 	my $chunk = $self->bar->chunk;
-	if ( $chunk->fixed_tempo ){
-		$bar->start_pos + $self->index * $chunk->note_length;
-	}
-	else { die "no support for tempo ramp" }
-
+	my $notes = ($bar->index - 1) * $chunk->count + $self->index;
+	$chunk->start_pos + $chunk->time_after_notes($notes);
 }
 sub start_pos ($self) {
 	my $bar = $self->bar;
 	my $chunk = $self->bar->chunk;
-	if ( $chunk->fixed_tempo ){
-		$bar->start_pos + ($self->index - 1) * $chunk->note_length;
-	}
-	else { die "no support for tempo ramp" }
-
+	my $notes = ($bar->index - 1) * $chunk->count + $self->index - 1;
+	$chunk->start_pos + $chunk->time_after_notes($notes);
 }
 sub tick ($self, $tick_index) {
 	::Tempo::Tick->new( beat => $self, index => $tick_index)
@@ -278,21 +295,19 @@ sub new ($class, %args) {
 sub end_pos ($self) {
 	my $beat = $self->beat;
 	my $chunk = $beat->bar->chunk;
-	if ( $chunk->fixed_tempo ){
-		$beat->start_pos + $self->index * $chunk->note_length / 24;
-	}
-	else { die "no support for tempo ramp" }
-
+	my $note_index = ($beat->bar->index - 1) * $chunk->count
+	               + $beat->index - 1;
+	$beat->start_pos
+		+ $self->index * $chunk->note_length_at($note_index) / 24;
 }
 sub start_pos ($self) {
 	my $beat = $self->beat;
 	my $bar = $beat->bar;
 	my $chunk = $bar->chunk;
-	if ( $chunk->fixed_tempo ){
-		$beat->start_pos + ($self->index - 1) * $chunk->note_length/ 24;
-	}
-	else { die "no support for tempo ramp" }
-
+	my $note_index = ($bar->index - 1) * $chunk->count
+	               + $beat->index - 1;
+	$beat->start_pos
+		+ ($self->index - 1) * $chunk->note_length_at($note_index) / 24;
 }
 }
 
