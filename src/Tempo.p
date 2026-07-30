@@ -228,8 +228,10 @@ sub end_tempo {
 	my ($end_bpm) = $self->fixed_tempo ? $self->tempo
 										 : $self->tempo =~ / - (\d+) /x;
 }
+sub ticks_per_note ($self) {
+	$config->{ticks_per_quarter_note} * $self->note_fraction;
 }
-
+}
 {
 package ::Tempo::Bar;
 use v5.36;
@@ -298,7 +300,7 @@ sub end_pos ($self) {
 	my $note_index = ($beat->bar->index - 1) * $chunk->count
 	               + $beat->index - 1;
 	$beat->start_pos
-		+ $self->index * $chunk->note_length_at($note_index) / 24;
+		+ $self->index * $chunk->note_length_at($note_index) * $chunk->ticks_per_note
 }
 sub start_pos ($self) {
 	my $beat = $self->beat;
@@ -307,7 +309,7 @@ sub start_pos ($self) {
 	my $note_index = ($bar->index - 1) * $chunk->count
 	               + $beat->index - 1;
 	$beat->start_pos
-		+ ($self->index - 1) * $chunk->note_length_at($note_index) / 24;
+		+ ($self->index - 1) * $chunk->note_length_at($note_index) * $chunk->note_fraction / 24;
 }
 }
 
