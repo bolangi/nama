@@ -322,7 +322,7 @@ use autodie qw(:all);
 
 my $label = qr| (?<label> [-_\d\w]+) :       |x;
 my $bars  = qr| (?<bars>  \d+      )         |x;
-my $meter = qr| (?<meter> \d / \d  )         |x;
+my $meter = qr| (?<meter> \d+ / \d+)         |x;
 my $chunks = qr| (?<tempo> \d+ ( - \d+)? )    |x;
 
 my @fields = qw( label bars meter tempo );
