@@ -8,6 +8,15 @@ use File::Copy;
 use ::Util qw(dest_string dest_type join_path freq);
 use ::Log qw(logpkg logsub);
 
+
+sub node ($track) {
+	my %node = (
+	send_type 	=> $track->send_type,
+	rw 			=> $track->rw,
+	)
+	
+}
+
 sub is_used {
 	my $track = shift;      # Track is used if:
 	my $bus = $track->bus;  # 
@@ -24,7 +33,7 @@ sub rec_status {
 	return OFF if 0 # 	! ($track->engine_group eq $::this_engine->name)
 				or  $track->{rw} eq OFF
 				or 	! $track->is_used
-				and ! ($mode->doodle and ! $mode->eager and $setup->{tracks_with_duplicate_inputs}->{$track->name} ); 
+				and ! ($mode->doodle and $setup->{tracks_with_duplicate_inputs}->{$track->name} ); 
 	if ($track->{rw} ne PLAY) # e.g. MON or REC
 	{
 		return OFF if $track->source_type eq 'jack_client' 

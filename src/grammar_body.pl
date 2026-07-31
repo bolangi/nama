@@ -1709,9 +1709,6 @@ redo: _redo { ::redo() }
 
 show_head_commit: _show_head_commit { ::show_head_commit() }
 
-eager: _eager on_or_off { $::mode->{eager} = $item{on_or_off} =~ /[1n]/ ? 1 : 0 }
-on_or_off: 'on' | '1' | 'off' | '0'
-
 new_engine: _new_engine ident port { ::Engine->new(name => $item{ident}, port => $item{port}) }
 
 port: dd

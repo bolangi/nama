@@ -1583,10 +1583,6 @@ show_head_commit:
   what: |
     show the last commit, which undo will roll back.
     A commit may contain multiple commands. 
-eager:
-  type: mode
-  what: set eager mode
-  parameters: on | off
 new_engine:
   type: engine
   what: Start a named Ecasound engine, or bind to an existing engine

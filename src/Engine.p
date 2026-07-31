@@ -272,8 +272,6 @@ sub configure {
 		{ 
 			set_position($project->{playback_position}) if $project->{playback_position} 
 		}
-		$self->start_transport('quiet') if $mode->eager 
-								and ($mode->doodle or $mode->preview);
 		transport_status();
 		$ui->flash_ready;
 		1

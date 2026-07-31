@@ -81,7 +81,6 @@ $help->{title}
 
 $mode->{preview}				#
 $mode->{doodle}					#
-$mode->{eager}					# dismantled
 $mode->{offset_run}				# record starting other than at the beginning
 $mode->{soloing}				# boolean
 $mode->{loop_enable}			# boolean
