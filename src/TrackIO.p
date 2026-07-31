@@ -314,7 +314,7 @@ sub set_rw {
 	my ($track, $setting) = @_;
 	#my $already = $track->rw eq $setting ? " already" : "";
 	$track->set(rw => $setting);
-	my $status = $track->rec_status();
+	my $status = $track->candidate_status();
 	::pagers("Track ",$track->name, " set to $setting", 
 		($status ne $setting ? ", but current status is $status" : ""));
 

@@ -292,6 +292,15 @@ $this_track->set(group => 'Main');
 	$resolution->{effective} = OFF;
 	is($this_track->effective_status, MON,
 		'track status resolution is returned as a snapshot');
+	my $message;
+	{
+		no warnings 'redefine';
+		local *::pagers = sub { $message = join '', @_ };
+		$this_track->set_rw(OFF);
+	}
+	is($message, 'Track sax set to OFF',
+		'set-rw feedback uses new candidate status, not old graph status');
+	$this_track->set(rw => MON);
 }
 
 {
