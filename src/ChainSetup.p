@@ -89,7 +89,7 @@ sub effective_status {
 
 sub engine_tracks { ::audio_tracks() } 
 sub engine_wav_out_tracks {
-	grep{$_->rec} engine_tracks();
+	grep { $_->effective_rec } engine_tracks();
 }
 # return file output entries, including Mixdown 
 sub really_recording { 

@@ -293,6 +293,19 @@ $this_track->set(group => 'Main');
 	is($this_track->effective_status, MON,
 		'track status resolution is returned as a snapshot');
 }
+
+{
+	local $::ChainSetup::g = Graph->new;
+	$this_track->set(rw => REC);
+	$::ChainSetup::g->add_path('soundcard_in', 'sax', 'wav_out');
+	::ChainSetup::prune_graph();
+	is_deeply(
+		[map { $_->name } ::ChainSetup::engine_wav_out_tracks()],
+		['sax'],
+		'engine WAV outputs use effective recording status',
+	);
+	$this_track->set(rw => MON);
+}
 ::ChainSetup::clear_status_resolution();
 
 my ($vol_id) = $this_track->vol;
