@@ -343,7 +343,7 @@ sub show_status {
 	push @output, "Modes settings:   ", join(", ", @modes), $/ if @modes;
 	my @actions;
 	push @actions, "record" if grep{ ! /Mixdown/ } ::ChainSetup::really_recording();
-	push @actions, "playback" if grep { $_->play } 
+	push @actions, "playback" if grep { $_->effective_play }
 		map{ $tn{$_} } $bn{Main}->tracks, q(Mixdown);
 
 	# We only check Main bus for playback. 
@@ -352,7 +352,7 @@ sub show_status {
 	# tracks are set to REC (with rec-to-file disabled)
 	
 	
-	push @actions, "mixdown" if $tn{Mixdown}->rec;
+	push @actions, "mixdown" if $tn{Mixdown}->effective_rec;
 	push @output, "Pending actions:  ", join(", ", @actions), $/ if @actions;
 	push @output, "Main bus version: ",$bn{Main}->version, $/ if $bn{Main}->version;
 	push @output, "Setup length is:  ", ::heuristic_time($setup->{audio_length}), $/; 
