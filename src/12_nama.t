@@ -420,6 +420,17 @@ nama_cmd('for 4 5 6 7 8; remove_track quiet');
 nama_cmd('Main; send 1');
 nama_cmd('add_bus Horns; sax move_to_bus Horns; sax stereo');
 
+$tn{Horns}->set(group => 'Null');
+ok(!$tn{Horns}->is_used, 'idle bus mix track is not currently used');
+my @horns_consumers = $bn{Horns}->candidate_consumers;
+is(scalar @horns_consumers, 1,
+	'bus finds candidate consumer without traversing graph use');
+is($horns_consumers[0]->name, 'Horns',
+	'bus candidate consumer is its mix track');
+is(($bn{Horns}->wantme)[0]->name, 'Horns',
+	'wantme remains a compatibility interface');
+$tn{Horns}->set(group => 'Main');
+
 $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Main_in

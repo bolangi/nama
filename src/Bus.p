@@ -170,7 +170,7 @@ sub apply {
 	my ($bus, $g)  = @_;
 	logpkg('debug', "bus ". $bus->name. ": applying routes");
 	logpkg('debug', "Bus destination is type: $bus->{send_type}, id: $bus->{send_id}");
-	my @wantme = $bus->wantme;
+	my @wantme = $bus->candidate_consumers;
 	logpkg('debug', "bus ". $bus->name. " consumed by ".$_->name) for @wantme;
 	map{ 
 		my $member = $_;
@@ -209,14 +209,19 @@ sub remove {
 	
 	delete $::bn{$bus->name};
 } 
-sub wantme {
+sub candidate_consumers {
 	my $bus = shift;
 	no warnings 'uninitialized';
+	# Graph pruning decides whether these consumers have a viable sink.
 	my @wantme = grep{ 	$_->{rw} =~ /REC|MON/ 
 					and $_->source_type eq 'bus' 
-					and $_->source_id eq $bus->name 
-					and $_->is_used} ::all_tracks();
+					and $_->source_id eq $bus->name} ::all_tracks();
 	@wantme
+
+}
+sub wantme {
+	my $bus = shift;
+	$bus->candidate_consumers;
 
 }
 }
