@@ -205,6 +205,22 @@ is($this_track->candidate_status, MON,
 	'candidate status does not depend on graph use');
 $this_track->set(group => 'Main');
 
+{
+	local $::ChainSetup::g = Graph->new;
+	$::ChainSetup::g->add_edge('sax', 'soundcard_out');
+	is_deeply(::ChainSetup::prune_graph(), {
+		removed => [{ track => 'sax', reason => 'no-source' }],
+	}, 'pruning reports a track without a source');
+}
+
+{
+	local $::ChainSetup::g = Graph->new;
+	$::ChainSetup::g->add_edge('soundcard_in', 'sax');
+	is_deeply(::ChainSetup::prune_graph(), {
+		removed => [{ track => 'sax', reason => 'no-sink' }],
+	}, 'pruning reports a track without a sink');
+}
+
 my ($vol_id) = $this_track->vol;
 
 ok(   (defined $vol_id and $::Effect::by_id{$vol_id}) , "apply volume control");

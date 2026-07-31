@@ -42,6 +42,7 @@ our (
 	@pre_output, 	# pre-output chain operators
 
 	$chain_setup,	# final result as string
+	$prune_report,	# tracks removed while resolving the routing graph
 	);
 
 
@@ -61,6 +62,7 @@ sub initialize {
 	%is_ecasound_chain = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 	undef $chain_setup;
+	undef $prune_report;
 	::disable_length_timer();
 	reset_aux_chain_counter();
 	unlink $file->chain_setup;
@@ -68,6 +70,7 @@ sub initialize {
 }
 sub ecasound_chain_setup { $chain_setup } 
 sub is_ecasound_chain { $is_ecasound_chain{$_[0]} }
+sub prune_report { $prune_report }
 
 sub engine_tracks { ::audio_tracks() } 
 sub engine_wav_out_tracks {
@@ -213,14 +216,24 @@ sub add_paths_for_mixdown_handling {
 }
 sub prune_graph {
 	logsub((caller(0))[3]);
+	$prune_report = { removed => [] };
 	::Graph::simplify_send_routing($g);
 	logpkg('debug',"Graph after simplify_send_routing:\n$g");
-	::Graph::remove_out_of_bounds_tracks($g) if ::edit_mode();
+	my @removed = ::edit_mode()
+		? ::Graph::remove_out_of_bounds_tracks($g)
+		: ();
+	push @{$prune_report->{removed}},
+		map { +{ track => $_, reason => 'out-of-bounds' } } @removed;
 	logpkg('debug',"Graph after remove_out_of_bounds_tracks:\n$g");
-	::Graph::recursively_remove_inputless_tracks($g);
+	@removed = ::Graph::recursively_remove_inputless_tracks($g);
+	push @{$prune_report->{removed}},
+		map { +{ track => $_, reason => 'no-source' } } @removed;
 	logpkg('debug',"Graph after recursively_remove_inputless_tracks:\n$g");
-	::Graph::recursively_remove_outputless_tracks($g); 
+	@removed = ::Graph::recursively_remove_outputless_tracks($g);
+	push @{$prune_report->{removed}},
+		map { +{ track => $_, reason => 'no-sink' } } @removed;
 	logpkg('debug',"Graph after recursively_remove_outputless_tracks:\n$g");
+	$prune_report
 }
 # object based dispatch from routing graph
 	
