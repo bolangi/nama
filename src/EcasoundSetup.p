@@ -169,7 +169,7 @@ sub transport_status {
 		pager(join '',"Warning: $_: input ",$tn{$_}->source,
 		" is already used by track ",$setup->{inputs_used}->{$tn{$_}->source},".")
 		if $setup->{tracks_with_duplicate_inputs}->{$_};
-	} grep { $tn{$_}->rec } $bn{Main}->tracks;
+	} grep { $tn{$_}->effective_rec } $bn{Main}->tracks;
 
 
 	# assume transport is stopped
