@@ -199,6 +199,12 @@ like(ref $this_track, qr/Track/, "track creation");
 
 is( $this_track->name, 'sax', "current track assignment");
 
+$this_track->set(group => 'Null');
+ok(!$this_track->is_used, 'idle track is not currently used');
+is($this_track->candidate_status, MON,
+	'candidate status does not depend on graph use');
+$this_track->set(group => 'Main');
+
 my ($vol_id) = $this_track->vol;
 
 ok(   (defined $vol_id and $::Effect::by_id{$vol_id}) , "apply volume control");

@@ -28,12 +28,8 @@ sub is_used {
 sub candidate_status {
 #	logsub((caller(0))[3]);
 	my $track = shift;
-	my $bus = $track->bus;
-
 	return OFF if 0 # 	! ($track->engine_group eq $::this_engine->name)
-				or  $track->{rw} eq OFF
-				or 	! $track->is_used
-				and ! ($mode->doodle and $setup->{tracks_with_duplicate_inputs}->{$track->name} ); 
+					or  $track->{rw} eq OFF;
 	if ($track->{rw} ne PLAY) # e.g. MON or REC
 	{
 		return OFF if $track->source_type eq 'jack_client' 
