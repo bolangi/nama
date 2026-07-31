@@ -199,11 +199,11 @@ sub trigger_rec_setup_hooks {
 			join "\n",
 			"track ".$_->name,
 			"effective status is: ".$_->effective_status,
-			"old rec status: ".$setup->{_old_rec_status}->{$_->name},
+			"old effective status: ".$setup->{_old_effective_status}->{$_->name},
 			"script was ". (-e $_->rec_setup_script ) ? "found" : "not found"
 		);
 		$_->effective_rec
-		and $setup->{_old_rec_status}->{$_->name} ne REC
+		and $setup->{_old_effective_status}->{$_->name} ne REC
 		and -e $_->rec_setup_script
 	} 
 	rec_hookable_tracks();
@@ -212,7 +212,7 @@ sub trigger_rec_setup_hooks {
  	map { system($_->rec_cleanup_script) } 
 	grep
 	{ 	! $_->effective_rec
-		and $setup->{_old_rec_status}->{$_->name} eq REC
+		and $setup->{_old_effective_status}->{$_->name} eq REC
 		and -e $_->rec_cleanup_script
 	}
 	rec_hookable_tracks();

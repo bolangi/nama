@@ -254,7 +254,7 @@ sub configure {
 		# transitions that participate in the completed setup.
 		trigger_rec_cleanup_hooks();
 		trigger_rec_setup_hooks();
-		$setup->{_old_rec_status} = {
+		$setup->{_old_effective_status} = {
 			map { $_->name => $_->effective_status } rec_hookable_tracks()
 		};
 
