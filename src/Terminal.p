@@ -1,5 +1,26 @@
 # ----------- Terminal related subroutines ---------
 
+use v5.36;
+
+# A Scroller item has no window of its own, so it cannot directly contain the
+# command Entry widget.  This one-line item reserves the Entry's place in the
+# Scroller; its render callback keeps a floating child window over that line.
+package ::TerminalEntryItem;
+
+sub new ($class, %args) {
+	bless { on_render => $args{on_render} }, $class
+}
+
+sub height_for_width ($self, $width) { 1 }
+
+sub render ($self, $rb, %args) {
+	for my $line ($args{firstline} .. $args{lastline}) {
+		$rb->goto($line, 0);
+		$rb->erase_to($args{width});
+	}
+	$self->{on_render}->() if $self->{on_render};
+}
+
 package ::;
 use v5.36;
 no warnings 'uninitialized';
@@ -30,6 +51,8 @@ rootwin
 
 {
 my ($rootwin, $vbox, $tickit, $term, $scroller, $entry);
+my ($entry_item, $entrywin, $scrollerwin, $scroller_geom_ev);
+my $entry_item_installed;
 $text->{loop} = IO::Async::Loop->new;
 
 sub initialize_terminal {
@@ -42,7 +65,12 @@ sub initialize_terminal {
 	create_entry_widget();
 	setup_key_bindings();
 	$vbox->add($scroller, valign => 'top', force_size => $lines - 2); 
-	$vbox->add($entry, valign => 'top');
+
+	$entry_item = ::TerminalEntryItem->new(
+		on_render => \&position_entry_widget,
+	);
+	$scroller->set_on_scrolled(sub { position_entry_widget() });
+	$tickit->later(\&install_entry_item);
 }
 
 sub create_entry_widget {
@@ -51,7 +79,7 @@ sub create_entry_widget {
 							print_to_terminal($line); 
 							$line =~ s/^.+?>\s*//;
 							process_line($line); 
-							show_prompt(prompt());
+							show_prompt();
 						}; 
 
 	$text->{entry} = $entry = Tickit::Widget::Entry->new( 
@@ -59,7 +87,65 @@ sub create_entry_widget {
 		on_enter => $do_command,
 	);
 
-	show_prompt(prompt());
+	show_prompt();
+}
+
+sub install_entry_item {
+	return if $entry_item_installed;
+
+	unless ($scroller->window) {
+		$tickit->later(\&install_entry_item);
+		return;
+	}
+
+	$scroller->push($entry_item);
+	$entry_item_installed = 1;
+	$scroller->scroll_to_bottom;
+	position_entry_widget();
+}
+
+sub position_entry_widget {
+	return unless $entry_item_installed;
+
+	my $parent = $scroller->window or return;
+
+	if (!defined $scrollerwin or "$scrollerwin" ne "$parent") {
+		if (defined $scrollerwin and defined $scroller_geom_ev) {
+			$scrollerwin->unbind_event_id($scroller_geom_ev);
+		}
+		if (defined $entrywin) {
+			$entry->set_window(undef);
+			$entrywin->close if $entrywin->can('close');
+			undef $entrywin;
+		}
+
+		$scrollerwin = $parent;
+		$scroller_geom_ev = $scrollerwin->bind_event(
+			geomchange => sub { position_entry_widget() },
+		);
+	}
+
+	my ($line, $offscreen) = $scroller->item2line($entry_item, 0, 1);
+	if (!defined $line or defined $offscreen) {
+		$entrywin->hide if defined $entrywin and $entrywin->is_visible;
+		return;
+	}
+
+	if (!defined $entrywin) {
+		$entrywin = $scrollerwin->make_float(
+			$line, 0, 1, $scrollerwin->cols,
+		);
+		$entry->set_window($entrywin);
+		$entry->take_focus;
+		return;
+	}
+
+	my $was_visible = $entrywin->is_visible;
+	$entrywin->change_geometry($line, 0, 1, $scrollerwin->cols);
+	unless ($was_visible) {
+		$entrywin->show;
+		$entry->take_focus;
+	}
 }
 sub setup_key_bindings {
 
@@ -122,16 +208,28 @@ sub suspend
 	$term->resume;
 }
 
-sub show_prompt ($prompt) {
-	$entry->set_text($prompt);
+sub show_prompt {
+	$entry->set_text(prompt());
 	$entry->set_position(99); 
 }
  
 sub print_to_terminal (@text) {
 	return unless defined $scroller;
 	chomp for @text;
-	$scroller->push( Tickit::Widget::Scroller::Item::Text->new( join ' ', @text ));
+
+	if ($entry_item_installed) {
+		$scroller->pop(1);
+		$entry_item_installed = 0;
+	}
+	$scroller->push(
+		Tickit::Widget::Scroller::Item::Text->new(join ' ', @text),
+	);
+	if (defined $entry_item and $scroller->window) {
+		$scroller->push($entry_item);
+		$entry_item_installed = 1;
+	}
 	$scroller->scroll_to_bottom;
+	position_entry_widget();
 }
 
 sub prompt { 
