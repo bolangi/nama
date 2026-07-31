@@ -51,7 +51,7 @@ sub create_entry_widget {
 							print_to_terminal($line); 
 							$line =~ s/^.+?>\s*//;
 							process_line($line); 
-							show_prompt();
+							show_prompt(prompt());
 						}; 
 
 	$text->{entry} = $entry = Tickit::Widget::Entry->new( 
@@ -59,7 +59,7 @@ sub create_entry_widget {
 		on_enter => $do_command,
 	);
 
-	show_prompt();
+	show_prompt(prompt());
 }
 sub setup_key_bindings {
 
@@ -122,8 +122,8 @@ sub suspend
 	$term->resume;
 }
 
-sub show_prompt {
-	$entry->set_text(prompt());
+sub show_prompt ($prompt) {
+	$entry->set_text($prompt);
 	$entry->set_position(99); 
 }
  
