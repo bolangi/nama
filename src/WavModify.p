@@ -2,11 +2,10 @@ package ::WavModify;
 use Role::Tiny;
 use v5.36;
 our $VERSION = 1.0;
-use ::Globals qw(PLAY);
 
 sub normalize {
 	my $track = shift;
-	if ($track->rec_status ne PLAY){
+	if (! $track->candidate_play){
 		::throw($track->name, ": You must set track to PLAY before normalizing, skipping.\n");
 		return;
 	} 
@@ -18,7 +17,7 @@ sub normalize {
 }
 sub fixdc {
 	my $track = shift;
-	if ($track->rec_status ne PLAY){
+	if (! $track->candidate_play){
 		::throw($track->name, ": You must set track to PLAY before fixing dc level, skipping.\n");
 		return;
 	} 
