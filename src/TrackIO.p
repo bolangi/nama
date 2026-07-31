@@ -382,7 +382,7 @@ sub used_by_another_track {
 	my @used =    grep{ $_->name ne $track->name
 						and $_->source_type eq 'track'
 						and $_->source_id eq $track->name 
-						and ($_->rec or $_->mon) } ::all_tracks();
+						and ($_->candidate_rec or $_->candidate_mon) } ::all_tracks();
 @used
 }
 1;
