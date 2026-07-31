@@ -11,10 +11,10 @@ sub is_bunch {
 }
 
 {
-my %set_stat = ( 
-				 (map{ $_ => 'rw' } qw(rec play mon off) ), 
-				 map{ $_ => 'rec_status' } qw(REC PLAY MON OFF )
-				 );
+my %set_stat = (
+					 (map{ $_ => 'rw' } qw(rec play mon off) ),
+					 map{ $_ => 'effective_status' } qw(REC PLAY MON OFF )
+					 );
 
 sub bunch {
 	my ($bunchname, @tracks) = @_;

@@ -300,6 +300,10 @@ $this_track->set(group => 'Main');
 	}
 	is($message, 'Track sax set to OFF',
 		'set-rw feedback uses new candidate status, not old graph status');
+	ok((grep { $_ eq 'sax' } ::bunch_tracks('off')),
+		'lowercase status bunch selects requested rw');
+	ok((grep { $_ eq 'sax' } ::bunch_tracks('MON')),
+		'uppercase status bunch selects effective graph status');
 	$this_track->set(rw => MON);
 }
 
