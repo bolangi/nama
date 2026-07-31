@@ -399,8 +399,8 @@ sub new_edit {
 		return if $name =~ /-v\d+-edit\d+/;
 	::throw("$name: must be in PLAY mode.
 Edits will be applied against current version"), 
-		return unless $this_track->play 
-			or $this_track->rec and
+		return unless $this_track->candidate_play
+			or $this_track->candidate_rec and
 			grep{ /$editre/ } keys %::Track::by_name;
 
 	# create edit
@@ -486,7 +486,7 @@ sub edit_mode		{ $mode->{offset_run} and defined $this_edit}
 sub edit_mode_conditions {        
 	defined $this_edit or ::throw('No edit is defined'), return;
 	defined $this_edit->play_start_time or ::throw('No edit points defined'), return;
-	$this_edit->host_alias_track->play
+	$this_edit->host_alias_track->candidate_play
 		or ::throw('host alias track : ',$this_edit->host_alias,
 				" status must be PLAY"), return;
 
@@ -696,7 +696,7 @@ sub explode_track {
 	# quit if I am already a mix track
 
 	::throw($track->name,": I am already a mix track. I cannot explode!"),return
-		if $track->is_mixing; # XX should not be allowed to explode if track is set to PLAY
+		if $track->is_candidate_mixing; # XX should not be allowed to explode if track is set to PLAY
 
 	my @versions = @{ $track->versions };
 
@@ -787,7 +787,7 @@ sub merge_edits {
 	::throw("Please select an edit and try again."), return
 		unless defined $edit;
 	::throw($edit->host_alias, ": track must be PLAY status.  Aborting."), return
-		unless $edit->host_alias_track->play;
+		unless $edit->host_alias_track->candidate_play;
 	::throw("Use exit_edit_mode and try again."), return if edit_mode();
 
 	# create merge message
@@ -796,7 +796,7 @@ sub merge_edits {
 		map{ my ($edit) = $tn{$_}->name =~ /edit(\d+)$/;
 			 my $ver  = $tn{$_}->playback_version;
 			 $edit => $ver
-		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->play} 
+		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->candidate_play }
 		$edit->version_bus->tracks; 
 	my $msg = "merges ".$edit->host_track."_$v.wav w/edits ".
 		join " ",map{$_."v$edits{$_}"} sort{$a<=>$b} keys %edits;
