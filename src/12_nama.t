@@ -304,6 +304,14 @@ $this_track->set(group => 'Main');
 		'lowercase status bunch selects requested rw');
 	ok((grep { $_ eq 'sax' } ::bunch_tracks('MON')),
 		'uppercase status bunch selects effective graph status');
+	my $source_message;
+	{
+		no warnings 'redefine';
+		local *::pager_newline = sub { $source_message = join '', @_ };
+		nama_cmd('source');
+	}
+	like($source_message, qr/however track is OFF/,
+		'source query uses candidate status, not old graph status');
 	$this_track->set(rw => MON);
 }
 
