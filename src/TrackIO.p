@@ -25,7 +25,7 @@ sub is_used {
 	or $track->used_by_another_track
 	or ($bus and $bus->can('wantme') and $bus->wantme)  # A bus needs my signal
 }
-sub rec_status {
+sub candidate_status {
 #	logsub((caller(0))[3]);
 	my $track = shift;
 	my $bus = $track->bus;
@@ -50,6 +50,13 @@ sub rec_status {
 	no warnings 'uninitialized';
 	return maybe_playback($track, $v);
 
+}
+
+# Until graph resolution supplies an effective status, rec_status remains the
+# public interface and returns the pre-graph candidate status.
+sub rec_status {
+	my $track = shift;
+	$track->candidate_status;
 }
 sub maybe_playback { # ordinary sub, not object method
 	my ($track, $playback_version) = @_;

@@ -252,7 +252,7 @@ our $VERSION = 1.0;
 use SUPER;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub rec_status {
+sub candidate_status {
 	my $track = shift;
  	$track->rw ne OFF ? MON : OFF 
 }
@@ -272,7 +272,7 @@ our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::SimpleTrack';
 
-sub rec_status{
+sub candidate_status{
 	my $track = shift;
  	return OFF if $track->engine_group ne $en{$::config->{ecasound_engine_name}}->name;
 	$mode->mastering ? MON :  OFF;
@@ -296,7 +296,7 @@ sub destination {
 	dest_string($bus->send_type,$bus->send_id, $track->width);
 }
 sub source_status { $tn{$_[0]->target}->source_status }
-sub rec_status { $_[0]->{rw} }
+sub candidate_status { $_[0]->{rw} }
 sub width { $_[0]->{width} }
 }
 {
@@ -307,7 +307,7 @@ our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub width { $tn{$_[0]->target}->width }
-sub rec_status { $tn{$_[0]->target}->rec_status }
+sub candidate_status { $tn{$_[0]->target}->candidate_status }
 sub full_path { $tn{$_[0]->target}->full_path} 
 sub playback_version { $tn{$_[0]->target}->playback_version} 
 sub source_type { $tn{$_[0]->target}->source_type}
@@ -325,7 +325,7 @@ use v5.36; use ::Log qw(logpkg);
 our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub rec_status{
+sub candidate_status{
 	my $track = shift;
 	$mode->mastering ? MON :  OFF;
 }
@@ -375,7 +375,7 @@ sub destination {
 	my $track = shift; 
 	$tn{Main}->destination if $track->play
 }
-sub rec_status {
+sub candidate_status {
  	my $track = shift;
 	$track->rw
 # 	return REC if $track->rw eq REC;
@@ -470,7 +470,7 @@ sub playat_time {
 	my $previous = $self->predecessor;
 	$previous ? $previous->endpoint : 0
 }
-sub rec_status { $_[0]->version ? PLAY : OFF } 
+sub candidate_status { $_[0]->version ? PLAY : OFF }
 
 # we currently are not compatible with offset run mode
 # perhaps we can enforce OFF status for clips under 
@@ -483,7 +483,7 @@ our $VERSION = 1.0;
 our @ISA = '::Clip';
 use SUPER;
 use ::Object qw(duration);
-sub rec_status { OFF }
+sub candidate_status { OFF }
 sub new { 
 	my ($class,%args) = @_;
 
@@ -552,7 +552,7 @@ sub exists_midi {
 	$tlist =~ s/[}{]//g;
 	my ($match) = grep{$_ eq $track->current_midi} split " ", $tlist;
 }
-sub rec_status { 
+sub candidate_status {
 		my $self = shift;
 		if	 ( $self->rw eq REC and	$self->is_selected )							{ REC  } 
 		elsif( $self->rw eq REC and	! $self->is_selected )							{ PLAY } 
@@ -640,5 +640,4 @@ sub midi_version {
 
 1;
 __END__
-
 

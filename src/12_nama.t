@@ -68,6 +68,15 @@ is( project_dir(), "$test_dir/$test_project", "establish project directory");
 
 is( ref $bn{Main}, q(Audio::Nama::SubBus), 'Bus initializtion');
 
+is($tn{Main}->candidate_status, MON,
+	'Main candidate status is MON when enabled');
+is($tn{Main}->rec_status, $tn{Main}->candidate_status,
+	'rec_status delegates to candidate_status');
+$tn{Main}->set(rw => OFF);
+is($tn{Main}->candidate_status, OFF,
+	'Main candidate status is OFF when disabled');
+$tn{Main}->set(rw => MON);
+
 
 force_jack();
 
