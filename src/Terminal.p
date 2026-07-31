@@ -168,7 +168,7 @@ sub setup_key_bindings {
 	my $spacebar = sub {
 		if ( $config->{press_space_to_start}
 				and $entry->position == length prompt()
-				and ! ($mode->song or $mode->live) )
+				) 
 		{ toggle_transport() }
 		else { $entry->on_text(' ') }
 	};
