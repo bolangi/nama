@@ -249,12 +249,14 @@ sub configure {
 
 	{ local $quiet = 1; stop_transport() }
 
-	trigger_rec_cleanup_hooks();
-	trigger_rec_setup_hooks();
-	$setup->{_old_rec_status} = { 
-		map{$_->name => $_->rec_status } rec_hookable_tracks()
-	};
 	if ( $self->setup() ){
+		# Graph pruning has now resolved candidate status. Run hooks only for
+		# transitions that participate in the completed setup.
+		trigger_rec_cleanup_hooks();
+		trigger_rec_setup_hooks();
+		$setup->{_old_rec_status} = {
+			map { $_->name => $_->effective_status } rec_hookable_tracks()
+		};
 
 		reset_latency_compensation() if $config->{opts}->{Q};
 		
@@ -341,4 +343,3 @@ sub is_active { $_[0]->rec_tracks or $_[0]->play_tracks }
 1
 
 __END__
-

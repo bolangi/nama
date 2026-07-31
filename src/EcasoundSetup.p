@@ -198,11 +198,11 @@ sub trigger_rec_setup_hooks {
 		logpkg('trace',
 			join "\n",
 			"track ".$_->name,
-			"rec status is: ".$_->rec_status,
+			"effective status is: ".$_->effective_status,
 			"old rec status: ".$setup->{_old_rec_status}->{$_->name},
 			"script was ". (-e $_->rec_setup_script ) ? "found" : "not found"
 		);
-		$_->rec 
+		$_->effective_rec
 		and $setup->{_old_rec_status}->{$_->name} ne REC
 		and -e $_->rec_setup_script
 	} 
@@ -211,7 +211,7 @@ sub trigger_rec_setup_hooks {
  sub trigger_rec_cleanup_hooks {
  	map { system($_->rec_cleanup_script) } 
 	grep
-	{ 	! $_->rec
+	{ 	! $_->effective_rec
 		and $setup->{_old_rec_status}->{$_->name} eq REC
 		and -e $_->rec_cleanup_script
 	}
