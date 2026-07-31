@@ -355,6 +355,14 @@ nama_cmd('send 5');
 is( $this_track->send_type, 'soundcard', 'set soundcard output');
 is( $this_track->send_id, 5, 'set soundcard output');
 
+# IO objects are generated from the graph only after pruning has resolved
+# candidate status into effective status.
+{
+	local $::ChainSetup::g = Graph->new;
+	$::ChainSetup::g->add_path('soundcard_in', 'sax', 'soundcard_out');
+	::ChainSetup::prune_graph();
+}
+
 # this is ALSA dependent (i.e. no JACK running)
 
 my $io = ::IO->new(track => 'sax');
