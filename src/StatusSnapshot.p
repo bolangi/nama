@@ -21,7 +21,7 @@ package ::;
 		source_type
 		send_id
 		send_type
-		rec_status
+		candidate_status
 		current_version
  );
 sub status_snapshot {
@@ -43,7 +43,7 @@ sub status_snapshot {
 					 jack_running	=> $jack->{jackd_running},
 					 tracks			=> [], );
 	map { push @{$snapshot{tracks}}, $_->snapshot(\@relevant_track_fields) }
-	grep{ $_->rec_status ne OFF } grep { $_->group ne 'Temp' } ::all_tracks();
+	grep{ ! $_->candidate_off } grep { $_->group ne 'Temp' } ::all_tracks();
 	\%snapshot;
 }
 sub status_snapshot_string { 

@@ -48,11 +48,20 @@ sub candidate_status {
 
 }
 
-# Until graph resolution supplies an effective status, rec_status remains the
-# public interface and returns the pre-graph candidate status.
+# rec_status is the compatibility interface: candidate status while the graph
+# is being built, and effective status after pruning resolves the graph.
 sub rec_status {
 	my $track = shift;
-	$track->candidate_status;
+	my $effective = $track->effective_status;
+	defined $effective ? $effective : $track->candidate_status;
+}
+sub status_resolution {
+	my $track = shift;
+	::ChainSetup::track_resolution($track);
+}
+sub effective_status {
+	my $track = shift;
+	::ChainSetup::effective_status($track);
 }
 sub maybe_playback { # ordinary sub, not object method
 	my ($track, $playback_version) = @_;

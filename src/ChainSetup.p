@@ -62,7 +62,7 @@ sub initialize {
 	%is_ecasound_chain = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 	undef $chain_setup;
-	undef $prune_report;
+	clear_status_resolution();
 	::disable_length_timer();
 	reset_aux_chain_counter();
 	unlink $file->chain_setup;
@@ -71,6 +71,14 @@ sub initialize {
 sub ecasound_chain_setup { $chain_setup } 
 sub is_ecasound_chain { $is_ecasound_chain{$_[0]} }
 sub prune_report { $prune_report }
+sub clear_status_resolution { undef $prune_report }
+sub track_resolution {
+	my $track = shift;
+	return unless $prune_report;
+	my $name = ref $track ? $track->name : $track;
+	my $resolution = $prune_report->{tracks}->{$name};
+	$resolution ? dclone($resolution) : undef
+}
 sub effective_status {
 	my $track = shift;
 	return unless $prune_report;

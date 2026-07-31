@@ -223,8 +223,16 @@ $this_track->set(group => 'Main');
 			},
 		},
 	}, 'pruning reports a track without a source');
-	is(::ChainSetup::effective_status('sax'), OFF,
+	is($this_track->effective_status, OFF,
 		'a pruned track has effective status OFF');
+	is($this_track->rec_status, OFF,
+		'rec_status uses effective status after pruning');
+	my ($snapshot) = grep { $_->{name} eq 'sax' }
+		@{status_snapshot()->{tracks}};
+	is($snapshot->{candidate_status}, MON,
+		'status snapshot uses candidate status before graph resolution');
+	ok(!exists $snapshot->{rec_status},
+		'status snapshot does not depend on effective rec_status');
 }
 
 {
@@ -247,9 +255,21 @@ $this_track->set(group => 'Main');
 	local $::ChainSetup::g = Graph->new;
 	$::ChainSetup::g->add_path('soundcard_in', 'sax', 'soundcard_out');
 	::ChainSetup::prune_graph();
-	is(::ChainSetup::effective_status('sax'), MON,
+	is($this_track->effective_status, MON,
 		'a surviving track retains its candidate status');
+	is($this_track->rec_status, MON,
+		'rec_status uses surviving effective status');
+	my $resolution = $this_track->status_resolution;
+	is_deeply($resolution, {
+		requested => MON,
+		candidate => MON,
+		effective => MON,
+	}, 'track exposes its status resolution');
+	$resolution->{effective} = OFF;
+	is($this_track->effective_status, MON,
+		'track status resolution is returned as a snapshot');
 }
+::ChainSetup::clear_status_resolution();
 
 my ($vol_id) = $this_track->vol;
 
