@@ -276,12 +276,13 @@ my $jack_connect_code = sub
 sub connect_jack_ports_list {
 
 	my @source_tracks = 
-		grep{ 	$_->source_type eq 'jack_ports_list' and
-	  	  		$_->rec
+		grep{ $_->source_type eq 'jack_ports_list' and
+				$_->effective_rec
 			} ::ChainSetup::engine_tracks();
 
 	my @send_tracks = 
-		grep{ $_->send_type eq 'jack_ports_list' } ::ChainSetup::engine_tracks();
+		grep{ $_->send_type eq 'jack_ports_list' and ! $_->effective_off }
+			::ChainSetup::engine_tracks();
 
 	# we need JACK
 	return if ! $jack->{jackd_running};
