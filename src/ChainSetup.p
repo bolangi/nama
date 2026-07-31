@@ -71,6 +71,13 @@ sub initialize {
 sub ecasound_chain_setup { $chain_setup } 
 sub is_ecasound_chain { $is_ecasound_chain{$_[0]} }
 sub prune_report { $prune_report }
+sub effective_status {
+	my $track = shift;
+	return unless $prune_report;
+	my $name = ref $track ? $track->name : $track;
+	my $resolution = $prune_report->{tracks}->{$name};
+	$resolution ? $resolution->{effective} : OFF
+}
 
 sub engine_tracks { ::audio_tracks() } 
 sub engine_wav_out_tracks {
@@ -216,7 +223,18 @@ sub add_paths_for_mixdown_handling {
 }
 sub prune_graph {
 	logsub((caller(0))[3]);
-	$prune_report = { removed => [] };
+	my @candidate_tracks = grep { ::Graph::is_a_track($_) } $g->vertices;
+	$prune_report = {
+		removed => [],
+		tracks => {
+			map {
+				$_ => {
+					requested => $tn{$_}->rw,
+					candidate => $tn{$_}->candidate_status,
+				}
+			} @candidate_tracks
+		},
+	};
 	::Graph::simplify_send_routing($g);
 	logpkg('debug',"Graph after simplify_send_routing:\n$g");
 	my @removed = ::edit_mode()
@@ -233,6 +251,15 @@ sub prune_graph {
 	push @{$prune_report->{removed}},
 		map { +{ track => $_, reason => 'no-sink' } } @removed;
 	logpkg('debug',"Graph after recursively_remove_outputless_tracks:\n$g");
+	for my $name (@candidate_tracks){
+		my $resolution = $prune_report->{tracks}->{$name};
+		my ($removed) = grep { $_->{track} eq $name }
+			@{$prune_report->{removed}};
+		$resolution->{effective} = $g->has_vertex($name)
+			? $resolution->{candidate}
+			: OFF;
+		$resolution->{reason} = $removed->{reason} if $removed;
+	}
 	$prune_report
 }
 # object based dispatch from routing graph

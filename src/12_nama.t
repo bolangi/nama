@@ -210,7 +210,17 @@ $this_track->set(group => 'Main');
 	$::ChainSetup::g->add_edge('sax', 'soundcard_out');
 	is_deeply(::ChainSetup::prune_graph(), {
 		removed => [{ track => 'sax', reason => 'no-source' }],
+		tracks => {
+			sax => {
+				requested => MON,
+				candidate => MON,
+				effective => OFF,
+				reason => 'no-source',
+			},
+		},
 	}, 'pruning reports a track without a source');
+	is(::ChainSetup::effective_status('sax'), OFF,
+		'a pruned track has effective status OFF');
 }
 
 {
@@ -218,7 +228,23 @@ $this_track->set(group => 'Main');
 	$::ChainSetup::g->add_edge('soundcard_in', 'sax');
 	is_deeply(::ChainSetup::prune_graph(), {
 		removed => [{ track => 'sax', reason => 'no-sink' }],
+		tracks => {
+			sax => {
+				requested => MON,
+				candidate => MON,
+				effective => OFF,
+				reason => 'no-sink',
+			},
+		},
 	}, 'pruning reports a track without a sink');
+}
+
+{
+	local $::ChainSetup::g = Graph->new;
+	$::ChainSetup::g->add_path('soundcard_in', 'sax', 'soundcard_out');
+	::ChainSetup::prune_graph();
+	is(::ChainSetup::effective_status('sax'), MON,
+		'a surviving track retains its candidate status');
 }
 
 my ($vol_id) = $this_track->vol;
