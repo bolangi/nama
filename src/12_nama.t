@@ -217,6 +217,8 @@ $this_track->set(group => 'Null');
 ok(!$this_track->is_used, 'idle track is not currently used');
 is($this_track->candidate_status, MON,
 	'candidate status does not depend on graph use');
+ok(!$this_track->effective_mon,
+	'effective status predicates are false before graph resolution');
 $this_track->set(group => 'Main');
 
 {
@@ -235,6 +237,10 @@ $this_track->set(group => 'Main');
 	}, 'pruning reports a track without a source');
 	is($this_track->effective_status, OFF,
 		'a pruned track has effective status OFF');
+	ok($this_track->effective_off,
+		'effective OFF predicate follows graph resolution');
+	ok(!$this_track->effective_mon,
+		'effective MON predicate rejects a pruned candidate');
 	is($this_track->rec_status, OFF,
 		'rec_status uses effective status after pruning');
 	my ($snapshot) = grep { $_->{name} eq 'sax' }

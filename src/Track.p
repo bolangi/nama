@@ -244,6 +244,13 @@ sub candidate_mon  { $_[0]->candidate_status eq MON }
 sub candidate_play { $_[0]->candidate_status eq PLAY }
 sub candidate_off  { $_[0]->candidate_status eq OFF }
 
+# These predicates are intentionally false until graph pruning has supplied an
+# effective status.  Callers that run before pruning should use candidate_*.
+sub effective_rec  { ($_[0]->effective_status // '') eq REC }
+sub effective_mon  { ($_[0]->effective_status // '') eq MON }
+sub effective_play { ($_[0]->effective_status // '') eq PLAY }
+sub effective_off  { ($_[0]->effective_status // '') eq OFF }
+
 sub current_midi {}
 sub fades { grep { $_->{track} eq $_[0]->name } values %::Fade::by_index  }
 
