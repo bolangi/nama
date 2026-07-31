@@ -233,6 +233,14 @@ $this_track->set(group => 'Main');
 		'status snapshot uses candidate status before graph resolution');
 	ok(!exists $snapshot->{rec_status},
 		'status snapshot does not depend on effective rec_status');
+	$this_track->set(rw => REC);
+	is($this_track->current_version, 0,
+		'effective current version follows the pruned status');
+	my ($rec_snapshot) = grep { $_->{name} eq 'sax' }
+		@{status_snapshot()->{tracks}};
+	is($rec_snapshot->{candidate_current_version}, $this_track->last + 1,
+		'status snapshot uses the candidate recording version');
+	$this_track->set(rw => MON);
 }
 
 {

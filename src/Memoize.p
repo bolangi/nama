@@ -18,6 +18,7 @@ my @track_methods = qw(
 	last 
 	current_wav 
 	current_version 
+	candidate_current_version
 	playback_version 
 	maybe_playback
 	candidate_status

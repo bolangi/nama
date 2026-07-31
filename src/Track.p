@@ -374,6 +374,14 @@ sub current_version {
 	elsif ( $status eq PLAY){ return $track->playback_version } 
 	else { return 0 }
 }
+sub candidate_current_version {
+	my $track = shift;
+	my $last = $track->last;
+	my $status = $track->candidate_status;
+	if 	($status eq REC){ return ++$last}
+	elsif ( $status eq PLAY){ return $track->playback_version }
+	else { return 0 }
+}
 sub source_status { 
 	my $track = shift; 
 	return 'Main' if $track->rec;
@@ -414,6 +422,14 @@ sub current_version {
 	#logpkg('debug', "last: $last status: $status");
 	if 	($status eq REC){ return ++$last}
 	elsif ( $status eq PLAY){ return $track->playback_version } 
+	else { return 0 }
+}
+sub candidate_current_version {
+	my $track = shift;
+	my $last = $track->last;
+	my $status = $track->candidate_status;
+	if 	($status eq REC){ return ++$last}
+	elsif ( $status eq PLAY){ return $track->playback_version }
 	else { return 0 }
 }
 sub playat_time {

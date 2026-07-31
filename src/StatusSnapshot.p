@@ -22,7 +22,7 @@ package ::;
 		send_id
 		send_type
 		candidate_status
-		current_version
+		candidate_current_version
  );
 sub status_snapshot {
 

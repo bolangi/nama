@@ -73,6 +73,18 @@ sub current_version {
 	else { return 0 }
 }
 
+sub candidate_current_version {
+	my $track = shift;
+	if ($track->candidate_rec){
+		my $last = $config->{use_group_numbering}
+			? ::Bus::overall_last()
+			: $track->last;
+		return ++$last
+	}
+	elsif ($track->candidate_play){ return $track->playback_version }
+	else { return 0 }
+}
+
 sub playback_version {
 	my $track = shift;
 	return $track->version if $track->version 
