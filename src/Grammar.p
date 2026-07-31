@@ -247,7 +247,7 @@ sub show_version_comment_brief {
 	$text and "  $version: $text\n";
 }
 sub show_send { "Send: ". $this_track->send_id. $/ 
-					if ! $this_track->off
+					if ! $this_track->candidate_off
 						and $this_track->send_id
 }
 
@@ -311,7 +311,7 @@ sub show_modifiers {
 }
 sub show_region {
 	my $t = $::this_track;
-	return unless $t->play;
+	return unless $t->candidate_play;
 	my @lines;
 	push @lines,join " ",
 		"Length:",time2($t->shifted_length),"\n";
