@@ -189,10 +189,10 @@ sub apply {
 		# add paths for recording
 		
 		::Graph::add_path_for_rec($g,$_) 
-			if $_->rec
+			if $_->candidate_rec
 				and ! $::mode->preview and ! $::mode->doodle;
 
-	} grep {$_->rec_status ne OFF} $bus->track_o;
+	} grep {! $_->candidate_off} $bus->track_o;
 }
 sub remove {
 	my $bus = shift;

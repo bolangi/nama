@@ -70,6 +70,10 @@ is( ref $bn{Main}, q(Audio::Nama::SubBus), 'Bus initializtion');
 
 is($tn{Main}->candidate_status, MON,
 	'Main candidate status is MON when enabled');
+ok($tn{Main}->candidate_mon,
+	'Main candidate MON predicate follows candidate status');
+ok(!$tn{Main}->candidate_rec,
+	'Main candidate REC predicate follows candidate status');
 is($tn{Main}->rec_status, $tn{Main}->candidate_status,
 	'rec_status delegates to candidate_status');
 $tn{Main}->set(rw => OFF);

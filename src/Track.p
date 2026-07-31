@@ -143,7 +143,7 @@ sub input_path {
 	# the corresponding bus handles input routing for mix tracks
 	# so they don't need to be connected here
 	
-	return() if $track->is_mixing and ! $track->play;
+	return() if $track->is_candidate_mixing and ! $track->candidate_play;
 
 	# the track may route to:
 	# + another track
@@ -152,10 +152,10 @@ sub input_path {
 
 	if($track->source_type eq 'track'){ ($track->source_id, $track->name) } 
 
-	elsif($track->rec_status =~ /REC|MON/){ 
+	elsif($track->candidate_status =~ /REC|MON/){
 		(input_node($track->source_type), $track->name) } 
 
-	elsif($track->play and ! $mode->doodle){
+	elsif($track->candidate_play and ! $mode->doodle){
 		(input_node('wav'), $track->name) 
 	}
 }
@@ -205,6 +205,10 @@ sub is_mixing {
 	my $track = shift;
 	$track->is_mixer and ($track->mon or $track->rec)
 }
+sub is_candidate_mixing {
+	my $track = shift;
+	$track->is_mixer and ($track->candidate_mon or $track->candidate_rec)
+}
 sub bus { $bn{$_[0]->group} }
 
 { my %system_track = map{ $_, 1} qw( Main Mixdown Eq Low
@@ -234,6 +238,11 @@ sub rec  { $_[0]->rec_status eq REC }
 sub mon  { $_[0]->rec_status eq MON }
 sub play { $_[0]->rec_status eq PLAY}
 sub off  { $_[0]->rec_status eq OFF }
+
+sub candidate_rec  { $_[0]->candidate_status eq REC }
+sub candidate_mon  { $_[0]->candidate_status eq MON }
+sub candidate_play { $_[0]->candidate_status eq PLAY }
+sub candidate_off  { $_[0]->candidate_status eq OFF }
 
 sub current_midi {}
 sub fades { grep { $_->{track} eq $_[0]->name } values %::Fade::by_index  }
@@ -640,4 +649,3 @@ sub midi_version {
 
 1;
 __END__
-
