@@ -270,6 +270,7 @@ my @events = qw(
 	remote_control
 	jack_polling
 	command_output
+	heartbeat
 );
 my %events = map{ $_ => 1} @events;
 sub check_event_type ($type) {
@@ -308,4 +309,3 @@ sub start_event ($label, $async) {
 
 1;
 __END__
-

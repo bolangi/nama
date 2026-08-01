@@ -68,6 +68,7 @@ sub initialize_terminal {
 	my $lines = $term->lines;
 	create_entry_widget();
 	setup_key_bindings();
+	install_tk_tickit_bridge() if defined $gui->{mw};
 	$vbox->add($scroller, valign => 'top', force_size => $lines - 2); 
 
 	$entry_item = ::TerminalEntryItem->new(
@@ -75,6 +76,19 @@ sub initialize_terminal {
 	);
 	$scroller->set_on_scrolled(sub { position_entry_widget() });
 	$tickit->later(\&install_entry_item);
+}
+
+sub start_terminal_ui {
+	$vbox->set_window($rootwin);
+}
+
+sub install_tk_tickit_bridge {
+	can_load(modules => { '::TkTickitBridge' => undef })
+		or croak 'Unable to load TkTickitBridge';
+	$text->{tk_tickit_bridge} = ::TkTickitBridge->new(
+		widget => $gui->{mw},
+		term   => $term,
+	)->install;
 }
 
 sub create_entry_widget {
