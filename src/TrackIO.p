@@ -25,15 +25,11 @@ sub is_used {
 	or $track->used_by_another_track
 	or ($bus and $bus->can('wantme') and $bus->wantme)  # A bus needs my signal
 }
-sub rec_status {
+sub candidate_rw {
 #	logsub((caller(0))[3]);
 	my $track = shift;
-	my $bus = $track->bus;
-
 	return OFF if 0 # 	! ($track->engine_group eq $::this_engine->name)
-				or  $track->{rw} eq OFF
-				or 	! $track->is_used
-				and ! ($mode->doodle and $setup->{tracks_with_duplicate_inputs}->{$track->name} ); 
+					or  $track->{rw} eq OFF;
 	if ($track->{rw} ne PLAY) # e.g. MON or REC
 	{
 		return OFF if $track->source_type eq 'jack_client' 
@@ -51,6 +47,26 @@ sub rec_status {
 	return maybe_playback($track, $v);
 
 }
+
+# rec_status is the compatibility interface: candidate rw while the graph
+# is being built, and effective rw after pruning resolves the graph.
+sub rec_status {
+	my $track = shift;
+	my $effective = $track->effective_rw;
+	defined $effective ? $effective : $track->candidate_rw;
+}
+sub resolve_rw_status {
+	my $track = shift;
+	::ChainSetup::track_resolution($track);
+}
+sub why {
+	my $track = shift;
+	::ChainSetup::explain_track_status($track);
+}
+sub effective_rw {
+	my $track = shift;
+	::ChainSetup::effective_rw($track);
+}
 sub maybe_playback { # ordinary sub, not object method
 	my ($track, $playback_version) = @_;
 	return PLAY if $track->targets->{$playback_version} and ! $mode->doodle;
@@ -60,7 +76,7 @@ sub maybe_playback { # ordinary sub, not object method
 
 sub rec_status_display {
 	my $track = shift;
-	my $rs = $track->rec_status;
+	my $rs = $track->effective_rw // $track->candidate_rw;
 	my $status;
 	$status .= $rs;
 	$status .= ' v'.$track->current_version if $rs eq REC;
@@ -241,7 +257,7 @@ sub output_object_text {   # text for user display
 sub source_status {
 	my $track = shift;
 	no warnings 'uninitialized';
-	return $track->current_wav if $track->play;
+	return $track->current_wav if $track->candidate_play;
 	my $bus = $bn{$track->source_id}; 
 	return join " ", $bus->name, $bus->display_type if $track->source_type eq 'bus';
 	return "track ".$track->source_id  if $track->source_type eq 'track';
@@ -302,7 +318,7 @@ sub set_rw {
 	my ($track, $setting) = @_;
 	#my $already = $track->rw eq $setting ? " already" : "";
 	$track->set(rw => $setting);
-	my $status = $track->rec_status();
+	my $status = $track->candidate_rw();
 	::pagers("Track ",$track->name, " set to $setting", 
 		($status ne $setting ? ", but current status is $status" : ""));
 
@@ -370,7 +386,7 @@ sub used_by_another_track {
 	my @used =    grep{ $_->name ne $track->name
 						and $_->source_type eq 'track'
 						and $_->source_id eq $track->name 
-						and ($_->rec or $_->mon) } ::all_tracks();
+						and ($_->candidate_rec or $_->candidate_mon) } ::all_tracks();
 @used
 }
 1;

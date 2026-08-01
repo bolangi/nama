@@ -20,7 +20,7 @@ sub add_path_for_rec {
 	logsub("&add_path_for_rec: track ".$track->name);
 
 	# Case 1: Regular track
-	if( $track->source_type !~ /track|bus|loop/  and !  $track->is_mixing)
+	if( $track->source_type !~ /track|bus|loop/)
 	{
 		# create temporary track for rec_file chain
 
@@ -58,7 +58,7 @@ sub add_path_for_rec {
 
 	} 
 	# Case 2: Mix track
-	elsif ($track->source_type =~ /bus|track/ or $track->is_mixing) 
+	elsif ($track->source_type =~ /bus|track/)
 	{
 
 		my $name = $track->name . '_rec_file';
@@ -296,18 +296,20 @@ sub inputless_tracks {
 sub remove_out_of_bounds_tracks {
 	my $g = shift;
 	my @names = $g->successors('wav_in');  # PLAY status tracks
-	map{ remove_tracks($g, $_) } 
-	grep{
+	my @remove = grep{
 		::edit_case(::edit_vars($::tn{$_})) =~ /out_of_bounds/
 	} @names;
+	remove_tracks($g, @remove);
 }
 
 sub recursively_remove_inputless_tracks {
 	my $g = shift;
+	my @removed;
 	# make multiple passes if necessary
 	while(my @i = inputless_tracks($g)){
-		remove_tracks($g, @i);
+		push @removed, remove_tracks($g, @i);
 	}
+	@removed
 }
 sub outputless_tracks {
 	my $g = shift;
@@ -315,16 +317,20 @@ sub outputless_tracks {
 }	
 sub recursively_remove_outputless_tracks {
 	my $g = shift;
+	my @removed;
 	while(my @i = outputless_tracks($g)){
-		remove_tracks($g, @i);
+		push @removed, remove_tracks($g, @i);
 	}
+	@removed
 }
 sub remove_tracks {
 	my ($g, @names) = @_;
-		map{ 	$g->delete_edges(map{@$_} $g->edges_from($_));
-				$g->delete_edges(map{@$_} $g->edges_to($_));
-				$g->delete_vertex($_);
-		} @names;
+	for (@names){
+		$g->delete_edges(map{@$_} $g->edges_from($_));
+		$g->delete_edges(map{@$_} $g->edges_to($_));
+		$g->delete_vertex($_);
+	}
+	@names
 }
 
 sub remove_branch {
@@ -358,4 +364,3 @@ sub simplify_send_routing {
 
 1;
 __END__
-

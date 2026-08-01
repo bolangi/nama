@@ -43,8 +43,8 @@ sub automix {
 	# get working track set
 	
 	my @tracks = grep{
-					$tn{$_}->play or
-					$bn{$_} and $tn{$_}->rec
+					$tn{$_}->candidate_play or
+					$bn{$_} and $tn{$_}->candidate_rec
 				 } $bn{Main}->tracks;
 
 	pager("tracks: @tracks");

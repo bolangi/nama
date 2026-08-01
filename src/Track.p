@@ -143,7 +143,7 @@ sub input_path {
 	# the corresponding bus handles input routing for mix tracks
 	# so they don't need to be connected here
 	
-	return() if $track->is_mixing and ! $track->play;
+	return() if $track->is_mixer and ! $track->candidate_play;
 
 	# the track may route to:
 	# + another track
@@ -152,10 +152,10 @@ sub input_path {
 
 	if($track->source_type eq 'track'){ ($track->source_id, $track->name) } 
 
-	elsif($track->rec_status =~ /REC|MON/){ 
+	elsif($track->candidate_rw =~ /REC|MON/){
 		(input_node($track->source_type), $track->name) } 
 
-	elsif($track->play and ! $mode->doodle){
+	elsif($track->candidate_play and ! $mode->doodle){
 		(input_node('wav'), $track->name) 
 	}
 }
@@ -201,10 +201,6 @@ sub rec_cleanup_script {
 	join_path(::project_dir(), $track->name."-rec-cleanup.sh")
 }
 sub current_edit { $_[0]->{current_edit}//={} }
-sub is_mixing {
-	my $track = shift;
-	$track->is_mixer and ($track->mon or $track->rec)
-}
 sub bus { $bn{$_[0]->group} }
 
 { my %system_track = map{ $_, 1} qw( Main Mixdown Eq Low
@@ -230,10 +226,22 @@ sub select_track {
 }
 sub is_selected { $::this_track->name eq $_[0]->name }
 
-sub rec  { $_[0]->rec_status eq REC }
-sub mon  { $_[0]->rec_status eq MON }
-sub play { $_[0]->rec_status eq PLAY}
-sub off  { $_[0]->rec_status eq OFF }
+sub rec  { $_[0]->rw eq REC }
+sub mon  { $_[0]->rw eq MON }
+sub play { $_[0]->rw eq PLAY }
+sub off  { $_[0]->rw eq OFF }
+
+sub candidate_rec  { $_[0]->candidate_rw eq REC }
+sub candidate_mon  { $_[0]->candidate_rw eq MON }
+sub candidate_play { $_[0]->candidate_rw eq PLAY }
+sub candidate_off  { $_[0]->candidate_rw eq OFF }
+
+# These predicates are intentionally false until graph pruning has supplied an
+# effective rw.  Callers that run before pruning should use candidate_*.
+sub effective_rec  { ($_[0]->effective_rw // '') eq REC }
+sub effective_mon  { ($_[0]->effective_rw // '') eq MON }
+sub effective_play { ($_[0]->effective_rw // '') eq PLAY }
+sub effective_off  { ($_[0]->effective_rw // '') eq OFF }
 
 sub current_midi {}
 sub fades { grep { $_->{track} eq $_[0]->name } values %::Fade::by_index  }
@@ -252,14 +260,14 @@ our $VERSION = 1.0;
 use SUPER;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub rec_status {
+sub candidate_rw {
 	my $track = shift;
  	$track->rw ne OFF ? MON : OFF 
 }
 sub destination {
 	my $track = shift; 
 	return 'Mixdown' if $tn{Mixdown}->rec;
-	return $track->SUPER() if $track->rec_status ne OFF
+	return $track->SUPER() if $track->rw ne OFF
 }
 #sub rec_status_display { $_[0]->rw ne OFF ? PLAY : OFF }
 sub activate_bus {}
@@ -272,7 +280,7 @@ our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::SimpleTrack';
 
-sub rec_status{
+sub candidate_rw{
 	my $track = shift;
  	return OFF if $track->engine_group ne $en{$::config->{ecasound_engine_name}}->name;
 	$mode->mastering ? MON :  OFF;
@@ -296,7 +304,7 @@ sub destination {
 	dest_string($bus->send_type,$bus->send_id, $track->width);
 }
 sub source_status { $tn{$_[0]->target}->source_status }
-sub rec_status { $_[0]->{rw} }
+sub candidate_rw { $_[0]->{rw} }
 sub width { $_[0]->{width} }
 }
 {
@@ -307,7 +315,7 @@ our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub width { $tn{$_[0]->target}->width }
-sub rec_status { $tn{$_[0]->target}->rec_status }
+sub candidate_rw { $tn{$_[0]->target}->candidate_rw }
 sub full_path { $tn{$_[0]->target}->full_path} 
 sub playback_version { $tn{$_[0]->target}->playback_version} 
 sub source_type { $tn{$_[0]->target}->source_type}
@@ -325,7 +333,7 @@ use v5.36; use ::Log qw(logpkg);
 our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub rec_status{
+sub candidate_rw{
 	my $track = shift;
 	$mode->mastering ? MON :  OFF;
 }
@@ -359,7 +367,7 @@ our @ISA = qw(::Track);
 sub current_version {	
 	my $track = shift;
 	my $last = $track->last;
-	my $status = $track->rec_status;
+	my $status = $track->candidate_rw;
 	#logpkg('debug', "last: $last status: $status");
 	if 	($status eq REC){ return ++$last}
 	elsif ( $status eq PLAY){ return $track->playback_version } 
@@ -375,7 +383,7 @@ sub destination {
 	my $track = shift; 
 	$tn{Main}->destination if $track->play
 }
-sub rec_status {
+sub candidate_rw {
  	my $track = shift;
 	$track->rw
 # 	return REC if $track->rw eq REC;
@@ -401,7 +409,7 @@ sub DESTROY {}
 sub current_version {	
 	my $track = shift;
 	my $last = $track->last;
-	my $status = $track->rec_status;
+	my $status = $track->candidate_rw;
 	#logpkg('debug', "last: $last status: $status");
 	if 	($status eq REC){ return ++$last}
 	elsif ( $status eq PLAY){ return $track->playback_version } 
@@ -470,7 +478,7 @@ sub playat_time {
 	my $previous = $self->predecessor;
 	$previous ? $previous->endpoint : 0
 }
-sub rec_status { $_[0]->version ? PLAY : OFF } 
+sub candidate_rw { $_[0]->version ? PLAY : OFF }
 
 # we currently are not compatible with offset run mode
 # perhaps we can enforce OFF status for clips under 
@@ -483,7 +491,7 @@ our $VERSION = 1.0;
 our @ISA = '::Clip';
 use SUPER;
 use ::Object qw(duration);
-sub rec_status { OFF }
+sub candidate_rw { OFF }
 sub new { 
 	my ($class,%args) = @_;
 
@@ -552,7 +560,7 @@ sub exists_midi {
 	$tlist =~ s/[}{]//g;
 	my ($match) = grep{$_ eq $track->current_midi} split " ", $tlist;
 }
-sub rec_status { 
+sub candidate_rw {
 		my $self = shift;
 		if	 ( $self->rw eq REC and	$self->is_selected )							{ REC  } 
 		elsif( $self->rw eq REC and	! $self->is_selected )							{ PLAY } 
@@ -640,5 +648,3 @@ sub midi_version {
 
 1;
 __END__
-
-

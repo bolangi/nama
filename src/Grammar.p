@@ -247,7 +247,7 @@ sub show_version_comment_brief {
 	$text and "  $version: $text\n";
 }
 sub show_send { "Send: ". $this_track->send_id. $/ 
-					if ! $this_track->off
+					if ! $this_track->candidate_off
 						and $this_track->send_id
 }
 
@@ -311,7 +311,7 @@ sub show_modifiers {
 }
 sub show_region {
 	my $t = $::this_track;
-	return unless $t->play;
+	return unless $t->candidate_play;
 	my @lines;
 	push @lines,join " ",
 		"Length:",time2($t->shifted_length),"\n";
@@ -343,7 +343,7 @@ sub show_status {
 	push @output, "Modes settings:   ", join(", ", @modes), $/ if @modes;
 	my @actions;
 	push @actions, "record" if grep{ ! /Mixdown/ } ::ChainSetup::really_recording();
-	push @actions, "playback" if grep { $_->play } 
+	push @actions, "playback" if grep { $_->effective_play }
 		map{ $tn{$_} } $bn{Main}->tracks, q(Mixdown);
 
 	# We only check Main bus for playback. 
@@ -352,7 +352,7 @@ sub show_status {
 	# tracks are set to REC (with rec-to-file disabled)
 	
 	
-	push @actions, "mixdown" if $tn{Mixdown}->rec;
+	push @actions, "mixdown" if $tn{Mixdown}->effective_rec;
 	push @output, "Pending actions:  ", join(", ", @actions), $/ if @actions;
 	push @output, "Main bus version: ",$bn{Main}->version, $/ if $bn{Main}->version;
 	push @output, "Setup length is:  ", ::heuristic_time($setup->{audio_length}), $/; 
@@ -376,14 +376,14 @@ sub show_inserts {
 }
 
 $text->{format_top} = <<TOP;
- No. Name       Requested  Status  Source                Destination   Vol   Pan
+ No. Name            Setting        Source             Destination  Vol   Pan
 ================================================================================
 TOP
 
 $text->{format_divider} = '-' x 77 . "\n";
 
 my $format_picture = <<PICTURE;
-@>>  @<<<<<<<<<<<<<< @>>>  @<<<<<< @<<<<<<<<<<<<<<<<<<<< @<<<<<<<<<<< @>>>  @>>>
+@>>  @<<<<<<<<<<<<<< @<<<<<<<<<<<<  @<<<<<<<<<<<<<<<<< @<<<<<<<<<<< @>>>  @>>>
 PICTURE
 
 sub show_tracks_section {
@@ -393,8 +393,9 @@ sub show_tracks_section {
     map {   formline $format_picture, 
             $_->n,
             $_->name,
-            $_->rw eq $_->rec_status ? undef : $_->rw,
-            $_->rec_status_display,
+            $_->rw ne $_->effective_rw
+				?  join(' but ', $_->rw , $_->effective_rw)
+				: $_->rec_status_display,
 			placeholder($_->source_status),
 			placeholder($_->destination),
 			placeholder($_->vol_level),
@@ -514,7 +515,7 @@ sub import_audio {
 }
 sub destroy_current_wav {
 	throw($this_track->name.": must be set to PLAY."), return
-		unless $this_track->play;
+		unless $this_track->candidate_play;
 	$this_track->current_version or
 		throw($this_track->name, 
 			": No current version (track set to OFF?) Skipping."), return;

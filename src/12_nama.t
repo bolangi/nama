@@ -68,6 +68,29 @@ is( project_dir(), "$test_dir/$test_project", "establish project directory");
 
 is( ref $bn{Main}, q(Audio::Nama::SubBus), 'Bus initializtion');
 
+my ($main_bus_snapshot) = grep { $_->{name} eq 'Main' }
+	@{status_snapshot()->{buses}};
+is($main_bus_snapshot->{rw}, MON,
+	'status snapshot includes bus routing state');
+my $bus_snapshot_before = status_snapshot_string();
+$bn{Main}->set(rw => OFF);
+isnt(status_snapshot_string(), $bus_snapshot_before,
+	'changing only bus rw changes the status snapshot');
+$bn{Main}->set(rw => MON);
+
+is($tn{Main}->candidate_rw, MON,
+	'Main candidate rw is MON when enabled');
+ok($tn{Main}->candidate_mon,
+	'Main candidate MON follows candidate rw');
+ok(!$tn{Main}->candidate_rec,
+	'Main candidate REC follows candidate rw');
+is($tn{Main}->rec_status, $tn{Main}->candidate_rw,
+	'rec_status delegates to candidate_rw');
+$tn{Main}->set(rw => OFF);
+is($tn{Main}->candidate_rw, OFF,
+	'Main candidate rw is OFF when disabled');
+$tn{Main}->set(rw => MON);
+
 
 force_jack();
 
@@ -190,6 +213,164 @@ like(ref $this_track, qr/Track/, "track creation");
 
 is( $this_track->name, 'sax', "current track assignment");
 
+$this_track->set(group => 'Null');
+ok(!$this_track->is_used, 'idle track is not currently used');
+is($this_track->candidate_rw, MON,
+	'candidate rw does not depend on graph use');
+ok(!$this_track->effective_mon,
+	'effective rw are false before graph resolution');
+$this_track->set(group => 'Main');
+
+{
+	local $::ChainSetup::g = Graph->new;
+	$::ChainSetup::g->add_edge('sax', 'soundcard_out');
+	my $report = ::ChainSetup::prune_graph();
+	is_deeply($report->{removed},
+		[{ track => 'sax', reason => 'no-source' }],
+		'pruning reports a track without a source');
+	my $resolution = $this_track->resolve_rw_status;
+	is($resolution->{requested}, MON, 'resolution records requested status');
+	is($resolution->{candidate_rw}, MON, 'resolution records candidate rw');
+	ok($resolution->{in_candidate_graph}, 'track entered candidate graph');
+	ok(!$resolution->{in_final_graph}, 'track did not survive final graph');
+	is($resolution->{reason}, 'no-source', 'resolution records no-source reason');
+	like($this_track->why, qr/graph branch had no viable source/,
+		'why explains no-source pruning');
+	like($this_track->why,
+		qr/Requested rw: MON\nCandidate rw: MON\nEffective rw: OFF\n/,
+		'why presents the three resolved rw values in order');
+	unlike($this_track->why, qr/\b(?:Current|Resolved)\b/,
+		'why omits current and resolved qualifiers');
+	is($this_track->effective_rw, OFF,
+		'a pruned track has effective rw OFF');
+	ok($this_track->effective_off,
+		'effective OFF predicate follows graph resolution');
+	ok(!$this_track->effective_mon,
+		'effective MON predicate rejects a pruned candidate');
+	ok($this_track->mon,
+		'MON alias follows requested rw after pruning');
+	ok(!$this_track->off,
+		'OFF alias does not follow effective graph status');
+	is($this_track->rec_status, OFF,
+		'rec_status uses effective rw after pruning');
+	my ($snapshot) = grep { $_->{name} eq 'sax' }
+		@{status_snapshot()->{tracks}};
+	is($snapshot->{candidate_rw}, MON,
+		'status snapshot uses candidate rw before graph resolution');
+	ok(!exists $snapshot->{rec_status},
+		'status snapshot does not depend on effective rec_status');
+	$this_track->set(rw => REC);
+	is($this_track->current_version, $this_track->last + 1,
+		'current version does not depend on effective graph status');
+	is($this_track->current_wav,
+		'sax_' . ($this_track->last + 1) . '.wav',
+		'current WAV does not depend on effective graph status');
+	is($this_track->full_path,
+		::join_path(this_wav_dir(), $this_track->current_wav),
+		'full path does not depend on effective graph status');
+	my ($rec_snapshot) = grep { $_->{name} eq 'sax' }
+		@{status_snapshot()->{tracks}};
+	is($rec_snapshot->{current_version}, $this_track->last + 1,
+		'status snapshot uses graph-independent current version');
+	$this_track->set(rw => MON);
+}
+
+{
+	local $::ChainSetup::g = Graph->new;
+	$::ChainSetup::g->add_edge('soundcard_in', 'sax');
+	my $report = ::ChainSetup::prune_graph();
+	is_deeply($report->{removed},
+		[{ track => 'sax', reason => 'no-sink' }],
+		'pruning reports a track without a sink');
+	is($this_track->resolve_rw_status->{reason}, 'no-sink',
+		'resolution records no-sink reason');
+}
+
+{
+	local $::ChainSetup::g = Graph->new;
+	$::ChainSetup::g->add_path('soundcard_in', 'sax', 'soundcard_out');
+	::ChainSetup::prune_graph();
+	is($this_track->effective_rw, MON,
+		'a surviving track retains its candidate rw');
+	is($this_track->rec_status, MON,
+		'rec_status uses surviving effective rw');
+	my $resolution = $this_track->resolve_rw_status;
+	is($resolution->{requested}, MON, 'survivor records requested status');
+	is($resolution->{candidate_rw}, MON, 'survivor records candidate rw');
+	is($resolution->{effective_rw}, MON, 'survivor records effective rw');
+	ok($resolution->{in_candidate_graph}, 'survivor entered candidate graph');
+	ok($resolution->{in_final_graph}, 'survivor remains in final graph');
+	ok(!defined $resolution->{reason}, 'survivor has no failure reason');
+	$resolution->{effective_rw} = OFF;
+	is($this_track->effective_rw, MON,
+		'track status resolution is returned as a snapshot');
+	my $message;
+	{
+		no warnings 'redefine';
+		local *::pagers = sub { $message = join '', @_ };
+		$this_track->set_rw(OFF);
+	}
+	is($message, 'Track sax set to OFF',
+		'set-rw feedback uses new candidate rw, not old graph status');
+	ok((grep { $_ eq 'sax' } ::bunch_tracks('off')),
+		'lowercase status bunch selects requested rw');
+	ok((grep { $_ eq 'sax' } ::bunch_tracks('MON')),
+		'uppercase status bunch selects effective graph status');
+	my $source_message;
+	{
+		no warnings 'redefine';
+		local *::pager_newline = sub { $source_message = join '', @_ };
+		nama_cmd('source');
+	}
+	like($source_message, qr/however track is OFF/,
+		'source query uses candidate rw, not old graph status');
+	$this_track->set(rw => MON);
+}
+
+{
+	local $::ChainSetup::g = Graph->new;
+	$this_track->set(rw => REC);
+	$::ChainSetup::g->add_path('soundcard_in', 'sax', 'wav_out');
+	::ChainSetup::prune_graph();
+	is_deeply(
+		[map { $_->name } ::ChainSetup::engine_wav_out_tracks()],
+		['sax'],
+		'engine WAV outputs use effective recording status',
+	);
+	$this_track->set(rw => MON);
+}
+
+{
+	local $::ChainSetup::g = Graph->new;
+	$this_track->set(rw => OFF);
+	::ChainSetup::prune_graph();
+	my $resolution = $this_track->resolve_rw_status;
+	is($resolution->{candidate_rw}, OFF,
+		'candidate-OFF track is included in resolution report');
+	ok(!$resolution->{in_candidate_graph},
+		'candidate-OFF track did not enter candidate graph');
+	is($resolution->{reason}, 'requested-off',
+		'resolution explains requested OFF');
+	like($this_track->why, qr/track was requested OFF/,
+		'why explains candidate-OFF track');
+	$this_track->set(rw => MON);
+}
+
+{
+	local $::ChainSetup::g = Graph->new;
+	::ChainSetup::prune_graph();
+	my $resolution = $this_track->resolve_rw_status;
+	is($resolution->{candidate_rw}, MON,
+		'non-OFF candidate absent from graph is included in report');
+	ok(!$resolution->{in_candidate_graph},
+		'unconnected candidate did not enter candidate graph');
+	is($resolution->{reason}, 'not-connected',
+		'resolution records candidate not connected to graph');
+	like($this_track->why, qr/not connected to the routing graph/,
+		'why explains candidate not connected to graph');
+}
+::ChainSetup::clear_rw_status();
+
 my ($vol_id) = $this_track->vol;
 
 ok(   (defined $vol_id and $::Effect::by_id{$vol_id}) , "apply volume control");
@@ -236,6 +417,14 @@ nama_cmd('send 5');
 
 is( $this_track->send_type, 'soundcard', 'set soundcard output');
 is( $this_track->send_id, 5, 'set soundcard output');
+
+# IO objects are generated from the graph only after pruning has resolved
+# candidate rw into effective rw.
+{
+	local $::ChainSetup::g = Graph->new;
+	$::ChainSetup::g->add_path('soundcard_in', 'sax', 'soundcard_out');
+	::ChainSetup::prune_graph();
+}
 
 # this is ALSA dependent (i.e. no JACK running)
 
@@ -404,6 +593,22 @@ check_setup('JACK send-Main-to-alternate-channel setup' );
 nama_cmd('for 4 5 6 7 8; remove_track quiet');
 nama_cmd('Main; send 1');
 nama_cmd('add_bus Horns; sax move_to_bus Horns; sax stereo');
+
+$tn{Horns}->set(group => 'Null');
+ok(!$tn{Horns}->is_used, 'idle bus mix track is not currently used');
+my $horns_rw = $tn{Horns}->rw;
+$tn{Horns}->set(rw => OFF);
+ok($tn{Horns}->is_mixer,
+	'bus mix-track identity does not depend on status');
+$tn{Horns}->set(rw => $horns_rw);
+my @horns_consumers = $bn{Horns}->candidate_consumers;
+is(scalar @horns_consumers, 1,
+	'bus finds candidate consumer without traversing graph use');
+is($horns_consumers[0]->name, 'Horns',
+	'bus candidate consumer is its mix track');
+is(($bn{Horns}->wantme)[0]->name, 'Horns',
+	'wantme remains a compatibility interface');
+$tn{Horns}->set(group => 'Main');
 
 $expected_setup_lines = <<EXPECTED;
 

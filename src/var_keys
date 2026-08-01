@@ -34,7 +34,7 @@ $jack->{fake_ports_list}		# for testing
 $jack->{clients}				# JACK client information
 $jack->{periodsize}				# 
 $setup->{_old_snapshot}			# for checking if engine needs reconfigured
-$setup->{_old_rec_status}		# for checking rec status change hooks
+$setup->{_old_effective_rw}	# for checking effective rw change hooks
 $setup->{inputs_used}			# we warn if tracks share same input channel
 $setup->{tracks_with_duplicate_inputs}
 $setup->{record_midi}

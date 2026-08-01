@@ -23,10 +23,10 @@ sub cache_track { # launch subparts if conditions are met
 	my $args = {}; # to pass params to routines involved in caching
 	(my $track, $args->{additional_time}) = @_;
 
-	my $bus = $track->is_mixing;
+	my $bus = $track->is_mixer;
 	my $obj; # track or bus
 	my $name = $track->name;
-	if( $track->off ){
+	if( $track->candidate_off ){
 		my $bus = $track->is_mixer && ! $track->playback_version;
 		my $status = $bus ? MON : PLAY;
 		throw(qq(Cannot cache track "$name" with status OFF. Set to $status and try again)); 
@@ -316,7 +316,7 @@ sub stop_polling_cache_progress {
 sub uncache_track { 
 	my $track = shift;
 	local $this_track;
-	$track->play or 
+	$track->candidate_play or
 		throw($track->name, ": cannot uncache unless track is set to PLAY, skipping."), return;
 	my $version = $track->playback_version;
 	my ($ec) = is_cached($track, $version);

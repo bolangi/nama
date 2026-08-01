@@ -528,6 +528,7 @@ modifiers: _modifiers { ::pager( $::this_track->modifiers); 1}
 nomodifiers: _nomodifiers { $::this_track->set(modifiers => ""); 1}
 show_chain_setup: _show_chain_setup { ::pager(::ChainSetup::ecasound_chain_setup); 1}
 dump_io: _dump_io { ::ChainSetup::show_io(); 1}
+why: _why { ::pager($::this_track->why); 1}
 show_track: _show_track {
 	my $output = $::text->{format_top};
 	$output .= ::show_tracks_section($::this_track);
@@ -581,7 +582,7 @@ source: _source 'bus' existing_bus_name {
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
-	my $status = $::this_track->rec_status;
+	my $status = $::this_track->candidate_rw;
 	my $source = join ": input set to ",$::this_track->name,  $::this_track->input_object_text;
 	$source .= " however track is $status" if $status ne ::REC and $status ne ::MON;
 	::pager_newline($source);

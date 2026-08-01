@@ -526,6 +526,12 @@ show_track:
     WAV version, and signal width (channel count).
   short: sh -fart
   parameters: none
+why:
+  type: track
+  what: |
+    Explain how the current track's requested and candidate rw values,
+    routing-graph membership, and pruning result produced its effective rw.
+  parameters: none
 show_mode:
   type: setup
   what: |

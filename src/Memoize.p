@@ -20,7 +20,7 @@ my @track_methods = qw(
 	current_version 
 	playback_version 
 	maybe_playback
-	rec_status 
+	candidate_rw
 	region_start_time 
 	region_end_time 
 	playat_time 
@@ -56,4 +56,3 @@ sub init_wav_memoize {
 }
 1;
 __END__
-

@@ -42,6 +42,7 @@ our (
 	@pre_output, 	# pre-output chain operators
 
 	$chain_setup,	# final result as string
+	$prune_report,	# tracks removed while resolving the routing graph
 	);
 
 
@@ -61,6 +62,7 @@ sub initialize {
 	%is_ecasound_chain = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 	undef $chain_setup;
+	clear_rw_status();
 	::disable_length_timer();
 	reset_aux_chain_counter();
 	unlink $file->chain_setup;
@@ -68,10 +70,108 @@ sub initialize {
 }
 sub ecasound_chain_setup { $chain_setup } 
 sub is_ecasound_chain { $is_ecasound_chain{$_[0]} }
+sub prune_report { $prune_report }
+sub clear_rw_status { undef $prune_report }
+sub track_resolution {
+	my $track = shift;
+	return unless $prune_report;
+	my $name = ref $track ? $track->name : $track;
+	my $resolution = $prune_report->{tracks}->{$name};
+	$resolution ? dclone($resolution) : undef
+}
+sub effective_rw {
+	my $track = shift;
+	return unless $prune_report;
+	my $name = ref $track ? $track->name : $track;
+	my $resolution = $prune_report->{tracks}->{$name};
+	$resolution ? $resolution->{effective_rw} : OFF
+}
+
+sub candidate_factors {
+	my ($track, $candidate) = @_;
+	my @factors;
+	my $class = ref $track;
+	$class =~ s/^.*:://;
+	push @factors, "track class: $class";
+	push @factors, "requested rw: ".$track->rw;
+	push @factors, "candidate rw: $candidate";
+	if ($track->source_type){
+		my $source = $track->source_type;
+		$source .= ' '.$track->source_id if defined $track->source_id;
+		push @factors, "configured source: $source";
+	}
+	if ($track->rw eq PLAY){
+		my $version = $track->playback_version;
+		push @factors, "playback version: $version";
+		push @factors, $track->targets->{$version}
+			? "playback file: ".$track->targets->{$version}
+			: "playback file: unavailable";
+		push @factors, "doodle mode suppresses playback" if $mode->doodle;
+	}
+	if ($track->source_type eq 'jack_client'){
+		push @factors, $jack->{clients}->{$track->source_id}
+			? "JACK source: available"
+			: "JACK source: unavailable";
+	}
+	if ($track->can('target') and $track->target and $tn{$track->target}){
+		push @factors, "status inherited from ".$track->target.
+			" (candidate rw ".$tn{$track->target}->candidate_rw.")";
+	}
+	\@factors
+}
+
+sub candidate_off_reason {
+	my $track = shift;
+	return 'requested-off' if $track->rw eq OFF;
+	if ($track->rw eq PLAY){
+		my $version = $track->playback_version;
+		return 'no-playback-file' unless $track->targets->{$version};
+		return 'doodle-mode' if $mode->doodle;
+	}
+	return 'missing-jack-client'
+		if $track->source_type eq 'jack_client'
+		and ! $jack->{clients}->{$track->source_id};
+	return 'candidate-off'
+}
+
+sub explain_track_status {
+	my $track = shift;
+	return "No track is selected.\n" unless $track;
+	my $resolution = $track->resolve_rw_status;
+	my $class = ref $track;
+	$class =~ s/^.*:://;
+	my @lines = ("Track: ".$track->name." ($class)");
+	if (! $resolution){
+		push @lines,
+			"Effective rw: unresolved",
+			"Reason: no audio routing graph resolution is available";
+		return join("\n", @lines)."\n"
+	}
+	push @lines,
+		"Requested rw: ".$resolution->{requested},
+		"Candidate rw: ".$resolution->{candidate_rw},
+		"Effective rw: ".$resolution->{effective_rw},
+		"Candidate graph: ".($resolution->{in_candidate_graph} ? 'yes' : 'no'),
+		"Final graph: ".($resolution->{in_final_graph} ? 'yes' : 'no');
+	my %reason = (
+		'requested-off'       => 'the track was requested OFF',
+		'no-playback-file'     => 'no WAV file was available to play',
+		'doodle-mode'          => 'doodle mode suppressed playback',
+		'missing-jack-client'  => 'the configured JACK source was unavailable',
+		'candidate-off'        => 'track-class rules resolved the candidate rw to OFF',
+		'not-connected'        => 'the candidate was not connected to the routing graph',
+		'out-of-bounds'         => 'the track was outside the active edit range',
+		'no-source'             => 'the graph branch had no viable source',
+		'no-sink'               => 'the graph branch had no viable sink',
+	);
+	push @lines, "Reason: ".($reason{$resolution->{reason}} // 'the track survived graph pruning');
+	push @lines, "Factors:", map { "  - $_" } @{$resolution->{factors} // []};
+	join("\n", @lines)."\n"
+}
 
 sub engine_tracks { ::audio_tracks() } 
 sub engine_wav_out_tracks {
-	grep{$_->rec} engine_tracks();
+	grep { $_->effective_rec } engine_tracks();
 }
 # return file output entries, including Mixdown 
 sub really_recording { 
@@ -145,7 +245,7 @@ sub generate_setup_try {
 		write_chains(); 
 		1
 	} else { 
-		::throw("No audio tracks to record or play.");
+		::throw("No active audio tracks, nothing to do"); 
 		0
 	}
 }
@@ -162,7 +262,7 @@ sub add_paths_for_aux_sends { # not including Main
 	map {  ::Graph::add_path_for_aux_send($g, $_ ) } 
 	grep {  $_->group !~ /Mixdown|Null/
 			and $_->send_type 
-			and $_->rec_status ne OFF } ::audio_tracks();
+			and ! $_->candidate_off } ::audio_tracks();
 }
 
 
@@ -175,8 +275,8 @@ sub add_paths_from_Main {
 		$g->add_path(qw[Eq High Boost]);
 	}
 	else { 
-		$g->add_path('Main', output_node($tn{Main}->send_type)) if $tn{Main}->mon
-			and ! $tn{Mixdown}->rec
+		$g->add_path('Main', output_node($tn{Main}->send_type)) if $tn{Main}->candidate_mon
+			and ! $tn{Mixdown}->candidate_rec
 
 		# tests require this, why not generated by
 		# add_paths_for_aux_sends() ??
@@ -213,14 +313,64 @@ sub add_paths_for_mixdown_handling {
 }
 sub prune_graph {
 	logsub((caller(0))[3]);
+	my @candidate_tracks = grep { ::Graph::is_a_track($_) } $g->vertices;
+	my %in_candidate_graph = map { $_ => 1 } @candidate_tracks;
+	my %report_track = map { $_ => 1 } @candidate_tracks;
+	$report_track{$_->name} = 1
+		for grep { $_->group ne 'Temp' } ::audio_tracks();
+	my @report_tracks = sort keys %report_track;
+	$prune_report = {
+		removed => [],
+		tracks => {
+			map {
+				my $track = $tn{$_};
+				my $candidate = $track->candidate_rw;
+				$_ => {
+					requested => $track->rw,
+					candidate_rw => $candidate,
+					in_candidate_graph => $in_candidate_graph{$_} ? 1 : 0,
+					factors => candidate_factors($track, $candidate),
+				}
+			} @report_tracks
+		},
+	};
 	::Graph::simplify_send_routing($g);
 	logpkg('debug',"Graph after simplify_send_routing:\n$g");
-	::Graph::remove_out_of_bounds_tracks($g) if ::edit_mode();
+	my @removed = ::edit_mode()
+		? ::Graph::remove_out_of_bounds_tracks($g)
+		: ();
+	push @{$prune_report->{removed}},
+		map { +{ track => $_, reason => 'out-of-bounds' } } @removed;
 	logpkg('debug',"Graph after remove_out_of_bounds_tracks:\n$g");
-	::Graph::recursively_remove_inputless_tracks($g);
+	@removed = ::Graph::recursively_remove_inputless_tracks($g);
+	push @{$prune_report->{removed}},
+		map { +{ track => $_, reason => 'no-source' } } @removed;
 	logpkg('debug',"Graph after recursively_remove_inputless_tracks:\n$g");
-	::Graph::recursively_remove_outputless_tracks($g); 
+	@removed = ::Graph::recursively_remove_outputless_tracks($g);
+	push @{$prune_report->{removed}},
+		map { +{ track => $_, reason => 'no-sink' } } @removed;
 	logpkg('debug',"Graph after recursively_remove_outputless_tracks:\n$g");
+	for my $name (@report_tracks){
+		my $resolution = $prune_report->{tracks}->{$name};
+		my ($removed) = grep { $_->{track} eq $name }
+			@{$prune_report->{removed}};
+		$resolution->{in_final_graph} = $g->has_vertex($name) ? 1 : 0;
+		$resolution->{effective_rw} = $resolution->{in_final_graph}
+			? $resolution->{candidate_rw} : OFF;
+		if ($resolution->{candidate_rw} eq OFF){
+			$resolution->{reason} = candidate_off_reason($tn{$name});
+		}
+		elsif (! $resolution->{in_candidate_graph}){
+			$resolution->{reason} = 'not-connected';
+		}
+		elsif ($removed){
+			$resolution->{reason} = $removed->{reason};
+		}
+		elsif (! $resolution->{in_final_graph}){
+			$resolution->{reason} = 'not-connected';
+		}
+	}
+	$prune_report
 }
 # object based dispatch from routing graph
 	
@@ -458,9 +608,9 @@ sub write_chains {
 sub setup_requires_realtime {
 	my $prof = $config->{realtime_profile};
 	if( $prof eq 'auto'){
-		grep{ ! $_->is_mixing 
+		grep{ ! $_->is_mixer
 				  and $_->is_user_track 
-				  and ($_->rec or $_->mon)
+				  and ($_->candidate_rec or $_->candidate_mon)
 			} ::audio_tracks() 
 	} elsif ( $prof eq 'realtime') {
 		my @fields = qw(soundcard jack_client jack_manual jack_ports_list);
