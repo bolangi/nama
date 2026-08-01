@@ -128,11 +128,20 @@ sub drain ($self) {
 }
 
 sub _on_tk_key ($self, $keysym, $char, $state) {
+	return if $self->_pointer_is_over_tk;
+
 	my $event = $self->_translate($keysym, $char, $state);
 	return unless $event;
 
 	$self->enqueue($event->%*);
 	return $self->{consume} ? Tk->break : undef;
+}
+
+sub _pointer_is_over_tk ($self) {
+	my $widget = $self->{widget} or return;
+	my ($root_x, $root_y) = $widget->pointerxy;
+	return if $root_x < 0 || $root_y < 0;
+	return !!$widget->containing($root_x, $root_y);
 }
 
 sub _translate ($self, $keysym, $char, $state) {
