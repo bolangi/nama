@@ -267,7 +267,7 @@ sub candidate_status {
 sub destination {
 	my $track = shift; 
 	return 'Mixdown' if $tn{Mixdown}->rec;
-	return $track->SUPER() if $track->rec_status ne OFF
+	return $track->SUPER() if $track->rw ne OFF
 }
 #sub rec_status_display { $_[0]->rw ne OFF ? PLAY : OFF }
 sub activate_bus {}
