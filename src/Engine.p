@@ -245,11 +245,16 @@ sub configure {
 	}
 	$setup->{changed} = 0 ; # reset for next time
 
-	nama_cmd('show_tracks');
-
 	{ local $quiet = 1; stop_transport() }
 
-	if ( $self->setup() ){
+	my $setup_succeeded = $self->setup();
+
+	# setup() resolves effective rw even when it finds an empty graph and
+	# returns false. Display that completed resolution rather than the report
+	# left behind by the preceding setup.
+	nama_cmd('show_tracks') if ::ChainSetup::prune_report();
+
+	if ( $setup_succeeded ){
 		# Graph pruning has now resolved candidate rw. Run hooks only for
 		# transitions that participate in the completed setup.
 		trigger_rec_cleanup_hooks();
