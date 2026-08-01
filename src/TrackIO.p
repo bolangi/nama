@@ -70,14 +70,13 @@ sub maybe_playback { # ordinary sub, not object method
 }
 
 
-sub status_display {
+sub rec_status_display {
 	my $track = shift;
-	my $rw = $track->rw;
-	my $effective = $track->effective_status;
-	return $rw if not defined $effective or $rw eq $effective;
-
-	my $candidate = $track->candidate_status;
-	join q(), '[', map(substr($_, 0, 1), $rw, $candidate, $effective), ']';
+	my $rs = $track->rec_status;
+	my $status;
+	$status .= $rs;
+	$status .= ' v'.$track->current_version if $rs eq REC;
+	$status
 }
 ### object methods for text-based commands 
 
