@@ -560,6 +560,11 @@ nama_cmd('add_bus Horns; sax move_to_bus Horns; sax stereo');
 
 $tn{Horns}->set(group => 'Null');
 ok(!$tn{Horns}->is_used, 'idle bus mix track is not currently used');
+my $horns_rw = $tn{Horns}->rw;
+$tn{Horns}->set(rw => OFF);
+ok($tn{Horns}->is_mixer,
+	'bus mix-track identity does not depend on status');
+$tn{Horns}->set(rw => $horns_rw);
 my @horns_consumers = $bn{Horns}->candidate_consumers;
 is(scalar @horns_consumers, 1,
 	'bus finds candidate consumer without traversing graph use');

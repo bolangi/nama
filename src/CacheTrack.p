@@ -23,7 +23,7 @@ sub cache_track { # launch subparts if conditions are met
 	my $args = {}; # to pass params to routines involved in caching
 	(my $track, $args->{additional_time}) = @_;
 
-	my $bus = $track->is_candidate_mixing;
+	my $bus = $track->is_mixer;
 	my $obj; # track or bus
 	my $name = $track->name;
 	if( $track->candidate_off ){

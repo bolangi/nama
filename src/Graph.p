@@ -20,7 +20,7 @@ sub add_path_for_rec {
 	logsub("&add_path_for_rec: track ".$track->name);
 
 	# Case 1: Regular track
-	if( $track->source_type !~ /track|bus|loop/  and !  $track->is_candidate_mixing)
+	if( $track->source_type !~ /track|bus|loop/)
 	{
 		# create temporary track for rec_file chain
 
@@ -58,7 +58,7 @@ sub add_path_for_rec {
 
 	} 
 	# Case 2: Mix track
-	elsif ($track->source_type =~ /bus|track/ or $track->is_candidate_mixing)
+	elsif ($track->source_type =~ /bus|track/)
 	{
 
 		my $name = $track->name . '_rec_file';
