@@ -228,7 +228,7 @@ $this_track->set(group => 'Main');
 	is_deeply($report->{removed},
 		[{ track => 'sax', reason => 'no-source' }],
 		'pruning reports a track without a source');
-	my $resolution = $this_track->status_resolution;
+	my $resolution = $this_track->resolve_rw_status;
 	is($resolution->{requested}, MON, 'resolution records requested status');
 	is($resolution->{candidate_rw}, MON, 'resolution records candidate rw');
 	ok($resolution->{in_candidate_graph}, 'track entered candidate graph');
@@ -282,7 +282,7 @@ $this_track->set(group => 'Main');
 	is_deeply($report->{removed},
 		[{ track => 'sax', reason => 'no-sink' }],
 		'pruning reports a track without a sink');
-	is($this_track->status_resolution->{reason}, 'no-sink',
+	is($this_track->resolve_rw_status->{reason}, 'no-sink',
 		'resolution records no-sink reason');
 }
 
@@ -294,7 +294,7 @@ $this_track->set(group => 'Main');
 		'a surviving track retains its candidate rw');
 	is($this_track->rec_status, MON,
 		'rec_status uses surviving effective rw');
-	my $resolution = $this_track->status_resolution;
+	my $resolution = $this_track->resolve_rw_status;
 	is($resolution->{requested}, MON, 'survivor records requested status');
 	is($resolution->{candidate_rw}, MON, 'survivor records candidate rw');
 	is($resolution->{effective_rw}, MON, 'survivor records effective rw');
@@ -344,7 +344,7 @@ $this_track->set(group => 'Main');
 	local $::ChainSetup::g = Graph->new;
 	$this_track->set(rw => OFF);
 	::ChainSetup::prune_graph();
-	my $resolution = $this_track->status_resolution;
+	my $resolution = $this_track->resolve_rw_status;
 	is($resolution->{candidate_rw}, OFF,
 		'candidate-OFF track is included in resolution report');
 	ok(!$resolution->{in_candidate_graph},
@@ -359,7 +359,7 @@ $this_track->set(group => 'Main');
 {
 	local $::ChainSetup::g = Graph->new;
 	::ChainSetup::prune_graph();
-	my $resolution = $this_track->status_resolution;
+	my $resolution = $this_track->resolve_rw_status;
 	is($resolution->{candidate_rw}, MON,
 		'non-OFF candidate absent from graph is included in report');
 	ok(!$resolution->{in_candidate_graph},
@@ -369,7 +369,7 @@ $this_track->set(group => 'Main');
 	like($this_track->why, qr/not connected to the routing graph/,
 		'why explains candidate not connected to graph');
 }
-::ChainSetup::clear_status_resolution();
+::ChainSetup::clear_rw_status();
 
 my ($vol_id) = $this_track->vol;
 

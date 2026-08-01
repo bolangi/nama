@@ -55,7 +55,7 @@ sub rec_status {
 	my $effective = $track->effective_rw;
 	defined $effective ? $effective : $track->candidate_rw;
 }
-sub status_resolution {
+sub resolve_rw_status {
 	my $track = shift;
 	::ChainSetup::track_resolution($track);
 }

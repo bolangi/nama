@@ -62,7 +62,7 @@ sub initialize {
 	%is_ecasound_chain = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 	undef $chain_setup;
-	clear_status_resolution();
+	clear_rw_status();
 	::disable_length_timer();
 	reset_aux_chain_counter();
 	unlink $file->chain_setup;
@@ -71,7 +71,7 @@ sub initialize {
 sub ecasound_chain_setup { $chain_setup } 
 sub is_ecasound_chain { $is_ecasound_chain{$_[0]} }
 sub prune_report { $prune_report }
-sub clear_status_resolution { undef $prune_report }
+sub clear_rw_status { undef $prune_report }
 sub track_resolution {
 	my $track = shift;
 	return unless $prune_report;
@@ -137,7 +137,7 @@ sub candidate_off_reason {
 sub explain_track_status {
 	my $track = shift;
 	return "No track is selected.\n" unless $track;
-	my $resolution = track_resolution($track);
+	my $resolution = $track->resolve_rw_status;
 	my $class = ref $track;
 	$class =~ s/^.*:://;
 	my @lines = ("Track: ".$track->name." ($class)");
