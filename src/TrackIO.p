@@ -59,6 +59,10 @@ sub status_resolution {
 	my $track = shift;
 	::ChainSetup::track_resolution($track);
 }
+sub why {
+	my $track = shift;
+	::ChainSetup::explain_track_status($track);
+}
 sub effective_status {
 	my $track = shift;
 	::ChainSetup::effective_status($track);

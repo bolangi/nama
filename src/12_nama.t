@@ -224,17 +224,18 @@ $this_track->set(group => 'Main');
 {
 	local $::ChainSetup::g = Graph->new;
 	$::ChainSetup::g->add_edge('sax', 'soundcard_out');
-	is_deeply(::ChainSetup::prune_graph(), {
-		removed => [{ track => 'sax', reason => 'no-source' }],
-		tracks => {
-			sax => {
-				requested => MON,
-				candidate => MON,
-				effective => OFF,
-				reason => 'no-source',
-			},
-		},
-	}, 'pruning reports a track without a source');
+	my $report = ::ChainSetup::prune_graph();
+	is_deeply($report->{removed},
+		[{ track => 'sax', reason => 'no-source' }],
+		'pruning reports a track without a source');
+	my $resolution = $this_track->status_resolution;
+	is($resolution->{requested}, MON, 'resolution records requested status');
+	is($resolution->{candidate}, MON, 'resolution records candidate status');
+	ok($resolution->{in_candidate_graph}, 'track entered candidate graph');
+	ok(!$resolution->{in_final_graph}, 'track did not survive final graph');
+	is($resolution->{reason}, 'no-source', 'resolution records no-source reason');
+	like($this_track->why, qr/graph branch had no viable source/,
+		'why explains no-source pruning');
 	is($this_track->effective_status, OFF,
 		'a pruned track has effective status OFF');
 	ok($this_track->effective_off,
@@ -272,17 +273,12 @@ $this_track->set(group => 'Main');
 {
 	local $::ChainSetup::g = Graph->new;
 	$::ChainSetup::g->add_edge('soundcard_in', 'sax');
-	is_deeply(::ChainSetup::prune_graph(), {
-		removed => [{ track => 'sax', reason => 'no-sink' }],
-		tracks => {
-			sax => {
-				requested => MON,
-				candidate => MON,
-				effective => OFF,
-				reason => 'no-sink',
-			},
-		},
-	}, 'pruning reports a track without a sink');
+	my $report = ::ChainSetup::prune_graph();
+	is_deeply($report->{removed},
+		[{ track => 'sax', reason => 'no-sink' }],
+		'pruning reports a track without a sink');
+	is($this_track->status_resolution->{reason}, 'no-sink',
+		'resolution records no-sink reason');
 }
 
 {
@@ -294,11 +290,12 @@ $this_track->set(group => 'Main');
 	is($this_track->rec_status, MON,
 		'rec_status uses surviving effective status');
 	my $resolution = $this_track->status_resolution;
-	is_deeply($resolution, {
-		requested => MON,
-		candidate => MON,
-		effective => MON,
-	}, 'track exposes its status resolution');
+	is($resolution->{requested}, MON, 'survivor records requested status');
+	is($resolution->{candidate}, MON, 'survivor records candidate status');
+	is($resolution->{effective}, MON, 'survivor records effective status');
+	ok($resolution->{in_candidate_graph}, 'survivor entered candidate graph');
+	ok($resolution->{in_final_graph}, 'survivor remains in final graph');
+	ok(!defined $resolution->{reason}, 'survivor has no failure reason');
 	$resolution->{effective} = OFF;
 	is($this_track->effective_status, MON,
 		'track status resolution is returned as a snapshot');
@@ -336,6 +333,36 @@ $this_track->set(group => 'Main');
 		'engine WAV outputs use effective recording status',
 	);
 	$this_track->set(rw => MON);
+}
+
+{
+	local $::ChainSetup::g = Graph->new;
+	$this_track->set(rw => OFF);
+	::ChainSetup::prune_graph();
+	my $resolution = $this_track->status_resolution;
+	is($resolution->{candidate}, OFF,
+		'candidate-OFF track is included in resolution report');
+	ok(!$resolution->{in_candidate_graph},
+		'candidate-OFF track did not enter candidate graph');
+	is($resolution->{reason}, 'requested-off',
+		'resolution explains requested OFF');
+	like($this_track->why, qr/track was requested OFF/,
+		'why explains candidate-OFF track');
+	$this_track->set(rw => MON);
+}
+
+{
+	local $::ChainSetup::g = Graph->new;
+	::ChainSetup::prune_graph();
+	my $resolution = $this_track->status_resolution;
+	is($resolution->{candidate}, MON,
+		'non-OFF candidate absent from graph is included in report');
+	ok(!$resolution->{in_candidate_graph},
+		'unconnected candidate did not enter candidate graph');
+	is($resolution->{reason}, 'not-connected',
+		'resolution records candidate not connected to graph');
+	like($this_track->why, qr/not connected to the routing graph/,
+		'why explains candidate not connected to graph');
 }
 ::ChainSetup::clear_status_resolution();
 

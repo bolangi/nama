@@ -528,6 +528,7 @@ modifiers: _modifiers { ::pager( $::this_track->modifiers); 1}
 nomodifiers: _nomodifiers { $::this_track->set(modifiers => ""); 1}
 show_chain_setup: _show_chain_setup { ::pager(::ChainSetup::ecasound_chain_setup); 1}
 dump_io: _dump_io { ::ChainSetup::show_io(); 1}
+why: _why { ::pager($::this_track->why); 1}
 show_track: _show_track {
 	my $output = $::text->{format_top};
 	$output .= ::show_tracks_section($::this_track);

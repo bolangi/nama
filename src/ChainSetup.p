@@ -87,6 +87,97 @@ sub effective_status {
 	$resolution ? $resolution->{effective} : OFF
 }
 
+sub candidate_factors {
+	my ($track, $candidate) = @_;
+	my @factors;
+	my $class = ref $track;
+	$class =~ s/^.*:://;
+	push @factors, "track class: $class";
+	push @factors, "requested rw: ".$track->rw;
+	push @factors, "candidate status: $candidate";
+	if ($track->source_type){
+		my $source = $track->source_type;
+		$source .= ' '.$track->source_id if defined $track->source_id;
+		push @factors, "configured source: $source";
+	}
+	if ($track->rw eq PLAY){
+		my $version = $track->playback_version;
+		push @factors, "playback version: $version";
+		push @factors, $track->targets->{$version}
+			? "playback file: ".$track->targets->{$version}
+			: "playback file: unavailable";
+		push @factors, "doodle mode suppresses playback" if $mode->doodle;
+	}
+	if ($track->source_type eq 'jack_client'){
+		push @factors, $jack->{clients}->{$track->source_id}
+			? "JACK source: available"
+			: "JACK source: unavailable";
+	}
+	if ($track->can('target') and $track->target and $tn{$track->target}){
+		push @factors, "status inherited from ".$track->target.
+			" (candidate ".$tn{$track->target}->candidate_status.")";
+	}
+	\@factors
+}
+
+sub candidate_off_reason {
+	my $track = shift;
+	return 'requested-off' if $track->rw eq OFF;
+	if ($track->rw eq PLAY){
+		my $version = $track->playback_version;
+		return 'no-playback-file' unless $track->targets->{$version};
+		return 'doodle-mode' if $mode->doodle;
+	}
+	return 'missing-jack-client'
+		if $track->source_type eq 'jack_client'
+		and ! $jack->{clients}->{$track->source_id};
+	return 'candidate-off'
+}
+
+sub explain_track_status {
+	my $track = shift;
+	return "No track is selected.\n" unless $track;
+	my $current_candidate = $track->candidate_status;
+	my $resolution = track_resolution($track);
+	my $class = ref $track;
+	$class =~ s/^.*:://;
+	my @lines = (
+		"Track: ".$track->name." ($class)",
+		"Current requested status: ".$track->rw,
+		"Current candidate status: $current_candidate",
+	);
+	if (! $resolution){
+		push @lines,
+			"Effective status: unresolved",
+			"Reason: no audio routing graph resolution is available";
+		return join("\n", @lines)."\n"
+	}
+	push @lines,
+		"Resolved requested status: ".$resolution->{requested},
+		"Resolved candidate status: ".$resolution->{candidate},
+		"Candidate graph: ".($resolution->{in_candidate_graph} ? 'yes' : 'no'),
+		"Final graph: ".($resolution->{in_final_graph} ? 'yes' : 'no'),
+		"Effective status: ".$resolution->{effective};
+	my %reason = (
+		'requested-off'       => 'the track was requested OFF',
+		'no-playback-file'     => 'no playable WAV file was available',
+		'doodle-mode'          => 'doodle mode suppressed playback',
+		'missing-jack-client'  => 'the configured JACK source was unavailable',
+		'candidate-off'        => 'track-class rules resolved the candidate status to OFF',
+		'not-connected'        => 'the candidate was not connected to the routing graph',
+		'out-of-bounds'         => 'the track was outside the active edit range',
+		'no-source'             => 'the graph branch had no viable source',
+		'no-sink'               => 'the graph branch had no viable sink',
+	);
+	push @lines, "Reason: ".($reason{$resolution->{reason}} // 'the track survived graph pruning');
+	if ($track->rw ne $resolution->{requested}
+		or $current_candidate ne $resolution->{candidate}){
+		push @lines, "Note: track settings changed after this graph was resolved";
+	}
+	push @lines, "Factors:", map { "  - $_" } @{$resolution->{factors} // []};
+	join("\n", @lines)."\n"
+}
+
 sub engine_tracks { ::audio_tracks() } 
 sub engine_wav_out_tracks {
 	grep { $_->effective_rec } engine_tracks();
@@ -232,15 +323,24 @@ sub add_paths_for_mixdown_handling {
 sub prune_graph {
 	logsub((caller(0))[3]);
 	my @candidate_tracks = grep { ::Graph::is_a_track($_) } $g->vertices;
+	my %in_candidate_graph = map { $_ => 1 } @candidate_tracks;
+	my %report_track = map { $_ => 1 } @candidate_tracks;
+	$report_track{$_->name} = 1
+		for grep { $_->group ne 'Temp' } ::audio_tracks();
+	my @report_tracks = sort keys %report_track;
 	$prune_report = {
 		removed => [],
 		tracks => {
 			map {
+				my $track = $tn{$_};
+				my $candidate = $track->candidate_status;
 				$_ => {
-					requested => $tn{$_}->rw,
-					candidate => $tn{$_}->candidate_status,
+					requested => $track->rw,
+					candidate => $candidate,
+					in_candidate_graph => $in_candidate_graph{$_} ? 1 : 0,
+					factors => candidate_factors($track, $candidate),
 				}
-			} @candidate_tracks
+			} @report_tracks
 		},
 	};
 	::Graph::simplify_send_routing($g);
@@ -259,14 +359,25 @@ sub prune_graph {
 	push @{$prune_report->{removed}},
 		map { +{ track => $_, reason => 'no-sink' } } @removed;
 	logpkg('debug',"Graph after recursively_remove_outputless_tracks:\n$g");
-	for my $name (@candidate_tracks){
+	for my $name (@report_tracks){
 		my $resolution = $prune_report->{tracks}->{$name};
 		my ($removed) = grep { $_->{track} eq $name }
 			@{$prune_report->{removed}};
-		$resolution->{effective} = $g->has_vertex($name)
-			? $resolution->{candidate}
-			: OFF;
-		$resolution->{reason} = $removed->{reason} if $removed;
+		$resolution->{in_final_graph} = $g->has_vertex($name) ? 1 : 0;
+		$resolution->{effective} = $resolution->{in_final_graph}
+			? $resolution->{candidate} : OFF;
+		if ($resolution->{candidate} eq OFF){
+			$resolution->{reason} = candidate_off_reason($tn{$name});
+		}
+		elsif (! $resolution->{in_candidate_graph}){
+			$resolution->{reason} = 'not-connected';
+		}
+		elsif ($removed){
+			$resolution->{reason} = $removed->{reason};
+		}
+		elsif (! $resolution->{in_final_graph}){
+			$resolution->{reason} = 'not-connected';
+		}
 	}
 	$prune_report
 }
