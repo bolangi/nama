@@ -72,7 +72,7 @@ sub maybe_playback { # ordinary sub, not object method
 
 sub rec_status_display {
 	my $track = shift;
-	my $rs = $track->rec_status;
+	my $rs = $track->effective_status // $track->candidate_status;
 	my $status;
 	$status .= $rs;
 	$status .= ' v'.$track->current_version if $rs eq REC;
