@@ -163,7 +163,7 @@ sub generate_setup_try {
 		write_chains(); 
 		1
 	} else { 
-		::throw("No audio tracks to record or play.");
+		::throw("No active audio tracks, nothing to do"); 
 		0
 	}
 }
