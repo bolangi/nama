@@ -46,9 +46,9 @@ sub last { $_[0]->versions->[-1] || 0 }
 sub current_wav {
 	my $track = shift;
 	my $last = $track->current_version;
-	if 	($track->rec){ 
+	if 	($track->candidate_rec){
 		$track->name . '_' . $last . '.wav'
-	} elsif ( $track->rw eq PLAY){ 
+	} elsif ($track->candidate_play){
 		my $filename = $track->targets->{ $track->playback_version } ;
 		$filename
 	} else {
@@ -62,23 +62,11 @@ sub current_version {
 
 	# two possible version numbers, depending on REC/PLAY status
 	
-	if 	($track->rec)
+	if 	($track->candidate_rec)
 	{ 
 		my $last = $config->{use_group_numbering} 
 					? ::Bus::overall_last()
 					: $track->last;
-		return ++$last
-	}
-	elsif ($track->play){ return $track->playback_version } 
-	else { return 0 }
-}
-
-sub candidate_current_version {
-	my $track = shift;
-	if ($track->candidate_rec){
-		my $last = $config->{use_group_numbering}
-			? ::Bus::overall_last()
-			: $track->last;
 		return ++$last
 	}
 	elsif ($track->candidate_play){ return $track->playback_version }

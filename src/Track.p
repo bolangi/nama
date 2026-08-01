@@ -375,18 +375,10 @@ our @ISA = qw(::Track);
 sub current_version {	
 	my $track = shift;
 	my $last = $track->last;
-	my $status = $track->rec_status;
+	my $status = $track->candidate_status;
 	#logpkg('debug', "last: $last status: $status");
 	if 	($status eq REC){ return ++$last}
 	elsif ( $status eq PLAY){ return $track->playback_version } 
-	else { return 0 }
-}
-sub candidate_current_version {
-	my $track = shift;
-	my $last = $track->last;
-	my $status = $track->candidate_status;
-	if 	($status eq REC){ return ++$last}
-	elsif ( $status eq PLAY){ return $track->playback_version }
 	else { return 0 }
 }
 sub source_status { 
@@ -425,18 +417,10 @@ sub DESTROY {}
 sub current_version {	
 	my $track = shift;
 	my $last = $track->last;
-	my $status = $track->rec_status;
+	my $status = $track->candidate_status;
 	#logpkg('debug', "last: $last status: $status");
 	if 	($status eq REC){ return ++$last}
 	elsif ( $status eq PLAY){ return $track->playback_version } 
-	else { return 0 }
-}
-sub candidate_current_version {
-	my $track = shift;
-	my $last = $track->last;
-	my $status = $track->candidate_status;
-	if 	($status eq REC){ return ++$last}
-	elsif ( $status eq PLAY){ return $track->playback_version }
 	else { return 0 }
 }
 sub playat_time {

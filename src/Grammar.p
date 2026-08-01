@@ -515,7 +515,7 @@ sub import_audio {
 sub destroy_current_wav {
 	throw($this_track->name.": must be set to PLAY."), return
 		unless $this_track->candidate_play;
-	$this_track->candidate_current_version or
+	$this_track->current_version or
 		throw($this_track->name, 
 			": No current version (track set to OFF?) Skipping."), return;
 	my $wav = $this_track->full_path;

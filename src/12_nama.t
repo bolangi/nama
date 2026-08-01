@@ -250,12 +250,18 @@ $this_track->set(group => 'Main');
 	ok(!exists $snapshot->{rec_status},
 		'status snapshot does not depend on effective rec_status');
 	$this_track->set(rw => REC);
-	is($this_track->current_version, 0,
-		'effective current version follows the pruned status');
+	is($this_track->current_version, $this_track->last + 1,
+		'current version does not depend on effective graph status');
+	is($this_track->current_wav,
+		'sax_' . ($this_track->last + 1) . '.wav',
+		'current WAV does not depend on effective graph status');
+	is($this_track->full_path,
+		::join_path(this_wav_dir(), $this_track->current_wav),
+		'full path does not depend on effective graph status');
 	my ($rec_snapshot) = grep { $_->{name} eq 'sax' }
 		@{status_snapshot()->{tracks}};
-	is($rec_snapshot->{candidate_current_version}, $this_track->last + 1,
-		'status snapshot uses the candidate recording version');
+	is($rec_snapshot->{current_version}, $this_track->last + 1,
+		'status snapshot uses graph-independent current version');
 	$this_track->set(rw => MON);
 }
 

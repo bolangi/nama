@@ -22,7 +22,7 @@ package ::;
 		send_id
 		send_type
 		candidate_status
-		candidate_current_version
+		current_version
  );
 	my @relevant_bus_fields = qw(
 		name
