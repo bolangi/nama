@@ -20,7 +20,7 @@ my @track_methods = qw(
 	current_version 
 	playback_version 
 	maybe_playback
-	candidate_status
+	candidate_rw
 	region_start_time 
 	region_end_time 
 	playat_time 

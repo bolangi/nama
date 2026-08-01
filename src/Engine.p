@@ -245,22 +245,17 @@ sub configure {
 	}
 	$setup->{changed} = 0 ; # reset for next time
 
+	nama_cmd('show_tracks');
+
 	{ local $quiet = 1; stop_transport() }
 
-	my $setup_succeeded = $self->setup();
-
-	# setup() resolves effective status even when it finds an empty graph and
-	# returns false.  Display that completed resolution rather than the report
-	# left behind by the preceding setup.
-	nama_cmd('show_tracks') if ::ChainSetup::prune_report();
-
-	if ( $setup_succeeded ){
-		# Graph pruning has now resolved candidate status. Run hooks only for
+	if ( $self->setup() ){
+		# Graph pruning has now resolved candidate rw. Run hooks only for
 		# transitions that participate in the completed setup.
 		trigger_rec_cleanup_hooks();
 		trigger_rec_setup_hooks();
-		$setup->{_old_effective_status} = {
-			map { $_->name => $_->effective_status } rec_hookable_tracks()
+		$setup->{_old_effective_rw} = {
+			map { $_->name => $_->effective_rw } rec_hookable_tracks()
 		};
 
 		reset_latency_compensation() if $config->{opts}->{Q};

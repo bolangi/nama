@@ -582,7 +582,7 @@ source: _source 'bus' existing_bus_name {
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
-	my $status = $::this_track->candidate_status;
+	my $status = $::this_track->candidate_rw;
 	my $source = join ": input set to ",$::this_track->name,  $::this_track->input_object_text;
 	$source .= " however track is $status" if $status ne ::REC and $status ne ::MON;
 	::pager_newline($source);

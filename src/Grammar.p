@@ -393,8 +393,8 @@ sub show_tracks_section {
     map {   formline $format_picture, 
             $_->n,
             $_->name,
-            $_->rw ne $_->effective_status 
-				?  join(' but ', $_->rw , $_->effective_status) 
+            $_->rw ne $_->effective_rw
+				?  join(' but ', $_->rw , $_->effective_rw)
 				: $_->rec_status_display,
 			placeholder($_->source_status),
 			placeholder($_->destination),

@@ -245,7 +245,7 @@ sub _mono_to_stereo{
 	#Higher channel count (WAV or Track): null
 
 	my $self   = shift;
-	my $status = $self->effective_status();
+	my $status = $self->effective_rw();
 	my $copy   = "-chcopy:1,2";
 	my $nocopy = "";
 	my $is_mono_track = sub { $self->width == 1 };

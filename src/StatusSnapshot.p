@@ -21,7 +21,7 @@ package ::;
 		source_type
 		send_id
 		send_type
-		candidate_status
+		candidate_rw
 		current_version
  );
 	my @relevant_bus_fields = qw(

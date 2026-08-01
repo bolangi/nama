@@ -79,12 +79,12 @@ sub track_resolution {
 	my $resolution = $prune_report->{tracks}->{$name};
 	$resolution ? dclone($resolution) : undef
 }
-sub effective_status {
+sub effective_rw {
 	my $track = shift;
 	return unless $prune_report;
 	my $name = ref $track ? $track->name : $track;
 	my $resolution = $prune_report->{tracks}->{$name};
-	$resolution ? $resolution->{effective} : OFF
+	$resolution ? $resolution->{effective_rw} : OFF
 }
 
 sub candidate_factors {
@@ -94,7 +94,7 @@ sub candidate_factors {
 	$class =~ s/^.*:://;
 	push @factors, "track class: $class";
 	push @factors, "requested rw: ".$track->rw;
-	push @factors, "candidate status: $candidate";
+	push @factors, "candidate rw: $candidate";
 	if ($track->source_type){
 		my $source = $track->source_type;
 		$source .= ' '.$track->source_id if defined $track->source_id;
@@ -115,7 +115,7 @@ sub candidate_factors {
 	}
 	if ($track->can('target') and $track->target and $tn{$track->target}){
 		push @factors, "status inherited from ".$track->target.
-			" (candidate ".$tn{$track->target}->candidate_status.")";
+			" (candidate rw ".$tn{$track->target}->candidate_rw.")";
 	}
 	\@factors
 }
@@ -137,43 +137,34 @@ sub candidate_off_reason {
 sub explain_track_status {
 	my $track = shift;
 	return "No track is selected.\n" unless $track;
-	my $current_candidate = $track->candidate_status;
 	my $resolution = track_resolution($track);
 	my $class = ref $track;
 	$class =~ s/^.*:://;
-	my @lines = (
-		"Track: ".$track->name." ($class)",
-		"Current requested status: ".$track->rw,
-		"Current candidate status: $current_candidate",
-	);
+	my @lines = ("Track: ".$track->name." ($class)");
 	if (! $resolution){
 		push @lines,
-			"Effective status: unresolved",
+			"Effective rw: unresolved",
 			"Reason: no audio routing graph resolution is available";
 		return join("\n", @lines)."\n"
 	}
 	push @lines,
-		"Resolved requested status: ".$resolution->{requested},
-		"Resolved candidate status: ".$resolution->{candidate},
+		"Requested rw: ".$resolution->{requested},
+		"Candidate rw: ".$resolution->{candidate_rw},
+		"Effective rw: ".$resolution->{effective_rw},
 		"Candidate graph: ".($resolution->{in_candidate_graph} ? 'yes' : 'no'),
-		"Final graph: ".($resolution->{in_final_graph} ? 'yes' : 'no'),
-		"Effective status: ".$resolution->{effective};
+		"Final graph: ".($resolution->{in_final_graph} ? 'yes' : 'no');
 	my %reason = (
 		'requested-off'       => 'the track was requested OFF',
-		'no-playback-file'     => 'no playable WAV file was available',
+		'no-playback-file'     => 'no WAV file was available to play',
 		'doodle-mode'          => 'doodle mode suppressed playback',
 		'missing-jack-client'  => 'the configured JACK source was unavailable',
-		'candidate-off'        => 'track-class rules resolved the candidate status to OFF',
+		'candidate-off'        => 'track-class rules resolved the candidate rw to OFF',
 		'not-connected'        => 'the candidate was not connected to the routing graph',
 		'out-of-bounds'         => 'the track was outside the active edit range',
 		'no-source'             => 'the graph branch had no viable source',
 		'no-sink'               => 'the graph branch had no viable sink',
 	);
 	push @lines, "Reason: ".($reason{$resolution->{reason}} // 'the track survived graph pruning');
-	if ($track->rw ne $resolution->{requested}
-		or $current_candidate ne $resolution->{candidate}){
-		push @lines, "Note: track settings changed after this graph was resolved";
-	}
 	push @lines, "Factors:", map { "  - $_" } @{$resolution->{factors} // []};
 	join("\n", @lines)."\n"
 }
@@ -333,10 +324,10 @@ sub prune_graph {
 		tracks => {
 			map {
 				my $track = $tn{$_};
-				my $candidate = $track->candidate_status;
+				my $candidate = $track->candidate_rw;
 				$_ => {
 					requested => $track->rw,
-					candidate => $candidate,
+					candidate_rw => $candidate,
 					in_candidate_graph => $in_candidate_graph{$_} ? 1 : 0,
 					factors => candidate_factors($track, $candidate),
 				}
@@ -364,9 +355,9 @@ sub prune_graph {
 		my ($removed) = grep { $_->{track} eq $name }
 			@{$prune_report->{removed}};
 		$resolution->{in_final_graph} = $g->has_vertex($name) ? 1 : 0;
-		$resolution->{effective} = $resolution->{in_final_graph}
-			? $resolution->{candidate} : OFF;
-		if ($resolution->{candidate} eq OFF){
+		$resolution->{effective_rw} = $resolution->{in_final_graph}
+			? $resolution->{candidate_rw} : OFF;
+		if ($resolution->{candidate_rw} eq OFF){
 			$resolution->{reason} = candidate_off_reason($tn{$name});
 		}
 		elsif (! $resolution->{in_candidate_graph}){

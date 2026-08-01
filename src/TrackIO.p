@@ -25,7 +25,7 @@ sub is_used {
 	or $track->used_by_another_track
 	or ($bus and $bus->can('wantme') and $bus->wantme)  # A bus needs my signal
 }
-sub candidate_status {
+sub candidate_rw {
 #	logsub((caller(0))[3]);
 	my $track = shift;
 	return OFF if 0 # 	! ($track->engine_group eq $::this_engine->name)
@@ -48,12 +48,12 @@ sub candidate_status {
 
 }
 
-# rec_status is the compatibility interface: candidate status while the graph
-# is being built, and effective status after pruning resolves the graph.
+# rec_status is the compatibility interface: candidate rw while the graph
+# is being built, and effective rw after pruning resolves the graph.
 sub rec_status {
 	my $track = shift;
-	my $effective = $track->effective_status;
-	defined $effective ? $effective : $track->candidate_status;
+	my $effective = $track->effective_rw;
+	defined $effective ? $effective : $track->candidate_rw;
 }
 sub status_resolution {
 	my $track = shift;
@@ -63,9 +63,9 @@ sub why {
 	my $track = shift;
 	::ChainSetup::explain_track_status($track);
 }
-sub effective_status {
+sub effective_rw {
 	my $track = shift;
-	::ChainSetup::effective_status($track);
+	::ChainSetup::effective_rw($track);
 }
 sub maybe_playback { # ordinary sub, not object method
 	my ($track, $playback_version) = @_;
@@ -76,7 +76,7 @@ sub maybe_playback { # ordinary sub, not object method
 
 sub rec_status_display {
 	my $track = shift;
-	my $rs = $track->effective_status // $track->candidate_status;
+	my $rs = $track->effective_rw // $track->candidate_rw;
 	my $status;
 	$status .= $rs;
 	$status .= ' v'.$track->current_version if $rs eq REC;
@@ -318,7 +318,7 @@ sub set_rw {
 	my ($track, $setting) = @_;
 	#my $already = $track->rw eq $setting ? " already" : "";
 	$track->set(rw => $setting);
-	my $status = $track->candidate_status();
+	my $status = $track->candidate_rw();
 	::pagers("Track ",$track->name, " set to $setting", 
 		($status ne $setting ? ", but current status is $status" : ""));
 
