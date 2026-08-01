@@ -74,6 +74,7 @@ lib/Audio/Nama/EffectNickname.pm
 lib/Audio/Nama/Memoize.pm
 lib/Audio/Nama/Wavinfo.pm
 lib/Audio/Nama/Effect.pm
+lib/Audio/Nama/Graphical.pm
 lib/Audio/Nama/EffectsRegistry.pm
 lib/Audio/Nama/IO.pm
 lib/Audio/Nama/Tempo.pm

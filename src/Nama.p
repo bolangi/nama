@@ -66,7 +66,7 @@ use ::Util qw(:all);
 # Import the two user-interface classes
 
 use ::Text;
-# use ::Graphical; # not right now
+use ::Graphical;
 
 # They are descendents of a base class we define in the root namespace
 
