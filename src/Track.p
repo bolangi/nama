@@ -226,10 +226,10 @@ sub select_track {
 }
 sub is_selected { $::this_track->name eq $_[0]->name }
 
-sub rec  { $_[0]->rec_status eq REC }
-sub mon  { $_[0]->rec_status eq MON }
-sub play { $_[0]->rec_status eq PLAY}
-sub off  { $_[0]->rec_status eq OFF }
+sub rec  { $_[0]->rw eq REC }
+sub mon  { $_[0]->rw eq MON }
+sub play { $_[0]->rw eq PLAY }
+sub off  { $_[0]->rw eq OFF }
 
 sub candidate_rec  { $_[0]->candidate_status eq REC }
 sub candidate_mon  { $_[0]->candidate_status eq MON }

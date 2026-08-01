@@ -241,6 +241,10 @@ $this_track->set(group => 'Main');
 		'effective OFF predicate follows graph resolution');
 	ok(!$this_track->effective_mon,
 		'effective MON predicate rejects a pruned candidate');
+	ok($this_track->mon,
+		'MON alias follows requested rw after pruning');
+	ok(!$this_track->off,
+		'OFF alias does not follow effective graph status');
 	is($this_track->rec_status, OFF,
 		'rec_status uses effective status after pruning');
 	my ($snapshot) = grep { $_->{name} eq 'sax' }

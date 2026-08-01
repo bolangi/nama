@@ -109,7 +109,7 @@ sub y_offset_multiplier {
 	my $self = shift;
 	my $before_me;
 	for (2 .. $self->track->n - 1){
-		$before_me++ if $ti{$_} and $ti{$_}->play;
+		$before_me++ if $ti{$_} and $ti{$_}->candidate_play;
 	}
 	$before_me
 }
@@ -129,4 +129,3 @@ Usage: waveform [options] source_audio [ouput.png]
     -h, --help                       Display this screen
 	
 =cut
-
