@@ -59,6 +59,10 @@ sub initialize_terminal {
 	$vbox =	Tickit::Widget::VBox->new; 
 	$scroller = Tickit::Widget::Scroller->new;
 	$text->{tickit}  = $tickit  = Tickit::Async->new( root => $vbox);
+	# Nama owns the IO::Async loop.  Attach Tickit explicitly so the text and
+	# graphical interfaces both service the same loop rather than allowing
+	# Tickit::Async to create one implicitly.
+	$text->{loop}->add($tickit);
 	$text->{term}    = $term    = $tickit->term;
 	$text->{rootwin} = $rootwin = $tickit->rootwin;
 	my $lines = $term->lines;
@@ -186,6 +190,7 @@ sub setup_key_bindings {
 							$entry->position - length prompt() ) },
 	'C-h'   	=> $backspace,
 	'Backspace' => $backspace,
+	'C-c'       => \&cleanup_exit,
     ' '			=> $spacebar,
 	'C-z'		=> \&suspend,
     'F1'		=> \&enable_popup,

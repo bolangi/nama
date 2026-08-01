@@ -192,9 +192,24 @@ sub kill_and_reap {
 	} @pids;
 }
 	
+my $cleanup_in_progress;
 sub cleanup_exit {
 	logsub((caller(0))[3]);
- 	remove_riff_header_stubs();
+	# Restore the terminal before any potentially slow engine cleanup.  A
+	# second interrupt still gets one last attempt to restore it before exiting.
+	if ($cleanup_in_progress++) {
+		eval {
+			$text->{term}->teardown;
+			$text->{term}->flush;
+		};
+		CORE::exit(130);
+	}
+	$SIG{INT} = \&cleanup_exit;
+	eval {
+		$text->{term}->teardown if defined $text->{term};
+		$text->{term}->flush    if defined $text->{term};
+	};
+	remove_riff_header_stubs();
 	trigger_rec_cleanup_hooks();
 	# for each process: 
 	# - SIGINT (1st time)
@@ -204,7 +219,6 @@ sub cleanup_exit {
 	# - SIGKILL
 	#project_snapshot(); 
 	::Engine::sync_action('kill_and_reap');
-	$text->{term}->teardown;
 	restore_stdout();
 	say;
 	exit;

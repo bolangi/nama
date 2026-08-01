@@ -19,10 +19,18 @@ our @ISA = '::';      ## default to root namespace, e.g.  Refresh_subs, Graphica
 
 sub hello {"make a window";}
 sub loop {
-  	while (1) {
-  		my ($user_input) = $text->{term}->readline($prompt) ;
-  		::process_line( $user_input );
-  	}
+	# Tk owns the graphical event loop.  Give IO::Async (and therefore
+	# Tickit::Async) a nonblocking turn at regular intervals so terminal input,
+	# timers, and engine I/O remain live while Tk is running.
+	my $pump_async;
+	$pump_async = sub {
+		return unless Tk::Exists($::gui->{mw});
+		$text->{loop}->loop_once(0);
+		$::gui->{mw}->after(10, $pump_async);
+	};
+
+	$::gui->{mw}->afterIdle($pump_async);
+	Tk::MainLoop();
 }
 
 sub initialize_tk { 
@@ -43,4 +51,3 @@ package ::;
 1;
 
 __END__
-

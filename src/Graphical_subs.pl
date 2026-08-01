@@ -38,14 +38,14 @@ sub init_gui {
 		$gui->{ww} = $gui->{mw}->Toplevel;
 		$gui->{ww}->title("Waveform Window");
 		$gui->{ww}->deiconify; 
-		$gui->{ww}->bind('<Control-Key-c>' => sub { exit } );
+		$gui->{ww}->bind('<Control-Key-c>' => \&cleanup_exit );
 		$gui->{ww}->bind('<Control-Key- >' => \&toggle_transport); 
 	}
 
 	### Exit via Ctrl-C 
 
-	$gui->{mw}->bind('<Control-Key-c>' => sub { exit } ); 
-	$gui->{ew}->bind('<Control-Key-c>' => sub { exit } );
+	$gui->{mw}->bind('<Control-Key-c>' => \&cleanup_exit );
+	$gui->{ew}->bind('<Control-Key-c>' => \&cleanup_exit );
 
     ## Press SPACE to start/stop transport
 
@@ -1327,4 +1327,3 @@ sub save_palette {
 }
 
 ### end
-
