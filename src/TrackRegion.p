@@ -41,10 +41,15 @@ sub timeline_position {
 
 sub adjusted_duration {
 	my $track = shift;
+	if (::timeline_adjustment_active()) {
+		my $adjustment = $track->timeline_adjustment;
+		return $adjustment->adjusted_endpoint
+			 - $adjustment->adjusted_startpoint
+	}
 	my $duration;
 	if ($track->region_start){
-		$duration = 	$track->adjusted_endpoint
-			  - $track->adjusted_startpoint
+		$duration = 	$track->endpoint
+			  - $track->startpoint
 	} else {
 		$duration = 	$track->wav_length;
 	}
@@ -53,32 +58,43 @@ sub adjusted_duration {
 
 sub adjusted_timeline_endpoint {
 	my $track = shift;
-	my $setup_length = $track->adjusted_duration;
+	my $adjustment = $track->timeline_adjustment
+		if ::timeline_adjustment_active();
+	my $setup_length = $adjustment
+		? $adjustment->adjusted_endpoint - $adjustment->adjusted_startpoint
+		: $track->adjusted_duration;
 	no warnings 'uninitialized';
-	$setup_length += $track->adjusted_timeline_position;
+	$setup_length += $adjustment
+		? $adjustment->adjusted_timeline_position
+		: $track->adjusted_timeline_position;
+}
+
+sub timeline_adjustment {
+	my $track = shift;
+	::timeline_adjustment(::timeline_adjustment_args($track))
 }
 
 sub adjusted_startpoint {
 	my $track = shift;
 	return $track->startpoint unless ::timeline_adjustment_active();
-	::new_region_start(::timeline_adjustment_args($track));
+	$track->timeline_adjustment->adjusted_startpoint
 	
 }
 sub adjusted_timeline_position {
 	my $track = shift;
 	return $track->timeline_position unless ::timeline_adjustment_active();
-	::new_playat(::timeline_adjustment_args($track));
+	$track->timeline_adjustment->adjusted_timeline_position
 }
 sub adjusted_endpoint {
 	my $track = shift;
 	return $track->endpoint unless ::timeline_adjustment_active();
-	::new_region_end(::timeline_adjustment_args($track));
+	$track->timeline_adjustment->adjusted_endpoint
 }
 
 sub region_is_out_of_bounds {
 	return unless ::timeline_adjustment_active();
 	my $track = shift;
-	::window_overlap_case(::timeline_adjustment_args($track)) =~ /out_of_bounds/
+	! $track->timeline_adjustment->is_playable
 }
 
 }

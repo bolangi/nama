@@ -724,10 +724,14 @@ foreach(@tests){
 		timeline_play_end 	=> $timeline_play_end,
 		wav_length 		=> $length,
 	};
-	is( ::window_overlap_case($args), $case, "$index: $case $comment");
-	is( ::new_playat($args), $new_playat, "$index: new_playat: $case");
-	is( ::new_region_start($args), $new_region_start, "$index: new_region_start: $case");
-	is( ::new_region_end($args), $new_region_end, "$index: new_region_end: $case");
+	my $adjustment = ::timeline_adjustment($args);
+	is( $adjustment->window_overlap_case, $case, "$index: $case $comment");
+	is( $adjustment->adjusted_timeline_position, $new_playat,
+		"$index: adjusted_timeline_position: $case");
+	is( $adjustment->adjusted_startpoint, $new_region_start,
+		"$index: adjusted_startpoint: $case");
+	is( $adjustment->adjusted_endpoint, $new_region_end,
+		"$index: adjusted_endpoint: $case");
 }
 }
 

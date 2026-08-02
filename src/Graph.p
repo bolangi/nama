@@ -296,9 +296,7 @@ sub inputless_tracks {
 sub remove_out_of_bounds_tracks {
 	my $g = shift;
 	my @names = $g->successors('wav_in');  # PLAY status tracks
-	my @remove = grep{
-		::window_overlap_case(::timeline_adjustment_args($::tn{$_})) =~ /out_of_bounds/
-	} @names;
+	my @remove = grep{ ! $::tn{$_}->timeline_adjustment->is_playable } @names;
 	remove_tracks($g, @remove);
 }
 

@@ -131,7 +131,7 @@ sub encode_mixdown_file {
 sub adjust_offset_recordings {
 	for( ::ChainSetup::engine_wav_out_tracks()){
 		no warnings 'uninitialized';
-		if (my $mark = timeline_adjustment_mark()){
+		if (my $mark = offset_run_positioning_mark()){
 			$_->set(playat => $mark);
 			logpkg('debug',$_->name, ": offsetting to $mark");
 		}

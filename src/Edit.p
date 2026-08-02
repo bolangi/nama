@@ -558,6 +558,21 @@ sub edit_fades {
 # adjusted_endpoint
 # window_overlap_case
 
+{
+package ::TimelineAdjustmentResult;
+
+sub new {
+	my ($class, %args) = @_;
+	bless \%args, $class
+}
+sub window_overlap_case        { $_[0]->{window_overlap_case} }
+sub adjusted_timeline_position { $_[0]->{adjusted_timeline_position} }
+sub adjusted_startpoint        { $_[0]->{adjusted_startpoint} }
+sub adjusted_endpoint          { $_[0]->{adjusted_endpoint} }
+sub is_playable                { $_[0]->window_overlap_case !~ /out_of_bounds/ }
+
+}
+
 sub timeline_adjustment {
 	my $args = shift;
 
@@ -597,12 +612,12 @@ sub timeline_adjustment {
 			: 'no_region_play_start_during_playat_delay';
 	}
 
-	return {
+	return ::TimelineAdjustmentResult->new(
 		window_overlap_case => $case,
 		adjusted_timeline_position => '*',
 		adjusted_startpoint => '*',
 		adjusted_endpoint => '*',
-	} if $case =~ /out_of_bounds/;
+	) if $case =~ /out_of_bounds/;
 
 	my $intersection_start = $window_start > $track_start
 		? $window_start : $track_start;
@@ -610,29 +625,14 @@ sub timeline_adjustment {
 	my $adjusted_endpoint = $requested_endpoint < $args->{wav_length}
 		? $requested_endpoint : $args->{wav_length};
 
-	{
+	::TimelineAdjustmentResult->new(
 		window_overlap_case => $case,
 		adjusted_timeline_position => $intersection_start - $window_start,
 		adjusted_startpoint => $source_start + $intersection_start - $track_start,
 		# The active window may intentionally extend past the nominal
 		# region to leave processing time for effect tails.
 		adjusted_endpoint => $adjusted_endpoint,
-	}
-}
-sub new_playat {
-	my $args = shift;
-	timeline_adjustment($args)->{adjusted_timeline_position}
-}
-sub new_region_start { 
-	my $args = shift;
-	timeline_adjustment($args)->{adjusted_startpoint}
-}
-sub new_region_end {   
-	my $args = shift;
-	timeline_adjustment($args)->{adjusted_endpoint}
-};
-sub window_overlap_case {
-	timeline_adjustment(shift)->{window_overlap_case}
+	)
 }
 
 sub timeline_play_start_position {
@@ -648,9 +648,9 @@ sub timeline_adjustment_type {
 	return '' unless timeline_adjustment_active();
 	$setup->{timeline_adjustment}->{type}
 }
-sub timeline_adjustment_mark {
-	return unless timeline_adjustment_active();
-	$setup->{timeline_adjustment}->{mark}
+sub offset_run_positioning_mark {
+	return unless is_offset_run_mode();
+	$setup->{timeline_adjustment}->{positioning_mark}
 }
 sub clear_timeline_adjustment { undef $setup->{timeline_adjustment} }
 sub timeline_adjustment_args {
@@ -840,7 +840,7 @@ sub set_offset_run_mark {
 		type => 'offset_run',
 		timeline_play_start => $timeline_play_start,
 		timeline_play_end => $timeline_play_end,
-		mark => $markname,
+		positioning_mark => $markname,
 	};
 	undef $this_edit;
 	request_setup();

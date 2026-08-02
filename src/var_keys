@@ -46,7 +46,7 @@ $setup->{audio_length}
 $setup->{timeline_adjustment}->{type}
 $setup->{timeline_adjustment}->{timeline_play_start}
 $setup->{timeline_adjustment}->{timeline_play_end}
-$setup->{timeline_adjustment}->{mark}
+$setup->{timeline_adjustment}->{positioning_mark}
 $setup->{edit_points}
 $setup->{_last_rec_tracks}		# tracks we recorded to the last time, for rerecord
 $setup->{_main_rw}				# Main track rw setting when recording, for rerecord
