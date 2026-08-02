@@ -148,8 +148,8 @@ sub heartbeat {
 	}
 	#print join " ", $status, colonize($here), $/;
 	my ($start, $end);
-	$start  = ::Mark::loop_start();
-	$end    = ::Mark::loop_end();
+	$start  = ::Mark::adjusted_loop_start();
+	$end    = ::Mark::adjusted_loop_end();
 	schedule_wraparound() 
 		if $mode->{loop_enable} 
 		and defined $start 
@@ -167,8 +167,9 @@ sub schedule_wraparound {
 
 	return unless $mode->{loop_enable};
 	my $here   = $this_engine->ecasound_iam("getpos");
-	my $start  = ::Mark::loop_start();
-	my $end    = ::Mark::loop_end();
+	my $start  = ::Mark::adjusted_loop_start();
+	my $end    = ::Mark::adjusted_loop_end();
+	return unless defined $start and defined $end;
 	my $diff = $end - $here;
 	logpkg('debug', "here: $here, start: $start, end: $end, diff: $diff");
 	if ( $diff < 0 ){ # go at once

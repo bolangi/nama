@@ -99,16 +99,42 @@ sub previous {
 
 sub all { sort { $a->{time} <=> $b->{time} }@all }
 
-sub loop_start { 
-	my @points = sort { $a <=> $b } 
-	grep{ $_ } map{ mark_time($_)} @{$setup->{loop_endpoints}}[0,1];
-	#print "points @points\n";
-	$points[0];
+sub loop_timeline_interval {
+	my @points = sort { $a <=> $b }
+		grep { defined }
+		map { time_from_tag($_) }
+		@{$setup->{loop_endpoints}}[0,1];
+	return unless @points == 2 and $points[0] < $points[1];
+	@points
 }
-sub loop_end {
-	my @points =sort { $a <=> $b } 
-		grep{ $_ } map{ mark_time($_)} @{$setup->{loop_endpoints}}[0,1];
-	$points[1];
+sub loop_timeline_start {
+	my @points = loop_timeline_interval();
+	$points[0]
+}
+sub loop_timeline_end {
+	my @points = loop_timeline_interval();
+	$points[1]
+}
+sub adjusted_loop_interval {
+	my @points = loop_timeline_interval();
+	return unless @points == 2;
+	return @points unless ::timeline_adjustment_active();
+
+	my $start = $points[0] > ::timeline_play_start_position()
+		? $points[0] : ::timeline_play_start_position();
+	my $end = $points[1] < ::timeline_play_end_position()
+		? $points[1] : ::timeline_play_end_position();
+	return unless $start < $end;
+
+	map { ::adjusted_time_from_timeline_position($_) } ($start, $end)
+}
+sub adjusted_loop_start {
+	my @points = adjusted_loop_interval();
+	$points[0]
+}
+sub adjusted_loop_end {
+	my @points = adjusted_loop_interval();
+	$points[1]
 }
 sub time_from_tag {
 	my $tag = shift;

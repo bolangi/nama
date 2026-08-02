@@ -176,13 +176,13 @@ sub transport_status {
 
 	# assume transport is stopped
 	# print looping status, setup length, current position
-	my $start  = ::Mark::loop_start();
-	my $end    = ::Mark::loop_end();
+	my $start  = ::Mark::loop_timeline_start();
+	my $end    = ::Mark::loop_timeline_end();
 	#print "start: $start, end: $end, loop_enable: $mode->{loop_enable}\n";
 	if (ref $setup->{record_midi} and %{$setup->{record_midi}}){
 		pager(join(" ", keys %{$setup->{record_midi}}), ": ready for caching");
 	}
-	if ($mode->{loop_enable} and $start and $end){
+	if ($mode->{loop_enable} and defined $start and defined $end){
 		#if (! $end){  $end = $start; $start = 0}
 		pager("looping from ", heuristic_time($start),
 				 	"to ",   heuristic_time($end));

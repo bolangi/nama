@@ -775,6 +775,60 @@ is(
 );
 }
 
+{
+local $setup->{timeline_adjustment};
+local $setup->{loop_endpoints} = ['20.5', '40.5'];
+
+is_deeply(
+	[::Mark::loop_timeline_interval()],
+	[20.5, 40.5],
+	'loop endpoints remain project timeline positions',
+);
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	[20.5, 40.5],
+	'loop endpoints are unchanged without timeline adjustment',
+);
+
+$setup->{loop_endpoints} = ['0.0', '10.0'];
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	['0.0', '10.0'],
+	'a loop endpoint at engine time zero is retained',
+);
+
+$setup->{timeline_adjustment} = {
+	type => 'offset_run',
+	timeline_play_start => 30.5,
+	timeline_play_end => 60.5,
+};
+$setup->{loop_endpoints} = ['20.5', '40.5'];
+is_deeply(
+	[::Mark::loop_timeline_interval()],
+	[20.5, 40.5],
+	'adjustment does not change permanent loop endpoints',
+);
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	[0, 10],
+	'loop crossing setup start is clipped and retains adjusted zero',
+);
+
+$setup->{loop_endpoints} = ['10.5', '20.5'];
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	[],
+	'loop entirely before adjusted setup is inactive',
+);
+
+$setup->{loop_endpoints} = ['50.5', '70.5'];
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	[20, 30],
+	'loop crossing setup end is clipped to adjusted setup endpoint',
+);
+}
+
 
 
 load_project(name => "test_project-convert51", create => 1);
