@@ -677,9 +677,9 @@ Merging of branches is not supported.
 
 =head2 Exiting
 
-The C<quit> command shuts down Nama and its engines. Project changes
-normally have already been saved during automatic reconfiguration;
-C<quit> itself does not perform an additional save.
+The C<quit> command shuts down Nama. Project changes are
+detected and saved after each user input; C<quit> itself
+does not perform an additional save.
 
 =head2 Jack ports list file
 
