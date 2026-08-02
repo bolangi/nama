@@ -8,19 +8,17 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(timeline_adjustment);
 
 # Input values describe one track/region and one permanent-timeline window:
-# playat, region_start, region_end, wav_length,
+# has_region, playat, region_start, region_end, wav_length,
 # timeline_play_start, and timeline_play_end.
 # The result contains only values needed to configure the adjusted engine IO.
 sub timeline_adjustment {
 	my $args = shift;
 
-	my $has_region = (
-		defined $args->{region_start}
-		and defined $args->{region_end}
-		and ($args->{region_start} or $args->{region_end})
-	);
-
-	if (defined $args->{region_start} != defined $args->{region_end}) {
+	my $has_region = $args->{has_region};
+	if ($has_region and (
+		! defined $args->{region_start}
+		or ! defined $args->{region_end}
+	)) {
 		carp "$args->{trackname}: improperly defined region";
 		return
 	}

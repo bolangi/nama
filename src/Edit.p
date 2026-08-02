@@ -581,6 +581,7 @@ sub timeline_adjustment_args {
 	::throw("track is undefined"), return unless $track;
 	{
 	trackname      	=> $track->name,
+	has_region     	=> $track->is_region,
 	playat 			=> $track->timeline_position,
 	region_start   	=> $track->startpoint,
 	region_end 		=> $track->endpoint,
