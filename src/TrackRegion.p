@@ -78,7 +78,7 @@ sub adjusted_endpoint {
 sub region_is_out_of_bounds {
 	return unless $mode->{offset_run};
 	my $track = shift;
-	::edit_case(::timeline_adjustment_args($track)) =~ /out_of_bounds/
+	::window_overlap_case(::timeline_adjustment_args($track)) =~ /out_of_bounds/
 }
 
 }

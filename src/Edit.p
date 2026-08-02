@@ -530,7 +530,7 @@ sub edit_fades {
 					track => $this_edit->edit_name,
 	); 
 }
-### edit region computations
+### timeline window adjustment
 # pass $args hash with following fields:
 #
 ### track values
@@ -540,121 +540,91 @@ sub edit_fades {
 # region_end
 # wav_length
 #
-### edit values
+### window values
 # timeline_play_start
 # timeline_play_end
 #
-### dispatch tables
-# playat_dispatch
-# region_start_dispatch
-# region_end_dispatch
-#
 ### output values
-# 
-# new_playat
-# new_region_start
-# new_region_end
+# adjusted_timeline_position
+# adjusted_startpoint
+# adjusted_endpoint
+# window_overlap_case
 
-sub region_start_dispatch { 
-	my ($args, $key) = @_;
-	my %table = (
+sub timeline_adjustment {
+	my $args = shift;
 
-    out_of_bounds_near				=> "*",
-    out_of_bounds_far				=> "*",	
-
-	play_start_during_playat_delay	=> $args->{region_start},
-	no_region_play_start_during_playat_delay =>  0,
-
-	play_start_within_region 
-				=> $args->{region_start} + $args->{timeline_play_start} - $args->{playat},
-	no_region_play_start_after_playat_delay
-				=> $args->{region_start} + $args->{timeline_play_start} - $args->{playat},
+	my $has_region = (
+		defined $args->{region_start}
+		and defined $args->{region_end}
+		and ($args->{region_start} or $args->{region_end})
 	);
-	$table{$key}
-}
-sub playat_dispatch {
-	my ($args, $key) = @_;
-	my %table = (
-    out_of_bounds_near				=> "*",
-    out_of_bounds_far				=> "*",	
 
-	play_start_during_playat_delay	=> $args->{playat} - $args->{timeline_play_start},
-	no_region_play_start_during_playat_delay
-									=> $args->{playat} - $args->{timeline_play_start},
+	if (defined $args->{region_start} != defined $args->{region_end}) {
+		carp "$args->{trackname}: improperly defined region";
+		return
+	}
 
-	play_start_within_region   				=> 0,
-	no_region_play_start_after_playat_delay => 0,
-	);
-	$table{$key}
-}
-sub region_end_dispatch {
-	my ($args, $key) = @_;
-	my %table = (
-    out_of_bounds_near				=> "*",
-    out_of_bounds_far				=> "*",	
+	my $source_start = $has_region ? $args->{region_start} : 0;
+	my $source_end   = $has_region ? $args->{region_end} : $args->{wav_length};
+	my $track_start  = $args->{playat};
+	my $track_end    = $track_start + $source_end - $source_start;
+	my $window_start = $args->{timeline_play_start};
+	my $window_end   = $args->{timeline_play_end};
 
-	play_start_during_playat_delay	
-		=>  $args->{region_start} + $args->{timeline_play_end} - $args->{playat},
-	no_region_play_start_during_playat_delay 
-		=>                  $args->{timeline_play_end} - $args->{playat},
+	my $case;
+	if ($window_end <= $track_start) {
+		$case = 'out_of_bounds_near';
+	}
+	elsif ($window_start >= $track_end) {
+		$case = 'out_of_bounds_far';
+	}
+	elsif ($window_start >= $track_start) {
+		$case = $has_region
+			? 'play_start_within_region'
+			: 'no_region_play_start_after_playat_delay';
+	}
+	else {
+		$case = $has_region
+			? 'play_start_during_playat_delay'
+			: 'no_region_play_start_during_playat_delay';
+	}
 
-	play_start_within_region 
-		=>  $args->{region_start} + $args->{timeline_play_end} - $args->{playat},
-	no_region_play_start_after_playat_delay
-		=>                  $args->{timeline_play_end} - $args->{playat},
-	);
-	$table{$key}
+	return {
+		window_overlap_case => $case,
+		adjusted_timeline_position => '*',
+		adjusted_startpoint => '*',
+		adjusted_endpoint => '*',
+	} if $case =~ /out_of_bounds/;
+
+	my $intersection_start = $window_start > $track_start
+		? $window_start : $track_start;
+	my $requested_endpoint = $source_start + $window_end - $track_start;
+	my $adjusted_endpoint = $requested_endpoint < $args->{wav_length}
+		? $requested_endpoint : $args->{wav_length};
+
+	{
+		window_overlap_case => $case,
+		adjusted_timeline_position => $intersection_start - $window_start,
+		adjusted_startpoint => $source_start + $intersection_start - $track_start,
+		# The active window may intentionally extend past the nominal
+		# region to leave processing time for effect tails.
+		adjusted_endpoint => $adjusted_endpoint,
+	}
 }
 sub new_playat {
 	my $args = shift;
-	playat_dispatch($args, edit_case($args));
+	timeline_adjustment($args)->{adjusted_timeline_position}
 }
 sub new_region_start { 
 	my $args = shift;
-	region_start_dispatch($args, edit_case($args));
+	timeline_adjustment($args)->{adjusted_startpoint}
 }
 sub new_region_end {   
 	my $args = shift;
-	my $end = region_end_dispatch($args, edit_case($args));
-	return $end if $end eq '*';
-	$end < $args->{wav_length} ? $end : $args->{wav_length}
+	timeline_adjustment($args)->{adjusted_endpoint}
 };
-# the following value will always allow enough time
-# to record the edit. it may be longer than the 
-# actual WAV file in some cases. (I doubt that
-# will be a problem.)
-
-sub edit_case {
-	my $args = shift;
-
-	# logic for no-region case
-	
-    if ( ! $args->{region_start} and ! $args->{region_end}  )
-	{
-		if( $args->{timeline_play_end} < $args->{playat})
-			{ "out_of_bounds_near" }
-		elsif( $args->{timeline_play_start} > $args->{playat} + $args->{wav_length})
-			{ "out_of_bounds_far" }
-		elsif( $args->{timeline_play_start} >= $args->{playat})
-			{"no_region_play_start_after_playat_delay"}
-		elsif( $args->{timeline_play_start} < $args->{playat} and $args->{timeline_play_end} > $args->{playat} )
-			{ "no_region_play_start_during_playat_delay"}
-	} 
-	# logic for region present case
-	
-	elsif ( defined $args->{region_start} and defined $args->{region_end} )
-	{ 
-		if ( $args->{timeline_play_end} < $args->{playat})
-			{ "out_of_bounds_near" }
-		elsif ( $args->{timeline_play_start} > $args->{playat} + $args->{region_end} - $args->{region_start})
-			{ "out_of_bounds_far" }
-		elsif ( $args->{timeline_play_start} >= $args->{playat})
-			{ "play_start_within_region"}
-		elsif ( $args->{timeline_play_start} < $args->{playat} and $args->{playat} < $args->{timeline_play_end})
-			{ "play_start_during_playat_delay"}
-		else {carp "$args->{trackname}: fell through if-then"}
-	}
-	else { carp "$args->{trackname}: improperly defined region" }
+sub window_overlap_case {
+	timeline_adjustment(shift)->{window_overlap_case}
 }
 
 sub timeline_play_start_position {
