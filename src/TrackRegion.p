@@ -71,23 +71,28 @@ sub adjusted_timeline_endpoint {
 
 sub timeline_adjustment {
 	my $track = shift;
-	::timeline_adjustment(::timeline_adjustment_args($track))
+	return ::timeline_adjustment(::timeline_adjustment_args($track))
+		if ::timeline_adjustment_active();
+
+	::TimelineAdjustmentResult->new(
+		window_overlap_case => 'unadjusted',
+		adjusted_timeline_position => $track->timeline_position,
+		adjusted_startpoint => $track->startpoint,
+		adjusted_endpoint => $track->endpoint,
+	)
 }
 
 sub adjusted_startpoint {
 	my $track = shift;
-	return $track->startpoint unless ::timeline_adjustment_active();
 	$track->timeline_adjustment->adjusted_startpoint
 	
 }
 sub adjusted_timeline_position {
 	my $track = shift;
-	return $track->timeline_position unless ::timeline_adjustment_active();
 	$track->timeline_adjustment->adjusted_timeline_position
 }
 sub adjusted_endpoint {
 	my $track = shift;
-	return $track->endpoint unless ::timeline_adjustment_active();
 	$track->timeline_adjustment->adjusted_endpoint
 }
 
