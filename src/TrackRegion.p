@@ -4,6 +4,7 @@ use Role::Tiny;
 use v5.36;
 our $VERSION = 1.0;
 use ::Globals qw(:all);
+use ::TimelineAdjustment ();
 use Carp;
 
 # these behaviors are associated with WAV playback

@@ -12,12 +12,15 @@ t/04_object.t
 t/06_latency.t
 t/11_mark.t
 t/12_nama.t
+t/13_fade_envelope.t
+t/14_timeline_adjustment.t
 t/data/fake_effects_cache.json
 lib/Audio/Nama.pm
 lib/Audio/Nama/Globals.pm
 lib/Audio/Nama/EcasoundRun.pm
 lib/Audio/Nama/Modes.pm
 lib/Audio/Nama/Fade.pm
+lib/Audio/Nama/FadeEnvelope.pm
 lib/Audio/Nama/MuteSoloFade.pm
 lib/Audio/Nama/EcasoundSetup.pm
 lib/Audio/Nama/Lat.pm
@@ -46,6 +49,7 @@ lib/Audio/Nama/Help.pm
 lib/Audio/Nama/Project.pm
 lib/Audio/Nama/Waveform.pm
 lib/Audio/Nama/TrackRegion.pm
+lib/Audio/Nama/TimelineAdjustment.pm
 lib/Audio/Nama/Config.pm
 lib/Audio/Nama/TrackEffect.pm
 lib/Audio/Nama/Graph.pm

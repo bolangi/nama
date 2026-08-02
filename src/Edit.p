@@ -247,6 +247,7 @@ sub edit_track 		{ $::tn{$_[0]->edit_name} }             # in version_bus
 {
 package ::;
 use v5.36; use Carp;
+use ::TimelineAdjustment qw(timeline_adjustment);
 no warnings 'uninitialized';
 
 our (
@@ -540,103 +541,6 @@ sub edit_fades {
 					track => $this_edit->edit_name,
 	); 
 }
-### timeline window adjustment
-# pass $args hash with following fields:
-#
-### track values
-# trackname
-# playat
-# region_start
-# region_end
-# wav_length
-#
-### window values
-# timeline_play_start
-# timeline_play_end
-#
-### output values
-# adjusted_timeline_position
-# adjusted_startpoint
-# adjusted_endpoint
-# window_overlap_case
-
-{
-package ::TimelineAdjustmentResult;
-
-sub new {
-	my ($class, %args) = @_;
-	bless \%args, $class
-}
-sub window_overlap_case        { $_[0]->{window_overlap_case} }
-sub adjusted_timeline_position { $_[0]->{adjusted_timeline_position} }
-sub adjusted_startpoint        { $_[0]->{adjusted_startpoint} }
-sub adjusted_endpoint          { $_[0]->{adjusted_endpoint} }
-sub is_playable                { $_[0]->window_overlap_case !~ /out_of_bounds/ }
-
-}
-
-sub timeline_adjustment {
-	my $args = shift;
-
-	my $has_region = (
-		defined $args->{region_start}
-		and defined $args->{region_end}
-		and ($args->{region_start} or $args->{region_end})
-	);
-
-	if (defined $args->{region_start} != defined $args->{region_end}) {
-		carp "$args->{trackname}: improperly defined region";
-		return
-	}
-
-	my $source_start = $has_region ? $args->{region_start} : 0;
-	my $source_end   = $has_region ? $args->{region_end} : $args->{wav_length};
-	my $track_start  = $args->{playat};
-	my $track_end    = $track_start + $source_end - $source_start;
-	my $window_start = $args->{timeline_play_start};
-	my $window_end   = $args->{timeline_play_end};
-
-	my $case;
-	if ($window_end <= $track_start) {
-		$case = 'out_of_bounds_near';
-	}
-	elsif ($window_start >= $track_end) {
-		$case = 'out_of_bounds_far';
-	}
-	elsif ($window_start >= $track_start) {
-		$case = $has_region
-			? 'play_start_within_region'
-			: 'no_region_play_start_after_playat_delay';
-	}
-	else {
-		$case = $has_region
-			? 'play_start_during_playat_delay'
-			: 'no_region_play_start_during_playat_delay';
-	}
-
-	return ::TimelineAdjustmentResult->new(
-		window_overlap_case => $case,
-		adjusted_timeline_position => '*',
-		adjusted_startpoint => '*',
-		adjusted_endpoint => '*',
-	) if $case =~ /out_of_bounds/;
-
-	my $intersection_start = $window_start > $track_start
-		? $window_start : $track_start;
-	my $requested_endpoint = $source_start + $window_end - $track_start;
-	my $adjusted_endpoint = $requested_endpoint < $args->{wav_length}
-		? $requested_endpoint : $args->{wav_length};
-
-	::TimelineAdjustmentResult->new(
-		window_overlap_case => $case,
-		adjusted_timeline_position => $intersection_start - $window_start,
-		adjusted_startpoint => $source_start + $intersection_start - $track_start,
-		# The active window may intentionally extend past the nominal
-		# region to leave processing time for effect tails.
-		adjusted_endpoint => $adjusted_endpoint,
-	)
-}
-
 sub timeline_play_start_position {
 	return unless timeline_adjustment_active();
 	$setup->{timeline_adjustment}->{timeline_play_start}
