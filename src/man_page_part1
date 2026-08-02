@@ -37,10 +37,9 @@ time-shifted or replaced.
 Audio processing is performed in realtime when a track is
 played and may be cached (frozen) to a new audio file.
 
-Project data is serialized as JSON. The complete history
-is tracked by the git version control system.  As a result,
-projects can be managed using branches and tags, and provide
-undo/redo.
+Project data is serialized as JSON. With git available,
+changes are committed to a project repository. Projects can then
+be managed using branches and tags, with undo and redo support.
 
 Nama supports some MIDI functionality via midish. 
 
@@ -56,12 +55,10 @@ duplicating an entire project sans audio files.
 Nama performs Audio IO via JACK or ALSA. Soundcard IO goes
 via JACK, if running, with transparent fallback to ALSA.
 
-Nama supports Ladish Level 1 session handling.
-
 =head2 User interfaces
 
 Nama has fully featured terminal command prompt, a Tk
-GUI, and experimental OSC and remote-command modes.
+GUI, and a remote-command mode.
  
 The command prompt can run Nama commands, Ecasound
 interactive-mode commands, commands for the midish MIDI
@@ -79,11 +76,32 @@ plugins.
 
 =item B<--gui, -g>
 
-Start Nama in GUI mode (default when Tk is available)
+Start Nama with a GUI and full terminal UI. Without this
+option Nama starts in terminal mode.
 
-=item B<--text, -t>
+=item B<--create-project, -c>
 
-Start Nama in text mode
+Create project if it doesn't exist
+
+=item B<--help, -h>
+
+This help display
+
+=back
+
+Advanced and Debugging options:
+
+=item B<--regenerate-effects-cache, -r>
+
+Regenerate the effects data cache
+
+=item B<--log, -L>
+
+Log these (comma separated) categories
+
+=item B<--sample-rate, -z>
+
+Set the project sample rate
 
 =item B<--config, -f>
 
@@ -97,10 +115,6 @@ Specify project root directory
 
 Use current dir for all WAV and project files
 
-=item B<--create-project, -c>
-
-Create project if it doesn't exist
-
 =item B<--net-eci, -n>
 
 Use Ecasound's Net-ECI interface
@@ -112,20 +126,6 @@ Use Ecasound's libecasoundc interface
 =item B<--save-alsa, -a>
 
 Save/restore alsa state with project data
-
-=item B<--help, -h>
-
-This help display
-
-=item B<--regenerate-effects-cache, -r>
-
-Regenerate the effects data cache
-
-=back
-
-Debugging options:
-
-=over 12
 
 =item B<--no-state, -M>
 
@@ -151,9 +151,9 @@ Simulate JACK environment
 
 Simulate ALSA environment
 
-=item B<--no-ecasound, -E>
+=item B<--fake-ecasound, -E>
 
-Don't spawn Ecasound process
+Use a dummy engine instead of spawning Ecasound
 
 =item B<--execute-command, -X>
 
@@ -163,16 +163,11 @@ Supply a command to execute
 
 Don't initialize terminal
 
-=item B<--no-fades, -F>
+=item B<--no-fade-on-transport-start, -F>
 
 No fades on transport start/stop
 
-=item B<--log, -L>
-
-Log these (comma separated) categories
-
 =back
-
 
 =head1 CONTROLLING NAMA/ECASOUND
 
@@ -192,8 +187,8 @@ whether the current track will get its audio stream from an
 external (e.g. live) source, whether an existing audio file
 will be played back, and whether a new audio file will be
 recorded. Nama responds to these commands by reconfiguring
-the engine and displaying the updated track status. See 'man
-::ChainSetup' for details on how the chain setup created.
+the engine and displaying the updated track status. See C<why>
+for the routing decision for the current track.
 
 =head2 Realtime Commands
 
@@ -216,11 +211,10 @@ F<.namarc> is placed in the user's home directory.
 
 =head2 Tk graphical interface
 
-Invoked by default if Tk is installed, this interface
-provides a subset of Nama's functionality on two
-windows: 
+Invoked with C<--gui> or C<-g> if Tk is installed, this interface
+provides a subset of Nama's functionality.
 
-=head2 Main Window
+=head3 Main window
 
 The top section has buttons for creating, loading and saving
 projects, adding tracks, adding effects to tracks. In
@@ -233,7 +227,7 @@ The GUI project name bar and time display change color to
 indicate whether the upcoming operation will include live
 recording (red), mixdown (yellow) or playback (green).
 
-=head2 Effects Window
+=head3 Effects window
 
 The B<effects window> provides sliders for each effect
 parameter of each track. Parameter range, defaults, and log/linear
@@ -242,13 +236,13 @@ are used to enter parameters values for plugins without
 hinted ranges. Any parameter label can be clicked to 
 add a parameter controller.
 
-=head2 Waveform Window
+=head3 Waveform window
 
 Provides a conventional view with waveform and playback head.
 
-=head2 Terminal Window 
+=head3 Terminal window
 
-The command prompt is available the terminal window
+The command prompt is available in the terminal window
 and provides access to all of Nama's functions.
 
 =head2 Text interface
@@ -304,7 +298,7 @@ New user tracks initially belong to the Main bus.
 Track output signals are usually mixed and pass through the
 Main track on the way to soundcard for monitoring.
 
-The following sections describes track attributes and
+The following sections describe track attributes and
 their effects.
 
 =head2 Width
@@ -318,10 +312,6 @@ audio input will be recorded as an interleaved stereo WAV
 file.  You can also use a 'stereo' declaration to avoid the
 automatic channel copy usually applied to single-channel
 sources.
-
-Specifying N channels for a track ('set width N') means N
-successive input channels will be recorded as an N-channel
-interleaved WAV file.
 
 =head2 REC/PLAY/MON/OFF
 
@@ -337,9 +327,9 @@ The I<PLAY> setting enqueues an audio file for playback from
 disk as the track source.
  
 The I<OFF> setting tells Nama to remove the track from the
-audio network. I<OFF> status may result for a track when no
-audio source is available. For example, a track with no
-recorded audio files will show OFF status when set to PLAY.
+audio network. A requested setting can resolve to an effective
+I<OFF> when no viable route is available. For example, a track
+set to PLAY cannot participate if no WAV file is available.
 
 =head2 Track output
 
@@ -349,10 +339,8 @@ signal goes via ALSA or JACK to the audio device.
 
 =head2 Bus setting
 
-Buses can force the status of their member tracks to OFF.
-Nama provides MON and OFF settings for buses.
-OFF (set by C<bus-off>) removes all member tracks from the chain
-setup, MON (set by C<bus-mon> restores them.
+C<bus-off> saves the settings of the current bus's member tracks
+and sets those tracks to OFF. C<bus-on> restores the saved settings.
 
 The B<mixplay> command sets the Mixdown track to PLAY and the
 Main bus to OFF.
@@ -401,7 +389,7 @@ multiple regions, the C<new-region> command takes a pair of
 marks to create a read-only copy of the current track with
 the specified region definition. 
 
-You can control this region as you would any other other
+You can control this region as you would any other
 track, shifting the start time, applying effects, adjusting volume, etc.
 
 =head3 Using Tracks from Other Projects
@@ -412,13 +400,13 @@ another track, which may belong to a different project.
 =head2 Effects
 
 Each track gets volume and pan effects by default.  New
-effects added using C<add-effect> are applied before pan
-volume controls.  You can position effects anywhere you
-choose using C<insert_effect> or C<position-effect>.
+effects added using C<add-effect> are applied before pan and
+volume controls. You can position effects anywhere you
+choose using C<insert-effect> or C<position-effect>.
 
 =head3 Fades
 
-Fades can be placed on any track. They
+Fades can be placed on any track. They are
 defined by mark position and duration. An additional volume
 operator, -eadb, is applied to each track to host the
 envelope controller that implements fades.
@@ -551,21 +539,19 @@ in the configuration file F<.namarc>.
 =head2 Mixdown
 
 The C<mixdown> command configures Nama for mixdown. The
-Mixdown track is set to REC (equivalent to C<Mixdown rec>)
-and the audio monitoring output is turned off (equivalent to
-C<Main off>).
+Mixdown track is set to REC and the Main track is set to MON.
 
 Mixdown proceeds after you start the transport.
 
 As a convenience, Mixdown_nn.wav will be symlinked to
 F<<project-name>_nn.wav> or F<<branch_name>_nn.wav> in the
-project directory. The latter format is used branches other
-than the default F<master> branch.) Corresponding encoded
+project directory. The latter format is used on branches other
+than the default F<master> branch. Corresponding encoded
 files are created if the F<mixdown_encodings> option is set
 in F<.namarc>.  Acceptable values are a space-separated
 list. The default is "mixdown_encodings: ogg mp3".
 
-=head2 Preview, Doodle and Eager Modes
+=head2 Preview and Doodle Modes
 
 These non-recording modes, invoked by C<preview> and
 C<doodle> commands tweak the routing rules for special
@@ -575,14 +561,11 @@ excluding any tracks with the same source as a currently
 routed track. The C<arm> command releases both preview and
 doodle modes.
 
-The eager setting causes the engine to start immediately
-following a reconfiguration.
-
 =head2 Saving Projects
 
-If git is available, projects are saved automatically after
-each command and it is not necessary to explicitly save
-your work.
+Project state is saved automatically when a configuration change
+causes the engine to be reconfigured. When Git support is enabled,
+changed state is also committed to the project repository.
 
 When you type C<save>, Settings related to the state of the
 project are saved in the file F<State.json> in the 
@@ -608,8 +591,8 @@ corresponding file. The F<.json> suffix may be omitted if
 
 =head3 Save with Git
 
-If git is available, Nama uses it to store snapshots of
-every step in the history of your project.
+When Git support is enabled, Nama stores snapshots of saved
+state changes in the history of your project.
 
 When you type C<save initial-mix>, the latest snapshot is
 tagged with the name "initial-mix", which you can recall
@@ -633,9 +616,10 @@ You can also issue native git commands at the Nama prompt.
 
 =head3 Git history example
 
-All projects begin on the "master" branch. Because this is
-the default branch, it is not displayed in the prompt.
-Otherwise "master" is not special in any way.
+The following example assumes that Git created a branch named
+"master". The initial branch name follows the local Git
+configuration. Nama omits "master" from the prompt; other branch
+names are displayed.
 
 In the graphs below, the letters indicate
 named snapshots.
@@ -693,9 +677,9 @@ Merging of branches is not supported.
 
 =head2 Exiting
 
-When you type C<quit> Nama will automatically save your work
-to F<State.json>. If you I<don't> want this behavior, use
-Ctrl-C to exit Nama.
+The C<quit> command shuts down Nama and its engines. Project changes
+normally have already been saved during automatic reconfiguration;
+C<quit> itself does not perform an additional save.
 
 =head2 Jack ports list file
 
@@ -760,11 +744,10 @@ and I<set-rec-end-mark> commands.
 Enter the I<new-edit> command to create the necessary 
 tracks and data structures.
 
-Use I<preview-edit> to confirm the edit positions.  The
-engine will run and you will hear the host track with the
-target region removed. Playback will be restricted to the
-edit region. You may use I<preview_out> to hear the clip to
-be removed.
+Use I<preview-edit-in> to configure playback of the host track with
+the target region removed. Use I<preview-edit-out> to configure
+playback of the clip to be replaced. Start the transport to hear
+either preview.
 
 Use I<list-marks> to see the edit marks and I<modify-mark> 
 to nudge them into perfect position.
@@ -772,13 +755,11 @@ to nudge them into perfect position.
 Once you are satisfied with the mark positions, you are
 ready to record your edit.
 
-Enter I<start-edit>. Playback will begin at first mark. The
-replacement clip will be recorded from the source specified
-in the original track.
+Enter I<record-edit>, then start the transport. Playback begins at
+the first mark, and the replacement clip is recorded from the
+source specified in the original track.
 
-Each I<start-edit> command will record an additional version
-on the edit track. I<redo-edit> will delete (destructively)
-the most recent audio clip and begin recording anew.
+Each recording run creates an additional version on the edit track.
 
 I<destroy-edit> deletes (destructively) the current edit.
 

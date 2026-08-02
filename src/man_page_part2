@@ -35,21 +35,14 @@ will additionally store all engine data, effects as
 well as routing.)
 
 The C<dump> command displays data for the current track.
-The C<dumpall> command shows all state that would be saved.
+The C<dumpa> command shows most internal state data.
 
-This is the same output that is written to the F<State.yml>
-file when you issue the C<save> command.
+Saved project state is written as JSON to F<State.json>.
 
 =head1 BUGS AND LIMITATIONS
 
-No latency compensation across signal paths is provided at
-present. This feature is under development.
-
-=head1 SECURITY CONCERNS
-
-If you are using Nama with the NetECI interface (i.e. if
-Audio::Ecasound is I<not> installed) you should block TCP
-port 2868 if your computer is exposed to the Internet. 
+There is no limitation on numbers of buses, tracks or
+effects. 
 
 =head1 INSTALLATION
 
@@ -72,7 +65,7 @@ C<cpanm Audio::Ecasound>
 
 You can pull the source code as follows: 
 
-C<git clone git://github.com/bolangi/nama.git>
+C<git clone https://gitlab.com/bolangi/nama.git>
 
 Consult the F<BUILD> file for build instructions.
 

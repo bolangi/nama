@@ -34,7 +34,7 @@ find_effect:
     ! (for example a delay with a feedback parameter)
 exit:
   type: general
-  what: Exit Nama, saving settings (the current project).
+  what: Exit Nama and shut down its engines.
   short: quit q
   parameters: none
 memoize:
@@ -163,9 +163,8 @@ mixdown:
 mixplay:
   type: mix
   what: |
-    Enter Mixdown play mode, setting user tracks to OFF 
-    and only playing the Mixdown track. Use "mixoff" to
-    leave this mode.
+    Enter Mixdown play mode by setting the Mixdown track to PLAY
+    and the Main track to OFF. Use "mixoff" to leave this mode.
   short: mxp
   parameters: none
   example: |
@@ -176,8 +175,8 @@ mixplay:
 mixoff:
   type: mix
   what: |
-    Leave the mixdown or mixplay mode. Sets Mixdown track to OFF, 
-    user tracks to MON.
+    Leave mixdown or mixplay mode. Set the Mixdown track to OFF
+    and the Main track to MON.
   short: mxo
   parameters: none
 automix:
@@ -1315,22 +1314,22 @@ destroy_edit:
   parameters: [ <integer:edit_index> ]
 preview_edit_in:
   type: edit
-  what: Play the track region without the edit segment.
+  what: Configure playback of the track region without the edit segment.
   short: pei
   parameters: none
 preview_edit_out:
   type: edit
-  what: Play the removed edit segment.
+  what: Configure playback of the segment to be replaced.
   short: peo
   parameters: none
 play_edit:
   type: edit
-  what: Play a completed edit.
+  what: Configure playback of a completed edit.
   short: ped
   parameters: none
 record_edit:
   type: edit
-  what: Record an audio file for the current edit.
+  what: Configure the current edit to record on the next transport run.
   short: red
   parameters: none
 edit_track:
@@ -1576,12 +1575,10 @@ compose:
     for speaker1 and speaker2.
 undo:
   type: general
-  what: |
-    roll back last commit (use "git log" to see specific commands)
-    Note: redo is not supported yet
+  what: Roll back the last commit (use "git log" to see specific commands).
 redo: 
   type: general
-  what: restore the last undone commit (TODO)
+  what: Restore the commit most recently removed by undo.
 show_head_commit:
   type: general
   short: show_head last_command last
