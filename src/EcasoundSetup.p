@@ -144,7 +144,9 @@ sub connect_transport {
 	register_own_ports();
 	$ui->length_display(-text => colonize($setup->{audio_length}));
 	ecasound_iam("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->effective_rec and $setup->{audio_length};
-	$ui->clock_config(-text => colonize(0));
+	$ui->clock_config(
+		-text => colonize(int(timeline_position_from_adjusted_time(0)))
+	);
 	sleeper(0.2); # time for ecasound engine to launch
 
 	# set delay for seeking under JACK

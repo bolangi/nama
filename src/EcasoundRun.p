@@ -112,9 +112,12 @@ sub engine_status {
 	my ($pos, $before_newlines, $after_newlines) = @_;
 	pager("\n" x $before_newlines, engine_is($pos), "\n" x $after_newlines);
 }
-sub current_position { 
-	my $pos = $this_engine->ecasound_iam("getpos"); 
-	colonize(int($pos || 0)) 
+sub current_timeline_position {
+	my $adjusted_time = $this_engine->ecasound_iam("getpos") // 0;
+	timeline_position_from_adjusted_time($adjusted_time)
+}
+sub current_position {
+	colonize(int(current_timeline_position()))
 }
 sub start_heartbeat {
  	start_event(poll_engine => timer(0, 1, \&::heartbeat));

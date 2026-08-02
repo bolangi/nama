@@ -298,7 +298,9 @@ sub abort_set_edit_points {
 sub get_edit_mark {
 	$p++;
 	if($p <= 3){  # record mark
-		my $pos = ecasound_iam('getpos');
+		my $pos = timeline_position_from_adjusted_time(
+			ecasound_iam('getpos')
+		);
 		push @_edit_points, $pos;
 		::pager(" got $names[$p] position ".d1($pos));
 		reset_input_line();

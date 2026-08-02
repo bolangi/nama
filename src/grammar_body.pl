@@ -324,9 +324,9 @@ get_state: _get_state save_target {
 # get_state: _get_state {
 #  	::load_project( name => $::project->{name},) ; 1}
 getpos: _getpos {  
-	::pager( ::d1( ::ecasound_iam('getpos'))); 1}
+	::pager( ::d1( ::current_timeline_position())); 1}
 setpos: _setpos timevalue {
-	::set_position($item{timevalue}); 1}
+	::set_timeline_position($item{timevalue}); 1}
 forward: _forward timevalue {
 	::forward( $item{timevalue} ); 1}
 rewind: _rewind timevalue {
@@ -711,7 +711,7 @@ list_marks: _list_marks {
 						$pre . join " ", $i++, sprintf("%.1f", $_->{time}), $_->name, "\n"
 		} @::Mark::all;
 	my $start = my $end = "undefined";
-	push @lines, "now at ". sprintf("%.1f\n", ::ecasound_iam("getpos"));
+	push @lines, "now at ". sprintf("%.1f\n", ::current_timeline_position());
 	::pager(@lines);
 	1;}
 to_mark: _to_mark dd {
@@ -1463,11 +1463,11 @@ rec_end_mark: _rec_end_mark {
 	$::this_edit->rec_end_mark->jump_here; 1;
 }
 set_play_start_mark: _set_play_start_mark {
-	$::setup->{edit_points}->[0] = ::ecasound_iam('getpos'); 1}
+	$::setup->{edit_points}->[0] = ::current_timeline_position(); 1}
 set_rec_start_mark: _set_rec_start_mark {
-	$::setup->{edit_points}->[1] = ::ecasound_iam('getpos'); 1}
+	$::setup->{edit_points}->[1] = ::current_timeline_position(); 1}
 set_rec_end_mark: _set_rec_end_mark {
-	$::setup->{edit_points}->[2] = ::ecasound_iam('getpos'); 1}
+	$::setup->{edit_points}->[2] = ::current_timeline_position(); 1}
 end_edit_mode: _end_edit_mode { ::end_edit_mode(); 1;}
 
 disable_edits: _disable_edits { ::disable_edits();1 }

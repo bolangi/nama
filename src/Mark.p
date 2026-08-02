@@ -309,6 +309,13 @@ sub set_position {
 	update_clock_display();
 }
 
+sub set_timeline_position {
+	my $timeline_position = shift;
+	set_position(
+		adjusted_playback_position_from_timeline_position($timeline_position)
+	)
+}
+
 # used by hotkeys
 
 #sub previous_mark {}

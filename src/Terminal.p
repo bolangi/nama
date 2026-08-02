@@ -662,7 +662,7 @@ sub param_status_bar {
 }
 sub jump_status_bar {
 	return unless $this_track; 
-	my $pos = ::ecasound_iam("getpos") // 0;
+	my $pos = ::current_timeline_position();
 	my $bar = "playback at ${pos}s, ";
 	if (defined $this_mark) {
 		my $mark = join ' ', 'Current mark:', $this_mark->name, 'at', $this_mark->time;
