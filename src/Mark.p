@@ -13,6 +13,7 @@ use ::Object qw(
 				 name 
                  time
 				 type
+				 tags
 				 );
 
 sub initialize {
@@ -166,6 +167,12 @@ sub drop_mark {
 	my $name = $arg{name};
 	my $here = $arg{time} // ecasound_iam("getpos");
 	my $type = $arg{type};
+	my $tags = {};
+	if ( defined $arg{tags} )
+	{
+		my @tags = (ref $arg{tags}) ? $arg{tags}->@* : $arg{tags};
+		$tags->{$_}++ for $arg{tags}->@* 
+	}
 
 	if( my $mark = $::Mark::by_name{$name}){
 		pager("$name: a mark with this name exists already at: ", 
@@ -179,7 +186,8 @@ sub drop_mark {
 
 	my $mark = ::Mark->new( time => $here, 
 							name => $name,
-							type => $type);
+							type => $type,
+							tags => $tags);
 
 	$ui->marker($mark); # for GUI
 }
