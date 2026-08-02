@@ -21,9 +21,9 @@ my @track_methods = qw(
 	playback_version 
 	maybe_playback
 	candidate_rw
-	region_start_time 
-	region_end_time 
-	playat_time 
+	startpoint
+	endpoint
+	timeline_position
 	user_ops 
 	input_path 
 	waveform

@@ -9,8 +9,8 @@ sub waveform {
 	my $self = shift;
 	::Waveform->new( 	project => $self->project, 
 						wav     => $self->current_wav,
-						start   => $self->region_start_time,
-						end     => $self->region_end_time,
+						start   => $self->startpoint,
+						end     => $self->endpoint,
 						track	=> $self,
 	);
 }

@@ -10,14 +10,14 @@ use Carp;
 
 sub is_region { defined $_[0]->{region_start} }
 
-sub region_start_time {
+sub startpoint {
 	my $track = shift;
 	return unless $track->is_region;
 	#return if $track->rec_status ne PLAY;
 	#carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
 	::Mark::time_from_tag( $track->region_start )
 }
-sub region_end_time {
+sub endpoint {
 	my $track = shift;
 	return unless $track->is_region;
 	#return if $track->rec_status ne PLAY;
@@ -29,7 +29,7 @@ sub region_end_time {
 		::Mark::time_from_tag( $track->region_end )
 	}
 }
-sub playat_time {
+sub timeline_position {
 	my $track = shift;
 	#carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
 	#return if $track->rec_status ne PLAY;
@@ -39,33 +39,39 @@ sub playat_time {
 # the following methods adjust
 # region start and playat values during edit mode
 
-sub shifted_length {
+sub adjusted_duration {
 	my $track = shift;
-	my $setup_length;
+	my $duration;
 	if ($track->region_start){
-		$setup_length = 	$track->shifted_region_end_time
-				  - $track->shifted_region_start_time
+		$duration = 	$track->adjusted_endpoint
+			  - $track->adjusted_startpoint
 	} else {
-		$setup_length = 	$track->wav_length;
+		$duration = 	$track->wav_length;
 	}
-	no warnings 'uninitialized';
-	$setup_length += $track->shifted_playat_time;
+	$duration
 }
 
-sub shifted_region_start_time {
+sub adjusted_timeline_endpoint {
 	my $track = shift;
-	return $track->region_start_time unless $mode->{offset_run};
+	my $setup_length = $track->adjusted_duration;
+	no warnings 'uninitialized';
+	$setup_length += $track->adjusted_timeline_position;
+}
+
+sub adjusted_startpoint {
+	my $track = shift;
+	return $track->startpoint unless $mode->{offset_run};
 	::new_region_start(::edit_vars($track));
 	
 }
-sub shifted_playat_time { 
+sub adjusted_timeline_position {
 	my $track = shift;
-	return $track->playat_time unless $mode->{offset_run};
+	return $track->timeline_position unless $mode->{offset_run};
 	::new_playat(::edit_vars($track));
 }
-sub shifted_region_end_time {
+sub adjusted_endpoint {
 	my $track = shift;
-	return $track->region_end_time unless $mode->{offset_run};
+	return $track->endpoint unless $mode->{offset_run};
 	::new_region_end(::edit_vars($track));
 }
 

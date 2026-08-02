@@ -141,7 +141,7 @@ sub fades {
 #   (otherwise 100%)
 
 # although we can get the precise start and endpoints,
-# I'm using 0 and $track->shifted_playat_time + track length
+# I'm using 0 and $track->adjusted_timeline_position + track length
 
 sub initial_level {
 	# return 0, 1 or undef
@@ -171,7 +171,7 @@ sub final_pair {   # duration: .... to length
 	defined $exit_level or return ();
 	my $track = $tn{$track_name};
 	(
-		$track->shifted_playat_time + $track->wav_length,
+		$track->adjusted_timeline_position + $track->wav_length,
 		$exit_level
 	);
 }
@@ -339,4 +339,3 @@ sub setup_fades {
 	
 
 1;
-

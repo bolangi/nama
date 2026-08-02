@@ -673,9 +673,9 @@ sub edit_vars {
 	my $track = $::tn{$edit}->{host_track};
 	{
 	trackname      	=> $track->name,
-	playat 			=> $track->playat_time,
-	region_start   	=> $track->region_start_time,
-	region_end 		=> $track->region_end_time,
+	playat 			=> $track->timeline_position,
+	region_start   	=> $track->startpoint,
+	region_end 		=> $track->endpoint,
 	edit_play_start => $edit->play_start_time(),
 	edit_play_end	=> $edit->play_end_time(),
 	setup_length 	=> $track->wav_length(),
@@ -827,12 +827,12 @@ sub merge_edits {
 }
 # offset recording
 
-# Note that although we use ->shifted_* methods, all are
+# Note that although we use ->adjusted_* methods, all are
 # executed outside of edit mode, so we get unadjusted values.
 
 sub setup_length {
 	my $setup_length;
-	map{  my $l = $_->shifted_length; $setup_length = $l if $l > $setup_length }
+	map{  my $l = $_->adjusted_timeline_endpoint; $setup_length = $l if $l > $setup_length }
 	grep{ $_-> play }
 	::ChainSetup::engine_tracks();
 	$setup_length

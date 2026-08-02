@@ -415,8 +415,8 @@ sub current_version {
 	elsif ( $status eq PLAY){ return $track->playback_version } 
 	else { return 0 }
 }
-sub playat_time {
-	logpkg('logcluck',$_[0]->name . "->playat_time");
+sub timeline_position {
+	logpkg('logcluck',$_[0]->name . "->timeline_position");
 	$_[0]->play_start_time
 }
 }
@@ -466,17 +466,17 @@ sub duration {
 	$self->{duration} 
 		? ::Mark::duration_from_tag($self->{duration})
 		: $self->is_region 
-			? $self->region_end_time - $self->region_start_time 
+			? $self->endpoint - $self->startpoint
 			: $self->wav_length;
 }
-sub endpoint { 
+sub timeline_endpoint {
 	my $self = shift;
-	$self->duration + ( $self->predecessor ?  $self->predecessor->endpoint : 0 )
+	$self->duration + ( $self->predecessor ?  $self->predecessor->timeline_endpoint : 0 )
 }
-sub playat_time {
+sub timeline_position {
 	my $self = shift;
 	my $previous = $self->predecessor;
-	$previous ? $previous->endpoint : 0
+	$previous ? $previous->timeline_endpoint : 0
 }
 sub candidate_rw { $_[0]->version ? PLAY : OFF }
 

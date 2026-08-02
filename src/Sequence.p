@@ -74,7 +74,7 @@ sub list_output {
 				++$i, 
 				$::tn{$_}->n,
 				$_,
-				sprintf("%.3f %.3f", $::tn{$_}->duration, $::tn{$_}->endpoint),
+				sprintf("%.3f %.3f", $::tn{$_}->duration, $::tn{$_}->timeline_endpoint),
 		} @{$self->items}
 }
 sub remove {
