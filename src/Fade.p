@@ -1,7 +1,7 @@
 # ----------- Fade ------------
 package ::Fade;
 use v5.36;
-use List::Util qw(min);
+use List::Util qw(min max);
 our $VERSION = 1.0;
 use Carp;
 use warnings;
@@ -11,6 +11,7 @@ our($n, %by_index);
 use ::Globals qw(:singletons %tn @fade_data); 
 use ::Log qw(logsub logpkg);
 use ::Effect  qw(remove_effect add_effect update_effect);
+use ::FadeEnvelope qw(clip_envelope_to_window);
 # we don't import 'type' as it would clobber our $fade->type attribute
 use ::Object qw( 
 				 n
@@ -105,6 +106,38 @@ sub all_fades {
 		$::Mark::by_name{$a->mark1}->{time} <=> $::Mark::by_name{$b->mark1}->{time}
 	} grep { $_->track eq $track_name } values %by_index
 }
+
+sub fade_timeline_interval {
+	my $fade = shift;
+	my $time1 = ::Mark::time_from_tag($fade->mark1);
+	my $time2 = ::Mark::time_from_tag($fade->mark2);
+
+	if (! defined $time2){
+		if ($fade->relation eq 'fade_from_mark'){
+			$time2 = $time1 + $fade->duration;
+		} elsif ($fade->relation eq 'fade_to_mark'){
+			$time2 = $time1;
+			$time1 -= $fade->duration;
+		} else {
+			$fade->dumpp;
+			die "fade processing failed";
+		}
+	}
+	(min($time1, $time2), max($time1, $time2))
+}
+
+sub fade_window_timeline_interval {
+	my $track = shift;
+	my $track_duration = $track->is_region
+		? $track->endpoint - $track->startpoint
+		: $track->wav_length;
+	my $track_timeline_endpoint = $track->timeline_position + $track_duration;
+	(
+		max(::timeline_play_start_position(), $track->timeline_position),
+		min(::timeline_play_end_position(), $track_timeline_endpoint),
+	)
+}
+
 sub fades {
 
 	# get fades within playable region
@@ -114,15 +147,17 @@ sub fades {
 	my @fades = all_fades($track_name);
 	return @fades if ! ::timeline_adjustment_active();
 
-	# handle offset run mode
+	# Fade marks and bounds are permanent timeline positions. Select a complete
+	# fade whenever any part of it overlaps the playable track/region window.
+	# The resulting envelope is clipped separately at its adjusted window edges.
 	my @in_bounds;
-	my $play_end = ::timeline_play_end_position();
-	my $play_start_time = ::timeline_play_start_position();
-	my $length = $track->wav_length;
+	my ($fade_window_start, $fade_window_end) =
+		fade_window_timeline_interval($track);
 	for my $fade (@fades){
-		my $play_end_time = $play_end ?  min($play_end, $length) : $length;
-		my $time = $::Mark::by_name{$fade->mark1}->{time};
-		push @in_bounds, $fade if $time >= $play_start_time and $time <= $play_end_time;
+		my ($fade_start, $fade_end) = fade_timeline_interval($fade);
+		push @in_bounds, $fade
+			if $fade_end >= $fade_window_start
+			and $fade_start <= $fade_window_end;
 	}
 	@in_bounds
 }
@@ -140,8 +175,7 @@ sub fades {
 #   segment will be at zero-percent level
 #   (otherwise 100%)
 
-# although we can get the precise start and endpoints,
-# I'm using 0 and $track->adjusted_timeline_position + track length
+# The envelope uses adjusted Ecasound timeline positions.
 
 sub initial_level {
 	# return 0, 1 or undef
@@ -209,6 +243,15 @@ sub fader_envelope_pairs {
 	logpkg('debug',sub{::json_out( \@specs)});
 
 	my @pairs = map{ spec_to_pairs($_) } @specs;
+	if (::timeline_adjustment_active()){
+		my ($timeline_start, $timeline_end) =
+			fade_window_timeline_interval($track);
+		@pairs = clip_envelope_to_window(
+			::adjusted_time_from_timeline_position($timeline_start),
+			::adjusted_time_from_timeline_position($timeline_end),
+			@pairs,
+		);
+	}
 
 #   WEIRD message - try to figure this out
 #   XXX results in bug via AUTOLOAD for Edit
