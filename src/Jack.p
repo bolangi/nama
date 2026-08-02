@@ -41,7 +41,8 @@ Please fix this problem before continuing (maybe restart jackd with --rate $proj
 sub client_port {
 	my $name = shift;
 $name =~ /(.+?):([^:]+)$/;
-=comment
+=begin comment
+
 	$name =~ /
 				(?<client>.+?)	# anything, non-greedy 
 	:							# a colon
@@ -49,6 +50,9 @@ $name =~ /(.+?):([^:]+)$/;
 	/x;
 
 	@+{qw(client port)}
+
+=end comment
+
 =cut
 $1, $2
 }

@@ -46,7 +46,9 @@ if ( $output eq 'pod' )
 
 }
 
-=comment testing for missing definitions
+=begin comment
+
+testing for missing definitions
 
 my %body;
 my $cmd = q(perl -ne '/^(\w+):/ and print "$1\n"' grammar_body.pl  | uniq);
@@ -56,6 +58,8 @@ map{ $ref->{$_} or print "$_\n" } keys %body;
 print "\n----\n";
 map{ $body{$_} or print "$_\n" } keys %{$ref};
 exit;
+
+=end comment
 
 =cut
 
@@ -95,7 +99,7 @@ elsif ($output eq 'pod'){
 		}
 		my $short = $ref->{$_}->{short};
 		$short = "($short) " if $short;
-		print "=head4 B<$_> $short- ", ucfirst $ref->{$_}->{what}, "\n\n";
+		print "=head3 B<$_> $short- ", ucfirst $ref->{$_}->{what}, "\n\n";
 
 		my $param = q();
 		$param = $ref->{$_}->{parameters} 

@@ -22,12 +22,16 @@ map{
 } @vars1, @vars2
 }
 my @files = glob("*.p *.pl *.t");
-=comment
+=begin comment
+
 use Data::Dumper::Concise;
 print Dumper \%singletons;
 print Dumper \%singleton_has_key;
 
 print join " ", @files;
+
+=end comment
+
 =cut
 
 my $srevars = join '|', map{ s/\$//; $_ } keys %singletons;

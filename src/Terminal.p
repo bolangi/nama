@@ -34,7 +34,7 @@ use File::Basename qw(fileparse);
 
 
 
-=comment
+=begin comment
 
 widget tree:
 
@@ -46,6 +46,8 @@ rootwin
 			item
 			item
     entry
+
+=end comment
 
 =cut
 
@@ -414,11 +416,14 @@ sub next_param {
 {my $override;
 sub revise_prompt {
 }
-=comment
+=begin comment
 	logsub((caller(0))[3]);
 	# hack to allow suppressing prompt
 	$override = ($_[0] eq "default" ? undef : $_[0]) if defined $_[0];
-    $override//prompt()
+	$override//prompt()
+
+=end comment
+
 =cut
 }
 

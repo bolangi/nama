@@ -163,7 +163,8 @@ sub add_midi_track {
 sub user_midi_tracks { grep { $_->class =~ /Midi/ } grep { !  $_->hide } all_tracks()  }
 
 	
-=comment
+=begin comment
+
 chdup aux_recorder dx7 piano 
 		
 tnew synth                                                                                               
@@ -179,6 +180,9 @@ s
 let complete_length = [mend];                                                                            
 2. clear the auxiliary track                                                                             
 clr aux_recorder $complete_length  
+
+=end comment
+
 =cut
 1;
 __END__

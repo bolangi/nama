@@ -14,8 +14,13 @@ __END__
 EXEC
 
 my @man;
-push @man, read_file('man_page_part1');
+push @man, read_file('man_page_part1'), "\n";
+my $tail = read_file('man_page_part2');
+my ($operation, $back_matter) = split /(?=^=head1 BUGS)/m, $tail, 2;
+die "Unable to split man_page_part2 at BUGS\n" unless defined $back_matter;
+push @man, $operation, "\n";
+push @man, "=head1 COMMAND REFERENCE\n\n";
 push @man, qx(./emit_command_headers pod);
-push @man, read_file('man_page_part2');
+push @man, $back_matter;
 write_file($script, $exec, @man);
 chmod 0755, $script;

@@ -1,6 +1,6 @@
-=head1 NAME
-
 =encoding UTF-8
+
+=head1 NAME
 
 B<Nama> - multitrack recorder and digital audio workstation
 
@@ -15,6 +15,15 @@ processing, editing, mixing, mastering and live
 performance. It can also perform general-purpose audio
 processing, such as 5.1 to stereo conversion. Nama uses 
 Ecasound as the audio processing engine.
+
+=head2 Documentation map
+
+This manual is organized by task. Start with L</OPTIONS> and
+L</USER INTERFACES> when setting up Nama. See L</TRACKS>,
+L</ROUTING>, and L</Saving Projects> for project work. Runtime
+behavior and troubleshooting are covered by L</REALTIME OPERATION>
+and L</DIAGNOSTICS>. The complete generated command listing is in
+L</COMMAND REFERENCE> near the end of the manual.
 
 =head2 Audio projects
 
@@ -203,7 +212,9 @@ is performed by editing the F<.namarc> file, which is
 formatted as YAML. On Nama's first run, a default version of
 F<.namarc> is placed in the user's home directory.
 
-=head1 Tk GRAPHICAL UI 
+=head1 USER INTERFACES
+
+=head2 Tk graphical interface
 
 Invoked by default if Tk is installed, this interface
 provides a subset of Nama's functionality on two
@@ -240,7 +251,7 @@ Provides a conventional view with waveform and playback head.
 The command prompt is available the terminal window
 and provides access to all of Nama's functions.
 
-=head1 TEXT USER INTERFACE
+=head2 Text interface
 
 Press the I<Enter> key if necessary to get the 
 command prompt, which will look something like this:
@@ -814,6 +825,3 @@ The return value will be the name of the current track.
 
 If the result is an object or data structure, it will be
 returned in a serialized form. 
-
-=head1 TEXT COMMANDS
-

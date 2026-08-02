@@ -117,7 +117,7 @@ sub y_offset_multiplier {
 1 # obligatory
 	
 __END__
-=comment
+=begin comment
 Usage: waveform [options] source_audio [ouput.png]
     -W, --width WIDTH                Width (in pixels) of generated waveform image -- Default 1800.
     -H, --height HEIGHT              Height (in pixels) of generated waveform image -- Default 280.
@@ -127,5 +127,7 @@ Usage: waveform [options] source_audio [ouput.png]
     -q, --quiet                      Don't print anything out when generating waveform
     -F, --force                      Force generationg of waveform if file exists
     -h, --help                       Display this screen
+
+=end comment
 	
 =cut

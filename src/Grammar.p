@@ -426,7 +426,8 @@ sub showlist {
 	my $section = [undef,undef,@list];
 
 	return $section ;
-=comment 
+=begin comment
+
 	if scalar @list <= $screen_lines - 5 or ! $screen_lines; 
 
 	my @sections;
@@ -444,6 +445,9 @@ sub showlist {
 					map $tn{$_}, $this_bus, $bn{$this_bus}->tracks]
 	}
 	@sections
+
+=end comment
+
 =cut
 }
 
