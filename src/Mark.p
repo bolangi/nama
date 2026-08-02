@@ -69,13 +69,12 @@ sub set_name {
 
 sub jump_here {
 	my $mark = shift;
-	::set_position($mark->time);
+	::set_position($mark->adjusted_time);
 	$::this_mark = $mark;
 }
-sub shifted_time {  # for marks within current edit
+sub adjusted_time {
 	my $mark = shift;
-	return $mark->time unless ::timeline_adjustment_active();
-	my $time = $mark->time - ::timeline_play_start_position();
+	my $time = ::adjusted_time_from_timeline_position($mark->time);
 	$time > 0 ? $time : 0
 }
 sub remove {
@@ -150,8 +149,7 @@ sub mark_time {
 	my $tag = shift;
 	my $time = time_from_tag($tag);
 	return unless defined $time;
-	$time -= ::timeline_play_start_position() if ::timeline_adjustment_active();
-	$time
+	::adjusted_time_from_timeline_position($time)
 }
 
 
@@ -165,7 +163,9 @@ sub drop_mark {
 	logsub((caller(0))[3]);
 	my %arg = @_;
 	my $name = $arg{name};
-	my $here = $arg{time} // ecasound_iam("getpos");
+	my $here = defined $arg{time}
+		? $arg{time}
+		: timeline_position_from_adjusted_time(ecasound_iam("getpos"));
 	my $type = $arg{type};
 	my $tags = {};
 	if ( defined $arg{tags} )
@@ -202,19 +202,21 @@ sub mark { # GUI_CODE
 	}
 	else{ 
 
-		set_position($pos);
+		set_position($mark->adjusted_time);
 	}
 }
 
 sub next_mark {
 	logsub((caller(0))[3]);
 	my $mark = next_mark_object();
-	set_position($mark->time);
+	set_position($mark->adjusted_time);
 	$this_mark = $mark;
 }
 sub next_mark_object {
 	my @marks = ::Mark::all();
-	my $here = ecasound_iam("cs-get-position");
+	my $here = timeline_position_from_adjusted_time(
+		ecasound_iam("cs-get-position")
+	);
 	for my $i ( 0..$#marks ){
 		if ($marks[$i]->time - $here > 0.001 ){
 			logpkg('debug', "here: $here, future time: ", $marks[$i]->time);
@@ -224,7 +226,9 @@ sub next_mark_object {
 }
 sub previous_mark_object {
 	my @marks = ::Mark::all();
-	my $here = ecasound_iam("cs-get-position");
+	my $here = timeline_position_from_adjusted_time(
+		ecasound_iam("cs-get-position")
+	);
 	for my $i ( reverse 0..$#marks ){
 		if ($marks[$i]->time < $here ){
 			return $marks[$i];
@@ -234,7 +238,7 @@ sub previous_mark_object {
 sub previous_mark {
 	logsub((caller(0))[3]);
 	my $mark = previous_mark_object();
-	set_position($mark->time);
+	set_position($mark->adjusted_time);
 	$this_mark = $mark;
 }
 	
@@ -246,7 +250,7 @@ sub modify_mark {
 	pager("adjusted to ",$mark->time, "\n") 
 		if $mark->time != $newtime;
 	};
-	set_position($mark->time);
+	set_position($mark->adjusted_time);
 	request_setup();
 }
 #  D: delete_current_mark
@@ -347,7 +351,13 @@ our $VERSION = 1.0;
 our @ISA = '::Mark';
 our $last_time;
 sub name { 'Here' }
-sub time { ::ecasound_iam('cs-connected') ? ($last_time = ::ecasound_iam('getpos')) : $last_time } 
+sub time {
+	::ecasound_iam('cs-connected')
+		? ($last_time = ::timeline_position_from_adjusted_time(
+			::ecasound_iam('getpos')
+		))
+		: $last_time
+}
 }
 
 { package ::ClipMark;

@@ -735,6 +735,36 @@ foreach(@tests){
 }
 }
 
+{
+local $setup->{timeline_adjustment};
+is(
+	::adjusted_time_from_timeline_position(37),
+	37,
+	'timeline position is unchanged without adjustment',
+);
+is(
+	::timeline_position_from_adjusted_time(7),
+	7,
+	'adjusted time is unchanged without adjustment',
+);
+
+$setup->{timeline_adjustment} = {
+	type => 'offset_run',
+	timeline_play_start => 30,
+	timeline_play_end => 60,
+};
+is(
+	::adjusted_time_from_timeline_position(37),
+	7,
+	'timeline position converts to adjusted time',
+);
+is(
+	::timeline_position_from_adjusted_time(7),
+	37,
+	'adjusted time converts to timeline position',
+);
+}
+
 
 
 load_project(name => "test_project-convert51", create => 1);
