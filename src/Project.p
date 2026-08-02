@@ -100,8 +100,7 @@ sub initialize_project_data {
 
 	$setup->{wav_info} = {};
 	
-	clear_offset_run_vars();
-	$mode->{offset_run} = 0;
+	clear_timeline_adjustment();
 	$this_edit = undef;
 	
 	{

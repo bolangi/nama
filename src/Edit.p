@@ -461,9 +461,8 @@ sub end_edit_mode  	{
 
 	# regenerate fades
 	
-	$mode->{offset_run} = 0; 
 	$mode->{loop_enable} = 0;
-	disable_offset_run_mode();	
+	clear_timeline_adjustment();
 	$this_track = $this_edit->host if defined $this_edit;
 	undef $this_edit;
 	request_setup();
@@ -481,8 +480,17 @@ sub destroy_edit {
 	$this_track = $this_edit->host;
 	end_edit_mode();
 }
-sub set_edit_mode 	{ $mode->{offset_run} = edit_mode_conditions() ?  1 : 0 }
-sub edit_mode		{ $mode->{offset_run} and defined $this_edit}
+sub set_edit_mode {
+	return unless edit_mode_conditions();
+	$setup->{timeline_adjustment} = {
+		type => 'edit',
+		timeline_play_start => $this_edit->play_start_time,
+		timeline_play_end => $this_edit->play_end_time,
+	};
+}
+sub edit_mode {
+	timeline_adjustment_type() eq 'edit' and defined $this_edit
+}
 sub edit_mode_conditions {        
 	defined $this_edit or ::throw('No edit is defined'), return;
 	defined $this_edit->play_start_time or ::throw('No edit points defined'), return;
@@ -628,15 +636,23 @@ sub window_overlap_case {
 }
 
 sub timeline_play_start_position {
-	defined $this_edit 
-		? $this_edit->play_start_time 
-		: $setup->{offset_run}->{start_time} # zero unless offset run mode
+	return unless timeline_adjustment_active();
+	$setup->{timeline_adjustment}->{timeline_play_start}
 }
 sub timeline_play_end_position {
-	defined $this_edit 
-		? $this_edit->play_end_time 
-		: $setup->{offset_run}->{end_time}   # undef unless offset run mode
+	return unless timeline_adjustment_active();
+	$setup->{timeline_adjustment}->{timeline_play_end}
 }
+sub timeline_adjustment_active { defined $setup->{timeline_adjustment} }
+sub timeline_adjustment_type {
+	return '' unless timeline_adjustment_active();
+	$setup->{timeline_adjustment}->{type}
+}
+sub timeline_adjustment_mark {
+	return unless timeline_adjustment_active();
+	$setup->{timeline_adjustment}->{mark}
+}
+sub clear_timeline_adjustment { undef $setup->{timeline_adjustment} }
 sub timeline_adjustment_args {
 	my $track = shift;
 	::throw("track is undefined"), return unless $track;
@@ -810,28 +826,31 @@ sub set_offset_run_mark {
 	::throw("This function not available in edit mode.  Aborting."), 
 		return if edit_mode();
 	my $markname = shift;
-	
-	$setup->{offset_run}->{start_time} = $::Mark::by_name{$markname}->time;
-	$setup->{offset_run}->{end_time}   = setup_length();
-	$setup->{offset_run}->{mark} = $markname;
-	enable_offset_run_mode();
+	my $timeline_play_start = $::Mark::by_name{$markname}->time;
+
+	# setup_length must be calculated on the unadjusted timeline,
+	# including when an existing offset run is being replaced.
+	my $timeline_play_end;
+	{
+		local $setup->{timeline_adjustment};
+		$timeline_play_end = setup_length();
+	}
+
+	$setup->{timeline_adjustment} = {
+		type => 'offset_run',
+		timeline_play_start => $timeline_play_start,
+		timeline_play_end => $timeline_play_end,
+		mark => $markname,
+	};
+	undef $this_edit;
 	request_setup();
 }
-sub clear_offset_run_vars {
-	$setup->{offset_run}->{start_time} = 0;
-	$setup->{offset_run}->{end_time}   = undef;
-	$setup->{offset_run}->{mark} 		   = undef;
-}
-sub enable_offset_run_mode {
-	undef $this_edit; 
-	$mode->{offset_run}++
-}
 sub disable_offset_run_mode {
-	undef $mode->{offset_run};
-	clear_offset_run_vars();
+	return unless is_offset_run_mode();
+	clear_timeline_adjustment();
 	::request_setup();
 }
-sub is_offset_run_mode { $mode->{offset_run} and ! defined $this_edit }
+sub is_offset_run_mode { timeline_adjustment_type() eq 'offset_run' }
 	
 sub select_edit_track {
 	my $track_selector_method = shift;

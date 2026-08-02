@@ -112,7 +112,7 @@ sub fades {
 	my $track_name = shift;
 	my $track = $tn{$track_name};
 	my @fades = all_fades($track_name);
-	return @fades if ! $mode->{offset_run};
+	return @fades if ! ::timeline_adjustment_active();
 
 	# handle offset run mode
 	my @in_bounds;

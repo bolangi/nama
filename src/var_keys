@@ -43,9 +43,10 @@ $setup->{wav_info}				# length and format of each WAV file
 $setup->{runtime_limit}
 $setup->{loop_endpoints}		# for looping
 $setup->{audio_length}
-$setup->{offset_run}->{start_time}
-$setup->{offset_run}->{end_time}
-$setup->{offset_run}->{mark}
+$setup->{timeline_adjustment}->{type}
+$setup->{timeline_adjustment}->{timeline_play_start}
+$setup->{timeline_adjustment}->{timeline_play_end}
+$setup->{timeline_adjustment}->{mark}
 $setup->{edit_points}
 $setup->{_last_rec_tracks}		# tracks we recorded to the last time, for rerecord
 $setup->{_main_rw}				# Main track rw setting when recording, for rerecord
@@ -81,7 +82,6 @@ $help->{title}
 
 $mode->{preview}				#
 $mode->{doodle}					#
-$mode->{offset_run}				# record starting other than at the beginning
 $mode->{soloing}				# boolean
 $mode->{loop_enable}			# boolean
 $mode->{mastering}				# boolean

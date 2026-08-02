@@ -131,7 +131,7 @@ sub encode_mixdown_file {
 sub adjust_offset_recordings {
 	for( ::ChainSetup::engine_wav_out_tracks()){
 		no warnings 'uninitialized';
-		if (my $mark = $setup->{offset_run}->{mark}){
+		if (my $mark = timeline_adjustment_mark()){
 			$_->set(playat => $mark);
 			logpkg('debug',$_->name, ": offsetting to $mark");
 		}
@@ -147,7 +147,7 @@ sub post_rec_configure {
 		
 		map{ $_->set(rw => PLAY) } @{$setup->{_last_rec_tracks}};
 		
-		undef $mode->{offset_run} if ! defined $this_edit;
+		clear_timeline_adjustment() if is_offset_run_mode();
 		$ui->refresh();
 		request_setup();
 		reconfigure_engine();
@@ -181,4 +181,3 @@ sub filename {
 }
 1;
 __END__
-
