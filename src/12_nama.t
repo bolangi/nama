@@ -764,6 +764,21 @@ is(
 	'adjusted time converts to timeline position',
 );
 is(
+	::Mark::time_from_tag('37.0'),
+	'37.0',
+	'time from tag remains a permanent timeline position',
+);
+is(
+	::Mark::adjusted_time_from_tag('37.0'),
+	7,
+	'adjusted time from tag converts for an engine consumer',
+);
+is(
+	::Mark::adjusted_time_from_tag('30.0'),
+	0,
+	'adjusted time from tag retains engine time zero',
+);
+is(
 	::adjusted_playback_position_from_timeline_position(20),
 	0,
 	'playback position before adjustment window clamps to zero',

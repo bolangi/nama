@@ -468,7 +468,7 @@ shift_track: _shift_track start_position {
 	}
 	# elsif ( pos =~ /^\d+$/ ) { # skip the mark index case
 	elsif ( $::Mark::by_name{$pos} ){
-		my $time = ::Mark::mark_time( $pos );
+		my $time = ::Mark::time_from_tag( $pos );
 		::pager($::this_track->name, qq(: Shifting start time to mark "$pos", $time seconds));
 		$::this_track->set(playat => $pos);
 		1;

@@ -219,9 +219,9 @@ sub fader_envelope_pairs {
 	for my $fade ( @fades ){
 
 		# calculate fades
-		my $marktime1 = ::Mark::mark_time($fade->mark1);
-		my $marktime2 = ::Mark::mark_time($fade->mark2);
-		if ($marktime2) {}  # nothing to do
+		my $marktime1 = ::Mark::adjusted_time_from_tag($fade->mark1);
+		my $marktime2 = ::Mark::adjusted_time_from_tag($fade->mark2);
+		if (defined $marktime2) {}  # nothing to do
 		elsif( $fade->relation eq 'fade_from_mark')
 			{ $marktime2 = $marktime1 + $fade->duration } 
 		elsif( $fade->relation eq 'fade_to_mark')

@@ -171,7 +171,7 @@ sub duration_from_tag {
 	#print "mark time: ", $mark->time, $/;
 	return $mark->time;
 }
-sub mark_time {
+sub adjusted_time_from_tag {
 	my $tag = shift;
 	my $time = time_from_tag($tag);
 	return unless defined $time;
