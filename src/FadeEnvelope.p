@@ -4,7 +4,7 @@ our $VERSION = 1.0;
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(clip_envelope_to_window);
+our @EXPORT_OK = qw(clip_envelope_to_window envelope_level_at_time);
 
 sub interpolated_point {
 	my ($left, $right, $time) = @_;
@@ -14,6 +14,19 @@ sub interpolated_point {
 		+ ($time - $left_time) / ($right_time - $left_time)
 		* ($right_level - $left_level);
 	[$time, $level]
+}
+
+sub envelope_level_at_time {
+	my ($time, @pairs) = @_;
+	my @points;
+	push @points, [splice @pairs, 0, 2] while @pairs;
+	return 1 if ! @points;
+	return $points[0]->[1] if $time <= $points[0]->[0];
+	return $points[-1]->[1] if $time >= $points[-1]->[0];
+
+	my $right = 1;
+	$right++ while $points[$right]->[0] < $time;
+	interpolated_point($points[$right - 1], $points[$right], $time)->[1]
 }
 
 sub clip_envelope_to_window {

@@ -314,7 +314,7 @@ sub show_region {
 	return unless $t->candidate_play;
 	my @lines;
 	push @lines,join " ",
-		"Length:",time2($t->adjusted_timeline_endpoint),"\n";
+		"Length:",time2($t->adjusted_duration),"\n";
 	$t->playat and push @lines,join " ",
 		"Play at:",time2($t->adjusted_timeline_position),
 		join($t->playat, qw[ ( ) ])."\n";
