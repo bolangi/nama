@@ -247,6 +247,7 @@ sub edit_track 		{ $::tn{$_[0]->edit_name} }             # in version_bus
 {
 package ::;
 use v5.36; use Carp;
+use ::TimelineAdjustment qw(timeline_adjustment);
 no warnings 'uninitialized';
 
 our (
@@ -298,7 +299,9 @@ sub abort_set_edit_points {
 sub get_edit_mark {
 	$p++;
 	if($p <= 3){  # record mark
-		my $pos = ecasound_iam('getpos');
+		my $pos = timeline_position_from_adjusted_time(
+			ecasound_iam('getpos')
+		);
 		push @_edit_points, $pos;
 		::pager(" got $names[$p] position ".d1($pos));
 		reset_input_line();
@@ -461,9 +464,8 @@ sub end_edit_mode  	{
 
 	# regenerate fades
 	
-	$mode->{offset_run} = 0; 
 	$mode->{loop_enable} = 0;
-	disable_offset_run_mode();	
+	clear_timeline_adjustment();
 	$this_track = $this_edit->host if defined $this_edit;
 	undef $this_edit;
 	request_setup();
@@ -481,8 +483,17 @@ sub destroy_edit {
 	$this_track = $this_edit->host;
 	end_edit_mode();
 }
-sub set_edit_mode 	{ $mode->{offset_run} = edit_mode_conditions() ?  1 : 0 }
-sub edit_mode		{ $mode->{offset_run} and defined $this_edit}
+sub set_edit_mode {
+	return unless edit_mode_conditions();
+	$setup->{timeline_adjustment} = {
+		type => 'edit',
+		timeline_play_start => $this_edit->play_start_time,
+		timeline_play_end => $this_edit->play_end_time,
+	};
+}
+sub edit_mode {
+	timeline_adjustment_type() eq 'edit' and defined $this_edit
+}
 sub edit_mode_conditions {        
 	defined $this_edit or ::throw('No edit is defined'), return;
 	defined $this_edit->play_start_time or ::throw('No edit points defined'), return;
@@ -530,155 +541,53 @@ sub edit_fades {
 					track => $this_edit->edit_name,
 	); 
 }
-### edit region computations
-# pass $args hash with following fields:
-#
-### track values
-# trackname
-# playat
-# region_start
-# region_end
-# setup_length
-#
-### edit values
-# edit_play_start
-# edit_play_end
-#
-### dispatch tables
-# playat_dispatch
-# region_start_dispatch
-# region_end_dispatch
-#
-### output values
-# 
-# new_playat
-# new_region_start
-# new_region_end
-
-sub region_start_dispatch { 
-	my ($args, $key) = @_;
-	my %table = (
-
-    out_of_bounds_near				=> "*",
-    out_of_bounds_far				=> "*",	
-
-	play_start_during_playat_delay	=> $args->{region_start},
-	no_region_play_start_during_playat_delay =>  0,
-
-	play_start_within_region 
-				=> $args->{region_start} + $args->{edit_play_start} - $args->{playat},
-	no_region_play_start_after_playat_delay
-				=> $args->{region_start} + $args->{edit_play_start} - $args->{playat},
+sub timeline_play_start_position {
+	return unless timeline_adjustment_active();
+	$setup->{timeline_adjustment}->{timeline_play_start}
+}
+sub timeline_play_end_position {
+	return unless timeline_adjustment_active();
+	$setup->{timeline_adjustment}->{timeline_play_end}
+}
+sub adjusted_time_from_timeline_position {
+	my $timeline_position = shift;
+	return $timeline_position unless timeline_adjustment_active();
+	$timeline_position - timeline_play_start_position()
+}
+sub timeline_position_from_adjusted_time {
+	my $adjusted_time = shift;
+	return $adjusted_time unless timeline_adjustment_active();
+	$adjusted_time + timeline_play_start_position()
+}
+sub adjusted_playback_position_from_timeline_position {
+	my $timeline_position = shift;
+	my $adjusted_position = adjusted_time_from_timeline_position(
+		$timeline_position
 	);
-	$table{$key}
+	$adjusted_position < 0 ? 0 : $adjusted_position
 }
-sub playat_dispatch {
-	my ($args, $key) = @_;
-	my %table = (
-    out_of_bounds_near				=> "*",
-    out_of_bounds_far				=> "*",	
-
-	play_start_during_playat_delay	=> $args->{playat} - $args->{edit_play_start},
-	no_region_play_start_during_playat_delay
-									=> $args->{playat} - $args->{edit_play_start},
-
-	play_start_within_region   				=> 0,
-	no_region_play_start_after_playat_delay => 0,
-	);
-	$table{$key}
+sub timeline_adjustment_active { defined $setup->{timeline_adjustment} }
+sub timeline_adjustment_type {
+	return '' unless timeline_adjustment_active();
+	$setup->{timeline_adjustment}->{type}
 }
-sub region_end_dispatch {
-	my ($args, $key) = @_;
-	my %table = (
-    out_of_bounds_near				=> "*",
-    out_of_bounds_far				=> "*",	
-
-	play_start_during_playat_delay	
-		=>  $args->{region_start} + $args->{edit_play_end} - $args->{playat},
-	no_region_play_start_during_playat_delay 
-		=>                  $args->{edit_play_end} - $args->{playat},
-
-	play_start_within_region 
-		=>  $args->{region_start} + $args->{edit_play_end} - $args->{playat},
-	no_region_play_start_after_playat_delay
-		=>                  $args->{edit_play_end} - $args->{playat},
-	);
-	$table{$key}
+sub offset_run_positioning_mark {
+	return unless is_offset_run_mode();
+	$setup->{timeline_adjustment}->{positioning_mark}
 }
-sub new_playat {
-	my $args = shift;
-	playat_dispatch($args, edit_case($args));
-}
-sub new_region_start { 
-	my $args = shift;
-	region_start_dispatch($args, edit_case($args));
-}
-sub new_region_end {   
-	my $args = shift;
-	my $end = region_end_dispatch($args, edit_case($args));
-	return $end if $end eq '*';
-	$end < $args->{setup_length} ? $end : $args->{setup_length}
-};
-# the following value will always allow enough time
-# to record the edit. it may be longer than the 
-# actual WAV file in some cases. (I doubt that
-# will be a problem.)
-
-sub edit_case {
-	my $args = shift;
-
-	# logic for no-region case
-	
-    if ( ! $args->{region_start} and ! $args->{region_end}  )
-	{
-		if( $args->{edit_play_end} < $args->{playat})
-			{ "out_of_bounds_near" }
-		elsif( $args->{edit_play_start} > $args->{playat} + $args->{setup_length})
-			{ "out_of_bounds_far" }
-		elsif( $args->{edit_play_start} >= $args->{playat})
-			{"no_region_play_start_after_playat_delay"}
-		elsif( $args->{edit_play_start} < $args->{playat} and $args->{edit_play_end} > $args->{playat} )
-			{ "no_region_play_start_during_playat_delay"}
-	} 
-	# logic for region present case
-	
-	elsif ( defined $args->{region_start} and defined $args->{region_end} )
-	{ 
-		if ( $args->{edit_play_end} < $args->{playat})
-			{ "out_of_bounds_near" }
-		elsif ( $args->{edit_play_start} > $args->{playat} + $args->{region_end} - $args->{region_start})
-			{ "out_of_bounds_far" }
-		elsif ( $args->{edit_play_start} >= $args->{playat})
-			{ "play_start_within_region"}
-		elsif ( $args->{edit_play_start} < $args->{playat} and $args->{playat} < $args->{edit_play_end})
-			{ "play_start_during_playat_delay"}
-		else {carp "$args->{trackname}: fell through if-then"}
-	}
-	else { carp "$args->{trackname}: improperly defined region" }
-}
-
-sub play_start_time {
-	defined $this_edit 
-		? $this_edit->play_start_time 
-		: $setup->{offset_run}->{start_time} # zero unless offset run mode
-}
-sub play_end_time {
-	defined $this_edit 
-		? $this_edit->play_end_time 
-		: $setup->{offset_run}->{end_time}   # undef unless offset run mode
-}
-sub edit_vars {
-	my $edit = shift || $this_edit;
-	::throw("edit is undefined"), return unless $edit;
-	my $track = $::tn{$edit}->{host_track};
+sub clear_timeline_adjustment { undef $setup->{timeline_adjustment} }
+sub timeline_adjustment_args {
+	my $track = shift;
+	::throw("track is undefined"), return unless $track;
 	{
 	trackname      	=> $track->name,
-	playat 			=> $track->playat_time,
-	region_start   	=> $track->region_start_time,
-	region_end 		=> $track->region_end_time,
-	edit_play_start => $edit->play_start_time(),
-	edit_play_end	=> $edit->play_end_time(),
-	setup_length 	=> $track->wav_length(),
+	has_region     	=> $track->is_region,
+	playat 			=> $track->timeline_position,
+	region_start   	=> $track->startpoint,
+	region_end 		=> $track->endpoint,
+	timeline_play_start => timeline_play_start_position(),
+	timeline_play_end   => timeline_play_end_position(),
+	wav_length          => $track->wav_length(),
 	}
 }
 
@@ -827,12 +736,12 @@ sub merge_edits {
 }
 # offset recording
 
-# Note that although we use ->shifted_* methods, all are
+# Note that although we use ->adjusted_* methods, all are
 # executed outside of edit mode, so we get unadjusted values.
 
 sub setup_length {
 	my $setup_length;
-	map{  my $l = $_->shifted_length; $setup_length = $l if $l > $setup_length }
+	map{  my $l = $_->adjusted_timeline_endpoint; $setup_length = $l if $l > $setup_length }
 	grep{ $_-> play }
 	::ChainSetup::engine_tracks();
 	$setup_length
@@ -841,28 +750,31 @@ sub set_offset_run_mark {
 	::throw("This function not available in edit mode.  Aborting."), 
 		return if edit_mode();
 	my $markname = shift;
-	
-	$setup->{offset_run}->{start_time} = $::Mark::by_name{$markname}->time;
-	$setup->{offset_run}->{end_time}   = setup_length();
-	$setup->{offset_run}->{mark} = $markname;
-	enable_offset_run_mode();
+	my $timeline_play_start = $::Mark::by_name{$markname}->time;
+
+	# setup_length must be calculated on the unadjusted timeline,
+	# including when an existing offset run is being replaced.
+	my $timeline_play_end;
+	{
+		local $setup->{timeline_adjustment};
+		$timeline_play_end = setup_length();
+	}
+
+	$setup->{timeline_adjustment} = {
+		type => 'offset_run',
+		timeline_play_start => $timeline_play_start,
+		timeline_play_end => $timeline_play_end,
+		positioning_mark => $markname,
+	};
+	undef $this_edit;
 	request_setup();
 }
-sub clear_offset_run_vars {
-	$setup->{offset_run}->{start_time} = 0;
-	$setup->{offset_run}->{end_time}   = undef;
-	$setup->{offset_run}->{mark} 		   = undef;
-}
-sub enable_offset_run_mode {
-	undef $this_edit; 
-	$mode->{offset_run}++
-}
 sub disable_offset_run_mode {
-	undef $mode->{offset_run};
-	clear_offset_run_vars();
+	return unless is_offset_run_mode();
+	clear_timeline_adjustment();
 	::request_setup();
 }
-sub is_offset_run_mode { $mode->{offset_run} and ! defined $this_edit }
+sub is_offset_run_mode { timeline_adjustment_type() eq 'offset_run' }
 	
 sub select_edit_track {
 	my $track_selector_method = shift;

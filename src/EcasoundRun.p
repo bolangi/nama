@@ -112,9 +112,12 @@ sub engine_status {
 	my ($pos, $before_newlines, $after_newlines) = @_;
 	pager("\n" x $before_newlines, engine_is($pos), "\n" x $after_newlines);
 }
-sub current_position { 
-	my $pos = $this_engine->ecasound_iam("getpos"); 
-	colonize(int($pos || 0)) 
+sub current_timeline_position {
+	my $adjusted_time = $this_engine->ecasound_iam("getpos") // 0;
+	timeline_position_from_adjusted_time($adjusted_time)
+}
+sub current_position {
+	colonize(int(current_timeline_position()))
 }
 sub start_heartbeat {
  	start_event(poll_engine => timer(0, 1, \&::heartbeat));
@@ -145,8 +148,8 @@ sub heartbeat {
 	}
 	#print join " ", $status, colonize($here), $/;
 	my ($start, $end);
-	$start  = ::Mark::loop_start();
-	$end    = ::Mark::loop_end();
+	$start  = ::Mark::adjusted_loop_start();
+	$end    = ::Mark::adjusted_loop_end();
 	schedule_wraparound() 
 		if $mode->{loop_enable} 
 		and defined $start 
@@ -164,8 +167,9 @@ sub schedule_wraparound {
 
 	return unless $mode->{loop_enable};
 	my $here   = $this_engine->ecasound_iam("getpos");
-	my $start  = ::Mark::loop_start();
-	my $end    = ::Mark::loop_end();
+	my $start  = ::Mark::adjusted_loop_start();
+	my $end    = ::Mark::adjusted_loop_end();
+	return unless defined $start and defined $end;
 	my $diff = $end - $here;
 	logpkg('debug', "here: $here, start: $start, end: $end, diff: $diff");
 	if ( $diff < 0 ){ # go at once

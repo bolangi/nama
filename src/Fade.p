@@ -1,7 +1,7 @@
 # ----------- Fade ------------
 package ::Fade;
 use v5.36;
-use List::Util qw(min);
+use List::Util qw(min max);
 our $VERSION = 1.0;
 use Carp;
 use warnings;
@@ -11,6 +11,7 @@ our($n, %by_index);
 use ::Globals qw(:singletons %tn @fade_data); 
 use ::Log qw(logsub logpkg);
 use ::Effect  qw(remove_effect add_effect update_effect);
+use ::FadeEnvelope qw(clip_envelope_to_window envelope_level_at_time);
 # we don't import 'type' as it would clobber our $fade->type attribute
 use ::Object qw( 
 				 n
@@ -63,7 +64,8 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
-	my @pairs = fader_envelope_pairs($track);
+	my $envelope = fader_envelope($track);
+	my @pairs = @{$envelope->{pairs}};
 	add_fader($track->name);	
 	my $operator  = ::fxn($track->fader)->type;
 	my $off_level = $config->{mute_level}->{$operator};
@@ -76,26 +78,27 @@ sub refresh_fade_controller {
 		remove_effect($controller);
 	}
 
-	# add controller
-	my $reuseid = pop @controllers; # we expect only one
-	logpkg('debug',"applying fade controller");
-	add_effect({
-		track		=> $track,
-		id			=> $reuseid,
-		parent	 	=> $track->fader,
-		type		=> 'klg',	  		 # Ecasound controller
-		params => [	1,				 # modify first parameter of fader op 
-					 		$off_level,
-					 		$on_level,
-					 		@pairs,
-					 	]
-	});
+	if (@pairs){
+		# add controller
+		my $reuseid = pop @controllers; # we expect only one
+		logpkg('debug',"applying fade controller");
+		add_effect({
+			track		=> $track,
+			id			=> $reuseid,
+			parent	 	=> $track->fader,
+			type		=> 'klg',	  		 # Ecasound controller
+			params => [	1,				 # modify first parameter of fader op
+							$off_level,
+							$on_level,
+							@pairs,
+						]
+		});
+	}
 
-	# set fader to correct initial value
-	# 	first fade is type 'in'  : 0
-	# 	first fade is type 'out' : 100%
+	# Set the fader to the level established at the window start, including
+	# the result of any fades completed earlier in the track or region.
 	
-	update_effect($track->fader,0, initial_level($track->name) * 100)
+	update_effect($track->fader, 0, $envelope->{initial_level} * 100)
 }
 
 
@@ -105,6 +108,45 @@ sub all_fades {
 		$::Mark::by_name{$a->mark1}->{time} <=> $::Mark::by_name{$b->mark1}->{time}
 	} grep { $_->track eq $track_name } values %by_index
 }
+
+sub fade_timeline_interval {
+	my $fade = shift;
+	my $time1 = ::Mark::time_from_tag($fade->mark1);
+	my $time2 = ::Mark::time_from_tag($fade->mark2);
+
+	if (! defined $time2){
+		if ($fade->relation eq 'fade_from_mark'){
+			$time2 = $time1 + $fade->duration;
+		} elsif ($fade->relation eq 'fade_to_mark'){
+			$time2 = $time1;
+			$time1 -= $fade->duration;
+		} else {
+			$fade->dumpp;
+			die "fade processing failed";
+		}
+	}
+	(min($time1, $time2), max($time1, $time2))
+}
+
+sub track_timeline_interval {
+	my $track = shift;
+	my $track_duration = $track->is_region
+		? $track->endpoint - $track->startpoint
+		: $track->wav_length;
+	my $track_timeline_endpoint = $track->timeline_position + $track_duration;
+	($track->timeline_position, $track_timeline_endpoint)
+}
+
+sub fade_window_timeline_interval {
+	my $track = shift;
+	my ($track_start, $track_end) = track_timeline_interval($track);
+	return ($track_start, $track_end) unless ::timeline_adjustment_active();
+	(
+		max(::timeline_play_start_position(), $track_start),
+		min(::timeline_play_end_position(), $track_end),
+	)
+}
+
 sub fades {
 
 	# get fades within playable region
@@ -112,72 +154,23 @@ sub fades {
 	my $track_name = shift;
 	my $track = $tn{$track_name};
 	my @fades = all_fades($track_name);
-	return @fades if ! $mode->{offset_run};
 
-	# handle offset run mode
+	# Fade marks and bounds are permanent timeline positions. Exclude only a
+	# fade wholly outside its track or region. Fades before an adjusted run
+	# window may still determine the level at which that window begins.
 	my @in_bounds;
-	my $play_end = ::play_end_time();
-	my $play_start_time = ::play_start_time();
-	my $length = $track->wav_length;
+	my ($track_start, $track_end) = track_timeline_interval($track);
 	for my $fade (@fades){
-		my $play_end_time = $play_end ?  min($play_end, $length) : $length;
-		my $time = $::Mark::by_name{$fade->mark1}->{time};
-		push @in_bounds, $fade if $time >= $play_start_time and $time <= $play_end_time;
+		my ($fade_start, $fade_end) = fade_timeline_interval($fade);
+		push @in_bounds, $fade
+			if $fade_end >= $track_start
+			and $fade_start <= $track_end;
 	}
 	@in_bounds
 }
 
-# our envelope must include a straight segment from the
-# beginning of the track (or region) to the fade
-# start. Similarly, we need a straight segment
-# from the last fade to the track (or region) end
-
-# - If the first fade is a fade-in, the straight
-#   segment will be at zero-percent level
-#   (otherwise 100%)
-#
-# - If the last fade is fade-out, the straight
-#   segment will be at zero-percent level
-#   (otherwise 100%)
-
-# although we can get the precise start and endpoints,
-# I'm using 0 and $track->shifted_playat_time + track length
-
-sub initial_level {
-	# return 0, 1 or undef
-	# 0: track starts silent
-	# 1: track starts at full volume
-	my $track_name = shift;
-	my @fades = fades($track_name) or return undef;
-	# if we fade in we'll hold level zero from beginning
-	(scalar @fades and $fades[0]->type eq 'in') ? 0 : 1
-}
-sub exit_level {
-	my $track_name = shift;
-	my @fades = fades($track_name) or return undef;
-	# if we fade out we'll hold level zero from end
-	(scalar @fades and $fades[-1]->type eq 'out') ? 0 : 1
-}
-sub initial_pair { # duration: zero to... 
-	my $track_name = shift;
-	my $init_level = initial_level($track_name);
-	defined $init_level or return ();
-	(0,  $init_level )
-	
-}
-sub final_pair {   # duration: .... to length
-	my $track_name = shift;
-	my $exit_level = exit_level($track_name);
-	defined $exit_level or return ();
-	my $track = $tn{$track_name};
-	(
-		$track->shifted_playat_time + $track->wav_length,
-		$exit_level
-	);
-}
-
-sub fader_envelope_pairs {
-	# return number_of_pairs, pos1, val1, pos2, val2,...
+sub fader_envelope {
+	# Return the initial fader level and Ecasound envelope pairs.
 	my $track = shift;
 	my @fades = fades($track->name);
 
@@ -185,21 +178,22 @@ sub fader_envelope_pairs {
 	for my $fade ( @fades ){
 
 		# calculate fades
-		my $marktime1 = ::Mark::mark_time($fade->mark1);
-		my $marktime2 = ::Mark::mark_time($fade->mark2);
-		if ($marktime2) {}  # nothing to do
+		my $adjusted_time1 = ::Mark::adjusted_time_from_tag($fade->mark1);
+		my $adjusted_time2 = ::Mark::adjusted_time_from_tag($fade->mark2);
+		if (defined $adjusted_time2) {}  # nothing to do
 		elsif( $fade->relation eq 'fade_from_mark')
-			{ $marktime2 = $marktime1 + $fade->duration } 
+			{ $adjusted_time2 = $adjusted_time1 + $fade->duration }
 		elsif( $fade->relation eq 'fade_to_mark')
 			{
-				$marktime2 = $marktime1;
-				$marktime1 -= $fade->duration
+				$adjusted_time2 = $adjusted_time1;
+				$adjusted_time1 -= $fade->duration
 			} 
 		else { $fade->dumpp; die "fade processing failed" }
-		logpkg('debug',"marktime1: $marktime1, marktime2: $marktime2");
+		logpkg('debug',
+			"adjusted_time1: $adjusted_time1, adjusted_time2: $adjusted_time2");
 		push @specs, 
-		[ 	$marktime1, 
-			$marktime2, 
+		[ 	$adjusted_time1,
+			$adjusted_time2,
 			$fade->type, 
 			::fxn($track->fader)->type,
 		];
@@ -208,20 +202,29 @@ sub fader_envelope_pairs {
 	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
 	logpkg('debug',sub{::json_out( \@specs)});
 
-	my @pairs = map{ spec_to_pairs($_) } @specs;
-
-#   WEIRD message - try to figure this out
-#   XXX results in bug via AUTOLOAD for Edit
-#	@pairs = (initial_pair($track->name), @pairs, final_pair($track->name)); 
-
-	# add flat segments 
-	# - from start to first fade 
-	# - from last fade to end
-
+	my @complete_pairs = map{ spec_to_pairs($_) } @specs;
+	my ($timeline_start, $timeline_end) =
+		fade_window_timeline_interval($track);
+	my $adjusted_start =
+		::adjusted_time_from_timeline_position($timeline_start);
+	my $adjusted_end =
+		::adjusted_time_from_timeline_position($timeline_end);
+	my $initial_level = envelope_level_at_time(
+		$adjusted_start,
+		@complete_pairs,
+	);
+	my @pairs = clip_envelope_to_window(
+		$adjusted_start,
+		$adjusted_end,
+		@complete_pairs,
+	);
 
 	# prepend number of pairs;
 	unshift @pairs, (scalar @pairs / 2) if @pairs;
-	@pairs;
+	{
+		initial_level => $initial_level,
+		pairs => \@pairs,
+	}
 }
 		
 # each 'spec' is an array reference of the form [ $from, $to, $type, $op ]
@@ -339,4 +342,3 @@ sub setup_fades {
 	
 
 1;
-

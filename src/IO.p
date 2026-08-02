@@ -260,27 +260,35 @@ sub _mono_to_stereo{
 }
 sub _playat_output {
 	my $track = shift;
-	return unless $track->shifted_playat_time;
+	my $adjustment = $track->timeline_adjustment;
+	my $timeline_position = $adjustment->adjusted_timeline_position;
+	return unless $timeline_position;
 		# or $track->latency_offset;
-	join ',',"playat" , $track->shifted_playat_time 
+	join ',',"playat" , $timeline_position
 		# + $track->latency_offset
 }
 sub _select_output {
 	my $track = shift;
 	no warnings 'uninitialized';
-	my $start = $track->shifted_region_start_time + $config->hardware_latency();
-	my $end   = $track->shifted_region_end_time;
-	return unless $config->hardware_latency() or defined $start and defined $end;
-	my $setup_length;
-	# CASE 1: a region is defined 
-	if ($end) { 
-		$setup_length = $end - $start;
+	my $adjustment = $track->timeline_adjustment;
+	my $adjusted_startpoint = $adjustment->adjusted_startpoint;
+	my $adjusted_endpoint = $adjustment->adjusted_endpoint;
+	my $hardware_latency = $config->hardware_latency();
+
+	return unless $hardware_latency
+		or defined $adjusted_startpoint and defined $adjusted_endpoint;
+
+	# Hardware latency compensation advances the source selection;
+	# it is separate from the timeline adjustment calculation.
+	my $select_start = $adjusted_startpoint + $hardware_latency;
+	my $select_duration;
+	if ($adjusted_endpoint) {
+		$select_duration = $adjusted_endpoint - $select_start;
 	}
-	# CASE 2: only hardware latency
 	else {
-		$setup_length = $track->wav_length - $start
+		$select_duration = $track->wav_length - $select_start
 	}
-	join ',',"select", $start, $setup_length
+	join ',',"select", $select_start, $select_duration
 }
 ###  utility subroutines
 

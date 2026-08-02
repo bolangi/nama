@@ -24,8 +24,11 @@ sub save_state {
 									: join_path(project_dir(),$filename) ;
 	$project->{nama_version} = $VERSION;
 
-	# store playback position, if possible
-	$project->{playback_position} = ecasound_iam("getpos") if $this_engine->valid_setup();
+	# Persistent playback position is always on the project timeline,
+	# even when Ecasound is running an adjusted setup.
+	$project->{playback_position} = timeline_position_from_adjusted_time(
+		ecasound_iam("getpos")
+	) if $this_engine->valid_setup();
 
 	# some stuff get saved independently of our state file
 	

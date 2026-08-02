@@ -34,7 +34,7 @@ sub clip {
 }
 sub rw { 
 	my $self = shift;
-	$::mode->{offset_run} ? OFF : $self->{rw}
+	::timeline_adjustment_active() ? OFF : $self->{rw}
 }
 # perl indexes arrays at zero, for nama users we number items from one
 sub insert_item {
@@ -74,7 +74,7 @@ sub list_output {
 				++$i, 
 				$::tn{$_}->n,
 				$_,
-				sprintf("%.3f %.3f", $::tn{$_}->duration, $::tn{$_}->endpoint),
+				sprintf("%.3f %.3f", $::tn{$_}->duration, $::tn{$_}->timeline_endpoint),
 		} @{$self->items}
 }
 sub remove {

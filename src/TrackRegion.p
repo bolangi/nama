@@ -4,20 +4,21 @@ use Role::Tiny;
 use v5.36;
 our $VERSION = 1.0;
 use ::Globals qw(:all);
+use ::TimelineAdjustment ();
 use Carp;
 
 # these behaviors are associated with WAV playback
 
 sub is_region { defined $_[0]->{region_start} }
 
-sub region_start_time {
+sub startpoint {
 	my $track = shift;
 	return unless $track->is_region;
 	#return if $track->rec_status ne PLAY;
 	#carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
 	::Mark::time_from_tag( $track->region_start )
 }
-sub region_end_time {
+sub endpoint {
 	my $track = shift;
 	return unless $track->is_region;
 	#return if $track->rec_status ne PLAY;
@@ -29,7 +30,7 @@ sub region_end_time {
 		::Mark::time_from_tag( $track->region_end )
 	}
 }
-sub playat_time {
+sub timeline_position {
 	my $track = shift;
 	#carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
 	#return if $track->rec_status ne PLAY;
@@ -39,40 +40,67 @@ sub playat_time {
 # the following methods adjust
 # region start and playat values during edit mode
 
-sub shifted_length {
+sub adjusted_duration {
 	my $track = shift;
-	my $setup_length;
-	if ($track->region_start){
-		$setup_length = 	$track->shifted_region_end_time
-				  - $track->shifted_region_start_time
-	} else {
-		$setup_length = 	$track->wav_length;
+	if (::timeline_adjustment_active()) {
+		my $adjustment = $track->timeline_adjustment;
+		return $adjustment->adjusted_endpoint
+			 - $adjustment->adjusted_startpoint
 	}
-	no warnings 'uninitialized';
-	$setup_length += $track->shifted_playat_time;
+	my $duration;
+	if ($track->region_start){
+		$duration = 	$track->endpoint
+			  - $track->startpoint
+	} else {
+		$duration = 	$track->wav_length;
+	}
+	$duration
 }
 
-sub shifted_region_start_time {
+sub adjusted_timeline_endpoint {
 	my $track = shift;
-	return $track->region_start_time unless $mode->{offset_run};
-	::new_region_start(::edit_vars($track));
+	my $adjustment = $track->timeline_adjustment
+		if ::timeline_adjustment_active();
+	my $setup_length = $adjustment
+		? $adjustment->adjusted_endpoint - $adjustment->adjusted_startpoint
+		: $track->adjusted_duration;
+	no warnings 'uninitialized';
+	$setup_length += $adjustment
+		? $adjustment->adjusted_timeline_position
+		: $track->adjusted_timeline_position;
+}
+
+sub timeline_adjustment {
+	my $track = shift;
+	return ::timeline_adjustment(::timeline_adjustment_args($track))
+		if ::timeline_adjustment_active();
+
+	::TimelineAdjustmentResult->new(
+		window_overlap_case => 'unadjusted',
+		adjusted_timeline_position => $track->timeline_position,
+		adjusted_startpoint => $track->startpoint,
+		adjusted_endpoint => $track->endpoint,
+	)
+}
+
+sub adjusted_startpoint {
+	my $track = shift;
+	$track->timeline_adjustment->adjusted_startpoint
 	
 }
-sub shifted_playat_time { 
+sub adjusted_timeline_position {
 	my $track = shift;
-	return $track->playat_time unless $mode->{offset_run};
-	::new_playat(::edit_vars($track));
+	$track->timeline_adjustment->adjusted_timeline_position
 }
-sub shifted_region_end_time {
+sub adjusted_endpoint {
 	my $track = shift;
-	return $track->region_end_time unless $mode->{offset_run};
-	::new_region_end(::edit_vars($track));
+	$track->timeline_adjustment->adjusted_endpoint
 }
 
 sub region_is_out_of_bounds {
-	return unless $mode->{offset_run};
+	return unless ::timeline_adjustment_active();
 	my $track = shift;
-	::case(::edit_vars($track)) =~ /out_of_bounds/
+	! $track->timeline_adjustment->is_playable
 }
 
 }

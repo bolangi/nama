@@ -661,74 +661,367 @@ check_setup('Create submix with output at soundcard - JACK');
 nama_cmd('remove_bus Vo');
 nama_cmd('sax mono');
 
-###### Timeline tests
-#
-# This table tests how the offset run mode affects
-# other time displacing operations. 
-#
-# If you have a region, the offset could occur
-# before the region, in the middle of the region
-# or after the region. Code for each case
-# is different. There is further an 
-# interaction with playat. 
-#
-# The tests are exhaustive, all possible
-# combinations are covered.
-#
-# The numbers indicate time positions.
-
-# asterisk (*) indicates that no output is available
-# for that specific field
+###### Timeline conversion tests
 
 {
+package OffsetRunTestTrack;
+use Role::Tiny::With;
+with '::TrackRegion';
 
-$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "Edit mode playat$ENV{NAMA_VERBOSE_TEST_OUTPUT} region endpoints adjustment";
-my @tests = split "\n",<<TEST_DATA;
-1 12 5 15 4   8  *  *  * 30 out_of_bounds_near region
-2 12 5 15 23 26  *  *  * 30 out_of_bounds_far region
-3 12 5 15 10 17  2  5 10 30 play_start_during_playat_delay region
-4 12 5 15 13 21  0  6 14 30 play_start_within_region region
-5 12 5 15 21 26  0 14 19 30 play_start_within_region region
-6  0 5 15  5  9  0 10 14 30 play_start_within_region region
-7  0 0  0  5  9  0  5  9 30 no_region_play_start_after_playat_delay no_playat
-8  2 0  0  5  9  0  3  7 30 no_region_play_start_after_playat_delay
-9  6 0  0  5  9  1  0  3 30 no_region_play_start_during_playat_delay
-10 6 0  0  3  5  *  *  * 30 out_of_bounds_near no_region
-11 6 0  0 40 49  *  *  * 30 out_of_bounds_far  no_region
-12 6 0  0 34 40  0 28 30 30 no_region_play_start_after_playat_delay end_after_wav_length
-
-TEST_DATA
-
-foreach(@tests){
-
-	#diag($_);
-	my ($index, 
-		$playat, 
-		$region_start, 
-		$region_end, 
-		$edit_play_start,
-		$edit_play_end, 
-		$new_playat, 
-		$new_region_start, 
-		$new_region_end,
-		$length,
-		$case, 
-		$comment,
-	) = split " ", $_;
-
-	my $args = {
-		playat 			=> $playat, 
-		region_start 	=> $region_start, 
-		region_end 		=> $region_end, 
-		edit_play_start => $edit_play_start,
-		edit_play_end 	=> $edit_play_end,
-		setup_length 	=> $length,
-	};
-	is( ::edit_case($args), $case, "$index: $case $comment");
-	is( ::new_playat($args), $new_playat, "$index: new_playat: $case");
-	is( ::new_region_start($args), $new_region_start, "$index: new_region_start: $case");
-	is( ::new_region_end($args), $new_region_end, "$index: new_region_end: $case");
+sub new { my ($class, %args) = @_; bless \%args, $class }
+sub set {
+	my ($self, %args) = @_;
+	$self->{$_} = $args{$_} for keys %args;
 }
+sub name { $_[0]->{name} }
+sub playat { $_[0]->{playat} }
+sub region_start { $_[0]->{region_start} }
+sub region_end { $_[0]->{region_end} }
+sub wav_length { $_[0]->{wav_length} }
+sub full_path { $_[0]->{full_path} }
+sub modifiers { '' }
+sub effective_rw { 'PLAY' }
+sub width { 2 }
+sub pan { undef }
+sub wav_format { 's16_le,2,44100,i' }
+sub fader { 'offset-test-fader' }
+
+package OffsetRunTestEffect;
+sub type { 'ea' }
+
+package OffsetRunTestEngine;
+sub valid_setup { 1 }
+
+package OffsetRunTestUI;
+sub save_palette {}
+
+package ::;
+}
+
+{
+local $setup->{timeline_adjustment};
+is(
+	::adjusted_time_from_timeline_position(37),
+	37,
+	'timeline position is unchanged without adjustment',
+);
+is(
+	::timeline_position_from_adjusted_time(7),
+	7,
+	'adjusted time is unchanged without adjustment',
+);
+
+$setup->{timeline_adjustment} = {
+	type => 'offset_run',
+	timeline_play_start => 30,
+	timeline_play_end => 60,
+};
+is(
+	::adjusted_time_from_timeline_position(37),
+	7,
+	'timeline position converts to adjusted time',
+);
+is(
+	::timeline_position_from_adjusted_time(7),
+	37,
+	'adjusted time converts to timeline position',
+);
+is(
+	::Mark::time_from_tag('37.0'),
+	'37.0',
+	'time from tag remains a permanent timeline position',
+);
+is(
+	::Mark::adjusted_time_from_tag('37.0'),
+	7,
+	'adjusted time from tag converts for an engine consumer',
+);
+is(
+	::Mark::adjusted_time_from_tag('30.0'),
+	0,
+	'adjusted time from tag retains engine time zero',
+);
+is(
+	::adjusted_playback_position_from_timeline_position(20),
+	0,
+	'playback position before adjustment window clamps to zero',
+);
+is(
+	::adjusted_playback_position_from_timeline_position(37),
+	7,
+	'playback timeline position converts for engine restore',
+);
+}
+
+{
+my @cases = (
+	{
+		name => 'full WAV overlapping offset start',
+		track => { playat => '0.0' },
+		window => [5, 9],
+		device_id => 'select,5,4,/tmp/offset-test.wav',
+	},
+	{
+		name => 'full WAV beginning after offset start',
+		track => { playat => '6.0' },
+		window => [5, 9],
+		device_id => 'playat,1,select,0,3,/tmp/offset-test.wav',
+	},
+	{
+		name => 'region overlapping offset start',
+		track => {
+			playat => '0.0', region_start => '5.0', region_end => '15.0',
+		},
+		window => [4, 8],
+		device_id => 'select,9,4,/tmp/offset-test.wav',
+	},
+	{
+		name => 'region beginning after offset start',
+		track => {
+			playat => '6.0', region_start => '5.0', region_end => '15.0',
+		},
+		window => [5, 9],
+		device_id => 'playat,1,select,5,3,/tmp/offset-test.wav',
+	},
+	{
+		name => 'region ending before offset start',
+		track => {
+			playat => '0.0', region_start => '5.0', region_end => '15.0',
+		},
+		window => [12, 20],
+		out_of_bounds => 1,
+	},
+	{
+		name => 'track playat delay crossing offset start',
+		track => { playat => '8.0' },
+		window => [5, 12],
+		device_id => 'playat,3,select,0,4,/tmp/offset-test.wav',
+	},
+);
+
+for my $case (@cases){
+	local $setup->{timeline_adjustment} = {
+		type => 'offset_run',
+		timeline_play_start => $case->{window}->[0],
+		timeline_play_end => $case->{window}->[1],
+	};
+	my $track = OffsetRunTestTrack->new(
+		name => 'offset-test',
+		wav_length => 30,
+		full_path => '/tmp/offset-test.wav',
+		%{$case->{track}},
+	);
+	local $tn{'offset-test'} = $track;
+	local $::IO::by_name{'offset-test'};
+	if ($case->{out_of_bounds}){
+		ok($track->region_is_out_of_bounds, $case->{name});
+		next;
+	}
+	local $setup->{wav_info}->{'/tmp/offset-test.wav'}->{format} =
+		's16_le,2,44100,i';
+	my $input = ::IO::from_wav->new(track => 'offset-test');
+	is($input->device_id, $case->{device_id},
+		"$case->{name}: adjusted Ecasound playat/select");
+	is(
+		$input->ecs_string,
+		'-f:s16_le,2,44100,i -i:' . $case->{device_id},
+		"$case->{name}: complete adjusted Ecasound input",
+	);
+}
+}
+
+{
+local $setup->{timeline_adjustment} = {
+	type => 'offset_run',
+	timeline_play_start => 10,
+	timeline_play_end => 20,
+};
+my $track = OffsetRunTestTrack->new(
+	name => 'fade-window-test',
+	playat => '0.0',
+	wav_length => 30,
+	full_path => '/tmp/fade-window-test.wav',
+);
+local $tn{'fade-window-test'} = $track;
+local %::Mark::by_name = (
+	before_start => bless({name => 'before_start', time => 2}, '::Mark'),
+	before_end   => bless({name => 'before_end',   time => 4}, '::Mark'),
+	inside_start => bless({name => 'inside_start', time => 12}, '::Mark'),
+	inside_end   => bless({name => 'inside_end',   time => 14}, '::Mark'),
+	after_start  => bless({name => 'after_start',  time => 22}, '::Mark'),
+	after_end    => bless({name => 'after_end',    time => 24}, '::Mark'),
+);
+local %::Fade::by_index = (
+	1 => bless({
+		track => 'fade-window-test', type => 'out',
+		mark1 => 'before_start', mark2 => 'before_end',
+	}, '::Fade'),
+	2 => bless({
+		track => 'fade-window-test', type => 'in',
+		mark1 => 'inside_start', mark2 => 'inside_end',
+	}, '::Fade'),
+	3 => bless({
+		track => 'fade-window-test', type => 'out',
+		mark1 => 'after_start', mark2 => 'after_end',
+	}, '::Fade'),
+);
+no warnings 'redefine';
+local $::Effect::by_id{'offset-test-fader'} =
+	bless({}, 'OffsetRunTestEffect');
+my $envelope = ::Fade::fader_envelope($track);
+is($envelope->{initial_level}, 0,
+	'a fade before the window establishes its initial level');
+is_deeply(
+	$envelope->{pairs},
+	[4, 0, 0, 2, 0, 4, 1, 10, 1],
+	'fades before, inside, and after produce the clipped engine envelope',
+);
+}
+
+{
+local $setup->{timeline_adjustment} = {
+	type => 'offset_run',
+	timeline_play_start => 30,
+	timeline_play_end => 60,
+};
+local %::Mark::by_name;
+local @::Mark::all;
+local $::this_mark;
+
+my $jump_mark = bless({name => 'Jump', time => 37}, '::Mark');
+$::Mark::by_name{Jump} = $jump_mark;
+my $engine_position;
+no warnings 'redefine';
+local *::set_position = sub { $engine_position = shift };
+$jump_mark->jump_here;
+is($engine_position, 7,
+	'jumping to a mark during offset mode seeks to adjusted engine time');
+
+local *::ecasound_iam = sub { 7 };
+::drop_mark(name => 'Dropped');
+is($::Mark::by_name{Dropped}->time, 37,
+	'dropping a mark during offset mode stores permanent timeline time');
+}
+
+{
+local $setup->{timeline_adjustment} = {
+	type => 'offset_run',
+	timeline_play_start => 30,
+	timeline_play_end => 60,
+};
+local $project->{playback_position};
+local $project->{nama_version};
+local $this_engine = bless({}, 'OffsetRunTestEngine');
+local $ui = bless({}, 'OffsetRunTestUI');
+local $config->{opts}->{a} = 0;
+no warnings 'redefine';
+local *::ecasound_iam = sub { 7 };
+local *::save_system_state = sub {};
+local *::save_global_effect_chains = sub {};
+local *::save_midish = sub {};
+::save_state('/tmp/offset-run-state.json');
+is($project->{playback_position}, 37,
+	'saving during offset mode stores permanent playback position');
+is(
+	::adjusted_playback_position_from_timeline_position(
+		$project->{playback_position}
+	),
+	7,
+	'restored permanent playback position converts back to engine time',
+);
+}
+
+{
+local $setup->{timeline_adjustment} = {
+	type => 'offset_run',
+	timeline_play_start => 30,
+	timeline_play_end => 60,
+	positioning_mark => 'RecordHere',
+};
+local %::Mark::by_name = (
+	RecordHere => bless({name => 'RecordHere', time => 37}, '::Mark'),
+);
+my $recorded = OffsetRunTestTrack->new(
+	name => 'recorded-offset-test',
+	playat => undef,
+	wav_length => 30,
+	full_path => '/tmp/recorded-offset-test.wav',
+);
+no warnings 'redefine';
+local *::ChainSetup::engine_wav_out_tracks = sub { $recorded };
+::adjust_offset_recordings();
+is($recorded->{playat}, 'RecordHere',
+	'recorded track stores permanent offset-run positioning mark');
+is($recorded->timeline_position, 37,
+	'recorded track resolves its permanent timeline position');
+}
+
+{
+local $setup->{timeline_adjustment};
+local $setup->{loop_endpoints} = ['20.5', '40.5'];
+
+is_deeply(
+	[::Mark::loop_timeline_interval()],
+	[20.5, 40.5],
+	'loop endpoints remain project timeline positions',
+);
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	[20.5, 40.5],
+	'loop endpoints are unchanged without timeline adjustment',
+);
+
+$setup->{loop_endpoints} = ['0.0', '10.0'];
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	['0.0', '10.0'],
+	'a loop endpoint at engine time zero is retained',
+);
+
+$setup->{timeline_adjustment} = {
+	type => 'offset_run',
+	timeline_play_start => 30.5,
+	timeline_play_end => 60.5,
+};
+$setup->{loop_endpoints} = ['20.5', '40.5'];
+is_deeply(
+	[::Mark::loop_timeline_interval()],
+	[20.5, 40.5],
+	'adjustment does not change permanent loop endpoints',
+);
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	[0, 10],
+	'loop crossing setup start is clipped and retains adjusted zero',
+);
+
+$setup->{loop_endpoints} = ['10.5', '20.5'];
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	[],
+	'loop entirely before adjusted setup is inactive',
+);
+
+$setup->{loop_endpoints} = ['50.5', '70.5'];
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	[20, 30],
+	'loop crossing setup end is clipped to adjusted setup endpoint',
+);
+
+$setup->{loop_endpoints} = ['40.5', '50.5'];
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	[10, 20],
+	'loop wholly inside offset window retains both adjusted endpoints',
+);
+
+$setup->{loop_endpoints} = ['70.5', '80.5'];
+is_deeply(
+	[::Mark::adjusted_loop_interval()],
+	[],
+	'loop wholly after offset window is inactive',
+);
 }
 
 

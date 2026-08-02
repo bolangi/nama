@@ -144,7 +144,9 @@ sub connect_transport {
 	register_own_ports();
 	$ui->length_display(-text => colonize($setup->{audio_length}));
 	ecasound_iam("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->effective_rec and $setup->{audio_length};
-	$ui->clock_config(-text => colonize(0));
+	$ui->clock_config(
+		-text => colonize(int(timeline_position_from_adjusted_time(0)))
+	);
 	sleeper(0.2); # time for ecasound engine to launch
 
 	# set delay for seeking under JACK
@@ -174,13 +176,13 @@ sub transport_status {
 
 	# assume transport is stopped
 	# print looping status, setup length, current position
-	my $start  = ::Mark::loop_start();
-	my $end    = ::Mark::loop_end();
+	my $start  = ::Mark::loop_timeline_start();
+	my $end    = ::Mark::loop_timeline_end();
 	#print "start: $start, end: $end, loop_enable: $mode->{loop_enable}\n";
 	if (ref $setup->{record_midi} and %{$setup->{record_midi}}){
 		pager(join(" ", keys %{$setup->{record_midi}}), ": ready for caching");
 	}
-	if ($mode->{loop_enable} and $start and $end){
+	if ($mode->{loop_enable} and defined $start and defined $end){
 		#if (! $end){  $end = $start; $start = 0}
 		pager("looping from ", heuristic_time($start),
 				 	"to ",   heuristic_time($end));

@@ -277,7 +277,12 @@ sub configure {
 		}
 		else 
 		{ 
-			set_position($project->{playback_position}) if $project->{playback_position} 
+			if ($project->{playback_position}) {
+				my $adjusted_position = adjusted_playback_position_from_timeline_position(
+					$project->{playback_position}
+				);
+				set_position($adjusted_position);
+			}
 		}
 		transport_status();
 		$ui->flash_ready;

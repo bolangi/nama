@@ -1175,7 +1175,7 @@ sub setup_playback_indicator {
 } 	
 sub update_indicator {
 	$gui->{wwcanvas}->delete('playback-indicator');
-	my $pos = ::ecasound_iam("getpos");
+	my $pos = ::current_timeline_position();
 	my $xpos = int( $pos * $config->{waveform_pixels_per_second} );
 	$gui->{wwcanvas}->createLine(
 			$xpos,0,
