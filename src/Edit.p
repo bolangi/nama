@@ -653,6 +653,13 @@ sub timeline_position_from_adjusted_time {
 	return $adjusted_time unless timeline_adjustment_active();
 	$adjusted_time + timeline_play_start_position()
 }
+sub adjusted_playback_position_from_timeline_position {
+	my $timeline_position = shift;
+	my $adjusted_position = adjusted_time_from_timeline_position(
+		$timeline_position
+	);
+	$adjusted_position < 0 ? 0 : $adjusted_position
+}
 sub timeline_adjustment_active { defined $setup->{timeline_adjustment} }
 sub timeline_adjustment_type {
 	return '' unless timeline_adjustment_active();

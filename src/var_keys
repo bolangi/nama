@@ -161,7 +161,7 @@ $project->{current_param}		# current parameter, per effect
 $project->{current_stepsize}	# stepsize, per effect/parameter
 $project->{current_waveform_timescale} # multiply by clip length for waveform image length in pixels.
 $project->{current_waveform}->{track_name}
-$project->{playback_position}	# in order to restore position after a reconfigure
+$project->{playback_position}	# timeline position restored after reconfigure
 $project->{mark_sequence_counter} # used for system assigned mark names
 $project->{redo}				# last commit removed by undo
 $project->{midi_history}		# all text commands sent to midish

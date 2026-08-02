@@ -763,6 +763,16 @@ is(
 	37,
 	'adjusted time converts to timeline position',
 );
+is(
+	::adjusted_playback_position_from_timeline_position(20),
+	0,
+	'playback position before adjustment window clamps to zero',
+);
+is(
+	::adjusted_playback_position_from_timeline_position(37),
+	7,
+	'playback timeline position converts for engine restore',
+);
 }
 
 
