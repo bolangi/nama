@@ -88,13 +88,8 @@ sub effective_rw {
 }
 
 sub candidate_factors {
-	my ($track, $candidate) = @_;
+	my $track = shift;
 	my @factors;
-	my $class = ref $track;
-	$class =~ s/^.*:://;
-	push @factors, "track class: $class";
-	push @factors, "requested rw: ".$track->rw;
-	push @factors, "candidate rw: $candidate";
 	if ($track->source_type){
 		my $source = $track->source_type;
 		$source .= ' '.$track->source_id if defined $track->source_id;
@@ -114,8 +109,7 @@ sub candidate_factors {
 			: "JACK source: unavailable";
 	}
 	if ($track->can('target') and $track->target and $tn{$track->target}){
-		push @factors, "status inherited from ".$track->target.
-			" (candidate rw ".$tn{$track->target}->candidate_rw.")";
+		push @factors, "status inherited from ".$track->target;
 	}
 	\@factors
 }
@@ -139,20 +133,15 @@ sub explain_track_status {
 	return "No track is selected.\n" unless $track;
 	my $resolution = $track->resolve_rw_status;
 	my $class = ref $track;
-	$class =~ s/^.*:://;
-	my @lines = ("Track: ".$track->name." ($class)");
+	$class =~ s/^:://;
+	$class =~ s/^Audio::Nama:://;
+	my @lines = ("Track ".$track->n.": ".$track->name." ($class)");
 	if (! $resolution){
 		push @lines,
-			"Effective rw: unresolved",
-			"Reason: no audio routing graph resolution is available";
+			"Error: no audio routing graph resolution is available",
+			"Effective rw: unresolved";
 		return join("\n", @lines)."\n"
 	}
-	push @lines,
-		"Requested rw: ".$resolution->{requested},
-		"Candidate rw: ".$resolution->{candidate_rw},
-		"Effective rw: ".$resolution->{effective_rw},
-		"Candidate graph: ".($resolution->{in_candidate_graph} ? 'yes' : 'no'),
-		"Final graph: ".($resolution->{in_final_graph} ? 'yes' : 'no');
 	my %reason = (
 		'requested-off'       => 'the track was requested OFF',
 		'no-playback-file'     => 'no WAV file was available to play',
@@ -164,8 +153,15 @@ sub explain_track_status {
 		'no-source'             => 'the graph branch had no viable source',
 		'no-sink'               => 'the graph branch had no viable sink',
 	);
-	push @lines, "Reason: ".($reason{$resolution->{reason}} // 'the track survived graph pruning');
-	push @lines, "Factors:", map { "  - $_" } @{$resolution->{factors} // []};
+	push @lines,
+		"Error: ".($reason{$resolution->{reason}} // 'none'),
+		"Requested rw: ".$resolution->{requested},
+		"Candidate rw: ".$resolution->{candidate_rw},
+		"Effective rw: ".$resolution->{effective_rw},
+		"Candidate graph: ".($resolution->{in_candidate_graph} ? 'yes' : 'no'),
+		"Final graph: ".($resolution->{in_final_graph} ? 'yes' : 'no');
+	my %seen;
+	push @lines, grep { ! $seen{$_}++ } @{$resolution->{factors} // []};
 	join("\n", @lines)."\n"
 }
 
@@ -329,7 +325,7 @@ sub prune_graph {
 					requested => $track->rw,
 					candidate_rw => $candidate,
 					in_candidate_graph => $in_candidate_graph{$_} ? 1 : 0,
-					factors => candidate_factors($track, $candidate),
+					factors => candidate_factors($track),
 				}
 			} @report_tracks
 		},

@@ -529,8 +529,7 @@ show_track:
 why:
   type: track
   what: |
-    Explain how the current track's requested and candidate rw values,
-    routing-graph membership, and pruning result produced its effective rw.
+    Show the current track's routing error and the data used to resolve it.
   parameters: none
 show_mode:
   type: setup
