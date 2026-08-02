@@ -61,24 +61,24 @@ sub adjusted_timeline_endpoint {
 sub adjusted_startpoint {
 	my $track = shift;
 	return $track->startpoint unless $mode->{offset_run};
-	::new_region_start(::edit_vars($track));
+	::new_region_start(::timeline_adjustment_args($track));
 	
 }
 sub adjusted_timeline_position {
 	my $track = shift;
 	return $track->timeline_position unless $mode->{offset_run};
-	::new_playat(::edit_vars($track));
+	::new_playat(::timeline_adjustment_args($track));
 }
 sub adjusted_endpoint {
 	my $track = shift;
 	return $track->endpoint unless $mode->{offset_run};
-	::new_region_end(::edit_vars($track));
+	::new_region_end(::timeline_adjustment_args($track));
 }
 
 sub region_is_out_of_bounds {
 	return unless $mode->{offset_run};
 	my $track = shift;
-	::case(::edit_vars($track)) =~ /out_of_bounds/
+	::edit_case(::timeline_adjustment_args($track)) =~ /out_of_bounds/
 }
 
 }

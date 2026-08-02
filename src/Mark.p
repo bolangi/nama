@@ -75,7 +75,7 @@ sub jump_here {
 sub shifted_time {  # for marks within current edit
 	my $mark = shift;
 	return $mark->time unless $mode->{offset_run};
-	my $time = $mark->time - ::play_start_time();
+	my $time = $mark->time - ::timeline_play_start_position();
 	$time > 0 ? $time : 0
 }
 sub remove {
@@ -150,7 +150,7 @@ sub mark_time {
 	my $tag = shift;
 	my $time = time_from_tag($tag);
 	return unless defined $time;
-	$time -= ::play_start_time() if $mode->{offset_run};
+	$time -= ::timeline_play_start_position() if $mode->{offset_run};
 	$time
 }
 

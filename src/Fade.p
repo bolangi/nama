@@ -116,8 +116,8 @@ sub fades {
 
 	# handle offset run mode
 	my @in_bounds;
-	my $play_end = ::play_end_time();
-	my $play_start_time = ::play_start_time();
+	my $play_end = ::timeline_play_end_position();
+	my $play_start_time = ::timeline_play_start_position();
 	my $length = $track->wav_length;
 	for my $fade (@fades){
 		my $play_end_time = $play_end ?  min($play_end, $length) : $length;

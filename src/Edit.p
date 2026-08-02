@@ -538,11 +538,11 @@ sub edit_fades {
 # playat
 # region_start
 # region_end
-# setup_length
+# wav_length
 #
 ### edit values
-# edit_play_start
-# edit_play_end
+# timeline_play_start
+# timeline_play_end
 #
 ### dispatch tables
 # playat_dispatch
@@ -566,9 +566,9 @@ sub region_start_dispatch {
 	no_region_play_start_during_playat_delay =>  0,
 
 	play_start_within_region 
-				=> $args->{region_start} + $args->{edit_play_start} - $args->{playat},
+				=> $args->{region_start} + $args->{timeline_play_start} - $args->{playat},
 	no_region_play_start_after_playat_delay
-				=> $args->{region_start} + $args->{edit_play_start} - $args->{playat},
+				=> $args->{region_start} + $args->{timeline_play_start} - $args->{playat},
 	);
 	$table{$key}
 }
@@ -578,9 +578,9 @@ sub playat_dispatch {
     out_of_bounds_near				=> "*",
     out_of_bounds_far				=> "*",	
 
-	play_start_during_playat_delay	=> $args->{playat} - $args->{edit_play_start},
+	play_start_during_playat_delay	=> $args->{playat} - $args->{timeline_play_start},
 	no_region_play_start_during_playat_delay
-									=> $args->{playat} - $args->{edit_play_start},
+									=> $args->{playat} - $args->{timeline_play_start},
 
 	play_start_within_region   				=> 0,
 	no_region_play_start_after_playat_delay => 0,
@@ -594,14 +594,14 @@ sub region_end_dispatch {
     out_of_bounds_far				=> "*",	
 
 	play_start_during_playat_delay	
-		=>  $args->{region_start} + $args->{edit_play_end} - $args->{playat},
+		=>  $args->{region_start} + $args->{timeline_play_end} - $args->{playat},
 	no_region_play_start_during_playat_delay 
-		=>                  $args->{edit_play_end} - $args->{playat},
+		=>                  $args->{timeline_play_end} - $args->{playat},
 
 	play_start_within_region 
-		=>  $args->{region_start} + $args->{edit_play_end} - $args->{playat},
+		=>  $args->{region_start} + $args->{timeline_play_end} - $args->{playat},
 	no_region_play_start_after_playat_delay
-		=>                  $args->{edit_play_end} - $args->{playat},
+		=>                  $args->{timeline_play_end} - $args->{playat},
 	);
 	$table{$key}
 }
@@ -617,7 +617,7 @@ sub new_region_end {
 	my $args = shift;
 	my $end = region_end_dispatch($args, edit_case($args));
 	return $end if $end eq '*';
-	$end < $args->{setup_length} ? $end : $args->{setup_length}
+	$end < $args->{wav_length} ? $end : $args->{wav_length}
 };
 # the following value will always allow enough time
 # to record the edit. it may be longer than the 
@@ -631,54 +631,53 @@ sub edit_case {
 	
     if ( ! $args->{region_start} and ! $args->{region_end}  )
 	{
-		if( $args->{edit_play_end} < $args->{playat})
+		if( $args->{timeline_play_end} < $args->{playat})
 			{ "out_of_bounds_near" }
-		elsif( $args->{edit_play_start} > $args->{playat} + $args->{setup_length})
+		elsif( $args->{timeline_play_start} > $args->{playat} + $args->{wav_length})
 			{ "out_of_bounds_far" }
-		elsif( $args->{edit_play_start} >= $args->{playat})
+		elsif( $args->{timeline_play_start} >= $args->{playat})
 			{"no_region_play_start_after_playat_delay"}
-		elsif( $args->{edit_play_start} < $args->{playat} and $args->{edit_play_end} > $args->{playat} )
+		elsif( $args->{timeline_play_start} < $args->{playat} and $args->{timeline_play_end} > $args->{playat} )
 			{ "no_region_play_start_during_playat_delay"}
 	} 
 	# logic for region present case
 	
 	elsif ( defined $args->{region_start} and defined $args->{region_end} )
 	{ 
-		if ( $args->{edit_play_end} < $args->{playat})
+		if ( $args->{timeline_play_end} < $args->{playat})
 			{ "out_of_bounds_near" }
-		elsif ( $args->{edit_play_start} > $args->{playat} + $args->{region_end} - $args->{region_start})
+		elsif ( $args->{timeline_play_start} > $args->{playat} + $args->{region_end} - $args->{region_start})
 			{ "out_of_bounds_far" }
-		elsif ( $args->{edit_play_start} >= $args->{playat})
+		elsif ( $args->{timeline_play_start} >= $args->{playat})
 			{ "play_start_within_region"}
-		elsif ( $args->{edit_play_start} < $args->{playat} and $args->{playat} < $args->{edit_play_end})
+		elsif ( $args->{timeline_play_start} < $args->{playat} and $args->{playat} < $args->{timeline_play_end})
 			{ "play_start_during_playat_delay"}
 		else {carp "$args->{trackname}: fell through if-then"}
 	}
 	else { carp "$args->{trackname}: improperly defined region" }
 }
 
-sub play_start_time {
+sub timeline_play_start_position {
 	defined $this_edit 
 		? $this_edit->play_start_time 
 		: $setup->{offset_run}->{start_time} # zero unless offset run mode
 }
-sub play_end_time {
+sub timeline_play_end_position {
 	defined $this_edit 
 		? $this_edit->play_end_time 
 		: $setup->{offset_run}->{end_time}   # undef unless offset run mode
 }
-sub edit_vars {
-	my $edit = shift || $this_edit;
-	::throw("edit is undefined"), return unless $edit;
-	my $track = $::tn{$edit}->{host_track};
+sub timeline_adjustment_args {
+	my $track = shift;
+	::throw("track is undefined"), return unless $track;
 	{
 	trackname      	=> $track->name,
 	playat 			=> $track->timeline_position,
 	region_start   	=> $track->startpoint,
 	region_end 		=> $track->endpoint,
-	edit_play_start => $edit->play_start_time(),
-	edit_play_end	=> $edit->play_end_time(),
-	setup_length 	=> $track->wav_length(),
+	timeline_play_start => timeline_play_start_position(),
+	timeline_play_end   => timeline_play_end_position(),
+	wav_length          => $track->wav_length(),
 	}
 }
 

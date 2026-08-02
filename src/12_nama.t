@@ -706,8 +706,8 @@ foreach(@tests){
 		$playat, 
 		$region_start, 
 		$region_end, 
-		$edit_play_start,
-		$edit_play_end, 
+		$timeline_play_start,
+		$timeline_play_end,
 		$new_playat, 
 		$new_region_start, 
 		$new_region_end,
@@ -720,9 +720,9 @@ foreach(@tests){
 		playat 			=> $playat, 
 		region_start 	=> $region_start, 
 		region_end 		=> $region_end, 
-		edit_play_start => $edit_play_start,
-		edit_play_end 	=> $edit_play_end,
-		setup_length 	=> $length,
+		timeline_play_start => $timeline_play_start,
+		timeline_play_end 	=> $timeline_play_end,
+		wav_length 		=> $length,
 	};
 	is( ::edit_case($args), $case, "$index: $case $comment");
 	is( ::new_playat($args), $new_playat, "$index: new_playat: $case");

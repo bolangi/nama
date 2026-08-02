@@ -297,7 +297,7 @@ sub remove_out_of_bounds_tracks {
 	my $g = shift;
 	my @names = $g->successors('wav_in');  # PLAY status tracks
 	my @remove = grep{
-		::edit_case(::edit_vars($::tn{$_})) =~ /out_of_bounds/
+		::edit_case(::timeline_adjustment_args($::tn{$_})) =~ /out_of_bounds/
 	} @names;
 	remove_tracks($g, @remove);
 }
