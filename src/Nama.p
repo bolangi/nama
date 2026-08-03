@@ -1,5 +1,5 @@
 package ::;
-our $VERSION = "1.605";
+our $VERSION = "2.000";
 use v5.36;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
