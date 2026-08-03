@@ -1,0 +1,71 @@
+#!/usr/bin/env perl
+use v5.36;
+use YAML::Tiny;
+
+my $output = shift @ARGV // q{};
+my $options = YAML::Tiny->read('options.yml')->[0];
+
+validate($options);
+
+if ($output eq 'specs') {
+	for my $option (@$options) {
+		my $spec = $option->{long};
+		$spec .= "=$option->{argument}" if $option->{argument};
+		say "\t\t'$spec' => '$option->{short}',";
+	}
+}
+elsif ($output eq 'help') {
+	say 'USAGE: nama [options] [project_name]';
+	say q{};
+	emit_help_group($options, 'basic');
+	say 'Advanced and diagnostic options';
+	say q{};
+	emit_help_group($options, 'diagnostic');
+	say 'See nama(1) for additional options.';
+}
+elsif ($output eq 'pod') {
+	my @groups = (
+		[basic      => undef],
+		[diagnostic => 'Advanced and diagnostic options'],
+		[man        => 'Additional options'],
+	);
+	for my $group (@groups) {
+		my ($audience, $heading) = @$group;
+		say "$heading\n" if defined $heading;
+		say '=over 12';
+		say q{};
+		for my $option (grep { $_->{audience} eq $audience } @$options) {
+			say "=item B<--$option->{long}, -$option->{short}>";
+			say q{};
+			say $option->{description};
+			say q{};
+		}
+		say '=back';
+		say q{};
+	}
+}
+else {
+	die "Usage: $0 specs|help|pod\n";
+}
+
+sub emit_help_group ($options, $audience) {
+	for my $option (grep { $_->{audience} eq $audience } @$options) {
+		printf "%-34s%s\n", "--$option->{long}, -$option->{short}",
+			$option->{description};
+	}
+	say q{};
+}
+
+sub validate ($options) {
+	my (%long, %short);
+	for my $option (@$options) {
+		die "Option without long name\n" unless $option->{long};
+		die "--$option->{long} has no short name\n" unless $option->{short};
+		die "Duplicate option --$option->{long}\n" if $long{$option->{long}}++;
+		die "Duplicate option -$option->{short}\n" if $short{$option->{short}}++;
+		die "--$option->{long} has invalid audience\n"
+			unless $option->{audience} =~ /\A(?:basic|diagnostic|man|hidden)\z/;
+		die "--$option->{long} needs a description\n"
+			unless $option->{audience} eq 'hidden' || $option->{description};
+	}
+}
