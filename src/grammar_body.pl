@@ -454,7 +454,7 @@ set_region: _set_region beginning { ::set_region( $item{beginning}, 'END' );
 	1;
 }
 remove_region: _remove_region { ::remove_region(); 1; }
-add_clip: _add_clip beginning ending track_name(?) {
+new_clip: _new_clip beginning ending track_name(?) {
 	my $name = $item{'track_name(?)'}->[0];
 	::new_region(@item{qw(beginning ending)}, $name); 1
 }

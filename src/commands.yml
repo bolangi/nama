@@ -562,11 +562,12 @@ set_region:
     mark sax_end   # Create another mark
     set-region sax_start sax_end 
     !  Play only the audio from 2.5 to 120.5 seconds.
-add_clip:
+new_clip:
   type: track
   what: |
     Make a clip copying the current track and adding a region 
     definition. The original track is untouched.
+  short: ncl
   parameters: <string:start_mark_name> | <float:start_time> <string:end_mark_name> | <float:end_time> [ <string:region_name> ]
   example: |
     sax # Select "sax" as the current track.
@@ -583,7 +584,7 @@ remove_region:
 shift_track:
   type: track
   what: |
-    Choose an initial delay before playing a track or region.
+    Position a track (or clip) on the timeline
     Can be reversed by unshift-track.
   short: shift playat pat
   parameters: <string:start_mark_name> | <integer:start_mark_index | <float:start_seconds>
@@ -592,7 +593,7 @@ shift_track:
     shift 6.7 # Move the start of track to 6.7 seconds.
 unshift_track:
   type: track
-  what: Restore the playback start time of a track or region to 0. 
+  what: Position track (or clip) at timeline zero.
   short: unshift
   parameters: none
 modifiers:

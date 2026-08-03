@@ -198,8 +198,8 @@ MARKS
 defining_and_positioning_clips => <<'DEFINING_AND_POSITIONING_CLIPS',
    Defining and positioning clips
 
-   set-region,    srg      - defining a playable region, a clip
-   add-clip,      acp      - make a clip by copying the current track and 
+   set-region,    srg      - reduce the track to playable region, a clip
+   new-clip,      ncl      - make a clip by copying the current track and 
                              defining a region
    remove-region, rrg      - remove region definition or clip
    shift-track,   shift    - set timeline position for track or region to play
