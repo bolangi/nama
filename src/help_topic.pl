@@ -25,6 +25,7 @@ version_control
 diagnostics
 edits
 advanced
+sequences
                 ) ;
 my $i;
 my @display_index = map{ $help->{index}->{++$i} = $_;  # integer => topic key
@@ -39,7 +40,10 @@ sub pad {
     my $pad = ' ' x ( $len - length $text);
     $text.$pad
 }
-my @twocolumn = map{ pad($display_index[$_], 22).$display_index[$_+13].$/ } 0..12;
+my $column_length = int((@display_index + 1) / 2);
+my @twocolumn = map {
+    pad($display_index[$_], 22).($display_index[$_ + $column_length] // '').$/
+} 0..$column_length - 1;
 
 
 %{ $help->{topic} }  = (
@@ -182,21 +186,24 @@ marks => <<MARKS,
    modify-mark, move-mark, 
     mmk, mm                   - change the time setting of current mark
 
-Marks belong to the overall timeline, not to a particular track.
-They do not move when a track is time-shifted.  Many commands
-that can take time positions as as arguments can also take mark
-names. This has the advantage that the time of effect will
-change when the mark is adjusted.  
+Marks belong to the overall timeline, not to a particular
+track. They do not move when a track is repositioned on the
+timeline. Many commands that can take time positions as 
+arguments can also take mark names. This has the advantage
+that the time of effect will change when the mark is
+adjusted.  
+
 MARKS
 
-time_shifting => <<'TIME_SHIFTING',
-   Regions and time shifting
+time_shifing => <<'TIME_SHIFTING',
+   Defining and positioning clips
 
-   set-region,    srg      - specify a track region using times or mark names
-   add-region,    arg      - define a region creating an auxiliary track
-   remove-region, rrg      - remove auxiliary track or region definition
-   shift-track,   shift    - set playback delay for track/region
-   unshift-track, unshift  - eliminate playback delay for track/region
+   set-region,    srg      - defining a playable region, a clip
+   add-clip,      acp      - make a clip by copying the current track and 
+                             defining a region
+   remove-region, rrg      - remove region definition or clip
+   shift-track,   shift    - set timeline position for track or region to play
+   unshift-track, unshift  - set timeline position to zero for a track or region
 TIME_SHIFTING
 
 track_io => <<'TRACKIO',
@@ -472,6 +479,23 @@ advanced => <<'ADVANCED',
 
    destroy-current-wav     - unlink current track's selected WAV version.
 ADVANCED
+
+sequences => <<'SEQUENCES',
+   new-sequence, nsq          - create a sequence from tracks or clips
+   select-sequence, slsq      - select the current sequence
+   list-sequences, lsq        - list all sequences
+   show-sequence, ssq         - show the items in the current sequence
+   append-to-sequence, asq    - append items to the current sequence
+   insert-in-sequence, isq    - insert items before a sequence position
+   remove-from-sequence, rsq  - remove items from the current sequence
+   add-spacer, asp            - add silence to the current sequence
+   delete-sequence, dsq       - delete a sequence
+   convert-to-sequence, csq   - convert the current track to a sequence
+   merge-sequence, msq        - render the current sequence to a WAV file
+
+A sequence plays its items consecutively. An item may be a track, which
+plays its entire WAV file, or a clip, which plays only its defined region.
+SEQUENCES
 
    
 );
