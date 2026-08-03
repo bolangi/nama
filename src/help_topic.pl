@@ -195,7 +195,7 @@ adjusted.
 
 MARKS
 
-time_shifing => <<'TIME_SHIFTING',
+time_shifting => <<'TIME_SHIFTING',
    Defining and positioning clips
 
    set-region,    srg      - defining a playable region, a clip
