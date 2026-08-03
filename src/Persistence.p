@@ -228,8 +228,8 @@ sub restore_state_from_file {
 	restore_global_effect_chains();
 
 	####### Backward Compatibility ########
-	
-	# none currently
+
+	delete $_->{rw} for	@bus_data;
 
 	#######################################
 
