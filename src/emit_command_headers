@@ -4,12 +4,12 @@ use Carp;
 no warnings "uninitialized";
 my $debug = 0;
 my (@commands, @abbrevs);
-use File::Slurp;
+use Path::Tiny;
 use YAML::Tiny;
 
 my $output = shift @ARGV;
 
-my $in = qx(cat ./commands.yml);
+my $in = path('./commands.yml')->slurp_raw;
 
 # preserve order for generating docs
 
@@ -135,7 +135,7 @@ sub yaml_in {
 	my $input = shift;
 	my $yaml = $input =~ /\n/ # check whether file or text
 		? $input 			# yaml text
-		: read_file($input);	# file name
+		: path($input)->slurp_raw; # file name
 	if ($yaml =~ /\t/){
 		croak "YAML file: $input contains illegal TAB character.";
 	}

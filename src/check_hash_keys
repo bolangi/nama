@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use v5.36;
-use File::Slurp;
+use Path::Tiny;
 # get registered keys by combining contents of two files 
 my %var_map = map{ split " ", $_ } split "\n", qx(./strip_all ./var_config);
 my @vars1 = values %var_map;
@@ -39,7 +39,7 @@ my $sre = qr/\$($srevars)->\{(\w+)}/;
 
 map{ 
 	my $filename = $_;
-	my $contents = read_file($filename);
+	my $contents = path($filename)->slurp_raw;
 	while( $contents =~ /$sre/g )
 	{
 		my($singleton,$key) = ($1,$2);

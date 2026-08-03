@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
-use File::Slurp;
+use Path::Tiny;
 my @files = @ARGV;
-map{ print strip_all(my $string = read_file($_)) } @files;
+map{ print strip_all(my $string = path($_)->slurp_raw) } @files;
 sub strip_all{ strip_blank_lines( strip_comments(@_) ) }
 
 sub strip_blank_lines {

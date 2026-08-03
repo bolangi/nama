@@ -1,9 +1,9 @@
 #!/usr/bin/env perl
 use v5.36;
-use File::Slurp;
+use Path::Tiny;
 print join $/, 
 		#map  { split " ", $_ }  # store as key/value pairs
 		grep { my @var = split " ", $_; @var == 2 } # take only substitutions
 		grep{ ! /^\s*$/ }  	# skip blank lines
 		map{ s/#.*$//; $_}  # remove comments
-		split "\n", read_file("./var_config");
+		split "\n", path("./var_config")->slurp_raw;

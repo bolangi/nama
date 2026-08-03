@@ -19,7 +19,6 @@ use v5.38;
 use Text::Template;
 use Getopt::Std;
 use Path::Tiny;
-use File::Slurp;
 use Cwd;
 use Storable qw(dclone); 
 
@@ -97,7 +96,7 @@ sub process {
 # ::, ::Text will be translated to Audio::Nama, # Audio::Nama::Text
 # after the file includes
 
-	if ( $file_out ) { write_file($file_out, $rooted_text) }
+	if ( $file_out ) { path($file_out)->spew_raw($rooted_text) }
 	else { print $rooted_text }
 }
 sub expand_root {
@@ -125,4 +124,3 @@ sub find_and_process {
 
 	
 __END__
-
