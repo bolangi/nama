@@ -8,7 +8,7 @@ track_fader
 effect_info
 effect_manipulation
 marks
-time_shifting
+defining_and_positioning_clips
 track_io
 inserts
 fades
@@ -195,7 +195,7 @@ adjusted.
 
 MARKS
 
-time_shifting => <<'TIME_SHIFTING',
+defining_and_positioning_clips => <<'DEFINING_AND_POSITIONING_CLIPS',
    Defining and positioning clips
 
    set-region,    srg      - defining a playable region, a clip
@@ -204,7 +204,7 @@ time_shifting => <<'TIME_SHIFTING',
    remove-region, rrg      - remove region definition or clip
    shift-track,   shift    - set timeline position for track or region to play
    unshift-track, unshift  - set timeline position to zero for a track or region
-TIME_SHIFTING
+DEFINING_AND_POSITIONING_CLIPS
 
 track_io => <<'TRACKIO',
    Track inputs and outputs are set by source and send commands, 
