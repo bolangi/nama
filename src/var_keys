@@ -138,6 +138,8 @@ $text->{rootwin}
 $text->{entry}
 $text->{entry_bindings}
 
+$text->{tk_tickit_bridge}
+
 # lists used for autocompletion
 $text->{autocomplete_keywords}
 $text->{executables}
