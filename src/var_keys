@@ -133,6 +133,7 @@ $text->{entry}
 $text->{entry_bindings}
 
 $text->{tk_tickit_bridge}
+$text->{terminal_starting}
 
 # lists used for autocompletion
 $text->{autocomplete_keywords}
