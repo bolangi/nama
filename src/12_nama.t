@@ -68,16 +68,6 @@ is( project_dir(), "$test_dir/$test_project", "establish project directory");
 
 is( ref $bn{Main}, q(Audio::Nama::SubBus), 'Bus initializtion');
 
-my ($main_bus_snapshot) = grep { $_->{name} eq 'Main' }
-	@{status_snapshot()->{buses}};
-is($main_bus_snapshot->{rw}, MON,
-	'status snapshot includes bus routing state');
-my $bus_snapshot_before = status_snapshot_string();
-$bn{Main}->set(rw => OFF);
-isnt(status_snapshot_string(), $bus_snapshot_before,
-	'changing only bus rw changes the status snapshot');
-$bn{Main}->set(rw => MON);
-
 is($tn{Main}->candidate_rw, MON,
 	'Main candidate rw is MON when enabled');
 ok($tn{Main}->candidate_mon,

@@ -26,7 +26,6 @@ package ::;
  );
 	my @relevant_bus_fields = qw(
 		name
-		rw
 		version
 		send_type
 		send_id

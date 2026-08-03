@@ -24,9 +24,6 @@ sub add_track {
 	$track->source($gui->{_chr}) if $gui->{_chr};
 #		$track->send($gui->{_chm}) if $gui->{_chm};
 
-	my $bus = $bn{$track->group}; 
-	$bus->set(rw => MON) unless $track->target; # not if is alias
-
 	# normal tracks set to config->new_track_rw 
 	# defaulting to MON
 	# track aliases default to PLAY

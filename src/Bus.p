@@ -12,7 +12,6 @@ our $VERSION = 1.0;
 our (%by_name);
 use ::Object qw(
 					name
-					rw
 					version 
 					send_type
 					send_id
@@ -38,7 +37,6 @@ sub new {
 	}
 	my $bus = bless { 
 		class => $class, # for serialization, may be overridden
-		rw   	=> MON, # for group control
 		@_ }, $class;
 	$by_name{$bus->name} = $bus;
 }
@@ -144,7 +142,6 @@ sub display_type {
 sub list {
 	my $self = shift;
 	my @fields = qw( name
-                    rw
                     version
                     send_type
                     send_id
@@ -341,10 +338,6 @@ sub add_bus {
 		send_id	 => $name,
 		) unless $bn{$name};
 	
-	my $bus = $bn{$name};
-	# modify bus and track settings to activate bus
-	$bus->set(rw => MON); 
-
 	@args = ( 
 		rw 			=> MON,
 		source_type => 'bus',
