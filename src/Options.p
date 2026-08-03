@@ -71,13 +71,13 @@ Advanced options
 --net-eci, -n                    Use Ecasound's Net-ECI interface (default)
 --libecasoundc, -l               Use Ecasound's libecasoundc interface
 --save-alsa, -a                  Save/restore alsa state with project data
---no-ecasound, -E                Don't spawn Ecasound process
+--fake-ecasound, -E              Use a dummy engine instead of spawning Ecasound
 --no-state, -M                   Don't load project state
 --no-static-effects-data, -S     Don't load effects data
 --no-static-effects-cache, -C    Don't load effects data cache
 --no-reconfigure-engine, -R      Don't automatically save or reconfigure
 --no-terminal, -T                Don't initialize terminal
---no-fades, -F                   No fades on transport start/stop
+--no-fade-on-transport-start, -F No fades on transport start/stop
 --fake-jack, -J                  Simulate JACK environment
 --fake-alsa, -A                  Simulate ALSA environment
 --log, -L                        Log these (comma separated) categories
@@ -91,4 +91,3 @@ HELP
 1;
 __END__
 	
-
