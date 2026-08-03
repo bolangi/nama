@@ -6,6 +6,8 @@
 CUR_DIR=`dirname $0`
 cd "$CUR_DIR"
 
+./generate_options help > /dev/null || exit 1
+
 ./check_hash_keys
 
 MD=..

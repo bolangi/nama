@@ -72,103 +72,10 @@ plugins.
 
 =head1 OPTIONS
 
-=over 12
-
-=item B<--create-project, -c>
-
-Create project if it doesn't exist
-
-=item B<--sample-rate, -z>
-
-Set sample rate for project
-
-=item B<--help, -h>
-
-This help display
-
-=back
-
-Advanced options
-
-=over 12
-
-=item B<--gui, -g>
-
-Start Nama in GUI mode (experimental)
-
-=item B<--regenerate-effects-cache, -r>
-
-Regenerate effects data cache
-
-=item B<--project-root, -d>
-
-Specify project root directory
-
-=item B<--config, -f>
-
-Specify configuration file (default: ~/.namarc)
-
-=item B<--use-pwd, -p>
-
-Use current dir for all WAV and project files
-
-=item B<--net-eci, -n>
-
-Use Ecasound's Net-ECI interface (default)
-
-=item B<--libecasoundc, -l>
-
-Use Ecasound's libecasoundc interface
-
-=item B<--save-alsa, -a>
-
-Save/restore alsa state with project data
-
-=item B<--fake-ecasound, -E>
-
-Use a dummy engine instead of spawning Ecasound
-
-=item B<--no-state, -M>
-
-Don't load project state
-
-=item B<--no-static-effects-data, -S>
-
-Don't load effects data
-
-=item B<--no-static-effects-cache, -C>
-
-Don't load effects data cache
-
-=item B<--no-reconfigure-engine, -R>
-
-Don't automatically save or reconfigure
-
-=item B<--no-terminal, -T>
-
-Don't initialize terminal
-
-=item B<--no-fade-on-transport-start, -F>
-
-No fades on transport start/stop
-
-=item B<--fake-jack, -J>
-
-Simulate JACK environment
-
-=item B<--fake-alsa, -A>
-
-Simulate ALSA environment
-
-=item B<--log, -L>
-
-Log these (comma separated) categories
-
-=item B<--execute-command, -X>
-
-Supply a command to execute
-
-=back
+[% my $pod = qx(./generate_options pod);
+   die "Unable to generate command-line option documentation\n" if $?;
+   $pod
+%]
 
 =head1 CONTROLLING NAMA/ECASOUND
 

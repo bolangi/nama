@@ -1,0 +1,106 @@
+---
+- long: gui
+  short: g
+  audience: basic
+  description: Start Nama in GUI mode
+- long: create-project
+  short: c
+  audience: basic
+  description: Create project if it doesn't exist
+- long: sample-rate
+  short: z
+  argument: s
+  audience: basic
+  description: Set sample rate for project
+- long: help
+  short: h
+  audience: basic
+  description: This help display
+- long: use-pwd
+  short: p
+  audience: diagnostic
+  description: "Utility mode: use current dir for all WAV and project files"
+- long: log
+  short: L
+  argument: s
+  audience: diagnostic
+  description: Log comma separated categories, also -L SUB and -L ALL
+- long: regenerate-effects-cache
+  short: r
+  audience: diagnostic
+  description: Regenerate effects data cache
+- long: project-root
+  short: d
+  argument: s
+  audience: man
+  description: Specify project root directory
+- long: config
+  short: f
+  argument: s
+  audience: man
+  description: "Specify configuration file (default: ~/.namarc)"
+- long: net-eci
+  short: n
+  audience: man
+  description: "Use Ecasound's Net-ECI interface (default)"
+- long: libecasoundc
+  short: l
+  audience: man
+  description: "Use Ecasound's libecasoundc interface"
+- long: save-alsa
+  short: a
+  audience: man
+  description: Save/restore ALSA state with project data
+- long: fake-ecasound
+  short: E
+  audience: man
+  description: Use a dummy engine instead of spawning Ecasound
+- long: no-state
+  short: M
+  audience: man
+  description: Don't load project state
+- long: no-static-effects-data
+  short: S
+  audience: man
+  description: Don't load effects data
+- long: no-static-effects-cache
+  short: C
+  audience: man
+  description: Don't load effects data cache
+- long: no-reconfigure-engine
+  short: R
+  audience: man
+  description: Don't automatically save or reconfigure
+- long: no-terminal
+  short: T
+  audience: man
+  description: Don't initialize terminal
+- long: no-fade-on-transport-start
+  short: F
+  audience: man
+  description: No fades on transport start/stop
+- long: fake-jack
+  short: J
+  audience: man
+  description: Simulate JACK environment
+- long: fake-alsa
+  short: A
+  audience: man
+  description: Simulate ALSA environment
+- long: execute-command
+  short: X
+  argument: s
+  audience: man
+  description: Supply a command to execute
+- long: text
+  short: t
+  audience: hidden
+- long: debugging-output
+  short: D
+  audience: hidden
+- long: no-latency
+  short: O
+  audience: hidden
+- long: latency
+  short: Q
+  audience: hidden

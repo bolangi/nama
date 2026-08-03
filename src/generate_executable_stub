@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 use v5.36;
 use File::Slurp;
+use Text::Template;
 use autodie;
 
 my $script_dir = '../bin';
@@ -14,7 +15,14 @@ __END__
 EXEC
 
 my @man;
-push @man, read_file('man_page_part1'), "\n";
+my $man_template = Text::Template->new(
+	TYPE       => 'FILE',
+	SOURCE     => 'man_page_part1',
+	DELIMITERS => [qw([% %])],
+);
+my $part1 = $man_template->fill_in;
+die "Unable to expand man_page_part1\n" unless defined $part1;
+push @man, $part1, "\n";
 my $tail = read_file('man_page_part2');
 my ($operation, $back_matter) = split /(?=^=head1 BUGS)/m, $tail, 2;
 die "Unable to split man_page_part2 at BUGS\n" unless defined $back_matter;

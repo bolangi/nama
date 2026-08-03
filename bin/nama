@@ -78,6 +78,10 @@ plugins.
 
 =over 12
 
+=item B<--gui, -g>
+
+Start Nama in GUI mode
+
 =item B<--create-project, -c>
 
 Create project if it doesn't exist
@@ -92,17 +96,27 @@ This help display
 
 =back
 
-Advanced options
+Advanced and diagnostic options
 
 =over 12
 
-=item B<--gui, -g>
+=item B<--use-pwd, -p>
 
-Start Nama in GUI mode (experimental)
+Utility mode: use current dir for all WAV and project files
+
+=item B<--log, -L>
+
+Log comma separated categories, also -L SUB and -L ALL
 
 =item B<--regenerate-effects-cache, -r>
 
 Regenerate effects data cache
+
+=back
+
+Additional options
+
+=over 12
 
 =item B<--project-root, -d>
 
@@ -111,10 +125,6 @@ Specify project root directory
 =item B<--config, -f>
 
 Specify configuration file (default: ~/.namarc)
-
-=item B<--use-pwd, -p>
-
-Use current dir for all WAV and project files
 
 =item B<--net-eci, -n>
 
@@ -126,7 +136,7 @@ Use Ecasound's libecasoundc interface
 
 =item B<--save-alsa, -a>
 
-Save/restore alsa state with project data
+Save/restore ALSA state with project data
 
 =item B<--fake-ecasound, -E>
 
@@ -164,15 +174,13 @@ Simulate JACK environment
 
 Simulate ALSA environment
 
-=item B<--log, -L>
-
-Log these (comma separated) categories
-
 =item B<--execute-command, -X>
 
 Supply a command to execute
 
 =back
+
+
 
 =head1 CONTROLLING NAMA/ECASOUND
 
@@ -1670,7 +1678,7 @@ show-latency-all
 
 =head2 Track commands
 
-=head3 B<set-region> (srg) - Specify a playback region for the current track using marks. 
+=head3 B<set-region> (srg) - Play part of a WAV file defined by two points
 Can be reversed with remove-region.
 
 
@@ -1689,7 +1697,7 @@ set-region sax_start sax_end
 
 =back
 
-=head3 B<add-region> - Make a copy of the current track using the supplied a region 
+=head3 B<add-region> - Make a copy of the current track defining a limited 
 definition. The original track is untouched.
 
 
@@ -1705,8 +1713,8 @@ add-region sax_start 66.7 trimmed_sax
 
 =back
 
-=head3 B<remove-region> (rrg) - Remove the region definition from the current track.
-Remove the current track if it is an auxiliary track.
+=head3 B<remove-region> (rrg) - Remove the region definition from a normal track
+Remove a helper track with a region definition
 
 
 =over 8

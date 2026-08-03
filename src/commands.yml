@@ -550,7 +550,7 @@ show_latency_all:
 set_region:
   type: track
   what: |
-    Specify a playback region for the current track using marks. 
+    Play part of a WAV file defined by two points
     Can be reversed with remove-region.
   short: srg
   parameters: <string:start_mark_name> <string:end_mark_name>
@@ -565,7 +565,7 @@ set_region:
 add_region:
   type: track
   what: |
-    Make a copy of the current track using the supplied a region 
+    Make a copy of the current track defining a limited 
     definition. The original track is untouched.
   parameters: <string:start_mark_name> | <float:start_time> <string:end_mark_name> | <float:end_time> [ <string:region_name> ]
   example: |
@@ -576,8 +576,8 @@ add_region:
 remove_region:
   type: track
   what: |
-    Remove the region definition from the current track.
-    Remove the current track if it is an auxiliary track.
+    Remove the region definition from a normal track
+    Remove a helper track with a region definition
   short: rrg
   parameters: none
 shift_track:
