@@ -37,12 +37,14 @@ my @display_index = map{ $help->{index}->{++$i} = $_;  # integer => topic key
                             } @{ $help->{arr_topic} };
 sub pad {
     my ($text, $len) = @_;
-    my $pad = ' ' x ( $len - length $text);
+    my $padding = $len - length $text;
+    $padding = 1 if $padding < 1;
+    my $pad = ' ' x $padding;
     $text.$pad
 }
 my $column_length = int((@display_index + 1) / 2);
 my @twocolumn = map {
-    pad($display_index[$_], 22).($display_index[$_ + $column_length] // '').$/
+    pad($display_index[$_], 35).($display_index[$_ + $column_length] // '').$/
 } 0..$column_length - 1;
 
 
@@ -282,7 +284,7 @@ Group control
    remove-bunches,   rb       - remove bunch definitions
 
    for                   - execute commands on several tracks 
-                           by name, or by specifying a group or bunch
+                           by name, or by specifying a bus or bunch
                            example: for strings; vol +10
                            example: for drumkit congas; mute
                            example: for 3 5; vol * 1.5
