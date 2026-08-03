@@ -57,15 +57,13 @@ $help->{usage} = <<HELP;
 
 USAGE: nama [options] [project_name]
 
---gui, -g                        Start Nama in GUI mode
---text, -t                       Start Nama in text mode (default)
 --create-project, -c             Create project if it doesn't exist
---execute-command, -X            Supply a command to execute
 --sample-rate, -z                Set sample rate for project
 --help, -h                       This help display
 
 Advanced options
 
+--gui, -g                        Start Nama in GUI mode (experimental)
 --regenerate-effects-cache, -r   Regenerate effects data cache
 --project-root, -d               Specify project root directory
 --config, -f                     Specify configuration file (default: ~/.namarc)
@@ -83,6 +81,7 @@ Advanced options
 --fake-jack, -J                  Simulate JACK environment
 --fake-alsa, -A                  Simulate ALSA environment
 --log, -L                        Log these (comma separated) categories
+--execute-command, -X            Supply a command to execute
 
 HELP
 }
