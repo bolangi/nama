@@ -19,7 +19,7 @@ sub setup_user_customization {
 			}
  	} 
 	return unless -r $filename;
-	say("reading user customization file $filename");
+	::terminal_say("reading user customization file $filename");
 	my %custom;
 	unless (%custom = do $filename) {
 		throw("couldn't parse $filename: $@\n") if $@;
@@ -45,4 +45,3 @@ sub gen_coderef {
 	$coderef
 }
 1;
-

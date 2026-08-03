@@ -4,7 +4,6 @@ package ::Log;
 use v5.36;
 our $VERSION = 1.1;
 use Exporter;
-use Carp qw(shortmess longmess);
 use File::Basename qw(basename);
 use IO::Handle ();
 use Time::HiRes qw(time);
@@ -48,10 +47,6 @@ sub initialize_logger ($cat_string = undef) {
 		%enabled = map { $_ => 1 } @cats;
 		$enabled{NOISY} = 1 if $noisy;
 
-		$SIG{__DIE__} = sub {
-			local $SIG{__DIE__};
-			die longmess(@_);
-		};
 	}
 
 	if ($cat_string and defined $ENV{NAMA_LOGFILE}) {
@@ -73,19 +68,22 @@ sub set_log_sink ($new_sink) {
 
 sub expand_cats (@cats) {
 	for (@cats) {
-		unless (/^::/ or /^#?ECI/ or /^#?SUB/ or /^ALL$/) {
-			s/^#/#::/ or s/^/::/;
+		my $negated = s/^#//;
+		unless (/^ECI/ or /^SUB$/ or /^ALL$/) {
+			$_ = canonical_category($_);
 		}
-		s/^::/Audio::Nama::/;
-		s/^#::/#Audio::Nama::/;
+		$_ = "#$_" if $negated;
 	}
 	return @cats;
 }
 
-my %valid_level = map { $_ => 1 } qw(
-	trace debug info warn error fatal
-	logwarn logdie logcarp logcroak logcluck logconfess
-);
+sub canonical_category ($category) {
+	return $category if $category =~ /^ECI/ or $category eq 'SUB';
+	my $name = basename($category);
+	$name =~ s/\.(?:pm?|t)\z//;
+	$name =~ s/^(?:Audio::Nama::)+//;
+	return "Audio::Nama::$name"; # SKIP_PREPROC
+}
 
 sub logit ($line_number, $category, $level, @message) {
 	_emit($line_number, $category, $level, @message);
@@ -95,15 +93,9 @@ sub _emit ($line_number, $category, $level, @message) {
 	return unless $enabled{$category};
 	return if $level eq 'trace' and !$noisy;
 
-	die "illegal log level: $level" unless $valid_level{$level};
+	die "illegal log level: $level" unless $level eq 'debug' or $level eq 'trace';
 	@message = map { ref $_ eq 'CODE' ? $_->() : $_ } @message;
 	my $message = join q(), @message;
-
-	{
-		local $Carp::CarpLevel = 1;
-		$message = shortmess($message) if $level eq 'logcarp' or $level eq 'logcroak';
-		$message = longmess($message)  if $level eq 'logcluck' or $level eq 'logconfess';
-	}
 
 	my $elapsed = int((time - $started) * 1000);
 	my $line = $line_number ? " (L $line_number) " : q( );
@@ -117,16 +109,13 @@ sub _emit ($line_number, $category, $level, @message) {
 		push @pending, $formatted;
 	}
 
-	die $message if $level eq 'logdie' or $level eq 'logcroak' or $level eq 'logconfess';
 	return;
 }
 
 sub logsub ($sub_name, @ignored) { _emit(0, 'SUB', 'debug', $sub_name) }
 
 sub logpkg ($file, $line_no, $level, @message) {
-	my $pkg = basename($file);
-	$pkg =~ s/\.pm\z//;
-	$pkg = "Audio::Nama::$pkg"; # SKIP_PREPROC
+	my $pkg = canonical_category($file);
 	_emit($line_no, $pkg, $level, @message);
 }
 

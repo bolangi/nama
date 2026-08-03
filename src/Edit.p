@@ -317,7 +317,7 @@ sub complete_edit_points {
 	ecasound_iam('stop');
 	::pager("\nEngine is stopped\n");
 	detect_spacebar();
-	print prompt(), " ";
+	::terminal_print(prompt(), " ");
 }
 }
 sub set_edit_points {
@@ -343,7 +343,7 @@ Engine will start in 2 seconds.));
 		detect_keystroke_p();
 		ecasound_iam('start');
 		::pager("\n\nEngine is running\n");
-		print prompt();
+		::terminal_print(prompt());
 	});
 }
 sub transfer_edit_points {

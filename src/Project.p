@@ -3,7 +3,7 @@
 package ::Project;
 use v5.36; use Carp;
 our $VERSION = 1.0;
-sub hello { my $self = shift; say "hello $self: ",::Dumper $::project}
+sub hello { my $self = shift; ::terminal_say("hello $self: ", ::Dumper($::project)) }
 }
 {
 package ::;
@@ -134,7 +134,7 @@ sub load_project {
 	if (not $project->{name} or not -d project_dir() and not $args{create})
 	{
 		no warnings 'uninitialized';
-		::pager_newline(qq(Project "$project->{name}" not found. Loading project "Untitled".)); 
+		::terminal_say(qq(Project "$project->{name}" not found. Loading project "Untitled".));
 		load_project(name => 'Untitled', create => 1);
 
 	}

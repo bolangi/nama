@@ -48,7 +48,6 @@ my $build = Module::Build->new(
 		'Text::Template' => 0,
 		'Tickit::Async' => 0,
 		'Tickit::Widget::Scroller::Item::Text' => 0,
-		'Tie::Simple' => 0,
 		'Time::HiRes'  => 0,
 		'Try::Tiny'  => 0,
 		'YAML::Tiny'  => 0,

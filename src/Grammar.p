@@ -45,7 +45,7 @@ sub setup_grammar {
 		map{ 'm'.$_, 1} grep{ !$skip{$_} } split " ", get_data_section("midi_commands")
 	};
 	for (keys %{$text->{midi_cmd}}){
-		say "$_: midi command same as Nama command" if $text->{commands}->{$_}
+		::terminal_say("$_: midi command same as Nama command") if $text->{commands}->{$_}
 	}
 
 }
@@ -76,7 +76,7 @@ sub process_line {
 	}
 	if (! $this_engine->started() ){
 		my $result = check_fx_consistency();
-		pagers("Inconsistency found in effects data",
+		::terminal_say("Inconsistency found in effects data",
 			Dumper ($result)) if $result->{is_error};
 	}
 	my $output = delete $text->{output_buffer};
@@ -213,7 +213,7 @@ sub expand_root {
 		} split "\n",$text;
 		$new;
 }
-say expand_root('Audio::Nama', '@::Tempo::chunks');
+::terminal_say(expand_root('Audio::Nama', '@::Tempo::chunks'));
 #### Formatted text output
 
 sub show_versions {
@@ -485,17 +485,17 @@ sub t_create_project {
 
 }
 sub mixdown {
-	pager_newline("Enabling mixdown to file") if ! $quiet;
+	::terminal_say("Enabling mixdown to file") if ! $quiet;
 	$tn{Mixdown}->set(rw => REC); 
 	$tn{Main}->set(rw => MON); 
 }
 sub mixplay { 
-	pager_newline("Setting mixdown playback mode.") if ! $quiet;
+	::terminal_say("Setting mixdown playback mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => PLAY);
 	$tn{Main}->set(rw => OFF); 
 }
 sub mixoff { 
-	pager_newline("Leaving mixdown mode.") if ! $quiet;
+	::terminal_say("Leaving mixdown mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => OFF);
 	$tn{Main}->set(rw => MON); 
 }

@@ -39,7 +39,6 @@ use Tickit::Widget::Scroller::Item::Text;
 ### We use our versions of these modules
 use ::Entry;      # modified Tickit::Widget::Entry to bind printable keys
 use ::Completion; # modified Tickit::Widget::Entry::Plugin::Completion for directory handling
-use Tie::Simple;
 use Try::Tiny;
 use Path::Tiny;
 # use File::HomeDir;# Assign.pm
@@ -156,7 +155,7 @@ use ::TrackUtils ();
 use ::Tempo ();
 
 sub main { 
-	say eval join(get_data_section('banner'), qw(" "));
+	::terminal_say(eval join(get_data_section('banner'), qw(" ")));
 	bootstrap_environment() ;
 	load_project(name => shift @ARGV,
 				 create => delete $config->{opts}->{c}); 
@@ -165,7 +164,7 @@ sub main {
 	nama_cmd($config->{opts}->{X});
 	reconfigure_engine();
 	if (not $ti{3}){ # no user tracks
-		say "Enter command to begin or type 'h' for help.";
+		::terminal_say("Enter command to begin or type 'h' for help.");
 		$this_track = $tn{Main};
 	}
 	show_prompt();
@@ -177,7 +176,6 @@ sub bootstrap_environment {
 	process_command_line_options();
 	setup_grammar();
 	initialize_interfaces();
-    redirect_stdout() unless  $config->{opts}->{T};
 }
 sub kill_and_reap {
 	my @pids = @_;
@@ -217,8 +215,7 @@ sub cleanup_exit {
 	# - SIGKILL
 	#project_snapshot(); 
 	::Engine::sync_action('kill_and_reap');
-	restore_stdout();
-	say;
+	CORE::print STDOUT "\n";
 	exit;
 }
 END { }

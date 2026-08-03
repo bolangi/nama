@@ -1,6 +1,6 @@
 # command: test
 #command: 'a-test' { print "aa-test" }
-command: _a_test { print "aaa-test" }
+command: _a_test { ::terminal_say("aaa-test") }
 _a_test: /something_else\b/ | /a-test\b/
 #test: 'test' shellish { 
 #	::pager( "found $item{shellish}");
@@ -226,7 +226,7 @@ help_effect: _help_effect effect { ::help_effect($item{effect}) ; 1}
 find_effect: _find_effect anytag(s) { 
 	::find_effect(@{$item{"anytag(s)"}}); 1}
 help: _help anytag  { ::help($item{anytag}) ; 1}
-help: _help { print( $::help->{screen} ); 1}
+help: _help { ::terminal_print( $::help->{screen} ); 1}
 project_name: _project_name { 
 	::pager( "project name: ", $::project->{name}); 1}
 new_project: _new_project project_id { 
@@ -307,7 +307,7 @@ save_state: _save_state save_target message(?) {
 		my @args = ('tag', $name);
 		push @args, '-m', $message if $message;
 		::git(@args);
-		::pager_newline(qq/tagged HEAD commit as "$name"/,
+		::terminal_say(qq/tagged HEAD commit as "$name"\n/,
 			qq/type "get $name" to return to this commit./)
 	}
 	1
@@ -341,7 +341,7 @@ samples: /\d+sa/ {
 }
 min_sec: /\d+/ ':' /\d+/ { $item[1] * 60 + $item[3] }
 
-notation_to_time: _notation_to_time timevalue { ::pager_newline( $item{timevalue} );1 }
+notation_to_time: _notation_to_time timevalue { ::terminal_say( $item{timevalue} );1 }
 bar_beat_tick: bar '/' beat '/' tick { ::notation_to_time(@item{qw(bar beat tick)}) } 
 bar_beat:      bar '/' beat          { ::notation_to_time(@item{qw(bar beat     )}) } 
 bar: dd
@@ -356,7 +356,7 @@ add_track: _add_track new_track_name {
 }
 add_midi_track: _add_midi_track new_track_name {
 	::add_midi_track($item{new_track_name});
-	::pager_newline(qq(creating MIDI track "$item{new_track_name}"));
+	::terminal_say(qq(creating MIDI track "$item{new_track_name}"));
 	1
 }
 arg: anytag
@@ -585,7 +585,7 @@ source: _source {
 	my $status = $::this_track->candidate_rw;
 	my $source = join ": input set to ",$::this_track->name,  $::this_track->input_object_text;
 	$source .= " however track is $status" if $status ne ::REC and $status ne ::MON;
-	::pager_newline($source);
+	::terminal_say($source);
 }
 send: _send ('track'|'t') trackname { 
 	$::this_track->set_send($item{trackname}, 'track'); 1
@@ -742,7 +742,7 @@ remove_effect: _remove_effect remove_target(s) {
 		}
 		else { 
 			my $FX = ::fxn($id);
-			::pager_newline("removing effect ".$FX->nameline);
+			::terminal_say("removing effect ".$FX->nameline);
 			$FX->_remove_effect();
 		}
 	} grep { $_ }  map{ split ' ', $_} @{ $item{"remove_target(s)"}} ;
@@ -754,7 +754,7 @@ add_controller: _add_controller parent effect value(s?) {
 	my $code = $item{effect};
 	my $parent = $item{parent};
 	my $parent_o = ::fxn($parent);
-	print "parent: ", $parent_o, " chain: ", $parent_o->chain;
+	::terminal_print("parent: ", $parent_o, " chain: ", $parent_o->chain);
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
@@ -779,7 +779,7 @@ add_controller: _add_controller effect value(s?) {
 	my $parent = ::this_op();
 	my $values = $item{"value(s?)"};
 	my $cmd = "add_controller $parent $code @$values";
-	print "command: $cmd\n";
+	::terminal_print("command: $cmd\n");
 	::nama_cmd($cmd);
 	1
 }
@@ -797,14 +797,14 @@ nickname_effect: _nickname_effect ident {
 	my $type = ::this_op_o()->type;
 	my $fxname = ::this_op_o()->fxname;
 	$::fx->{alias}->{$ident} = $type;
-	::pager_newline("$ident: nickname created for $type ($fxname)");
+	::terminal_say("$ident: nickname created for $type ($fxname)");
 	1
 }
 remove_nickname: _remove_nickname { ::this_op_o()->remove_name() }
 delete_nickname_definition: _delete_nickname_definition ident {
 	my $was = delete $::fx->{alias}->{$item{ident}};
 	$was or ::throw("$item{ident}: no such nickname"), return 0;
-	::pager_newline("$item{ident}: effect nickname deleted");
+	::terminal_say("$item{ident}: effect nickname deleted");
 }
 list_nickname_definitions: _list_nickname_definitions {
 	my @lines;
@@ -854,7 +854,7 @@ add_effect: _add_effect add_target parameter_value(s?) before(?) {
 	{
 		my $iname = $FX->fxname;
 		my $id = $FX->id;
-		::pager_newline("Added $id, $iname");
+		::terminal_say("Added $id, $iname");
 		::set_current_op($id);
 	}
 }
@@ -944,7 +944,7 @@ fx_alias3: ident {
 	grep { $_->surname eq $item{ident} } $::this_track->user_ops_o;
 }
 remove_target: existing_op_id | fx_pos | fx_surname | fx_name
-	{ $item[-1] or print("no effect object found\n"), return 0}
+	{ $item[-1] or ::terminal_print("no effect object found\n"), return 0}
 fx_alias: fx_alias2 | fx_alias1
 fx_nick: ident { $::fx->{alias}->{$item{ident}} }
 fx_alias1: op_id
@@ -993,11 +993,11 @@ remove_bunch: _remove_bunch ident(s) {
  	map{ delete $::project->{bunch}->{$_} } @{$item{'ident(s)'}}; 1}
 add_to_bunch: _add_to_bunch ident(s) { ::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions { 
-	::pagers( join " ", @{$::this_track->versions}); 1}
+	::terminal_say( join " ", @{$::this_track->versions}); 1}
 ladspa_register: _ladspa_register { 
 	::pager( ::ecasound_iam("ladspa-register")); 1}
 preset_register: _preset_register { 
-	::pagers( ::ecasound_iam("preset-register")); 1}
+	::terminal_say( ::ecasound_iam("preset-register")); 1}
 ctrl_register: _ctrl_register { 
 	::pager( ::ecasound_iam("ctrl-register")); 1}
 preview: _preview { ::set_preview_mode(); 1}
@@ -1370,7 +1370,7 @@ list_fade: _list_fade { ::pager(join "\n",
 		sort{$a->n <=> $b->n} values %::Fade::by_index); 
 	1 } 
 add_comment: _add_comment text { 
- 	::pagers( $::this_track->name. ": comment: $item{text}"); 
+	::terminal_say( $::this_track->name. ": comment: $item{text}");
  	$::project->{track_comments}->{$::this_track->name} = $item{text};
  	1;
 }
@@ -1423,7 +1423,7 @@ show_version_comments_all: _show_version_comments_all {
 	1;
 }
 add_system_version_comment: _add_system_version_comment dd text {
-	::pagers( $::this_track->add_system_version_comment(@item{qw(dd text)}));1;
+	::terminal_say( $::this_track->add_system_version_comment(@item{qw(dd text)}));1;
 }
 new_edit: _new_edit {
 	::new_edit();
@@ -1761,17 +1761,17 @@ set_sample_rate: _set_sample_rate {::get_sample_rate()}
 
 bus_on: _bus_on 
 { 
-	::pagers('turning bus on'); 
+	::terminal_say('turning bus on');
 	my $bus_name = $::this_track->source_type eq 'bus' ? $::this_track->source_id : $::this_bus;
-	print "bus_name: $bus_name\n";
+	::terminal_print("bus_name: $bus_name\n");
 	$::bn{$bus_name}->tracks_on
 }
 
 bus_off: _bus_off 
 { 
-	::pagers('turning bus off'); 
+	::terminal_say('turning bus off');
 	my $bus_name = $::this_track->source_type eq 'bus' ? $::this_track->source_id : $::this_bus;
-	print "bus_name: $bus_name\n";
+	::terminal_print("bus_name: $bus_name\n");
 	$::bn{$bus_name}->tracks_off 
 }
 arm_metronome: _arm_metronome { ::arm_metronome(); 1 }

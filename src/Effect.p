@@ -399,7 +399,7 @@ sub position_effect {
 	}
 	# easier to reconfigure the engine than to code for
 	# repositioning ecasound effects.
-	say join " - ",@new_op_list;
+	::terminal_say(join " - ",@new_op_list);
 	@{$track->ops} = @new_op_list;
 	::request_setup();
 	$this_track = $track;
@@ -412,7 +412,7 @@ sub apply_op {
 	local $config->{category} = 'ECI_FX';
 	my $id = $self->id;
 	logpkg('debug', "id: $id");
-	logpkg('logcluck', "$id: expected effect entry not found!"), return
+	logpkg('debug', "$id: expected effect entry not found!"), return
 		if effect_entry_is_bad($id);
 	my $code = $self->type;
 	my $dad = $self->parent;
@@ -750,7 +750,7 @@ sub remove_effect {
 	logsub((caller(0))[3]);
 	my $id = shift;
 	my $FX = fxn($id)
-		or logpkg('logcarp',"$id: does not exist, skipping...\n"), return;
+		or logpkg('debug',"$id: does not exist, skipping...\n"), return;
 	$FX->_remove_effect;
 }
 

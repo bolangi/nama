@@ -202,10 +202,10 @@ sub add_ops {
 	my ($new_surname, $existing) = $track->unique_surname($ec_args->{surname});
 	if ( $new_surname ne $ec_args->{surname})
 	{
-		::pager_newline(
+		::terminal_say(
 			"track ".
 			$track->name.qq(: other effects with surname "$ec_args->{surname}" found,),
-			qq(using "$new_surname". Others are: $existing.));
+			qq( using "$new_surname". Others are: $existing.));
 		$ec_args->{surname} = $new_surname;
 	}
 

@@ -184,7 +184,7 @@ sub cancel_wraparound {
 }
 sub limit_processing_time {
 	my $length = shift;
- 	start_event(processing_time => timer($length, 0, sub { ::stop_transport(); print prompt() }));
+	start_event(processing_time => timer($length, 0, sub { ::stop_transport(); ::terminal_print(prompt()) }));
 }
 sub disable_length_timer {
 	stop_event('processing_time');
@@ -211,9 +211,9 @@ sub _stop_do_start {
 		$result
 }
 sub restart_ecasound {
-	pager_newline("killing ecasound processes @{$en{$::config->{ecasound_engine_name}}->{pids}}");
+	::terminal_say("killing ecasound processes @{$en{$::config->{ecasound_engine_name}}->{pids}}");
 	kill_my_ecasound_processes();
-	pager_newline(q(restarting Ecasound engine - your may need to use the "arm" command));	
+	::terminal_say(q(restarting Ecasound engine - your may need to use the "arm" command));
 	initialize_ecasound_engine();
 	request_setup();
 	reconfigure_engine();

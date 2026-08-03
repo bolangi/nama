@@ -21,7 +21,7 @@ sub new {
 	my $class = shift;	
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	::pager_newline("$vals{name}: returning existing engine"), 
+	::terminal_say("$vals{name}: returning existing engine"),
 		return $by_name{$vals{name}} if $by_name{$vals{name}};
 	my $self = bless { name => 'default', %vals }, $class;
 	#print "object class: $class, object type: ", ref $self, $/;
@@ -141,7 +141,7 @@ our @ISA = '::Engine';
 sub init_ecasound_socket {
 	my $self = shift;
 	my $port = $self->port;
-	::pager_newline("Creating socket on port $port.");
+	::terminal_say("Creating socket on port $port.");
 	$self->{socket} = IO::Socket::INET->new (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 
@@ -164,12 +164,12 @@ sub launch_ecasound_server {
 	my $ps = qx(ps ax);
 	if ( $ps =~ /ecasound/ and $ps =~ /--server/ and ($ps =~ /tcp-port=$port/) )
 	{ 
-		::pager_newline("Found existing Ecasound server on port $port") 
+		::terminal_say("Found existing Ecasound server on port $port")
 	}
 	else 
 	{ 
 		
-		::pager_newline("Starting Ecasound server on port $port");
+		::terminal_say("Starting Ecasound server on port $port");
 		system("$command $redirect") == 0 or carp("system $command failed: $?\n")
 	}
 	sleep 1;
@@ -201,7 +201,7 @@ sub ecasound_iam{
 				/sx;  # s-flag: . matches newline
 
 if(	! $return_value == 256 ){
-	logit($category,'error',"Net-ECI bad return value: $return_value (expected 256)");
+	logit($category,'debug',"Net-ECI bad return value: $return_value (expected 256)");
 
 }
 	no warnings 'uninitialized';
@@ -209,7 +209,7 @@ if(	! $return_value == 256 ){
 
 	if( $type eq 'e')
 	{
-		logit($category,'error',"ECI error! Command: $cmd. Reply: $reply");
+		logit($category,'debug',"ECI error! Command: $cmd. Reply: $reply");
 	}
 	else
 	{ 	logit($category,'debug',"Net-ECI  got: $reply");
@@ -302,7 +302,7 @@ with '::EcasoundRun';
 
 sub launch_ecasound_server {
 	my $self = shift;
-	::pager_newline("Using Ecasound via Audio::Ecasound (libecasoundc)");
+	::terminal_say("Using Ecasound via Audio::Ecasound (libecasoundc)");
 	$self->{audio_ecasound} = Audio::Ecasound->new();
 }
 sub ecasound_iam{

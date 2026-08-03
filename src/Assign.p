@@ -59,8 +59,8 @@ sub assign {
 	
 	my %h = @_; # parameters appear in %h
 	my $class;
-	logpkg('logcarp',"didn't expect scalar here") if ref $h{data} eq 'SCALAR';
-	logpkg('logcarp',"didn't expect code here") if ref $h{data} eq 'CODE';
+	logpkg('debug',"didn't expect scalar here") if ref $h{data} eq 'SCALAR';
+	logpkg('debug',"didn't expect code here") if ref $h{data} eq 'CODE';
 	# print "data: $h{data}, ", ref $h{data}, $/;
 
 	if ( ref $h{data} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
@@ -175,7 +175,7 @@ DEBUG
 			else { die "unsupported assignment: ".ref $val }
 			logpkg('debug',"eval string: $eval"); 
 			eval($eval);
-			logpkg('logcarp',"failed to eval $eval: $@") if $@;
+			logpkg('debug',"failed to eval $eval: $@") if $@;
 		}  # end if sigil{key}
 	} @keys;
 	1;
@@ -214,7 +214,7 @@ sub assign_singletons {
 					' = $data->{$ident}->{$key}';
 				logpkg('debug',"eval: $cmd");
 				eval $cmd;
-				logpkg('logcarp',"error during eval: $@") if $@;
+				logpkg('debug',"error during eval: $@") if $@;
 			} keys %{ $data->{$ident} }
 		}
 	} @singleton_idents;  # list of "singleton" variables
@@ -307,7 +307,7 @@ sub serialize {
 		if ($identifier){
 			logpkg('debug',"attempting to eval $eval_string");
 			eval($eval_string);
-			logpkg('error', "eval failed ($@)") if $@;
+			logpkg('debug', "eval failed ($@)") if $@;
 		}
 	} @vars;
 	logpkg('debug',sub{join $/,'\%state', Dumper \%state});
@@ -381,4 +381,3 @@ sub quote_yaml_scalars {
 	
 
 1;
-

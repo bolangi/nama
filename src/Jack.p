@@ -33,7 +33,7 @@ sub update_jack_client_list {
 		    and ::throw(qq(
 JACK audio daemon sample rate is $sample_rate but sample rate for project "$project->{name}" is $project->{sample_rate}.
 Please fix this problem before continuing (maybe restart jackd with --rate $project->{sample_rate}?))),
-			print prompt();
+			::terminal_print(prompt());
 		$warn_count++;
 	} else {  }
 }

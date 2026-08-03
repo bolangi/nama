@@ -651,8 +651,8 @@ sub track_gui {
 				);
 
 
-		 logpkg('debug',sub{my %q = %p; delete $q{parent}; print
-		 "=============\n%p\n",json_out(\%q)});
+		 logpkg('debug',sub{my %q = %p; delete $q{parent};
+		 "=============\n%p\n" . json_out(\%q)});
 
 		$vol = make_scale( \%p );
 		# Mute

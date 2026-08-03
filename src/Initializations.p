@@ -238,7 +238,7 @@ sub initialize_interfaces {
 	
 	if ( $config->{opts}->{g}){
 			::Graphical::initialize_tk() and $ui = ::Graphical->new()
-			or pager_newline( "Unable to load perl Tk module. Starting in console mode.")
+			or ::terminal_say( "Unable to load perl Tk module. Starting in console mode.")
 	}
 	if ( not defined $ui ){
 		$ui = ::Text->new();
@@ -303,7 +303,7 @@ sub initialize_interfaces {
 	and process_is_running('jack-plumbing')
 	){
 
-		pager_newline(<<PLUMB);
+		::terminal_say(<<PLUMB);
 Jack.plumbing daemon detected!
 
 Attempting to stop it...  
@@ -327,7 +327,7 @@ Please do one of the following, then restart Nama:
 ....Exiting.) );
 exit;
 		}
-		else { pager_newline("Stopped.") }
+		else { ::terminal_say("Stopped.") }
 	}
 		
 	initialize_terminal() unless $config->{opts}->{T};
@@ -348,7 +348,7 @@ sub initialize_ecasound_engine {
 	my $class;
 	if ($config->{opts}->{A} or $config->{opts}->{E})
 	{
-		pager_newline("Starting dummy engine only"); 
+		::terminal_say("Starting dummy engine only");
 		%args = (
 			name => $config->{ecasound_engine_name}
 		);
@@ -357,7 +357,7 @@ sub initialize_ecasound_engine {
 	elsif (
 		$config->{opts}->{l} 
 		and can_load( modules => { 'Audio::Ecasound' => undef })
-		and say("loaded Audio::Ecasound")
+		and ::terminal_say("loaded Audio::Ecasound")
 	){  
 		%args = (
 			name => $config->{ecasound_engine_name}, 

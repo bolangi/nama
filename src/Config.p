@@ -31,7 +31,7 @@ sub global_config {
 	# 3. .namarc in the home directory, i.e. ~/.namarc
 	# 4. .namarc in the project root directory, i.e. ~/nama/.namarc
 	if( $config->{opts}->{f} ){
-		pager_newline("reading config file $config->{opts}->{f}\n");
+		::terminal_say("reading config file $config->{opts}->{f}\n");
 		return read_file($config->{opts}->{f});
 	}
 	my @search_path = (project_dir(), $ENV{HOME}, project_root() );
@@ -40,7 +40,7 @@ sub global_config {
 				if (-d $_) {
 					my $config_path = join_path($_, config_file());
 					if( -f $config_path or -l $config_path){ 
-						say "Found config file: $config_path";
+						::terminal_say("Found config file: $config_path");
 						my $yml = read_file($config_path);
 						return $yml;
 					}
@@ -80,7 +80,7 @@ sub read_config {
 	$config->{sample_rate} = $cfg{abbreviations}{frequency};
 
 	$config->{use_git} and ! git_executable_found() and 
-		say("Config file requests Git version control,
+		::terminal_say("Config file requests Git version control,
 but the git executable could not be found.
 Please check that the git executable directory is included
 in your shell's \$PATH variable (currently $ENV{PATH}). 
@@ -128,7 +128,7 @@ sub first_run {
 
 	my $missing;
 	my @a = `which analyseplugin`;
-	@a or print( <<WARN
+	@a or ::terminal_print( <<WARN
 LADSPA helper program 'analyseplugin' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. You will probably have more fun with the LADSPA
@@ -136,7 +136,7 @@ libraries and executables installed. http://ladspa.org
 WARN
 	) and  sleeper (0.6) and $missing++;
 	my @b = `which ecasound`;
-	@b or print( <<WARN
+	@b or ::terminal_print( <<WARN
 Ecasound executable program 'ecasound' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. This suite depends on the Ecasound
@@ -144,31 +144,30 @@ libraries and executables for all audio processing!
 WARN
 	) and sleeper (0.6) and $missing++;
 	if ( $missing ) {
-	print "You lack $missing main parts of this suite.  
-Do you want to continue? [N] ";
+	::terminal_print("You lack $missing main parts of this suite.\n"
+		. "Do you want to continue? [N] ");
 	$missing and 
 	my $reply = <STDIN>;
 	chomp $reply;
-	print("Goodbye.\n"), exit unless $reply =~ /y/i;
+	::terminal_print("Goodbye.\n"), exit unless $reply =~ /y/i;
 	}
-print <<HELLO;
+::terminal_print(<<HELLO);
 
 Aloha. Welcome to Nama and Ecasound.
 
 HELLO
 	sleeper (0.6);
-	print "Configuration file $config_path not found.
-
-May I create it for you? [yes] ";
+	::terminal_print("Configuration file $config_path not found.\n\n"
+		. "May I create it for you? [yes] ");
 	my $make_namarc = <STDIN>;
 	sleep 1;
-	print <<PROJECT_ROOT;
+	::terminal_print(<<PROJECT_ROOT);
 
 Nama places all sound and control files under the
 project root directory, by default $ENV{HOME}/nama.
 
 PROJECT_ROOT
-	print "Would you like to create $ENV{HOME}/nama? [yes] ";
+	::terminal_print("Would you like to create $ENV{HOME}/nama? [yes] ");
 	my $reply = <STDIN>;
 	chomp $reply;
 	my $default_config;
@@ -190,7 +189,7 @@ PROJECT_ROOT
 		# needed for $file->user_customization() to resolve in next line
 		write_file($file->user_customization(), get_data_section('custom_pl'));
 	} else {
-		print <<OTHER;
+		::terminal_print(<<OTHER);
 Please make sure to set the project_root directory in
 .namarc, or on the command line using the -d option.
 
@@ -200,8 +199,8 @@ OTHER
 		write_file($config_path, $default_config);
 	}
 	sleep 1;
-	print "\n.... Done!\n\nPlease edit $config_path and restart Nama.\n\n";
-	print "Exiting.\n"; 
+	::terminal_print("\n.... Done!\n\nPlease edit $config_path and restart Nama.\n\n");
+	::terminal_print("Exiting.\n");
 	exit;	
 	}
 }

@@ -74,7 +74,7 @@ sub mixdown_postprocessing {
 		$comment .= "(commit $sha)" if $sha;
 	}
 	$tn{Mixdown}->add_system_version_comment($version, $comment);
-	pager_newline($comment);	
+	::terminal_say($comment);
 	encode_mixdown_file($oldfile,$tag_name);
 	chdir $was_in;
 }

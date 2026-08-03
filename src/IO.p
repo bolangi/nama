@@ -587,7 +587,7 @@ our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my %vals = @_;
-	print "from_bus: ", ::Dumper \%vals;
+	::terminal_print("from_bus: ", ::Dumper \%vals);
 	#$class->SUPER::new( %vals, device_id => "loop,$vals{endpoint}");
 }
 }

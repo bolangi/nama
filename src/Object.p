@@ -71,7 +71,7 @@ sub set {
 }
 sub dumpp  {
 	my $self = shift;
-	print $self->dump
+	::terminal_print($self->dump)
 }
 sub dump {
 	my $self = shift;
@@ -113,7 +113,7 @@ __END__
 
   $object->set( bux => 2);
   
-  print "bux is " . $object->bux . "\n";
+  ::terminal_print("bux is " . $object->bux . "\n");
 
 
   # Define a subclass (automatically inherits parent attributes)
@@ -125,5 +125,4 @@ __END__
   my $lonely_bar = Bar->new();
   
   $lonely_bar->set(bux => 3); 
-
 

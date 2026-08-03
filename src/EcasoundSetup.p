@@ -187,9 +187,9 @@ sub transport_status {
 		pager("looping from ", heuristic_time($start),
 				 	"to ",   heuristic_time($end));
 	}
-	pagers("\nNow at: ", current_position());
-	pagers("Engine is ". ( $this_engine->started() ? "running." : "ready."));
-	pagers("\nPress SPACE to start or stop engine.")
+	::terminal_say("\nNow at: ", current_position());
+	::terminal_say("Engine is ". ( $this_engine->started() ? "running." : "ready."));
+	::terminal_say("\nPress SPACE to start or stop engine.")
 		if $config->{press_space_to_start};
 }
 

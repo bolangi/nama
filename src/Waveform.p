@@ -56,7 +56,7 @@ sub generate_waveforms {
 
 		my @cmd = ('waveform', '-F', '-b', '#ffffff', '-c', '#ff0000',
 			'-W', $width, '-H', $height, $wav, $png);
-		say join ' ', @cmd;
+		::terminal_say(join ' ', @cmd);
 		system @cmd;
 		my $status = $?;
 		next if image_has_dimensions($png, $width, $height);

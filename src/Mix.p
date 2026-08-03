@@ -23,8 +23,8 @@ sub check_level {
 	ecasound_iam('start'); # don't use heartbeat
 	sleep 2; # time for engine to stabilize
 	while( ecasound_iam('engine-status') ne 'finished'){ 
-		print q(.); sleep 1; update_clock_display()}; 
-	print " Done\n";
+		::terminal_print(q(.)); sleep 1; update_clock_display()};
+	::terminal_print(" Done\n");
 
 	my $cs = ecasound_iam('cop-status');
 
@@ -95,8 +95,8 @@ sub automix {
 	ecasound_iam('start'); # don't use heartbeat
 	sleep 2; # time for engine to stabilize
 	while( ecasound_iam('engine-status') ne 'finished'){ 
-		print q(.); sleep 1; update_clock_display()}; 
-	print " Done\n";
+		::terminal_print(q(.)); sleep 1; update_clock_display()};
+	::terminal_print(" Done\n");
 
 	# parse cop status
 	my $cs = ecasound_iam('cop-status');

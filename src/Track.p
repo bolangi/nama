@@ -71,7 +71,7 @@ sub new {
 	my $novol = delete $vals{novol};
 	my $nopan = delete $vals{nopan};
 	my $restore = delete $vals{restore};
-	say "restoring track $vals{name}" if $restore;
+	::terminal_say("restoring track $vals{name}") if $restore;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
 	
@@ -416,7 +416,7 @@ sub current_version {
 	else { return 0 }
 }
 sub timeline_position {
-	logpkg('logcluck',$_[0]->name . "->timeline_position");
+	logpkg('debug',$_[0]->name . "->timeline_position");
 	$_[0]->play_start_time
 }
 }

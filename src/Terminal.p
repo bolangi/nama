@@ -233,17 +233,43 @@ sub show_prompt {
 	$entry->set_text(prompt());
 	$entry->set_position(99); 
 }
+
+sub terminal_print (@text) {
+	my $output = join q(), map { defined $_ ? $_ : q() } @text;
+	if (defined $scroller) {
+		print_to_terminal($output);
+	}
+	else {
+		CORE::print STDOUT $output;
+	}
+}
+
+sub terminal_say (@text) {
+	my $output = join q(), map { defined $_ ? $_ : q() } @text;
+	$output .= "\n" unless $output =~ /\n\z/;
+	terminal_print($output);
+}
+
+sub terminal_warn (@text) {
+	my $output = join q(), map { defined $_ ? $_ : q() } @text;
+	if (defined $scroller and defined $tickit) {
+		$tickit->later(sub { print_to_terminal($output) });
+		return;
+	}
+	CORE::print STDERR $output;
+}
  
 sub print_to_terminal (@text) {
 	return unless defined $scroller;
-	chomp for @text;
+	my $output = join q(), map { defined $_ ? $_ : q() } @text;
+	$output =~ s/\n\z//;
 
 	if ($entry_item_installed) {
 		$scroller->pop(1);
 		$entry_item_installed = 0;
 	}
 	$scroller->push(
-		Tickit::Widget::Scroller::Item::Text->new(join ' ', @text),
+		Tickit::Widget::Scroller::Item::Text->new($output),
 	);
 	if (defined $entry_item and $scroller->window) {
 		$scroller->push($entry_item);
@@ -352,30 +378,10 @@ sub activate_effect_hotkeys { set_hotkey_mode('effect') }
 } # popup 
 
 } # tickit UI
-our ($old_output_fh);
-sub redirect_stdout {
-	open(FH, '>', '/dev/null') or die; 
-	FH->autoflush;
-	$old_output_fh = select FH;
-   	tie *FH, 'Tie::Simple', '', 
-     		WRITE     => sub {  },
-			PRINT 		=> sub { my $text = $_[1]; print_to_terminal($text) },
-             PRINTF    => sub {  },
-             READ      => sub {  },
-             READLINE  => sub {  },
-             GETC      => sub {  },
-             CLOSE     => sub {  };
-			
-}
 BEGIN { $SIG{__WARN__} = \&filter_print_to_terminal }
 $SIG{INT} = \&cleanup_exit;
 sub filter_print_to_terminal {
-	print_to_terminal(@_) unless $_[0] =~ /ScrollBox/;
-}
-
-sub restore_stdout {
-	select $old_output_fh;
-	close FH;
+	terminal_warn(@_) unless $_[0] =~ /ScrollBox/;
 }
 
 sub end_of_list_sound { system( $config->{hotkey_beep} ) }
@@ -427,37 +433,13 @@ sub revise_prompt {
 =cut
 }
 
-sub throw {
+sub throw (@text) {
 	logsub((caller(0))[3]);
-	pager_newline(@_)
-}
-sub pagers { &pager_newline(join "",@_) } # pass arguments along
-
-sub pager_newline { 
-
-	# Add a newline if necessary to each line
-	# push them onto the output buffer
-	# print them to the screen
-	
-	my @lines = @_;
-	for (@lines){ $_ .= "\n" if  ! /\n$/ }
-	print(@lines);
-}
-
-sub paging_allowed {
-
-		# The pager interferes with GUI and testing
-		# so do not use the pager in these conditions
-		# or if use_pager config variable is not set.
-		
-		$config->{use_pager} 
-		and ! $config->{opts}->{T}
+	terminal_say(@text)
 }
 sub pager {
 
-	# push array onto output buffer, add two newlines
-	# and print on terminal or view in pager
-	# as appropriate
+	# Normalize command output and print it on the terminal.
 	
 	logsub((caller(0))[3]);
 	my @output = @_;
@@ -466,7 +448,7 @@ sub pager {
 	$output[-1] .= "\n\n";
 	@output = map{"$_\n"} map{ split "\n"} @output;
 	return unless scalar @output;
-	print for @output;
+	terminal_print($_) for @output;
 }
 sub file_pager {};
 1;

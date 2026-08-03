@@ -2,7 +2,7 @@ use Test2::Bundle::More;
 use strict;
 use warnings;
 
-use ::Log qw(initialize_logger logit set_log_sink);
+use ::Log qw(initialize_logger logit logpkg set_log_sink);
 
 my @output;
 my $lazy_calls = 0;
@@ -33,5 +33,13 @@ logit('SUB', 'debug', 'included by ALL');
 logit('Audio::Nama::EffectsRegistry', 'trace', 'noisy output');
 is scalar(@output) - $before, 2, 'ALL exclusion and NOISY are preserved';
 like $output[-1], qr/noisy output\n\z/, 'NOISY enables trace messages';
+
+initialize_logger('03_log');
+set_log_sink(sub { push @output, @_ });
+$before = scalar @output;
+logpkg('debug', 'file-derived category');
+is scalar(@output) - $before, 1, 'logpkg matches its file-derived category';
+like $output[-1], qr/Audio::Nama::03_log .*file-derived category\n\z/,
+	'logpkg normalizes the generated filename';
 
 done_testing;

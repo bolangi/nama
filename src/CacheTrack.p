@@ -289,7 +289,7 @@ sub caching_cleanup {
 }
 sub poll_progress {
 	my $args = $setup->{cache_track_args};
-	print ".";
+	::terminal_print(".");
 	my $status = ecasound_iam('engine-status'); 
 	my $here   = ecasound_iam("getpos");
 	update_clock_display();

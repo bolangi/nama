@@ -52,7 +52,7 @@ sub restore_state_from_vcs {
 	# checkout branch if matching branch exists
 	
     if (git_branch_exists($name)){
-		pager_newline( qq($name: branch exists. Checking out branch $name.) );
+		::terminal_say( qq($name: branch exists. Checking out branch $name.) );
 		git_checkout($name);
 		
 	}
@@ -65,12 +65,12 @@ sub restore_state_from_vcs {
 		my $branch = tag_branch($tag);
 	
 		if (git_branch_exists($branch)){
-			pager_newline( qq(tag $tag: matching branch exists. Checking out $branch.) );
+			::terminal_say( qq(tag $tag: matching branch exists. Checking out $branch.) );
 			git_checkout($branch);
 		}
 
 		else {
-			pager_newline( "Creating and checking out branch $branch from tag $tag");
+			::terminal_say( "Creating and checking out branch $branch from tag $tag");
 			git_create_branch($branch, $tag);
 			
 		}
@@ -202,13 +202,12 @@ sub git_branch_display {
 	$display
 }
 sub list_branches {
-	pager_newline(
+	::terminal_say(join "\n",
 		"---Branches--- (asterisk marks current branch)",
 		$project->{repo}->run('branch'),
 		"",
 		"-----Tags-----",
-		$project->{repo}->run('tag','--list')	
-	);
+		$project->{repo}->run('tag','--list'));
 }
 
 sub redo {
@@ -238,6 +237,6 @@ sub show_head_commit {
 	my $show = git(qw/show HEAD/);	
 	my ($commit) = $show =~ /commit ([a-z0-9]{10})/;
 	my (undef,$msg)    = split "\n\n",$show;
-	pager_newline("commit: $commit",$msg);
+	::terminal_say("commit: $commit\n", $msg);
 }
 1

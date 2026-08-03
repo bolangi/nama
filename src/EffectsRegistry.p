@@ -18,7 +18,7 @@ sub prepare_static_effects_data{
 		if (! $source and ($config->{opts}->{r} or new_plugins())){ 
 
 			rename $file->effects_cache, $file->effects_cache . ".bak";
-			print "Regenerating effects data cache\n";
+			::terminal_print("Regenerating effects data cache\n");
 		}
 	}
 
