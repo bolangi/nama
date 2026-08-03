@@ -175,7 +175,9 @@ sub bootstrap_environment {
 	definitions();
 	process_command_line_options();
 	initialize_user_interface();
-	::terminal_say(eval join(get_data_section('banner'), qw(" ")));
+	my $banner = get_data_section('banner');
+	$banner =~ s/\$VERSION/$VERSION/g;
+	::terminal_say($banner);
 	setup_grammar();
 	initialize_services();
 }
