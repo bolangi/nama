@@ -186,7 +186,6 @@ sub definitions {
 		waveform_canvas_x			=> 2400,
 		waveform_canvas_y			=> 4800,
 		waveform_pixels_per_second  => 10,
-		display_waveform			=> 1,
 		loop_chain_channel_width     => 16,
 
 		ticks_per_quarter_note		=> 24,
