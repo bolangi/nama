@@ -20,6 +20,7 @@ sub rec_cleanup {
 	logpkg('debug',"transport still running, can't cleanup"), return if $this_engine->running;
 	if( my (@files) = new_files_were_recorded() )
 	{
+		::Waveform::generate_waveforms(@files);
 		if( my @rec_tracks = ::ChainSetup::engine_wav_out_tracks() )
 		{
 			$project->{playback_position} = 0;

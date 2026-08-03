@@ -34,6 +34,7 @@ my $build = Module::Build->new(
 		'JSON::XS' => 0,
 		'IPC::Open3'  => 0,
 		'IPC::System::Simple' => 0,
+		'Image::Size' => 0,
 		'List::Util' => 0,
 		'List::MoreUtils' => 0,
 		'Log::Log4perl' => 0,
@@ -63,4 +64,3 @@ my $build = Module::Build->new(
 );
  
 $build->create_build_script;
-

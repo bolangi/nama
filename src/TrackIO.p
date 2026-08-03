@@ -371,6 +371,7 @@ sub import_audio  {
 		::sleeper(0.2); 
 		sleep 1 while $this_engine->running();
 	} 
+	::Waveform::generate_waveforms($destination);
 	::refresh_wav_cache() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
 }
 

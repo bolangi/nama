@@ -58,8 +58,10 @@ sub add_track_alias_project {
 	$project_name //= $::project->{name}; 
 	my $dir =  join_path(project_root(), $project_name, '.wav'); 
 	if ( -d $dir ){
-		if ( glob "$dir/$track*.wav"){
+		my @wavs = File::Find::Rule->file()->name("$track*.wav")->in($dir);
+		if (@wavs){
 			::pager("Found target WAV files.\n");
+			::Waveform::generate_waveforms(@wavs);
 			my @params = (
 				target => $track, 
 				project => $project_name,
@@ -200,4 +202,3 @@ sub this_op_o { $this_track and $this_track->op and fxn($this_track->op) }
 sub this_param { $this_track ? $this_track->param : ""}
 sub this_stepsize { $this_track ? $this_track->stepsize : ""}
 sub this_track_name { $this_track ? $this_track->name : "" }
-

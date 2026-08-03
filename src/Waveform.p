@@ -1,33 +1,16 @@
 package ::Waveform;
-use ::Globals qw($project $config $gui %ti);
+use ::Globals qw($project $config $gui $ui %ti);
 use ::Util qw(join_path);
 use v5.36;
+use Image::Size qw(imgsize);
 our $VERSION = 1.0;
 use Try::Tiny;
 use vars qw(%by_name);
 use ::Object qw(wav track project start end);
 
-# * objects of this class represent a waveform display 
-# * each object is associated with an audio file
-# * object will find or generate PNG for the audio
-# * will display waveform
-#    + if shift, correctly position PNG
-#    + if region, trim the PNG existing for the track
-
-# the $track->waveform method will create a new object of this class 
-# we will memoize since it remains constant between reconfigures
-
-# keyed to the 
-# + name of the WAV file
-# + name of project
-# + start and end times
-
-# the get_png() method will find or generate the appropriate PNG
-
-
-# files are of the form # sax_1.wav.1200x200-10.png 
-# where the numbers correspond to width and height in pixels of the audio
-# waveform image, and the x-scaling in pixels per second (default 10)
+# Each WAV has one waveform image, named by appending .png to its path.
+# WAV files are immutable in Nama, so an existing image is reused unless
+# its dimensions differ from the current waveform configuration.
 
 sub new {
 	my $class = shift;
@@ -35,53 +18,65 @@ sub new {
 	bless \%args, $class	
 }
 
-sub generate_waveform {
-	my $self = shift;
-	my ($width, $height, $pixels_per_second) = @_;
-	$pixels_per_second //= $config->{waveform_pixels_per_second};
-	$height //= $config->{waveform_height};
-	$width //= int( $self->track->wav_length * $pixels_per_second);
-	my $name = waveform_name($self->track->full_path, $width, $height, $pixels_per_second);
-	my @cmd = ('waveform', '-b', '#ffffff', '-c', '#ff0000',
-		'-W', $width, '-H', $height, $self->track->full_path, $name);
-	say join ' ', @cmd;
-	system @cmd;
-	::throw("waveform generation failed: @cmd") if $? or not -f $name;
-	$name;
+sub waveform_name { "$_[0].png" }
+
+sub waveforms_enabled {
+	$config->{display_waveform}
+		&& ref($ui)
+		&& $ui->isa('::Graphical');
 }
 
-# utility subroutine
-sub waveform_name {
-	my($path, $width, $height, $pixels, $start, $end) = @_;
-			"$path."  . $width . 'x' . "$height-$pixels-red-on-white"
-			. region_def($start,$end) . ".png"
+sub desired_dimensions {
+	my ($wav, $options) = @_;
+	my $pixels_per_second = $options->{pixels_per_second}
+		// $config->{waveform_pixels_per_second};
+	my $height = $options->{height} // $config->{waveform_height};
+	my $width = int(::wav_length($wav) * $pixels_per_second);
+	($width, $height);
 }
-sub region_def {}
-sub find_waveform {
 
-	my $self = shift;
-	my $match = shift() // '*';
-	my @files = File::Find::Rule->file()
-	 ->name( $self->wav . ".$match.png"  )
-	 ->in(   ::this_wav_dir()      );
-	@files;
+sub image_has_dimensions {
+	my ($png, $wanted_width, $wanted_height) = @_;
+	return unless -f $png;
+	my ($width, $height) = imgsize($png);
+	defined $width && defined $height
+		&& $width == $wanted_width && $height == $wanted_height;
 }
+
+sub generate_waveforms {
+	return unless waveforms_enabled();
+	my $options = ref $_[0] eq 'HASH' ? shift : {};
+	my %seen;
+	for my $wav (grep { defined && -f && !$seen{$_}++ } @_){
+		my ($width, $height) = desired_dimensions($wav, $options);
+		next unless $width > 0 && $height > 0;
+		my $png = waveform_name($wav);
+		next if !$options->{force}
+			&& image_has_dimensions($png, $width, $height);
+
+		my @cmd = ('waveform', '-F', '-b', '#ffffff', '-c', '#ff0000',
+			'-W', $width, '-H', $height, $wav, $png);
+		say join ' ', @cmd;
+		system @cmd;
+		::throw("waveform generation failed: @cmd")
+			if $? || !image_has_dimensions($png, $width, $height);
+	}
+}
+
 sub get_waveform {
 	my $self = shift;
-	my $pixels_per_second = $config->{waveform_pixels_per_second};
-	my $height = $config->{waveform_height};
-	my $width = int($self->track->wav_length * $pixels_per_second);
-	my $waveform = waveform_name(
-		$self->track->full_path, $width, $height, $pixels_per_second);
-	-f $waveform
-		? $waveform
-		: $self->generate_waveform($width, $height, $pixels_per_second);
+	my $wav = $self->track->full_path;
+	generate_waveforms($wav);
+	my $png = waveform_name($wav);
+	my ($width, $height) = desired_dimensions($wav, {});
+	image_has_dimensions($png, $width, $height) ? $png : undef;
 }
 sub display {
 	my $self = shift;
-	my ($waveform) = $self->get_waveform; 
+	my $waveform = $self->get_waveform or return;
 	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
-	$gui->{waveform}{$self->track->name} = []; # unused? 
+	# Keep the Photo object alive for as long as the canvas uses the image.
+	$gui->{waveform}{$self->track->name} = $widget;
 	$gui->{wwcanvas}->createImage(	0,
 												$self->y_offset_multiplier * $config->{waveform_height}, 
 												-anchor => 'nw', 
@@ -95,24 +90,18 @@ sub display {
 }
 sub width  {
 	my $self = shift;
-	my ($waveform) = $self->get_waveform; 
-	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
-		or ::throw("cannot parse waveform filename: $waveform");
+	my $waveform = $self->get_waveform or return;
+	my ($width) = imgsize($waveform);
 	$width
 }
 sub height  {
 	my $self = shift;
-	my ($waveform) = $self->get_waveform; 
-	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
-		or ::throw("cannot parse waveform filename: $waveform");
+	my $waveform = $self->get_waveform or return;
+	my (undef, $height) = imgsize($waveform);
 	$height
 }
 sub pixels_per_second  {
-	my $self = shift;
-	my ($waveform) = $self->get_waveform;
-	my ($width, $height, $pixels_per_second) = $waveform =~ /(\d+)x(\d+)-(\d+)/
-		or ::throw("cannot parse waveform filename: $waveform");
-	$pixels_per_second
+	$config->{waveform_pixels_per_second}
 }
 sub y_offset_multiplier {
 	my $self = shift;
