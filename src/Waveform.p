@@ -46,13 +46,15 @@ sub generate_waveform {
 		'-W', $width, '-H', $height, $self->track->full_path, $name);
 	say join ' ', @cmd;
 	system @cmd;
+	::throw("waveform generation failed: @cmd") if $? or not -f $name;
 	$name;
 }
 
 # utility subroutine
 sub waveform_name {
 	my($path, $width, $height, $pixels, $start, $end) = @_;
-			"$path."  . $width . 'x' . "$height-$pixels" . region_def($start,$end) . ".png"
+			"$path."  . $width . 'x' . "$height-$pixels-red-on-white"
+			. region_def($start,$end) . ".png"
 }
 sub region_def {}
 sub find_waveform {
@@ -66,8 +68,14 @@ sub find_waveform {
 }
 sub get_waveform {
 	my $self = shift;
-	my ($waveform) = $self->find_waveform; 
-	$waveform or $self->generate_waveform; 
+	my $pixels_per_second = $config->{waveform_pixels_per_second};
+	my $height = $config->{waveform_height};
+	my $width = int($self->track->wav_length * $pixels_per_second);
+	my $waveform = waveform_name(
+		$self->track->full_path, $width, $height, $pixels_per_second);
+	-f $waveform
+		? $waveform
+		: $self->generate_waveform($width, $height, $pixels_per_second);
 }
 sub display {
 	my $self = shift;
