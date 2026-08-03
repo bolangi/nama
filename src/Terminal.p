@@ -68,20 +68,20 @@ sub initialize_terminal {
 	$text->{term}    = $term    = $tickit->term;
 	$text->{rootwin} = $rootwin = $tickit->rootwin;
 	my $lines = $term->lines;
-	create_entry_widget();
-	setup_key_bindings();
-	install_tk_tickit_bridge() if defined $gui->{mw};
 	$vbox->add($scroller, valign => 'top', force_size => $lines - 2); 
 
 	$entry_item = ::TerminalEntryItem->new(
 		on_render => \&position_entry_widget,
 	);
 	$scroller->set_on_scrolled(sub { position_entry_widget() });
-	$tickit->later(\&install_entry_item);
+	$text->{terminal_starting} = 1;
 }
 
-sub start_terminal_ui {
-	$vbox->set_window($rootwin);
+sub finish_terminal_startup {
+	create_entry_widget();
+	setup_key_bindings();
+	$tickit->later(\&install_entry_item);
+	delete $text->{terminal_starting};
 }
 
 sub install_tk_tickit_bridge {
@@ -238,6 +238,7 @@ sub terminal_print (@text) {
 	my $output = join q(), map { defined $_ ? $_ : q() } @text;
 	if (defined $scroller) {
 		print_to_terminal($output);
+		$text->{loop}->loop_once(0) if $text->{terminal_starting};
 	}
 	else {
 		CORE::print STDOUT $output;

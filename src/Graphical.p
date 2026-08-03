@@ -22,7 +22,6 @@ sub loop {
 	# Tk owns the graphical event loop.  Give IO::Async (and therefore
 	# Tickit::Async) a nonblocking turn at regular intervals so terminal input,
 	# timers, and engine I/O remain live while Tk is running.
-	::start_terminal_ui();
 	my $pump_async;
 	$pump_async = sub {
 		return unless Tk::Exists($::gui->{mw});

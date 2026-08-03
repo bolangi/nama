@@ -186,6 +186,7 @@ sub definitions {
 		waveform_canvas_x			=> 2400,
 		waveform_canvas_y			=> 4800,
 		waveform_pixels_per_second  => 10,
+		display_waveform			=> 1,
 		loop_chain_channel_width     => 16,
 
 		ticks_per_quarter_note		=> 24,
@@ -231,22 +232,41 @@ sub definitions {
 
 }
 
-sub initialize_interfaces {
+sub initialize_user_interface {
 	
 	logsub((caller(0))[3]);
+	my $tk_warning;
 	
 	if ( $config->{opts}->{g}){
-			::Graphical::initialize_tk() and $ui = ::Graphical->new()
-			or ::terminal_say( "Unable to load perl Tk module. Starting in console mode.")
+		::Graphical::initialize_tk() and $ui = ::Graphical->new()
+			or $tk_warning = "Unable to load perl Tk module. Starting in console mode."
 	}
 	if ( not defined $ui ){
 		$ui = ::Text->new();
-		$text->{loop} = IO::Async::Loop->new;
 	}
 	choose_sleep_routine();
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
 	logpkg('debug', sub{"Command line options\n".  json_out($config->{opts})});
+
+	# first_run uses ordinary STDIN, so let it finish before Tickit takes over
+	# the terminal.  On established installations this is a no-op.
+	first_run() unless $config->{opts}->{d};
+
+	unless ($config->{opts}->{T}) {
+		initialize_terminal();
+		::Log::set_log_sink(sub ($message) {
+			$text->{tickit}->later(sub { print_to_terminal($message) });
+		});
+	}
+	else {
+		::Log::set_log_sink(sub ($message) { print STDERR $message });
+	}
+	::terminal_say($tk_warning) if $tk_warning;
+	1;
+}
+
+sub initialize_services {
 
 	read_config(global_config());  # from .namarc if we have one
 	# set sample rate is needed for prepare_static_effects_data() and initialize_project_data()
@@ -267,11 +287,6 @@ sub initialize_interfaces {
 		pager("placing all files in current working directory ($config->{root_dir})\n");
 	}
 
-	# skip initializations if user (test) supplies project
-	# directory
-	
-	first_run() unless $config->{opts}->{d}; 
-
 	prepare_static_effects_data() unless $config->{opts}->{S};
 	setup_user_customization();	# depends on effect_index() in above
 
@@ -282,6 +297,7 @@ sub initialize_interfaces {
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
+	install_tk_tickit_bridge() if defined $gui->{mw};
 	
 	# fake JACK for testing environment
 
@@ -329,16 +345,6 @@ exit;
 		else { ::terminal_say("Stopped.") }
 	}
 		
-	initialize_terminal() unless $config->{opts}->{T};
-	if ($config->{opts}->{T}) {
-		::Log::set_log_sink(sub ($message) { print STDERR $message });
-	}
-	else {
-		::Log::set_log_sink(sub ($message) {
-			$text->{tickit}->later(sub { print_to_terminal($message) });
-		});
-	}
-
 	1;	
 }
 

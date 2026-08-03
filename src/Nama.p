@@ -155,7 +155,6 @@ use ::TrackUtils ();
 use ::Tempo ();
 
 sub main { 
-	::terminal_say(eval join(get_data_section('banner'), qw(" ")));
 	bootstrap_environment() ;
 	load_project(name => shift @ARGV,
 				 create => delete $config->{opts}->{c}); 
@@ -167,15 +166,18 @@ sub main {
 		::terminal_say("Enter command to begin or type 'h' for help.");
 		$this_track = $tn{Main};
 	}
-	show_prompt();
+	finish_terminal_startup() unless $config->{opts}->{T};
+	show_prompt() unless $config->{opts}->{T};
 	$ui->loop();
 }
 
 sub bootstrap_environment {
 	definitions();
 	process_command_line_options();
+	initialize_user_interface();
+	::terminal_say(eval join(get_data_section('banner'), qw(" ")));
 	setup_grammar();
-	initialize_interfaces();
+	initialize_services();
 }
 sub kill_and_reap {
 	my @pids = @_;
