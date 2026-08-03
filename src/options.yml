@@ -2,7 +2,7 @@
 - long: gui
   short: g
   audience: basic
-  description: Start Nama in GUI mode
+  description: Enable GUI (basic recording and mixing)
 - long: create-project
   short: c
   audience: basic
