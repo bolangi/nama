@@ -1,7 +1,6 @@
 $config->{memoize} 				# method caching
 $config->{hires_timer}			# indicates if we are capable
 $config->{opts}					# command line arguments
-$config->{soundcard_channels}	# a constant needed for GUI - can we discover this?
 $config->{disable_auto_reconfigure} # -R option
 $config->{engine_muting_time} 	# interval for engine to smoothly mute/unmute
 $config->{engine_command_output_buffer_size}
@@ -15,15 +14,10 @@ $config->{latency_op}			# operator for latency compensation
 $config->{latency_op_init}		# initial values
 $config->{latency_op_set}		# subroutine for setting latency compensation
 $config->{_is_system_bus}		# a hash
-$config->{use_midi}
-$config->{default_waveform_height}
 $config->{waveform_canvas_x}
 $config->{waveform_canvas_y}
-$config->{loop_chain_channel_width}
 $config->{soundcard_loopback_delay}
-$config->{display_waveform}
 $config->{use_effects_bugfix}
-$config->{use_metronome}
 $config->{beep}
 $config->{playback_jump_seconds}
 $config->{mark_bump_seconds}
@@ -255,9 +249,6 @@ $gui->{waveform}				# waveform display widgets, by trackname
 
 $jack->{connections}
 $jack->{is_own_port}
-$jack->{connections}
-$jack->{is_other_port}
-$jack->{is_own_port}
 $jack->{is_other_port}
 $jack->{graph}
 $jack->{watcher}
@@ -267,5 +258,3 @@ $fx_cache->{lv2_register}
 $fx_cache->{preset_register}
 $fx_cache->{ctrl_register}
 $fx_cache->{cop_register}
-$fx_cache->{preset_register}
-$fx_cache->{ctrl_register}
