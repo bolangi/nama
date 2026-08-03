@@ -626,7 +626,6 @@ sub status_bar {
 	$status =  "$name mode: $hotkey_mode $status";
 }
 
-sub jump_status_bar {}
 sub bump_status_bar {}
 
 	
