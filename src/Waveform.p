@@ -58,8 +58,17 @@ sub generate_waveforms {
 			'-W', $width, '-H', $height, $wav, $png);
 		say join ' ', @cmd;
 		system @cmd;
-		::throw("waveform generation failed: @cmd")
-			if $? || !image_has_dimensions($png, $width, $height);
+		my $status = $?;
+		next if image_has_dimensions($png, $width, $height);
+
+		my ($actual_width, $actual_height) = -f $png
+			? imgsize($png)
+			: ();
+		my $actual = defined $actual_width
+			? "$actual_width x $actual_height"
+			: 'no readable PNG';
+		::throw("waveform generation failed (status $status; ",
+			"expected $width x $height; got $actual): @cmd");
 	}
 }
 
