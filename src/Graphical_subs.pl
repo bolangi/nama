@@ -1174,16 +1174,41 @@ sub setup_playback_indicator {
 	start_event(update_playback_position_display => timer(0, 0.1, \&update_indicator));
 } 	
 sub update_indicator {
-	$gui->{wwcanvas}->delete('playback-indicator');
 	my $pos = ::current_timeline_position();
 	my $xpos = int( $pos * $config->{waveform_pixels_per_second} );
-	$gui->{wwcanvas}->createLine(
+	my @indicator = $gui->{wwcanvas}->find('withtag', 'playback-indicator');
+	if (@indicator) {
+		$gui->{wwcanvas}->coords(
+			$indicator[0], $xpos, 0, $xpos, $config->{waveform_canvas_y});
+	}
+	else {
+		$gui->{wwcanvas}->createLine(
 			$xpos,0,
 			$xpos,$config->{waveform_canvas_y},
 			-fill => 'red',
 			-width => 1,
 			-tags => 'playback-indicator'
-	);
+		);
+	}
+
+	my $scrollregion = $gui->{wwcanvas}->cget('-scrollregion');
+	my @scrollregion = ref $scrollregion eq 'ARRAY'
+		? @$scrollregion
+		: split(' ', $scrollregion);
+	my $scroll_width = $scrollregion[2] - $scrollregion[0];
+	return unless $scroll_width > 0;
+
+	my ($left_fraction, $right_fraction) = $gui->{wwcanvas}->xview;
+	my $left = $scrollregion[0] + $left_fraction * $scroll_width;
+	my $right = $scrollregion[0] + $right_fraction * $scroll_width;
+	return if $xpos >= $left && $xpos <= $right;
+
+	my $viewport_width = $right - $left;
+	my $new_left = $xpos < $left ? $xpos : $xpos - $viewport_width;
+	my $new_fraction = ($new_left - $scrollregion[0]) / $scroll_width;
+	$new_fraction = 0 if $new_fraction < 0;
+	$new_fraction = 1 if $new_fraction > 1;
+	$gui->{wwcanvas}->xviewMoveto($new_fraction);
 }
 
 sub get_saved_colors {
