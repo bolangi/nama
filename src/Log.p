@@ -2,109 +2,132 @@
 
 package ::Log;
 use v5.36;
-our $VERSION = 1.0;
-use Log::Log4perl qw(get_logger :levels);
+our $VERSION = 1.1;
 use Exporter;
-use Carp qw(carp cluck confess croak);
+use Carp qw(shortmess longmess);
+use File::Basename qw(basename);
+use IO::Handle ();
+use Time::HiRes qw(time);
+
 our @ISA = 'Exporter';
-our @EXPORT_OK = qw(logit logpkg logsub initialize_logger);
-our $appender;
+our @EXPORT_OK = qw(logit logpkg logsub initialize_logger set_log_sink);
 
-sub initialize_logger {
-	my $cat_string = shift;
+my %enabled;
+my $noisy;
+my $started = time;
+my $sink;
+my $log_fh;
+my @pending;
 
+sub initialize_logger ($cat_string = undef) {
 	my @all_cats = qw(
 [% qx(./emit_logging_categories) %]
 	);
-	push @all_cats, 'ECI','SUB';
+	push @all_cats, qw(ECI SUB);
+
+	close $log_fh if defined $log_fh;
+	undef $log_fh;
+	undef $sink;
+	@pending = ();
+	%enabled = ();
+	$noisy = 0;
+	$started = time;
 
 	my %negate;
-	%negate = map{ $_ => 1} map{ s/^#//; $_ } grep{ /^#/ } 
-		expand_cats(split q(,), $cat_string) if $cat_string;
-	#say("negate\n",::json_out(\%negate));
+	if ($cat_string) {
+		my @requested = map { s/^\s+|\s+$//gr } split q(,), $cat_string;
+		$noisy = grep { $_ eq 'NOISY' } @requested;
+		@requested = grep { $_ ne 'NOISY' } @requested;
 
-	my $layout = "[\%r] %c %m%n"; # backslash to protect from source filter
-	my $logfile = $ENV{NAMA_LOGFILE};
-	$SIG{ __DIE__ } = sub { Carp::confess( @_ ) } if $cat_string;
-	
-	$appender = $logfile ? 'FILE' : 'STDERR';
-	$logfile //= "/dev/null";
+		%negate = map { $_ => 1 }
+			expand_cats(map { s/^#//r } grep { /^#/ } @requested);
 
-	my @cats;
-	@cats = expand_cats(split ',', $cat_string) if $cat_string;
-	#logpkg('debug',"initial logging categories: @cats");
-	#logpkg('trace',"all cats: @all_cats");
-	
-	@cats = grep{ ! $negate{$_} } @all_cats if grep {$_ eq 'ALL'} @cats;
-	
-	#logpkg('debug',"Final logging categories: @cats");
+		my @cats = expand_cats(@requested);
+		@cats = grep { !$negate{$_} } @all_cats
+			if grep { $_ eq 'ALL' } @cats;
+		%enabled = map { $_ => 1 } @cats;
+		$enabled{NOISY} = 1 if $noisy;
 
-	my $conf = qq(
-		#log4perl.rootLogger			= DEBUG, $appender
-		#log4perl.category.Audio.Nama	= DEBUG, $appender
+		$SIG{__DIE__} = sub {
+			local $SIG{__DIE__};
+			die longmess(@_);
+		};
+	}
 
-		# dummy entry - avoid no logger/no appender warnings
-		log4perl.category.DUMMY			= DEBUG, DUMMY
-		log4perl.appender.DUMMY			= Log::Log4perl::Appender::Screen
-		log4perl.appender.DUMMY.layout	= Log::Log4perl::Layout::NoopLayout
+	if ($cat_string and defined $ENV{NAMA_LOGFILE}) {
+		open $log_fh, '>>:encoding(UTF-8)', $ENV{NAMA_LOGFILE}
+			or die "Unable to open $ENV{NAMA_LOGFILE}: $!";
+		$log_fh->autoflush(1);
+		$sink = sub ($message) { print {$log_fh} $message };
+	}
 
-		# screen appender
-		log4perl.appender.STDERR		= Log::Log4perl::Appender::Screen
-		log4perl.appender.STDERR.layout	= Log::Log4perl::Layout::PatternLayout
-		log4perl.appender.STDERR.layout.ConversionPattern = $layout
-
-		# file appender
-		log4perl.appender.FILE		= Log::Log4perl::Appender::File
-		log4perl.appender.FILE.filename	= $logfile
-		log4perl.appender.FILE.layout	= Log::Log4perl::Layout::PatternLayout
-		log4perl.appender.FILE.layout.ConversionPattern = $layout
-
-		#log4perl.additivity.SUB			= 0 # doesn't work... why?
-	);
-	# add lines for the categories we want to log
-	$conf .= join "\n", "", map{ cat_line($_)} @cats if @cats;
-	#say $conf; 
-	Log::Log4perl::init(\$conf);
-	return( { map { $_, 1 } @cats } )
+	return { %enabled };
 }
-sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
 
-sub expand_cats {
-	# Convert Module  -> ::Module  -> Audio::Nama::Module
-	# Convert !Module -> !::Module -> !Audio::Nama::Module
-	no warnings 'uninitialized';
-	my @cats = @_;
-	map { s/^(#)?::/$1Audio::Nama::/; $_}                    # SKIP_PREPROC
-	map { s/^(#)?/$1::/ unless /^::/ or /^#?ECI/ or /^#?SUB/ or /^ALL$/; $_ }# SKIP_PREPROC
-	@cats;
+sub set_log_sink ($new_sink) {
+	return if defined $log_fh;
+	$sink = $new_sink;
+	my @messages = splice @pending;
+	$sink->($_) for @messages;
 }
-{
-my %is_method = map { $_ => 1 } 
-		qw( trace debug info warn error fatal
-			logwarn logdie
-			logcarp logcroak logcluck logconfess);
-	
-sub logit {
-	my ($line_number, $category, $level, @message) = @_;
-	#say qq($line_number, $category, $level, @message) ;
-	#confess("first call to logit");
-	my $line_number_output  = $line_number ? " (L $line_number) ": "";
-	cluck "illegal level: $level" unless $is_method{$level};
-	my $logger = get_logger($category);
-	$logger->$level($line_number_output, @message);
-}
-}
-sub logsub { logit('SUB','debug',$_[0]) }
 
-sub logpkg { 
-	my( $file, $line_no, $level, @message) = @_;
-	# convert Effects.pm to Audio::Nama::Effects to support logpkg
-	my $pkg = $file;
-	($pkg) = $file =~ m| ([^/]+)\.pm$ |x;
-	$pkg //= "Dummy::Pkg";
-	$pkg = "Audio::Nama::$pkg";  # SKIP_PREPROC
-	#say "category: $pkg";
-	logit ($line_no,$pkg,$level, @message) 
+sub expand_cats (@cats) {
+	for (@cats) {
+		unless (/^::/ or /^#?ECI/ or /^#?SUB/ or /^ALL$/) {
+			s/^#/#::/ or s/^/::/;
+		}
+		s/^::/Audio::Nama::/;
+		s/^#::/#Audio::Nama::/;
+	}
+	return @cats;
 }
-	
+
+my %valid_level = map { $_ => 1 } qw(
+	trace debug info warn error fatal
+	logwarn logdie logcarp logcroak logcluck logconfess
+);
+
+sub logit ($line_number, $category, $level, @message) {
+	_emit($line_number, $category, $level, @message);
+}
+
+sub _emit ($line_number, $category, $level, @message) {
+	return unless $enabled{$category};
+	return if $level eq 'trace' and !$noisy;
+
+	die "illegal log level: $level" unless $valid_level{$level};
+	@message = map { ref $_ eq 'CODE' ? $_->() : $_ } @message;
+	my $message = join q(), @message;
+
+	{
+		local $Carp::CarpLevel = 1;
+		$message = shortmess($message) if $level eq 'logcarp' or $level eq 'logcroak';
+		$message = longmess($message)  if $level eq 'logcluck' or $level eq 'logconfess';
+	}
+
+	my $elapsed = int((time - $started) * 1000);
+	my $line = $line_number ? " (L $line_number) " : q( );
+	my $formatted = "[$elapsed] $category$line$message";
+	$formatted .= "\n" unless $formatted =~ /\n\z/;
+
+	if (defined $sink) {
+		$sink->($formatted);
+	}
+	else {
+		push @pending, $formatted;
+	}
+
+	die $message if $level eq 'logdie' or $level eq 'logcroak' or $level eq 'logconfess';
+	return;
+}
+
+sub logsub ($sub_name, @ignored) { _emit(0, 'SUB', 'debug', $sub_name) }
+
+sub logpkg ($file, $line_no, $level, @message) {
+	my $pkg = basename($file);
+	$pkg =~ s/\.pm\z//;
+	$pkg = "Audio::Nama::$pkg"; # SKIP_PREPROC
+	_emit($line_no, $pkg, $level, @message);
+}
+
 1;

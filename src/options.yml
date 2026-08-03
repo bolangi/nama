@@ -24,7 +24,7 @@
   short: L
   argument: s
   audience: diagnostic
-  description: Log comma separated categories, also -L SUB and -L ALL
+  description: Log comma separated categories; SUB logs calls, ALL logs all categories, NOISY includes trace output
 - long: regenerate-effects-cache
   short: r
   audience: diagnostic

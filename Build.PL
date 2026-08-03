@@ -37,7 +37,6 @@ my $build = Module::Build->new(
 		'Image::Size' => 0,
 		'List::Util' => 0,
 		'List::MoreUtils' => 0,
-		'Log::Log4perl' => 0,
 		'Module::Load::Conditional'  => 0, 
 		'Parse::RecDescent'  => 0,
 		'Path::Tiny' => 0,

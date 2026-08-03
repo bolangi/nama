@@ -25,7 +25,6 @@ use IO::Async::Loop::Select;
 use IO::Socket; 
 use IO::Select;
 use IPC::Open3;
-use Log::Log4perl qw(get_logger :levels);
 use Module::Load::Conditional qw(can_load); 
 use Module::Load;
 use Parse::RecDescent;
@@ -176,7 +175,6 @@ sub main {
 sub bootstrap_environment {
 	definitions();
 	process_command_line_options();
-	start_logging();
 	setup_grammar();
 	initialize_interfaces();
     redirect_stdout() unless  $config->{opts}->{T};

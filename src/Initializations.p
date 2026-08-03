@@ -331,6 +331,14 @@ exit;
 	}
 		
 	initialize_terminal() unless $config->{opts}->{T};
+	if ($config->{opts}->{T}) {
+		::Log::set_log_sink(sub ($message) { print STDERR $message });
+	}
+	else {
+		::Log::set_log_sink(sub ($message) {
+			$text->{tickit}->later(sub { print_to_terminal($message) });
+		});
+	}
 
 	1;	
 }
@@ -400,9 +408,6 @@ sub munge_category {
 	$cat
 }
 
-sub start_logging { 
-	$config->{want_logging} = initialize_logger($config->{opts}->{L})
-}
 sub ecasound_iam{ $en{$::config->{ecasound_engine_name}} and $en{$::config->{ecasound_engine_name}}->ecasound_iam(@_) }
 
 1;
