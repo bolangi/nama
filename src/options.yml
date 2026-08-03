@@ -6,7 +6,7 @@
 - long: create-project
   short: c
   audience: basic
-  description: Create project if it doesn't exist
+  description: Create project if not existing
 - long: sample-rate
   short: z
   argument: s
