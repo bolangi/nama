@@ -367,14 +367,14 @@ ok(   (defined $vol_id and $::Effect::by_id{$vol_id}) , "apply volume control");
 
 nama_cmd('add_effect time_reverb3');
 
-like( this_op_o()->code, qr/time_reverb3/, "apply preset");
+like( this_op_o()->about->{code}, qr/time_reverb3/, "apply preset");
 
 is (this_op_o()->track_effect_index, 0, "positioned before vol/pan faders");
 
 nama_cmd('add_effect decimator 1 2');
 
-like( this_op_o()->code, qr/decimator/, "apply LADSPA effect");
 
+like( this_op_o()->about->{code}, qr/decimator/, "apply LADSPA effect");
 is( this_op_o()->track_effect_index, 1, "position before faders, after other effects");
 
 nama_cmd('vol -2');

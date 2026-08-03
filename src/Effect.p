@@ -43,19 +43,10 @@ sub initialize {
 	# volume settings
 	$fx->{muted} = [];
 }
-sub AUTOLOAD {
-	my $self = shift;
-	#say "got self: $self", ::Dumper $self;
-	die 'not object' unless ref $self;
-	# get tail of method call
-	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
-	# see if this can be satisfied by a field from
-	# the corresponding effects registry entry
-	$call = 'name' if $call eq 'fxname';
-	$self->about->{$call}
+sub fxname {
+    my $self = shift;
+    $self->about->{name}
 }
-sub DESTROY {}
-
 sub new {
 	my ($class, %args) = @_;
 
@@ -1303,7 +1294,7 @@ sub fade_out_level {
 }
 sub ecasound_format {
 	my $self = shift;
-	my $cmd = '-'.$self->code;
+	my $cmd = '-'.$self->about->{code};
 	$cmd .= ':'.join ',' ,@{$self->{params}} if $self->{params} and @{$self->{params}} > 0;
 	$cmd
 }
