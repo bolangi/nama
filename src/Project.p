@@ -135,7 +135,7 @@ sub load_project {
 	{
 		no warnings 'uninitialized';
 		::terminal_say(qq(Project "$project->{name}" not found. Loading project "Untitled".));
-		load_project(name => 'Untitled', create => 1);
+		return load_project(name => 'Untitled', create => 1);
 
 	}
 	create_project_dirs() if $args{create};

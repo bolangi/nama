@@ -265,6 +265,7 @@ sub metronome_track {
 
 sub initialize_tempo_map { 
 	@::Tempo::Chunk::chunks = ();
+	$::Tempo::Chunk::index = 0;
 	remove_section_marks();
 }
 sub remove_section_marks { for( ::Mark::all() ){ $_->remove if $_->type eq 'song' } }
