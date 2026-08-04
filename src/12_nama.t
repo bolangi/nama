@@ -2,7 +2,7 @@ package ::;
 use ::;
 use Test2::Bundle::More;
 use File::Path qw(make_path remove_tree);
-use File::Slurp;
+use Path::Tiny qw(path);
 use Cwd;
 
 use strict;
@@ -16,7 +16,7 @@ $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("working directory: ",cwd);
 
 our $test_dir = "/tmp/nama-test";
-$fx_cache->{fake} = read_file("t/data/fake_effects_cache.json");
+$fx_cache->{fake} = path("t/data/fake_effects_cache.json")->slurp_utf8;
 
 cleanup_dirs();
 setup_dirs();
@@ -180,6 +180,12 @@ my $yaml = q(---
 ...);
 
 my @test = @{yaml_in($yaml)};
+
+is(
+	yaml_in('name: one-line YAML')->{name},
+	'one-line YAML',
+	'yaml_in treats a non-file string as YAML text',
+);
 
 
 my $i;

@@ -9,7 +9,7 @@ sub hello { my $self = shift; ::terminal_say("hello $self: ", ::Dumper($::projec
 package ::;
 use v5.36;
 use Carp;
-use File::Slurp;
+use Path::Tiny qw(path);
 
 # this sub caches the symlink-resolved form of the 
 # project root directory
@@ -121,9 +121,9 @@ sub create_project_dirs {
 	map{create_dir($_)} project_dir(), this_wav_dir(), waveform_dir() 
 }
 sub create_file_stubs {
-		write_file($file->state_store, "{}\n") unless -e $file->state_store;
-		write_file($file->midi_store,    "\n") unless -e $file->midi_store; 
-#		write_file($file->tempo_map,     "\n") unless -e $file->tempo_map;
+		path($file->state_store)->spew_utf8("{}\n") unless -e $file->state_store;
+		path($file->midi_store)->spew_utf8("\n") unless -e $file->midi_store;
+#		path($file->tempo_map)->spew_utf8("\n") unless -e $file->tempo_map;
 }
 sub load_project {
 	logsub((caller(0))[3]);
@@ -360,7 +360,8 @@ sub use_project_template {
 	);
 }
 sub list_project_templates {
-	my @templates= map{ /(.+?)\.json$/; $1}  read_dir(join_path(project_root(), "templates"));
+	my @templates = map { /(.+?)\.json$/; $1 }
+		map { $_->basename } path(project_root(), "templates")->children;
 	
 	pager(join "\n","Templates:",@templates);
 }

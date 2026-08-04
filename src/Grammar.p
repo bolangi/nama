@@ -3,6 +3,7 @@
 package ::;
 use ::Effect  qw(:all);
 use v5.36;
+use Path::Tiny qw(path);
 
 sub setup_grammar {
 
@@ -155,7 +156,7 @@ sub do_script {
 			else{ $filename = join_path(project_root(),$name) }
 		}
 		-e $filename or throw("$filename: file not found. Skipping"), return;
-		$script = read_file($filename)
+		$script = path($filename)->slurp_utf8
 	}
 	my @lines = split "\n",$script;
 	my $old_opt_r = $config->{opts}->{R};

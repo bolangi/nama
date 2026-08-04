@@ -1,5 +1,6 @@
 package ::;
 use v5.36;
+use Path::Tiny qw(path);
 
 sub add_track {
 
@@ -138,7 +139,6 @@ sub add_pan_control {
 }
 sub rename_track {
 	use Cwd;
-	use File::Slurp;
 	my ($oldname, $newname, $statefile, $dir) = @_;
 	project_snapshot();
 	my $old_dir = cwd();
@@ -153,7 +153,7 @@ sub rename_track {
 	# is part of the specified set and the value 
 	# exactly matches $oldname
 	
-	my $state = read_file($statefile);
+	my $state = path($statefile)->slurp_utf8;
 
 	$state =~ s/
 		"					# open quote
@@ -176,7 +176,7 @@ sub rename_track {
 		\ 				# space
 		"$oldname"/"$1" : "$newname"/gx;
 
-	write_file($statefile, $state);
+	path($statefile)->spew_utf8($state);
 	my $msg = "Rename track $oldname -> $newname";
 	project_snapshot($msg);
 	::pager($msg);

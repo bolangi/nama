@@ -11,6 +11,7 @@ package ::;
 
 use v5.36;
 no warnings 'uninitialized';
+use Path::Tiny qw(path);
 
 use ::Globals qw(:all);
 
@@ -32,7 +33,7 @@ sub global_config {
 	# 4. .namarc in the project root directory, i.e. ~/nama/.namarc
 	if( $config->{opts}->{f} ){
 		::terminal_say("reading config file $config->{opts}->{f}\n");
-		return read_file($config->{opts}->{f});
+		return path($config->{opts}->{f})->slurp_utf8;
 	}
 	my @search_path = (project_dir(), $ENV{HOME}, project_root() );
 	my $c = 0;
@@ -41,7 +42,7 @@ sub global_config {
 					my $config_path = join_path($_, config_file());
 					if( -f $config_path or -l $config_path){ 
 						::terminal_say("Found config file: $config_path");
-						my $yml = read_file($config_path);
+						my $yml = path($config_path)->slurp_utf8;
 						return $yml;
 					}
 				}
@@ -49,7 +50,7 @@ sub global_config {
 }
 
 # sub global_config {
-# 	read_file( join_path($ENV{HOME}, config_file()));
+# 	path(join_path($ENV{HOME}, config_file()))->slurp_utf8;
 # }
 
 sub read_config {
@@ -62,9 +63,16 @@ sub read_config {
 	
 	my $config_file = shift;
 	
-	my $yml = $config_file // get_data_section("default_namarc");
-	strip_all( $yml );
-	my %cfg = %{  yaml_in($yml) };
+	my $yml = $config_file // '';
+	strip_all($yml);
+	if ($yml !~ /\S/) {
+		$yml = get_data_section("default_namarc") // '';
+		strip_all($yml);
+	}
+	my $cfg = yaml_in($yml);
+	croak "Missing, corrupt or empty config file\n"
+		unless ref($cfg) eq 'HASH';
+	my %cfg = %$cfg;
 	logpkg('debug', "config file:", Dumper \%cfg);
 	*subst = \%{$cfg{abbreviations}}; # alias
 	walk_tree(\%cfg);
@@ -187,7 +195,7 @@ PROJECT_ROOT
 		mkpath( join_path($default_project_root, qw(untitled .wav)) );
 		$config->{root_dir} = $default_project_root; 
 		# needed for $file->user_customization() to resolve in next line
-		write_file($file->user_customization(), get_data_section('custom_pl'));
+		path($file->user_customization())->spew_utf8(get_data_section('custom_pl'));
 	} else {
 		::terminal_print(<<OTHER);
 Please make sure to set the project_root directory in
@@ -196,7 +204,7 @@ Please make sure to set the project_root directory in
 OTHER
 	}
 	if ($make_namarc !~ /n/i){
-		write_file($config_path, $default_config);
+		path($config_path)->spew_utf8($default_config);
 	}
 	sleep 1;
 	::terminal_print("\n.... Done!\n\nPlease edit $config_path and restart Nama.\n\n");

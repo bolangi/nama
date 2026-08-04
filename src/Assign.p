@@ -7,7 +7,7 @@ use warnings;
 no warnings q(uninitialized);
 use Carp qw(carp confess croak cluck);
 use YAML::Tiny;
-use File::Slurp;
+use Path::Tiny qw(path);
 use File::HomeDir;
 use ::Log qw(logsub logpkg);
 use Storable qw(nstore retrieve);
@@ -34,7 +34,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = ();
 
-our $to_json = JSON::XS->new->utf8->allow_blessed->pretty->canonical(1) ;
+our $to_json = JSON::XS->new->allow_blessed->pretty->canonical(1);
 use Carp;
 
 {my $var_map = { qw(
@@ -229,9 +229,9 @@ our %suffix =
 	);
 our %dispatch = 
 	( storable => sub { my($ref, $path) = @_; nstore($ref, $path) },
-	  perl     => sub { my($ref, $path) = @_; write_file($path, Dumper $ref) },
-	  yaml	   => sub { my($ref, $path) = @_; write_file($path, json_out($ref))},
-	  json	   => sub { my($ref, $path) = @_; write_file($path, json_out($ref))},
+	  perl     => sub { my($ref, $path) = @_; path($path)->spew_utf8(Dumper $ref) },
+	  yaml	   => sub { my($ref, $path) = @_; path($path)->spew_utf8(json_out($ref))},
+	  json	   => sub { my($ref, $path) = @_; path($path)->spew_utf8(json_out($ref))},
 	);
 
 sub serialize_and_write {
@@ -335,7 +335,7 @@ sub json_out {
 sub json_in {
 	logsub((caller(0))[3]);
 	my $json = shift;
-	my $data_ref = decode_json($json);
+	my $data_ref = $to_json->decode($json);
 	$data_ref
 }
 
@@ -343,13 +343,16 @@ sub yaml_in {
 	
 	# logsub((caller(0))[3]);
 	my $input = shift;
-	my $yaml = $input =~ /\n/ # check whether file or text
-		? $input 			# yaml text
-		: do
-			{
-				logpkg('debug',"filename: $input"); 
-				read_file($input);	# file name
-			};
+	my $is_file = defined($input)
+		&& length($input)
+		&& $input !~ /\n/
+		&& -f $input;
+	my $yaml = $is_file
+		? do {
+			logpkg('debug',"filename: $input");
+			path($input)->slurp_utf8;
+		}
+		: ($input // '');
 	if ($yaml =~ /\t/){
 		croak "YAML file: $input contains illegal TAB character.";
 	}

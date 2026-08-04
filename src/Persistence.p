@@ -5,6 +5,7 @@ package ::;
 use File::Copy;
 use v5.36; no warnings 'uninitialized';
 use vars '$VERSION';
+use Path::Tiny qw(path);
 
 
 sub save_state {
@@ -195,7 +196,7 @@ sub restore_state_from_file {
 	my $path = $file->untracked_state_store;
 	if (-r $path)
 	{
-		my $source = read_file($path);
+		my $source = path($path)->slurp_utf8;
 
 		my $ref = decode($source, $suffix);
 		assign(
@@ -208,7 +209,7 @@ sub restore_state_from_file {
 	$path = $filename;
 	if (-r $path)
 	{
-		my $source = read_file($path);
+		my $source = path($path)->slurp_utf8;
 		my $ref = decode($source, $suffix);
 
 		assign(
@@ -375,7 +376,7 @@ sub restore_global_effect_chains {
 	logsub((caller(0))[3]);
 		my $path =  $file->global_effect_chains;
 		-r $path or return;
-		my $source = read_file($path);
+		my $source = path($path)->slurp_utf8;
 		throw("$path: empty file"), return unless $source;
 		my $suffix = 'json';
 		my $ref = decode($source, $suffix);

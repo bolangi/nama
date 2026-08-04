@@ -1,7 +1,7 @@
 # ------- Jack port connect routines -------
 package ::;
 use v5.36;
-use File::Slurp;
+use Path::Tiny qw(path);
 no warnings 'uninitialized';
 
 # general functions
@@ -336,7 +336,7 @@ sub make_connections {
 			": JACK ports file $file not found. No sources connected."), 
 			return if ! -e -r $file;
 		my $line_number = 0;
-		my @lines = read_file($file);
+		my @lines = path($file)->lines_utf8;
 		for my $external_port (@lines){   
 			# $external_port is the source port name
 			chomp $external_port;

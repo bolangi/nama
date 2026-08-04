@@ -3,6 +3,7 @@
 package ::;
 use v5.36;
 use ::Util qw(round);
+use Path::Tiny qw(path);
 no warnings 'uninitialized';
 
 ## register data about LADSPA plugins, and Ecasound effects and
@@ -32,7 +33,7 @@ sub prepare_static_effects_data{
 	elsif (-f $file->effects_cache and ! $config->{opts}->{C})
 	{  
 		logpkg('debug', "found effects cache: ",$file->effects_cache);
-		$source = read_file($file->effects_cache); # scalar assign
+		$source = path($file->effects_cache)->slurp_utf8;
 	} 
 	if ($source)
 	{

@@ -23,7 +23,6 @@ use v5.36;
 our $VERSION = 1.0;
 use Carp qw(carp cluck croak);
 use File::Copy qw(copy);
-use File::Slurp;
 use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
 

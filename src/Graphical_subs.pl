@@ -1,5 +1,7 @@
 # gui handling
 
+use Path::Tiny qw(path);
+
 # in the $gui variable, keys with leading _underscore
 # indicate variables
 #
@@ -1226,7 +1228,7 @@ sub get_saved_colors {
 	$pal .= '.json' unless $pal =~ /\.json$/;
 	logpkg('debug',"pal $pal");
 	$pal = -f $pal 
-			? scalar read_file($pal)
+			? path($pal)->slurp_utf8
 			: get_data_section('default_palette_json');
 	my $ref = decode($pal, 'json');
 	#say "palette file",json_out($ref);

@@ -3,7 +3,7 @@ use Role::Tiny;
 use v5.36;
 our $VERSION = 1.0;
 use ::Globals qw(:all);
-use File::Slurp qw(write_file);
+use Path::Tiny qw(path);
 use File::Copy;
 use ::Util qw(dest_string dest_type join_path freq);
 use ::Log qw(logpkg logsub);
@@ -365,7 +365,7 @@ sub import_audio  {
 		::teardown_engine();
 		my $ecs = qq(-f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
 		my $path = join_path(::project_dir()."convert.ecs");
-		write_file($path, $ecs);
+		path($path)->spew_utf8($ecs);
 		::load_ecs($path) or ::throw("$path: load failed, aborting"), return;
 		::ecasound_iam('start');
 		::sleeper(0.2); 

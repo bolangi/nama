@@ -42,7 +42,6 @@ use ::Completion; # modified Tickit::Widget::Entry::Plugin::Completion for direc
 use Try::Tiny;
 use Path::Tiny;
 # use File::HomeDir;# Assign.pm
-# use File::Slurp;  # several
 # use List::Util;   # Fade.pm
 # use List::MoreUtils; # Effects.pm
 # use Time::HiRes; # automatically detected

@@ -4,6 +4,7 @@ package ::;
 use v5.36;
 #use ::Log qw(logpkg);
 use Carp;
+use Path::Tiny qw(path);
 
 {
 my ($pid, $sel);
@@ -142,7 +143,7 @@ sub midi_rec_cleanup {
 }
 }
 sub write_aux_midi_commands {
-	write_file($file->aux_midi_commands,  get_data_section('aux_midi_commands'))
+	path($file->aux_midi_commands)->spew_utf8(get_data_section('aux_midi_commands'))
 		unless -e $file->aux_midi_commands
 }
 sub add_midi_track {

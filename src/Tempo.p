@@ -232,7 +232,7 @@ use v5.36;
 use Data::Dumper::Concise;
 use ::Log qw(logsub logpkg);
 use ::Util qw(strip_comments);
-use File::Slurp;
+use Path::Tiny qw(path);
 use List::Util qw(sum);
 use autodie qw(:all);
 
@@ -273,7 +273,7 @@ sub remove_section_marks { for( ::Mark::all() ){ $_->remove if $_->type eq 'song
 sub read_tempo_map {
 	my $file = shift;
 	return unless -e $file;
-	my @lines = grep{ ! /^\s*$/ } strip_comments(read_file($file));
+	my @lines = grep{ ! /^\s*$/ } strip_comments(path($file)->lines_utf8);
 	parse_tempo_map( @lines );
 }
 sub parse_tempo_map {
