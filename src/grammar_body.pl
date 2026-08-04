@@ -37,7 +37,7 @@ meta: bang shellcode stopper {
 
 	::pager( "executing this shell code:  $shellcode" )
 		if $shellcode ne $item{shellcode};
-	my $output = qx( $shellcode );
+	my $output = qx( $shellcode 2>&1 );
 	chdir $olddir;
 	::pager($output) if $output;
 	1;
