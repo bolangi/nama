@@ -242,6 +242,18 @@ sub effective_mon  { ($_[0]->effective_rw // '') eq MON }
 sub effective_play { ($_[0]->effective_rw // '') eq PLAY }
 sub effective_off  { ($_[0]->effective_rw // '') eq OFF }
 
+sub show_tracks_setting {
+	my $track = shift;
+	return join(' v', REC, $track->current_version) if $track->rec;
+	return join(' but ', $track->rw, $track->effective_rw)
+		if $track->rw ne $track->effective_rw;
+	$track->rec_status_display;
+}
+sub show_tracks_source      { $_[0]->source_status }
+sub show_tracks_destination { $_[0]->rec ? $_[0]->current_wav : $_[0]->destination }
+sub show_tracks_volume      { $_[0]->vol_level }
+sub show_tracks_pan         { $_[0]->pan_level }
+
 sub current_midi {}
 sub fades { grep { $_->{track} eq $_[0]->name } values %::Fade::by_index  }
 
@@ -567,6 +579,16 @@ sub candidate_rw {
 		else																		{ OFF  }
 }
 sub versions { $_[0]->{midi_versions} }
+
+sub show_tracks_setting {
+	my $track = shift;
+	return join(' v', REC, $track->current_version) if $track->rec;
+	$track->rw;
+}
+sub show_tracks_source      { $_[0]->source_id }
+sub show_tracks_destination { $_[0]->send_id }
+sub show_tracks_volume      {}
+sub show_tracks_pan         {}
 
 
 sub select_track {

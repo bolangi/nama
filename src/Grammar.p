@@ -394,15 +394,11 @@ sub show_tracks_section {
     map {   formline $format_picture, 
             $_->n,
             $_->name,
-			$_->rec
-				? join(' v', REC, $_->current_version)
-				: $_->rw ne $_->effective_rw
-				?  join(' but ', $_->rw , $_->effective_rw)
-				: $_->rec_status_display,
-			placeholder($_->source_status),
-			placeholder($_->rec ? $_->current_wav : $_->destination),
-			placeholder($_->vol_level),
-			placeholder($_->pan_level),
+			$_->show_tracks_setting,
+			placeholder($_->show_tracks_source),
+			placeholder($_->show_tracks_destination),
+			placeholder($_->show_tracks_volume),
+			placeholder($_->show_tracks_pan),
 			($_->is_comment ? 'C' : undef)
         } @tracks;
         

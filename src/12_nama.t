@@ -1403,6 +1403,12 @@ check_setup('Hardware insert via soundcard, prefader  - JACK');
 		'MIDI declaration selects the new track');
 	is($midi->as_hash->{class}, 'Audio::Nama::MidiTrack',
 		'MIDI track class is preserved for project persistence');
+	$midi->set(source_id => 'nord', send_id => 'dx7', rw => PLAY);
+	my $midi_display = show_tracks_section($midi);
+	like($midi_display, qr/\bsynth\b.*\bPLAY\b.*\bnord\b.*\bdx7\b/,
+		'show-tracks displays MIDI status and routing');
+	unlike($midi_display, qr/PLAY but OFF/,
+		'MIDI display is independent of the audio graph status');
 	$midi->remove;
 }
 
