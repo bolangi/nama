@@ -8,6 +8,7 @@ sub add_track {
 	my ($name, @params) = @_;
 	my %vals = (name => $name, @params);
 	my $class = $vals{class} // '::Track';
+	my $rw = $vals{rw};
 	{ no warnings 'uninitialized';	
 	logpkg('debug', "name: $name, ch_r: $gui->{_chr}, ch_m: $gui->{_chm}");
 	}	
@@ -28,9 +29,11 @@ sub add_track {
 	# normal tracks set to config->new_track_rw 
 	# defaulting to MON
 	# track aliases default to PLAY
-	$track->set(rw => $track->{target}
-					?  PLAY
-					:  $config->{new_track_rw} || MON );
+	$track->set(rw => defined $rw
+					?  $rw
+					:  $track->{target}
+						?  PLAY
+						:  $config->{new_track_rw} || MON );
 	$gui->{_track_name} = $gui->{_chm} = $gui->{_chr} = undef;
 
 	set_current_bus();

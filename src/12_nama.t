@@ -1387,7 +1387,24 @@ EXPECTED
 check_setup('Hardware insert via soundcard, prefader  - JACK');
 
 #load_project(name => "midi", create => 1);
-#add_midi_track('synth');
+{
+	my $midi = add_midi_track('synth');
+	is(ref $midi, 'Audio::Nama::MidiTrack',
+		'MIDI declaration creates a MidiTrack');
+	is($tn{synth}, $midi,
+		'MIDI declaration uses the normal track registry');
+	is($ti{$midi->n}, $midi,
+		'MIDI declaration receives a normal track number');
+	is($midi->engine_group, $config->{midi_engine_name},
+		'MIDI declaration assigns the MIDI engine');
+	is($midi->rw, OFF,
+		'MIDI declaration does not inherit the audio MON default');
+	is($this_track, $midi,
+		'MIDI declaration selects the new track');
+	is($midi->as_hash->{class}, 'Audio::Nama::MidiTrack',
+		'MIDI track class is preserved for project persistence');
+	$midi->remove;
+}
 
 sub gen_alsa { force_alsa(); nama_cmd('gen')}
 sub gen_jack { force_jack(); nama_cmd('gen')}
