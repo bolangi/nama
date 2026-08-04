@@ -211,7 +211,7 @@ sub setup_key_bindings {
 	'C-z'		=> \&suspend,
     'F1'		=> \&enable_popup,
 	'M-Enter'	=> \&enable_popup,
-	'F8'		=> \&toggle_popup,
+	'F8'		=> \&activate_effect_hotkeys,
 };
 
 	$entry->bind_keys( $text->{entry_bindings}->%*	); 

@@ -142,7 +142,8 @@ hotkeys:
     Up: increment_param_10
     Down: decrement_param_10
     Enter: disable_popup
-    F8: toggle_popup
+    M-Enter: disable_popup
+    F8: disable_popup
     u: decrement_param_10
     i: increment_param_10
     j: decrement_param
