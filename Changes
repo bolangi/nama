@@ -10,9 +10,10 @@ Changes to Audio::Nama
     * refactor of key status and routing algorithms
     * logging system rewritten to provide full diagnostics
     * refactor region and clip positioning
-    * many bug fixes
     * improvements to show-tracks display and help system
     * documentation fixes
+    * improve fade behavior, planned envelope and on demand
+    * many bug fixes
 
 1.605 July 4, 2026
     * metronome related
