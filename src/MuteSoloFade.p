@@ -67,13 +67,10 @@ sub solo {
 	map{ $bn{$_}->tracks }			# tracks list
 	keys %buses;					# buses list
 
-	# mute all tracks on our mute list (do we skip already muted tracks?)
-	
-	do_many_tracks( { tracks => [ keys %to_mute ], method => 'mute' } );
-
-	# unmute all tracks on our wanted list
-	
-	do_many_tracks( { tracks => [ keys %not_mute ], method => 'unmute' } );
+	transition_tracks({
+		mute => [keys %to_mute],
+		unmute => [keys %not_mute],
+	});
 	
 	$mode->{soloing} = 1;
 }
@@ -81,13 +78,14 @@ sub solo {
 sub nosolo {
 	# unmute all except in @{$fx->{muted}} list
 
-	# unmute all tracks
-	do_many_tracks( { tracks => [ map{$_->name} user_tracks() ], method => 'unmute' } );
-
-	# re-mute previously muted tracks
-	if (@{$fx->{muted}}){
-		do_many_tracks( { tracks => [ @{$fx->{muted}} ], method => 'mute' } );
-	}
+	my %previously_muted = map { $_ => 1 } @{$fx->{muted}};
+	transition_tracks({
+		unmute => [
+			map { $_->name }
+			grep { ! $previously_muted{$_->name} }
+			user_tracks()
+		],
+	});
 
 	# remove listing of muted tracks
 	@{$fx->{muted}} = ();
@@ -97,7 +95,7 @@ sub nosolo {
 sub all {
 
 	# unmute all tracks
-	do_many_tracks( { tracks => [ ::Track::user() ], method => 'unmute' } );
+	transition_tracks({ unmute => [map { $_->name } user_tracks()] });
 
 	# remove listing of muted tracks
 	@{$fx->{muted}} = ();
@@ -105,12 +103,57 @@ sub all {
 	$mode->{soloing} = 0;
 }
 
-sub do_many_tracks {
-	# args: { tracks => [ track objects ], method => method_name }
+sub transition_tracks {
+	# Apply one coordinated ramp so all tracks reach corresponding levels
+	# together. Whole excluded buses already arrive here as their mix tracks;
+	# individual members are used only for partly soloed buses.
 	my $args = shift;
-	my $method = $args->{method};
-	my $delay = $args->{delay} || $config->{engine_muting_time};
-	map{ $tn{$_}->$method('nofade'); sleeper($delay) } @{$args->{tracks}};
+	my $seconds = $args->{delay} || $config->{engine_muting_time};
+	my @transitions;
+
+	for my $method (qw(mute unmute)){
+		for my $name (@{$args->{$method} || []}){
+			my $track = $tn{$name} or next;
+			my $vol = $track->vol_o or next;
+
+			if ($method eq 'mute'){
+				next if defined $track->old_vol_level;
+				my $from = $vol->params->[0];
+				$track->set(old_vol_level => $from);
+				push @transitions,
+					[$method, $track, $vol, $from, $vol->mute_level];
+			}
+			else {
+				next unless defined $track->old_vol_level;
+				push @transitions,
+					[$method, $track, $vol, $vol->params->[0],
+						$track->old_vol_level];
+			}
+		}
+	}
+
+	return unless @transitions;
+	my $steps = ::Effect::fade_step_count($seconds);
+	if ($steps and $this_engine->started() and $config->{hires_timer}){
+		my $wink = $seconds / $steps;
+		for my $step (1..$steps - 1){
+			sleeper($wink);
+			for my $transition (@transitions){
+				my ($method, $track, $vol, $from, $to) = @$transition;
+				$vol->_modify_effect(
+					1,
+					::Effect::fade_level($from, $to, $step, $steps),
+				);
+			}
+		}
+		sleeper($wink);
+	}
+
+	for my $transition (@transitions){
+		my ($method, $track, $vol, $from, $to) = @$transition;
+		$vol->_modify_effect(1, $to);
+		$track->set(old_vol_level => undef) if $method eq 'unmute';
+	}
 }
 
 1;

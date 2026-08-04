@@ -233,6 +233,28 @@ like(ref $this_track, qr/Track/, "track creation");
 
 is( $this_track->name, 'sax', "current track assignment");
 
+{
+	my $track = $tn{sax};
+	my $original_level = $track->vol_level;
+	transition_tracks({ mute => ['sax'] });
+	is($track->vol_level, $track->vol_o->mute_level,
+		'a coordinated mute reaches the mute level');
+	is($track->old_vol_level, $original_level,
+		'a coordinated mute saves the original level');
+
+	@{$fx->{muted}} = ('sax');
+	nosolo();
+	ok(defined $track->old_vol_level,
+		'nosolo leaves a previously muted track muted');
+	is_deeply($fx->{muted}, [], 'nosolo clears its saved mute list');
+
+	transition_tracks({ unmute => ['sax'] });
+	is($track->vol_level, $original_level,
+		'a coordinated unmute restores the original level');
+	ok(! defined $track->old_vol_level,
+		'a coordinated unmute clears the saved level');
+}
+
 $this_track->set(group => 'Null');
 ok(!$this_track->is_used, 'idle track is not currently used');
 is($this_track->candidate_rw, MON,
