@@ -30,6 +30,7 @@ use ::Log qw(logpkg logsub);
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
 use File::Basename qw(fileparse);
+use File::Temp qw(tempfile);
 #use DDP;
 
 
@@ -484,17 +485,30 @@ sub throw (@text) {
 	terminal_say(@text)
 }
 sub pager {
-
-	# Normalize command output and print it on the terminal.
-	
 	logsub((caller(0))[3]);
-	my @output = @_;
-	@output or return;
-	chomp $output[-1];
-	$output[-1] .= "\n\n";
-	@output = map{"$_\n"} map{ split "\n"} @output;
-	return unless scalar @output;
-	terminal_print($_) for @output;
+	my $output = join q(), map { defined $_ ? $_ : q() } @_;
+	return unless length $output;
+	return unless $text->{term};
+
+	my $width = $text->{term}->cols;
+	my $lines = 0;
+	$lines += int(((length($_) || 1) - 1) / ($width || 1)) + 1
+		for split /\n/, $output, -1;
+	if ($lines <= $text->{term}->lines - 1) {
+		terminal_print($output, $output =~ /\n\z/ ? "\n" : "\n\n");
+		return;
+	}
+
+	my ($fh, $filename) = tempfile(UNLINK => 1);
+	print {$fh} $output;
+	close $fh;
+
+	$text->{term}->pause;
+	system 'less', '-R', $filename;
+	$text->{term}->resume;
+	$text->{rootwin}->expose;
+	$text->{term}->flush;
+	$text->{entry}->take_focus;
 }
 sub file_pager {};
 1;
