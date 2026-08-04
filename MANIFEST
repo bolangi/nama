@@ -1,10 +1,10 @@
-BUILD
+BUILD.md
 Build.PL
 Changes
 COPYING
 MANIFEST			This list of files
 META.yml
-README
+README.md
 bin/nama
 t/01_symbols.t
 t/02_assign.t
