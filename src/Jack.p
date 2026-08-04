@@ -6,6 +6,11 @@ no warnings 'uninitialized';
 
 # general functions
 
+sub jack_running {
+	qx(jack_lsp > /dev/null 2>&1);
+	$? == 0
+}
+
 sub update_jack_client_list {
 	state $warn_count;
 	#logsub((caller(0))[3]);
@@ -14,7 +19,7 @@ sub update_jack_client_list {
 	# skip if Ecasound is busy
 	return if $this_engine->started();
 
-	if( $jack->{jackd_running} = process_is_running('jackd') ){
+	if( $jack->{jackd_running} = jack_running() ){
 		# reset our clients data 
 		$jack->{clients} = {};
 
