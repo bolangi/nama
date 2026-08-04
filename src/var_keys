@@ -160,7 +160,7 @@ $project->{current_waveform_timescale} # multiply by clip length for waveform im
 $project->{current_waveform}->{track_name}
 $project->{playback_position}	# timeline position restored after reconfigure
 $project->{mark_sequence_counter} # used for system assigned mark names
-$project->{redo}				# last commit removed by undo
+$project->{redo_stack}			# commits removed by undo, oldest first
 $project->{midi_history}		# all text commands sent to midish
 $project->{sample_rate}
 

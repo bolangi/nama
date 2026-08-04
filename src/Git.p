@@ -121,6 +121,9 @@ sub git_commit {
 	use utf8;
 	git( add => @files);
 	git( commit => '--quiet', '--message', $commit_message);
+	# A new commit starts a new line of history.  Commits previously
+	# removed by undo no longer form a valid redo path.
+	$project->{redo_stack} = [];
 	reset_command_buffer();
 }
 
@@ -211,27 +214,51 @@ sub list_branches {
 }
 
 sub redo {
-	if ($project->{redo}){
-		git('cherry-pick',$project->{redo});
-		load_project(name => $project->{name});
-		delete $project->{redo};
-	} else {throw("nothing to redo")}
+	return throw("redo requires Git support")
+		unless $config->{use_git} and $project->{repo};
+	return throw("nothing to redo")
+		unless $project->{redo_stack} and @{$project->{redo_stack}};
+	return throw("project files have changed; commit or undo them before redoing")
+		if state_changed();
+
+	my @redo_stack = @{$project->{redo_stack}};
+	my $commit = pop @redo_stack;
+	# Move the branch pointer forward to the original commit.  This keeps
+	# the existing graph and commit identity intact instead of recreating
+	# the change as a new commit with cherry-pick.
+	git('reset', '--hard', $commit);
+	load_project(name => $project->{name});
+	$project->{redo_stack} = \@redo_stack;
 	1
 }
 sub undo {
+	return throw("undo requires Git support")
+		unless $config->{use_git} and $project->{repo};
+
+	# Store any pending project change first, so undo always operates on
+	# the state the user currently sees rather than an older snapshot.
+	project_snapshot('state before undo');
+	return throw("project files have changed; cannot undo safely")
+		if state_changed();
+
+	my $count = git(qw/rev-list --count HEAD/);
+	return throw("nothing to undo") if $count <= 1;
+
 	pager("removing last commit"); 
 	local $quiet = 1;
 
-	# get the commit id
-	my $show = git(qw/show HEAD/);	
-	my ($commit) = $show =~ /commit ([a-z0-9]{10})/;
+	my $commit = git(qw/rev-parse HEAD/);
+	chomp $commit;
+	my @redo_stack = @{$project->{redo_stack} // []};
 
-	# blow it away
 	git(qw/reset --hard HEAD^/); 
 	load_project( name => $project->{name});
 
-	# remember it 
-	$project->{redo} = $commit;
+	# The newest removed commit is the next one to redo.  Retaining the
+	# earlier entries permits any number of undo/redo steps.
+	push @redo_stack, $commit;
+	$project->{redo_stack} = \@redo_stack;
+	1
 }
 sub show_head_commit {
 	my $show = git(qw/show HEAD/);	

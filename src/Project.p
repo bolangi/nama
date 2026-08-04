@@ -94,6 +94,7 @@ sub initialize_project_data {
 	$project->{artist} = undef;
 	$project->{bunch} = {};	
 	$project->{sample_rate} = $config->{sample_rate};
+	$project->{redo_stack} = [];
 	
 	create_system_buses();
 	$this_bus = 'Main';

@@ -412,15 +412,12 @@ mute:
   type: track
   what: |
     Mute the current track by reducing the volume parameter.
-    For a MIDI track, mute its versions in midish.
     Use "unmute" to restore the former volume level.
   short: c cut
   parameters: none
 unmute:
   type: track
-  what: |
-    Restore the previous volume level. It can be used after mute or solo.
-    For a MIDI track, unmute its current version in midish.
+  what: Restore previous volume level. It can be used after mute or solo.
   short: nomute C uncut
   parameters: none
 unity:
@@ -1579,10 +1576,14 @@ compose:
     for speaker1 and speaker2.
 undo:
   type: general
-  what: Roll back the last commit (use "git log" to see specific commands).
+  what: |
+    Roll back the last commit (use "git log" to see specific commands).
+    Undo may be repeated to move backward through project history.
 redo: 
   type: general
-  what: Restore the commit most recently removed by undo.
+  what: |
+    Restore the next commit removed by undo. Redo may be repeated to move
+    forward again, until a new project change creates a different history.
 show_head_commit:
   type: general
   short: show_head last_command last
