@@ -87,6 +87,8 @@
 	%mute_level						$config->{mute_level}
 	%fade_out_level 				$config->{fade_out_level}
 	$fade_resolution 				$config->{fade_resolution}
+    $fade_minimum_steps            $config->{fade_minimum_steps}
+    $fade_maximum_steps            $config->{fade_maximum_steps}
 	%unity_level					$config->{unity_level}
 
 	$enforce_channel_bounds    		$config->{enforce_channel_bounds}

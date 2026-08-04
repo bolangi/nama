@@ -159,6 +159,8 @@ sub definitions {
 		fade_time1_fraction             => 0.9,
 		fade_time2_fraction             => 0.1,
 		fade_resolution                 => 100, # steps per second
+		fade_minimum_steps              => 5,
+		fade_maximum_steps              => 20,
 		fader_op 						=> 'ea',
 		mute_level                      => {ea => 0,    eadb => -96},
 		fade_out_level                  => {ea => 0,    eadb => -40},

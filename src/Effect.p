@@ -1213,26 +1213,39 @@ sub fade_level {
 	$from + ($to - $from) * $step / $steps
 }
 
+sub fade_step_count {
+	my ($seconds) = @_;
+	return 0 unless defined $seconds and $seconds > 0;
+
+	my $steps = int($seconds * $config->{fade_resolution} + 0.5);
+	$steps = $config->{fade_minimum_steps}
+		if $steps < $config->{fade_minimum_steps};
+	$steps = $config->{fade_maximum_steps}
+		if $steps > $config->{fade_maximum_steps};
+	$steps
+}
+
 sub fade {
 	my $self = shift;
 	# parameter starts at one
 	my ($param, $from, $to, $seconds) = @_;
 
 	my $id = $self->id;
+	my $steps = fade_step_count($seconds);
 	# no fade without Time::HiRes
 	# no fade unless engine is running
-	if ( $this_engine->started() and $config->{hires_timer} )
+	if ( $steps and $this_engine->started() and $config->{hires_timer} )
 	{
-		my $steps = $seconds * $config->{fade_resolution};
-		my $wink  = 1/$config->{fade_resolution};
+		my $wink  = $seconds / $steps;
 		logpkg('debug', "id: $id, param: $param, from: $from, to: $to, seconds: $seconds");
 		for my $step (1..$steps - 1){
+			sleeper( $wink );
 			$self->_modify_effect(
 				$param,
 				fade_level($from, $to, $step, $steps),
 			);
-			sleeper( $wink );
-		}		
+		}
+		sleeper( $wink );
 	}
 	$self->_modify_effect($param, $to)
 }
@@ -1246,18 +1259,19 @@ sub plan_fade {
 	my $to	    = $args{to}      || 0;
 	my $seconds = $args{seconds} || 1;
 	my $in_future 	= $args{in_future};
-	my $steps 	= $seconds * $config->{fade_resolution};
-	my $wink  	= 1/$config->{fade_resolution};
+	my $steps 	= fade_step_count($seconds);
+	my $wink  	= $seconds / $steps;
 	my $id 		= $self->id;
 	logpkg('debug', "id: $id, param: $param, from: $from, to: $to, seconds: $seconds");
 	if ( not $in_future ){
 		for my $step (1..$steps - 1){
+			sleeper( $wink );
 			$self->_modify_effect(
 				$param,
 				fade_level($from, $to, $step, $steps),
 			);
-			sleeper( $wink );
-		}		
+		}
+		sleeper( $wink );
 		$self->_modify_effect($param, $to)
 	}
 	else {

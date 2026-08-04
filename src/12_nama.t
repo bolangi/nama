@@ -42,6 +42,15 @@ is(::Effect::fade_level(25, 75, 1, 2), 50,
 is(::Effect::fade_level(75, 25, 1, 2), 50,
 	'absolute fade levels work in both directions');
 
+is(::Effect::fade_step_count(0.03), 5,
+	'short fades use the minimum operation count');
+is(::Effect::fade_step_count(0.18), 18,
+	'ordinary fades follow the configured resolution');
+is(::Effect::fade_step_count(2), 20,
+	'long fades use the maximum operation count');
+is(::Effect::fade_step_count(0), 0,
+	'a zero-length fade has no intermediate operations');
+
 # object id => type mappings
 #
 my @id_to_type = (

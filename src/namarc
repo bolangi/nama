@@ -84,6 +84,12 @@ realtime_profile: nonrealtime # other choices: realtime or auto
 # receive sufficiently frequent envelope updates.
 edit_realtime: 1
 
+# Nama-driven ramps target fade_resolution updates per second, bounded by
+# these minimum and maximum operation counts.
+fade_resolution: 100
+fade_minimum_steps: 5
+fade_maximum_steps: 20
+
 press_space_to_start_transport: 1 
 
 # The buffer size settings below apply only when JACK is *not* used
