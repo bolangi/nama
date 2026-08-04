@@ -640,8 +640,23 @@ sub gen_words {
 	# don't print if full paths;
 	#unless (grep { m(/) } @result)
 	#{
-	 print_to_terminal("found", scalar @result, "matches") if @result > 10;
-	 print_to_terminal($_) for @result;
+	 if (@result > 8) {
+	 	print_to_terminal("found", scalar @result, "matches");
+	 	my $width = 2;
+	 	for (@result) {
+	 		$width = length($_) + 2 if length($_) + 2 > $width;
+	 	}
+	 	my $columns = int($text->{term}->cols / $width) || 1;
+	 	my $rows = int((@result + $columns - 1) / $columns);
+	 	for my $row (0 .. $rows - 1) {
+	 		my @items = map $result[$row + $_ * $rows], 0 .. $columns - 1;
+	 		pop @items while @items and not defined $items[-1];
+	 		print_to_terminal(join '', map { sprintf "%-*s", $width, $_ } @items);
+	 	}
+	 }
+	 else {
+	 	print_to_terminal($_) for @result;
+	 }
 	 print_to_terminal(' ');
 	#}
 
