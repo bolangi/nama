@@ -1,4 +1,19 @@
 Changes to Audio::Nama
+
+2.000 August 3, 2026
+    * works with JACK served by Pipewire or jackd, also ALSA
+    * full support for metronome and tempo maps, including tempo ramp
+    * can indicate positions by bar/beat or bar/beat/tick
+    * tickit terminal library replaces readline
+    * restored simple GUI for common recording/mixing scenarios
+    * hotkeys mappings for adjusting effect parameters 
+    * refactor of key status and routing algorithms
+    * logging system rewritten to provide full diagnostics
+    * refactor region and clip positioning
+    * many bug fixes
+    * improvements to show-tracks display and help system
+    * documentation fixes
+
 1.605 July 4, 2026
     * metronome related
     * rename packges to avoid cpan warnings
