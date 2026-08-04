@@ -1399,16 +1399,61 @@ check_setup('Hardware insert via soundcard, prefader  - JACK');
 		'MIDI declaration assigns the MIDI engine');
 	is($midi->rw, OFF,
 		'MIDI declaration does not inherit the audio MON default');
+	ok(! defined $midi->source_id && ! defined $midi->send_id,
+		'MIDI declaration leaves routing endpoints unset');
+	is($midi->source_type, 'midi',
+		'MIDI declaration identifies the source type');
+	is($midi->send_type, 'midi',
+		'MIDI declaration identifies the destination type');
 	is($this_track, $midi,
 		'MIDI declaration selects the new track');
 	is($midi->as_hash->{class}, 'Audio::Nama::MidiTrack',
 		'MIDI track class is preserved for project persistence');
+	$midi->set_rw(PLAY);
+	is($midi->rw, OFF,
+		'MIDI track cannot play before source and send are set');
 	$midi->set(source_id => 'nord', send_id => 'dx7', rw => PLAY);
 	my $midi_display = show_tracks_section($midi);
 	like($midi_display, qr/\bsynth\b.*\bPLAY\b.*\bnord\b.*\bdx7\b/,
 		'show-tracks displays MIDI status and routing');
 	unlike($midi_display, qr/PLAY but OFF/,
 		'MIDI display is independent of the audio graph status');
+	{
+		my @midish_commands;
+		no warnings 'redefine';
+		local *Audio::Nama::midish_cmd = sub {
+			my ($command) = @_;
+			push @midish_commands, $command;
+			return '{synth_1}' if $command eq 'print [tlist]';
+			return;
+		};
+		local $en{$config->{midi_engine_name}} =
+			bless {}, 'Audio::Nama::MidiEngine';
+		$midi->set(midi_versions => [1], version => 1, rw => PLAY);
+		is($midi->midi_version_name(1), 'synth_1',
+			'MIDI version name is derived by MidiTrack');
+
+		$midi->mute;
+		is_deeply(\@midish_commands,
+			['print [tlist]', 'mute synth_1'],
+			'MIDI mute is dispatched through MidiEngine');
+
+		@midish_commands = ();
+		$midi->unmute;
+		is_deeply(\@midish_commands,
+			['print [tlist]', 'unmute synth_1'],
+			'MIDI unmute is dispatched through MidiEngine');
+
+		@midish_commands = ();
+		$midi->select_track;
+		is_deeply(\@midish_commands, [],
+			'selecting a MIDI track does not unmute it');
+
+		$midi->set_rw(OFF);
+		is_deeply(\@midish_commands,
+			['print [tlist]', 'mute synth_1'],
+			'setting a MIDI track OFF mutes its current version');
+	}
 	$midi->remove;
 }
 

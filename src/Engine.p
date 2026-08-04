@@ -348,6 +348,24 @@ sub system_tracks { $tn{$config->{midi_record_buffer}}}
 sub user_tracks { grep { $_->name ne $config->{midi_record_buffer} } $_[0]->tracks }
 sub play_tracks { grep {$_->play} $_[0]->user_tracks }
 sub is_active { $_[0]->rec_tracks or $_[0]->play_tracks }
+
+sub has_track {
+	my ($self, $name) = @_;
+	return unless defined $name and length $name;
+	my $tlist = ::midish_cmd('print [tlist]') // '';
+	$tlist =~ s/[}{]//g;
+	scalar grep { $_ eq $name } split ' ', $tlist;
+}
+sub mute_track {
+	my ($self, $name) = @_;
+	return unless $self->has_track($name);
+	::midish_cmd("mute $name");
+}
+sub unmute_track {
+	my ($self, $name) = @_;
+	return unless $self->has_track($name);
+	::midish_cmd("unmute $name");
+}
 		
 } # end package 
 1

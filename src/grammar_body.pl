@@ -622,7 +622,7 @@ rw_setting:   'REC ' | 'rec'
 			| 'MON'  | 'mon'
 			| 'OFF'  | 'off' { $return = $item[1] }
 rw: rw_setting {
-		 $::this_track->set(rw => uc $item{rw_setting}) ;
+		 $::this_track->set_rw(uc $item{rw_setting}) ;
 	1
 }
 

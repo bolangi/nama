@@ -541,24 +541,20 @@ sub new {
 	my $self = super();
 	$self
 }
-# TODO enable
 sub mute {   
 	my $track = shift;
-	if ( $track->exists_midi )
-	{
-		::midish_cmd( 'mute '  . $_[0]->current_midi ) 
-	}
+	my $engine = $track->engine or return;
+	$engine->mute_track($track->midi_version_name($_))
+		for @{$track->versions};
 }
 sub unmute { 
 	my $track = shift;
-	if ( $track->exists_midi )
-	{
-		# mute unselected versions
-		map{ ::midish_cmd( 'mute '. midi_version_name($track->name, $_) ) }
-		grep{ $_ != $track->version } @{$track->versions};
-
-		::midish_cmd( 'unmute '  . $_[0]->current_midi ) 
-	}
+	my $engine = $track->engine or return;
+	my $current = $track->current_midi;
+	$engine->mute_track($track->midi_version_name($_))
+		for grep { $track->midi_version_name($_) ne ($current // '') }
+			@{$track->versions};
+	$engine->unmute_track($current);
 }
 sub rw_set {
 	my $track = shift;
@@ -567,9 +563,8 @@ sub rw_set {
 }
 sub exists_midi {
 	my $track = shift;
-	my ($tlist) = ::midish_cmd('print [tlist]');
-	$tlist =~ s/[}{]//g;
-	my ($match) = grep{$_ eq $track->current_midi} split " ", $tlist;
+	my $engine = $track->engine or return;
+	$engine->has_track($track->current_midi);
 }
 sub candidate_rw {
 		my $self = shift;
@@ -594,7 +589,6 @@ sub show_tracks_pan         {}
 sub select_track {
 		my $track = shift;
 		$::this_track = $track;
-		$track->unmute;
 		::set_current_bus();
 }
 sub current_midi {
@@ -605,13 +599,13 @@ sub current_midi {
 	 
 	my $track = shift;
 	
-	if 	($track->rec_status eq REC)
+	if 	($track->candidate_rw eq REC)
 	{ 
-		midi_version_name($track->name, $track->current_version)
+		$track->midi_version_name($track->current_version)
 	} 
-	elsif ( $track->rec_status eq PLAY)
+	elsif ( $track->candidate_rw eq PLAY)
 	{ 
-		midi_version_name($track->name, $track->playback_version)
+		$track->midi_version_name($track->playback_version)
 	} 
 	else 
 	{ 
@@ -635,17 +629,29 @@ sub set_io {
 	$track->set($id_field => $id);
 } 
 sub set_rw {
-	my $track = shift;
-	my ($bus, $setting) = @_;
+	my ($track, $setting) = @_;
 	::throw("can't set MIDI track to MON. Setting is unchanged"), return if $setting eq MON;
+	if ($setting =~ /^(?:PLAY|REC)$/
+		and grep { ! defined $_ or ! length $_ }
+			($track->source_id, $track->send_id)) {
+		::throw($track->name,
+			": set MIDI source and send before setting the track to $setting");
+		return;
+	}
+	my $current = $track->current_midi;
 	$track->{rw} = $setting;
-	# mute all versions
-	#$logic{$setting}->($bus, $setting);
+	if ($setting eq OFF) {
+		my $engine = $track->engine;
+		$engine->mute_track($current) if $engine;
+	}
+	elsif ($setting eq PLAY) {
+		$track->unmute;
+	}
 }
 sub create_midi_version {
 	my $track = shift;
 	my $n = shift;
-	::add_midi_track(midi_version_name($track->name, $n), hide => 1);
+	::add_midi_track($track->midi_version_name($n), hide => 1);
 }
 sub set_version {
 	my ($track, $n) = @_;
@@ -662,7 +668,12 @@ sub set_version {
 }
 sub midi_version {
 	my $track = shift;
-	join '_', $track->name, $track->version if $track->version
+	$track->midi_version_name($track->version);
+}
+sub midi_version_name {
+	my ($track, $version) = @_;
+	return unless $version;
+	join '_', $track->name, $version;
 }
 
 }

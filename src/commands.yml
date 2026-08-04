@@ -412,12 +412,15 @@ mute:
   type: track
   what: |
     Mute the current track by reducing the volume parameter.
+    For a MIDI track, mute its versions in midish.
     Use "unmute" to restore the former volume level.
   short: c cut
   parameters: none
 unmute:
   type: track
-  what: Restore previous volume level. It can be used after mute or solo.
+  what: |
+    Restore the previous volume level. It can be used after mute or solo.
+    For a MIDI track, unmute its current version in midish.
   short: nomute C uncut
   parameters: none
 unity:
