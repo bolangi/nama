@@ -1,52 +1,51 @@
-BUILD INSTRUCTIONS
-    You may decide to clone the Nama's github repository and from source
-    rather than installing from CPAN. It is easier to browse or hack on
-    Nama this way. Functionality is separated into a number of files, and
-    you will see $::package_var instead of $Audio::Nama::package_var.
+# Build Instructions
 
-    You can get also updates more quickly and can share patches with other
-    developers.
+You may clone Nama's git repository and install from
+source.  It is easier to browse or hack on Nama this
+way. Functionality is separated into a number of files,
+and you will see $::package_var instead of
+$Audio::Nama::package_var.
 
-  Procedure
-    For typical build and test:
+## Procedure
 
-            cpan Text::Template
-            git-clone git://github.com/bolangi/nama.git
-            cd nama/src
-            ./build
-            ./ui
+For typical build and test:
 
-    To install the module, do as usual:
+		cpan Text::Template
+		git-clone git://gitlab.com/bolangi/nama.git
+		cd nama/src
+		./build
+		./ui
 
-            cd ..
-            perl Makefile.PL
-            make install
+To install the module:
 
-  How it works
-    The build script creates the perl modules for the distribution under the
-    nama/lib directory using *.p, *.pl, *.t and other files in the nama/src
-    directory.
+		cd ..
+		perl Build.PL
+		./Build install
 
-    build looks into the *.p files for lines that look like:
+How it works
+
+The build script creates the perl modules for the distribution under the
+nama/lib directory using *.p, *.pl, *.t and other files in the nama/src
+directory.
+
+build looks into the *.p files for lines that look like:
 
         [% somefile.pl %]
 
-    This notation is analogous to the C-preprocessor #include directive:
-    somefile.pl gets included in the source at that point. Some of these
-    include lines are more complicated:
+This notation is analogous to the C-preprocessor #include directive:
+somefile.pl gets included in the source at that point. Some of these
+include lines are more complicated:
 
         [% qx(./strip_comments ./grammar_body) %]
 
-    Here the preprocessor runs the script strip_comments on grammar_body,
-    removing text that would choke the parser generator.
+Here the preprocessor runs the script strip_comments on grammar_body,
+removing text that would choke the parser generator.
 
-    Build provides a few parameters to the preprocessing script preproc,
-    which uses the Text::Template to perform most of the required
-    substitutions.
+Build provides a few parameters to the preprocessing script preproc,
+which uses the Text::Template to perform most of the required
+substitutions.
 
-    To see the names of the files and scripts used to build the modules
-    type:
-
+To see the names of the files and scripts used to build the modules
+type:
             ls *.p        
             grep '\[%' *  # shows all include directives
-
