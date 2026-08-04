@@ -50,6 +50,10 @@ sample_rate: frequency
 
 realtime_profile: auto
 
+# Use the realtime buffer profile for edit playback so short crossfades
+# receive sufficiently frequent envelope updates.
+edit_realtime: 1
+
 ecasound_buffersize:
   realtime:
     jack_period_multiple: 2

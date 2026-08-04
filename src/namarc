@@ -80,6 +80,10 @@ sample_rate: frequency
 
 realtime_profile: nonrealtime # other choices: realtime or auto
 
+# Use the realtime buffer profile for edit playback so short crossfades
+# receive sufficiently frequent envelope updates.
+edit_realtime: 1
+
 press_space_to_start_transport: 1 
 
 # The buffer size settings below apply only when JACK is *not* used

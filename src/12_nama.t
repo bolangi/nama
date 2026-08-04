@@ -35,6 +35,12 @@ $config->{use_git} = 0;
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "Check representative variable from default .namarc";
 
 is( $config->{mix_to_disk_format}, "s16_le,N,44100,i", "Read mix_to_disk_format");
+is( $config->{edit_realtime}, 1, "Realtime edit playback is enabled by default");
+
+is(::Effect::fade_level(25, 75, 1, 2), 50,
+	'fade step is calculated as an absolute level');
+is(::Effect::fade_level(75, 25, 1, 2), 50,
+	'absolute fade levels work in both directions');
 
 # object id => type mappings
 #
@@ -58,6 +64,15 @@ while( my($dest,$type) = splice @id_to_type, 0,2){
 my $test_project = 'test';
 
 load_project(name => $test_project, create => 1);
+
+{
+	local $config->{realtime_profile} = 'nonrealtime';
+	local $config->{edit_realtime} = 1;
+	local $setup->{timeline_adjustment} = { type => 'edit' };
+	local $this_edit = bless {}, '::Edit';
+	ok(::ChainSetup::setup_requires_realtime(),
+		'edit mode overrides the nonrealtime profile');
+}
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("project project dir: ".project_dir());
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("project project wav dir: ".this_wav_dir());

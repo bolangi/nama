@@ -602,6 +602,8 @@ sub write_chains {
 
 }
 sub setup_requires_realtime {
+	return 1 if $config->{edit_realtime} and ::edit_mode();
+
 	my $prof = $config->{realtime_profile};
 	if( $prof eq 'auto'){
 		grep{ ! $_->is_mixer

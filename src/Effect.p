@@ -1208,6 +1208,11 @@ sub check_fx_consistency {
 	$result;
 }
 
+sub fade_level {
+	my ($from, $to, $step, $steps) = @_;
+	$from + ($to - $from) * $step / $steps
+}
+
 sub fade {
 	my $self = shift;
 	# parameter starts at one
@@ -1220,11 +1225,12 @@ sub fade {
 	{
 		my $steps = $seconds * $config->{fade_resolution};
 		my $wink  = 1/$config->{fade_resolution};
-		my $size = ($to - $from)/$steps;
 		logpkg('debug', "id: $id, param: $param, from: $from, to: $to, seconds: $seconds");
-		# first step by step
-		for (1..$steps - 1){
-			$self->_modify_effect($param, $size, '+');
+		for my $step (1..$steps - 1){
+			$self->_modify_effect(
+				$param,
+				fade_level($from, $to, $step, $steps),
+			);
 			sleeper( $wink );
 		}		
 	}
@@ -1243,21 +1249,26 @@ sub plan_fade {
 	my $steps 	= $seconds * $config->{fade_resolution};
 	my $wink  	= 1/$config->{fade_resolution};
 	my $id 		= $self->id;
-	my $size 	= ($to - $from)/$steps;
 	logpkg('debug', "id: $id, param: $param, from: $from, to: $to, seconds: $seconds");
 	if ( not $in_future ){
-		for (1..$steps - 1){
-			$self->_modify_effect($param, $size, '+');
+		for my $step (1..$steps - 1){
+			$self->_modify_effect(
+				$param,
+				fade_level($from, $to, $step, $steps),
+			);
 			sleeper( $wink );
 		}		
 		$self->_modify_effect($param, $to)
 	}
 	else {
 		my $advance = $in_future;
-		my $coderef = sub { $self->_modify_effect($param, $size, '+') };
-		for (1..$steps - 1){
+		for my $step (1..$steps - 1){
 			$advance += $wink;
-			schedule_fade($advance, $coderef)
+			my $level = fade_level($from, $to, $step, $steps);
+			schedule_fade(
+				$advance,
+				sub { $self->_modify_effect($param, $level) },
+			)
 		}		
 		$advance += $wink;
 		schedule_fade($advance, sub { $self->_modify_effect($param, $to) } );
