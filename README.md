@@ -66,7 +66,7 @@ follows:
 
 		git clone git://gitlab.com/bolangi/nama.git
 
-Consult the F<BUILD> file for build instructions.
+Consult the BUILD.md file for build instructions.
 
 ### Non-Perl Dependencies
 
