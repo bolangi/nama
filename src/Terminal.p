@@ -54,7 +54,7 @@ rootwin
 {
 my ($rootwin, $vbox, $tickit, $term, $scroller, $entry);
 my ($entry_item, $entrywin, $scrollerwin, $scroller_geom_ev);
-my $entry_item_installed;
+my $entry_widget_present;
 $text->{loop} = IO::Async::Loop->new;
 
 sub initialize_terminal {
@@ -111,7 +111,7 @@ sub create_entry_widget {
 }
 
 sub install_entry_item {
-	return if $entry_item_installed;
+	return if $entry_widget_present;
 
 	unless ($scroller->window) {
 		$tickit->later(\&install_entry_item);
@@ -119,13 +119,13 @@ sub install_entry_item {
 	}
 
 	$scroller->push($entry_item);
-	$entry_item_installed = 1;
+	$entry_widget_present = 1;
 	$scroller->scroll_to_bottom;
 	position_entry_widget();
 }
 
 sub position_entry_widget {
-	return unless $entry_item_installed;
+	return unless $entry_widget_present;
 
 	my $parent = $scroller->window or return;
 
@@ -169,7 +169,7 @@ sub position_entry_widget {
 }
 sub setup_key_bindings {
 
-	Tickit::Widget::Entry::Plugin::Completion->apply($entry, 
+	my $completion_engine = Tickit::Widget::Entry::Plugin::Completion->apply($entry,
 		gen_words => \&gen_words, 
 		use_popup => 0, 
 		ignore_case => 1); 
@@ -215,6 +215,15 @@ sub setup_key_bindings {
 };
 
 	$entry->bind_keys( $text->{entry_bindings}->%*	); 
+	$entry->bind_keys(
+		Tab => sub {
+			$entry->text_splice($entry->position, 0, ' ')
+				if command() =~ /^\s*(?:load|load-project|link|link-track)$/;
+			my $completing_project =
+				command() =~ /^\s*(?:load|load-project|link|link-track)\s+$/;
+			$completion_engine->key_complete($completing_project);
+		},
+	);
 
 }
 sub disable_entry_bindings {
@@ -265,24 +274,61 @@ sub print_to_terminal (@text) {
 	my $output = join q(), map { defined $_ ? $_ : q() } @text;
 	$output =~ s/\n\z//;
 
-	if ($entry_item_installed) {
+	if ($entry_widget_present) {
 		$scroller->pop(1);
-		$entry_item_installed = 0;
+		$entry_widget_present = 0;
 	}
 	$scroller->push(
 		Tickit::Widget::Scroller::Item::Text->new($output),
 	);
 	if (defined $entry_item and $scroller->window) {
 		$scroller->push($entry_item);
-		$entry_item_installed = 1;
+		$entry_widget_present = 1;
 	}
 	$scroller->scroll_to_bottom;
 	position_entry_widget();
 }
 
-sub prompt { 
+sub prompt (@args) {
+	return confirmation_prompt(@args) if @args;
+
 	logsub((caller(0))[3]);
-		my $prompt = join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
+	join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
+}
+
+sub confirmation_prompt ($message, $default) {
+	my $default_answer = $default =~ /^(?:1|y|yes)$/i ? 1
+		: $default =~ /^(?:0|n|no)$/i ? 0
+		: croak "prompt default must be yes or no";
+	my $choices = $default_answer ? '[y]/n' : 'y/[n]';
+	my $answer;
+
+	$entry->set_text("$message $choices");
+	$entry->set_position(length $entry->text);
+
+	my $set_answer = sub ($value) {
+		$answer = $value;
+	};
+	$entry->bind_keys(
+		y     => sub { $set_answer->(1) },
+		Y     => sub { $set_answer->(1) },
+		n     => sub { $set_answer->(0) },
+		N     => sub { $set_answer->(0) },
+		Enter => sub { $set_answer->($default_answer) },
+	);
+
+	$text->{loop}->loop_once while !defined $answer;
+
+	$entry->bind_keys(
+		y     => undef,
+		Y     => undef,
+		n     => undef,
+		N     => undef,
+		Enter => 'key_enter_line',
+	);
+	print_to_terminal("$message $choices ".($answer ? 'y' : 'n'));
+	show_prompt();
+	return $answer;
 }
 sub next_command {
 	$text->{command_index}++ unless $text->{command_index} == scalar $text->{command_history}->@*;
@@ -508,9 +554,9 @@ sub gen_words {
 	my $keywords = [];
 	my $is_command;
 
-	if (command() =~ /^load(.project)? / )
+	if (command() =~ /^\s*(?:load|load-project|link|link-track) / )
 	{
-		$keywords = $text->{project_list};
+		$keywords = project_list();
 	}
 #	elsif (command() =~ /^! / )
 #	{

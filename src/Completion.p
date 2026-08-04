@@ -134,6 +134,8 @@ sub apply
 
    # Need to disable style-applied keypress binding so this takes effect
    $entry->set_style( '<Tab>' => "" );
+
+   return $plugin;
 }
 
 field $_ignore_case       :param //= 0;
@@ -159,8 +161,10 @@ field $_popup_window;
 
 method key_complete
 {
+   my ( $allow_empty ) = @_;
    my ( $partial ) = substr( $_entry->text, 0, $_entry->position ) =~ m/(\S*)$/;
-   my $plen = length $partial or return 1;
+   my $plen = length $partial;
+   return 1 unless $plen or $allow_empty;
 
    my $match = $_ignore_case ? qr/^\Q$partial\E/i : qr/^\Q$partial\E/;
    my @completions = grep { $_ =~ $match } $_gen_words->(
