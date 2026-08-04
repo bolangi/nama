@@ -16,10 +16,6 @@
   short: h
   audience: basic
   description: This help display
-- long: use-pwd
-  short: p
-  audience: diagnostic
-  description: "Utility mode: use current dir for all WAV and project files"
 - long: log
   short: L
   argument: s
