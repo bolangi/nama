@@ -235,7 +235,10 @@ sub disable_entry_bindings {
 sub suspend
 {
 	$term->pause;
-	kill STOP => $$;
+	# Suspend the entire foreground job, including any audio-engine children.
+	# Stopping only Nama leaves those children running, so the shell does not
+	# regain control until the terminal sends a second stop signal.
+	kill STOP => 0;
 	$term->resume;
 }
 
