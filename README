@@ -1,8 +1,6 @@
-=head1 NAME
+# Nama - digital audio workstation
 
-Nama - digital audio workstation
-
-=head1 DESCRIPTION
+## Description
 
 Nama is a digital audio workstation. It is suitable for
 multitrack recording, effects-processing, editing, mixing,
@@ -18,7 +16,7 @@ mixdown to wav, ogg, mp3, etc.
 
 Nama has a full-featured command interpreter with TAB
 completion, keyword help and command history; a hotkey mode
-for tweaking effect parameters, a Tk-based GUI, and project
+for tweaking effect parameters, and project
 management (history, branching, tags) based on git.  Users
 can define command aliases, custom commands, and key
 bindings for the hotkey mode. 
@@ -35,28 +33,13 @@ profiles (used to create Nama's mastering network) are
 templates for placing effects on multiple tracks. User
 scripting provides another way to reuse functionality.
 
-Nama's GUI will display if Tk is available.  Nama can spawn
-Audacity or MHWaveedit to view/edit selected waveforms. 
-
-=head2 Project management
-
 Project state is serialized as JSON files and the entire
 project history is managed by Git. Projects can be branched,
 tagged, and easily restored to earlier states. 
 
-=head2 Project reuse
+## Installation
 
-Three types of templates are available to reuse project
-components: effect chains, effect profiles, and project
-templates. An effect chain is a series of effects with
-parameters.  An effect profile includes one or more tracks
-with their effects and inserts. Nama's mastering network is
-stored as an effect profile.  Project templates duplicate an
-entire project without audio files. 
-
-=head1 INSTALLATION
-
-=head2 Installing Nama and its Perl Dependencies from CPAN
+### Installing Nama and its Perl Dependencies from CPAN
 
 The following command will install Nama, automatically
 pulling in all Perl modules required to run Nama in text mode:
@@ -71,26 +54,21 @@ To use the GUI, you will need to install Tk:
 
 		cpanm Tk
 
-You may optionally install Audio::Ecasound to run Ecasound
-via libecasoundc:
-
-		cpanm Audio::Ecasound
-
 You can browse the sources or download a tarball via:
 
 		http://search.cpan.org/dist/Audio-Nama
 
-=head2 Building from Source
+### Building from Source
 
 If you want to inspect or modify Nama's internals, or keep
 up with new developments, you can pull the source code as
 follows: 
 
-		git clone git://github.com/bolangi/nama.git
+		git clone git://gitlab.com/bolangi/nama.git
 
 Consult the F<BUILD> file for build instructions.
 
-=head2 Non-Perl Dependencies
+### Non-Perl Dependencies
 
 The Ecasound audio processing libraries should be installed.
 Ecasound should be compiled with support for LADSPA, libsndfile,
@@ -114,10 +92,10 @@ listed in the default configuration file .namarc.
 Git is required to utilize Nama's project 
 management and  and undo features. 
 
-=head2 COPYRIGHT
+## Copyright
 
 Unless specified otherwise, this code is 
-2003 - 2014, copyright Joel Roth
+2008 - 2026, copyright Joel Roth
 
 All rights are reserved except as provided by the Gnu Public
 License, version 3, as detailed in the file COPYING provided
