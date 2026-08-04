@@ -55,7 +55,7 @@ sub add_track_alias {
 # track name in a different project
 
 sub add_track_alias_project {
-	my ($name, $track, $project_name) = @_;
+	my ($project_name, $track, $name)  = @_;
 	$project_name //= $::project->{name}; 
 	my $dir =  join_path(project_root(), $project_name, '.wav'); 
 	if ( -d $dir ){

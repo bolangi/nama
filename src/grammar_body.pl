@@ -431,9 +431,9 @@ quiet: 'quiet'
 link_track: _link_track existing_project_name track_name new_track_name end
 {
 	::add_track_alias_project(
-		$item{new_track_name},
+		$item{existing_project_name},
 		$item{track_name}, 
-		$item{existing_project_name}
+		$item{new_track_name},
 	); 
 1
 }
