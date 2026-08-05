@@ -10,7 +10,7 @@ sub start {
 	my $self = shift; 
 
 	$self->valid_setup
-		or throw("\nAudio engine is not configured. Cannot start.\n"),return;
+		or throw("\nAudio engine is not configured. Cannot start."),return;
 
 
 	# use gradual unmuting to avoid pop on start
