@@ -172,6 +172,9 @@ sub main {
 sub bootstrap_environment {
 	definitions();
 	process_command_line_options();
+	read_config(global_config());  # from .namarc if we have one
+	# set sample rate is needed for prepare_static_effects_data() and initialize_project_data()
+	$config->{sample_rate} = $config->{opts}->{z} if $config->{opts}->{z};
 	initialize_user_interface();
 	my $banner = get_data_section('banner');
 	$banner =~ s/\$VERSION/$VERSION/g;
