@@ -248,6 +248,12 @@ sub suspend
 	# regain control until the terminal sends a second stop signal.
 	kill STOP => 0;
 	$term->resume;
+
+	# Commands run by the shell while Nama is stopped may have changed any part
+	# of the terminal.  Tickit still has the old screen contents in its damage
+	# model, so invalidate the whole window after fg instead of waiting for a
+	# focus or resize event to happen to repaint it.
+	$rootwin->expose;
 }
 
 sub show_prompt {
