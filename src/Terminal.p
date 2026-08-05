@@ -210,9 +210,9 @@ sub setup_key_bindings {
 	'C-c'       => \&cleanup_exit,
     ' '			=> $spacebar,
 	'C-z'		=> \&suspend,
-    'F1'		=> \&enable_popup,
-	'M-Enter'	=> \&enable_popup,
-	'F8'		=> \&activate_effect_hotkeys,
+    'F1'		=> \&enable_hotkeys,
+	'M-Enter'	=> \&enable_hotkeys,
+	 user_hotkeys(),
 };
 
 	$entry->bind_keys( $text->{entry_bindings}->%*	); 
@@ -227,6 +227,13 @@ sub setup_key_bindings {
 	);
 
 }
+sub user_hotkeys {
+	my $mappings = $config->{hotkeys}->{entry};
+	return unless defined $mappings;
+	map{ $_ => $mappings->{$_}->&*  } keys $config->{hotkeys}->{entry}->@*
+}
+	
+
 sub disable_entry_bindings {
 	$entry->bind_keys( map {$_, undef} keys $text->{entry_bindings}->%* );
 	
@@ -353,20 +360,21 @@ sub command {
 }
 
 
+# bottom line status bar for hot key modes
 
 {
-my ($popup, $expose_ev, $key_ev, $status, $mode, $popup_active);
-sub enable_popup  { 
-	popup($mode), $popup_active = 1 if defined $mode
+my ($popup, $expose_ev, $key_ev, $status, $mode, $hotkeys_active);
+sub enable_hotkeys  { 
+	popup($mode), $hotkeys_active = 1 if defined $mode
 }
-sub disable_popup { 
+sub disable_hotkeys { 
 	return unless defined $expose_ev;
 	$popup->unbind_event_id($_) for ($expose_ev, $key_ev); 
-	$popup_active = 0; 
+	$hotkeys_active = 0; 
 	$entry->take_focus 
 }
-sub toggle_popup { if (popup_active()){  disable_popup() } else { enable_popup() } }
-sub popup_active { defined $popup and $popup->is_focused }
+sub toggle_hotkeys { if (hotkeys_active()){  disable_hotkeys() } else { enable_hotkeys() } }
+sub hotkeys_active { defined $popup and $popup->is_focused }
 
 sub popup ($mode) {
 	my ($top, $left, $lines, $cols) = ($text->{rootwin}->lines - 1, 0, 1, $text->{rootwin}->cols); 
@@ -421,7 +429,7 @@ sub set_popup_text ($str) {
 sub set_hotkey_mode ($m) {
 	popup($m);
 	$mode = $m;	
-	$popup_active = 1;
+	$hotkeys_active = 1;
 }
 sub activate_effect_hotkeys { set_hotkey_mode('effect') }
 
