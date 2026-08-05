@@ -165,7 +165,6 @@ sub main {
 		::terminal_say("Enter command to begin or type 'h' for help.");
 		$this_track = $tn{Main};
 	}
-	finish_terminal_startup() unless $config->{opts}->{T};
 	show_prompt() unless $config->{opts}->{T};
 	$ui->loop();
 }

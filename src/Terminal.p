@@ -75,14 +75,12 @@ sub initialize_terminal {
 		on_render => \&position_entry_widget,
 	);
 	$scroller->set_on_scrolled(sub { position_entry_widget() });
-	$text->{terminal_starting} = 1;
 }
 
 sub finish_terminal_startup {
 	create_entry_widget();
 	setup_key_bindings();
 	$tickit->later(\&install_entry_item);
-	delete $text->{terminal_starting};
 }
 
 sub install_tk_tickit_bridge {
