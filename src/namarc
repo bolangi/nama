@@ -130,6 +130,8 @@ alias:
     reverb: gverb
 
 hotkeys:
+  user:
+    F8: activate_effect_hotkeys
   effect:
     Insert: previous_track
     Delete: next_track

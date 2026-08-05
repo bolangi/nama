@@ -186,7 +186,7 @@ sub setup_key_bindings {
 			unless $entry->position <= $stop_pos 
 	};
 
-	my $spacebar = sub {
+	my $toggle_transport = sub {
 		if ( $config->{press_space_to_start}
 				and $entry->position == length prompt()
 				) 
@@ -194,24 +194,25 @@ sub setup_key_bindings {
 		else { $entry->on_text(' ') }
 	};
 
+	sub beginning_of_line     		{ $entry->set_position( length prompt() ) }
+	sub delete_to_end_of_line 		{ $entry->text_delete(  $entry->position, 999) }
+	sub delete_to_beginning_of_line { $entry->text_delete(  length prompt(), 
+															$entry->position - length prompt() ) }
+
 	$text->{entry_bindings} = {
 
-	'Up' 		=> sub { previous_command() }, 
-	'Down'		=> sub { next_command()     }, 
+    ' '			=> $toggle_transport,
 	'Left'		=> $left,
-	'C-a'	  	=> sub { $entry->set_position( length prompt() ) },
-	'Home'  	=> sub { $entry->set_position( length prompt() ) },
-	'C-k'		=> sub { $entry->text_delete(  $entry->position, 999) },
-	'C-u'   	=> sub { $entry->text_delete(  
-							length prompt(), 
-							$entry->position - length prompt() ) },
 	'C-h'   	=> $backspace,
 	'Backspace' => $backspace,
+	'Up' 		=> \&previous_command, 
+	'Down'		=> \&next_command, 
+	'C-a'	  	=> \&beginning_of_line,
+	'Home'  	=> \&beginning_of_line,
+	'C-k'		=> \&delete_to_end_of_line,
+	'C-u'   	=> \&delete_to_beginning_of_line,
 	'C-c'       => \&cleanup_exit,
-    ' '			=> $spacebar,
 	'C-z'		=> \&suspend,
-    'F1'		=> \&enable_hotkeys,
-	'M-Enter'	=> \&enable_hotkeys,
 	 user_hotkeys(),
 };
 
@@ -228,9 +229,11 @@ sub setup_key_bindings {
 
 }
 sub user_hotkeys {
-	my $mappings = $config->{hotkeys}->{entry};
+	my $mappings = $config->{hotkeys}->{user};
 	return unless defined $mappings;
-	map{ $_ => $mappings->{$_}->&*  } keys $config->{hotkeys}->{entry}->@*
+	no strict 'refs';
+	map{ $_ => \&{$mappings->{$_}} } keys $mappings->%*
+	#map{ $_ => eval '\&'. $mappings->{$_} } keys $mappings->%*
 }
 	
 
