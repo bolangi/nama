@@ -5,15 +5,15 @@ Changes to Audio::Nama
     * full support for metronome and tempo maps, including tempo ramp
     * can indicate positions by bar/beat or bar/beat/tick
     * tickit terminal library replaces readline
-    * restored simple GUI for common recording/mixing scenarios
     * hotkeys mappings for adjusting effect parameters 
-    * refactor of key status and routing algorithms
-    * logging system rewritten to provide full diagnostics
-    * refactor region and clip positioning
+    * custom key mappings
+    * simple GUI for common recording/mixing scenario
+    * refactor of key REC/MON/OFF status and routing algorithms
+    * rewritten logging system with full diagnostics
+    * refactor timeline, region and clip positioning, nomenclature
     * improvements to show-tracks display and help system
     * documentation fixes
-    * improve fade behavior, planned envelope and on demand
-    * many bug fixes
+    * improve fade behavior, both planned envelopes and on demand
 
 1.605 July 4, 2026
     * metronome related
