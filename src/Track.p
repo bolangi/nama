@@ -250,7 +250,7 @@ sub show_tracks_setting {
 	$track->rec_status_display;
 }
 sub show_tracks_source      { $_[0]->source_status }
-sub show_tracks_destination { $_[0]->rec ? $_[0]->current_wav : $_[0]->destination }
+sub show_tracks_destination { $_[0]->destination }
 sub show_tracks_volume      { $_[0]->vol_level }
 sub show_tracks_pan         { $_[0]->pan_level }
 
