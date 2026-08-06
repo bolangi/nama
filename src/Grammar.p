@@ -534,7 +534,7 @@ sub destroy_current_wav {
 
 sub pan_set {
 	my ($track, $new_position) = @_;
-	my $current = $track->pan_o->params->[0];
+	my $current = $track->pan_effect->params->[0];
 	$track->set(old_pan_level => $current)
 		unless defined $track->old_pan_level;
 	update_effect(

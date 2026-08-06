@@ -237,7 +237,7 @@ is( $this_track->name, 'sax', "current track assignment");
 	my $track = $tn{sax};
 	my $original_level = $track->vol_level;
 	transition_tracks({ mute => ['sax'] });
-	is($track->vol_level, $track->vol_o->mute_level,
+	is($track->vol_level, $track->volume_effect->mute_level,
 		'a coordinated mute reaches the mute level');
 	is($track->old_vol_level, $original_level,
 		'a coordinated mute saves the original level');
@@ -442,9 +442,9 @@ is_deeply(
 	[$this_track->user_effect_ids],
 	'user_effects resolves user effect IDs to objects',
 );
-is($this_track->volume_effect, $this_track->vol_o,
+is($this_track->volume_effect, $this_track->volume_effect,
 	'volume_effect returns the volume Effect object');
-is($this_track->pan_effect, $this_track->pan_o,
+is($this_track->pan_effect, $this_track->pan_effect,
 	'pan_effect returns the pan Effect object');
 is($this_track->vol_id, $this_track->vol,
 	'vol_id aliases the volume effect ID');
@@ -523,7 +523,7 @@ is_deeply(
 
 nama_cmd('vol -2');
 
-is( $this_track->vol_o->params->[0], -2, "modify effect" );
+is( $this_track->volume_effect->params->[0], -2, "modify effect" );
 
 nama_cmd(join " ", 'position_effect', this_op_o()->id, 'ZZZ');
 
