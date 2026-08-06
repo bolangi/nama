@@ -1157,16 +1157,16 @@ sub check_fx_consistency {
 
 		# check for missing special-purpose ops
 
-		my $no_vol_op 		= ! $track->vol;
-		my $no_pan_op 		= ! $track->pan;
+		my $no_vol_op 		= ! $track->vol_id;
+		my $no_pan_op 		= ! $track->pan_id;
 		my $no_latency_op 	= ! $track->latency_op;
 
 		# check for orphan special-purpose op entries
 
-		$is_track_error++, $result->{track}->{$name}->{orphan_vol} = $track->vol 
-			if $track->vol and !  grep { $track->vol eq $_ } @ops;
-		$is_track_error++,$result->{track}->{$name}->{orphan_pan} = $track->pan 
-			if $track->pan and !  grep { $track->pan eq $_ } @ops;
+		$is_track_error++, $result->{track}->{$name}->{orphan_vol} = $track->vol_id
+			if $track->vol_id and !  grep { $track->vol_id eq $_ } @ops;
+		$is_track_error++,$result->{track}->{$name}->{orphan_pan} = $track->pan_id
+			if $track->pan_id and !  grep { $track->pan_id eq $_ } @ops;
 
 		# we don't check for orphan latency ops as this is
 		# allowed in order to keep constant $op_id over
