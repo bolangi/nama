@@ -88,6 +88,7 @@ sub effect_id_by_name {
 }
 sub vol_level { my $self = shift; try { $self->vol_o->params->[0] } }
 sub pan_level { my $self = shift; try { $self->pan_o->params->[0] } }
+sub vol_id { $_[0]->vol }
 sub vol_o { my $self = shift; fxn($self->vol) }
 sub volume_effect { $_[0]->vol_o }
 sub pan_o { my $self = shift; fxn($self->pan) }
