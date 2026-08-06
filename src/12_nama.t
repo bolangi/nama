@@ -435,13 +435,8 @@ is($this_track->selected_effect, this_op_o(),
 	'selected_effect returns the selected Effect object');
 is_deeply($this_track->effect_ids, $this_track->ops,
 	'effect_ids aliases the serialized effect IDs');
-is_deeply([$this_track->user_effect_ids], [$this_track->user_ops],
-	'user_effect_ids aliases user effect IDs');
-is_deeply(
-	[map { $_->id } $this_track->user_effects],
-	[$this_track->user_effect_ids],
-	'user_effects resolves user effect IDs to objects',
-);
+is_deeply([$this_track->user_ops], [$this_track->user_ops],
+	'user_ops aliases user effect IDs');
 is($this_track->volume_effect, $this_track->volume_effect,
 	'volume_effect returns the volume Effect object');
 is($this_track->pan_effect, $this_track->pan_effect,

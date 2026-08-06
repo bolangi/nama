@@ -27,7 +27,7 @@ sub pos {
 }
 sub user_effects {
 	my $track = shift;
-	map{ fxn($_) } $track->user_effect_ids;
+	map{ fxn($_) } $track->user_ops;
 }
 sub channel_ops {
 	my $track = shift;
@@ -58,7 +58,7 @@ sub apply_ops {
 	my $track = shift;
 	$_->apply_op for $track->ecasound_dynamic_apply_list;
 }
-sub user_effect_ids {
+sub user_ops {
 	my $track = shift;
 	my @skip = 	grep {fxn($_)}  # must exist
 				map { $track->{$_} } qw(vol pan fader latency_op );
@@ -72,8 +72,6 @@ sub user_effect_ids {
 
 	grep{ ! $skip{$_} } @{ $track->{ops} || [] };
 }
-sub user_ops { $_[0]->user_effect_ids }
-
 sub first_effect_of_type {
 	my $track = shift;
 	my $type = shift;
