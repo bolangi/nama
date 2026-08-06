@@ -429,6 +429,28 @@ nama_cmd('add_effect decimator 1 2');
 like( this_op_o()->about->{code}, qr/decimator/, "apply LADSPA effect");
 is( this_op_o()->track_effect_index, 1, "position before faders, after other effects");
 
+is($this_track->op_id, $this_track->op,
+	'op_id aliases the selected effect ID');
+is($this_track->selected_effect, this_op_o(),
+	'selected_effect returns the selected Effect object');
+is_deeply($this_track->effect_ids, $this_track->ops,
+	'effect_ids aliases the serialized effect IDs');
+is_deeply([$this_track->user_effect_ids], [$this_track->user_ops],
+	'user_effect_ids aliases user effect IDs');
+is_deeply(
+	[map { $_->id } $this_track->user_effects],
+	[$this_track->user_effect_ids],
+	'user_effects resolves user effect IDs to objects',
+);
+is($this_track->volume_effect, $this_track->vol_o,
+	'volume_effect returns the volume Effect object');
+is($this_track->pan_effect, $this_track->pan_o,
+	'pan_effect returns the pan Effect object');
+is($this_track->vol_id, $this_track->vol,
+	'vol_id aliases the volume effect ID');
+is($this_track->pan_id, $this_track->pan,
+	'pan_id aliases the pan effect ID');
+
 nama_cmd('vol -2');
 
 is( $this_track->vol_o->params->[0], -2, "modify effect" );

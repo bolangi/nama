@@ -10,6 +10,7 @@ use List::MoreUtils qw(first_index);
 # current operator and current parameter for the track
 sub op { $project->{current_op}->{$_[0]->name} //= $_[0]->{ops}->[-1] }
 sub op_id { $_[0]->op }
+sub selected_effect { fxn($_[0]->op_id) }
 sub effect_ids { $_[0]->ops }
 
 sub param { $project->{current_param}->{$_[0]->op} //= 1 }
@@ -28,6 +29,7 @@ sub user_ops_o {
 	my $track = shift;
 	map{ fxn($_) } $track->user_ops();
 }
+sub user_effects { $_[0]->user_ops_o }
 sub channel_ops {
 	my $track = shift;
 	grep{ $_->is_channel_op } $track->ops_o;	
@@ -71,6 +73,7 @@ sub user_ops {
 
 	grep{ ! $skip{$_} } @{ $track->{ops} || [] };
 }
+sub user_effect_ids { $_[0]->user_ops }
 
 sub first_effect_of_type {
 	my $track = shift;
