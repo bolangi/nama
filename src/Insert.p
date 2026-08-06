@@ -64,7 +64,7 @@ sub new {
 				group => 'Insert',
 				hide => 1,
 				rw => MON);
-	map{ ::remove_effect($_)} $wet->vol, $wet->pan, $dry->vol, $dry->pan;
+	map{ ::remove_effect($_)} $wet->vol, $wet->pan_id, $dry->vol, $dry->pan_id;
 	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet, $dry;
 
 	$self->{dry_vol} = ::add_effect({
@@ -291,7 +291,7 @@ sub new {
 			params => [1,2]
 		});
 	}
-	map{ ::remove_effect($_)} $wet_send->vol, $wet_send->pan;
+	map{ ::remove_effect($_)} $wet_send->vol, $wet_send->pan_id;
 	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet_send;
 	$self
 } 

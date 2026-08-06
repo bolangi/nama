@@ -122,7 +122,7 @@ sub new_clip {
 		%args
 	);
 	modify_effect( $clip->vol, 1, undef, fxn($track->vol)->params->[0]);
-	modify_effect( $clip->pan, 1, undef, fxn($track->pan)->params->[0]);
+	modify_effect( $clip->pan_id, 1, undef, fxn($track->pan_id)->params->[0]);
 	$clip
 }
 sub new_spacer {

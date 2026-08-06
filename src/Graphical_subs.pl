@@ -698,7 +698,7 @@ sub track_gui {
 	  
 		# Pan
 		
-		my $pan_id = $ti{$n}->pan;
+		my $pan_id = $ti{$n}->pan_id;
 		
 		logpkg('debug', "pan effect_id: $pan_id");
 		$p_num = 0;           # first parameter

@@ -666,10 +666,10 @@ nosolo: _nosolo { ::nosolo() ; 1}
 unity: _unity { ::unity($::this_track); 1}
 
 pan: _pan panval { 
-	::update_effect( $::this_track->pan, 0, $item{panval});
+	::update_effect( $::this_track->pan_id, 0, $item{panval});
 	1;} 
 pan: _pan sign panval {
-	::modify_effect( $::this_track->pan, 1, $item{sign}, $item{panval} );
+	::modify_effect( $::this_track->pan_id, 1, $item{sign}, $item{panval} );
 	1;} 
 panval: float 
       | dd
@@ -841,7 +841,7 @@ add_effect: _add_effect add_target parameter_value(s?) before(?) {
 	else{ 	  	$args->{type}			= $item{add_target}				}
 	# place effect before fader if there is one
 	my $fader = 
-			   ::fxn($::this_track->pan) && $::this_track->pan
+			   ::fxn($::this_track->pan_id) && $::this_track->pan_id
 			|| ::fxn($::this_track->vol) && $::this_track->vol;
 	{ no warnings 'uninitialized';
 	::logpkg('debug',$::this_track->name,": effect insert point is $fader", 

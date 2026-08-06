@@ -134,7 +134,7 @@ sub add_pan_control {
 	my $pan_id = ::Effect->new(
 				chain => $n, 
 				type => 'epp',
-				id => $ti{$n}->pan, # often undefined
+				id => $ti{$n}->pan_id, # often undefined
 				)->id;
 	
 	$ti{$n}->set(pan => $pan_id);  # save the id for next time

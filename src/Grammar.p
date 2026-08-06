@@ -538,7 +538,7 @@ sub pan_set {
 	$track->set(old_pan_level => $current)
 		unless defined $track->old_pan_level;
 	update_effect(
-		$track->pan,	# id
+		$track->pan_id,	# id
 		0, 					# parameter
 		$new_position,		# value
 	);
@@ -584,7 +584,7 @@ sub pan_back {
 	my $old = $track->old_pan_level;
 	if (defined $old){
 		update_effect(
-			$track->pan,	# id
+			$track->pan_id,	# id
 			0, 					# parameter
 			$old,				# value
 		);

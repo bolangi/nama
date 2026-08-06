@@ -251,7 +251,7 @@ sub _mono_to_stereo{
 	my $is_mono_track = sub { $self->width == 1 };
 	my $is_mono_wav   = sub { ::channels($self->wav_format) == 1};
 	if  ( 
-			($self->track and $tn{$self->track}->pan)
+			($self->track and $tn{$self->track}->pan_id)
 			and
 		  (	$status =~ /REC|MON/ and $is_mono_track->() 
 			or $status eq PLAY and $is_mono_wav->() )

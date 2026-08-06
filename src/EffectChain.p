@@ -227,7 +227,7 @@ sub add_ops {
 	my @added;
 	my %runtime_id_for;
 	if( $self->track_cache ){
-		@ops_list = grep{ $_ ne $track->vol and $_ ne $track->pan }
+		@ops_list = grep{ $_ ne $track->vol and $_ ne $track->pan_id }
 								@{$self->ops_list}
 	} else {
 		@ops_list = @{$self->ops_list};
