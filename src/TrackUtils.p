@@ -121,7 +121,7 @@ sub add_volume_control {
 	my $vol_id = ::Effect->new(
 				chain => $n, 
 				type => $config->{volume_control_operator},
-				id => $ti{$n}->vol, # often undefined
+				id => $ti{$n}->vol_id, # often undefined
 				)->id;
 	
 	$ti{$n}->set(vol => $vol_id);  # save the id for next time

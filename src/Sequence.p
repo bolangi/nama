@@ -121,7 +121,7 @@ sub new_clip {
 		%region_args,
 		%args
 	);
-	modify_effect( $clip->vol, 1, undef, fxn($track->vol)->params->[0]);
+	modify_effect( $clip->vol_id, 1, undef, fxn($track->vol_id)->params->[0]);
 	modify_effect( $clip->pan_id, 1, undef, fxn($track->pan_id)->params->[0]);
 	$clip
 }

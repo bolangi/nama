@@ -641,7 +641,7 @@ sub track_gui {
 	
 	if ( ::need_vol_pan($ti{$n}->name, "vol") ){
 
-		my $vol_id = $ti{$n}->vol;
+		my $vol_id = $ti{$n}->vol_id;
 
 		logpkg('debug', "vol effect_id: $vol_id");
 		my %p = ( 	parent => \$gui->{track_frame},

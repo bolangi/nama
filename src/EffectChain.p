@@ -227,7 +227,7 @@ sub add_ops {
 	my @added;
 	my %runtime_id_for;
 	if( $self->track_cache ){
-		@ops_list = grep{ $_ ne $track->vol and $_ ne $track->pan_id }
+		@ops_list = grep{ $_ ne $track->vol_id and $_ ne $track->pan_id }
 								@{$self->ops_list}
 	} else {
 		@ops_list = @{$self->ops_list};
@@ -281,8 +281,8 @@ sub add_inserts {
 
 		$insert_data->{track} = $track->name;
 		my $insert = $class->new(%$insert_data);
-		#$::by_index{$wet_effect_chain}->add($insert->wet_name, $tn{$insert->wet_name}->vol)
-		#$::by_index{$dry_effect_chain}->add($insert->dry_name, $tn{$insert->dry_name}->vol)
+		#$::by_index{$wet_effect_chain}->add($insert->wet_name, $tn{$insert->wet_name}->vol_id)
+		#$::by_index{$dry_effect_chain}->add($insert->dry_name, $tn{$insert->dry_name}->vol_id)
 	} @{$self->inserts_data};
 }
 sub add_region {

@@ -33,7 +33,7 @@ use ::Object qw(
 [% qx(./strip_all ./track_fields) %]
 );
 
-# Note that ->vol return the effect_id 
+# Note that ->vol_id return the effect_id 
 # ->old_volume_level is the level saved before muting
 # ->old_pan_level is the level saved before pan full right/left
 # commands

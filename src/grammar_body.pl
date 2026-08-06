@@ -629,20 +629,20 @@ rw: rw_setting {
 set_version: _set_version dd { $::this_track->set_version($item{dd}); 1}
 
 vol: _vol value { 
-	$::this_track->vol or 
+	$::this_track->vol_id or 
 		::throw(( $::this_track->name . ": no volume control available")), return;
 	::modify_effect(
-		$::this_track->vol,
+		$::this_track->vol_id,
 		1,
 		undef,
 		$item{value});
 	1;
 } 
 vol: _vol sign(?) value { 
-	$::this_track->vol or 
+	$::this_track->vol_id or 
 		::throw( $::this_track->name . ": no volume control available"), return;
 	::modify_effect(
-		$::this_track->vol,
+		$::this_track->vol_id,
 		1,
 		$item{'sign(?)'}->[0],
 		$item{value});
@@ -842,7 +842,7 @@ add_effect: _add_effect add_target parameter_value(s?) before(?) {
 	# place effect before fader if there is one
 	my $fader = 
 			   ::fxn($::this_track->pan_id) && $::this_track->pan_id
-			|| ::fxn($::this_track->vol) && $::this_track->vol;
+			|| ::fxn($::this_track->vol_id) && $::this_track->vol_id;
 	{ no warnings 'uninitialized';
 	::logpkg('debug',$::this_track->name,": effect insert point is $fader", 
 	::Dumper($args));

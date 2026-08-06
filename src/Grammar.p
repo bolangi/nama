@@ -561,7 +561,7 @@ sub unity {
 		$track->set(old_vol_level => $track->volume_effect->params->[0]);
 	}
 	update_effect( 
-		$track->vol, 
+		$track->vol_id, 
 		0, 
 		$config->{unity_level}->{$track->volume_effect->type}
 	);
@@ -571,7 +571,7 @@ sub vol_back {
 	my $old = $track->old_vol_level;
 	if (defined $old){
 		update_effect(
-			$track->vol,	# id
+			$track->vol_id,	# id
 			0, 					# parameter
 			$old,				# value
 		);
