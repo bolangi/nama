@@ -377,14 +377,14 @@ sub show_inserts {
 }
 
 $text->{format_top} = <<TOP;
- No. Name            Setting        Source             Destination  Vol   Pan
-================================================================================
+ No. Name            Setting     Source           Destination       Vol   Pan
+=============================================================================
 TOP
 
 $text->{format_divider} = '-' x 77 . "\n";
 
 my $format_picture = <<PICTURE;
-@>>  @<<<<<<<<<<<<<< @<<<<<<<<<<<<  @<<<<<<<<<<<<<<<<< @<<<<<<<<<<< @>>>  @>>>
+@>>  @<<<<<<<<<<<<<< @<<<<<<<<<< @<<<<<<<<<<<<<<< @<<<<<<<<<<<<<<<< @>>>  @>>>
 PICTURE
 
 sub show_tracks_section {
