@@ -128,8 +128,8 @@ sub unmute {
 	return if ! defined $track->old_vol_level;
 
 	$nofade
-		? $track->vol_o->_modify_effect(1, $track->old_vol_level)
-		: $track->vol_o->fadein($track->old_vol_level);
+		? $track->volume_effect->_modify_effect(1, $track->old_vol_level)
+		: $track->volume_effect->fadein($track->old_vol_level);
 
 	$track->set(old_vol_level => undef);
 }

@@ -114,7 +114,7 @@ sub transition_tracks {
 	for my $method (qw(mute unmute)){
 		for my $name (@{$args->{$method} || []}){
 			my $track = $tn{$name} or next;
-			my $vol = $track->vol_o or next;
+			my $vol = $track->volume_effect or next;
 
 			if ($method eq 'mute'){
 				next if defined $track->old_vol_level;

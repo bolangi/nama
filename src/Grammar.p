@@ -558,12 +558,12 @@ sub remove_track_cmd {
 sub unity {
 	my ($track, $save) = @_;
 	if ($save){
-		$track->set(old_vol_level => $track->vol_o->params->[0]);
+		$track->set(old_vol_level => $track->volume_effect->params->[0]);
 	}
 	update_effect( 
 		$track->vol, 
 		0, 
-		$config->{unity_level}->{$track->vol_o->type}
+		$config->{unity_level}->{$track->volume_effect->type}
 	);
 }
 sub vol_back {
