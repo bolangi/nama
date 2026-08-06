@@ -661,15 +661,15 @@ sub insert_effect {
 	my $running = $this_engine->started();
 	pager("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
+	my $pos = fxn($args{before}) or die "$args{before}: effect ID not found";
 	pager("Cannot insert effect before controller.\n"), return 
-		if fxn($args{before})->is_controller;
+		if $pos->is_controller;
 	if ($running){
 		$ui->stop_heartbeat;
 		::mute();
 		$this_engine->stop_command;
 		sleeper( 0.05); 
 	}
-	my $pos = fxn($args{before}) or die "$args{before}: effect ID not found";
 	my $track = $pos->track;
 	$this_track eq $pos->track or die "$args{before} is not on current track";
 	#
