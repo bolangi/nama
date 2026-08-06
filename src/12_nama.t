@@ -451,6 +451,58 @@ is($this_track->vol_id, $this_track->vol,
 is($this_track->pan_id, $this_track->pan,
 	'pan_id aliases the pan effect ID');
 
+{
+	my $effect_chain = bless {
+		ops_list => [qw(template-parent template-controller)],
+		ops_data => {
+			'template-parent' => {
+				type   => 1,
+				params => [],
+			},
+			'template-controller' => {
+				type       => 2,
+				params     => [],
+				belongs_to => 'template-parent',
+			},
+		},
+	}, '::EffectChain';
+
+	my @created_with;
+	my $next_runtime_id = 0;
+	package ::EffectChainTestEffect {
+		sub id { $_[0]->{id} }
+	}
+	no warnings 'redefine';
+	local *::EffectChain::append_effect = sub {
+		my ($args) = @_;
+		push @created_with, { %$args };
+		my $id = $args->{id} // 'runtime-' . ++$next_runtime_id;
+		[bless { id => $id }, '::EffectChainTestEffect'];
+	};
+
+	{
+		local *::EffectChain::fxn = sub { undef };
+		$effect_chain->add_ops($this_track, {});
+	}
+	is($created_with[0]->{id}, 'template-parent',
+		'EffectChain preserves an available parent ID');
+	is($created_with[1]->{parent}, 'template-parent',
+		'EffectChain preserves an available controller relationship');
+
+	@created_with = ();
+	{
+		local *::EffectChain::fxn = sub { 1 };
+		$effect_chain->add_ops($this_track, {});
+		$effect_chain->add_ops($this_track, {});
+	}
+	is($created_with[1]->{parent}, 'runtime-1',
+		'first application maps a controller to its runtime parent ID');
+	is($created_with[3]->{parent}, 'runtime-3',
+		'second application builds an independent runtime ID mapping');
+	is($effect_chain->parent_id('template-controller'), 'template-parent',
+		'applying an EffectChain does not mutate its template relationships');
+}
+
 nama_cmd('vol -2');
 
 is( $this_track->vol_o->params->[0], -2, "modify effect" );

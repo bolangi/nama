@@ -199,14 +199,17 @@ sub add_ops {
 
 	# make sure surname is unique
 	
-	my ($new_surname, $existing) = $track->unique_surname($ec_args->{surname});
-	if ( $new_surname ne $ec_args->{surname})
+	if (defined $ec_args->{surname})
 	{
-		::terminal_say(
-			"track ".
-			$track->name.qq(: other effects with surname "$ec_args->{surname}" found,),
-			qq( using "$new_surname". Others are: $existing.));
-		$ec_args->{surname} = $new_surname;
+		my ($new_surname, $existing) = $track->unique_surname($ec_args->{surname});
+		if ( $new_surname ne $ec_args->{surname})
+		{
+			::terminal_say(
+				"track ".
+				$track->name.qq(: other effects with surname "$ec_args->{surname}" found,),
+				qq( using "$new_surname". Others are: $existing.));
+			$ec_args->{surname} = $new_surname;
+		}
 	}
 
 	
@@ -222,6 +225,7 @@ sub add_ops {
 	
 	my @ops_list;
 	my @added;
+	my %runtime_id_for;
 	if( $self->track_cache ){
 		@ops_list = grep{ $_ ne $track->vol and $_ ne $track->pan }
 								@{$self->ops_list}
@@ -230,17 +234,20 @@ sub add_ops {
 	}
 	for (@ops_list)
 	{	
+		my $template_id = $_;
+		my $template_parent_id = $self->parent_id($template_id);
 		my $args = 
 		{
 			chain  		=> $track->n,
-			type   		=> $self->type($_),
-			params 		=> $self->params($_),
-			parent		=> $self->parent_id($_),
+			type   		=> $self->type($template_id),
+			params 		=> $self->params($template_id),
+			parent		=> $runtime_id_for{$template_parent_id}
+						// $template_parent_id,
 		};
 
 		
 		# drop the ID if it is already used
-		$args->{id} = $_ unless fxn($_);
+		$args->{id} = $template_id unless fxn($template_id);
 
 		logpkg('debug',"args ", json_out($args));
 
@@ -249,6 +256,7 @@ sub add_ops {
 		my $FX = append_effect($args)->[0];
 		push @added, $FX;
 		my $new_id = $FX->id;
+		$runtime_id_for{$template_id} = $new_id;
 		
 		# the effect ID may be new, or it may be previously 
 		# assigned ID, 
@@ -256,13 +264,6 @@ sub add_ops {
 		# to be unique; not to collide with any other effect
 		
 		logpkg('debug',"new id: $new_id");
-		my $orig_id = $_;
-		if ( $new_id ne $orig_id)
-		# re-write all controllers to belong to new id
-		{
-			map{ $self->parent_id($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
-		}
-		
 	}
 }
 sub add_inserts {
