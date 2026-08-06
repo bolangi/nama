@@ -955,8 +955,8 @@ sub update_ecasound_effect {
 
 sub update_effect {
 	my ($id, $param, $val) = @_;
-	return if ! defined fxn($id);
-	fxn($id)->params->[$param] = $val;
+	my $FX = fxn($id) or return;
+	$FX->params->[$param] = $val;
 	update_ecasound_effect( @_ );
 }
 
@@ -1197,7 +1197,10 @@ sub check_fx_consistency {
 	# check for objects missing fields
 	
 	my @incomplete_entries = 
-		grep { ! fxn($_)->params or ! fxn($_)->type or !  fxn($_)->chain } 
+		grep {
+			my $FX = fxn($_);
+			! $FX->params or ! $FX->type or ! $FX->chain
+		}
 		grep { $_ } keys %::Effect::by_id;
 
 	if(@incomplete_entries)
