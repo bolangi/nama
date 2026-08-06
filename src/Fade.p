@@ -67,10 +67,10 @@ sub refresh_fade_controller {
 	my $envelope = fader_envelope($track);
 	my @pairs = @{$envelope->{pairs}};
 	add_fader($track->name);	
-	my $operator  = ::fxn($track->fader)->type;
+	my $operator  = $track->fader_effect->type;
 	my $off_level = $config->{mute_level}->{$operator};
 	my $on_level  = $config->{unity_level}->{$operator};
-	my @controllers = @{::fxn($track->fader)->owns};
+	my @controllers = @{$track->fader_effect->owned_ids};
 	logpkg('debug',$track->name, ": existing controllers: @controllers");
 	for my $controller (@controllers)
 	{

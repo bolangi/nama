@@ -451,6 +451,24 @@ is($this_track->vol_id, $this_track->vol,
 is($this_track->pan_id, $this_track->pan,
 	'pan_id aliases the pan effect ID');
 
+my $volume_effect = $this_track->volume_effect;
+is($volume_effect->parent_id, $volume_effect->{parent},
+	'parent_id returns the serialized parent effect ID');
+is_deeply($volume_effect->owned_ids, $volume_effect->owns,
+	'owned_ids aliases the serialized owned effect IDs');
+is_deeply(
+	[map { $_->id } $volume_effect->owned_effects],
+	$volume_effect->owned_ids,
+	'owned_effects resolves owned effect IDs to objects',
+);
+is_deeply([$volume_effect->controller_ids], [$volume_effect->controllers],
+	'controller_ids aliases controller IDs');
+is_deeply(
+	[map { $_->id } $volume_effect->controller_effects],
+	[$volume_effect->controller_ids],
+	'controller_effects resolves controller IDs to objects',
+);
+
 {
 	my $effect_chain = bless {
 		ops_list => [qw(template-parent template-controller)],

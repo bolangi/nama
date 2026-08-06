@@ -117,7 +117,7 @@ sub new {
 		# store relationship
 
 		my $parent = fxn($parent_id);
-		my $owns = $parent->owns;
+		my $owns = $parent->owned_ids;
 		logpkg('debug',"parent owns @$owns");
 
 		# register effect_id with parent unless it is already there
@@ -143,9 +143,13 @@ sub new {
 no warnings 'redefine';
 sub parent {
 	my $self = shift;
-	fxn($self->{parent});
+	fxn($self->parent_id);
 }
 }
+
+sub parent_id { $_[0]->{parent} }
+sub owned_ids { $_[0]->owns }
+sub owned_effects { map { fxn($_) } @{ $_[0]->owned_ids } }
 
 sub is_read_only {
     my ($self, $param) = @_;
@@ -214,7 +218,7 @@ sub track_effect_index { # the position of the ID in the track's op array
 	my $pos = first_index {$id eq $_} @{$self->track->ops} ;
 	$pos
 }
-sub controllers {
+sub controller_ids {
 	my $self = shift;
 	my %children;
 	# we want controllers with this parent, also controllers
@@ -229,6 +233,8 @@ sub controllers {
 
 	@ctrl
 }
+sub controllers { $_[0]->controller_ids }
+sub controller_effects { map { fxn($_) } $_[0]->controller_ids }
 sub sync_one_effect {
 		my $self = shift;
 		my $chain = $self->chain;
@@ -309,7 +315,7 @@ sub _remove_effect {
 	my $id = $self->id;
 	my $n 		= $self->chain;
 	my $parent 	= $self->parent;
-	my $owns	= $self->owns;
+	my $owns	= $self->owned_ids;
 	logpkg('debug', "id: $id", ($parent ? ". parent: ".$parent->id : '' ));
 
 	my $object = $parent ? q(controller) : q(chain operator); 
@@ -334,7 +340,7 @@ sub _remove_effect {
 
 		# remove parent ownership of deleted controller
 
-		my $parent_owns = $parent->owns;
+		my $parent_owns = $parent->owned_ids;
 		logpkg('debug',"parent $parent owns: ". join ",", @$parent_owns);
 
 		@$parent_owns = (grep {$_ ne $id} @$parent_owns);
@@ -367,7 +373,7 @@ sub position_effect {
 	my $track = $ti{$self->chain};
 
 	my $op_index = $self->track_effect_index;
-	my @children = $self->controllers;
+	my @children = $self->controller_ids;
 	my $count = scalar @children + 1;
 	my @new_op_list = @{$track->ops};
 
@@ -432,7 +438,7 @@ sub apply_op {
 	$this_engine->ecasound_iam($add_cmd);
 	$this_engine->ecasound_iam("cop-bypass on") if $self->bypassed;
 
-	my $owns = $self->owns;
+	my $owns = $self->owned_ids;
 	(ref $owns) =~ /ARRAY/ or croak "expected array";
 	logpkg('debug',"children found: ". join ",", @$owns);
 
@@ -993,7 +999,7 @@ sub get_ecasound_cop_params {
 		
 sub ops_with_controller {
 	grep{ ! $_->is_controller }
-	grep{ scalar @{$_->owns} }
+	grep{ scalar @{$_->owned_ids} }
 	map{ fxn($_) }
 	map{ @{ $_->ops } } 
 	::ChainSetup::engine_tracks();
@@ -1032,7 +1038,7 @@ sub expanded_ops_list { # including controllers
 	map 
 	{ push @expanded, 
 		$_, 
-		expanded_ops_list( reverse @{fxn($_)->owns} );
+		expanded_ops_list( reverse @{fxn($_)->owned_ids} );
 
 		# we reverse controllers listing so 
 		# the first controller is applied last
