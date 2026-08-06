@@ -133,7 +133,12 @@ sub generate_mappings_for_shortcuts {
 		else {
 		my ($short) = $code =~ /:([-\w]+)/;
 		if ( $short ) { 
-			if ($fx_cache->{partial_label_to_full}->{$short}) { warn "name collision: $_\n" }
+			if ($fx_cache->{partial_label_to_full}->{$short}) { 
+				my $msg = "name collision: $code\n";
+				$msg .= "short name conflicts with $fx_cache->{partial_label_to_full}->{$short}\n";
+				$msg .= "no short name available" ;
+				throw($msg);
+			}
 			else { $fx_cache->{partial_label_to_full}->{$short} = $code }
 		}
 		}
