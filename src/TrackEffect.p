@@ -13,34 +13,34 @@ sub op_id { $_[0]->op }
 sub selected_effect { fxn($_[0]->op_id) }
 sub effect_ids { $_[0]->ops }
 
-sub param { $project->{current_param}->{$_[0]->op} //= 1 }
+sub param { $project->{current_param}->{$_[0]->op_id} //= 1 }
 
 sub stepsize {
-	$project->{current_stepsize}->{$_[0]->op}->[$_[0]->param] //= 0.01 
+	$project->{current_stepsize}->{$_[0]->op_id}->[$_[0]->param] //= 0.01
 	# TODO use hint if available
 }
 sub pos {
 	my $track = shift;
-	my $op = $track->op;
-	my $index = first_index {$_ eq $op } @{$track->ops};
+	my $op_id = $track->op_id;
+	my $index = first_index {$_ eq $op_id } @{$track->effect_ids};
 	return($index || 0);
 }
-sub user_ops_o {
+sub user_effects {
 	my $track = shift;
-	map{ fxn($_) } $track->user_ops();
+	map{ fxn($_) } $track->user_effect_ids;
 }
-sub user_effects { $_[0]->user_ops_o }
+sub user_ops_o { $_[0]->user_effects }
 sub channel_ops {
 	my $track = shift;
-	grep{ $_->is_channel_op } $track->ops_o;	
+	grep{ $_->is_channel_op } $track->effects;
 }
 sub audio_ops {
 	my $track = shift;
 	grep{ 
-			! $_->is_channel_op
+		! $_->is_channel_op
 		and ! $_->is_controller
 
-	} $track->ops_o;	
+	} $track->effects;
 }
 sub ops_ecasound_order {
 	my $track = shift;
@@ -48,18 +48,18 @@ sub ops_ecasound_order {
 }
 sub ecasound_dynamic_apply_list { # audio ops and their controllers
 	my $track = shift;
-	grep{ ! $_->is_channel_op } $track->ops_o;
+	grep{ ! $_->is_channel_op } $track->effects;
 }
-sub ops_o {
+sub effects {
 	my $track = shift;
-	map{ ::fxn($_) } @{ $track->ops }
+	map{ ::fxn($_) } @{ $track->effect_ids }
 }
-sub effects { $_[0]->ops_o }
+sub ops_o { $_[0]->effects }
 sub apply_ops {
 	my $track = shift;
 	$_->apply_op for $track->ecasound_dynamic_apply_list;
 }
-sub user_ops {
+sub user_effect_ids {
 	my $track = shift;
 	my @skip = 	grep {fxn($_)}  # must exist
 				map { $track->{$_} } qw(vol pan fader latency_op );
@@ -73,30 +73,30 @@ sub user_ops {
 
 	grep{ ! $skip{$_} } @{ $track->{ops} || [] };
 }
-sub user_effect_ids { $_[0]->user_ops }
+sub user_ops { $_[0]->user_effect_ids }
 
 sub first_effect_of_type {
 	my $track = shift;
 	my $type = shift;
-	for my $op ( @{$track->ops} ){
-		my $FX = fxn($op);
+	for my $effect_id ( @{$track->effect_ids} ){
+		my $FX = fxn($effect_id);
 		return $FX if $FX->type =~ /$type/ # Plate matches el:Plate
 	}
 }
 sub effect_id_by_name {
 	my $track = shift;
 	my $ident = shift;
-	for my $FX ($track->user_ops_o)
+	for my $FX ($track->user_effects)
 	{ return $FX->id if $FX->name eq $ident }
 }
-sub vol_level { my $self = shift; try { $self->vol_o->params->[0] } }
-sub pan_level { my $self = shift; try { $self->pan_o->params->[0] } }
+sub vol_level { my $self = shift; try { $self->volume_effect->params->[0] } }
+sub pan_level { my $self = shift; try { $self->pan_effect->params->[0] } }
 sub vol_id { $_[0]->vol }
-sub vol_o { my $self = shift; fxn($self->vol) }
-sub volume_effect { $_[0]->vol_o }
+sub volume_effect { my $self = shift; fxn($self->vol_id) }
+sub vol_o { $_[0]->volume_effect }
 sub pan_id { $_[0]->pan }
-sub pan_o { my $self = shift; fxn($self->pan) }
-sub pan_effect { $_[0]->pan_o }
+sub pan_effect { my $self = shift; fxn($self->pan_id) }
+sub pan_o { $_[0]->pan_effect }
 sub fader_id { $_[0]->fader }
 sub fader_effect { my $self = shift; fxn($self->fader) }
 sub latency_effect_id { $_[0]->latency_op }
@@ -110,7 +110,7 @@ sub mute {
 	return if defined $track->old_vol_level();
 
 	# do nothing if track has no volume operator
-	my $vol = $track->vol_o;
+	my $vol = $track->volume_effect;
 	return unless $vol;
 
 	# store vol level for unmute
