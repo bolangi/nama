@@ -29,7 +29,6 @@ sub user_effects {
 	my $track = shift;
 	map{ fxn($_) } $track->user_effect_ids;
 }
-sub user_ops_o { $_[0]->user_effects }
 sub channel_ops {
 	my $track = shift;
 	grep{ $_->is_channel_op } $track->effects;
@@ -93,10 +92,8 @@ sub vol_level { my $self = shift; try { $self->volume_effect->params->[0] } }
 sub pan_level { my $self = shift; try { $self->pan_effect->params->[0] } }
 sub vol_id { $_[0]->vol }
 sub volume_effect { my $self = shift; fxn($self->vol_id) }
-sub vol_o { $_[0]->volume_effect }
 sub pan_id { $_[0]->pan }
 sub pan_effect { my $self = shift; fxn($self->pan_id) }
-sub pan_o { $_[0]->pan_effect }
 sub fader_id { $_[0]->fader }
 sub fader_effect { my $self = shift; fxn($self->fader) }
 sub latency_effect_id { $_[0]->latency_op }
