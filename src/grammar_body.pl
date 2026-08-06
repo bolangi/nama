@@ -941,7 +941,7 @@ modify_effect: _modify_effect parameter(s /,/) sign parameter_value {
 fx_alias3: ident { 
 	join " ", 
 	map{ $_->id } 
-	grep { $_->surname eq $item{ident} } $::this_track->user_ops_o;
+	grep { $_->surname eq $item{ident} } $::this_track->user_effects;
 }
 remove_target: existing_op_id | fx_pos | fx_surname | fx_name
 	{ $item[-1] or ::terminal_print("no effect object found\n"), return 0}

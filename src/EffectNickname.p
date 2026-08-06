@@ -6,7 +6,7 @@ use Role::Tiny;
 sub effect_nickname_count {
 	my ($track, $nick) = @_;
 	my $count = 0;
-	for my $FX ($track->user_ops_o){ $count++ if $FX->name =~ /^$nick\d*$/ }
+	for my $FX ($track->user_effects){ $count++ if $FX->name =~ /^$nick\d*$/ }
 	$count
 }
 sub unique_surname {
@@ -16,7 +16,7 @@ sub unique_surname {
 	# $surname, $previous_surnames
 	my $max = undef;
 	my %found;
-	for my $FX ($track->user_ops_o)
+	for my $FX ($track->user_effects)
 	{ 
 		if( $FX->surname =~ /^$surname(\d*)$/)
 		{
@@ -31,7 +31,7 @@ sub unique_nickname {
 	my ($track, $nickname) = @_;
 	my $i = 0;
 	my @found;
-	for my $FX ($track->user_ops_o)
+	for my $FX ($track->user_effects)
 	{ 
 		if( $FX->name =~ /^$nickname(\d*)$/)
 		{
@@ -45,7 +45,7 @@ sub unique_nickname {
 sub with_surname {
 	my ($track, $surname) = @_;
 	my @found;
-	for my $FX ($track->user_ops_o)
+	for my $FX ($track->user_effects)
 	{ push @found, $FX->id if $FX->surname eq $surname }
 	@found ? "@found" : undef
 }
