@@ -774,9 +774,9 @@ add_controller: _add_controller parent effect value(s?) {
 	1;
 }
 add_controller: _add_controller effect value(s?) {
-	::throw("current effect is undefined, skipping\n"), return 1 if ! ::this_op();
+	::throw("current effect is undefined, skipping\n"), return 1 if ! ::this_op_id();
 	my $code = $item{effect};
-	my $parent = ::this_op();
+	my $parent = ::this_op_id();
 	my $values = $item{"value(s?)"};
 	my $cmd = "add_controller $parent $code @$values";
 	::terminal_print("command: $cmd\n");
@@ -925,18 +925,18 @@ modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) sign parameter_va
 	::pager(::show_effect(@{ $item{'fx_alias(s)'} })); 1
 }
 modify_effect: _modify_effect parameter(s /,/) parameter_value {
-	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
+	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op_id();
 	::modify_multiple_effects( 
-		[::this_op()], 
+		[::this_op_id()], 
 		$item{'parameter(s)'},
 		undef,
 		$item{parameter_value});
-	::pager( ::show_effect(::this_op(), "with track affiliation")); 1
+	::pager( ::show_effect(::this_op_id(), "with track affiliation")); 1
 }
 modify_effect: _modify_effect parameter(s /,/) sign parameter_value {
-	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
-	::modify_multiple_effects( [::this_op()], @item{qw(parameter(s) sign parameter_value)});
-	::pager( ::show_effect(::this_op())); 1
+	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op_id();
+	::modify_multiple_effects( [::this_op_id()], @item{qw(parameter(s) sign parameter_value)});
+	::pager( ::show_effect(::this_op_id())); 1
 }
 fx_alias3: ident { 
 	join " ", 
@@ -980,8 +980,8 @@ show_effect: _show_effect fx_alias(s) {
 	::pager(@lines); 1
 }
 show_effect: _show_effect {
-	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
-	::pager( ::show_effect(::this_op(), "with track affiliation"));
+	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op_id();
+	::pager( ::show_effect(::this_op_id(), "with track affiliation"));
 	1;
 }
 dump_effect: _dump_effect fx_alias { ::pager( ::json_out(::fxn($item{fx_alias})->as_hash) ); 1}
@@ -1199,17 +1199,17 @@ bypass_effects: _bypass_effects 'all' {
 #  current effect 
 #
 bypass_effects: _bypass_effects { 
-	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
+	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op_id();
  	::pager( "track ",$::this_track->name,", bypassing effects:"); 
-	::pager( ::named_effects_list(::this_op()));
- 	::bypass_effects($::this_track, ::this_op());  
+	::pager( ::named_effects_list(::this_op_id()));
+ 	::bypass_effects($::this_track, ::this_op_id());  
  	1; 
 }
 bring_back_effects:   _bring_back_effects end { 
-	::pager("current effect is undefined, skipping"), return 1 if ! ::this_op();
+	::pager("current effect is undefined, skipping"), return 1 if ! ::this_op_id();
 	::pager( "restoring effects:");
-	::pager( ::named_effects_list(::this_op()));
-	::restore_effects( $::this_track, ::this_op());
+	::pager( ::named_effects_list(::this_op_id()));
+	::restore_effects( $::this_track, ::this_op_id());
 }
 bring_back_effects:   _bring_back_effects op_id(s) { 
 	my $arr_ref = $item{'op_id(s)'};

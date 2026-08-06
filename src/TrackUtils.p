@@ -197,7 +197,7 @@ sub rec_hookable_tracks {
 }
 sub user_tracks { grep { ! $_->is_system_track } all_tracks() }
 sub system_tracks { grep { $_->is_system_track } all_tracks() }
-sub this_op { $this_track and $this_track->op }
+sub this_op_id { $this_track and $this_track->op }
 sub this_effect { $this_track and $this_track->op and fxn($this_track->op) }
 sub this_param { $this_track ? $this_track->param : ""}
 sub this_stepsize { $this_track ? $this_track->stepsize : ""}

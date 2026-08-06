@@ -26,7 +26,7 @@ use ::Globals qw(
 use ::Object qw(  
 [% qx( cat ./effect_fields ) %]
 );
-*this_op			= \&::this_op;
+*this_op_id			= \&::this_op_id;
 *this_param			= \&::this_param;
 *this_stepsize		= \&::this_stepsize;
 our %by_id;
@@ -455,7 +455,7 @@ sub import_engine_subs {
 	*sleeper			= \&::sleeper;
 	*nama_cmd    = \&::nama_cmd;
 	*pager				= \&::pager;
-	*this_op			= \&::this_op;
+	*this_op_id			= \&::this_op_id;
 	*this_param			= \&::this_param;
 	*this_stepsize		= \&::this_stepsize;
 }
@@ -1117,29 +1117,29 @@ sub set_current_op {
 }
 sub set_current_param {
 	my $parameter = shift;
-	$project->{current_param}->{::this_op()} = $parameter;
+	$project->{current_param}->{::this_op_id()} = $parameter;
 }
 sub set_param_stepsize {
 	my $stepsize = shift;
-	$project->{current_stepsize}->{::this_op()}->[this_param()] = $stepsize;
+	$project->{current_stepsize}->{::this_op_id()}->[this_param()] = $stepsize;
 }
 sub increase_stepsize_10x {
-	$project->{current_stepsize}->{::this_op()}->[this_param()] *= 10;
+	$project->{current_stepsize}->{::this_op_id()}->[this_param()] *= 10;
 }
 sub decrease_stepsize_10x {
-	$project->{current_stepsize}->{::this_op()}->[this_param()] /= 10;
+	$project->{current_stepsize}->{::this_op_id()}->[this_param()] /= 10;
 }
 sub param_stepsize {
-	$project->{current_stepsize}->{::this_op()}->[this_param()] 
+	$project->{current_stepsize}->{::this_op_id()}->[this_param()] 
 }
-sub increment_param { modify_effect(::this_op(), this_param(),'+',this_stepsize())}
-sub decrement_param { modify_effect(::this_op(), this_param(),'-',this_stepsize())}
-sub increment_param_10 { modify_effect(::this_op(), this_param(),'+',10*this_stepsize())}
-sub decrement_param_10 { modify_effect(::this_op(), this_param(),'-',10*this_stepsize())}
+sub increment_param { modify_effect(::this_op_id(), this_param(),'+',this_stepsize())}
+sub decrement_param { modify_effect(::this_op_id(), this_param(),'-',this_stepsize())}
+sub increment_param_10 { modify_effect(::this_op_id(), this_param(),'+',10*this_stepsize())}
+sub decrement_param_10 { modify_effect(::this_op_id(), this_param(),'-',10*this_stepsize())}
 
 sub set_parameter_value {
 	my $value = shift;
-	modify_effect(::this_op(), this_param(), undef, $value)
+	modify_effect(::this_op_id(), this_param(), undef, $value)
 }
 
 

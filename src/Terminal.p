@@ -726,13 +726,13 @@ sub param_status_bar {
 	return " no selected effect" unless $this_track->op;
 	return " no effect found"    unless defined this_effect();
 	my $effect_info = join " ",
-				this_op(), 
+				this_op_id(), 
 				this_effect()->fxname ? this_effect()->fxname : '<unnamed>';
 # 	if (this_effect()->no_params) {
 # 		return "$effect_info (no parameters to adjust)";
 # 	}
 	my $param_pos = this_param() - 1;
-	my $param_info = parameter_info(this_op(), $param_pos);
+	my $param_info = parameter_info(this_op_id(), $param_pos);
 	if (this_effect()->is_read_only ){
 		return "$effect_info $param_info - no adjustment possible";
 	}
