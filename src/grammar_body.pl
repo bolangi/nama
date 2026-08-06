@@ -792,15 +792,15 @@ add_target: fx_nick | existing_effect_chain | known_effect_type
 
 nickname_effect: _nickname_effect ident {
 	my $ident = $item{ident};
-	::this_op_o()->set_name($ident);
-	::throw("$ident: no such nickname. Skipping."), return unless defined ::this_op_o();
-	my $type = ::this_op_o()->type;
-	my $fxname = ::this_op_o()->fxname;
+	::this_effect()->set_name($ident);
+	::throw("$ident: no such nickname. Skipping."), return unless defined ::this_effect();
+	my $type = ::this_effect()->type;
+	my $fxname = ::this_effect()->fxname;
 	$::fx->{alias}->{$ident} = $type;
 	::terminal_say("$ident: nickname created for $type ($fxname)");
 	1
 }
-remove_nickname: _remove_nickname { ::this_op_o()->remove_name() }
+remove_nickname: _remove_nickname { ::this_effect()->remove_name() }
 delete_nickname_definition: _delete_nickname_definition ident {
 	my $was = delete $::fx->{alias}->{$item{ident}};
 	$was or ::throw("$item{ident}: no such nickname"), return 0;
@@ -985,7 +985,7 @@ show_effect: _show_effect {
 	1;
 }
 dump_effect: _dump_effect fx_alias { ::pager( ::json_out(::fxn($item{fx_alias})->as_hash) ); 1}
-dump_effect: _dump_effect { ::pager( ::json_out(::this_op_o()->as_hash) ); 1}
+dump_effect: _dump_effect { ::pager( ::json_out(::this_effect()->as_hash) ); 1}
 list_effects: _list_effects { ::pager(::list_effects()); 1}
 add_bunch: _add_bunch ident(s) { ::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches { ::bunch(); 1}
@@ -1737,10 +1737,10 @@ trim_submix: _trim_submix effect parameter sign(?) value {
 	my $FX = $::tn{$real_track}->first_effect_of_type(::full_effect_code($item{effect}));
  	::modify_effect($FX->id, $item{parameter}, @{$item{'sign(?)'}}, $item{value});
 }
-set_effect_name: _set_effect_name ident { ::this_op_o->set_name($item{ident}); 1}
-remove_effect_name: _remove_effect_name { ::this_op_o->set_name(); 1 			  }
-set_effect_surname: _set_effect_surname ident { ::this_op_o->set_surname($item{ident}); 1}
-remove_effect_surname: _remove_effect_surname { ::this_op_o()->set_surname(); 1} 
+set_effect_name: _set_effect_name ident { ::this_effect->set_name($item{ident}); 1}
+remove_effect_name: _remove_effect_name { ::this_effect->set_name(); 1 			  }
+set_effect_surname: _set_effect_surname ident { ::this_effect->set_surname($item{ident}); 1}
+remove_effect_surname: _remove_effect_surname { ::this_effect()->set_surname(); 1} 
 
 select_track: _select_track track_spec
 

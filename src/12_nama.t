@@ -419,19 +419,19 @@ ok(   (defined $vol_id and $::Effect::by_id{$vol_id}) , "apply volume control");
 
 nama_cmd('add_effect time_reverb3');
 
-like( this_op_o()->about->{code}, qr/time_reverb3/, "apply preset");
+like( this_effect()->about->{code}, qr/time_reverb3/, "apply preset");
 
-is (this_op_o()->track_effect_index, 0, "positioned before vol/pan faders");
+is (this_effect()->track_effect_index, 0, "positioned before vol/pan faders");
 
 nama_cmd('add_effect decimator 1 2');
 
 
-like( this_op_o()->about->{code}, qr/decimator/, "apply LADSPA effect");
-is( this_op_o()->track_effect_index, 1, "position before faders, after other effects");
+like( this_effect()->about->{code}, qr/decimator/, "apply LADSPA effect");
+is( this_effect()->track_effect_index, 1, "position before faders, after other effects");
 
 is($this_track->op_id, $this_track->op,
 	'op_id aliases the selected effect ID');
-is($this_track->selected_effect, this_op_o(),
+is($this_track->selected_effect, this_effect(),
 	'selected_effect returns the selected Effect object');
 is_deeply($this_track->effect_ids, $this_track->ops,
 	'effect_ids aliases the serialized effect IDs');
@@ -520,17 +520,17 @@ nama_cmd('vol -2');
 
 is( $this_track->volume_effect->params->[0], -2, "modify effect" );
 
-nama_cmd(join " ", 'position_effect', this_op_o()->id, 'ZZZ');
+nama_cmd(join " ", 'position_effect', this_effect()->id, 'ZZZ');
 
-is( $this_track->ops->[-1], this_op_o()->id, 
+is( $this_track->ops->[-1], this_effect()->id, 
 	'position effect at end, using ZZZ pseudo-id');
 
-nama_cmd(join " ", 'position_effect', this_op_o()->id, $vol_id);
+nama_cmd(join " ", 'position_effect', this_effect()->id, $vol_id);
 
-is( $this_track->ops->[this_op_o()->track_effect_index + 1], $vol_id, 
+is( $this_track->ops->[this_effect()->track_effect_index + 1], $vol_id, 
 	"position effect before another effect");
 
-my $op_id = this_op_o()->id;
+my $op_id = this_effect()->id;
 nama_cmd("remove_effect $op_id");
 
 ok( (not grep { $_ eq $op_id } @{$this_track->ops}), 'remove effect');

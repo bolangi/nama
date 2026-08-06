@@ -724,16 +724,16 @@ sub bump_status_bar {}
 	
 sub param_status_bar {
 	return " no selected effect" unless $this_track->op;
-	return " no effect found"    unless defined this_op_o();
+	return " no effect found"    unless defined this_effect();
 	my $effect_info = join " ",
 				this_op(), 
-				this_op_o()->fxname ? this_op_o()->fxname : '<unnamed>';
-# 	if (this_op_o()->no_params) {
+				this_effect()->fxname ? this_effect()->fxname : '<unnamed>';
+# 	if (this_effect()->no_params) {
 # 		return "$effect_info (no parameters to adjust)";
 # 	}
 	my $param_pos = this_param() - 1;
 	my $param_info = parameter_info(this_op(), $param_pos);
-	if (this_op_o()->is_read_only ){
+	if (this_effect()->is_read_only ){
 		return "$effect_info $param_info - no adjustment possible";
 	}
 	$param_info .= " Stepsize: ". ::Effect::param_stepsize();
