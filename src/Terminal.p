@@ -560,7 +560,9 @@ sub load_keywords {
 	$text->{hyphenated_commands} = \%hyphenated;
 	push @keywords, keys %hyphenated;
 	push @keywords, keys %{$text->{iam}};
-	push @keywords, keys %{$text->{midi_cmd}} if $config->{use_midi};
+	push @keywords, map{ s/^/m/; $_} keys $text->{midi_cmd}->%* if $config->{use_midi};
+	my %seen;
+	@keywords = grep { !$seen{fc $_}++ } @keywords;
 	$text->{keywords}    = [sort {$a cmp $b} @keywords ];
 	$text->{autocomplete_keywords}->@* = grep { not /_/ } $text->{keywords}->@*;
 	#$text->{executables} = executables(); # too many for our current algorithm
