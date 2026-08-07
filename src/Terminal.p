@@ -716,8 +716,8 @@ sub status_bar {
 	           jump  => \&jump_status_bar,
 			   bump  => \&jump_status_bar );
 	my $status = $bar{$hotkey_mode}->();
-	my $name  = "[".$this_track->name."]"; 
-	$status =  "$name mode: $hotkey_mode $status";
+	my $name  = $this_track->name; 
+	$status =  "[$name] [$hotkey_mode] $status";
 }
 
 sub bump_status_bar {}
@@ -728,7 +728,7 @@ sub param_status_bar {
 	return " no effect found"    unless defined this_effect();
 	my $effect_info = join " ",
 				this_op_id(), 
-				this_effect()->fxname ? this_effect()->fxname : '<unnamed>';
+				this_effect()->fxname ? this_effect()->fxname : '(unnamed)';
 # 	if (this_effect()->no_params) {
 # 		return "$effect_info (no parameters to adjust)";
 # 	}
@@ -737,7 +737,7 @@ sub param_status_bar {
 	if (this_effect()->is_read_only ){
 		return "$effect_info $param_info - no adjustment possible";
 	}
-	$param_info .= " Stepsize: ". ::Effect::param_stepsize();
+	$param_info .= " Step: ". ::Effect::param_stepsize();
 	return "$effect_info $param_info";
 }
 sub jump_status_bar {
