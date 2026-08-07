@@ -420,8 +420,7 @@ sub process_keystrokes ($mode, $info) {
 		set_popup_text(status_bar($mode));
 	}
 	else {
-		return unless $i % 2; # hack to avoid duplicate message
-		throw("$str: no binding found in $mode hotkey mode.");
+		# throw("$str: no binding found in $mode hotkey mode.");
 	}
 	return 1
 }
