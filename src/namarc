@@ -145,44 +145,15 @@ hotkeys:
     Down: decrement_param_10
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
-    F8: disable_hotkeys
-    u: decrement_param_10
-    i: increment_param_10
-    j: decrement_param
-    k: increment_param
-    l: previous_track
-    ;: next_track
-    o: previous_effect
-    p: next_effect
+    F8: toggle_hotkeys
+#    u: decrement_param_10
+#    i: increment_param_10
+#    j: decrement_param
+#    k: increment_param
+#    l: previous_track
+#    ;: next_track
+#    o: previous_effect
+#    p: next_effect
     +: increase_stepsize_10x
     -: decrease_stepsize_10x
-  common: 
-    F11: clip_start
-    F12: clip_end
-    Keypad0: replay
-    [: back(30)
-    ]: forward(30)
-    {: back(120)
-    }: forward(120)
-    (: backward(300)
-    ): forward(300)
-  jump:
-    Home: jump_to_start
-    End: jump_to_end
-    PageUp: previous_mark
-    PageDown: next_mark
-    Right: jump_forward_1
-    Up: jump_forward_10
-    Left: jump_back_1
-    Down: jump_back_10
-  bump:
-    Home: jump_to_start
-    End: jump_to_end
-    PageUp: previous_mark
-    PageDown: next_mark
-    Right: bump_mark_forward_1
-    Up: bump_mark_forward_10
-    Left: bump_mark_back_1
-    Down: bump_mark_back_10
-
 # end
