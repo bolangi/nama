@@ -268,7 +268,13 @@ sub initialize_tempo_map {
 	$::Tempo::Chunk::index = 0;
 	remove_section_marks();
 }
-sub remove_section_marks { for( ::Mark::all() ){ $_->remove if $_->type eq 'song' } }
+sub remove_section_marks { 
+	for( ::Mark::all() ) { 
+ 		 $_->remove if defined $_ 
+					and defined $_->type 
+					and $_->type eq 'song'
+	}
+}
 
 sub read_tempo_map {
 	my $file = shift;
