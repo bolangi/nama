@@ -1130,7 +1130,7 @@ sub decrease_stepsize_10x {
 	$project->{current_stepsize}->{::this_op_id()}->[this_param()] /= 10;
 }
 sub param_stepsize {
-	$project->{current_stepsize}->{::this_op_id()}->[this_param()] 
+	$project->{current_stepsize}->{::this_op_id()}->[this_param()] //= 0.01
 }
 sub increment_param { modify_effect(::this_op_id(), this_param(),'+',this_stepsize())}
 sub decrement_param { modify_effect(::this_op_id(), this_param(),'-',this_stepsize())}
