@@ -996,7 +996,7 @@ list_versions: _list_versions {
 	::terminal_say( join " ", @{$::this_track->versions}); 1}
 ladspa_register: _ladspa_register { 
 	::pager( ::ecasound_iam("ladspa-register")); 1}
-lv2_register: _lv2_register { ::terminal_say( qx(lv2ls) ); 1}
+lv2_register: _lv2_register { ::pager(::run_external_ecasound_cmd('lv2-register')); 1}
 preset_register: _preset_register { 
 	::terminal_say( ::ecasound_iam("preset-register")); 1}
 ctrl_register: _ctrl_register { 
