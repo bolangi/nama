@@ -953,6 +953,10 @@ ladspa_register:
   what: List installed LADSPA plugins
   short: lrg
   parameters: none
+lv2_register:
+  type: effect
+  what: List installed LV2 plugins
+  short: lvr
 list_marks:
   type: mark
   what: List all marks with index, name and their respective positions in time.
