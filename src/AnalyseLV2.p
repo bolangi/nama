@@ -158,7 +158,7 @@ sub generateportinfo {
 	}
 	$portinfo .= "\" ";
 	$portinfo .= "$plugin{$currentport}{iotype}, ";
-	$portinfo .= "$plugin{$currentport}{etype}";
+	$portinfo .= "$plugin{$currentport}{etype}" if defined $plugin{$currentport}{etype};
 	$portinfo .= ", " . &stripzeros($plugin{$currentport}{minval})
 	if exists($plugin{$currentport}{minval});
 	$portinfo .= " to " . &stripzeros($plugin{$currentport}{maxval})
