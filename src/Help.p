@@ -7,34 +7,35 @@ use v5.36;
 no warnings 'uninitialized';
 sub helpline {
 	my $cmd = shift;
-	my $out = "Command: $cmd\n";
-	$out .=  "Shortcuts: $text->{commands}->{$cmd}->{short}\n"
+	my @out;
+	push @out, "Command: $cmd";
+	push @out, "Shortcuts: $text->{commands}->{$cmd}->{short}"
 			if $text->{commands}->{$cmd}->{short};	
-	$out .=  "Category: $text->{commands}->{$cmd}->{type}\n";
-	my $what = munge_help($text->{commands}->{$cmd}->{what});
-	$out .=  "Description: $what\n";
-	$out .=  "Usage: $cmd "; 
-
-	if ( $text->{commands}->{$cmd}->{parameters} 
-			&& $text->{commands}->{$cmd}->{parameters} ne 'none' ){
-		$out .=  $text->{commands}->{$cmd}->{parameters}
-	}
-	$out .= "\n";
-	my $example = $text->{commands}->{$cmd}->{example};
-	$example = munge_help($example);
-	#$example =~ s/!n/\n/g;
-	if ($example){
-		$out .=  "Example: ";
-		if ($example =~ /\n/s){
-			$example = "\n$example";    # add leading newline
-			$example =~ s(\n)(\n    )g; # indent
-		}
-		$out .=  $example;
-		$out .= "\n";
-	}
-	($/, ucfirst $out, $/);
+	push @out, "Category: $text->{commands}->{$cmd}->{type}";
+	push @out, "Description: " . munge_help($text->{commands}->{$cmd}->{what});
+	my $usage = "Usage: $cmd "; 
+	$usage .= 		$text->{commands}->{$cmd}->{parameters}
+		   		 if $text->{commands}->{$cmd}->{parameters} ne 'none' ;
 	
+	push @out, $usage;
+	my $example =   $text->{commands}->{$cmd}->{example};
+	if ($example){
+		my $title .= 'Example:';
+		my $eg = munge_help($example);
+		# indent 4 spaces if multiline
+		if ($eg =~ /\n/s){
+			$eg =~ s(^)(    )g;
+			$eg =~ s(\n)(\n    )g;
+			push @out, $title, $eg;
+		}
+		else {
+			push @out, "$title $eg";
+		}
+	}
+	join "\n",@out, undef; # add final newline
+		
 }
+	
 sub munge_help {
 	my $text = shift;
 	$text =~ s/(^\s*)!(\s*#)/$1 $2/mg;
