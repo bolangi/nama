@@ -25,6 +25,22 @@ sub is_used {
 	or $track->used_by_another_track
 	or ($bus and $bus->can('wantme') and $bus->wantme)  # A bus needs my signal
 }
+sub missing_jack_client {
+	my $track = shift;
+	$track->source_type eq 'jack_client' 
+		and not $jack->{clients}->{$track->source_id}
+}
+sub missing_source_track {
+	my $track = shift;
+	$track->source_type eq 'track' 
+		and not defined $tn{$track->source_id}
+}
+sub disabled_source_track {
+	my $track = shift;
+	$track->source_type eq 'track' 
+		and $tn{$track->source_id}->rw eq OFF;
+}
+
 sub candidate_rw {
 #	logsub((caller(0))[3]);
 	my $track = shift;
@@ -32,12 +48,8 @@ sub candidate_rw {
 					or  $track->{rw} eq OFF;
 	if ($track->{rw} ne PLAY) # e.g. MON or REC
 	{
-		return OFF if (	$track->source_type eq 'jack_client' 
-							and not $jack->{clients}->{$track->{source_id}})
-					or ($track->source_type eq 'track' 
-							and not defined $tn{$track->source_id})
-					or ($track->source_type eq 'track' 
-							and $tn{$track->source_id}->rw eq OFF);
+		return OFF if $track->missing_source_track
+					or $track->disabled_source_track;
 		return $track->{rw}
 	}
 	my $v = $track->playback_version;
