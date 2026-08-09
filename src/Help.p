@@ -8,7 +8,7 @@ no warnings 'uninitialized';
 sub helpline {
 	my $cmd = shift;
 	my @out;
-	push @out, "Command: $cmd";
+	push @out, "\nCommand: $cmd";
 	push @out, "Shortcuts: $text->{commands}->{$cmd}->{short}"
 			if $text->{commands}->{$cmd}->{short};	
 	push @out, "Category: $text->{commands}->{$cmd}->{type}";
@@ -26,13 +26,14 @@ sub helpline {
 		if ($eg =~ /\n/s){
 			$eg =~ s(^)(    )g;
 			$eg =~ s(\n)(\n    )g;
+			$eg =~ s/\s*\n$//s;
 			push @out, $title, $eg;
 		}
 		else {
-			push @out, "$title $eg";
+			push @out, "$title $eg\n";
 		}
 	}
-	join "\n",@out, undef; # add final newline
+	join "\n",@out; 
 		
 }
 	
@@ -98,19 +99,18 @@ IAM
 		} keys %{$text->{commands}};
 
 		if ( @help ){ push @output, 
-			qq("$name" matches the following commands:\n\n), @help;
+			qq("$name" matches the following commands:), @help;
 		}
 	}
 	if (@output){
 		map{ s/_/-/g } @output;
 		::pager( @output ); 
-	} else { throw("$name: no help found.\n"); }
+	} else { throw("$name: no help found."); }
 	
 }
 sub help_effect {
 	my ($input, $id, $no_match, @output);
 	$id = $input = shift;
-	push @output, "\n";
 
 	# e.g. help tap_reverb    
 	#      help 2142
