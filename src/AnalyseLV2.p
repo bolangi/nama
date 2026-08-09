@@ -24,7 +24,7 @@ my $currentport;
 
 my @contents;
 
-sub _analyse_lv2 {
+sub analyse_lv2 {
 	%plugin = ();
 	%scalepoints = ();
 	# Some variables used here.
@@ -256,11 +256,6 @@ sub print_lv2_scalepoints {
 	}
 	else { push @buffer, "Plugin $plugin{general}{name} does not have any port with scale points.\n\n"; }
 	return @buffer;
-}
-
-sub analyse_lv2 {
-	my ($uri) = @_;
-	return _analyse_lv2($uri);
 }
 
 sub lv2_help {
