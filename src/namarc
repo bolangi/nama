@@ -146,10 +146,8 @@ hotkeys:
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
     F8: toggle_hotkeys
-    F11: increase_stepsize_10x
-    F12: decrease_stepsize_10x
-    +: increase_stepsize_10x
-    -: decrease_stepsize_10x
+    M-Up: increase_stepsize_10x
+    M-Down: decrease_stepsize_10x
 
 #    u: decrement_param_10
 #    i: increment_param_10
