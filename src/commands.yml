@@ -1267,7 +1267,7 @@ add_version_comment:
   what: Add a version comment (replacing any previous user comment). This will add a comment for the current version of the current track.
   short: avc
   parameters: <string:comment>
-  example: avc "The good take with the clear 6/8"
+  example: avc "Good take with clear 6/8 feel"
 remove_version_comment:
   type: track
   what: Remove version comment(s) from the current track.
