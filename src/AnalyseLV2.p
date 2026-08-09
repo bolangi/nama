@@ -17,6 +17,7 @@ my %scalepoints;
 # Path to utilities
 my $lv2info;
 my $lv2ls;
+find_utils() or die "lv2info or lv2ls utility not found";
 
 # Various internals:
 my $currentport;
@@ -25,6 +26,7 @@ my @contents;
 
 sub _analyse_lv2 {
 	%plugin = ();
+	%scalepoints = ();
 	# Some variables used here.
 	my ($uri) = @_;
 	my $linecount = my $match;
@@ -258,17 +260,11 @@ sub print_lv2_scalepoints {
 
 sub analyse_lv2 {
 	my ($uri) = @_;
-	if ( find_utils() ) {
-		return _analyse_lv2($uri);
-	} else {
-		$plugin{error} = "Utilities not found.";
-		return \%plugin;
-	}
+	return _analyse_lv2($uri);
 }
 
 sub lv2_help {
 	my $uri = shift;
-	find_utils();
 	analyse_lv2($uri);
 	print_lv2();
 }
