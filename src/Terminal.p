@@ -307,6 +307,9 @@ sub print_to_terminal (@text) {
 	position_entry_widget();
 }
 
+sub prompt_for_text {}
+sub prompt_approve {}
+
 sub prompt (@args) {
 	return confirmation_prompt(@args) if @args;
 
