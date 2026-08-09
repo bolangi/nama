@@ -32,8 +32,12 @@ sub candidate_rw {
 					or  $track->{rw} eq OFF;
 	if ($track->{rw} ne PLAY) # e.g. MON or REC
 	{
-		return OFF if $track->source_type eq 'jack_client' 
-					and not $jack->{clients}->{$track->{source_id}};
+		return OFF if (	$track->source_type eq 'jack_client' 
+							and not $jack->{clients}->{$track->{source_id}})
+					or ($track->source_type eq 'track' 
+							and not defined $tn{$track->source_id})
+					or ($track->source_type eq 'track' 
+							and $tn{$track->source_id}->rw eq OFF);
 		return $track->{rw}
 	}
 	my $v = $track->playback_version;
