@@ -233,7 +233,6 @@ sub read_in_effects_data {
 	# join the two lines of each entry
 	my @lad = map { join " ", splice(@ladspa,0,2) } 1..@ladspa/2; 
 	#logpkg('debug',join "\n","ladpsa-register processed output:",@lad);
-	generate_ladspa_help($_) for @lad;
 
 	#### LV2
 
@@ -249,7 +248,6 @@ sub read_in_effects_data {
 	
 	# split on newlines
 	my @lv2 = split /\n/,$lv2;
-	generate_lv2_help($_) for @lv2;
 
 #	logpkg('debug',sub{ json_out(\@lv2) });
 
@@ -257,17 +255,14 @@ sub read_in_effects_data {
 
 	my $preset = ecasound_iam("preset-register");
 	my @preset = grep {! /^\s*$/ } split "\n", $preset;
-	generate_help($_) for @preset;
 	logpkg('debug',"preset-register output:\n",$preset);
 
 	my $ctrl = 	ecasound_iam("ctrl-register");
 	my @ctrl  = grep {! /^\s*$/ } split "\n", $ctrl;
 	logpkg('debug',"ctrl-register output:\n",$ctrl);
-	generate_help($_) for @ctrl;
 
 	my $cop = ecasound_iam("cop-register");
 	my @cop = grep {! /^\s*$/ } split "\n", $cop;
-	generate_help($_) for @cop;
 
 	logpkg('debug',"cop-register output:\n",$cop);
 
