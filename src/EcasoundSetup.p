@@ -130,13 +130,13 @@ sub connect_transport {
 		#or throw("Failed to connect setup, engine not ready"),return;
 	my $status = ecasound_iam("engine-status");
 	if ($status ne 'not started'){
-		throw("Invalid chain setup, cannot connect engine.\n");
+		throw("Invalid chain setup, cannot connect engine.");
 		return;
 	}
 	ecasound_iam('engine-launch');
 	$status = ecasound_iam("engine-status");
 	if ($status ne 'stopped'){
-		throw("Failed to launch engine. Engine status: $status\n");
+		throw("Failed to launch engine. Engine status: $status");
 		return;
 	}
 	$setup->{audio_length} = ecasound_iam('cs-get-length'); # returns zero if unknown
@@ -187,9 +187,9 @@ sub transport_status {
 		pager("looping from ", heuristic_time($start),
 				 	"to ",   heuristic_time($end));
 	}
-	::terminal_say("\nNow at: ", current_position());
+	::terminal_say("Now at: ", current_position());
 	::terminal_say("Engine is ". ( $this_engine->started() ? "running." : "ready."));
-	::terminal_say("\nPress SPACE to start or stop engine.")
+	::terminal_say("Press SPACE to start or stop engine.")
 		if $config->{press_space_to_start};
 }
 

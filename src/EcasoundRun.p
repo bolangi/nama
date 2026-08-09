@@ -10,7 +10,7 @@ sub start {
 	my $self = shift; 
 
 	$self->valid_setup
-		or throw("\nAudio engine is not configured. Cannot start."),return;
+		or throw("Audio engine is not configured. Cannot start."),return;
 
 
 	# use gradual unmuting to avoid pop on start
@@ -25,7 +25,7 @@ sub start {
 	# sleep 1s
 	#
 
-	pager("\n\nStarting at ". current_position()) unless $quiet;
+	pager("Starting at ". current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
 	$self->start_command;
@@ -64,7 +64,7 @@ sub stop {
 	disable_length_timer();
 	if ( ! $quiet ){
 		sleeper(0.5);
-		engine_status(current_position(),2,0);
+		engine_status(current_position());
 	}
 	unmute();
 	stop_heartbeat();
@@ -106,7 +106,7 @@ sub disconnect_transport {
 }
 sub engine_is {
 	my $pos = shift;
-	"\n\nEngine is ". $this_engine->ecasound_iam("engine-status"). ( $pos ? " at $pos" : "" )
+	"Engine is ". $this_engine->ecasound_iam("engine-status"). ( $pos ? " at $pos" : "" )
 }
 sub engine_status { 
 	my ($pos, $before_newlines, $after_newlines) = @_;
@@ -139,7 +139,7 @@ sub heartbeat {
 	my $here   = $this_engine->ecasound_iam("getpos");
 	my $status = $this_engine->ecasound_iam('engine-status');
 	if( $status =~ /finished|error/ ){
-		engine_status(current_position(),2,1);
+		engine_status(current_position());
 		revise_prompt();
 		stop_heartbeat(); 
 		sleeper(0.2);
