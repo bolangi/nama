@@ -112,10 +112,10 @@ wav_versions => <<'WAV_VERSIONS',
 A track can record multiple audio files ('takes'). The audio filenames
 follow the trackname so that recording a track named 'piano' will
 produce files with names with names like piano_1.wav, piano_2.wav.
-Audio files recorded by Nama are considered immutable resources and
-stored outside of version control.
+Audio files recorded by Nama are considered immutable and stored 
+outside of version control.
 
-One version can be selected as streaming source when when the track is
+One version can be selected as the stream source when the track is
 set to PLAY. The version number is zero by default, which means
 select the most recent (highest numbered) take. The bus-version command
 will set default version number for all tracks belonging to the current 
