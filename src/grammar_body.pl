@@ -1760,21 +1760,10 @@ route_track: _route_track source_id send_id {
 set_sample_rate: _set_sample_rate dd {::set_sample_rate($item{dd})}
 set_sample_rate: _set_sample_rate {::get_sample_rate()}
 
-bus_on: _bus_on 
-{ 
-	::terminal_say('turning bus on');
-	my $bus_name = $::this_track->source_type eq 'bus' ? $::this_track->source_id : $::this_bus;
-	::terminal_print("bus_name: $bus_name\n");
-	$::bn{$bus_name}->tracks_on
-}
+bus_on: _bus_on { ::bus_on(); 1 }
 
-bus_off: _bus_off 
-{ 
-	::terminal_say('turning bus off');
-	my $bus_name = $::this_track->source_type eq 'bus' ? $::this_track->source_id : $::this_bus;
-	::terminal_print("bus_name: $bus_name\n");
-	$::bn{$bus_name}->tracks_off 
-}
+bus_off: _bus_off { ::bus_off(); 1}
+
 arm_metronome: _arm_metronome { ::arm_metronome(); 1 }
 
 set_param_stepsize: _set_param_stepsize value {::set_param_stepsize($item{value});   ::activate_effect_hotkeys();1} 

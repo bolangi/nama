@@ -416,6 +416,35 @@ sub remove_submix_helper_tracks {
 }
 sub submixes { grep { (ref $_) =~ /SendBusCooked/ } values %::Bus::by_name }
 
+
+sub bus_on { 
+	my $bus_name = $this_track->source_type eq 'bus' ? $this_track->source_id : $this_bus;
+	my $bus = $bn{$bus_name};	
+	if ( grep{ $setup->{bus}->{oldrw}->{$_} } $bus->tracks )
+	{
+		terminal_say("$bus_name bus: reconnecting member tracks");
+		$bn{$bus_name}->tracks_on
+	}
+	else 
+	{
+		terminal_say('already active')
+	}
+}
+
+sub bus_off {
+	my $bus_name = $this_track->source_type eq 'bus' ? $this_track->source_id : $this_bus;
+	my $bus = $bn{$bus_name};	
+	if (grep{ $setup->{bus}->{oldrw}->{$_} } $bus->tracks )
+	{
+		terminal_say("$bus_name bus: member tracks already disconnected")
+	}
+	else 
+	{
+		terminal_say("$bus_name bus: disconnecting member tracks");
+		$bn{$bus_name}->tracks_off 
+	}
+}
+
 }
 }
 1;
