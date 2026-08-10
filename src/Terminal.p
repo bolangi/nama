@@ -304,13 +304,13 @@ sub prompt_for_text {}
 sub prompt_approve {}
 
 sub prompt (@args) {
-	return confirmation_prompt(@args) if @args;
+	return prompt_yn(@args) if @args;
 
 	logsub((caller(0))[3]);
 	join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
 }
 
-sub confirmation_prompt ($message, $default) {
+sub prompt_yn ($message, $default) {
 	my $default_answer = $default =~ /^(?:1|y|yes)$/i ? 1
 		: $default =~ /^(?:0|n|no)$/i ? 0
 		: croak "prompt default must be yes or no";
