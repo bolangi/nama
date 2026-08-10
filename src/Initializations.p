@@ -258,12 +258,9 @@ sub initialize_user_interface {
 	unless ($config->{opts}->{T}) {
 		initialize_terminal();
 		finish_terminal_startup(); 
-		::Log::set_log_sink(sub ($message) {
-			$text->{tickit}->later(sub { print_to_terminal($message) });
-		});
 	}
 	else {
-		::Log::set_log_sink(sub ($message) { print STDERR $message });
+		::Log::discard_output_buffer();
 	}
 	::terminal_say($tk_warning) if $tk_warning;
 

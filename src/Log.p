@@ -9,7 +9,10 @@ use IO::Handle ();
 use Time::HiRes qw(time);
 
 our @ISA = 'Exporter';
-our @EXPORT_OK = qw(logit logpkg logsub initialize_logger set_log_sink);
+our @EXPORT_OK = qw(
+	logit logpkg logsub initialize_logger
+	initialize_output emit_output set_log_sink set_output_sink discard_output_buffer
+);
 
 my %enabled;
 my $noisy;
@@ -18,16 +21,45 @@ my $sink;
 my $log_fh;
 my @pending;
 
+sub initialize_output () {
+	close $log_fh if defined $log_fh;
+	undef $log_fh;
+	undef $sink;
+	@pending = ();
+
+	if (defined $ENV{NAMA_LOGFILE}) {
+		open $log_fh, '>>:encoding(UTF-8)', $ENV{NAMA_LOGFILE}
+			or die "Unable to open $ENV{NAMA_LOGFILE}: $!";
+		$log_fh->autoflush(1);
+	}
+}
+
+sub emit_output ($message, $immediate_fh = undef) {
+	print {$log_fh} $message if defined $log_fh;
+
+	if (defined $sink) {
+		$sink->($message);
+	}
+	else {
+		push @pending, $message;
+		print {$immediate_fh} $message if defined $immediate_fh;
+	}
+}
+
+sub set_output_sink ($new_sink) {
+	$sink = $new_sink;
+	my @messages = splice @pending;
+	$sink->($_) for @messages;
+}
+
+sub discard_output_buffer () { @pending = () }
+
 sub initialize_logger ($cat_string = undef) {
 	my @all_cats = qw(
 [% qx(./emit_logging_categories) %]
 	);
 	push @all_cats, qw(ECI SUB);
 
-	close $log_fh if defined $log_fh;
-	undef $log_fh;
-	undef $sink;
-	@pending = ();
 	%enabled = ();
 	$noisy = 0;
 	$started = time;
@@ -49,21 +81,11 @@ sub initialize_logger ($cat_string = undef) {
 
 	}
 
-	if ($cat_string and defined $ENV{NAMA_LOGFILE}) {
-		open $log_fh, '>>:encoding(UTF-8)', $ENV{NAMA_LOGFILE}
-			or die "Unable to open $ENV{NAMA_LOGFILE}: $!";
-		$log_fh->autoflush(1);
-		$sink = sub ($message) { print {$log_fh} $message };
-	}
-
 	return { %enabled };
 }
 
 sub set_log_sink ($new_sink) {
-	return if defined $log_fh;
-	$sink = $new_sink;
-	my @messages = splice @pending;
-	$sink->($_) for @messages;
+	set_output_sink($new_sink);
 }
 
 sub expand_cats (@cats) {
@@ -102,12 +124,7 @@ sub _emit ($line_number, $category, $level, @message) {
 	my $formatted = "[$elapsed] $category$line$message";
 	$formatted .= "\n" unless $formatted =~ /\n\z/;
 
-	if (defined $sink) {
-		$sink->($formatted);
-	}
-	else {
-		push @pending, $formatted;
-	}
+	emit_output($formatted, \*STDERR);
 
 	return;
 }

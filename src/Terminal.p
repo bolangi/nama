@@ -26,7 +26,7 @@ use v5.36;
 no warnings 'uninitialized';
 use Carp;
 use ::Globals qw(:singletons $this_bus $this_track $text);
-use ::Log qw(logpkg logsub);
+use ::Log qw(logpkg logsub emit_output set_output_sink);
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
 use File::Basename qw(fileparse);
@@ -119,6 +119,9 @@ sub install_entry_item {
 
 	$scroller->push($entry_item);
 	$entry_widget_present = 1;
+	set_output_sink(sub ($message) {
+		$tickit->later(sub { print_to_terminal($message) });
+	});
 	$scroller->scroll_to_bottom;
 	position_entry_widget();
 }
@@ -263,13 +266,7 @@ sub show_prompt {
 
 sub terminal_print (@text) {
 	my $output = join q(), map { defined $_ ? $_ : q() } @text;
-	if (defined $scroller) {
-		print_to_terminal($output);
-		$text->{loop}->loop_once(0) if $text->{terminal_starting};
-	}
-	else {
-		CORE::print STDOUT $output;
-	}
+	emit_output($output, \*STDOUT);
 }
 
 sub terminal_say (@text) {
@@ -280,11 +277,7 @@ sub terminal_say (@text) {
 
 sub terminal_warn (@text) {
 	my $output = join q(), map { defined $_ ? $_ : q() } @text;
-	if (defined $scroller and defined $tickit) {
-		$tickit->later(sub { print_to_terminal($output) });
-		return;
-	}
-	CORE::print STDERR $output;
+	emit_output($output, \*STDERR);
 }
  
 sub print_to_terminal (@text) {

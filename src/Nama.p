@@ -148,7 +148,7 @@ use ::Bunch ();
 use ::Wavinfo ();
 use ::Midi ();
 use ::Latency ();
-use ::Log qw(logit logpkg logsub initialize_logger);
+use ::Log qw(logit logpkg logsub initialize_logger initialize_output);
 use ::TrackUtils ();
 
 use ::Tempo ();
@@ -171,6 +171,7 @@ sub main {
 
 sub bootstrap_environment {
 	definitions();
+	initialize_output();
 	process_command_line_options();
 	read_config(global_config());  # from .namarc if we have one
 	# set sample rate is needed for prepare_static_effects_data() and initialize_project_data()
