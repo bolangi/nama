@@ -135,8 +135,8 @@ sub explain_track_status {
 	return "No track is selected.\n" unless $track;
 	my $resolution = $track->resolve_rw_status;
 	my $class = ref $track;
-	$class =~ s/^:://;
-	$class =~ s/^Audio::Nama:://;
+	$class =~ s/^:://; 				# SKIP_PREPROC
+	$class =~ s/^Audio::Nama:://; 	# SKIP_PREPROC
 	my @lines = ("Track ".$track->n.": ".$track->name." ($class)");
 	if (! $resolution){
 		push @lines,
