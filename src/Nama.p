@@ -35,10 +35,11 @@ use Text::Format;
 use Tickit::Async;
 use Tickit::Widgets qw(Static VBox);
 use Tickit::Widget::Scroller;
-use Tickit::Widget::Scroller::Item::Text;
+#use Tickit::Widget::Scroller::Item::Text;
 ### We use our versions of these modules
 use ::Entry;      # modified Tickit::Widget::Entry to bind printable keys
 use ::Completion; # modified Tickit::Widget::Entry::Plugin::Completion for directory handling
+use ::ScrollerItemText; # modified Tickit::Widget::Scroller::Item::Text to suppress warnings
 use Try::Tiny;
 use Path::Tiny;
 # use File::HomeDir;# Assign.pm
