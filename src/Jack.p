@@ -23,9 +23,6 @@ sub update_jack_client_list {
 		# reset our clients data 
 		$jack->{clients} = {};
 
-		$jack->{use_jacks} 
-			?  jacks_get_port_latency() 
-			:  parse_port_latency();
 		parse_ports_list();
 
 		my ($bufsize) = qx(jack_bufsize);
