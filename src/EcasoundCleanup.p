@@ -99,7 +99,7 @@ sub delete_existing_mixdown_tag_and_convenience_encodings {
 	logsub((caller(0))[3]);
 	my $name = shift;
 	logpkg('debug',"name: $name");
-		git('tag', '-d', $name);
+		git('tag', '-d', $name) if git_tag_exists($name);
 		foreach( qw(mp3 ogg wav) ){
 			my $file = join_path(project_dir(),"$name.$_");
 			unlink $file if -e $file;
