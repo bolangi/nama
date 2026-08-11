@@ -55,7 +55,7 @@ rootwin
 {
 my ($rootwin, $vbox, $tickit, $term, $scroller, $entry);
 my ($entry_item, $entrywin, $scrollerwin, $scroller_geom_ev);
-my $entry_widget_present;
+my ($entry_widget_present, $terminal_view_lines);
 $text->{loop} = IO::Async::Loop->new;
 
 sub initialize_terminal {
@@ -169,6 +169,30 @@ sub position_entry_widget {
 		$entry->take_focus;
 	}
 }
+sub reset_terminal_view {
+	return unless $entry_widget_present and defined $entry_item;
+
+	# Keep every item as scrollback, but show only the final entry line.  New
+	# input and output expand this viewport until it again fills the terminal.
+	$terminal_view_lines = 1;
+	$vbox->set_child_opts($scroller, force_size => $terminal_view_lines);
+	$scroller->scroll_to_bottom;
+	position_entry_widget();
+	$entry->take_focus;
+}
+
+sub grow_terminal_view ($item) {
+	return unless defined $terminal_view_lines;
+
+	my $width = $scroller->window ? $scroller->window->cols : $term->cols;
+	my $added_lines = $item->height_for_width($width || 1);
+	my $max_lines = $term->lines - 2;
+	$terminal_view_lines += $added_lines;
+	$terminal_view_lines = $max_lines if $terminal_view_lines >= $max_lines;
+	$vbox->set_child_opts($scroller, force_size => $terminal_view_lines);
+	undef $terminal_view_lines if $terminal_view_lines == $max_lines;
+}
+
 sub setup_key_bindings {
 
 	my $completion_engine = Tickit::Widget::Entry::Plugin::Completion->apply($entry,
@@ -213,6 +237,7 @@ sub setup_key_bindings {
 	'C-k'		=> \&delete_to_end_of_line,
 	'C-u'   	=> \&delete_to_beginning_of_line,
 	'C-c'       => \&cleanup_exit,
+	'C-l'       => \&reset_terminal_view,
 	'C-z'		=> \&suspend,
 	 user_hotkeys(),
 };
@@ -289,9 +314,9 @@ sub print_to_terminal (@text) {
 		$scroller->pop(1);
 		$entry_widget_present = 0;
 	}
-	$scroller->push(
-		Tickit::Widget::Scroller::Item::Text->new($output),
-	);
+	my $output_item = Tickit::Widget::Scroller::Item::Text->new($output);
+	$scroller->push($output_item);
+	grow_terminal_view($output_item);
 	if (defined $entry_item and $scroller->window) {
 		$scroller->push($entry_item);
 		$entry_widget_present = 1;
