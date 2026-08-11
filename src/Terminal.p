@@ -55,7 +55,8 @@ rootwin
 {
 my ($rootwin, $vbox, $tickit, $term, $scroller, $entry);
 my ($entry_item, $entrywin, $scrollerwin, $scroller_geom_ev);
-my ($entry_widget_present, $terminal_view_lines);
+my ($entry_widget_present, $terminal_view_lines, $terminal_page_floor_lines,
+	$terminal_page_lines);
 $text->{loop} = IO::Async::Loop->new;
 
 sub initialize_terminal {
@@ -174,11 +175,74 @@ sub reset_terminal_view {
 
 	# Keep every item as scrollback, but show only the final entry line.  New
 	# input and output expand this viewport until it again fills the terminal.
+	$terminal_page_lines = int($scroller->window->lines / 2) || 1;
 	$terminal_view_lines = 1;
+	undef $terminal_page_floor_lines;
 	$vbox->set_child_opts($scroller, force_size => $terminal_view_lines);
 	$scroller->scroll_to_bottom;
 	position_entry_widget();
 	$entry->take_focus;
+}
+
+sub terminal_max_view_lines {
+	$term->lines - 2;
+}
+
+sub terminal_native_page_lines {
+	# Capture Scroller's native half-window distance before Ctrl-L collapses
+	# the window, then retain that increment while the viewport changes size.
+	$terminal_page_lines // (int($scroller->window->lines / 2) || 1);
+}
+
+sub finish_terminal_page_resize {
+	# VBox applies child geometry on its next layout pass.  Keep the live end
+	# bottom-aligned so growth reveals older lines above and shrinkage removes
+	# those same lines in reverse order.
+	$tickit->later(sub {
+		return unless $entry_widget_present;
+		$scroller->scroll_to_bottom;
+		position_entry_widget();
+		$entry->take_focus;
+	});
+}
+
+sub page_terminal_view ($direction) {
+	my $page_lines = terminal_native_page_lines();
+
+	# Outside a Ctrl-L viewport, preserve Scroller's normal paging behavior.
+	unless (defined $terminal_view_lines) {
+		$scroller->scroll($direction * $page_lines);
+		return;
+	}
+
+	if ($direction < 0 and $terminal_view_lines < terminal_max_view_lines()) {
+		$terminal_page_floor_lines //= $terminal_view_lines;
+		$terminal_view_lines += $page_lines;
+		$terminal_view_lines = terminal_max_view_lines()
+			if $terminal_view_lines > terminal_max_view_lines();
+		$vbox->set_child_opts($scroller, force_size => $terminal_view_lines);
+		finish_terminal_page_resize();
+		return;
+	}
+
+	# At full height, continue through older history using native scrolling.
+	# PageDown first returns to the live bottom, then reverses viewport growth.
+	if ($direction > 0 and $scroller->lines_below) {
+		$scroller->scroll($page_lines);
+		return;
+	}
+	if ($direction > 0
+		and defined $terminal_page_floor_lines
+		and $terminal_view_lines > $terminal_page_floor_lines) {
+		$terminal_view_lines -= $page_lines;
+		$terminal_view_lines = $terminal_page_floor_lines
+			if $terminal_view_lines < $terminal_page_floor_lines;
+		$vbox->set_child_opts($scroller, force_size => $terminal_view_lines);
+		finish_terminal_page_resize();
+		return;
+	}
+
+	$scroller->scroll($direction * $page_lines);
 }
 
 sub grow_terminal_view ($item) {
@@ -238,6 +302,8 @@ sub setup_key_bindings {
 	'C-u'   	=> \&delete_to_beginning_of_line,
 	'C-c'       => \&cleanup_exit,
 	'C-l'       => \&reset_terminal_view,
+	'PageUp'    => sub { page_terminal_view(-1) },
+	'PageDown'  => sub { page_terminal_view(+1) },
 	'C-z'		=> \&suspend,
 	 user_hotkeys(),
 };
