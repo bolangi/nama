@@ -300,12 +300,13 @@ sub print_to_terminal (@text) {
 	position_entry_widget();
 }
 
-sub prompt_for_text {}
-sub prompt_approve {}
+sub prompt_for_text {
 
-sub prompt (@args) {
-	return prompt_yn(@args) if @args;
+	#return prompt_yn(@args) if @args;
 
+}
+
+sub prompt {
 	logsub((caller(0))[3]);
 	join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
 }
