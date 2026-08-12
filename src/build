@@ -7,8 +7,8 @@ fi
 ./myproc
 cd ..
 ./Build.PL
+./Build
 echo "Now you can go to the nama toplevel directory and type:"
-echo "\t./Build"
 echo "\t./Build test"
 echo "If you're happy with the result you can do:"
 echo "\t./Build install"
