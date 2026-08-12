@@ -20,6 +20,7 @@ To install the module:
 
 		cd ..
 		perl Build.PL
+		./Build
 		./Build install
 
 How it works

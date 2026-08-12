@@ -1,2 +1,1 @@
-./myproc; cd .. ;src/build; ./Build.PL; ./Build test
-
+./myproc; cd .. ;src/build; ./Build.PL; ./Build; ./Build test

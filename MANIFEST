@@ -3,9 +3,10 @@ Build.PL
 Changes
 COPYING
 MANIFEST			This list of files
+META.json
 META.yml
 README.md
-bin/nama
+script/nama
 t/01_symbols.t
 t/02_assign.t
 t/03_log.t

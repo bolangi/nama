@@ -1,2 +1,1 @@
-perl -I ../lib ../bin/nama $@
-
+perl -I ../lib ../script/nama $@
