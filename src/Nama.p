@@ -227,6 +227,36 @@ sub cleanup_exit {
 }
 END { }
 
+=encoding UTF-8
+
+=head1 NAME
+
+Audio::Nama - multitrack recorder and digital audio workstation
+
+=head1 SYNOPSIS
+
+B<nama> [I<options>] [I<project-name>]
+
+=head1 DESCRIPTION
+
+A multitrack audio application for recording, effects
+processing, editing, mixing, mastering and live performance.
+Audio clips can be combined into sequences, or split into
+separate audio files. Nama can also perform general-purpose
+audio processing, such as 5.1 to stereo conversion. Nama
+uses Ecasound as the audio processing engine. 
+
+See C<man nama> for full documentation.
+
+=head1 AUTHOR
+
+Joel Roth, E<lt>joelz@pobox.comE<gt>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008-2026 Joel Roth.
+
+=cut
 1;
 __DATA__
 @@ commands_yml
@@ -258,3 +288,6 @@ __DATA__
 [% qx(cat ./fs_midish) %]
 @@ test_tempo_map
 [% qx(cat ./tempo_map) %]
+
+
+1;
