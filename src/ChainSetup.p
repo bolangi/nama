@@ -348,11 +348,24 @@ sub prune_graph {
 	push @{$prune_report->{removed}},
 		map { +{ track => $_, reason => 'no-sink' } } @removed;
 	logpkg('debug',"Graph after recursively_remove_outputless_tracks:\n$g");
+	# A regular recording track has a sibling temporary vertex for its
+	# route to wav_out. Resolve each surviving helper back to the logical
+	# track whose monitoring vertex may have been removed as outputless.
+	my %recording_path = map {
+		my $helper = $tn{$_};
+		$helper->can('target') && $helper->target
+			&& $g->has_edge($_, 'wav_out')
+			? ($helper->target => 1) : ()
+	} grep { $tn{$_} } $g->vertices;
 	for my $name (@report_tracks){
 		my $resolution = $prune_report->{tracks}->{$name};
+		$resolution->{recording_path} =
+			$resolution->{candidate_rw} eq REC
+			&& $recording_path{$name} ? 1 : 0;
 		my ($removed) = grep { $_->{track} eq $name }
 			@{$prune_report->{removed}};
-		$resolution->{in_final_graph} = $g->has_vertex($name) ? 1 : 0;
+		$resolution->{in_final_graph} =
+			($g->has_vertex($name) || $resolution->{recording_path}) ? 1 : 0;
 		$resolution->{effective_rw} = $resolution->{in_final_graph}
 			? $resolution->{candidate_rw} : OFF;
 		if ($resolution->{candidate_rw} eq OFF){
@@ -361,7 +374,7 @@ sub prune_graph {
 		elsif (! $resolution->{in_candidate_graph}){
 			$resolution->{reason} = 'not-connected';
 		}
-		elsif ($removed){
+		elsif ($removed and ! $resolution->{recording_path}){
 			$resolution->{reason} = $removed->{reason};
 		}
 		elsif (! $resolution->{in_final_graph}){

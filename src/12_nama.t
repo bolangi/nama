@@ -330,6 +330,32 @@ $this_track->set(group => 'Main');
 
 {
 	local $::ChainSetup::g = Graph->new;
+	local $::this_track = $this_track;
+	my $track = $this_track;
+	$track->set(rw => REC);
+	$::ChainSetup::g->add_edge('soundcard_in', 'sax');
+	::Graph::add_path_for_rec($::ChainSetup::g, $track);
+	my $report = ::ChainSetup::prune_graph();
+	is_deeply($report->{removed},
+		[{ track => 'sax', reason => 'no-sink' }],
+		'the outputless monitoring vertex is still pruned');
+	my $resolution = $track->resolve_rw_status;
+	ok($resolution->{recording_path},
+		'resolution records the surviving route to wav_out');
+	ok($resolution->{in_final_graph},
+		'the recording path represents the logical track in the final graph');
+	is($resolution->{effective_rw}, REC,
+		'a surviving recording path gives the logical track effective REC');
+	ok(!defined $resolution->{reason},
+		'vertex optimization is not reported as a track failure');
+	like($track->why, qr/Effective rw: REC/,
+		'why reports the surviving recording operation');
+	$track->set(rw => MON);
+	::ChainSetup::remove_temporary_tracks();
+}
+
+{
+	local $::ChainSetup::g = Graph->new;
 	$::ChainSetup::g->add_path('soundcard_in', 'sax', 'soundcard_out');
 	::ChainSetup::prune_graph();
 	is($this_track->effective_rw, MON,
