@@ -55,8 +55,7 @@ rootwin
 {
 my ($rootwin, $vbox, $tickit, $term, $scroller, $entry);
 my ($entry_item, $entrywin, $scrollerwin, $scroller_geom_ev);
-my ($entry_widget_present, $terminal_view_lines, $terminal_page_floor_lines,
-	$terminal_page_lines);
+my ($entry_widget_present, $terminal_view_lines, $terminal_page_floor_lines);
 $text->{loop} = IO::Async::Loop->new;
 
 sub initialize_terminal {
@@ -175,7 +174,6 @@ sub reset_terminal_view {
 
 	# Keep every item as scrollback, but show only the final entry line.  New
 	# input and output expand this viewport until it again fills the terminal.
-	$terminal_page_lines = int($scroller->window->lines / 2) || 1;
 	$terminal_view_lines = 1;
 	undef $terminal_page_floor_lines;
 	$vbox->set_child_opts($scroller, force_size => $terminal_view_lines);
@@ -186,12 +184,6 @@ sub reset_terminal_view {
 
 sub terminal_max_view_lines {
 	$term->lines - 2;
-}
-
-sub terminal_native_page_lines {
-	# Capture Scroller's native half-window distance before Ctrl-L collapses
-	# the window, then retain that increment while the viewport changes size.
-	$terminal_page_lines // (int($scroller->window->lines / 2) || 1);
 }
 
 sub finish_terminal_page_resize {
@@ -207,9 +199,9 @@ sub finish_terminal_page_resize {
 }
 
 sub page_terminal_view ($direction) {
-	my $page_lines = terminal_native_page_lines();
+	my $page_lines = terminal_max_view_lines();
 
-	# Outside a Ctrl-L viewport, preserve Scroller's normal paging behavior.
+	# Move one full terminal screen per keypress.
 	unless (defined $terminal_view_lines) {
 		$scroller->scroll($direction * $page_lines);
 		return;
