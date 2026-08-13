@@ -70,7 +70,7 @@ sub initialize_terminal {
 	$text->{term}    = $term    = $tickit->term;
 	$text->{rootwin} = $rootwin = $tickit->rootwin;
 	my $lines = $term->lines;
-	$vbox->add($scroller, valign => 'top', force_size => $lines - 2); 
+	$vbox->add($scroller, valign => 'top', force_size => $lines - 1); 
 
 	$entry_item = ::TerminalEntryItem->new(
 		on_render => \&position_entry_widget,
