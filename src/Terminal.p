@@ -1,26 +1,5 @@
 # ----------- Terminal related subroutines ---------
 
-use v5.36;
-
-# A Scroller item has no window of its own, so it cannot directly contain the
-# command Entry widget.  This one-line item reserves the Entry's place in the
-# Scroller; its render callback keeps a floating child window over that line.
-package ::TerminalEntryItem;
-
-sub new ($class, %args) {
-	bless { on_render => $args{on_render} }, $class
-}
-
-sub height_for_width ($self, $width) { 1 }
-
-sub render ($self, $rb, %args) {
-	for my $line ($args{firstline} .. $args{lastline}) {
-		$rb->goto($line, 0);
-		$rb->erase_to($args{width});
-	}
-	$self->{on_render}->() if $self->{on_render};
-}
-
 package ::;
 use v5.36;
 no warnings 'uninitialized';
@@ -854,4 +833,28 @@ sub beep {
 	}
 	system($cmd);
 }
+use v5.36;
+
+# A Scroller item has no window of its own, so it cannot
+# directly contain the command Entry widget.  This one-line
+# item reserves the Entry's place in the Scroller; its
+# render callback keeps a floating child window over that
+# line.
+
+package ::TerminalEntryItem;
+
+sub new ($class, %args) {
+	bless { on_render => $args{on_render} }, $class
+}
+
+sub height_for_width ($self, $width) { 1 }
+
+sub render ($self, $rb, %args) {
+	for my $line ($args{firstline} .. $args{lastline}) {
+		$rb->goto($line, 0);
+		$rb->erase_to($args{width});
+	}
+	$self->{on_render}->() if $self->{on_render};
+}
+
 1;
