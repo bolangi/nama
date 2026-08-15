@@ -41,9 +41,12 @@ sub initialize_terminal {
 	$vbox =	Tickit::Widget::VBox->new; 
 	$scroller = Tickit::Widget::Scroller->new;
 	$text->{tickit}  = $tickit  = Tickit::Async->new( root => $vbox);
-	# Nama owns the IO::Async loop.  Attach Tickit explicitly so the text and
-	# graphical interfaces both service the same loop rather than allowing
+
+	# Nama owns the IO::Async loop.  Attach Tickit
+	# explicitly so the text and graphical interfaces both
+	# service the same loop rather than allowing
 	# Tickit::Async to create one implicitly.
+
 	$text->{loop}->add($tickit);
 	$text->{term}    = $term    = $tickit->term;
 	$text->{rootwin} = $rootwin = $tickit->rootwin;
@@ -230,7 +233,7 @@ sub grow_terminal_view ($item) {
 
 sub setup_key_bindings {
 
-	my $completion_engine = Tickit::Widget::Entry::Plugin::Completion->apply($entry,
+	my $completion_engine = Tickit::Widget::Entry::Plugin::Completion->apply(     $entry,
 		gen_words => \&gen_words, 
 		use_popup => 0, 
 		ignore_case => 1); 
