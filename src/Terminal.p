@@ -503,10 +503,10 @@ sub set_hotkey_mode ($m) {
 }
 sub stepsize : lvalue {
 	if ( $mode eq 'effect' ) {
-		$project->{current_stepsize}->{this_op_id()}->[this_param()] 
+		$project->{stepsize}->{this_op_id()}->[this_param()] 
 	}
 	elsif ( $mode =~  /jump|bump/ ) {
-		$project->{current_stepsize}->{$mode}
+		$project->{stepsize}->{$mode}
 	}
 }
 sub activate_effect_hotkeys { set_hotkey_mode('effect') }

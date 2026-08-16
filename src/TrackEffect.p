@@ -16,7 +16,7 @@ sub effect_ids { $_[0]->ops }
 sub param { $project->{current_param}->{$_[0]->op_id} //= 1 }
 
 sub stepsize {
-	$project->{current_stepsize}->{$_[0]->op_id}->[$_[0]->param] //= 0.01
+	$project->{stepsize}->{$_[0]->op_id}->[$_[0]->param] //= 0.01
 	# TODO use hint if available
 }
 sub pos {
