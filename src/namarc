@@ -149,7 +149,7 @@ hotkeys:
     M-Up: increase_stepsize_10x
     M-Down: decrease_stepsize_10x
     M-Right: increase_stepsize_2x
-    M-Down: decrease_stepsize_2x
+    M-Left: decrease_stepsize_2x
   jump:
     Insert: previous_track
     Delete: next_track
