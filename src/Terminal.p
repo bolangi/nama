@@ -478,7 +478,9 @@ sub process_keystrokes ($mode, $info) {
 	my $action = $config->{hotkeys}->{$mode}->{$str};
 	if (defined $action){
 		no strict 'refs';
-		&$action();	
+		$action =~ /\W/ 
+			? eval $action
+			: &$action();	
 		set_popup_text(status_bar($mode));
 	}
 	else {
