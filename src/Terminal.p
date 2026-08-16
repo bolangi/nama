@@ -501,7 +501,20 @@ sub set_hotkey_mode ($m) {
 	$mode = $m;	
 	$hotkeys_active = 1;
 }
+sub stepsize : lvalue {
+	if ( $mode eq 'effect' ) {
+		$project->{current_stepsize}->{this_op_id()}->[this_param()] 
+	}
+	elsif ( $mode =~  /jump|bump/ ) {
+		$project->{current_stepsize}->{$mode}
+	}
+}
 sub activate_effect_hotkeys { set_hotkey_mode('effect') }
+
+sub increase_stepsize_10x { stepsize() *= 10 }
+sub decrease_stepsize_10x { stepsize() /= 10 }
+sub increase_stepsize_2x  { stepsize() *=  2 }
+sub decrease_stepsize_2x  { stepsize() /=  2 }
 
 } # popup 
 
