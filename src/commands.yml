@@ -380,11 +380,9 @@ set_version:
     sh        # Display information about the current track
 destroy_current_wav:
   type: track
-  what: |
-    Remove the currently selected recording version from the
-    current track after confirming user intent. This DESTRUCTIVE
-    command removes the underlying audio file from your disk.
-    Use with caution.
+  short: unlink-current-wav
+  what: Confirm with user, then destructively remove the selected audio file from the current track
+  example: piano ver 2; destroy-current-wav
   parameters: none
 list_versions:
   type: track
