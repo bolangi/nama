@@ -186,8 +186,6 @@ hotkeys:
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
-#bump,  loop and stop
-#bump, set to mark and start. 
 #    u: decrement_param_10
 #    i: increment_param_10
 #    j: decrement_param

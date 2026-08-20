@@ -509,6 +509,11 @@ sub stepsize : lvalue {
 		$project->{stepsize}->{$mode}
 	}
 }
+
+
+#bump,  loop and stop
+#bump, set to mark and start. 
+
 sub activate_effect_hotkeys { set_hotkey_mode('effect') }
 
 sub increase_stepsize_10x { stepsize() *= 10 }
