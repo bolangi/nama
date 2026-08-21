@@ -307,11 +307,8 @@ bus => <<BUS,
                                    for cello violin bass; move-to-bus Strings
    list-buses, lbs      - list bus data
    remove-bus           - remove a bus
-   bus-version          - select default .wav version for all tracks on bus
-   bus-off              - set all tracks belonging to bus to OFF
-   bus-on               - restore bus tracks to status at previous bus-off
-                        * often it is sufficient to set the mix track
-						  rec/mon/play/off/mute to control the bus
+   bus-version          - select default audiofile version for all tracks on bus
+
 BUS
 
 mixdown => <<MIXDOWN,
