@@ -58,7 +58,6 @@ devices:
 
 alsa_capture_device: consumer
 alsa_playback_device: consumer
-mixer_out_format: cd-stereo
 
 # audio file format templates
 
