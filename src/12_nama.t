@@ -34,7 +34,7 @@ $config->{use_git} = 0;
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "Check representative variable from default .namarc";
 
-is( $config->{mix_to_disk_format}, "s16_le,N,44100,i", "Read mix_to_disk_format");
+is( $config->{mix_to_disk_format}, "s16_le,N,44100", "Read mix_to_disk_format");
 is( $config->{edit_realtime}, 1, "Realtime edit playback is enabled by default");
 
 is(::Effect::fade_level(25, 75, 1, 2), 50,
@@ -124,7 +124,7 @@ my $yaml = q(---
     name: sax
     width: 1
     full_path: /foo/.wav/sax_1.wav
-  ecs_string: -f:s16_le,1,44100,i -o:/foo/.wav/sax_1.wav
+  ecs_string: -f:s16_le,1,44100 -o:/foo/.wav/sax_1.wav
 -
   class: from_wav
   args:
@@ -640,7 +640,7 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:1 -o:alsa,default
 -a:3 -o:loop,Main_in
--a:R3 -f:s16_le,1,44100,i -o:/tmp/nama-test/test/.wav/sax_1.wav
+-a:R3 -f:s16_le,1,44100 -o:/tmp/nama-test/test/.wav/sax_1.wav
 EXPECTED
 
 check_setup('ALSA basic setup' );
@@ -662,7 +662,7 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
 -a:3 -o:loop,Main_in
--a:R3 -f:s16_le,1,44100,i -o:/tmp/nama-test/test/.wav/sax_1.wav
+-a:R3 -f:s16_le,1,44100 -o:/tmp/nama-test/test/.wav/sax_1.wav
 
 EXPECTED
 
@@ -836,7 +836,7 @@ sub modifiers { '' }
 sub effective_rw { 'PLAY' }
 sub width { 2 }
 sub pan { undef }
-sub wav_format { 's16_le,2,44100,i' }
+sub wav_format { 's16_le,2,44100' }
 sub fader { 'offset-test-fader' }
 
 package OffsetRunTestEffect;
@@ -971,13 +971,13 @@ for my $case (@cases){
 		next;
 	}
 	local $setup->{wav_info}->{'/tmp/offset-test.wav'}->{format} =
-		's16_le,2,44100,i';
+		's16_le,2,44100';
 	my $input = ::IO::from_wav->new(track => 'offset-test');
 	is($input->device_id, $case->{device_id},
 		"$case->{name}: adjusted Ecasound playat/select");
 	is(
 		$input->ecs_string,
-		'-f:s16_le,2,44100,i -i:' . $case->{device_id},
+		'-f:s16_le,2,44100 -i:' . $case->{device_id},
 		"$case->{name}: complete adjusted Ecasound input",
 	);
 }
