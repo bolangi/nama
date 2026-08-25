@@ -44,12 +44,12 @@ abbreviations:
 # define audio devices
 
 devices: 
-  jack:
-    signal_format: f32_le,N,frequency # do not change this
   consumer:
     ecasound_id: alsa,default
     input_format: 16-stereo
     output_format: 16-stereo
+  jack:
+    signal_format: f32_le,N,frequency # do not change this
   null:
     ecasound_id: null
     output_format: ~
