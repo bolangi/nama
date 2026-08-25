@@ -143,13 +143,14 @@ hotkeys:
     Right: increment_param
     Up: increment_param_10
     Down: decrement_param_10
-    Enter: disable_hotkeys
-    M-Enter: disable_hotkeys
-    F8: toggle_hotkeys
     M-Up: increase_stepsize_10x
     M-Down: decrease_stepsize_10x
     M-Right: increase_stepsize_2x
     M-Left: decrease_stepsize_2x
+    M-PageDown: enter_stepsize
+    Enter: disable_hotkeys
+    M-Enter: disable_hotkeys
+    F8: toggle_hotkeys
   jump:
     Insert: previous_track
     Delete: next_track
@@ -157,9 +158,9 @@ hotkeys:
     End: jump_to_end
     PageUp: previous_mark
     PageDown: next_mark
+    Left: jump_back_1
     Right: jump_forward_1
     Up: jump_forward_10
-    Left: set_step_bump(shift-1)
     Down: jump_back_10
     M-Up: increase_stepsize_10x
     M-Down: increase_stepsize_10x
@@ -168,6 +169,7 @@ hotkeys:
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
+    F8: toggle_hotkeys
   bump:   
     Insert: previous_track
     Delete: next_track
@@ -186,6 +188,7 @@ hotkeys:
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
+    F8: toggle_hotkeys
 #    u: decrement_param_10
 #    i: increment_param_10
 #    j: decrement_param
