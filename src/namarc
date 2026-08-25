@@ -63,9 +63,9 @@ mixer_out_format: cd-stereo
 
 # audio file format templates
 
-mix_to_disk_format: s16_le,N,frequency,i
-raw_to_disk_format: s16_le,N,frequency,i
-cache_to_disk_format: s16_le,N,frequency,i
+mix_to_disk_format: s16_le,N,frequency
+raw_to_disk_format: s16_le,N,frequency
+cache_to_disk_format: s16_le,N,frequency
 
 mixdown_encodings: mp3 ogg
 
