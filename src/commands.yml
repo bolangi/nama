@@ -1725,7 +1725,17 @@ arm_metronome:
 effect_hotkeys:
   type: effect
   short: hkx
-  what: enable hotkeys and popup for adjusting effect parameters
+  what: enable hotkeys and status bar for tuning effect parameters
+  parameters: none
+jump_hotkeys:
+  type: transport
+  short: hkj
+  what: enable hotkeys and status bar for seeking
+  parameters: none
+bump_hotkeys:
+  type: mark
+  short: hkb
+  what: enable hotkeys and status bar for bumping marks 
   parameters: none
 set_param_stepsize:
   type: effect
