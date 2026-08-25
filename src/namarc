@@ -48,9 +48,8 @@ devices:
     signal_format: f32_le,N,frequency # do not change this
   consumer:
     ecasound_id: alsa,default
-    input_format: 16-mono
+    input_format: 16-stereo
     output_format: 16-stereo
-    hardware_latency: 0
   null:
     ecasound_id: null
     output_format: ~
