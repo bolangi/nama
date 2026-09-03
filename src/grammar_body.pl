@@ -1554,7 +1554,6 @@ rerecord: _rerecord {
 		
 		map{ $_->set(rw => ::REC) } @{$::setup->{_last_rec_tracks}}; 
 		$::tn{Main}->set(rw => $::setup->{_main_rw});
-		::restore_preview_mode();
 		1;
 }
 
