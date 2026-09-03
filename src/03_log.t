@@ -61,7 +61,7 @@ emit_output('after startup', $stdout_fh);
 
 is $immediate_stdout, 'stdout early', 'early stdout is displayed immediately';
 is $immediate_stderr, 'stderr early', 'early stderr is displayed immediately';
-is \@displayed, ['stdout early', 'stderr early', 'after startup'],
+is_deeply \@displayed, ['stdout early', 'stderr early', 'after startup'],
 	'early output is replayed in order and later output uses the display sink';
 open my $read_log, '<', $logfile or die $!;
 my $logged = do { local $/; <$read_log> };
