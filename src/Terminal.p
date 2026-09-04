@@ -375,14 +375,61 @@ sub print_to_terminal (@text) {
 sub prompt_for_text ($message) {
 	my $answer;
 	my $command_entry = $entry;
-	my $prompt_entry = Tickit::Widget::Entry->new;
+	my $prompt_length = length $message;
+	my $prompt_entry = Tickit::Widget::Entry->new(
+		text     => $message,
+		position => $prompt_length,
+	);
+	my $backward_word_position = sub {
+		my $position = $prompt_entry->find_bow_backward(
+			$prompt_entry->position,
+		);
+		$position < $prompt_length ? $prompt_length : $position;
+	};
+	my $backward_char = sub {
+		$prompt_entry->set_position($prompt_entry->position - 1)
+			if $prompt_entry->position > $prompt_length;
+	};
+	my $backward_word = sub {
+		$prompt_entry->set_position($backward_word_position->());
+	};
+	my $delete_backward_char = sub {
+		$prompt_entry->text_delete($prompt_entry->position - 1, 1)
+			if $prompt_entry->position > $prompt_length;
+	};
+	my $delete_backward_word = sub {
+		my $start = $backward_word_position->();
+		$prompt_entry->text_delete(
+			$start,
+			$prompt_entry->position - $start,
+		);
+	};
+	my $beginning_of_input = sub {
+		$prompt_entry->set_position($prompt_length);
+	};
 
-	print_to_terminal($message);
 	$command_entry->set_window(undef);
 	$text->{entry} = $entry = $prompt_entry;
 	$prompt_entry->set_window($entrywin);
 	$prompt_entry->bind_keys(
-		Enter => sub { $answer = $prompt_entry->text },
+		Enter => sub {
+			$answer = substr($prompt_entry->text, $prompt_length);
+		},
+		Left          => $backward_char,
+		'C-Left'      => $backward_word,
+		'M-b'         => $backward_word,
+		Backspace     => $delete_backward_char,
+		'C-h'         => $delete_backward_char,
+		'C-Backspace' => $delete_backward_word,
+		'C-w'         => $delete_backward_word,
+		'C-a'         => $beginning_of_input,
+		Home          => $beginning_of_input,
+		'C-u' => sub {
+			$prompt_entry->text_delete(
+				$prompt_length,
+				$prompt_entry->position - $prompt_length,
+			);
+		},
 	);
 	$prompt_entry->take_focus;
 
@@ -391,7 +438,7 @@ sub prompt_for_text ($message) {
 	$prompt_entry->set_window(undef);
 	$text->{entry} = $entry = $command_entry;
 	$command_entry->set_window($entrywin);
-	print_to_terminal($answer);
+	print_to_terminal($message.$answer);
 	show_prompt();
 	return $answer;
 }
