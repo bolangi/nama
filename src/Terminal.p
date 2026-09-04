@@ -6,6 +6,12 @@ no warnings 'uninitialized';
 use Carp;
 use ::Globals qw(:singletons $this_bus $this_track $text);
 use ::Log qw(logpkg logsub emit_output set_output_sink);
+use ::StepSize qw(
+	next_parameter_stepsize
+	previous_parameter_stepsize
+	next_time_stepsize
+	previous_time_stepsize
+);
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
 use File::Basename qw(fileparse);
@@ -531,10 +537,21 @@ sub set_stepsize ($stepsize) {
 
 sub activate_effect_hotkeys { set_hotkey_mode('effect') }
 
-sub increase_stepsize_10x { set_stepsize(stepsize() * 10) }
-sub decrease_stepsize_10x { set_stepsize(stepsize() / 10) }
-sub increase_stepsize_2x  { set_stepsize(stepsize() *  2) }
-sub decrease_stepsize_2x  { set_stepsize(stepsize() /  2) }
+sub next_stepsize ($count = 1) {
+	my $current = stepsize();
+	my $next = $mode eq 'effect'
+		? next_parameter_stepsize($current, $count)
+		: next_time_stepsize($current, $count);
+	set_stepsize($next);
+}
+
+sub previous_stepsize ($count = 1) {
+	my $current = stepsize();
+	my $previous = $mode eq 'effect'
+		? previous_parameter_stepsize($current, $count)
+		: previous_time_stepsize($current, $count);
+	set_stepsize($previous);
+}
 
 } # popup 
 

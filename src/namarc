@@ -136,10 +136,10 @@ hotkeys:
     Right: increment_param
     Up: increment_param_10
     Down: decrement_param_10
-    M-Up: increase_stepsize_10x
-    M-Down: decrease_stepsize_10x
-    M-Right: increase_stepsize_2x
-    M-Left: decrease_stepsize_2x
+    M-Up: next_stepsize(3)
+    M-Down: previous_stepsize(3)
+    M-Right: next_stepsize
+    M-Left: previous_stepsize
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
@@ -155,10 +155,10 @@ hotkeys:
     Right: jump_forward_1
     Up: jump_forward_10
     Down: jump_back_10
-    M-Up: increase_stepsize_10x
-    M-Down: increase_stepsize_10x
-    M-Left: decrease_stepsize_2x
-    M-Right: increase_stepsize_2x
+    M-Up: next_stepsize(3)
+    M-Down: previous_stepsize(3)
+    M-Left: previous_stepsize
+    M-Right: next_stepsize
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
@@ -174,10 +174,10 @@ hotkeys:
     Up: bump_mark_forward_10
     Left: bump_mark_back_1
     Down: bump_mark_back_10
-    M-Up: increase_stepsize_10x
-    M-Down: increase_stepsize_10x
-    M-Left: decrease_stepsize_2x
-    M-Right: increase_stepsize_2x
+    M-Up: next_stepsize(3)
+    M-Down: previous_stepsize(3)
+    M-Left: previous_stepsize
+    M-Right: next_stepsize
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
