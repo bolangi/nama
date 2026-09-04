@@ -155,10 +155,10 @@ hotkeys:
     Right: jump_forward
     Up: jump_forward(10)
     Down: jump_forward(-10)
-    M-Up: next_stepsize(3)
-    M-Down: previous_stepsize(3)
     M-Left: previous_stepsize
-    M-Right: next_stepsize
+    M-Right: next_stepsize # approx factor of two, next in sequence 1, 2, 5, 10
+    M-Up: next_stepsize(3) # factor of ten, third in sequence 2, 5, 10
+    M-Down: previous_stepsize(3)
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
@@ -170,14 +170,14 @@ hotkeys:
     End: jump_to_end
     PageUp: previous_mark
     PageDown: next_mark
+    Left: bump_mark(-1)
     Right: bump_mark
     Up: bump_mark(10)
-    Left: bump_mark(-1)
     Down: bump_mark(-10)
-    M-Up: next_stepsize(3)
-    M-Down: previous_stepsize(3)
     M-Left: previous_stepsize
     M-Right: next_stepsize
+    M-Up: next_stepsize(3) 
+    M-Down: previous_stepsize(3) 
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
