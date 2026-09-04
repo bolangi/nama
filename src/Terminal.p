@@ -372,10 +372,28 @@ sub print_to_terminal (@text) {
 	position_entry_widget();
 }
 
-sub prompt_for_text {
+sub prompt_for_text ($message) {
+	my $answer;
+	my $command_entry = $entry;
+	my $prompt_entry = Tickit::Widget::Entry->new;
 
-	#return prompt_yn(@args) if @args;
+	print_to_terminal($message);
+	$command_entry->set_window(undef);
+	$text->{entry} = $entry = $prompt_entry;
+	$prompt_entry->set_window($entrywin);
+	$prompt_entry->bind_keys(
+		Enter => sub { $answer = $prompt_entry->text },
+	);
+	$prompt_entry->take_focus;
 
+	$text->{loop}->loop_once while !defined $answer;
+
+	$prompt_entry->set_window(undef);
+	$text->{entry} = $entry = $command_entry;
+	$command_entry->set_window($entrywin);
+	print_to_terminal($answer);
+	show_prompt();
+	return $answer;
 }
 
 sub prompt {
