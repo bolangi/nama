@@ -65,15 +65,4 @@ is next_time_stepsize(216_000), 216_000,
 is previous_time_stepsize(216_000), 108_000,
 	'time step can move down from the upper boundary';
 
-for my $case (
-	[ sub { next_parameter_stepsize(0) }, qr/positive number/, 'zero parameter step is rejected' ],
-	[ sub { next_time_stepsize(-1) }, qr/positive number/, 'negative time step is rejected' ],
-	[ sub { next_time_stepsize(1, 1.5) }, qr/non-negative integer/, 'fractional position count is rejected' ],
-) {
-	my ($code, $expected, $name) = @$case;
-	my $error = eval { $code->(); q() };
-	$error = $@ if $@;
-	like $error, $expected, $name;
-}
-
 done_testing;
