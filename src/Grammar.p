@@ -523,6 +523,9 @@ sub destroy_current_wav {
 		throw($this_track->name, 
 			": No current version (track set to OFF?) Skipping."), return;
 	my $wav = $this_track->full_path;
+
+		my $answer = prompt_yn("Permanently delete file $wav?",0);
+		throw("No action taken."), return if not $answer;
 		# remove version comments, if any
 		delete $project->{track_version_comments}{$this_track->name}{$this_track->version};
 		pager("Unlinking $wav");
