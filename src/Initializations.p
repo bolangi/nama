@@ -192,7 +192,10 @@ sub definitions {
 		loop_chain_channel_width     => 16,
 
 		ticks_per_quarter_note		=> 24,
-		
+
+		initial_param_stepsize		=> 0.001,
+		initial_jump_stepsize		=> 1,
+		initial_bump_stepsize		=> 1,
 
 	}, '::Config';
 

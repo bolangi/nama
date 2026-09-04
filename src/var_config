@@ -110,6 +110,12 @@
 	$ticks_per_quarter_note 		$config->{ticks_per_quarter_note}
 
 	$use_metronome					$config->{use_metronome}
+
+	# hotkey modes
+	
+    $initial_param_stepsize			$config->{initial_param_stepsize}
+    $initial_bump_stepsize			$config->{initial_bump_stepsize}
+    $initial_jump_stepsize			$config->{initial_jump_stepsize}
 	
 	# end
 
