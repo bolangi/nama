@@ -225,7 +225,7 @@ sub cleanup_exit {
 	::Engine::sync_action('kill_and_reap');
 	exit;
 }
-END { }
+END { say() }
 
 =encoding UTF-8
 
