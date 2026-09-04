@@ -3,7 +3,7 @@ use v5.36;
 our $VERSION = 1.0;
 use Role::Tiny;
 use ::Effect qw(fxn);
-use ::Globals qw($project);
+use ::Globals qw($config $project);
 use Try::Tiny;
 use List::MoreUtils qw(first_index);
 
@@ -16,7 +16,8 @@ sub effect_ids { $_[0]->ops }
 sub param { $project->{current_param}->{$_[0]->op_id} //= 1 }
 
 sub stepsize {
-	$project->{stepsize}->{$_[0]->op_id}->[$_[0]->param] //= 0.01
+	$project->{stepsize}->{$_[0]->op_id}->[$_[0]->param]
+		//= $config->{initial_param_stepsize}
 	# TODO use hint if available
 }
 sub pos {
