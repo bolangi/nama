@@ -7,6 +7,7 @@ use ::StepSize qw(
 	previous_parameter_stepsize
 	next_time_stepsize
 	previous_time_stepsize
+	format_time_stepsize
 );
 
 is next_parameter_stepsize(0.01), 0.02,
@@ -64,5 +65,20 @@ is next_time_stepsize(216_000), 216_000,
 	'time step remains at the current 60-hour upper boundary';
 is previous_time_stepsize(216_000), 108_000,
 	'time step can move down from the upper boundary';
+
+is format_time_stepsize(0.001), '0.001s',
+	'fractional step displays in seconds';
+is format_time_stepsize(30), '30s',
+	'second step displays in seconds';
+is format_time_stepsize(60), '1m',
+	'one minute displays in minutes';
+is format_time_stepsize(300), '5m',
+	'minute step displays in minutes';
+is format_time_stepsize(3600), '1h',
+	'one hour displays in hours';
+is format_time_stepsize(108_000), '30h',
+	'hour step displays in hours';
+is format_time_stepsize(90), '1.5m',
+	'manually entered step uses the largest natural unit';
 
 done_testing;

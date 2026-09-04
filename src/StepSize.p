@@ -10,6 +10,7 @@ our @EXPORT_OK = qw(
 	previous_parameter_stepsize
 	next_time_stepsize
 	previous_time_stepsize
+	format_time_stepsize
 );
 
 my @parameter_mantissas = (1, 2, 5);
@@ -42,6 +43,16 @@ sub next_time_stepsize ($current, $count = 1) {
 sub previous_time_stepsize ($current, $count = 1) {
 	$current = _previous_time_step($current) for 1 .. $count;
 	$current
+}
+
+sub format_time_stepsize ($seconds) {
+	my ($value, $unit) = $seconds >= 60 * 60 ? ($seconds / (60 * 60), 'h')
+		: $seconds >= 60 ? ($seconds / 60, 'm')
+		: ($seconds, 's');
+	my $formatted = sprintf '%.14f', $value;
+	$formatted =~ s/0+$//;
+	$formatted =~ s/\.$//;
+	$formatted . $unit
 }
 
 sub _next_parameter_step ($current) {

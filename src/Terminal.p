@@ -11,6 +11,7 @@ use ::StepSize qw(
 	previous_parameter_stepsize
 	next_time_stepsize
 	previous_time_stepsize
+	format_time_stepsize
 );
 use Data::Dumper::Concise;
 use List::MoreUtils qw(first_index);
@@ -862,7 +863,7 @@ sub jump_status_bar {
 		$bar .= "$mark, ";
 	}
 	my $label = $mode eq 'jump' ? 'Jump size' : 'Mark bump';
-	$bar .= "$label: " . stepsize() . 's';
+	$bar .= "$label: " . format_time_stepsize(stepsize());
 	$bar
 }
 sub clip_start_beep 	{ beep( $config->{beep}->{clip_start})}
