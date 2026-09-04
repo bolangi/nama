@@ -12,6 +12,7 @@ t/02_assign.t
 t/03_log.t
 t/04_object.t
 t/06_latency.t
+t/07_entry.t
 t/11_mark.t
 t/12_nama.t
 t/13_fade_envelope.t
