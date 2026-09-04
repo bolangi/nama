@@ -501,13 +501,28 @@ sub set_hotkey_mode ($m) {
 	$mode = $m;	
 	$hotkeys_active = 1;
 }
-sub stepsize : lvalue {
-	if ( $mode eq 'effect' ) {
-		$project->{stepsize}->{this_op_id()}->[this_param()] 
+sub stepsize {
+	if ($mode eq 'effect') {
+		return $project->{stepsize}->{this_op_id()}->[this_param()]
+			//= $config->{initial_param_stepsize};
 	}
-	elsif ( $mode =~  /jump|bump/ ) {
-		$project->{stepsize}->{$mode}
+	if ($mode eq 'jump' or $mode eq 'bump') {
+		return $project->{stepsize}->{$mode}
+			//= $config->{"initial_${mode}_stepsize"};
 	}
+	croak "No stepsize for hotkey mode '$mode'";
+}
+
+sub set_stepsize ($stepsize) {
+	if ($mode eq 'effect') {
+		$project->{stepsize}->{this_op_id()}->[this_param()] = $stepsize;
+		return;
+	}
+	if ($mode eq 'jump' or $mode eq 'bump') {
+		$project->{stepsize}->{$mode} = $stepsize;
+		return;
+	}
+	croak "No stepsize for hotkey mode '$mode'";
 }
 
 
@@ -516,10 +531,10 @@ sub stepsize : lvalue {
 
 sub activate_effect_hotkeys { set_hotkey_mode('effect') }
 
-sub increase_stepsize_10x { stepsize() *= 10 }
-sub decrease_stepsize_10x { stepsize() /= 10 }
-sub increase_stepsize_2x  { stepsize() *=  2 }
-sub decrease_stepsize_2x  { stepsize() /=  2 }
+sub increase_stepsize_10x { set_stepsize(stepsize() * 10) }
+sub decrease_stepsize_10x { set_stepsize(stepsize() / 10) }
+sub increase_stepsize_2x  { set_stepsize(stepsize() *  2) }
+sub decrease_stepsize_2x  { set_stepsize(stepsize() /  2) }
 
 } # popup 
 
