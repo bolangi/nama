@@ -151,10 +151,10 @@ hotkeys:
     End: jump_to_end
     PageUp: previous_mark
     PageDown: next_mark
-    Left: jump_back_1
-    Right: jump_forward_1
-    Up: jump_forward_10
-    Down: jump_back_10
+    Left: jump_forward(-1)
+    Right: jump_forward
+    Up: jump_forward(10)
+    Down: jump_forward(-10)
     M-Up: next_stepsize(3)
     M-Down: previous_stepsize(3)
     M-Left: previous_stepsize
@@ -170,10 +170,10 @@ hotkeys:
     End: jump_to_end
     PageUp: previous_mark
     PageDown: next_mark
-    Right: bump_mark_forward_1
-    Up: bump_mark_forward_10
-    Left: bump_mark_back_1
-    Down: bump_mark_back_10
+    Right: bump_mark
+    Up: bump_mark(10)
+    Left: bump_mark(-1)
+    Down: bump_mark(-10)
     M-Up: next_stepsize(3)
     M-Down: previous_stepsize(3)
     M-Left: previous_stepsize

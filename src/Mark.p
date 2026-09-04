@@ -279,16 +279,6 @@ sub modify_mark {
 	set_position($mark->adjusted_time);
 	request_setup();
 }
-#  D: delete_current_mark
-#  .: drop_snip_mark
-sub bump_mark_minus_1 { }
-sub bump_mark_plus_1 { }
-sub bump_mark_minus_point_1 { }
-sub bump_mark_plus_point_1 { }
-sub bump_mark_minus_point_01 { }
-sub bump_mark_plus_point_01 { }
-
-
 ## jump playback head position
 
 sub jump_to_start { 
@@ -348,17 +338,17 @@ sub set_timeline_position {
 #sub next_mark {}
 sub delete_current_mark {}
 #sub drop_mark {}
-sub bump_mark_forward_1 {}
-sub bump_mark_forward_10 {}
-sub bump_mark_back_1 {}
-sub bump_mark_back_10 {}
 #sub jump_to_start {}
 #sub jump_to_end {}
-sub jump_pos_forward_1 {}
-sub jump_pos_forward_10 {}
-sub jump_pos_back_1 {}
-sub jump_pos_back_10 {}
 sub jump_replay {}
+
+sub bump_mark ($multiplier = 1) {
+	return unless $this_mark;
+	modify_mark(
+		$this_mark,
+		$this_mark->time + $multiplier * ::stepsize(),
+	);
+}
 
 sub forward {
 	my $delta = shift;
@@ -371,11 +361,9 @@ sub rewind {
 	my $delta = shift;
 	forward( -$delta );
 }
-sub jump_forward {
-	my $multiplier = shift;
-	 forward( $multiplier * $text->{hotkey_playback_jumpsize})
-	}
-sub jump_backward { jump_forward( - shift()) }
+sub jump_forward ($multiplier = 1) {
+	forward($multiplier * ::stepsize())
+}
 
 	
 } # end package

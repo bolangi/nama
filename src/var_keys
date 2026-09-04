@@ -19,8 +19,6 @@ $config->{waveform_canvas_y}
 $config->{soundcard_loopback_delay}
 $config->{use_effects_bugfix}
 $config->{beep}
-$config->{playback_jump_seconds}
-$config->{mark_bump_seconds}
 
 $jack->{seek_delay}				# extra time for stop-seek-start process
 $jack->{jackd_running}			# jackd status, but this should be a subroutine
@@ -117,7 +115,6 @@ $text->{command_index}
 $text->{loop}
 $text->{screen_lines}			# 
 $text->{screen_columns}			#
-$text->{hotkey_playback_jumpsize}
 $text->{hyphenated_commands}	# remove-track => remove_track
 $text->{eval_result}			# buffer for result of eval_perl() 
 $text->{output_buffer}			# buffer for output of OSC commands

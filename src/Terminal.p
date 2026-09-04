@@ -503,8 +503,8 @@ sub set_popup_text ($str) {
 }
 
 sub set_hotkey_mode ($m) {
-	popup($m);
 	$mode = $m;	
+	popup($mode);
 	$hotkeys_active = 1;
 }
 sub stepsize {
@@ -836,9 +836,6 @@ sub status_bar {
 	$status =  "[$name] [$hotkey_mode] $status";
 }
 
-sub bump_status_bar {}
-
-	
 sub param_status_bar {
 	return " no selected effect" unless $this_track->op;
 	return " no effect found"    unless defined this_effect();
@@ -862,10 +859,10 @@ sub jump_status_bar {
 	my $bar = "playback at ${pos}s, ";
 	if (defined $this_mark) {
 		my $mark = join ' ', 'Current mark:', $this_mark->name, 'at', $this_mark->time;
-		$bar .= $mark;
+		$bar .= "$mark, ";
 	}
-	$bar .= "Jump size: $config->{playback_jump_seconds}s, ";
-	$bar .= "Mark bump: $config->{mark_bump_seconds}s " ;
+	my $label = $mode eq 'jump' ? 'Jump size' : 'Mark bump';
+	$bar .= "$label: " . stepsize() . 's';
 	$bar
 }
 sub clip_start_beep 	{ beep( $config->{beep}->{clip_start})}
