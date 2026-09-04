@@ -426,7 +426,7 @@ sub prompt_for_text ($message) {
 			$submitted_line = $line;
 			$answer = $input;
 		},
-		'C-c'         => sub { $cancelled = 1 },
+		'C-q'         => sub { $cancelled = 1 },
 		Left          => $backward_char,
 		'C-Left'      => $backward_word,
 		'M-b'         => $backward_word,
@@ -452,7 +452,7 @@ sub prompt_for_text ($message) {
 	$text->{entry} = $entry = $command_entry;
 	$command_entry->set_window($entrywin);
 	print_to_terminal(
-		$cancelled ? "$cancelled_line^C" : $submitted_line,
+		$cancelled ? "$cancelled_line^Q" : $submitted_line,
 	);
 	show_prompt();
 	return $cancelled ? undef : $answer;
