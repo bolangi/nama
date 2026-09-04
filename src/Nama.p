@@ -198,6 +198,7 @@ sub kill_and_reap {
 my $cleanup_in_progress;
 sub cleanup_exit {
 	logsub((caller(0))[3]);
+	scroll_to_bottom();
 	# Restore the terminal before any potentially slow engine cleanup.  A
 	# second interrupt still gets one last attempt to restore it before exiting.
 	if ($cleanup_in_progress++) {
@@ -222,7 +223,6 @@ sub cleanup_exit {
 	# - SIGKILL
 	#project_snapshot(); 
 	::Engine::sync_action('kill_and_reap');
-	CORE::print STDOUT "\n";
 	exit;
 }
 END { }

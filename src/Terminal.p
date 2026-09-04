@@ -177,6 +177,8 @@ sub terminal_max_view_lines {
 	$term->lines - 2;
 }
 
+sub scroll_to_bottom { $scroller->scroll_to_bottom if defined $scroller}
+
 sub finish_terminal_page_resize {
 	# VBox applies child geometry on its next layout pass.  Keep the live end
 	# bottom-aligned so growth reveals older lines above and shrinkage removes
