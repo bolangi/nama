@@ -374,6 +374,8 @@ sub print_to_terminal (@text) {
 
 sub prompt_for_text ($message) {
 	my $answer;
+	my $cancelled;
+	my $submitted_line;
 	my $command_entry = $entry;
 	my $prompt_length = length $message;
 	my $prompt_entry = Tickit::Widget::Entry->new(
@@ -413,8 +415,18 @@ sub prompt_for_text ($message) {
 	$prompt_entry->set_window($entrywin);
 	$prompt_entry->bind_keys(
 		Enter => sub {
-			$answer = substr($prompt_entry->text, $prompt_length);
+			my $line = $prompt_entry->text;
+			my $input = substr($line, $prompt_length);
+			if ($input =~ /^\s*$/) {
+				print_to_terminal($line);
+				$prompt_entry->set_text($message);
+				$prompt_entry->set_position($prompt_length);
+				return;
+			}
+			$submitted_line = $line;
+			$answer = $input;
 		},
+		'C-c'         => sub { $cancelled = 1 },
 		Left          => $backward_char,
 		'C-Left'      => $backward_word,
 		'M-b'         => $backward_word,
@@ -433,14 +445,17 @@ sub prompt_for_text ($message) {
 	);
 	$prompt_entry->take_focus;
 
-	$text->{loop}->loop_once while !defined $answer;
+	$text->{loop}->loop_once while !defined $answer and !$cancelled;
 
+	my $cancelled_line = $prompt_entry->text;
 	$prompt_entry->set_window(undef);
 	$text->{entry} = $entry = $command_entry;
 	$command_entry->set_window($entrywin);
-	print_to_terminal($message.$answer);
+	print_to_terminal(
+		$cancelled ? "$cancelled_line^C" : $submitted_line,
+	);
 	show_prompt();
-	return $answer;
+	return $cancelled ? undef : $answer;
 }
 
 sub prompt {
