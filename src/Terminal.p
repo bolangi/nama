@@ -316,11 +316,15 @@ sub suspend
 	$rootwin->expose;
 }
 
+sub set_entry_prompt ($target, $prompt, $input) {
+	my $line = $prompt.$input;
+	$target->set_text($line);
+	$target->set_editable_from(length $prompt);
+	$target->set_position(length $line);
+}
+
 sub show_prompt {
-	my $prompt = prompt();
-	$entry->set_text($prompt);
-	$entry->set_editable_from(length $prompt);
-	$entry->set_position(length $prompt);
+	set_entry_prompt($entry, prompt(), q());
 }
 
 sub terminal_print (@text) {
@@ -380,9 +384,7 @@ sub prompt_for_text ($message) {
 			my $input = substr($line, $prompt_length);
 			if ($input =~ /^\s*$/) {
 				print_to_terminal($line);
-				$prompt_entry->set_text($message);
-				$prompt_entry->set_editable_from($prompt_length);
-				$prompt_entry->set_position($prompt_length);
+				set_entry_prompt($prompt_entry, $message, q());
 				return;
 			}
 			$submitted_line = $line;
@@ -418,9 +420,7 @@ sub prompt_yn ($message, $default) {
 	my $answer;
 
 	my $prompt = "$message $choices";
-	$entry->set_text($prompt);
-	$entry->set_editable_from(length $prompt);
-	$entry->set_position(length $prompt);
+	set_entry_prompt($entry, $prompt, q());
 
 	my $set_answer = sub ($value) {
 		$answer = $value;
@@ -456,10 +456,11 @@ sub previous_command {
 }
 sub print_command {
 	my $prompt = prompt();
-	my $line = $prompt.$text->{command_history}->[$text->{command_index}];
-	$entry->set_text($line);
-	$entry->set_editable_from(length $prompt);
-	$entry->set_position(length $line);
+	set_entry_prompt(
+		$entry,
+		$prompt,
+		$text->{command_history}->[$text->{command_index}],
+	);
 }
 
  
