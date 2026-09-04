@@ -83,16 +83,18 @@ sub install_tk_tickit_bridge {
 
 sub create_entry_widget {
 
+	my $prompt = prompt();
 	my $do_command = sub { my ( $self, $line ) = @_; 
 							print_to_terminal($line); 
-							$line =~ s/^.+?>\s*//;
-							process_line($line); 
+							process_line(substr($line, $self->editable_from));
 							show_prompt();
 						}; 
 
 	$text->{entry} = $entry = Tickit::Widget::Entry->new( 
-		text 	 => prompt(),
-		on_enter => $do_command,
+		text          => $prompt,
+		position      => length($prompt),
+		editable_from => length($prompt),
+		on_enter      => $do_command,
 	);
 
 	show_prompt();
@@ -245,42 +247,25 @@ sub setup_key_bindings {
 		use_popup => 0, 
 		ignore_case => 1); 
 
-	my $backspace  = sub { 
-		my $stop_pos = length prompt();
-		$entry->text_delete( $entry->position - 1, 1 ) 
-			unless $entry->position <= $stop_pos 
-	};
-	my $left = sub { 
-		my $stop_pos = length prompt();
-		$entry->set_position( $entry->position - 1 ) 
-			unless $entry->position <= $stop_pos 
-	};
-
 	my $toggle_transport = sub {
 		if ( $config->{press_space_to_start}
-				and $entry->position == length prompt()
+				and $entry->position == $entry->editable_from
 				) 
 		{ toggle_transport() }
 		else { $entry->on_text(' ') }
 	};
 
-	sub beginning_of_line     		{ $entry->set_position( length prompt() ) }
-	sub delete_to_end_of_line 		{ $entry->text_delete(  $entry->position, 999) }
-	sub delete_to_beginning_of_line { $entry->text_delete(  length prompt(), 
-															$entry->position - length prompt() ) }
+	my $delete_to_end_of_line = sub {
+		my ($widget) = @_;
+		$widget->text_delete($widget->position, length($widget->text));
+	};
 
 	$text->{entry_bindings} = {
 
     ' '			=> $toggle_transport,
-	'Left'		=> $left,
-	'C-h'   	=> $backspace,
-	'Backspace' => $backspace,
 	'Up' 		=> \&previous_command, 
 	'Down'		=> \&next_command, 
-	'C-a'	  	=> \&beginning_of_line,
-	'Home'  	=> \&beginning_of_line,
-	'C-k'		=> \&delete_to_end_of_line,
-	'C-u'   	=> \&delete_to_beginning_of_line,
+	'C-k'		=> $delete_to_end_of_line,
 	'C-c'       => \&cleanup_exit,
 	'C-l'       => \&reset_terminal_view,
 	'PageUp'    => sub { page_terminal_view(-1) },
@@ -332,8 +317,10 @@ sub suspend
 }
 
 sub show_prompt {
-	$entry->set_text(prompt());
-	$entry->set_position(99); 
+	my $prompt = prompt();
+	$entry->set_text($prompt);
+	$entry->set_editable_from(length $prompt);
+	$entry->set_position(length $prompt);
 }
 
 sub terminal_print (@text) {
@@ -379,36 +366,10 @@ sub prompt_for_text ($message) {
 	my $command_entry = $entry;
 	my $prompt_length = length $message;
 	my $prompt_entry = Tickit::Widget::Entry->new(
-		text     => $message,
-		position => $prompt_length,
+		text          => $message,
+		position      => $prompt_length,
+		editable_from => $prompt_length,
 	);
-	my $backward_word_position = sub {
-		my $position = $prompt_entry->find_bow_backward(
-			$prompt_entry->position,
-		);
-		$position < $prompt_length ? $prompt_length : $position;
-	};
-	my $backward_char = sub {
-		$prompt_entry->set_position($prompt_entry->position - 1)
-			if $prompt_entry->position > $prompt_length;
-	};
-	my $backward_word = sub {
-		$prompt_entry->set_position($backward_word_position->());
-	};
-	my $delete_backward_char = sub {
-		$prompt_entry->text_delete($prompt_entry->position - 1, 1)
-			if $prompt_entry->position > $prompt_length;
-	};
-	my $delete_backward_word = sub {
-		my $start = $backward_word_position->();
-		$prompt_entry->text_delete(
-			$start,
-			$prompt_entry->position - $start,
-		);
-	};
-	my $beginning_of_input = sub {
-		$prompt_entry->set_position($prompt_length);
-	};
 
 	$command_entry->set_window(undef);
 	$text->{entry} = $entry = $prompt_entry;
@@ -420,28 +381,14 @@ sub prompt_for_text ($message) {
 			if ($input =~ /^\s*$/) {
 				print_to_terminal($line);
 				$prompt_entry->set_text($message);
+				$prompt_entry->set_editable_from($prompt_length);
 				$prompt_entry->set_position($prompt_length);
 				return;
 			}
 			$submitted_line = $line;
 			$answer = $input;
 		},
-		'C-x'         => sub { $cancelled = 1 },
-		Left          => $backward_char,
-		'C-Left'      => $backward_word,
-		'M-b'         => $backward_word,
-		Backspace     => $delete_backward_char,
-		'C-h'         => $delete_backward_char,
-		'C-Backspace' => $delete_backward_word,
-		'C-w'         => $delete_backward_word,
-		'C-a'         => $beginning_of_input,
-		Home          => $beginning_of_input,
-		'C-u' => sub {
-			$prompt_entry->text_delete(
-				$prompt_length,
-				$prompt_entry->position - $prompt_length,
-			);
-		},
+		'C-x' => sub { $cancelled = 1 },
 	);
 	$prompt_entry->take_focus;
 
@@ -470,8 +417,10 @@ sub prompt_yn ($message, $default) {
 	my $choices = $default_answer ? '[y]/n' : 'y/[n]';
 	my $answer;
 
-	$entry->set_text("$message $choices");
-	$entry->set_position(length $entry->text);
+	my $prompt = "$message $choices";
+	$entry->set_text($prompt);
+	$entry->set_editable_from(length $prompt);
+	$entry->set_position(length $prompt);
 
 	my $set_answer = sub ($value) {
 		$answer = $value;
@@ -506,13 +455,16 @@ sub previous_command {
 	print_command();
 }
 sub print_command {
-	$entry->set_text(prompt().$text->{command_history}->[$text->{command_index}]);
-	$entry->set_position(99);
+	my $prompt = prompt();
+	my $line = $prompt.$text->{command_history}->[$text->{command_index}];
+	$entry->set_text($line);
+	$entry->set_editable_from(length $prompt);
+	$entry->set_position(length $line);
 }
 
  
 sub command {
-	substr( $entry->text, length prompt() )
+	substr( $entry->text, $entry->editable_from )
 }
 
 

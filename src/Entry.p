@@ -104,7 +104,7 @@ Delete to the start of the line
 
 Delete one word backwards
 
-=item * Backspace
+=item * Backspace or Ctrl-H
 
 Delete one character backwards
 
@@ -174,6 +174,11 @@ Optional. Initial text to display in the box
 
 Optional. Initial position of the cursor within the text.
 
+=item editable_from => INT
+
+Optional. Character position at which editable input begins. Cursor movement
+and text editing cannot affect text before this position. Defaults to zero.
+
 =item on_enter => CODE
 
 Optional. Callback function to invoke when the C<< <Enter> >> key is pressed.
@@ -184,6 +189,7 @@ Optional. Callback function to invoke when the C<< <Enter> >> key is pressed.
 
 field $_text          :reader :param //= "";
 field $_pos_ch        :reader(position) :param(position) //= 0;
+field $_editable_from :reader :param //= 0;
 field $_scrolloffs_co = 0;
 field $_overwrite     = 0;
 field %_keybindings = (
@@ -196,6 +202,7 @@ field %_keybindings = (
    'M-b' => "key_backward_word",
    'M-f' => "key_forward_word",
 
+   'C-h'         => "key_backward_delete_char",
    'Backspace'   => "key_backward_delete_char",
    'C-Backspace' => "key_backward_delete_word",
    'Delete'      => "key_forward_delete_char",
@@ -215,6 +222,9 @@ field $_on_enter :reader :param = undef;
 ADJUST
 {
    my $textlen = length $_text;
+   $_editable_from = 0 if $_editable_from < 0;
+   $_editable_from = $textlen if $_editable_from > $textlen;
+   $_pos_ch = $_editable_from if $_pos_ch < $_editable_from;
    $_pos_ch = $textlen if $_pos_ch > $textlen;
 
    # Since we take keyboard input we almost certainly want to take focus here
@@ -480,6 +490,35 @@ Returns the current entry position, in terms of characters within the text.
 
 # generated accessor
 
+=head2 editable_from
+
+   $position = $entry->editable_from;
+
+Returns the first editable character position. Text before this position is
+protected from cursor movement and editing operations.
+
+=head2 set_editable_from
+
+   $entry->set_editable_from( $position );
+
+Set the first editable character position. Values outside the current text are
+clamped to its bounds. If necessary, the cursor moves to the new boundary.
+
+=cut
+
+# generated accessor
+
+method set_editable_from
+{
+   my ( $pos_ch ) = @_;
+
+   $pos_ch = 0 if $pos_ch < 0;
+   $pos_ch = length $_text if $pos_ch > length $_text;
+   $_editable_from = $pos_ch;
+
+   $self->set_position( $_pos_ch );
+}
+
 =head2 set_position
 
    $entry->set_position( $position );
@@ -492,7 +531,7 @@ method set_position
 {
    my ( $pos_ch ) = @_;
 
-   $pos_ch = 0 if $pos_ch < 0;
+   $pos_ch = $_editable_from if $pos_ch < $_editable_from;
    $pos_ch = length $_text if $pos_ch > length $_text;
 
    $self->reposition_cursor( $pos_ch );
@@ -591,10 +630,10 @@ Returns the currently entered text.
 
    $entry->set_text( $text );
 
-Replace the text in the entry box. This completely redraws the widget's
-window. It is largely provided for initialisation; for normal edits (such as
-from keybindings), it is preferable to use C<text_insert>, C<text_delete> or
-C<text_splice>.
+Replace the text in the entry box, including any protected prefix. This
+completely redraws the widget's window. It is largely provided for
+initialisation; for normal edits (such as from keybindings), it is preferable
+to use C<text_insert>, C<text_delete> or C<text_splice>.
 
 =cut
 
@@ -603,6 +642,8 @@ method set_text
    my ( $text ) = @_;
 
    $_text = $text;
+   $_editable_from = length $text if $_editable_from > length $text;
+   $_pos_ch = $_editable_from if $_pos_ch < $_editable_from;
    $_pos_ch = length $text if $_pos_ch > length $text;
 
    $self->redraw;
@@ -650,6 +691,12 @@ text deleted from the section.
 method text_splice
 {
    my ( $pos_ch, $len_ch, $text ) = @_;
+
+   if( $pos_ch < $_editable_from ) {
+      $len_ch -= $_editable_from - $pos_ch;
+      $len_ch = 0 if $len_ch < 0;
+      $pos_ch = $_editable_from;
+   }
 
    my $textlen_ch = length($text);
 
