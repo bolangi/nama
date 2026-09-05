@@ -197,22 +197,31 @@ sub kill_and_reap {
 	
 my $cleanup_in_progress;
 sub cleanup_exit {
-	logsub((caller(0))[3]);
-	scroll_to_bottom();
-	# Restore the terminal before any potentially slow engine cleanup.  A
-	# second interrupt still gets one last attempt to restore it before exiting.
 	if ($cleanup_in_progress++) {
-		eval {
-			$text->{term}->teardown;
-			$text->{term}->flush;
-		};
 		CORE::exit(130);
 	}
-	$SIG{INT} = \&cleanup_exit;
+
+	logsub((caller(0))[3]);
+	scroll_to_bottom();
+
 	eval {
-		$text->{term}->teardown if defined $text->{term};
-		$text->{term}->flush    if defined $text->{term};
+		close_hotkey_popup();
+
+		if (defined $text->{term}) {
+			$text->{term}->goto($text->{term}->lines - 1, 0);
+			$text->{term}->setpen();
+			$text->{term}->erasech($text->{term}->cols, 0);
+			$text->{term}->flush;
+
+			$text->{term}->teardown;
+			$text->{term}->flush;
+		}
 	};
+
+	# The terminal is restored before the potentially slow engine cleanup.
+	# A second interrupt may now exit immediately.
+	$SIG{INT} = sub { CORE::exit(130) };
+
 	remove_riff_header_stubs();
 	trigger_rec_cleanup_hooks();
 	# for each process: 

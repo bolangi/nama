@@ -14,6 +14,7 @@ use ::StepSize qw(
 	format_time_stepsize
 );
 use Data::Dumper::Concise;
+use IO::Async::Signal;
 use List::MoreUtils qw(first_index);
 use File::Basename qw(fileparse);
 use File::Temp qw(tempfile);
@@ -39,7 +40,7 @@ rootwin
 =cut
 
 {
-my ($rootwin, $vbox, $tickit, $term, $scroller, $entry);
+my ($rootwin, $vbox, $tickit, $term, $scroller, $entry, $sigint);
 my ($entry_item, $entrywin, $scrollerwin, $scroller_geom_ev);
 my ($entry_widget_present, $terminal_view_lines, $terminal_page_floor_lines);
 $text->{loop} = IO::Async::Loop->new;
@@ -55,6 +56,11 @@ sub initialize_terminal {
 	# Tickit::Async to create one implicitly.
 
 	$text->{loop}->add($tickit);
+	$sigint = IO::Async::Signal->new(
+		name       => 'INT',
+		on_receipt => sub { cleanup_exit() },
+	);
+	$text->{loop}->add($sigint);
 	$text->{term}    = $term    = $tickit->term;
 	$text->{rootwin} = $rootwin = $tickit->rootwin;
 	my $lines = $term->lines;
@@ -635,7 +641,6 @@ sub previous_stepsize ($count = 1) {
 
 } # tickit UI
 BEGIN { $SIG{__WARN__} = \&filter_print_to_terminal }
-$SIG{INT} = \&cleanup_exit;
 sub filter_print_to_terminal {
 	terminal_warn(@_) unless $_[0] =~ /ScrollBox/;
 }
