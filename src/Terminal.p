@@ -481,27 +481,41 @@ sub command {
 # bottom line status bar for hot key modes
 
 {
-my ($popup, $expose_ev, $key_ev, $status, $mode, $hotkeys_active);
-sub enable_hotkeys  { 
-	popup($mode), $hotkeys_active = 1 if defined $mode
+my ($popup, $expose_ev, $key_ev, $status, $hotkeys_active);
+sub enable_hotkeys {
+	return unless defined $mode->{hotkeys};
+	popup() unless defined $popup;
+	set_popup_text(status_bar($mode->{hotkeys}));
+	bind_hotkey_keys();
+	$hotkeys_active = 1;
+	$popup->take_focus;
 }
-sub disable_hotkeys { 
-	return unless defined $expose_ev;
-	$popup->unbind_event_id($_) for ($expose_ev, $key_ev); 
-	$hotkeys_active = 0; 
-	$entry->take_focus 
+sub disable_hotkeys {
+	if (defined $popup and defined $key_ev) {
+		$popup->unbind_event_id($key_ev);
+		undef $key_ev;
+	}
+	$hotkeys_active = 0;
+	$entry->take_focus;
 }
-sub toggle_hotkeys { if (hotkeys_active()){  disable_hotkeys() } else { enable_hotkeys() } }
-sub hotkeys_active { defined $popup and $popup->is_focused }
+sub toggle_hotkeys { $hotkeys_active ? disable_hotkeys() : enable_hotkeys() }
+sub hotkeys_active { !!$hotkeys_active }
 
-sub popup ($mode) {
+sub bind_hotkey_keys {
+	return if defined $key_ev;
+	$key_ev = $popup->bind_event(
+		key => sub ( $rootwin, $, $info, @ ) { process_keystrokes($info) },
+	);
+}
+
+sub popup {
 	my ($top, $left, $lines, $cols) = ($text->{rootwin}->lines - 1, 0, 1, $text->{rootwin}->cols); 
 	
    $text->{popup} = $popup = $rootwin->make_popup($top, $left, $lines, $cols);
 
 	$popup->pen->chattrs({ bg => 'yellow', fg => 'black' });
 
-	$status = status_bar($mode);
+	$status = status_bar($mode->{hotkeys});
 	$popup->take_focus;
 
 	# We use expose event to update text, because event
@@ -512,7 +526,7 @@ sub popup ($mode) {
          $rb->erase_to( $rootwin->cols );
          $rb->text_at( 0,0,$status, $popup->pen);
     });
-   $key_ev = $popup->bind_event( key => sub ( $rootwin, $, $info, @ ) { process_keystrokes($mode, $info) } );
+	bind_hotkey_keys();
    $popup->take_focus;
    $popup->show;
 
@@ -521,19 +535,20 @@ sub popup ($mode) {
 
 {
 my $i = 0;
-sub process_keystrokes ($mode, $info) {
+sub process_keystrokes ($info) {
 	$i++;
 	my $str = $info->str;
-	my $action = $config->{hotkeys}->{$mode}->{$str};
+	my $hotkey_mode = $mode->{hotkeys};
+	my $action = $config->{hotkeys}->{$hotkey_mode}->{$str};
 	if (defined $action){
 		no strict 'refs';
 		$action =~ /\W/ 
 			? eval $action
 			: &$action();	
-		set_popup_text(status_bar($mode));
+		set_popup_text(status_bar($mode->{hotkeys})) if $hotkeys_active;
 	}
 	else {
-		# throw("$str: no binding found in $mode hotkey mode.");
+		# throw("$str: no binding found in $hotkey_mode hotkey mode.");
 	}
 	return 1
 }
@@ -545,38 +560,53 @@ sub set_popup_text ($str) {
 		$popup->expose 
 }
 
+sub close_hotkey_popup {
+	if (defined $popup) {
+		$popup->unbind_event_id($expose_ev) if defined $expose_ev;
+		$popup->unbind_event_id($key_ev) if defined $key_ev;
+		$popup->close;
+	}
+	undef $popup;
+	undef $expose_ev;
+	undef $key_ev;
+	undef $status;
+	undef $text->{popup};
+	$hotkeys_active = 0;
+}
+
 sub set_effect_mode { set_hotkey_mode('effect') }
 sub set_jump_mode   { set_hotkey_mode('jump')   }
 sub set_bump_mode   { set_hotkey_mode('bump')   }
 
 sub set_hotkey_mode ($m) {
-	$m =~ /^bump|jump|effect$/ or die("illegal hotkey mode: $m");
-	$mode = $m;	
-	popup($mode);
-	$hotkeys_active = 1;
+	$m =~ /^(bump|jump|effect)$/ or die("illegal hotkey mode: $m");
+	$mode->{hotkeys} = $m;
+	enable_hotkeys();
 }
 sub stepsize {
-	if ($mode eq 'effect') {
+	my $hotkey_mode = $mode->{hotkeys};
+	if ($hotkey_mode eq 'effect') {
 		return $project->{stepsize}->{this_op_id()}->[this_param()]
 			//= $config->{initial_param_stepsize};
 	}
-	if ($mode eq 'jump' or $mode eq 'bump') {
-		return $project->{stepsize}->{$mode}
-			//= $config->{"initial_${mode}_stepsize"};
+	if ($hotkey_mode eq 'jump' or $hotkey_mode eq 'bump') {
+		return $project->{stepsize}->{$hotkey_mode}
+			//= $config->{"initial_${hotkey_mode}_stepsize"};
 	}
-	croak "No stepsize for hotkey mode '$mode'";
+	croak "No stepsize for hotkey mode '$hotkey_mode'";
 }
 
 sub set_stepsize ($stepsize) {
-	if ($mode eq 'effect') {
+	my $hotkey_mode = $mode->{hotkeys};
+	if ($hotkey_mode eq 'effect') {
 		$project->{stepsize}->{this_op_id()}->[this_param()] = $stepsize;
 		return;
 	}
-	if ($mode eq 'jump' or $mode eq 'bump') {
-		$project->{stepsize}->{$mode} = $stepsize;
+	if ($hotkey_mode eq 'jump' or $hotkey_mode eq 'bump') {
+		$project->{stepsize}->{$hotkey_mode} = $stepsize;
 		return;
 	}
-	croak "No stepsize for hotkey mode '$mode'";
+	croak "No stepsize for hotkey mode '$hotkey_mode'";
 }
 
 
@@ -587,7 +617,7 @@ sub activate_effect_hotkeys { set_hotkey_mode('effect') }
 
 sub next_stepsize ($count = 1) {
 	my $current = stepsize();
-	my $next = $mode eq 'effect'
+	my $next = $mode->{hotkeys} eq 'effect'
 		? next_parameter_stepsize($current, $count)
 		: next_time_stepsize($current, $count);
 	set_stepsize($next);
@@ -595,7 +625,7 @@ sub next_stepsize ($count = 1) {
 
 sub previous_stepsize ($count = 1) {
 	my $current = stepsize();
-	my $previous = $mode eq 'effect'
+	my $previous = $mode->{hotkeys} eq 'effect'
 		? previous_parameter_stepsize($current, $count)
 		: previous_time_stepsize($current, $count);
 	set_stepsize($previous);
@@ -909,7 +939,7 @@ sub jump_status_bar {
 		my $mark = join ' ', 'Current mark:', $this_mark->name, 'at', $this_mark->time;
 		$bar .= "$mark, ";
 	}
-	my $label = $mode eq 'jump' ? 'Jump size' : 'Mark bump';
+	my $label = $mode->{hotkeys} eq 'jump' ? 'Jump size' : 'Mark bump';
 	$bar .= "$label: " . format_time_stepsize(stepsize());
 	$bar
 }

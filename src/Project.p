@@ -146,7 +146,7 @@ sub load_project {
 	
 	teardown_engine();
 	trigger_rec_cleanup_hooks();
-	$text->{popup}->close if defined $text->{popup};
+	close_hotkey_popup();
 	initialize_project_data();
 	remove_riff_header_stubs(); 
 	cache_wav_info();
