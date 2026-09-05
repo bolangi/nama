@@ -292,7 +292,14 @@ sub user_hotkeys {
 	my $mappings = $config->{hotkeys}->{user};
 	return unless defined $mappings;
 	no strict 'refs';
-	map{ $_ => \&{$mappings->{$_}} } keys $mappings->%*
+	map{ 
+		my $key = $_;
+		my $action = $mappings->{$_};
+		$key => 
+			$action =~ /\W/ # matches non-word character
+				? eval "sub { $action }"
+				: \&{$mappings->{$_}}
+	} keys $mappings->%*
 	#map{ $_ => eval '\&'. $mappings->{$_} } keys $mappings->%*
 }
 	
@@ -538,7 +545,12 @@ sub set_popup_text ($str) {
 		$popup->expose 
 }
 
+sub set_effect_mode { set_hotkey_mode('effect') }
+sub set_jump_mode   { set_hotkey_mode('jump')   }
+sub set_bump_mode   { set_hotkey_mode('bump')   }
+
 sub set_hotkey_mode ($m) {
+	$m =~ /^bump|jump|effect$/ or die("illegal hotkey mode: $m");
 	$mode = $m;	
 	popup($mode);
 	$hotkeys_active = 1;
