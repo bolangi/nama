@@ -124,7 +124,7 @@ alias:
 
 hotkeys:
   user:
-    F7: disable_hotkeys
+    F7: toggle_hotkeys
     F8: set_effect_mode
     F9: set_jump_mode
     F10: set_bump_mode
@@ -146,7 +146,7 @@ hotkeys:
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
-    F7: disable_hotkeys
+    F7: toggle_hotkeys
     F8: toggle_hotkeys
     F9: set_jump_mode
     F10: set_bump_mode
@@ -168,6 +168,7 @@ hotkeys:
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
+    F7: toggle_hotkeys
     F8: set_effect_mode
     F9: toggle_hotkeys
     F10: set_bump_mode
@@ -189,6 +190,7 @@ hotkeys:
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
+    F7: toggle_hotkeys
     F8: set_effect_mode
     F9: set_jump_mode
     F10: toggle_hotkeys
