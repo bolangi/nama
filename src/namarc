@@ -124,7 +124,10 @@ alias:
 
 hotkeys:
   user:
-    F8: activate_effect_hotkeys
+    F7: disable_hotkeys
+    F8: set_hotkey_mode('effect')
+    F9: set_hotkey_mode('jump')
+    F10: set_hotkey_mode('bump')
   effect:
     Insert: previous_track
     Delete: next_track
@@ -136,10 +139,10 @@ hotkeys:
     Right: increment_param
     Up: increment_param_10
     Down: decrement_param_10
-    M-Up: next_stepsize(3)
-    M-Down: previous_stepsize(3)
-    M-Right: next_stepsize
+    M-Right: next_stepsize # increase by factor of about two, next in sequence 1, 2, 5, 10...
     M-Left: previous_stepsize
+    M-Up: next_stepsize(3) # increase by factor of ten
+    M-Down: previous_stepsize(3)
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
@@ -155,9 +158,9 @@ hotkeys:
     Right: jump_forward
     Up: jump_forward(10)
     Down: jump_forward(-10)
+    M-Right: next_stepsize # increase by factor of about two, next in seqence 1s, 2s, 5s, 10s, 30s, 60s, 2m, 5m,...
     M-Left: previous_stepsize
-    M-Right: next_stepsize # approx factor of two, next in sequence 1, 2, 5, 10
-    M-Up: next_stepsize(3) # factor of ten, third in sequence 2, 5, 10
+    M-Up: next_stepsize(3) # increase by factor of about ten
     M-Down: previous_stepsize(3)
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
