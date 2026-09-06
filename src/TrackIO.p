@@ -380,7 +380,7 @@ sub import_audio  {
 		::terminal_say("importing $path as $destination, converting to $format");
 		::teardown_engine();
 		my $ecs = qq(-f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
-		my $path = join_path(::project_dir()."convert.ecs");
+		my $path = join_path(::project_dir(),"convert.ecs");
 		path($path)->spew_utf8($ecs);
 		::load_ecs($path) or ::throw("$path: load failed, aborting"), return;
 		::ecasound_iam('start');
