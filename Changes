@@ -5,7 +5,9 @@ Changes to Audio::Nama
     * full support for metronome and tempo maps, including tempo ramp
     * can indicate positions by bar/beat or bar/beat/tick
     * tickit terminal library replaces readline
-    * hotkeys mappings for adjusting effect parameters 
+    * keybindings for adjusting effect parameters (effect mode)
+    * keybindings for adjusting transport position (jump mode)
+    * keybindings for adjusting mark positions (bump mode)
     * custom key mappings
     * simple GUI for common recording/mixing scenario
     * refactor of key REC/MON/OFF status and routing algorithms
