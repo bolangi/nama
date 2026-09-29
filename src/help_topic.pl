@@ -61,10 +61,11 @@ project => <<'PROJECT',
    load-project, load      - load an existing project, e.g 'load <project-name>'
    create-project, create  - create a new project (usually under $HOME/nama/project-name/)
    list-projects, lp       - list all projects
-   undo                    - go back in time to the state before the last command
-   redo                    - reapply the step rolled back by undo
+   undo                    - go back to the previous project state, undoing the last command
+                             that changed project state
+   redo                    - reapply changes rolled back by undo, one commit at a time
    exit, quit              - exit program, saving state 
-
+   Ctrl-C                  - exit program without saving state
 
 PROJECT
 
@@ -72,9 +73,9 @@ track_basics => <<'TRACKBASICS',
    add-track, add          - Create a new track
 
       Example: add sax     - Add a new track 'sax', mono by default.
-                           - Sax is selected, and receives next commands.
+                           - Track 'sax' is selected, and receives subsequent commands.
                source 3    - Use soundcard channel 3 as input
-               rec         - Arm for recording an audio file (e.g. sax_1.wav)
+               rec         - Arm track for recording an audio file (e.g. sax_1.wav)
                start       - Start engine, begin recording
                stop        - Stop engine, close file and queue for playback
      
@@ -86,21 +87,21 @@ track_basics => <<'TRACKBASICS',
       width from JACK client 'synth'. Use of semicolons allow several 
       commands in one line of input.
 
-   import-audio, import    - Import a .wav file, resampling if necessary
-   remove-track            - Remove effects, parameters and GUI for current track
+   import-audio, import    - Import a WAV (RIFF) file, resampling if necessary
+   remove-track            - Remove current track (all WAV files remain)
 TRACKBASICS
 
 track_status => <<'TRACKSTATUS',
 
 Prepare conditions for next engine run
 
-   rec              -  REC: record and monitor audio source
-   mon              -  MON: monitor audio source
-   play             -  PLAY: queue .wav file for playback
-   off              -  OFF: omit track from audio network
-   show-tracks,show - show status, all tracks
-   show-track,sh    - show status of current track, including effects, versions, etc.
-   chains           - show the audio network configuration
+   rec               -  REC: record and monitor audio source
+   mon               -  MON: monitor audio source
+   play              -  PLAY: queue WAV file for playback
+   off               -  OFF: omit track from audio network
+   show-tracks, show - show status, all tracks
+   show-track, sh    - show status of current track, including effects, versions, etc.
+   chains            - show the audio network configuration
 TRACKSTATUS
 
 
@@ -123,12 +124,12 @@ bus.
 WAV_VERSIONS
 
 transport => <<TRANSPORT,
-   start, t, SPACE    -  Start processing. SPACE must be at beginning of command line.
-   stop, s, SPACE     -  Stop processing. SPACE must be at beginning of command line.
-   rewind, rw         -  Rewind  some number of seconds, i.e. rw 15
-   forward, fw        -  Forward some number of seconds, i.e. fw 75
-   setpos, sp         -  Set the playback head position, i.e. setpos 49.2
-   getpos, gp         -  Get the current head position 
+   start, t, SPACE      - Start processing. SPACE must be at beginning of command line.
+   stop, s, SPACE       - Stop processing. SPACE must be at beginning of command line.
+   rewind, rw           - Rewind  some number of seconds, i.e. rw 15
+   forward, fw          - Forward some number of seconds, i.e. fw 75
+   setpos, sp           - Set the playback head position, i.e. setpos 49.2
+   getpos, gp           - Get the current head position 
    jump-to-start, beg   - set playback head to beginning of audio file(s)
    jump-to-end, end     - set playback head to end
 TRANSPORT
@@ -166,7 +167,7 @@ effect_info => <<'EFFECT_INFO',
 EFFECT_INFO
 effect_manipulation => <<'EFFECT_DO',
    add-effect,     afx           - add an effect to the current track
-                                   Example: afx ea 50
+                                   Example: afx ea 50 (amplify to 50%, halving signal)
    add-controller, acl           - add an Ecasound controller to the parameter
                                    of an effect  
    insert-effect,  ifx           - insert an effect before another effect
@@ -191,16 +192,13 @@ marks => <<MARKS,
 Marks belong to the overall timeline, not to a particular
 track. They do not move when a track is repositioned on the
 timeline. Many commands that can take time positions as 
-arguments can also take mark names. This has the advantage
-that the time of effect will change when the mark is
-adjusted.  
-
+arguments can also take mark names or bar/beat/tick positions.
 MARKS
 
 defining_and_positioning_clips => <<'DEFINING_AND_POSITIONING_CLIPS',
    Defining and positioning clips
 
-   set-region,    srg      - reduce the track to playable region, a clip
+   set-region,    srg      - reduce current track to a playable region, a clip
    new-clip,      ncl      - make a clip by copying the current track and 
                              defining a region
    remove-region, rrg      - remove region definition or clip
@@ -258,30 +256,30 @@ Use inserts to pass an audio stream through an external effect
 such as a JACK client or an analog fx box hooked to
 your soundcard. 
 
-   add-insert,         ain    - add an insert to current track
-   remove-insert,      rin    - remove an insert from current track
+   add-insert, ain            - add an insert to current track
+   remove-insert, rin         - remove an insert from current track
    set-insert-wetness, wet    - set/query insert wetness 
                                 example: wet 99 (99% wet, 1% dry)
 INSERTS
 fades => <<FADES,
-   add-fade,         afd, fade  - add fade (in or out) to current track
+   add-fade, afd, fade        - add fade (in or out) to current track
                                   examples: 
                                       fade in song-start 0.2
                                   (fades in at mark 'song-start' over 0.2 s)
                                       fade out 0.5 song-start
                                   (fades out over 0.5 s ending at 'song-start')
                                   
-   remove-fade,      rfd        - remove fade (by index)
-   list-fade         lfd        - list all fades
+   remove-fade, rfd           - remove fade (by index)
+   list-fade, lfd             - list all fades
 FADES
 
 group => <<GROUP,
 Group control
-   new-bunch, bunch, nb       - name a bunch of tracks
-                                e.g. bunch strings violins cello bass
-                                e.g. bunch 3 4 6 7 (track indexes)
-   list-bunches,     lb       - list groups of tracks (bunches)
-   remove-bunches,   rb       - remove bunch definitions
+   new-bunch, bunch, nb  - name a bunch of tracks
+                            e.g. bunch strings violins cello bass
+                            e.g. bunch 3 4 6 7 (track indexes)
+   list-bunches, lb      - list groups of tracks (bunches)
+   remove-bunches, rb    - remove bunch definitions
 
    for                   - execute commands on several tracks 
                            by name, or by specifying a bus or bunch
@@ -300,8 +298,7 @@ Group control
 GROUP
 
 bus => <<BUS,
-   add-bus, abs         - create a sub-bus feeding a regular user track
-                          of the same name
+   add-bus, abs         - create a sub-bus feeding a track of the same name
                           example: add-bus Strings 
                                    add-tracks violin cello bass
                                    for cello violin bass; move-to-bus Strings
