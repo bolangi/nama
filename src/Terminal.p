@@ -73,6 +73,7 @@ sub initialize_terminal {
 }
 
 sub finish_terminal_startup {
+	$vbox->set_window($rootwin) if $ui->isa('::Graphical');
 	create_entry_widget();
 	setup_key_bindings();
 	$tickit->later(\&install_entry_item);
