@@ -12,9 +12,9 @@ Changes to Audio::Nama
     * simple GUI for common recording/mixing scenario
     * refactor of key REC/MON/OFF status and routing algorithms
     * rewritten logging system with full diagnostics
-    * refactor timeline, region and clip positioning, nomenclature
+    * refactor timeline, region and clip positioning, naming
     * improvements to show-tracks display and help system
-    * documentation fixes
+    * documentation updates
     * improve fade behavior, both planned envelopes and on demand
 
 1.605 July 4, 2026
