@@ -1,1 +1,1 @@
-cd $MD; ./Build.PL && ./Build && ./Build test && mbtiny dist
+cd .. ; ./Build.PL && ./Build && ./Build test && mbtiny regenerate META.json META.yml && mbtiny dist
