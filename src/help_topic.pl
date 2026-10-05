@@ -132,7 +132,12 @@ transport => <<TRANSPORT,
    getpos, gp           - Get the current head position 
    jump-to-start, beg   - set playback head to beginning of audio file(s)
    jump-to-end, end     - set playback head to end
+
+   Commands that take time positions in seconds can also
+   take mark names and h:m:s, m:s. With a tempo map, you can
+   use bar/beat or bar/beat/tick notations.
 TRANSPORT
+
 track_fader => <<'TRACKFADER',
    Track volume/pan fader can be used to change settings for the current track.
 
@@ -191,8 +196,7 @@ marks => <<MARKS,
 
 Marks belong to the overall timeline, not to a particular
 track. They do not move when a track is repositioned on the
-timeline. Many commands that can take time positions as 
-arguments can also take mark names or bar/beat/tick positions.
+timeline. 
 MARKS
 
 defining_and_positioning_clips => <<'DEFINING_AND_POSITIONING_CLIPS',
