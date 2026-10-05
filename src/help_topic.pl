@@ -134,8 +134,10 @@ transport => <<TRANSPORT,
    jump-to-end, end     - set playback head to end
 
    Commands that take time positions in seconds can also
-   take mark names and h:m:s, m:s. With a tempo map, you can
-   use bar/beat or bar/beat/tick notations.
+   take mark names and H:M:S, M:S. Seconds can be decimal
+   values. With a tempo map, you can use bar/beat or
+   bar/beat/tick notations.
+
 TRANSPORT
 
 track_fader => <<'TRACKFADER',
