@@ -333,7 +333,7 @@ forward: _forward timevalue {
 	::forward( $item{timevalue} ); 1}
 rewind: _rewind timevalue {
 	::rewind( $item{timevalue} ); 1}
-timevalue: bar_beat_tick | bar_beat | min_sec | decimal_seconds  
+timevalue: bar_beat_tick | bar_beat | hour_min_sec | min_sec | decimal_seconds  
 seconds: samples  # samples returns seconds
 seconds: /\d+/
 samples: /\d+sa/ {
@@ -341,7 +341,8 @@ samples: /\d+sa/ {
  	#print "found $samples samples\n";
  	$return = $samples/$::project->{sample_rate}
 }
-min_sec: /\d+/ ':' /\d+/ { $item[1] * 60 + $item[3] }
+hour_min_sec: /\d+/ ':' /\d+/ ':' decimal_seconds { $item[1] * 3600 + $item[3] * 60 + $item{decimal_seconds} }
+min_sec: /\d+/ ':' decimal_seconds { $item[1] * 60 + $item{decimal_seconds} }
 
 notation_to_time: _notation_to_time timevalue { ::terminal_say( $item{timevalue} );1 }
 bar_beat_tick: bar '/' beat '/' tick { ::notation_to_time(@item{qw(bar beat tick)}) } 
