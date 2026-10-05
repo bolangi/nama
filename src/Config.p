@@ -74,7 +74,7 @@ sub read_config {
 		unless ref($cfg) eq 'HASH';
 	my %cfg = %$cfg;
 	logpkg('debug', "config file:", Dumper \%cfg);
-	*subst = \%{$cfg{abbreviations}}; # alias
+	*subst = \$cfg{abbreviations}->%*; # alias
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
 	assign( 
@@ -116,7 +116,7 @@ sub walk_tree {
 	my $ref = shift;
 	map { substitute($ref, $_) } 
 		grep {$_ ne q(abbreviations)} 
-			keys %{ $ref };
+			keys $ref->%*;
 }
 sub substitute{
 	my ($parent, $key)  = @_;

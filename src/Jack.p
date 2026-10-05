@@ -133,7 +133,7 @@ sub parse_port_connections {
 }
 sub jack_port_to_nama {
 	my $jack_port = shift;
-	grep{ /$config->{ecasound_jack_client_name}/ and $jack->{is_own_port}->{$_} } @{ $jack->{connections}->{$jack_port} };
+	grep{ /$config->{ecasound_jack_client_name}/ and $jack->{is_own_port}->{$_} } $jack->{connections}->{$jack_port}->@*;
 }
 	
 sub parse_port_latency {
@@ -239,9 +239,9 @@ sub parse_ports_list {
 				s/ $//; # remove trailing space
 
 				# make entries for 'system' and 'system:capture_1'
-				push @{ $jack->{clients}->{$_}->{$direction} }, $_;
+				push $jack->{clients}->{$_}->{$direction}->@*, $_;
 				my ($client, $port) = /(.+?):(.+)/;
-				push @{ $jack->{clients}->{$client}->{$direction} }, $_; 
+				push $jack->{clients}->{$client}->{$direction}->@*, $_; 
 
 		 } @port_aliases;
 

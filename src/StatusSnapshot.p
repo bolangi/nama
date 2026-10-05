@@ -51,11 +51,11 @@ sub status_snapshot {
 					 jack_running	=> $jack->{jackd_running},
 					 tracks			=> [],
 					 buses			=> [], );
-	map { push @{$snapshot{tracks}}, $_->snapshot(\@relevant_track_fields) }
+	map { push $snapshot{tracks}->@*, $_->snapshot(\@relevant_track_fields) }
 	grep{ ! $_->candidate_off } grep { $_->group ne 'Temp' } ::all_tracks();
 	for my $bus (sort { $a->name cmp $b->name } ::Bus::all()){
 		my %bus_snapshot = map { $_ => $bus->$_ } @relevant_bus_fields;
-		push @{$snapshot{buses}}, \%bus_snapshot;
+		push $snapshot{buses}->@*, \%bus_snapshot;
 	}
 	\%snapshot;
 }

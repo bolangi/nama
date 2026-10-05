@@ -228,7 +228,7 @@ sub update_cache_map {
 	my $track = $args->{track};
 
 	my @inserts = $track->get_inserts;
-	my @all_ops = @{$track->ops};
+	my @all_ops = $track->ops->@*;
 	my @ops_to_remove = $track->user_ops;
 	
 	my %constructor_args = 

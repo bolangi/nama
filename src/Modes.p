@@ -74,7 +74,7 @@ sub master_on {
 		add_mastering_effects();
 	} else { 
 		unhide_mastering_tracks();
-		map{ $ui->track_gui($tn{$_}->n) } @{$mastering->{track_names}};
+		map{ $ui->track_gui($tn{$_}->n) } $mastering->{track_names}->@*;
 	}
 
 }
@@ -82,8 +82,8 @@ sub master_off {
 	return if ! $mode->mastering;
 	hide_mastering_tracks();
 	map{ $ui->remove_track_gui($tn{$_}->n) 
-		} @{$mastering->{track_names}};
-	$this_track = $tn{Main} if grep{ $this_track->name eq $_} @{$mastering->{track_names}};
+		} $mastering->{track_names}->@*;
+	$this_track = $tn{Main} if grep{ $this_track->name eq $_} $mastering->{track_names}->@*;
 ;
 }
 
@@ -97,7 +97,7 @@ sub add_mastering_tracks {
 		);
 		$ui->track_gui( $track->n );
 
- 	} grep{ $_ ne 'Boost' } @{$mastering->{track_names}};
+ 	} grep{ $_ ne 'Boost' } $mastering->{track_names}->@*;
 	my $track = ::BoostTrack->new(
 		name 		=> 'Boost', 
 		rw 			=> MON,

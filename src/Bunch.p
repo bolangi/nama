@@ -57,7 +57,7 @@ sub bunch_tracks {
 		$bunchy = uc $bunchy;
 		@tracks = grep{$tn{$_}->$method eq $bunchy} 
 				$bn{$this_bus}->tracks
-	} elsif ( $project->{bunch}->{$bunchy} and @tracks = @{$project->{bunch}->{$bunchy}}  ) {
+	} elsif ( $project->{bunch}->{$bunchy} and @tracks = $project->{bunch}->{$bunchy}->@*  ) {
 		logpkg('debug', "bunch tracks: @tracks");
 	} else { throw("$bunchy: no matching bunch identifier found") }
 	@tracks;

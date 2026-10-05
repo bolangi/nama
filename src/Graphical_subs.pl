@@ -184,12 +184,12 @@ sub init_gui {
 
 my @color_items = map { [ 'command' => $_, 
 							-command  => colorset('mw', $_ ) ]
-						} @{$gui->{_palette_fields}};
+						} $gui->{_palette_fields}->@*;
 $gui->{palette}->AddItems( @color_items);
 
 @color_items = map { [ 'command' => $_, 
 							-command  => namaset( $_ ) ]
-						} @{$gui->{_nama_fields}};
+						} $gui->{_nama_fields}->@*;
 
 	$gui->{add_track}->{add_mono}->configure( 
 			-text => 'Add Mono Track',
@@ -487,7 +487,7 @@ sub global_version_buttons {
 	
 	my @user_track_indices = grep { $_ > 2 } map {$_->n} ::audio_tracks();
 	
-		next unless grep{  grep{ $v == $_ } @{ $ti{$_}->versions } }
+		next unless grep{  grep{ $v == $_ } $ti{$_}->versions->@* }
 			@user_track_indices;
 		
 
@@ -565,10 +565,10 @@ sub track_gui {
 					# -relief => 'sunken',
 					-tearoff => 0);
 	my @versions = '';
-	#push @versions, @{$ti{$n}->versions} if @{$ti{$n}->versions};
+	#push @versions, $ti{$n}->versions->@* if $ti{$n}->versions->@*;
 	my $ref = ref $ti{$n}->versions ;
 		$ref =~ /ARRAY/ and 
-		push (@versions, @{$ti{$n}->versions}) or
+		push (@versions, $ti{$n}->versions->@*) or
 		croak "chain $n, found unexpectedly $ref\n";;
 	my $indicator;
 	for my $v (@versions) {
@@ -729,15 +729,15 @@ sub track_gui {
 	# effects, held by track_widget->n->effects is the frame for
 	# all effects of the track
 
-	@{ $gui->{tracks}->{$n} }{qw(name version rw ch_r ch_m mute effects)} 
+	$gui->{tracks}->{$n}->@{qw(name version rw ch_r ch_m mute effects)} 
 		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
 	#logpkg('debug', "=============$gui->{tracks}\n",sub{json_out($gui->{tracks})});
 	my $independent_effects_frame 
-		= ${ $gui->{tracks}->{$n}->{effects} }->Frame->pack(-fill => 'x');
+		= ($gui->{tracks}->{$n}->{effects}->$*)->Frame->pack(-fill => 'x');
 
 
 	my $controllers_frame 
-		= ${ $gui->{tracks}->{$n}->{effects} }->Frame->pack(-fill => 'x');
+		= ($gui->{tracks}->{$n}->{effects}->$*)->Frame->pack(-fill => 'x');
 	
 	# parents are the independent effects
 	# children are controllers for various paramters
@@ -800,7 +800,7 @@ sub remove_track_gui {
  	my $n = shift;
 	logsub((caller(0))[3]);
 	return unless $gui->{tracks_remove}->{$n};
- 	map {$_->destroy  } @{ $gui->{tracks_remove}->{$n} };
+ 	map {$_->destroy  } $gui->{tracks_remove}->{$n}->@*;
 	delete $gui->{tracks_remove}->{$n};
 	delete $gui->{tracks}->{$n};
 }
@@ -856,7 +856,7 @@ sub update_version_button {
 sub add_effect_gui {
 		logsub((caller(0))[3]);
 		my $ui = shift;
-		my %p 			= %{shift()};
+		my %p 			= shift()->%*;
 		my ($n,$code,$id,$parent,$parameter,$FX) =
 			@p{qw(chain type id parent parameter self)};
 		my $i = $fx_cache->{full_label_to_index}->{$code};
@@ -969,7 +969,7 @@ sub destroy_widgets {
 	my @children = $gui->{track_frame}->children;
 	# leave field labels (first row)
 	map{ $_->destroy  } @children[11..$#children]; # fragile
-	%{$gui->{marks}} and map{ $_->destroy } values %{$gui->{marks}};
+	$gui->{marks}->%* and map{ $_->destroy } values $gui->{marks}->%*;
 }
 sub remove_effect_gui { 
 	my $ui = shift;
@@ -979,7 +979,7 @@ sub remove_effect_gui {
 	my $n = $FX->chain;
 	logpkg('debug', "id: $id, chain: $n");
 
-	logpkg('debug', "i have widgets for these ids: ", join " ",keys %{$gui->{fx}});
+	logpkg('debug', "i have widgets for these ids: ", join " ",keys $gui->{fx}->%*);
 	logpkg('debug', "preparing to destroy: $id");
 	return unless defined $gui->{fx}->{$id};
 	$gui->{fx}->{$id}->destroy();
@@ -996,7 +996,7 @@ sub effect_button {
 	my @indices = ($start..$end);
 	if ($start >= $fx_cache->{split}->{ladspa}{a} and $start <= $fx_cache->{split}->{ladspa}{z}){
 		@indices = ();
-		@indices = @{$fx_cache->{ladspa_sorted}}[$start..$end];
+		@indices = $fx_cache->{ladspa_sorted}->@[$start..$end];
 		logpkg('debug', "length sorted indices list: ",scalar @indices );
 	logpkg('debug', "Indices: @indices");
 	}
@@ -1023,7 +1023,7 @@ sub make_scale {
 	
 	logsub((caller(0))[3]);
 	my $ref = shift;
-	my %p = %{$ref};
+	my %p = $ref->%*;
 # 	%p contains following:
 # 	id   => operator id
 # 	parent => parent widget, i.e. the frame
@@ -1060,10 +1060,10 @@ sub make_scale {
 	if 	($display_type eq q(scale) ) { 
 
 		# return scale type controller widgets
-		my $frame = ${ $p{parent} }->Frame;
+		my $frame = ($p{parent}->$*)->Frame;
 			
 
-		#return ${ $p{parent} }->Scale(
+		#return ($p{parent}->$*)->Scale(
 		
 		my $log_display;
 		
@@ -1112,7 +1112,7 @@ sub make_scale {
 
 	 	# then return field type controller widget
 
-		return ${ $p{parent} }->Entry(
+		return ($p{parent}->$*)->Entry(
 			-textvariable =>\$FX->params->[$p],
 			-width => 6,
 	#		-command => sub { ::update_ecasound_effect($id, $p, $FX->params->[$p]) },
@@ -1241,7 +1241,7 @@ sub get_saved_colors {
 	#print "\n1namapalette: \n", json_out($gui->{_nama_palette});
 	my %setformat;
 	map{ $setformat{$_} = $gui->{_palette}->{mw}{$_} if $gui->{_palette}->{mw}{$_}  } 
-		keys %{$gui->{_palette}->{mw}};	
+		keys $gui->{_palette}->{mw}->%*;	
 	#print "\nsetformat: \n", json_out(\%setformat);
 	$gui->{mw}->setPalette( %setformat );
 }
@@ -1307,7 +1307,7 @@ sub colorchooser {
 	$new_color;
 }
 sub init_palettefields {
-	@{$gui->{_palette_fields}} = qw[ 
+	$gui->{_palette_fields}->@* = qw[ 
 		foreground
 		background
 		activeForeground
@@ -1322,7 +1322,7 @@ sub init_palettefields {
 		troughColor
 	];
 
-	@{$gui->{_nama_fields}} = qw [
+	$gui->{_nama_fields}->@* = qw [
 		RecForeground
 		RecBackground
 		MonForeground

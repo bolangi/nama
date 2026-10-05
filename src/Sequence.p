@@ -40,25 +40,25 @@ sub rw {
 sub insert_item {
 	my $self = shift;
 	my ($item, $index) = @_;
-	$self->append_item($item), return if $index == @{$self->{items}} + 1;
+	$self->append_item($item), return if $index == $self->{items}->@* + 1;
 	$self->verify_item($index) or die "$index: sequence index out of range";
-	splice @{$self->{items}}, $index - 1,0, $item->name 
+	splice $self->{items}->@*, $index - 1,0, $item->name 
 }
 sub verify_item {
 	my ($self, $index) = @_;
-	$index >= 1 and $index <= scalar @{$self->items} 
+	$index >= 1 and $index <= scalar $self->items->@* 
 }
 sub delete_item {
 	my $self = shift;
 	my $index = shift;
 	$self->verify_item($index) or die "$index: sequence index out of range";
-	my $trackname = splice(@{$self->{items}}, $index - 1, 1);
+	my $trackname = splice($self->{items}->@*, $index - 1, 1);
 	$::tn{$trackname} and $::tn{$trackname}->remove;
 }
 sub append_item {
 	my $self = shift;
 	my $item = shift;
-	push( @{$self->{items}}, $item->name );
+	push( $self->{items}->@*, $item->name );
 }
 sub item {
 	my $self = shift;
@@ -75,7 +75,7 @@ sub list_output {
 				$::tn{$_}->n,
 				$_,
 				sprintf("%.3f %.3f", $::tn{$_}->duration, $::tn{$_}->timeline_endpoint),
-		} @{$self->items}
+		} $self->items->@*
 }
 sub remove {
 	my $sequence = shift;
@@ -94,7 +94,7 @@ sub remove {
 	
 		# remove mix track unless it has some WAV files
 
-		$mix_track->remove unless scalar @{ $mix_track->versions };
+		$mix_track->remove unless scalar $mix_track->versions->@*;
 	}
 
 	# remove sequence from index
@@ -134,7 +134,7 @@ sub new_spacer {
 		rw => OFF,
 		group => $self->name,
 	);
-	$self->insert_item( $spacer, $position || ( scalar @{ $self->{items} } + 1 ))
+	$self->insert_item( $spacer, $position || ( scalar $self->{items}->@* + 1 ))
 }
 sub unique_clip_name {
 	my ($self, $trackname, $version) = @_;
@@ -150,7 +150,7 @@ sub new_sequence {
 
 	my %args = @_;
 	my $name = $args{name};
-	my @tracks = defined $args{tracks} ? @{ $args{tracks} } : ();
+	my @tracks = defined $args{tracks} ? $args{tracks}->@* : ();
 	my $group = $args{group} || 'Main';
 	my $mix_track = $tn{$name} || add_track($name, group => $group);
 	$mix_track->set( rw => MON,

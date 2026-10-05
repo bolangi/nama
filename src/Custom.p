@@ -7,7 +7,7 @@ sub setup_user_customization {
 	my $filename = $file->user_customization();
 
 	# effect aliases from .namarc
-	for( keys %{$config->{alias}->{effect}} )
+	for( keys $config->{alias}->{effect}->%* )
 	{ my $longform = $config->{alias}->{effect}->{$_};
 		 if(effect_index($longform))
 			{
@@ -30,7 +30,7 @@ sub setup_user_customization {
 	{ no warnings 'redefine';
 		*prompt = $custom{prompt} if $custom{prompt};
 	}
-	my @commands = keys %{ $custom{commands} };
+	my @commands = keys $custom{commands}->%*;
 	for my $cmd(@commands){
 		#my $coderef = gen_coderef($cmd,$custom{commands}{$cmd}) or next;
 		$text->{user_command}->{$cmd} = $custom{commands}{$cmd};

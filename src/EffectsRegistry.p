@@ -143,7 +143,7 @@ sub generate_mappings_for_shortcuts {
 		}
 		}
 		$fx_cache->{partial_label_to_full}->{$code} = $code;
-	} keys %{$fx_cache->{full_label_to_index}};
+	} keys $fx_cache->{full_label_to_index}->%*;
 	#print json_out $fx_cache->{partial_label_to_full};
 }
 { my %dispatch =
@@ -184,7 +184,7 @@ sub extract_effects_data {
 		$fx_cache->{registry}->[$j]->{display} = qq(field);
 		$fx_cache->{registry}->[$j]->{plugin_type} = $plugin_type;
 		$fx_cache->{user_help}->[$j] = $dispatch{$plugin_type}->($line);
-		map{ push @{$fx_cache->{registry}->[$j]->{params}}, {name => $_} } @p_names
+		map{ push $fx_cache->{registry}->[$j]->{params}->@*, {name => $_} } @p_names
 			if @p_names;
 	}
 
@@ -196,10 +196,10 @@ sub sort_ladspa_effects {
 	my $aa = $fx_cache->{split}->{ladspa}{a};
 	my $zz = $fx_cache->{split}->{ladspa}{z};
 #	print "start: $aa end $zz\n";
-	map{push @{$fx_cache->{ladspa_sorted}}, 0} ( 1 .. $aa ); # fills array slice [0..$aa-1]
-	splice @{$fx_cache->{ladspa_sorted}}, $aa, 0,
+	map{push $fx_cache->{ladspa_sorted}->@*, 0} ( 1 .. $aa ); # fills array slice [0..$aa-1]
+	splice $fx_cache->{ladspa_sorted}->@*, $aa, 0,
 		 sort { $fx_cache->{registry}->[$a]->{name} cmp $fx_cache->{registry}->[$b]->{name} } ($aa .. $zz) ;
-	logpkg('debug', "sorted array length: ". scalar @{$fx_cache->{ladspa_sorted}});
+	logpkg('debug', "sorted array length: ". scalar $fx_cache->{ladspa_sorted}->@*);
 }		
 sub run_external_ecasound_cmd {
 	my $cmd = shift;
@@ -398,7 +398,7 @@ sub read_in_effects_data {
 
 sub integrate_cop_hints {
 
-	my @cop_hints =  @{ yaml_in( get_data_section('ecasound_chain_operator_hints_yml')) };
+	my @cop_hints =  yaml_in( get_data_section('ecasound_chain_operator_hints_yml'))->@*;
 	for my $hashref ( @cop_hints ){
 		#print "cop hints ref type is: ",ref $hashref, $/;
 		my $code = $hashref->{code};
@@ -494,7 +494,7 @@ sub get_ladspa_hints{
 		#last if ++$i > 10;
 	}
 		
-	for (1..scalar @{ $fx_cache->{user_help}} )
+	for (1..scalar $fx_cache->{user_help}->@* )
 	{
 		next if $fx_cache->{registry}->[$_]->{plugin_type} ne 'ladspa';
 		my $code = $fx_cache->{registry}->[$_]->{code};
@@ -560,16 +560,16 @@ sub integrate_ladspa_hints {
 		if ($i) {
 			$fx_cache->{registry}->[$i]->{params} = $fx_cache->{ladspa}->{$_}->{params};
 			# we revise the number of parameters read in from ladspa-register
-			$fx_cache->{registry}->[$i]->{count} = scalar @{$fx_cache->{ladspa}->{$_}->{params}};
+			$fx_cache->{registry}->[$i]->{count} = scalar $fx_cache->{ladspa}->{$_}->{params}->@*;
 			$fx_cache->{registry}->[$i]->{display} = $fx_cache->{ladspa}->{$_}->{display};
 		}
-	} keys %{$fx_cache->{ladspa}};
+	} keys $fx_cache->{ladspa}->%*;
 
 my %L;
 my %M;
 
-map { $L{$_}++ } keys %{$fx_cache->{ladspa}};
-map { $M{$_}++ } grep {/el:/} keys %{$fx_cache->{full_label_to_index}};
+map { $L{$_}++ } keys $fx_cache->{ladspa}->%*;
+map { $M{$_}++ } grep {/el:/} keys $fx_cache->{full_label_to_index}->%*;
 
 for my $k (keys %L) {
 	$M{$k} or logpkg('debug', "$k not found in ecasound listing");
@@ -579,9 +579,9 @@ for my $k (keys %M) {
 }
 
 
-logpkg('debug', sub {join "\n", sort keys %{$fx_cache->{ladspa}}});
+logpkg('debug', sub {join "\n", sort keys $fx_cache->{ladspa}->%*});
 logpkg('debug', '-' x 60);
-logpkg('debug', sub{join "\n", grep {/el:/} sort keys %{$fx_cache->{full_label_to_index}}});
+logpkg('debug', sub{join "\n", grep {/el:/} sort keys $fx_cache->{full_label_to_index}->%*});
 
 #print json_out $fx_cache->{registry}; exit;
 

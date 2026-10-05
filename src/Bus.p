@@ -200,7 +200,7 @@ sub remove {
 	my $mix_track = $::tn{$bus->name};
 
 	# remove mix track unless it has some WAV files
-	$mix_track->remove if defined $mix_track and not scalar @{ $mix_track->versions };
+	$mix_track->remove if defined $mix_track and not scalar $mix_track->versions->@*;
 
 	# remove bus from index
 	

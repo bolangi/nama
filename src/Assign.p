@@ -30,7 +30,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
         config_vars
 ) ] );
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+our @EXPORT_OK = ( $EXPORT_TAGS{'all'}->@* );
 
 our @EXPORT = ();
 
@@ -70,7 +70,7 @@ sub assign {
 	} 
 	$class = $h{class};
  	$class .= "::" unless $class =~ /::$/;  # SKIP_PREPROC
-	my @vars = @{ $h{vars} };
+	my @vars = $h{vars}->@*;
 	my $ref = $h{data};
 	my $type = ref $ref;
 	logpkg('debug',<<ASSIGN);
@@ -109,8 +109,8 @@ ASSIGN
 	
 	#print join " ", "Variables:\n", @vars, $/ ;
 	croak "expected hash" if ref $ref !~ /HASH/;
-	my @keys =  keys %{ $ref }; # identifiers, *no* sigils
-	logpkg('debug',sub{ join " ","found keys: ", keys %{ $ref },"\n---\n"});
+	my @keys =  keys $ref->%*; # identifiers, *no* sigils
+	logpkg('debug',sub{ join " ","found keys: ", keys $ref->%*,"\n---\n"});
 	map{  
 		my $eval;
 		my $key = $_;
@@ -215,7 +215,7 @@ sub assign_singletons {
 				logpkg('debug',"eval: $cmd");
 				eval $cmd;
 				logpkg('debug',"error during eval: $@") if $@;
-			} keys %{ $data->{$ident} }
+			} keys $data->{$ident}->%*
 		}
 	} @singleton_idents;  # list of "singleton" variables
 }
@@ -253,7 +253,7 @@ sub serialize {
 	logsub((caller(0))[3]);
 
 	my %h = @_;
-	my @vars = @{ $h{vars} };
+	my @vars = $h{vars}->@*;
 	my $class = $h{class};
 	my $file  = $h{file};
 	my $format = $h{format} // 'perl'; # default to Data::Dumper::Concise

@@ -65,12 +65,12 @@ sub new {
 sub refresh_fade_controller {
 	my $track = shift;
 	my $envelope = fader_envelope($track);
-	my @pairs = @{$envelope->{pairs}};
+	my @pairs = $envelope->{pairs}->@*;
 	add_fader($track->name);	
 	my $operator  = $track->fader_effect->type;
 	my $off_level = $config->{mute_level}->{$operator};
 	my $on_level  = $config->{unity_level}->{$operator};
-	my @controllers = @{$track->fader_effect->owned_ids};
+	my @controllers = $track->fader_effect->owned_ids->@*;
 	logpkg('debug',$track->name, ": existing controllers: @controllers");
 	for my $controller (@controllers)
 	{
@@ -235,7 +235,7 @@ sub fader_envelope {
 # $op:   'ea' or 'eadb'
 
 sub spec_to_pairs {
-	my ($from, $to, $type, $op) = @{$_[0]};
+	my ($from, $to, $type, $op) = $_[0]->@*;
 	logpkg('debug',"from: $from, to: $to, type: $type");
 	my $cutpos;
 	my @pairs;

@@ -124,9 +124,9 @@ sub save_system_state {
 # 	@history = $text->{term}->GetHistory if $text->{term};
 # 	my %seen;
 # 	$text->{command_history} = [];
-# 	map { push @{$text->{command_history}}, $_ 
+# 	map { push $text->{command_history}->@*, $_ 
 # 			unless $seen{$_}; $seen{$_}++ } @history;
-	my $max = scalar @{$text->{command_history}};
+	my $max = scalar $text->{command_history}->@*;
 	$max = 50 if $max > 50;
 	my $hist = $text->{command_history}; 
 	@$hist = @$hist[-$max..-1];
@@ -327,7 +327,7 @@ sub restore_state_from_file {
 
 	# restore command history
 	
-	#$text->{term}->SetHistory(@{$text->{command_history}})
+	#$text->{term}->SetHistory($text->{command_history}->@*)
 	#	if (ref $text->{command_history}) =~ /ARRAY/;
 
 ;

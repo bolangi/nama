@@ -220,7 +220,7 @@ sub restart_ecasound {
 }
 sub kill_my_ecasound_processes {
 	my @signals = (15, 9);
-	map{ kill $_, @{$en{$::config->{ecasound_engine_name}}->{pids}}; sleeper(1)} @signals;
+	map{ kill $_, $en{$::config->{ecasound_engine_name}}->{pids}->@*; sleeper(1)} @signals;
 }
 
 

@@ -163,7 +163,7 @@ sub explain_track_status {
 		"Candidate graph: ".($resolution->{in_candidate_graph} ? 'yes' : 'no'),
 		"Final graph: ".($resolution->{in_final_graph} ? 'yes' : 'no');
 	my %seen;
-	push @lines, grep { ! $seen{$_}++ } @{$resolution->{factors} // []};
+	push @lines, grep { ! $seen{$_}++ } ($resolution->{factors} // [])->@*;
 	join("\n", @lines)."\n"
 }
 
@@ -337,15 +337,15 @@ sub prune_graph {
 	my @removed = ::edit_mode()
 		? ::Graph::remove_out_of_bounds_tracks($g)
 		: ();
-	push @{$prune_report->{removed}},
+	push $prune_report->{removed}->@*,
 		map { +{ track => $_, reason => 'out-of-bounds' } } @removed;
 	logpkg('debug',"Graph after remove_out_of_bounds_tracks:\n$g");
 	@removed = ::Graph::recursively_remove_inputless_tracks($g);
-	push @{$prune_report->{removed}},
+	push $prune_report->{removed}->@*,
 		map { +{ track => $_, reason => 'no-source' } } @removed;
 	logpkg('debug',"Graph after recursively_remove_inputless_tracks:\n$g");
 	@removed = ::Graph::recursively_remove_outputless_tracks($g);
-	push @{$prune_report->{removed}},
+	push $prune_report->{removed}->@*,
 		map { +{ track => $_, reason => 'no-sink' } } @removed;
 	logpkg('debug',"Graph after recursively_remove_outputless_tracks:\n$g");
 	# A regular recording track has a sibling temporary vertex for its
@@ -363,7 +363,7 @@ sub prune_graph {
 			$resolution->{candidate_rw} eq REC
 			&& $recording_path{$name} ? 1 : 0;
 		my ($removed) = grep { $_->{track} eq $name }
-			@{$prune_report->{removed}};
+			$prune_report->{removed}->@*;
 		$resolution->{in_final_graph} =
 			($g->has_vertex($name) || $resolution->{recording_path}) ? 1 : 0;
 		$resolution->{effective_rw} = $resolution->{in_final_graph}
@@ -399,7 +399,7 @@ sub process_routing_graph {
 	
 	map { 
 		$inputs{$_->ecs_string} //= [];
-		push @{$inputs{$_->ecs_string}}, $_->chain_id;
+		push $inputs{$_->ecs_string}->@*, $_->chain_id;
 		$post_input{$_->chain_id} .= $_->ecs_extra if $_->ecs_extra;
 		$post_input{$_->chain_id} .= join ' ', map{ $_->ecasound_format } $_->channel_ops if $_->channel_ops 
 	} 
@@ -407,7 +407,7 @@ sub process_routing_graph {
 
 	map { 
 		$outputs{$_->ecs_string} //= [];
-		push @{$outputs{$_->ecs_string}}, $_->chain_id;
+		push $outputs{$_->ecs_string}->@*, $_->chain_id;
 		$pre_output{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
 	} 
 	grep { $_->direction eq 'output' } @io;
@@ -548,9 +548,9 @@ sub massaged_endpoint {
 sub decode_edge {
 	# assume track-endpoint or endpoint-track
 	# return track, endpoint
-	my ($a, $b) = @{$_[0]};
+	my ($a, $b) = $_[0]->@*;
 	#say "a: $a, b: $b";
-	my ($name, $endpoint) = $tn{$a} ? @{$_[0]} : reverse @{$_[0]} ;
+	my ($name, $endpoint) = $tn{$a} ? $_[0]->@* : reverse $_[0]->@* ;
 	my $direction = $tn{$a} ? 'output' : 'input';
 	($name, $endpoint, $direction)
 }

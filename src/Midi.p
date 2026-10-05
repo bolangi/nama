@@ -35,7 +35,7 @@ sub midish_cmd {
 	print $fh_midi_write "$command\n";
 	#say "applied midish command: $command";
 	$project->{midi_history} //=[];
-	push  @{ $project->{midi_history} },$command;
+	push  $project->{midi_history}->@*,$command;
 
 	my $length = 2**16;
 	sleeper(0.05);
@@ -132,7 +132,7 @@ sub midi_rec_cleanup {
 
 	my $version = $track->current_version;
 	$track->set_version($version);
-		push @{$track->midi_versions}, $version;
+		push $track->midi_versions->@*, $version;
 		$track->set(rw => PLAY);
 		my $cmd = join ' ', 'chdup', $config->{midi_record_buffer}, $track->source_id, $track->midi_version;
 		::terminal_say("cmd: $cmd");

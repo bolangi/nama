@@ -168,7 +168,7 @@ sub remove {
 	# remove corresponding fades
 	map{ $_->remove } grep { $_->track eq $track->name } values %::Fade::by_index;
 	# remove effects
- 	map{ ::remove_effect($_) } @{ $track->ops };
+ 	map{ ::remove_effect($_) } $track->ops->@*;
  	delete $by_index{$n};
  	delete $by_name{$track->name};
 }
@@ -179,7 +179,7 @@ sub remove {
 sub as_hash {
 	my $self = shift;
 	my $class = ref $self;
-	my %guts = %{ $self };
+	my %guts = $self->%*;
 	$guts{class} = $class; # make sure we save the correct class name
 	return \%guts;
 }
@@ -463,7 +463,7 @@ our @ISA = qw( ::VersionTrack ::Track );
 sub sequence { my $self = shift; $::bn{$self->group} };
 
 sub index { my $self = shift; my $i = 0;
-	for( @{$self->sequence->items} ){
+	for( $self->sequence->items->@* ){
 		$i++;
 		return $i if $self->name eq $_
 	}
@@ -545,7 +545,7 @@ sub mute {
 	my $track = shift;
 	my $engine = $track->engine or return;
 	$engine->mute_track($track->midi_version_name($_))
-		for @{$track->versions};
+		for $track->versions->@*;
 }
 sub unmute { 
 	my $track = shift;
@@ -553,7 +553,7 @@ sub unmute {
 	my $current = $track->current_midi;
 	$engine->mute_track($track->midi_version_name($_))
 		for grep { $track->midi_version_name($_) ne ($current // '') }
-			@{$track->versions};
+			$track->versions->@*;
 	$engine->unmute_track($current);
 }
 sub rw_set {
@@ -659,7 +659,7 @@ sub set_version {
 	if ($n == 0){
 		::pager("$name: version set to zero, following bus default\n");
 		$track->set(version => $n)
-	} elsif ( grep{ $n == $_ } @{$track->versions} ){
+	} elsif ( grep{ $n == $_ } $track->versions->@* ){
 		::pager("$name: anchoring version $n\n");
 		$track->set(version => $n);
 	} else { 

@@ -15,7 +15,7 @@ BEGIN {
 sub import {
 	return unless shift eq '::Object';
 	my $pkg   = caller;
-	my $child = 0+@{"${pkg}::ISA"};
+	my $child = 0+("${pkg}::ISA")->@*;
 	eval join '',
 		"package $pkg;\n",
 		' use vars qw(%_is_field);   ',
@@ -47,8 +47,8 @@ sub is_legal_key {
 	
 	my ($class, $key) = @_;
 	$class = ref $class if ref $class;  # support objects
-	return 1 if ${"$class\::_is_field"}{$key};
-	my ($parent_class) = @{"$class\::ISA"};
+	return 1 if ("$class\::_is_field")->{$key};
+	my ($parent_class) = ("$class\::ISA")->@*;
 
 	return unless $parent_class and $parent_class !~ /Object::Tiny/;
 
@@ -83,7 +83,7 @@ sub as_hash {
 	my $self = shift;
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic
-	my %guts = %{ $self };
+	my %guts = $self->%*;
 	bless $self, $class;
 	$guts{class} = $class if is_legal_key(ref $self, 'class');
 	return \%guts;

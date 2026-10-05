@@ -28,10 +28,10 @@ sub solo {
 
 	# get list of already muted tracks if I haven't done so already
 	
-	if ( ! @{$fx->{muted}} ){
-		@{$fx->{muted}} = map{ $_->name } grep{ defined $_->old_vol_level} user_tracks() }
+	if ( ! $fx->{muted}->@* ){
+		$fx->{muted}->@* = map{ $_->name } grep{ defined $_->old_vol_level} user_tracks() }
 
-	logpkg('debug', join " ", "already muted:", sub{map{$_->name} @{$fx->{muted}}});
+	logpkg('debug', join " ", "already muted:", sub{map{$_->name} $fx->{muted}->@*});
 
 	# convert bunches to tracks
 	my @names = map{ bunch_tracks($_) } @args;
@@ -76,9 +76,9 @@ sub solo {
 }
 
 sub nosolo {
-	# unmute all except in @{$fx->{muted}} list
+	# unmute all except in $fx->{muted}->@* list
 
-	my %previously_muted = map { $_ => 1 } @{$fx->{muted}};
+	my %previously_muted = map { $_ => 1 } $fx->{muted}->@*;
 	transition_tracks({
 		unmute => [
 			map { $_->name }
@@ -88,7 +88,7 @@ sub nosolo {
 	});
 
 	# remove listing of muted tracks
-	@{$fx->{muted}} = ();
+	$fx->{muted}->@* = ();
 	
 	$mode->{soloing} = 0;
 }
@@ -98,7 +98,7 @@ sub all {
 	transition_tracks({ unmute => [map { $_->name } user_tracks()] });
 
 	# remove listing of muted tracks
-	@{$fx->{muted}} = ();
+	$fx->{muted}->@* = ();
 	
 	$mode->{soloing} = 0;
 }
@@ -112,7 +112,7 @@ sub transition_tracks {
 	my @transitions;
 
 	for my $method (qw(mute unmute)){
-		for my $name (@{$args->{$method} || []}){
+		for my $name (($args->{$method} || [])->@*){
 			my $track = $tn{$name} or next;
 			my $vol = $track->volume_effect or next;
 

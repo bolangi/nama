@@ -128,13 +128,13 @@ sub new {
  		# and insert child id immediately afterwards
  		# unless already present
 
-		insert_after_string($parent_id, $id, @{$track->ops})
-			unless grep {$id eq $_} @{$track->ops}
+		insert_after_string($parent_id, $id, $track->ops->@*)
+			unless grep {$id eq $_} $track->ops->@*
 	}
 	else { 
 
 		# append effect_id to track list unless already present
-		push @{$track->ops}, $id unless grep {$id eq $_} @{$track->ops}
+		push $track->ops->@*, $id unless grep {$id eq $_} $track->ops->@*
 	} 
 	$self
 }
@@ -149,7 +149,7 @@ sub parent {
 
 sub parent_id { $_[0]->{parent} }
 sub owned_ids { $_[0]->owns }
-sub owned_effects { map { fxn($_) } @{ $_[0]->owned_ids } }
+sub owned_effects { map { fxn($_) } $_[0]->owned_ids->@* }
 
 sub is_read_only {
     my ($self, $param) = @_;
@@ -167,7 +167,7 @@ sub has_read_only_param {
 	my $self = shift;
 	no warnings 'uninitialized';
 	my $entry = $self->about;
-		for(0..scalar @{$entry->{params}} - 1)
+		for(0..scalar $entry->{params}->@* - 1)
 		{
 			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
 		}
@@ -184,7 +184,7 @@ sub ecasound_controller_index {
 	my $id = $self->id;
 	my $opcount = 0;
 	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
-	for my $op (@{ $ti{$n}->ops }) { 
+	for my $op ($ti{$n}->ops->@*) { 
 		# increment only controllers
 		next unless fxn($op)->is_controller;
 		$opcount++;
@@ -199,7 +199,7 @@ sub ecasound_effect_index {
 	my $id = $self->id;
 	my $opcount = 0;
 	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
-	for my $op (@{ $ti{$n}->ops }) { 
+	for my $op ($ti{$n}->ops->@*) { 
 			my $fx = fxn($op);
  			next if $fx->is_controller;
 			++$opcount;   # first index is 1
@@ -215,7 +215,7 @@ sub ecasound_effect_index_ {
 sub track_effect_index { # the position of the ID in the track's op array
 	my $self = shift;
 	my $id = $self->id;
-	my $pos = first_index {$id eq $_} @{$self->track->ops} ;
+	my $pos = first_index {$id eq $_} $self->track->ops->@* ;
 	$pos
 }
 sub controller_ids {
@@ -229,7 +229,7 @@ sub controller_ids {
 				grep{ $_->{parent} eq $self->id 
 					or $children{$_->{parent}} 
 					and $children{$_->id}++ 
-					} map{ fxn($_)} @{ $self->track->ops };
+					} map{ fxn($_)} $self->track->ops->@*;
 
 	@ctrl
 }
@@ -240,7 +240,7 @@ sub sync_one_effect {
 		my $chain = $self->chain;
 		$this_engine->current_chain($chain);
 		$this_engine->current_chain_operator($self->ecasound_effect_index);
-		$self->set(params => get_ecasound_cop_params( scalar @{$self->params} ));
+		$self->set(params => get_ecasound_cop_params( scalar $self->params->@* ));
 }
 sub offset {
 	my $self = shift;
@@ -287,7 +287,7 @@ sub _modify_effect {
 	my $code = $self->type;
 	my $i = $self->_effect_index;
 	defined $i or confess "undefined effect code for $op_id: ",::Dumper $self;
-	my $parameter_count = scalar @{ $self->about->{params} };
+	my $parameter_count = scalar $self->about->{params}->@*;
 	::pager("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
 	::pager("$op_id: parameter $parameter is read-only, skipping\n"), return 
@@ -350,7 +350,7 @@ sub _remove_effect {
 	# remove effect ID from track
 	
 	if( my $track = $ti{$n} ){
-		my @ops_list = @{$track->ops};
+		my @ops_list = $track->ops->@*;
 		my @new_list = grep  { $_ ne $id  } @ops_list;
 		$track->{ops} =   [ @new_list ];
 	}
@@ -375,7 +375,7 @@ sub position_effect {
 	my $op_index = $self->track_effect_index;
 	my @children = $self->controller_ids;
 	my $count = scalar @children + 1;
-	my @new_op_list = @{$track->ops};
+	my @new_op_list = $track->ops->@*;
 
 	# remove op and children
 	my @op_and_ctrl = splice @new_op_list, $op_index, $count;
@@ -397,7 +397,7 @@ sub position_effect {
 	# easier to reconfigure the engine than to code for
 	# repositioning ecasound effects.
 	::terminal_say(join " - ",@new_op_list);
-	@{$track->ops} = @new_op_list;
+	$track->ops->@* = @new_op_list;
 	::request_setup();
 	$this_track = $track;
 	nama_cmd('show_track');
@@ -419,7 +419,7 @@ sub apply_op {
 	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
 	
 	$code = '-' . $code . ($code =~ /:/ ? q(,) : q(:) );
-	my @vals = @{ $self->params };
+	my @vals = $self->params->@*;
 	logpkg('debug', "values: @vals");
 
 	# we start to build iam command
@@ -502,7 +502,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 
 ) ] );
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+our @EXPORT_OK = ( $EXPORT_TAGS{'all'}->@* );
 
 our @EXPORT = ();
 
@@ -612,7 +612,7 @@ sub append_effect {
 		
 		# assign defaults if no values supplied
 		my $count = $fx_cache->{registry}->[effect_index($args{type})]->{count} ;
-		my @defaults = @{fx_defaults($args{type})};
+		my @defaults = fx_defaults($args{type})->@*;
 		if( @defaults )  
 		{
 			for my $i (0..$count - 1)
@@ -626,11 +626,11 @@ sub append_effect {
 		push @added, $FX;
 		if( ! $FX->name )
 		{
-			while( my($alias, $type) = each %{$fx->{alias}} )
+			while( my($alias, $type) = each $fx->{alias}->%* )
 			{	
 				$FX->set_name($track->unique_nickname($alias)), 
 				# need to reset 'each'
-				keys %{$fx->{alias}}, last if $type eq $FX->type 
+				keys $fx->{alias}->%*, last if $type eq $FX->type 
 			}
 		}
 		$ui->add_effect_gui(\%args) unless $track->hide;
@@ -684,7 +684,7 @@ sub insert_effect {
 	my $last_index = $#{$track->ops};
 
 	# note ops after insertion point 
-	my @after_ops = @{$track->ops}[$offset..$last_index];
+	my @after_ops = $track->ops->@[$offset..$last_index];
 
 	# remove corresponding chain operators from the engine
 	logpkg('debug',"ops to remove and re-apply: @after_ops");
@@ -693,7 +693,7 @@ sub insert_effect {
 	}
 
 	# remove the corresponding ids from the track list
-	splice @{$track->ops}, $offset;
+	splice $track->ops->@*, $offset;
 
 	# add the new effect in the proper position
 	my $added = append_effect(\%args);
@@ -701,7 +701,7 @@ sub insert_effect {
 	logpkg('debug',"@{$track->ops}");
 
 	# replace the effects that had been removed
-	push @{$track->ops}, @after_ops;
+	push $track->ops->@*, @after_ops;
 
 	logpkg('debug',sub{"@{$track->ops}"});
 
@@ -794,7 +794,7 @@ sub fx_defaults {
 	my $code = shift;
 	my $i = effect_index($code);
 	my $values = [];
-	foreach my $p ( @{ $fx_cache->{registry}->[$i]->{params} })
+	foreach my $p ( $fx_cache->{registry}->[$i]->{params}->@*)
 	{
 		return [] unless defined $p->{default};
 		push @$values, $p->{default};
@@ -997,15 +997,15 @@ sub get_ecasound_cop_params {
 		
 sub ops_with_controller {
 	grep{ ! $_->is_controller }
-	grep{ scalar @{$_->owned_ids} }
+	grep{ scalar $_->owned_ids->@* }
 	map{ fxn($_) }
-	map{ @{ $_->ops } } 
+	map{ $_->ops->@* } 
 	::ChainSetup::engine_tracks();
 }
 sub ops_with_read_only_params {
 	grep{ $_->has_read_only_param() }
 	map{ fxn($_) }
-	map{ @{ $_->ops } } 
+	map{ $_->ops->@* } 
 	::ChainSetup::engine_tracks();
 }
 
@@ -1036,7 +1036,7 @@ sub expanded_ops_list { # including controllers
 	map 
 	{ push @expanded, 
 		$_, 
-		expanded_ops_list( reverse @{fxn($_)->owned_ids} );
+		expanded_ops_list( reverse fxn($_)->owned_ids->@* );
 
 		# we reverse controllers listing so 
 		# the first controller is applied last
@@ -1056,7 +1056,7 @@ sub expanded_ops_list { # including controllers
 sub intersect_with_track_ops_list {
 	my ($track, @effects)  = @_;
 	my %ops;
-	map{ $ops{$_}++} @{$track->ops};
+	map{ $ops{$_}++} $track->ops->@*;
 	my @intersection = grep { $ops{$_} } @effects;
 	my @outersection = grep { !$ops{$_} } @effects;
 	carp "@outersection: effects don't belong to track: ", $track->name, 
@@ -1144,7 +1144,7 @@ sub check_fx_consistency {
 	{     
 		my $track = $_;
 		my $name = $track->name;
-		my @ops = @{ $track->{ops} };
+		my @ops = $track->{ops}->@*;
 		my $is_track_error;
 
 		# check for missing special-purpose ops
@@ -1321,7 +1321,7 @@ sub fade_out_level {
 sub ecasound_format {
 	my $self = shift;
 	my $cmd = '-'.$self->about->{code};
-	$cmd .= ':'.join ',' ,@{$self->{params}} if $self->{params} and @{$self->{params}} > 0;
+	$cmd .= ':'.join ',' ,$self->{params}->@* if $self->{params} and $self->{params}->@* > 0;
 	$cmd
 }
 

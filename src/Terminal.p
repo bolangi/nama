@@ -305,7 +305,7 @@ sub user_hotkeys {
 		$key => 
 			$action =~ /\W/ # matches non-word character
 				? eval "sub { $action }"
-				: \&{$mappings->{$_}}
+				: \($mappings->{$_}->&*)
 	} keys $mappings->%*
 	#map{ $_ => eval '\&'. $mappings->{$_} } keys $mappings->%*
 }
@@ -666,7 +666,7 @@ sub previous_effect {
 sub next_effect {
 	my $op = $this_track->op;
 	my $pos = $this_track->pos;
-	end_of_list_sound(),return if $pos == scalar @{ $this_track->ops } - 1;
+	end_of_list_sound(),return if $pos == scalar $this_track->ops->@* - 1;
 	$pos++;
 	set_current_op($this_track->ops->[$pos]);
 }
@@ -677,7 +677,7 @@ sub previous_param {
 }
 sub next_param {
 	my $param = $this_track->param;
-	$param < scalar @{ fxn($this_track->op)->params }
+	$param < scalar fxn($this_track->op)->params->@*
 		? $project->{current_param}->{$this_track->op}++ 
 		: end_of_list_sound()
 }
@@ -747,16 +747,16 @@ sub get_ecasound_iam_keywords {
 									t
 									?	);
 	
-	%{$text->{iam}} = map{$_,1 } 
+	$text->{iam}->%* = map{$_,1 } 
 				grep{ ! $reserved{$_} } split /[\s,]/, ecasound_iam('int-cmd-list');
 }
 sub load_keywords {
-	my @keywords = keys %{$text->{commands}};
+	my @keywords = keys $text->{commands}->%*;
  	# complete hyphenated forms as well
  	my %hyphenated = map{my $h = $_; $h =~ s/_/-/g; $h => $_ }grep{ /_/ } @keywords;
 	$text->{hyphenated_commands} = \%hyphenated;
 	push @keywords, keys %hyphenated;
-	push @keywords, keys %{$text->{iam}};
+	push @keywords, keys $text->{iam}->%*;
 	push @keywords, (keys $text->{midi_cmd}->%*) if $config->{use_midi};
 	my %seen;
 	# Silently ignore duplicate command names, which is the

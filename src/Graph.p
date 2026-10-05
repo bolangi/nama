@@ -128,7 +128,7 @@ sub expand_graph {
 	
 	
 	for ($g->edges){
-		my($a,$b) = @{$_}; 
+		my($a,$b) = $_->@*; 
 		logpkg('debug',"$a-$b: processing...");
 		logpkg('debug',"$a-$b: already seen") if $seen{"$a-$b"};
 		next if $seen{"$a-$b"};

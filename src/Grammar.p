@@ -22,7 +22,7 @@ sub setup_grammar {
 		@shortcuts = split " ", $shortcuts if $shortcuts;
 		map{ $text->{command_shortcuts}->{$_} = $full_name } @shortcuts;
 
-	} keys %{$text->{commands}};
+	} keys $text->{commands}->%*;
 
 	$::AUTOSTUB = 1;
 	$::RD_TRACE = 1;
@@ -45,7 +45,7 @@ sub setup_grammar {
 	{
 		map{ 'm'.$_, 1} grep{ !$skip{$_} } split " ", get_data_section("midi_commands")
 	};
-	for (keys %{$text->{midi_cmd}}){
+	for (keys $text->{midi_cmd}->%*){
 		::terminal_say("$_: midi command same as Nama command") if $text->{commands}->{$_}
 	}
 
@@ -60,12 +60,12 @@ sub process_line {
 		push $text->{command_history}->@*, $user_input;
 		$text->{command_index} = scalar $text->{command_history}->@*;
 		# convert hyphenated commands to underscore form
-		while( my($from, $to) = each %{$text->{hyphenated_commands}} ){ $user_input =~ s/$from/$to/g }
+		while( my($from, $to) = each $text->{hyphenated_commands}->%* ){ $user_input =~ s/$from/$to/g }
 			my $context = context();
 			my $success = nama_cmd( $user_input );
 			my $command_stamp = { context => $context, 
 								  command => $user_input };
-			push(@{$project->{command_buffer}}, $command_stamp);
+			push($project->{command_buffer}->@*, $command_stamp);
 			
 			reconfigure_engine();
 
@@ -219,11 +219,11 @@ sub expand_root {
 
 sub show_versions {
 		no warnings 'uninitialized';
-		if (@{$this_track->versions} ){
+		if ($this_track->versions->@* ){
 			"Versions: ". join(" ", 
 				map { 
 					my $cached = is_cached($this_track, $_) ? 'c' : '';
-					$_ . $cached } @{$this_track->versions}
+					$_ . $cached } $this_track->versions->@*
 			). $/
 		} else {}
 }
@@ -256,11 +256,11 @@ sub show_bus { "Bus: ". $this_track->group. $/ if $this_track->group ne 'Main' }
 
 sub show_effects {
 	::sync_effect_parameters();
-	join "", map { show_effect($_) } @{ $this_track->ops };
+	join "", map { show_effect($_) } $this_track->ops->@*;
 }
 sub list_effects {
 	::sync_effect_parameters();
-	join "", "Effects on ", $this_track->name,":\n", map{ list_effect($_) } @{ $this_track->ops };
+	join "", "Effects on ", $this_track->name,":\n", map{ list_effect($_) } $this_track->ops->@*;
 }
 
 sub list_effect {
@@ -279,13 +279,13 @@ sub show_effect {
 	my @lines = $FX->nameline;
 	#EQ: GVerb, gverb, 1216, bypassed, famp5, neap
  	my $i = $FX->registry_index;
-	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
+	my @pnames = ($fx_cache->{registry}->[ $i ]->{params})->@*;
 	{
 	no warnings 'uninitialized';
 	push @lines, parameter_info_padded($op_id, $_) for 0..scalar @pnames - 1;
 	}
-	scalar @{$FX->params} - scalar @pnames - 1 
-		and push @lines, parameter_info_padded($op_id, $_) for scalar @pnames .. (scalar @{$FX->params} - 1);
+	scalar $FX->params->@* - scalar @pnames - 1 
+		and push @lines, parameter_info_padded($op_id, $_) for scalar @pnames .. (scalar $FX->params->@* - 1);
 	@lines
 }
 sub parameter_info {

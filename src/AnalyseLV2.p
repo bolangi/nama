@@ -249,7 +249,7 @@ sub print_lv2_scalepoints {
 		foreach my $port (sort {$a <=> $b} (keys(%scalepoints))) {
 			$currentport = $port;
 			push @buffer, "Port $currentport: " . generateportinfo();
-			foreach my $point ( sort {$a <=> $b} (keys(%{ $scalepoints{$currentport} })) ) {
+			foreach my $point ( sort {$a <=> $b} (keys($scalepoints{$currentport}->%*)) ) {
 				push @buffer, "\t $point \= $scalepoints{$currentport}{$point}\n";
 			}
 		}

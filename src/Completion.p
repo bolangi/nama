@@ -204,11 +204,11 @@ method key_complete
    my %next;
    foreach ( @completions ) {
       my $l = substr( $_, $plen, 1 );
-      push @{ $next{$l} }, $_;
+      push $next{$l}->@*, $_;
    }
 
    my @possibles = map {
-      @{ $next{$_} } == 1 ? $next{$_}[0]
+      $next{$_}->@* == 1 ? $next{$_}[0]
                           : substr( $next{$_}[0], 0, $plen + 1 ) . "..."
    } sort keys %next;
 

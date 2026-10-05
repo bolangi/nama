@@ -203,7 +203,7 @@ my $yaml = q(---
   ecs_string: -i:jack_multi,Horgand:out_1,Horgand:out_2
 ...);
 
-my @test = @{yaml_in($yaml)};
+my @test = yaml_in($yaml)->@*;
 
 is(
 	yaml_in('name: one-line YAML')->{name},
@@ -219,7 +219,7 @@ for (@test) {
 	$i++;
 	$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "IO.pm unit test $i";
 	my $class = "Audio::Nama::IO::$t{class}";
-	my $io = $class->new(%{$t{args}});
+	my $io = $class->new($t{args}->%*);
 	my @keys = sort grep{ $_ ne 'class'} keys %t;
 	is( $io->ecs_string, $t{ecs_string}, "$t{class} ecs_string");
 }
@@ -242,7 +242,7 @@ is( $this_track->name, 'sax', "current track assignment");
 	is($track->old_vol_level, $original_level,
 		'a coordinated mute saves the original level');
 
-	@{$fx->{muted}} = ('sax');
+	$fx->{muted}->@* = ('sax');
 	nosolo();
 	ok(defined $track->old_vol_level,
 		'nosolo leaves a previously muted track muted');
@@ -296,7 +296,7 @@ $this_track->set(group => 'Main');
 	is($this_track->rec_status, OFF,
 		'rec_status uses effective rw after pruning');
 	my ($snapshot) = grep { $_->{name} eq 'sax' }
-		@{status_snapshot()->{tracks}};
+		status_snapshot()->{tracks}->@*;
 	is($snapshot->{candidate_rw}, MON,
 		'status snapshot uses candidate rw before graph resolution');
 	ok(!exists $snapshot->{rec_status},
@@ -311,7 +311,7 @@ $this_track->set(group => 'Main');
 		::join_path(this_wav_dir(), $this_track->current_wav),
 		'full path does not depend on effective graph status');
 	my ($rec_snapshot) = grep { $_->{name} eq 'sax' }
-		@{status_snapshot()->{tracks}};
+		status_snapshot()->{tracks}->@*;
 	is($rec_snapshot->{current_version}, $this_track->last + 1,
 		'status snapshot uses graph-independent current version');
 	$this_track->set(rw => MON);
@@ -557,7 +557,7 @@ is( $this_track->ops->[this_effect()->track_effect_index + 1], $vol_id,
 my $op_id = this_effect()->id;
 nama_cmd("remove_effect $op_id");
 
-ok( (not grep { $_ eq $op_id } @{$this_track->ops}), 'remove effect');
+ok( (not grep { $_ eq $op_id } $this_track->ops->@*), 'remove effect');
 
 nama_cmd('source 2');
 
@@ -962,7 +962,7 @@ for my $case (@cases){
 		name => 'offset-test',
 		wav_length => 30,
 		full_path => '/tmp/offset-test.wav',
-		%{$case->{track}},
+		$case->{track}->%*,
 	);
 	local $tn{'offset-test'} = $track;
 	local $::IO::by_name{'offset-test'};

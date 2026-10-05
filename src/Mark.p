@@ -103,7 +103,7 @@ sub loop_timeline_interval {
 	my @points = sort { $a <=> $b }
 		grep { defined }
 		map { time_from_tag($_) }
-		@{$setup->{loop_endpoints}}[0,1];
+		$setup->{loop_endpoints}->@[0,1];
 	return unless @points == 2 and $points[0] < $points[1];
 	@points
 }

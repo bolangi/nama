@@ -49,8 +49,8 @@ use v5.36;
 no warnings 'uninitialized';
 sub find_duplicate_inputs { # in Main bus only
 
-	%{$setup->{tracks_with_duplicate_inputs}} = ();
-	%{$setup->{inputs_used}} = ();
+	$setup->{tracks_with_duplicate_inputs}->%* = ();
+	$setup->{inputs_used}->%* = ();
 	logsub((caller(0))[3]);
 	map{	my $source = $_->source;
 			$setup->{tracks_with_duplicate_inputs}->{$_->name}++ if $setup->{inputs_used}->{$source} ;
@@ -179,8 +179,8 @@ sub transport_status {
 	my $start  = ::Mark::loop_timeline_start();
 	my $end    = ::Mark::loop_timeline_end();
 	#print "start: $start, end: $end, loop_enable: $mode->{loop_enable}\n";
-	if (ref $setup->{record_midi} and %{$setup->{record_midi}}){
-		pager(join(" ", keys %{$setup->{record_midi}}), ": ready for caching");
+	if (ref $setup->{record_midi} and $setup->{record_midi}->%*){
+		pager(join(" ", keys $setup->{record_midi}->%*), ": ready for caching");
 	}
 	if ($mode->{loop_enable} and defined $start and defined $end){
 		#if (! $end){  $end = $start; $start = 0}

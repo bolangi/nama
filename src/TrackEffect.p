@@ -23,7 +23,7 @@ sub stepsize {
 sub pos {
 	my $track = shift;
 	my $op_id = $track->op_id;
-	my $index = first_index {$_ eq $op_id } @{$track->effect_ids};
+	my $index = first_index {$_ eq $op_id } $track->effect_ids->@*;
 	return($index || 0);
 }
 sub user_effects {
@@ -52,7 +52,7 @@ sub ecasound_dynamic_apply_list { # audio ops and their controllers
 }
 sub effects {
 	my $track = shift;
-	map{ ::fxn($_) } @{ $track->effect_ids }
+	map{ ::fxn($_) } $track->effect_ids->@*
 }
 sub ops_o { $_[0]->effects }
 sub apply_ops {
@@ -71,12 +71,12 @@ sub user_ops {
 
 	map{ $skip{$_}++ } @skip, ::expanded_ops_list(@skip);
 
-	grep{ ! $skip{$_} } @{ $track->{ops} || [] };
+	grep{ ! $skip{$_} } ($track->{ops} || [])->@*;
 }
 sub first_effect_of_type {
 	my $track = shift;
 	my $type = shift;
-	for my $effect_id ( @{$track->effect_ids} ){
+	for my $effect_id ( $track->effect_ids->@* ){
 		my $FX = fxn($effect_id);
 		return $FX if $FX->type =~ /$type/ # Plate matches el:Plate
 	}

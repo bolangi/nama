@@ -182,7 +182,7 @@ sub store_fades { # replacing previous
 }
 sub remove_fades {
 	my $edit = shift;
-	map{ $_->remove } map{ $::Fade::by_index{$_} } @{$edit->fades};
+	map{ $_->remove } map{ $::Fade::by_index{$_} } $edit->fades->@*;
 	$edit->set(fades => []);
 }
 
@@ -194,7 +194,7 @@ sub destroy {
 	delete $by_name{$edit->edit_name};
 
 	# list edit track WAV files
-	my @wavs = values %{$edit->edit_track->targets};
+	my @wavs = values $edit->edit_track->targets->%*;
 
 	#   track removal also takes care of fades # VERIFY
 	#	my $fades = $edit->fades;
@@ -261,7 +261,7 @@ our (
 
 sub detect_keystroke_p {
 	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub {
-		&{$text->{term_attribs}->{'callback_read_char'}}();
+		$text->{term_attribs}->{'callback_read_char'}->();
 		
 		abort_set_edit_points(), return
 			if $text->{term_attribs}->{line_buffer} eq "q"
@@ -308,12 +308,12 @@ sub get_edit_mark {
 		if( $p == 3){ complete_edit_points() }
 		else{
 		#$text->{term}->stuff_char(10);
-		#	&{$text->{term_attribs}->{'callback_read_char'}}();
+		#	$text->{term_attribs}->{'callback_read_char'}->();
 		}
 	}
 }
 sub complete_edit_points {
-	@{$setup->{edit_points}} = @_edit_points; # save to global
+	$setup->{edit_points}->@* = @_edit_points; # save to global
 	ecasound_iam('stop');
 	::pager("\nEngine is stopped\n");
 	detect_spacebar();
@@ -348,12 +348,12 @@ Engine will start in 2 seconds.));
 }
 sub transfer_edit_points {
 	::throw("Use 'set_edit_points' command to specify edit region"), return
-		 unless scalar @{$setup->{edit_points}};
+		 unless scalar $setup->{edit_points}->@*;
 	my $edit = shift;
 	::Mark->new( name => $edit->play_start_name, time => $setup->{edit_points}->[0]);
 	::Mark->new( name => $edit->rec_start_name,  time => $setup->{edit_points}->[1]);
 	::Mark->new( name => $edit->rec_end_name,    time => $setup->{edit_points}->[2]);
-	@{$setup->{edit_points}} = ();
+	$setup->{edit_points}->@* = ();
 }
 
 sub generate_edit_record_setup { # for current edit
@@ -453,7 +453,7 @@ sub edit_action {
 # 	return unless $is_setup;
 # 	if ($action !~ /record/){
 # 		$mode->{loop_enable}++;
-# 		@{$setup->{loop_endpoints}} = (0,$setup->{audio_length} - 0.05);
+# 		$setup->{loop_endpoints}->@* = (0,$setup->{audio_length} - 0.05);
 # 		#  and transport_start()
 # 	}
 # 	connect_transport(); 
@@ -607,7 +607,7 @@ sub explode_track {
 	::throw($track->name,": I am already a mix track. I cannot explode!"),return
 		if $track->is_mixer;
 
-	my @versions = @{ $track->versions };
+	my @versions = $track->versions->@*;
 
 	# quit if I have only one version
 

@@ -58,7 +58,7 @@ our %EXPORT_TAGS =
 );
 {
 	my %seen;
-	push @{$EXPORT_TAGS{all}}, grep {!$seen{$_}++} @{$EXPORT_TAGS{$_}} foreach
+	push $EXPORT_TAGS{all}->@*, grep {!$seen{$_}++} $EXPORT_TAGS{$_}->@* foreach
 keys %EXPORT_TAGS;
 }
 

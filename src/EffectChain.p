@@ -94,7 +94,7 @@ sub new {
 		# in both cases, we clone the data structures
 		# to ensure we don't damage the original
 		
-		for (@{$vals{ops_list}}){ 	
+		for ($vals{ops_list}->@*){ 	
 
 			if ( $vals{ops_data}->{$_} )
 											
@@ -114,7 +114,7 @@ sub new {
 
 		$vals{ops_data} = $ops_data;
 
-		if( scalar @{$vals{inserts_data}})
+		if( scalar $vals{inserts_data}->@*)
 		{
 
 			# rewrite inserts to store what we need:
@@ -127,8 +127,8 @@ sub new {
 				map
 				{ 
 					logpkg('debug',"insert: ", sub{Dumper $_});
-					my @wet_ops = @{$tn{$_->wet_name}->ops};
-					my @dry_ops = @{$tn{$_->dry_name}->ops};
+					my @wet_ops = $tn{$_->wet_name}->ops->@*;
+					my @dry_ops = $tn{$_->dry_name}->ops->@*;
 					my $wet_effect_chain = ::EffectChain->new(
 						project => 1,
 						insert	=> 1,
@@ -168,7 +168,7 @@ sub new {
 					#   dry_effect_chain => ec_index,
 					
 					$hash
-				} @{$vals{inserts_data}}
+				} $vals{inserts_data}->@*
 			];
 		}
 
@@ -228,9 +228,9 @@ sub add_ops {
 	my %runtime_id_for;
 	if( $self->track_cache ){
 		@ops_list = grep{ $_ ne $track->vol_id and $_ ne $track->pan_id }
-								@{$self->ops_list}
+								$self->ops_list->@*
 	} else {
-		@ops_list = @{$self->ops_list};
+		@ops_list = $self->ops_list->@*;
 	}
 	for (@ops_list)
 	{	
@@ -283,7 +283,7 @@ sub add_inserts {
 		my $insert = $class->new(%$insert_data);
 		#$::by_index{$wet_effect_chain}->add($insert->wet_name, $tn{$insert->wet_name}->vol_id)
 		#$::by_index{$dry_effect_chain}->add($insert->dry_name, $tn{$insert->dry_name}->vol_id)
-	} @{$self->inserts_data};
+	} $self->inserts_data->@*;
 }
 sub add_region {
 	my ($self, $track) = @_;
@@ -315,7 +315,7 @@ sub add_fades {
 	map{ 
 		my %h = %$_; 
 		my $fade = ::Fade->new( %h, track => $track->name ) ;
-	} @{ $self->{fade_data} }
+	} $self->{fade_data}->@*
 }
 sub destroy {
 	my $self = shift;
@@ -378,7 +378,7 @@ sub summary {
 	map{ 
 		my $i = ::effect_index( $self->{ops_data}->{$_}->{type} ); 
 		my $name = "    ". $fx_cache->{registry}->[$i]->{name};
-	} @{$_->ops_list};
+	} $_->ops_list->@*;
 	map{ $_,"\n"} @output;
 }
 

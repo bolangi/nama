@@ -156,7 +156,7 @@ sub set_io {
 			my $client_direction = $direction eq 'source' ? 'output' : 'input';
 
 			my $name = $track->name;
-			my $width = scalar @{ ::jack_client_array($id, $client_direction) };
+			my $width = scalar ::jack_client_array($id, $client_direction)->@*;
 			$width or ::terminal_say(
 				qq(Track $name: $direction port for JACK client "$id" not found.));
 			$width or return;
@@ -207,7 +207,7 @@ sub set_version {
 	if ($n == 0){
 		::terminal_say("$name: following bus default");
 		$track->set(version => $n)
-	} elsif ( grep{ $n == $_ } @{$track->versions} ){
+	} elsif ( grep{ $n == $_ } $track->versions->@* ){
 		::terminal_say("$name: anchoring version $n");
 		$track->set(version => $n)
 	} else { 

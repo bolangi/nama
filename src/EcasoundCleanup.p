@@ -146,7 +146,7 @@ sub post_rec_configure {
 
 		# toggle recorded tracks to PLAY for auditioning
 		
-		map{ $_->set(rw => PLAY) } @{$setup->{_last_rec_tracks}};
+		map{ $_->set(rw => PLAY) } $setup->{_last_rec_tracks}->@*;
 		
 		clear_timeline_adjustment() if is_offset_run_mode();
 		$ui->refresh();

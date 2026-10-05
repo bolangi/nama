@@ -29,11 +29,11 @@ map {
 				\(? # open parenthesis
 
 			}x;
-		while ($text =~ /($re)/g and push @{ $found{$_} }, $1 ) {}
+		while ($text =~ /($re)/g and push $found{$_}->@*, $1 ) {}
 
 	} @all;
 
-#print join $/, sort map{ @{ $found{$_} } } keys %found;
+#print join $/, sort map{ $found{$_}->@* } keys %found;
 print "---------\n";
 print join $/, map{ chomp; $_ } sort keys %found;
 

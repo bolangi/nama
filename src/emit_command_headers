@@ -56,7 +56,7 @@ map{ $body{$_}++ } split " ", qx($cmd);
 
 map{ $ref->{$_} or print "$_\n" } keys %body;
 print "\n----\n";
-map{ $body{$_} or print "$_\n" } keys %{$ref};
+map{ $body{$_} or print "$_\n" } keys $ref->%*;
 exit;
 
 =end comment

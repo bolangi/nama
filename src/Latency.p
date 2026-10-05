@@ -357,7 +357,7 @@ sub latency_param {
 	my $op = shift;
 	my $i = effect_index(type($op));	
 	my $p = 0; 
-	for my $param ( @{ $fx_cache->{registry}->[$i]->{params} } )
+	for my $param ( $fx_cache->{registry}->[$i]->{params}->@* )
 	{
 		$p++;
 		return $p if lc( $param->{name}) eq 'latency' 

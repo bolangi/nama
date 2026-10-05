@@ -96,7 +96,7 @@ IAM
 			{
 				push @help, helpline($cmd) 
 			}
-		} keys %{$text->{commands}};
+		} keys $text->{commands}->%*;
 
 		if ( @help ){ push @output, 
 			qq("$name" matches the following commands:), @help;
@@ -131,7 +131,7 @@ sub help_effect {
 	# one-line help for Ecasound and chain operators, controllers and presets
 	
 	if ($id !~ /^(lv2|el):/) {
-		push @output, grep{ /$id/  } @{$fx_cache->{user_help}};
+		push @output, grep{ /$id/  } $fx_cache->{user_help}->@*;
 	}
 
 	# full help for LADSPA/LV2 plugins
@@ -152,7 +152,7 @@ sub find_effect {
 		my $didnt_match;
 		map{ $_help =~ /\Q$_\E/i or $didnt_match++ }  @keys;
 		! $didnt_match; # select if no cases of non-matching
-	} grep{$_} @{$fx_cache->{user_help}};
+	} grep{$_} $fx_cache->{user_help}->@*;
 	if ( @matches ){
 	::pager( $text->{wrap}->paragraphs(@matches) , "\n" );
 	} else { throw(join " ", "No effects were found matching:",@keys,"\n\n") }
@@ -168,7 +168,7 @@ sub parse_midi_help {
 	{
 	 /(^\w+)/ 
 		? ($cmd = $1, $acc{$cmd} = [], $j++)
-		: (push @{$acc{$cmd}}, $_ );
+		: (push $acc{$cmd}->@*, $_ );
 	}
 	$help->{midish} = \%acc;
 	return

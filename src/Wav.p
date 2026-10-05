@@ -76,7 +76,7 @@ sub current_version {
 sub playback_version {
 	my $track = shift;
 	return $track->version if $track->version 
-				and grep {$track->version  == $_ } @{$track->versions} ;
+				and grep {$track->version  == $_ } $track->versions->@* ;
 	$track->last;
 }
 sub targets { # WAV file targets, distinct from 'target' attribute
@@ -140,6 +140,6 @@ sub _targets {
 sub _versions {  
 #	$::debug2 and print "&versions\n";
 	my %args = @_;
-	[ sort { $a <=> $b } keys %{ _targets(%args)} ]  
+	[ sort { $a <=> $b } keys _targets(%args)->%* ]  
 }
 1;

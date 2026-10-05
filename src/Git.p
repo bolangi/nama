@@ -101,9 +101,9 @@ sub reset_command_buffer { $project->{command_buffer} = [] }
 
 sub command_buffer_contents {
 	no warnings 'uninitialized'; 
-	scalar @{$project->{command_buffer}} and join("\n", 
+	scalar $project->{command_buffer}->@* and join("\n", 
 		undef,
-		(map{ $_->{command} } @{$project->{command_buffer}}),
+		(map{ $_->{command} } $project->{command_buffer}->@*),
 		# context for first command of group
 		"* track: $project->{command_buffer}->[0]->{context}->{track}",
 		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
@@ -217,11 +217,11 @@ sub redo {
 	return throw("redo requires Git support")
 		unless $config->{use_git} and $project->{repo};
 	return throw("nothing to redo")
-		unless $project->{redo_stack} and @{$project->{redo_stack}};
+		unless $project->{redo_stack} and $project->{redo_stack}->@*;
 	return throw("project files have changed; commit or undo them before redoing")
 		if state_changed();
 
-	my @redo_stack = @{$project->{redo_stack}};
+	my @redo_stack = $project->{redo_stack}->@*;
 	my $commit = pop @redo_stack;
 	# Move the branch pointer forward to the original commit.  This keeps
 	# the existing graph and commit identity intact instead of recreating
@@ -249,7 +249,7 @@ sub undo {
 
 	my $commit = git(qw/rev-parse HEAD/);
 	chomp $commit;
-	my @redo_stack = @{$project->{redo_stack} // []};
+	my @redo_stack = ($project->{redo_stack} // [])->@*;
 
 	git(qw/reset --hard HEAD^/); 
 	load_project( name => $project->{name});
