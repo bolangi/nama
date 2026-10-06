@@ -3,7 +3,7 @@
 package ::Project;
 use v5.36; use Carp;
 our $VERSION = 1.0;
-sub hello { my $self = shift; ::terminal_say("hello $self: ", ::Dumper($::project)) }
+sub hello { my $self = shift; ::notify("hello $self: ", ::Dumper($::project)) }
 }
 {
 package ::;
@@ -135,7 +135,7 @@ sub load_project {
 	if (not $project->{name} or not -d project_dir() and not $args{create})
 	{
 		no warnings 'uninitialized';
-		::terminal_say(qq(Project "$project->{name}" not found. Loading project "Untitled".));
+		::notify(qq(Project "$project->{name}" not found. Loading project "Untitled".));
 		return load_project(name => 'Untitled', create => 1);
 
 	}
@@ -368,7 +368,7 @@ sub list_project_templates {
 }
 sub remove_project_template {
 	map{my $name = $_; 
-		pager("$name: removing template");
+		::notify("$name: removing template");
 		$name .= ".yml" unless $name =~ /\.yml$/;
 		unlink join_path( project_root(), "templates", $name);
 	} @_;

@@ -163,7 +163,7 @@ sub main {
 	nama_cmd($config->{opts}->{X});
 	reconfigure_engine();
 	if (not $ti{3}){ # no user tracks
-		::terminal_say("Enter command to begin or type 'h' for help.");
+		::notify("Enter command to begin or type 'h' for help.");
 		$this_track = $tn{Main};
 	}
 	show_prompt() unless $config->{opts}->{T};
@@ -180,7 +180,7 @@ sub bootstrap_environment {
 	initialize_user_interface();
 	my $banner = get_data_section('banner');
 	$banner =~ s/\$VERSION/$VERSION/g;
-	::terminal_say($banner);
+	::notify($banner);
 	setup_grammar();
 	initialize_services();
 }

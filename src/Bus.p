@@ -345,7 +345,7 @@ sub add_bus {
 		@args
 	);
 
-	$tn{$name} and ::terminal_say( qq($name: setting as mix track for bus "$name"));
+	$tn{$name} and ::notify( qq($name: setting as mix track for bus "$name"));
 
 	my $track = $tn{$name}// add_track($name, width => 2);
 
@@ -366,7 +366,7 @@ sub add_submix {
 		::throw($name,": bus name already in use. Aborting."), return;
 	}
 	if ($bn{$name}){
-		::terminal_say( qq(monitor bus "$name" already exists.  Updating with new tracks.) );
+		::notify( qq(monitor bus "$name" already exists.  Updating with new tracks.) );
 	} else {
 	my @args = (
 		name => $name, 
@@ -422,12 +422,12 @@ sub bus_on {
 	my $bus = $bn{$bus_name};	
 	if ( grep{ $setup->{bus}->{oldrw}->{$_} } $bus->tracks )
 	{
-		terminal_say("$bus_name bus: reconnecting member tracks");
+		notify("$bus_name bus: reconnecting member tracks");
 		$bn{$bus_name}->tracks_on
 	}
 	else 
 	{
-		terminal_say('already active')
+		notify('already active')
 	}
 }
 
@@ -436,11 +436,11 @@ sub bus_off {
 	my $bus = $bn{$bus_name};	
 	if (grep{ $setup->{bus}->{oldrw}->{$_} } $bus->tracks )
 	{
-		terminal_say("$bus_name bus: member tracks already disconnected")
+		notify("$bus_name bus: member tracks already disconnected")
 	}
 	else 
 	{
-		terminal_say("$bus_name bus: disconnecting member tracks");
+		notify("$bus_name bus: disconnecting member tracks");
 		$bn{$bus_name}->tracks_off 
 	}
 }

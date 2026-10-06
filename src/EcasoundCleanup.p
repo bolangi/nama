@@ -74,7 +74,7 @@ sub mixdown_postprocessing {
 		$comment .= "(commit $sha)" if $sha;
 	}
 	$tn{Mixdown}->add_system_version_comment($version, $comment);
-	::terminal_say($comment);
+	::notify($comment);
 	encode_mixdown_file($oldfile,$tag_name);
 	chdir $was_in;
 }
@@ -170,7 +170,7 @@ sub new_files_were_recorded {
 		} @files;
 	if(@recorded){
 		refresh_wav_cache();
-		pager(join " ", "recorded:", map{ filename($_) } @recorded);
+		::notify(join " ", "recorded:", map{ filename($_) } @recorded);
 	}
 	map{ _get_wav_info($_) } @recorded;
 	@recorded 

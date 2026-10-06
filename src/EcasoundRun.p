@@ -25,7 +25,7 @@ sub start {
 	# sleep 1s
 	#
 
-	pager("Starting at ". current_position()) unless $quiet;
+	::notify("Starting at ". current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
 	$self->start_command;
@@ -110,7 +110,7 @@ sub engine_is {
 }
 sub engine_status { 
 	my ($pos, $before_newlines, $after_newlines) = @_;
-	pager("\n" x $before_newlines, engine_is($pos), "\n" x $after_newlines);
+	::notify("\n" x $before_newlines, engine_is($pos), "\n" x $after_newlines);
 }
 sub current_timeline_position {
 	my $adjusted_time = $this_engine->ecasound_iam("getpos") // 0;
@@ -211,9 +211,9 @@ sub _stop_do_start {
 		$result
 }
 sub restart_ecasound {
-	::terminal_say("killing ecasound processes @{$en{$::config->{ecasound_engine_name}}->{pids}}");
+	::notify("killing ecasound processes @{$en{$::config->{ecasound_engine_name}}->{pids}}");
 	kill_my_ecasound_processes();
-	::terminal_say(q(restarting Ecasound engine - your may need to use the "arm" command));
+	::notify(q(restarting Ecasound engine - your may need to use the "arm" command));
 	initialize_ecasound_engine();
 	request_setup();
 	reconfigure_engine();

@@ -46,7 +46,7 @@ sub setup_grammar {
 		map{ 'm'.$_, 1} grep{ !$skip{$_} } split " ", get_data_section("midi_commands")
 	};
 	for (keys $text->{midi_cmd}->%*){
-		::terminal_say("$_: midi command same as Nama command") if $text->{commands}->{$_}
+		::notify("$_: midi command same as Nama command") if $text->{commands}->{$_}
 	}
 
 }
@@ -77,7 +77,7 @@ sub process_line {
 	}
 	if (! $this_engine->started() ){
 		my $result = check_fx_consistency();
-		::terminal_say("Inconsistency found in effects data",
+		::notify("Inconsistency found in effects data",
 			Dumper ($result)) if $result->{is_error};
 	}
 	my $output = delete $text->{output_buffer};
@@ -214,7 +214,7 @@ sub expand_root {
 		} split "\n",$text;
 		$new;
 }
-::terminal_say(expand_root('Audio::Nama', '@::Tempo::chunks'));
+::notify(expand_root('Audio::Nama', '@::Tempo::chunks'));
 #### Formatted text output
 
 sub show_versions {
@@ -458,13 +458,13 @@ sub t_load_project {
 	return if $this_engine->started() and ::ChainSetup::really_recording();
 	my $name = shift;
 	my %args = @_;
-	pager("input name: $name\n");
+	::notify("input name: $name\n");
 	$name = sanitize($name);
 	throw("Project $name does not exist\n"), return
 		unless -d join_path(project_root(), $name) or $args{create};
 	stop_transport() if $this_engine->started(); 
 	load_project( name => $name, %args );
-	pager("loaded project: $project->{name}\n") unless $args{create};
+	::notify("loaded project: $project->{name}\n") unless $args{create};
 	{no warnings 'uninitialized';
 	logpkg('debug',"load hook: $config->{execute_on_project_load}");
 	}
@@ -480,21 +480,21 @@ sub t_create_project {
 	package ::;
 	my $name = shift;
 	t_load_project($name, create => 1);
-	pager("created project: $project->{name}\n");
+	::notify("created project: $project->{name}\n");
 
 }
 sub mixdown {
-	::terminal_say("Enabling mixdown to file") if ! $quiet;
+	::notify("Enabling mixdown to file") if ! $quiet;
 	$tn{Mixdown}->set(rw => REC); 
 	$tn{Main}->set(rw => MON); 
 }
 sub mixplay { 
-	::terminal_say("Setting mixdown playback mode.") if ! $quiet;
+	::notify("Setting mixdown playback mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => PLAY);
 	$tn{Main}->set(rw => OFF); 
 }
 sub mixoff { 
-	::terminal_say("Leaving mixdown mode.") if ! $quiet;
+	::notify("Leaving mixdown mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => OFF);
 	$tn{Main}->set(rw => MON); 
 }
@@ -502,7 +502,7 @@ sub remove_fade {
 	my $i = shift;
 	my $fade = $::Fade::by_index{$i}
 		or throw("fade index $i not found. Aborting."), return 1;
-	pager("removing fade $i from track " .$fade->track ."\n");
+	::notify("removing fade $i from track " .$fade->track ."\n");
 	$fade->remove;
 }
 sub import_audio {
@@ -528,7 +528,7 @@ sub destroy_current_wav {
 		throw("No action taken."), return if not $answer;
 		# remove version comments, if any
 		delete $project->{track_version_comments}{$this_track->name}{$this_track->version};
-		pager("Unlinking $wav");
+		::notify("Unlinking $wav");
 		unlink $wav or warn "couldn't unlink: $!\n";
 		refresh_wav_cache();
 	$this_track->set(version => $this_track->last); 
@@ -552,7 +552,7 @@ sub remove_track_cmd {
 	
 	# avoid having ownerless SlaveTracks.  
  	::ChainSetup::remove_temporary_tracks();
-		$quiet or pager( join '',"Removing track ",$track->name,". WAV files will be kept. Other data will be lost.");
+		$quiet or ::notify( join '',"Removing track ",$track->name,". WAV files will be kept. Other data will be lost.");
 		remove_submix_helper_tracks($track->name);
 		$track->remove;
 		$this_track = $tn{Main};
@@ -596,7 +596,7 @@ sub pan_back {
 }
 
 sub get_sample_rate {
-	pager("project $project->{name}: audio engine sample rate is ",$project->{sample_rate} );
+	::notify("project $project->{name}: audio engine sample rate is ",$project->{sample_rate} );
 	$project->{sample_rate}
 }
 
@@ -606,13 +606,13 @@ sub set_sample_rate {
 	my %allowable = map{$_ => 1} @allowable; 
 	if ( $allowable{$srate} ){
 		$project->{sample_rate} = $srate;
-		pager("project $project->{name}: setting audio engine sample rate to $srate Hz for future runs." );
+		::notify("project $project->{name}: setting audio engine sample rate to $srate Hz for future runs." );
 		$srate
 	}
 	else {
 		get_sample_rate();
-		pager qq(The value "$srate" is not an allowable sample rate.);
-		pager("Use one of: @allowable");
+		::notify qq(The value "$srate" is not an allowable sample rate.);
+		::notify("Use one of: @allowable");
 	}
 }
 sub list_buses {

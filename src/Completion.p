@@ -253,7 +253,7 @@ method key_complete
       }
       else {
          # TODO: Handle at least Enter, maybe arrows to select?
-         ::terminal_say("TODO: Unsure how to handle key $str in popup menu");
+         ::notify("TODO: Unsure how to handle key $str in popup menu");
       }
 
       $popup->hide;

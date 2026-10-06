@@ -166,7 +166,7 @@ sub init_gui {
 		 -command => sub { 
 				stop_transport() if $this_engine->started;
 				save_state($gui->{_save_id});
-				pager("Exiting... \n");
+				::notify("Exiting... \n");
 				#$text->{term}->tkRunning(0);
 				#$gui->{ew}->destroy;
 				#$gui->{mw}->destroy;
@@ -509,7 +509,7 @@ sub track_gui {
 	logsub((caller(0))[3]);
 	my $ui = shift;
 	my $n = shift;
-	pager("track_gui already generated"), return
+	::notify("track_gui already generated"), return
 		if defined $gui->{tracks}->{$n} ;
 	return if $ti{$n}->hide;
 	

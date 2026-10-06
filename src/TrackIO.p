@@ -147,7 +147,7 @@ sub set_io {
 
 			my $port_name = $track->jack_manual_port($direction);
 
-			::terminal_say($track->name, ": JACK $direction port is $port_name. Make connections manually.");
+			::notify($track->name, ": JACK $direction port is $port_name. Make connections manually.");
 			$id = 'manual';
 			$id = $port_name;
 			$type = 'jack_manual';
@@ -157,10 +157,10 @@ sub set_io {
 
 			my $name = $track->name;
 			my $width = scalar ::jack_client_array($id, $client_direction)->@*;
-			$width or ::terminal_say(
+			$width or ::notify(
 				qq(Track $name: $direction port for JACK client "$id" not found.));
 			$width or return;
-			$width ne $track->width and ::terminal_say(
+			$width ne $track->width and ::notify(
 				"Track $name set to ", ::width($track->width),
 				qq(, but JACK source "$id" is ), ::width($width), '.');
 		}
@@ -195,9 +195,9 @@ sub set_source {
 	my $new_source = $track->input_object_text;;
 	my $object = $new_source;
 	if ( $old_source  eq $new_source ){
-		::terminal_say($track->name, ": input unchanged, $object");
+		::notify($track->name, ": input unchanged, $object");
 	} else {
-		::terminal_say("Track ",$track->name, ": source set to $object");
+		::notify("Track ",$track->name, ": source set to $object");
 	}
 }
 
@@ -205,10 +205,10 @@ sub set_version {
 	my ($track, $n) = @_;
 	my $name = $track->name;
 	if ($n == 0){
-		::terminal_say("$name: following bus default");
+		::notify("$name: following bus default");
 		$track->set(version => $n)
 	} elsif ( grep{ $n == $_ } $track->versions->@* ){
-		::terminal_say("$name: anchoring version $n");
+		::notify("$name: anchoring version $n");
 		$track->set(version => $n)
 	} else { 
 		::throw("$name: version $n does not exist, skipping.\n")
@@ -225,10 +225,10 @@ sub set_send {
 	logpkg('debug', "send is now $new_send");
 	my $object = $track->output_object_text;
 	if ( $old_send  eq $new_send ){
-		::terminal_say("Track ",$track->name, ": send unchanged, ",
+		::notify("Track ",$track->name, ": send unchanged, ",
 			( $object ?  $object : 'off'));
 	} else {
-		::terminal_say("Track ",$track->name, ": ",
+		::notify("Track ",$track->name, ": ",
 		$object 
 			? "$object is now a send target" 
 			: "send target is turned off.");
@@ -337,10 +337,10 @@ sub set_rw {
 	if ($setting eq MON and $track->group eq 'Main' and $tn{Main}->off)
 	{
 		$tn{Main}->set(rw => MON);
-		::terminal_say('Enabling Main bus monitoring.');
+		::notify('Enabling Main bus monitoring.');
 	}
 	my $status = $track->candidate_rw();
-	::terminal_say("Track ",$track->name, " set to $setting",
+	::notify("Track ",$track->name, " set to $setting",
 		($status ne $setting ? ", but current status is $status" : ""));
 
 }
@@ -368,7 +368,7 @@ sub import_audio  {
 		return;
 	}
 	my ($depth,$width,$freq) = split ',', ::wav_format($path);
-	::terminal_say("format: ", ::wav_format($path));
+	::notify("format: ", ::wav_format($path));
 	$frequency ||= $freq;
 	if ( ! $frequency ){
 		::throw("Cannot detect sample rate of $path. Skipping.",
@@ -378,11 +378,11 @@ sub import_audio  {
 	my $desired_frequency = freq( $config->{raw_to_disk_format} );
 	my $destination = join_path(::this_wav_dir(),$track->name."_$version.wav");
 	if ( $frequency == $desired_frequency and $path =~ /.wav$/i){
-		::terminal_say("copying $path to $destination");
+		::notify("copying $path to $destination");
 		copy($path, $destination) or die "copy failed: $!";
 	} else {	
 		my $format = ::signal_format($config->{raw_to_disk_format}, $width);
-		::terminal_say("importing $path as $destination, converting to $format");
+		::notify("importing $path as $destination, converting to $format");
 		::teardown_engine();
 		my $ecs = qq(-f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
 		my $path = join_path(::project_dir(),"convert.ecs");

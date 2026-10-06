@@ -61,7 +61,7 @@ sub add_track_alias_project {
 	if ( -d $dir ){
 		my @wavs = File::Find::Rule->file()->name("$track*.wav")->in($dir);
 		if (@wavs){
-			::pager("Found target WAV files.\n");
+			::notify("Found target WAV files.\n");
 			::Waveform::generate_waveforms(@wavs);
 			my @params = (
 				target => $track, 
@@ -182,7 +182,7 @@ sub rename_track {
 	path($statefile)->spew_utf8($state);
 	my $msg = "Rename track $oldname -> $newname";
 	project_snapshot($msg);
-	::pager($msg);
+	::notify($msg);
 	load_project(name => $::project->{name});
 }
 sub user_tracks_present {

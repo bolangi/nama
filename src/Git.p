@@ -52,7 +52,7 @@ sub restore_state_from_vcs {
 	# checkout branch if matching branch exists
 	
     if (git_branch_exists($name)){
-		::terminal_say( qq($name: branch exists. Checking out branch $name.) );
+		::notify( qq($name: branch exists. Checking out branch $name.) );
 		git_checkout($name);
 		
 	}
@@ -65,12 +65,12 @@ sub restore_state_from_vcs {
 		my $branch = tag_branch($tag);
 	
 		if (git_branch_exists($branch)){
-			::terminal_say( qq(tag $tag: matching branch exists. Checking out $branch.) );
+			::notify( qq(tag $tag: matching branch exists. Checking out $branch.) );
 			git_checkout($branch);
 		}
 
 		else {
-			::terminal_say( "Creating and checking out branch $branch from tag $tag");
+			::notify( "Creating and checking out branch $branch from tag $tag");
 			git_create_branch($branch, $tag);
 			
 		}
@@ -165,7 +165,7 @@ sub git_create_branch {
 	$from_target = "from $branchfrom" if $branchfrom;
 	push @args, $branchname;
 	push(@args, $branchfrom) if $branchfrom;
-	pager("Creating branch $branchname $from_target");
+	::notify("Creating branch $branchname $from_target");
 	git(checkout => '-b', @args)
 }
 
@@ -205,7 +205,7 @@ sub git_branch_display {
 	$display
 }
 sub list_branches {
-	::terminal_say(join "\n",
+	::notify(join "\n",
 		"---Branches--- (asterisk marks current branch)",
 		$project->{repo}->run('branch'),
 		"",
@@ -244,7 +244,7 @@ sub undo {
 	my $count = git(qw/rev-list --count HEAD/);
 	return throw("nothing to undo") if $count <= 1;
 
-	pager("removing last commit"); 
+	::notify("removing last commit"); 
 	local $quiet = 1;
 
 	my $commit = git(qw/rev-parse HEAD/);
@@ -264,6 +264,6 @@ sub show_head_commit {
 	my $show = git(qw/show HEAD/);	
 	my ($commit) = $show =~ /commit ([a-z0-9]{10})/;
 	my (undef,$msg)    = split "\n\n",$show;
-	::terminal_say("commit: $commit\n", $msg);
+	::notify("commit: $commit\n", $msg);
 }
 1

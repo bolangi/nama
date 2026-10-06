@@ -313,7 +313,7 @@ sub render_metronome_track {
 	my $map = $file->tempo_map;
 	my $rate = $project->{sample_rate};
 	my $cmd = "klick -f $map -r $rate -W $output";
-	pager("executing: $cmd");
+	::notify("executing: $cmd");
 	my $ret = 
  	try   { system($cmd) } 
 	catch { throw("caught error: $_"); "failed" };
@@ -336,7 +336,7 @@ sub arm_metronome {
 	try { system('killall','klick') };
 	my $cmd = 'klick -t -f '. $file->tempo_map . '&';
 	system $cmd;
-	::pager("metronome is armed");
+	::notify("metronome is armed");
 }
 
 sub note_duration ($count, $note) {

@@ -70,7 +70,7 @@ sub new {
 	my $novol = delete $vals{novol};
 	my $nopan = delete $vals{nopan};
 	my $restore = delete $vals{restore};
-	::terminal_say("restoring track $vals{name}") if $restore;
+	::notify("restoring track $vals{name}") if $restore;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
 	
@@ -657,10 +657,10 @@ sub set_version {
 	my ($track, $n) = @_;
 	my $name = $track->name;
 	if ($n == 0){
-		::pager("$name: version set to zero, following bus default\n");
+		::notify("$name: version set to zero, following bus default\n");
 		$track->set(version => $n)
 	} elsif ( grep{ $n == $_ } $track->versions->@* ){
-		::pager("$name: anchoring version $n\n");
+		::notify("$name: anchoring version $n\n");
 		$track->set(version => $n);
 	} else { 
 		::throw("$name: version $n does not exist, skipping.\n")

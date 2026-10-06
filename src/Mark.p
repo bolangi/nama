@@ -42,7 +42,7 @@ sub new {
 	#print "self class: $class, self type: ", ref $self, $/;
 	if ($self->name) {
 		if ( my $old = delete $by_name{$self->name} ) {
-			::pager("replacing previous mark at " .  $old->time);
+			::notify("replacing previous mark at " .  $old->time);
 			@all = grep{ $_->name ne $self->name } @all;
 		}
 		$by_name{ $self->name } = $self;
@@ -57,7 +57,7 @@ sub new {
 sub set_name {
 	my $mark = shift;
 	my $name = shift;
-	pager("name: $name\n");
+	::notify("name: $name\n");
 	if ( defined $by_name{ $name } ){
 	carp "you attempted to assign to name already in use\n";
 	}
@@ -201,12 +201,12 @@ sub drop_mark {
 	}
 
 	if( my $mark = $::Mark::by_name{$name}){
-		pager("$name: a mark with this name exists already at: ", 
+		::notify("$name: a mark with this name exists already at: ", 
 			colonize($mark->time));
 		return
 	}
 	if( my ($mark) = grep { $_->time == $here} ::Mark::all()){
-		pager( q(This position is already marked by "),$mark->name,q(") );
+		::notify( q(This position is already marked by "),$mark->name,q(") );
 		 return 
 	}
 
@@ -272,8 +272,8 @@ sub modify_mark {
 	my ($mark, $newtime, $quiet) = @_;
 	$mark->set( time => $newtime );
 	! $quiet && do {
-	pager($mark->name, ": set to ", d2( $newtime), "\n");
-	pager("adjusted to ",$mark->time, "\n") 
+	::notify($mark->name, ": set to ", d2( $newtime), "\n");
+	::notify("adjusted to ",$mark->time, "\n") 
 		if $mark->time != $newtime;
 	};
 	set_position($mark->adjusted_time);

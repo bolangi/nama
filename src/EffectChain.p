@@ -204,7 +204,7 @@ sub add_ops {
 		my ($new_surname, $existing) = $track->unique_surname($ec_args->{surname});
 		if ( $new_surname ne $ec_args->{surname})
 		{
-			::terminal_say(
+			::notify(
 				"track ".
 				$track->name.qq(: other effects with surname "$ec_args->{surname}" found,),
 				qq( using "$new_surname". Others are: $existing.));
@@ -411,7 +411,7 @@ sub new_effect_profile {
 	logsub((caller(0))[3]);
 	my ($bunch, $profile) = @_;
 	my @tracks = bunch_tracks($bunch);
-	::pager( qq(effect profile "$profile" created for tracks: @tracks) );
+	::notify( qq(effect profile "$profile" created for tracks: @tracks) );
 	map { 
 		::EffectChain->new(
 			profile 	=> $profile,
@@ -426,7 +426,7 @@ sub new_effect_profile {
 sub delete_effect_profile { 
 	logsub((caller(0))[3]);
 	my $name = shift;
-	::pager( qq(deleting effect profile: $name) );
+	::notify( qq(deleting effect profile: $name) );
 	map{ $_->destroy} ::EffectChain::find( profile => $name );
 }
 
@@ -436,7 +436,7 @@ sub apply_effect_profile {  # overwriting current effects
 	my @chains = ::EffectChain::find(profile => $profile);
 
 	# add missing tracks 
-	map{ ::pager( "adding track $_" ); add_track($_) } 
+	map{ ::notify( "adding track $_" ); add_track($_) } 
 		grep{ !$tn{$_} } 
 		map{ $_->track_name } @chains;	
 	# add effect chains

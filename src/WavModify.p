@@ -12,7 +12,7 @@ sub normalize {
 	# track version will exist if PLAY status
 	my $cmd = 'ecanormalize ';
 	$cmd .= $track->full_path;
-	::pager("executing: $cmd\n");
+	::notify("executing: $cmd\n");
 	system $cmd;
 }
 sub fixdc {
@@ -24,7 +24,7 @@ sub fixdc {
 
 	my $cmd = 'ecafixdc ';
 	$cmd .= $track->full_path;
-	::pager("executing: $cmd\n");
+	::notify("executing: $cmd\n");
 	system $cmd;
 }
 1;

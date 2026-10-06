@@ -47,7 +47,7 @@ sub save_state {
 	if ( $config->{opts}->{a} ) {
 		my $filename = $filename;
 		$filename =~ s/\.yml$//;
-		pager("storing ALSA settings\n");
+		::notify("storing ALSA settings\n");
 		pager(qx(alsactl -f $filename.alsa store))
 	}
 }
@@ -295,7 +295,7 @@ sub restore_state_from_file {
 	if ( $config->{opts}->{a} ) {
 		my $filename = $filename; 
 		$filename =~ s/\.yml$//;
-		pager("restoring ALSA settings\n");
+		::notify("restoring ALSA settings\n");
 		pager(qx(alsactl -f $filename.alsa restore));
 	}
 

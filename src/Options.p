@@ -21,7 +21,7 @@ sub process_command_line_options {
 
 	eval $getopts or die "Stopped.\n";
 	
-	if ($config->{opts}->{h}){ ::terminal_say($help->{usage}); exit; }
+	if ($config->{opts}->{h}){ ::notify($help->{usage}); exit; }
 
 }
 BEGIN {

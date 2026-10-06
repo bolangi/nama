@@ -265,7 +265,7 @@ sub initialize_user_interface {
 	else {
 		::Log::discard_output_buffer();
 	}
-	::terminal_say($tk_warning) if $tk_warning;
+	::notify($tk_warning) if $tk_warning;
 
 	1;
 }
@@ -280,12 +280,12 @@ sub initialize_services {
 		
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
-		pager("project_root $config->{opts}->{d} specified on command line\n");
+		::notify("project_root $config->{opts}->{d} specified on command line\n");
 		$config->{root_dir} = $config->{opts}->{d};
 	}
 	if ($config->{opts}->{p}){
 		$config->{root_dir} = getcwd();
-		pager("placing all files in current working directory ($config->{root_dir})\n");
+		::notify("placing all files in current working directory ($config->{root_dir})\n");
 	}
 
 	prepare_static_effects_data() unless $config->{opts}->{S};
@@ -319,7 +319,7 @@ sub initialize_services {
 	and process_is_running('jack-plumbing')
 	){
 
-		::terminal_say(<<PLUMB);
+		::notify(<<PLUMB);
 Jack.plumbing daemon detected!
 
 Attempting to stop it...  
@@ -343,7 +343,7 @@ Please do one of the following, then restart Nama:
 ....Exiting.) );
 exit;
 		}
-		else { ::terminal_say("Stopped.") }
+		else { ::notify("Stopped.") }
 	}
 		
 	1;	
@@ -354,7 +354,7 @@ sub initialize_ecasound_engine {
 	my $class;
 	if ($config->{opts}->{A} or $config->{opts}->{E})
 	{
-		::terminal_say("Starting dummy engine only");
+		::notify("Starting dummy engine only");
 		%args = (
 			name => $config->{ecasound_engine_name}
 		);
@@ -363,7 +363,7 @@ sub initialize_ecasound_engine {
 	elsif (
 		$config->{opts}->{l} 
 		and can_load( modules => { 'Audio::Ecasound' => undef })
-		and ::terminal_say("loaded Audio::Ecasound")
+		and ::notify("loaded Audio::Ecasound")
 	){  
 		%args = (
 			name => $config->{ecasound_engine_name}, 

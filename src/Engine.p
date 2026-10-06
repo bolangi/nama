@@ -21,7 +21,7 @@ sub new {
 	my $class = shift;	
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	::terminal_say("$vals{name}: returning existing engine"),
+	::notify("$vals{name}: returning existing engine"),
 		return $by_name{$vals{name}} if $by_name{$vals{name}};
 	my $self = bless { name => 'default', %vals }, $class;
 	#print "object class: $class, object type: ", ref $self, $/;
@@ -141,7 +141,7 @@ our @ISA = '::Engine';
 sub init_ecasound_socket {
 	my $self = shift;
 	my $port = $self->port;
-	::terminal_say("Creating socket on port $port.");
+	::notify("Creating socket on port $port.");
 	$self->{socket} = IO::Socket::INET->new (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 
@@ -164,12 +164,12 @@ sub launch_ecasound_server {
 	my $ps = qx(ps ax);
 	if ( $ps =~ /ecasound/ and $ps =~ /--server/ and ($ps =~ /tcp-port=$port/) )
 	{ 
-		::terminal_say("Found existing Ecasound server on port $port")
+		::notify("Found existing Ecasound server on port $port")
 	}
 	else 
 	{ 
 		
-		::terminal_say("Starting Ecasound server on port $port");
+		::notify("Starting Ecasound server on port $port");
 		system("$command $redirect") == 0 or carp("system $command failed: $?\n")
 	}
 	sleep 1;
@@ -302,7 +302,7 @@ with '::EcasoundRun';
 
 sub launch_ecasound_server {
 	my $self = shift;
-	::terminal_say("Using Ecasound via Audio::Ecasound (libecasoundc)");
+	::notify("Using Ecasound via Audio::Ecasound (libecasoundc)");
 	$self->{audio_ecasound} = Audio::Ecasound->new();
 }
 sub ecasound_iam{

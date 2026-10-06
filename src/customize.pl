@@ -25,7 +25,7 @@ commands =>
 		# usage: greet <name> <adjective>
 		greet => sub { 
 				my ($name,$adjective) = @_;
-				pager("Hello $name! You look $adjective today!!");
+				::notify("Hello $name! You look $adjective today!!");
 		},
 		disable_jack_polling => sub{ stop_event('poll_jack')},
 

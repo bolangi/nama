@@ -376,7 +376,7 @@ $this_track->set(group => 'Main');
 	my $message;
 	{
 		no warnings 'redefine';
-		local *::terminal_say = sub { $message = join '', @_ };
+		local *::notify = sub { $message = join '', @_ };
 		$this_track->set_rw(OFF);
 	}
 	is($message, 'Track sax set to OFF',
@@ -388,7 +388,7 @@ $this_track->set(group => 'Main');
 	my $source_message;
 	{
 		no warnings 'redefine';
-		local *::terminal_say = sub { $source_message = join '', @_ };
+		local *::notify = sub { $source_message = join '', @_ };
 		nama_cmd('source');
 	}
 	like($source_message, qr/however track is OFF/,

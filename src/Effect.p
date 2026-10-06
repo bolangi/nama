@@ -288,9 +288,9 @@ sub _modify_effect {
 	my $i = $self->_effect_index;
 	defined $i or confess "undefined effect code for $op_id: ",::Dumper $self;
 	my $parameter_count = scalar $self->about->{params}->@*;
-	::pager("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
+	::notify("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
-	::pager("$op_id: parameter $parameter is read-only, skipping\n"), return 
+	::notify("$op_id: parameter $parameter is read-only, skipping\n"), return 
 		if $self->is_read_only($parameter);
 		my $new_value;
 		if ($sign) {
@@ -387,7 +387,7 @@ sub position_effect {
 	else { 
 		my $POS = fxn($pos);
 		my $track2 = $ti{$POS->chain};
-		::pager("$pos: position belongs to a different track, skipping.\n"), return
+		::notify("$pos: position belongs to a different track, skipping.\n"), return
 			unless $track eq $track2;
 		my $new_op_index = $POS->track_effect_index; 
 		# insert op
@@ -396,7 +396,7 @@ sub position_effect {
 	}
 	# easier to reconfigure the engine than to code for
 	# repositioning ecasound effects.
-	::terminal_say(join " - ",@new_op_list);
+	::notify(join " - ",@new_op_list);
 	$track->ops->@* = @new_op_list;
 	::request_setup();
 	$this_track = $track;
@@ -663,10 +663,10 @@ sub insert_effect {
 	local $config->{category} = 'ECI_FX';
 	return(append_effect(\%args)) if $args{before} eq 'ZZZ';
 	my $running = $this_engine->started();
-	pager("Cannot insert effect while engine is recording.\n"), return 
+	::notify("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
 	my $pos = fxn($args{before}) or die "$args{before}: effect ID not found";
-	pager("Cannot insert effect before controller.\n"), return 
+	::notify("Cannot insert effect before controller.\n"), return 
 		if $pos->is_controller;
 	if ($running){
 		$ui->stop_heartbeat;
@@ -724,7 +724,7 @@ sub modify_effect {
 		# $parameter: one-based
 	
 	my $FX = fxn($op_id)
-		or pager("$op_id: non-existing effect id. Skipping.\n"), return; 
+		or ::notify("$op_id: non-existing effect id. Skipping.\n"), return; 
 	$FX->_modify_effect($parameter, $value, $sign);
 }
 

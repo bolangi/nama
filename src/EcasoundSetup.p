@@ -168,7 +168,7 @@ sub connect_transport {
 sub transport_status {
 	
 	map{ 
-		pager(join '',"Warning: $_: input ",$tn{$_}->source,
+		::notify(join '',"Warning: $_: input ",$tn{$_}->source,
 		" is already used by track ",$setup->{inputs_used}->{$tn{$_}->source},".")
 		if $setup->{tracks_with_duplicate_inputs}->{$_};
 	} grep { $tn{$_}->effective_rec } $bn{Main}->tracks;
@@ -180,16 +180,16 @@ sub transport_status {
 	my $end    = ::Mark::loop_timeline_end();
 	#print "start: $start, end: $end, loop_enable: $mode->{loop_enable}\n";
 	if (ref $setup->{record_midi} and $setup->{record_midi}->%*){
-		pager(join(" ", keys $setup->{record_midi}->%*), ": ready for caching");
+		::notify(join(" ", keys $setup->{record_midi}->%*), ": ready for caching");
 	}
 	if ($mode->{loop_enable} and defined $start and defined $end){
 		#if (! $end){  $end = $start; $start = 0}
-		pager("looping from ", heuristic_time($start),
+		::notify("looping from ", heuristic_time($start),
 				 	"to ",   heuristic_time($end));
 	}
-	::terminal_say("Now at: ", current_position());
-	::terminal_say("Engine is ". ( $this_engine->started() ? "running." : "ready."));
-	::terminal_say("Press SPACE to start or stop engine.")
+	::notify("Now at: ", current_position());
+	::notify("Engine is ". ( $this_engine->started() ? "running." : "ready."));
+	::notify("Press SPACE to start or stop engine.")
 		if $config->{press_space_to_start};
 }
 

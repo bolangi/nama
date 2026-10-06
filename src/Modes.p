@@ -51,7 +51,7 @@ sub exit_preview_modes {
 		return unless $mode->{preview} or $mode->{doodle};
 		disable_preview_modes();
 		stop_transport();
-		pager("Exiting preview/doodle mode");
+		::notify("Exiting preview/doodle mode");
 }
 sub disable_preview_modes {
 	undef $mode->{preview};

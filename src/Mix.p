@@ -47,7 +47,7 @@ sub automix {
 					$bn{$_} and $tn{$_}->candidate_rec
 				 } $bn{Main}->tracks;
 
-	pager("tracks: @tracks");
+	::notify("tracks: @tracks");
 
 	## we do not allow automix if inserts are present	
 

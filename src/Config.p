@@ -32,7 +32,7 @@ sub global_config {
 	# 3. .namarc in the home directory, i.e. ~/.namarc
 	# 4. .namarc in the project root directory, i.e. ~/nama/.namarc
 	if( $config->{opts}->{f} ){
-		::terminal_say("reading config file $config->{opts}->{f}\n");
+		::notify("reading config file $config->{opts}->{f}\n");
 		return path($config->{opts}->{f})->slurp_utf8;
 	}
 	my @search_path = (project_dir(), $ENV{HOME}, project_root() );
@@ -41,7 +41,7 @@ sub global_config {
 				if (-d $_) {
 					my $config_path = join_path($_, config_file());
 					if( -f $config_path or -l $config_path){ 
-						::terminal_say("Found config file: $config_path");
+						::notify("Found config file: $config_path");
 						my $yml = path($config_path)->slurp_utf8;
 						return $yml;
 					}
@@ -88,7 +88,7 @@ sub read_config {
 	$config->{sample_rate} = $cfg{abbreviations}{frequency};
 
 	$config->{use_git} and ! git_executable_found() and 
-		::terminal_say("Config file requests Git version control,
+		::notify("Config file requests Git version control,
 but the git executable could not be found.
 Please check that the git executable directory is included
 in your shell's \$PATH variable (currently $ENV{PATH}). 

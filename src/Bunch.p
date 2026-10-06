@@ -22,7 +22,7 @@ sub bunch {
 		::pager(json_out( $project->{bunch} ));
 	} elsif (! @tracks){
 		$project->{bunch}->{$bunchname} 
-			and pager("bunch $bunchname: @{$project->{bunch}->{$bunchname}}\n") 
+			and ::notify("bunch $bunchname: @{$project->{bunch}->{$bunchname}}\n") 
 			or  throw("bunch $bunchname: does not exist.\n");
 	} elsif (my @mispelled = grep { ! $tn{$_} and ! $ti{$_}} @tracks){
 		::throw("@mispelled: mispelled track(s), skipping.\n");

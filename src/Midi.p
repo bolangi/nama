@@ -15,7 +15,7 @@ sub start_midish_process {
 	logsub((caller(0))[3]);
 	my $executable = qx(which midish);
 	chomp $executable;
-	$executable or ::terminal_say("Midish not found!"), return;
+	$executable or ::notify("Midish not found!"), return;
 	$pid = open3($fh_midi_write, $fh_midi_read, $fh_midi_error,"$executable -v")
 		or warn "Midish failed to start!";
 
@@ -46,7 +46,7 @@ sub midish_cmd {
 		if ($h eq $fh_midi_error)
 		{
 			sysread($fh_midi_error,$buf,$length);
-			if($buf){::terminal_say("MIDISH ERR-> $buf")}
+			if($buf){::notify("MIDISH ERR-> $buf")}
 		}
 		else
 		{
@@ -59,7 +59,7 @@ sub midish_cmd {
 
 sub close_midish {
 	save_midish();
-	::terminal_say("reaping midish");
+	::notify("reaping midish");
 	kill_and_reap($pid);
 }	
 sub save_midish {
@@ -135,7 +135,7 @@ sub midi_rec_cleanup {
 		push $track->midi_versions->@*, $version;
 		$track->set(rw => PLAY);
 		my $cmd = join ' ', 'chdup', $config->{midi_record_buffer}, $track->source_id, $track->midi_version;
-		::terminal_say("cmd: $cmd");
+		::notify("cmd: $cmd");
 		midish_cmd($cmd);
 		midish_cmd("clr $config->{midi_record_buffer} $length");
 		$track->unmute();

@@ -49,7 +49,7 @@ sub cache_track { # launch subparts if conditions are met
 	my @to_cache = cachable($track) or throw("Nothing to cache, skipping."), return;
 
 	$obj = $bus ? 'bus' : 'track';
-	pager("$name: Preparing to cache $obj with ",join ', ',@to_cache);
+	::notify("$name: Preparing to cache $obj with ",join ', ',@to_cache);
 	if($bus)
 	{ generate_cache_bus_graph($args) }
 	else
@@ -58,7 +58,7 @@ sub cache_track { # launch subparts if conditions are met
 	my $result = process_cache_graph($g);
 	if ( $result )
 	{ 
-		pager("generated graph");
+		::notify("generated graph");
 		deactivate_vol_pan($args);
 		cache_engine_run($args);
 		reactivate_vol_pan($args);
@@ -188,8 +188,8 @@ sub cache_engine_run {
 
 	$args->{processing_time} = $setup->{audio_length} + $args->{additional_time};
 
-	pager($args->{track}->name.": processing time: ". d2($args->{processing_time}). " seconds");
-	pager("Starting cache operation. Please wait.");
+	::notify($args->{track}->name.": processing time: ". d2($args->{processing_time}). " seconds");
+	::notify("Starting cache operation. Please wait.");
 	
 	revise_prompt(" "); 
 
@@ -259,7 +259,7 @@ sub update_cache_map {
 
 	my $act = $args->{bus} ? 'reactivate bus' 
 								: "restore version $args->{original_version}";
-	pager(qq(Saving attributes for cached $obj "$track->name"));
+	::notify(qq(Saving attributes for cached $obj "$track->name"));
 
 	pager(qq(The 'uncache' command on this track will $act, 
 and restore any effects, fades, inserts or region definition.));
@@ -275,7 +275,7 @@ and restore any effects, fades, inserts or region definition.));
 	$tagname =~ s/ /-/g;
 	try{ git(tag => $tagname, '-a','-m',$msg) };
 	$track->add_system_version_comment($args->{cached_version}, $msg);
-	pager($msg); 
+	::notify($msg); 
 }
 
 sub caching_cleanup {
@@ -300,7 +300,7 @@ sub poll_progress {
 		   $status =~ /finished|error|stopped/ 
 		or $here > $args->{processing_time};
 
-	pager("Done.");
+	::notify("Done.");
 	logpkg('debug', engine_status(current_position(),2,1));
 	#revise_prompt();
 	stop_polling_cache_progress($args);
@@ -329,12 +329,12 @@ You must remove them before you can uncache this version."), return;
 	$ec->add($track);
 	if ($track->is_mixer and not $ec->track_version_original) {
 		$track->set(rw => MON);
-		pager("Enabling bus $track->{group} by setting mix track $track->{name} to MON");
+		::notify("Enabling bus $track->{group} by setting mix track $track->{name} to MON");
 	} else {
 		my $v = $ec->track_version_original;
 		$track->set( version => $v);
-		pager("Track $track->{name}: selecting previously cached version $v");
-		$track->is_region and pager(
+		::notify("Track $track->{name}: selecting previously cached version $v");
+		$track->is_region and ::notify(
 			"Track $track->{name}: setting original region bounded by marks "
 				. $track->region_start. " and ". $track->region_end) 	
 		}

@@ -228,7 +228,7 @@ sub destroy {
 	# remove edit track WAV files if we've reached here
 	map{ 
 		my $path = ::join_path(::this_wav_dir(), $_);
-		::pager("removing $path");
+		::notify("removing $path");
 		#unlink $path;
 	} @wavs;
 }
@@ -303,7 +303,7 @@ sub get_edit_mark {
 			ecasound_iam('getpos')
 		);
 		push @_edit_points, $pos;
-		::pager(" got $names[$p] position ".d1($pos));
+		::notify(" got $names[$p] position ".d1($pos));
 		reset_input_line();
 		if( $p == 3){ complete_edit_points() }
 		else{
@@ -315,7 +315,7 @@ sub get_edit_mark {
 sub complete_edit_points {
 	$setup->{edit_points}->@* = @_edit_points; # save to global
 	ecasound_iam('stop');
-	::pager("\nEngine is stopped\n");
+	::notify("\nEngine is stopped\n");
 	detect_spacebar();
 	::terminal_print(prompt(), " ");
 }
@@ -326,7 +326,7 @@ sub set_edit_points {
 		return 1 if ::ChainSetup::really_recording();
 	::throw("You need stop the engine first. Aborting"), 
 		return 1 if $this_engine->started();
-	::pager("Ready to set edit points!");
+	::notify("Ready to set edit points!");
 	sleeper(0.2);
 	::pager(q(Press the "P" key three times to mark positions for:
     + play-start
@@ -342,7 +342,7 @@ Engine will start in 2 seconds.));
 		reset_input_line();
 		detect_keystroke_p();
 		ecasound_iam('start');
-		::pager("\n\nEngine is running\n");
+		::notify("\n\nEngine is running\n");
 		::terminal_print(prompt());
 	});
 }
@@ -409,7 +409,7 @@ Edits will be applied against current version"),
 	# create edit
 	
 	my $v = $this_track->playback_version;
-	::pager("$name: creating new edit against version $v");
+	::notify("$name: creating new edit against version $v");
 	my $edit = ::Edit->new(
 		host_track 		=> $this_track->name,
 		host_version	=> $v,
@@ -476,7 +476,7 @@ sub destroy_edit {
    	#	= $text->{term}->readline('destroy edit "'.$this_edit->edit_name.
 	# qq(" and all its WAV files?? [n] ));
 	if ( $reply =~ /y/i ){
-		::pager("permanently removing edit");
+		::notify("permanently removing edit");
 		$this_edit->destroy;
 	}
 	#$text->{term}->remove_history($text->{term}->where_history);
@@ -711,7 +711,7 @@ sub merge_edits {
 		join " ",map{$_."v$edits{$_}"} sort{$a<=>$b} keys %edits;
 	# merges mic_1.wav w/mic-v1-edits 1_2 2_1 
 	
-	::pager($msg);
+	::notify($msg);
 
 	# cache at version_mix level
 	

@@ -348,7 +348,7 @@ sub terminal_print (@text) {
 	emit_output($output, \*STDOUT);
 }
 
-sub terminal_say (@text) {
+sub notify (@text) {
 	my $output = join q(), map { defined $_ ? $_ : q() } @text;
 	$output .= "\n" unless $output =~ /\n\z/;
 	terminal_print($output);
@@ -697,7 +697,7 @@ sub revise_prompt {
 
 sub throw (@text) {
 	logsub((caller(0))[3]);
-	terminal_say(@text)
+	notify(@text)
 }
 sub pager {
 	logsub((caller(0))[3]);
