@@ -799,13 +799,13 @@ sub gen_words {
 
 	elsif (command() =~ /imp(ort)?(-audio|-midi)? / ) # followed by a space
 	{
-	#print_to_terminal("word: $word");
+	#notify("word: $word");
 
 		## substitute environment variable 
 
 		my ($var);
 		if ( ($var) = $word =~ m[  \$ (\w+) $ ]x  and $ENV{$var}){
-			#print_to_terminal("var: $var");
+			#notify("var: $var");
 			$pwd = path($ENV{$var});
 			my $item = $pwd->stringify;
 			if ($pwd->is_dir){
@@ -823,7 +823,7 @@ sub gen_words {
 			return
 		}
 		my ($stub, $dir) =  fileparse($word);
-		#print_to_terminal("word: $word, dir: $dir, stub: $stub");
+		#notify("word: $word, dir: $dir, stub: $stub");
 
 		$pwd = path($dir);
 
@@ -843,8 +843,8 @@ sub gen_words {
 			}
 		}
 		map { path($_)->is_dir and s{$}{/} } @$keywords;
-		#print_to_terminal("found",scalar @$keywords , "files in this directory");
-		#print_to_terminal($_) for @$keywords; 
+		#notify("found",scalar @$keywords , "files in this directory");
+		#notify($_) for @$keywords; 
 		
 	}
 	elsif ( command() =~ /^ \s* ! /x )
@@ -860,8 +860,8 @@ sub gen_words {
 		$is_command++;
 	}
 
-	#print_to_terminal("found ".scalar @$keywords. " keywords");
-	#print_to_terminal($_) for @$keywords[0..10];
+	#notify("found ".scalar @$keywords. " keywords");
+	#notify($_) for @$keywords[0..10];
 	my $first = undef;
 	my $last = scalar @$keywords - 1;
 	for (my $i = 0;      $i <= $last; $i++)  { $first = $i,     last if @$keywords[$i] =~ /^$word/i }
@@ -873,7 +873,7 @@ sub gen_words {
 	#unless (grep { m(/) } @result)
 	#{
 	 if (@result > 8) {
-	 	print_to_terminal("found", scalar @result, "matches");
+	 	notify("found", scalar @result, "matches");
 	 	my $width = 2;
 	 	for (@result) {
 	 		$width = length($_) + 2 if length($_) + 2 > $width;
@@ -883,13 +883,13 @@ sub gen_words {
 	 	for my $row (0 .. $rows - 1) {
 	 		my @items = map $result[$row + $_ * $rows], 0 .. $columns - 1;
 	 		pop @items while @items and not defined $items[-1];
-	 		print_to_terminal(join '', map { sprintf "%-*s", $width, $_ } @items);
+	 		notify(join '', map { sprintf "%-*s", $width, $_ } @items);
 	 	}
 	 }
 	 else {
-	 	print_to_terminal($_) for @result;
+	 	notify($_) for @result;
 	 }
-	 print_to_terminal(' ');
+	 notify(' ');
 	#}
 
 	@result;
