@@ -92,7 +92,7 @@ sub create_entry_widget {
 
 	my $prompt = prompt();
 	my $do_command = sub { my ( $self, $line ) = @_; 
-							print_to_terminal($line); 
+							add_scroller_item($line); 
 							process_line(substr($line, $self->editable_from));
 							show_prompt();
 						}; 
@@ -118,7 +118,7 @@ sub install_entry_item {
 	$scroller->push($entry_item);
 	$entry_widget_present = 1;
 	set_output_sink(sub ($message) {
-		$tickit->later(sub { print_to_terminal($message) });
+		$tickit->later(sub { add_scroller_item($message) });
 	});
 	$scroller->scroll_to_bottom;
 	position_entry_widget();
@@ -359,7 +359,7 @@ sub terminal_warn (@text) {
 	emit_output($output, \*STDERR);
 }
  
-sub print_to_terminal (@text) {
+sub add_scroller_item (@text) {
 	return unless defined $scroller;
 	my $output = join q(), map { defined $_ ? $_ : q() } @text;
 	$output =~ s/\n\z//;
@@ -399,7 +399,7 @@ sub prompt_for_text ($message) {
 			my $line = $prompt_entry->text;
 			my $input = substr($line, $prompt_length);
 			if ($input =~ /^\s*$/) {
-				print_to_terminal($line);
+				add_scroller_item($line);
 				set_entry_prompt($prompt_entry, $message, q());
 				return;
 			}
@@ -416,7 +416,7 @@ sub prompt_for_text ($message) {
 	$prompt_entry->set_window(undef);
 	$text->{entry} = $entry = $command_entry;
 	$command_entry->set_window($entrywin);
-	print_to_terminal(
+	add_scroller_item(
 		$cancelled ? "$cancelled_line^X" : $submitted_line,
 	);
 	show_prompt();
@@ -458,7 +458,7 @@ sub prompt_yn ($message, $default) {
 		N     => undef,
 		Enter => 'key_enter_line',
 	);
-	print_to_terminal("$message $choices ".($answer ? 'y' : 'n'));
+	add_scroller_item("$message $choices ".($answer ? 'y' : 'n'));
 	show_prompt();
 	return $answer;
 }
@@ -641,9 +641,10 @@ sub previous_stepsize ($count = 1) {
 } # popup 
 
 } # tickit UI
-BEGIN { $SIG{__WARN__} = \&filter_print_to_terminal }
-sub filter_print_to_terminal {
-	terminal_warn(@_) unless $_[0] =~ /ScrollBox/;
+BEGIN { $SIG{__WARN__} = \&filter_spurious_warnings }
+sub filter_spurious_warnings {
+	return if $_[0] =~ /ScrollBox/;
+	terminal_warn(@_) 
 }
 
 sub end_of_list_sound { system( $config->{hotkey_beep} ) }
