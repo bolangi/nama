@@ -3,19 +3,21 @@ Changes to Audio::Nama
 2.000 August 3, 2026
     * works with JACK served by Pipewire or jackd, also ALSA
     * full support for metronome and tempo maps, including tempo ramp
-    * can indicate positions by bar/beat or bar/beat/tick
+    * can now indicate positions by bar/beat or bar/beat/tick
+    * can now indicate positions by H:M:S or M:S
     * tickit terminal library replaces readline
     * keybindings for adjusting effect parameters (effect mode)
     * keybindings for adjusting transport position (jump mode)
     * keybindings for adjusting mark positions (bump mode)
     * custom key mappings
     * simple GUI for common recording/mixing scenario
-    * refactor of key REC/MON/OFF status and routing algorithms
+    * refactor of key PLAY/REC/MON/OFF status and routing algorithms
     * rewritten logging system with full diagnostics
     * refactor timeline, region and clip positioning, naming
     * improvements to show-tracks display and help system
     * documentation updates
     * improve fade behavior, both planned envelopes and on demand
+    * setting track to MON automatically enables Main output bus
 
 1.605 July 4, 2026
     * metronome related
