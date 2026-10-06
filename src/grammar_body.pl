@@ -228,7 +228,7 @@ help_effect: _help_effect effect { ::help_effect($item{effect}) ; 1}
 find_effect: _find_effect anytag(s) { 
 	::find_effect(@{$item{"anytag(s)"}}); 1}
 help: _help anytag  { ::help($item{anytag}) ; 1}
-help: _help { ::terminal_print( $::help->{screen} ); 1}
+help: _help { ::notify( $::help->{screen} ); 1}
 project_name: _project_name { 
 	::notify( "project name: ", $::project->{name}); 1}
 new_project: _new_project project_id { 
@@ -757,7 +757,7 @@ add_controller: _add_controller parent effect value(s?) {
 	my $code = $item{effect};
 	my $parent = $item{parent};
 	my $parent_o = ::fxn($parent);
-	::terminal_print("parent: ", $parent, " chain: ", $parent_o->chain);
+	::notify("parent: ", $parent, " chain: ", $parent_o->chain);
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;

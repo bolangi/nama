@@ -71,7 +71,7 @@ sub set {
 }
 sub dumpp  {
 	my $self = shift;
-	::terminal_print($self->dump)
+	::($self->dump)
 }
 sub dump {
 	my $self = shift;
@@ -113,7 +113,7 @@ __END__
 
   $object->set( bux => 2);
   
-  ::terminal_print("bux is " . $object->bux . "\n");
+  ::notify("bux is " . $object->bux . "\n");
 
 
   # Define a subclass (automatically inherits parent attributes)

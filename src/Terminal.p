@@ -710,7 +710,7 @@ sub pager {
 	$lines += int(((length($_) || 1) - 1) / ($width || 1)) + 1
 		for split /\n/, $output, -1;
 	if ($lines <= $text->{term}->lines - 1) {
-		terminal_print($output, $output =~ /\n\z/ ? "\n" : "\n\n");
+		notify($output, $output =~ /\n\z/ ? "" : "\n");
 		return;
 	}
 
