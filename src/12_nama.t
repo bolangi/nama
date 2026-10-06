@@ -73,6 +73,7 @@ while( my($dest,$type) = splice @id_to_type, 0,2){
 my $test_project = 'test';
 
 load_project(name => $test_project, create => 1);
+nama_cmd('Main mon');
 
 {
 	local $config->{realtime_profile} = 'nonrealtime';
@@ -1180,6 +1181,7 @@ is_deeply(
 
 
 load_project(name => "test_project-convert51", create => 1);
+nama_cmd('Main mon');
 
 my $script = <<CONVERT51;
 [% qx(cat ./stereo51.nms ) %]
@@ -1209,6 +1211,7 @@ check_setup('pianoteq feeding crossover network' );
 
 
 load_project(name => "$test_project-sendbus-cooked", create => 1);
+nama_cmd('Main mon');
 
 do_script(' add mic
             add guitar
@@ -1275,6 +1278,7 @@ EXPECTED
 check_setup('Submix, AKA add_submix_cooked - JACK');
 
 load_project(name => "add_submix_raw", create => 1);
+nama_cmd('Main mon');
 
 nama_cmd("add_tracks mic guitar; for 3 4; mon;; 4 source 2; stereo; add_submix_raw raw-user 7"); 
 $expected_setup_lines = <<EXPECTED;
@@ -1335,6 +1339,7 @@ check_setup('Send Bus, Raw - ALSA');
 
 force_jack();
 load_project(name => "$test_project-add_insert_post", create => 1);
+nama_cmd('Main mon');
 
 nama_cmd("add sax; mon; gen");
 nama_cmd("add_insert post jconvolver; gen");
@@ -1366,6 +1371,7 @@ EXPECTED
 check_setup('JACK client as postfader insert');
 
 load_project(name => "add_insert_pre", create => 1);
+nama_cmd('Main mon');
 nama_cmd("add sax; mon; add_insert pre jconvolver; gen");
 $expected_setup_lines = <<EXPECTED;
 
@@ -1391,6 +1397,7 @@ EXPECTED
 check_setup('JACK client as pre-fader insert');
 
 load_project(name => "add_insert_via_soundcard-postfader", create => 1);
+nama_cmd('Main mon');
 nama_cmd("add sax; mon; source 2; add_insert post 5; gen");
 $expected_setup_lines = <<EXPECTED;
 -a:1 -i:loop,Main_in
@@ -1444,6 +1451,7 @@ EXPECTED
 check_setup('Insert via soundcard, postfader - ALSA');
 
 load_project(name => "add_insert_via_soundcard_pre", create => 1);
+nama_cmd('Main mon');
 nama_cmd("add sax; mon; source 2; add_insert pre 5; gen");
 $expected_setup_lines = <<EXPECTED;
 
