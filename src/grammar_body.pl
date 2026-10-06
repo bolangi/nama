@@ -782,7 +782,7 @@ add_controller: _add_controller effect value(s?) {
 	my $parent = ::this_op_id();
 	my $values = $item{"value(s?)"};
 	my $cmd = "add_controller $parent $code @$values";
-	::terminal_print("command: $cmd\n");
+	::notify("command: $cmd");
 	::nama_cmd($cmd);
 	1
 }
@@ -947,7 +947,7 @@ fx_alias3: ident {
 	grep { $_->surname eq $item{ident} } $::this_track->user_effects;
 }
 remove_target: existing_op_id | fx_pos | fx_surname | fx_name
-	{ $item[-1] or ::terminal_print("no effect object found\n"), return 0}
+	{ $item[-1] or ::notify("no effect object found"), return 0}
 fx_alias: fx_alias2 | fx_alias1
 fx_nick: ident { $::fx->{alias}->{$item{ident}} }
 fx_alias1: op_id

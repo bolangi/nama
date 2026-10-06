@@ -136,7 +136,7 @@ sub first_run {
 
 	my $missing;
 	my @a = `which analyseplugin`;
-	@a or ::terminal_print( <<WARN
+	@a or ::notify( <<WARN
 LADSPA helper program 'analyseplugin' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. You will probably have more fun with the LADSPA
@@ -144,7 +144,7 @@ libraries and executables installed. http://ladspa.org
 WARN
 	) and  sleeper (0.6) and $missing++;
 	my @b = `which ecasound`;
-	@b or ::terminal_print( <<WARN
+	@b or ::notify( <<WARN
 Ecasound executable program 'ecasound' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. This suite depends on the Ecasound
@@ -157,9 +157,9 @@ WARN
 	$missing and 
 	my $reply = <STDIN>;
 	chomp $reply;
-	::terminal_print("Goodbye.\n"), exit unless $reply =~ /y/i;
+	::notify("Goodbye."), exit unless $reply =~ /y/i;
 	}
-::terminal_print(<<HELLO);
+::notify(<<HELLO);
 
 Aloha. Welcome to Nama and Ecasound.
 
@@ -169,7 +169,7 @@ HELLO
 		. "May I create it for you? [yes] ");
 	my $make_namarc = <STDIN>;
 	sleep 1;
-	::terminal_print(<<PROJECT_ROOT);
+	::notify(<<PROJECT_ROOT);
 
 Nama places all sound and control files under the
 project root directory, by default $ENV{HOME}/nama.
@@ -197,7 +197,7 @@ PROJECT_ROOT
 		# needed for $file->user_customization() to resolve in next line
 		path($file->user_customization())->spew_utf8(get_data_section('custom_pl'));
 	} else {
-		::terminal_print(<<OTHER);
+		::notify(<<OTHER);
 Please make sure to set the project_root directory in
 .namarc, or on the command line using the -d option.
 
@@ -207,8 +207,8 @@ OTHER
 		path($config_path)->spew_utf8($default_config);
 	}
 	sleep 1;
-	::terminal_print("\n.... Done!\n\nPlease edit $config_path and restart Nama.\n\n");
-	::terminal_print("Exiting.\n");
+	::notify("\n.... Done!\n\nPlease edit $config_path and restart Nama.");
+	::notify("Exiting.");
 	exit;	
 	}
 }

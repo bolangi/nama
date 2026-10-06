@@ -24,7 +24,7 @@ sub check_level {
 	sleep 2; # time for engine to stabilize
 	while( ecasound_iam('engine-status') ne 'finished'){ 
 		::terminal_print(q(.)); sleep 1; update_clock_display()};
-	::terminal_print(" Done\n");
+	::notify(" Done");
 
 	my $cs = ecasound_iam('cop-status');
 
@@ -96,7 +96,7 @@ sub automix {
 	sleep 2; # time for engine to stabilize
 	while( ecasound_iam('engine-status') ne 'finished'){ 
 		::terminal_print(q(.)); sleep 1; update_clock_display()};
-	::terminal_print(" Done\n");
+	::notify(" Done");
 
 	# parse cop status
 	my $cs = ecasound_iam('cop-status');
