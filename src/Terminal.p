@@ -725,7 +725,6 @@ sub pager {
 	$text->{term}->flush;
 	$text->{entry}->take_focus;
 }
-sub file_pager {};
 1;
 # command line processing routines
 
