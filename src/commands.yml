@@ -1453,7 +1453,7 @@ edit_waveform:
 rerecord:
   type: setup
   what: Record as before. This will set all the tracks to record, which have been recorded just before you listened back.
-  short: rerec
+  short: rerec newtake
   parameters: none
   example: |
     for piano guitar;rec # Set piano and guitar track to record.
