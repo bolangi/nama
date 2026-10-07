@@ -201,10 +201,7 @@ Most commands have abbreviations, such as 'afx' for
 
 Each track has a descriptive name (i.e. vocal) and an
 integer track-number assigned when the track is created.
-New user tracks initially belong to the Main bus.
 
-Track output signals are usually mixed and pass through the
-Main track on the way to soundcard for monitoring.
 
 The following sections describe track attributes and
 their effects.
@@ -223,43 +220,44 @@ sources.
 
 =head2 REC/PLAY/MON/OFF
 
-Basic signal routing for each track is controlled by its
-setting to REC, MON, PLAY or OFF. 
+Signal routing for each track is controlled by setting
+it to REC, MON, PLAY or OFF, and by source and send
+commands.
 
-The I<MON> setting prepares to connect the live track source. 
+The C<mon> command connects the track to a live audio source.
 
-The I<REC> setting prepares to connect the live track source and
-record it to an audio file.
+The C<rec> command connects the track to a live audio source.
+and records the prefader signal to an audio file.
 
-The I<PLAY> setting enqueues an audio file for playback from
-disk as the track source.
+The C<play> command enqueues an audio file as the track
+source.
  
-The I<OFF> setting tells Nama to remove the track from the
-audio network. A requested setting can resolve to an effective
-I<OFF> when no viable route is available. For example, a track
-set to PLAY cannot participate if no WAV file is available.
+The C<off> command removes the track from the audio network.
+OFF status may also result if a track is without viable
+source or sink. For example, a track set to PLAY cannot be
+part of the audio network if no audio file is available.
 
-=head2 Track output
+Use the C<why> command to diagnose the reason when you
+are unable to make a desired setting for a track.
 
-By default a track belongs to the Main bus and is routed to
-the Main track. This track provides a final fader before the
-signal goes via ALSA or JACK to the audio device.
+=head2 Source/Send
 
-=head2 Bus setting
+The C<source> command selects the audio stream for recording
+or monitoring the current track. The audio stream
+may be from a sound card, JACK client or another track.
 
-C<bus-off> saves the settings of the current bus's member tracks
-and sets those tracks to OFF. C<bus-on> restores the saved settings.
-
-The B<mixplay> command sets the Mixdown track to PLAY and the
-Main bus to OFF.
+The C<send> command routes a track's post-fader output to a
+soundcard channel or JACK client. This is in addition to the normal
+output via the mixer. Nama currently allows one send per
+track.  
 
 =head2 Version Numbers
 
-Multiple audio files ("takes") can be recorded for each track. These are
-distinguished by a version number that increments with each
-recording run, i.e. F<sax_1.wav>, F<sax_2.wav>, etc.  All
-audio files recorded in the same run have the same version
-number.
+Multiple audio files ("takes") can be recorded for each
+track. These are distinguished by a version number that
+increments with each recording run, i.e. F<sax_1.wav>,
+F<sax_2.wav>, etc.  All audio files recorded in the same run
+have the same version number.
 
 The version numbers for track playback can be selected at
 the bus or track level. By setting the bus version
@@ -271,8 +269,8 @@ The track version setting, if present, overrides the bus
 version setting. Setting the track version to zero restores
 control of the version number to the bus.
 
-The Main bus version setting does I<not> propagate to
-other buses. 
+The Main bus version setting does I<not> propagate to other
+buses. 
 
 =head2 Marks
 
@@ -283,22 +281,25 @@ involves a single track, and you will be shortening the
 stream by setting a region to play, set any marks you need
 I<after> defining the region.
 
-=head2 Regions
+=head2 Clips
 
-The C<region> command allows you to define endpoints for a
-portion of an audio file.  You can then use the C<shift>
-command to move the region to the desired time position.
+The C<set-region> command allows you to define endpoints for
+a portion of a track's audio file, limiting it to a region.
+We refer to a track with a region definition as a I<clip>.
+
+You can create multiple clips from a single track, by using
+the C<new-clip> command. These clips are read-only, and do
+not record audio.
+
+Use the C<shift> command move a track or clip to a 
+desired position on the timeline.
 
 If you use named marks as endpoints, the region will change
-if the mark's position is adjusted.
+if the mark positions are adjusted.
 
-Each track can have one region definition. To create
-multiple regions, the C<new-region> command takes a pair of
-marks to create a read-only copy of the current track with
-the specified region definition. 
-
-You can control this region as you would any other
-track, shifting the start time, applying effects, adjusting volume, etc.
+You can work with clips as you would with any other track,
+shifting the start time, applying effects, adjusting volume,
+etc.
 
 =head3 Using Tracks from Other Projects
 
@@ -319,12 +320,7 @@ defined by mark position and duration. An additional volume
 operator, -eadb, is applied to each track to host the
 envelope controller that implements fades.
 
-=head3 Sends and Inserts
-
-The C<send> command can route a track's post-fader output
-to a soundcard channel or JACK client in addition to the
-normal mixer input. Nama currently allows one aux send per
-track.
+=head3 Inserts
 
 The C<add-insert> command configures a pre- or post-fader
 send-and-return to soundcard channels or JACK clients.
@@ -363,6 +359,12 @@ the bus and is stereo by default.
 	# use the mix track to control bus output volume
 	Strings vol - 10
 
+=head2 Bus settings
+
+C<bus-off> saves the REC/MON/PLAY/OFF setting of the current
+bus's member tracks and sets those tracks to OFF. C<bus-on>
+restores the saved settings.
+
 =head3 Submixes
 
 B<Submixes> are a type of bus used to provide instrument
@@ -370,6 +372,23 @@ monitors, or to send the outputs from multiple user tracks
 to an external program such as jconverter.
 
 =head1 ROUTING
+
+=head2 Mixer
+
+New user tracks initially belong to the Main bus.
+
+Audio streams from these tracks are mixed and the Main track
+serves as master fader before the signal goes via ALSA or
+JACK to the audio device.
+ 
+=head2 Monitoring
+
+In a new project, Main is set to MON, which enables
+monitoring of user tracks.
+
+To defeat monitoring for all tracks, set Main to OFF.  To
+defeat monitoring of individual tracks, use the mute
+command.
 
 =head2 General Notes
 
@@ -390,12 +409,12 @@ Let's examine the signal flow from track 3, the first
 available user track. Assume track 3 is named "sax".
 
 We will divide the signal flow into track and mixer
-sections.  Parentheses show the chain id.
+sections.  Parentheses show the chain ID.
 
 The stereo outputs of each user track terminate at 
 Main_in, a loop device at the mixer input.
 
-=head3 Track, REC status
+=head3 Track with REC status
 
     Sound device   --+---(3)----> Main_in
       /JACK client   |
@@ -406,7 +425,7 @@ soundcard or JACK client. The input signal will be written
 directly to a file except in the special preview and doodle
 modes.
 
-=head3 Track, PLAY status
+=head3 Track with PLAY status
 
     sax_1.wav ------(3)----> Main_in
 
@@ -424,7 +443,7 @@ provides final control before audio output or mixdown.
 =head3 Mastering Mode
 
 In mastering mode (invoked by C<master-on> and released
-C<master-off>) the following network receives the Main
+C<master-off>) the mastering network receives the Main
 track signal as input and provides an output to the
 soundcard or WAV file.
 
@@ -451,6 +470,9 @@ Mixdown track is set to REC and the Main track is set to MON.
 
 Mixdown proceeds after you start the transport.
 
+The C<mixplay> command sets the Mixdown track to PLAY and the
+Main bus to OFF.
+
 As a convenience, Mixdown_nn.wav will be symlinked to
 F<<project-name>_nn.wav> or F<<branch_name>_nn.wav> in the
 project directory. The latter format is used on branches other
@@ -463,11 +485,10 @@ list. The default is "mixdown_encodings: ogg mp3".
 
 These non-recording modes, invoked by C<preview> and
 C<doodle> commands tweak the routing rules for special
-purposes. B<Preview mode> disables recording of WAV files
-to disk. B<Doodle mode> disables PLAY inputs while
-excluding any tracks with the same source as a currently
-routed track. The C<arm> command releases both preview and
-doodle modes.
+purposes. B<Preview mode> disables recording of WAV files to
+disk. B<Doodle mode> disables PLAY inputs and includes only
+one track per audio source.  The C<arm> command releases
+both preview and doodle modes.
 
 =head2 Saving Projects
 
