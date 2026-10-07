@@ -188,7 +188,7 @@ sub initialize_mixer {
 			send_type => 'soundcard',
 			send_id => 1,
 			width => 2,
-			rw => OFF,
+			rw => MON,
 			source_type => 'bus',
 			source_id => 'Main',
 			); 
