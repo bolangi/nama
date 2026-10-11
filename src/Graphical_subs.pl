@@ -2,6 +2,17 @@
 
 use Path::Tiny qw(path);
 
+sub tk_space_transport {
+	my ($window) = @_;
+	my $widget = $window->XEvent->W;
+
+	return if grep { $widget->isa($_) }
+		qw(Tk::Entry Tk::Text Tk::Button Tk::Menubutton Tk::Menu);
+
+	toggle_transport();
+	Tk->break;
+}
+
 # in the $gui variable, keys with leading _underscore
 # indicate variables
 #
@@ -49,7 +60,14 @@ sub init_gui {
 	$gui->{mw}->bind('<Control-Key-c>' => \&cleanup_exit );
 	$gui->{ew}->bind('<Control-Key-c>' => \&cleanup_exit );
 
-    ## Press SPACE to start/stop transport
+    ## Press SPACE to start/stop transport outside text fields and buttons/menus
+
+	$gui->{mw}->bind('<Key-space>' => \&tk_space_transport);
+	$gui->{ew}->bind('<Key-space>' => \&tk_space_transport);
+	$gui->{ww}->bind('<Key-space>' => \&tk_space_transport)
+		if $gui->{ww};
+
+	## Keep the existing Ctrl-SPACE transport bindings
 
 	$gui->{mw}->bind('<Control-Key- >' => \&toggle_transport); 
 	$gui->{ew}->bind('<Control-Key- >' => \&toggle_transport); 
