@@ -13,6 +13,11 @@ sub tk_space_transport {
 	Tk->break;
 }
 
+sub tk_control_space_transport {
+	toggle_transport();
+	Tk->break;
+}
+
 # in the $gui variable, keys with leading _underscore
 # indicate variables
 #
@@ -52,7 +57,7 @@ sub init_gui {
 		$gui->{ww}->title("Waveform Window");
 		$gui->{ww}->deiconify; 
 		$gui->{ww}->bind('<Control-Key-c>' => \&cleanup_exit );
-		$gui->{ww}->bind('<Control-Key- >' => \&toggle_transport); 
+		$gui->{ww}->bind('<Control-Key-space>' => \&tk_control_space_transport);
 	}
 
 	### Exit via Ctrl-C 
@@ -69,8 +74,8 @@ sub init_gui {
 
 	## Keep the existing Ctrl-SPACE transport bindings
 
-	$gui->{mw}->bind('<Control-Key- >' => \&toggle_transport); 
-	$gui->{ew}->bind('<Control-Key- >' => \&toggle_transport); 
+	$gui->{mw}->bind('<Control-Key-space>' => \&tk_control_space_transport);
+	$gui->{ew}->bind('<Control-Key-space>' => \&tk_control_space_transport);
 	
 	if ($config->{display_waveform})
 	{
