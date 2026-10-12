@@ -18,6 +18,12 @@ sub tk_control_space_transport {
 	Tk->break;
 }
 
+sub tk_save_and_quit {
+	stop_transport() if $this_engine->started;
+	save_state();
+	cleanup_exit();
+}
+
 # in the $gui variable, keys with leading _underscore
 # indicate variables
 #
@@ -64,6 +70,11 @@ sub init_gui {
 
 	$gui->{mw}->bind('<Control-Key-c>' => \&cleanup_exit );
 	$gui->{ew}->bind('<Control-Key-c>' => \&cleanup_exit );
+
+	$gui->{mw}->bind('<Control-Key-q>' => \&tk_save_and_quit);
+	$gui->{ew}->bind('<Control-Key-q>' => \&tk_save_and_quit);
+	$gui->{ww}->bind('<Control-Key-q>' => \&tk_save_and_quit)
+		if $gui->{ww};
 
     ## Press SPACE to start/stop transport outside text fields and buttons/menus
 
@@ -175,16 +186,7 @@ sub init_gui {
 			reconfigure_engine();
 		});
 	$gui->{quit}->configure(-text => "Quit",
-		 -command => sub { 
-				stop_transport() if $this_engine->started;
-				save_state($gui->{_save_id});
-				::notify("Exiting... \n");
-				#$text->{term}->tkRunning(0);
-				#$gui->{ew}->destroy;
-				#$gui->{mw}->destroy;
-				#::nama_cmd('quit');
-				exit;
-				 });
+		-command => \&tk_save_and_quit);
 	$gui->{palette}->configure(
 		-text => 'Palette',
 		-relief => 'raised',
