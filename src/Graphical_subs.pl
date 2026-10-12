@@ -18,6 +18,24 @@ sub tk_control_space_transport {
 	Tk->break;
 }
 
+sub tk_waveform_seek {
+	my ($canvas) = @_;
+	return unless $this_engine->valid_setup;
+	return if ::ChainSetup::really_recording();
+	my $pps = $config->{waveform_pixels_per_second};
+	return unless $pps > 0;
+
+	# canvasx includes the horizontal scroll offset.
+	my $timeline_position = $canvas->canvasx($canvas->XEvent->x) / $pps;
+	my $position = adjusted_playback_position_from_timeline_position(
+		$timeline_position);
+	my $length = $setup->{audio_length};
+	$position = $length if $length > 0 and $position > $length;
+	set_position($position);
+	update_indicator();
+	Tk->break;
+}
+
 sub tk_save_and_quit {
 	stop_transport() if $this_engine->started;
 	save_state();
@@ -91,6 +109,9 @@ sub init_gui {
 	if ($config->{display_waveform})
 	{
 		$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
+		# CanvasBind binds the widget; Canvas::bind binds canvas items.
+		$gui->{wwcanvas}->Subwidget('scrolled')->CanvasBind(
+			'<Button-1>' => \&tk_waveform_seek);
 		configure_waveform_window();
 	}
 
