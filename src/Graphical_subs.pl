@@ -140,12 +140,6 @@ sub init_gui {
 	$gui->{load_project} = $gui->{load_frame}->Button->pack(-side => 'left');;
 	$gui->{new_project} = $gui->{load_frame}->Button->pack(-side => 'left');;
 	$gui->{quit} = $gui->{load_frame}->Button->pack(-side => 'left');
-	$gui->{save_project} = $gui->{load_frame}->Button->pack(-side => 'left');
-	$gui->{savefile_entry} = $gui->{load_frame}->Entry(
-									-textvariable => \$gui->{_save_id},
-									-width => 15
-									)->pack(-side => 'left');
-	$gui->{load_savefile} = $gui->{load_frame}->Button->pack(-side => 'left');
 	$gui->{palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
 		->pack( -side => 'left');
 	$gui->{nama_palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
@@ -176,15 +170,6 @@ sub init_gui {
 		-command => sub{ load_project(
 							name => remove_spaces($gui->{_project_name}),
 							create => 1)});
-	$gui->{save_project}->configure(
-		-text => 'Save settings',
-		-command => #sub { print "save_id: $gui->{_save_id}\n" });
-		 sub {save_state($gui->{_save_id}) });
-	$gui->{load_savefile}->configure(
-		-text => 'Recall settings',
- 		-command => sub {load_project (name => $project->{name},  # current project 
- 										settings => $gui->{_save_id})},
-				);
 	$gui->{quit}->configure(-text => "Quit",
 		 -command => sub { 
 				stop_transport() if $this_engine->started;
