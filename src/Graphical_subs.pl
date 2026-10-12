@@ -1228,7 +1228,7 @@ sub update_indicator {
 		$gui->{wwcanvas}->createLine(
 			$xpos,0,
 			$xpos,$config->{waveform_canvas_y},
-			-fill => 'red',
+			-fill => '#ffff00', # bright yellow
 			-width => 1,
 			-tags => 'playback-indicator'
 		);
