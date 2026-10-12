@@ -162,14 +162,18 @@ sub init_gui {
 
 	$gui->{load_project}->configure(
 		-text => 'Load',
-		-command => sub{ load_project(
-			name => remove_spaces($gui->{_project_name}),
-			)});
+		-command => sub {
+			load_project(name => remove_spaces($gui->{_project_name}));
+			$ui->length_display(-text => colonize(0));
+			reconfigure_engine();
+		});
 	$gui->{new_project}->configure( 
 		-text => 'Create',
-		-command => sub{ load_project(
-							name => remove_spaces($gui->{_project_name}),
-							create => 1)});
+		-command => sub {
+			load_project(name => remove_spaces($gui->{_project_name}), create => 1);
+			$ui->length_display(-text => colonize(0));
+			reconfigure_engine();
+		});
 	$gui->{quit}->configure(-text => "Quit",
 		 -command => sub { 
 				stop_transport() if $this_engine->started;
