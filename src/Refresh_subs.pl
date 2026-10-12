@@ -14,9 +14,10 @@ sub refresh_waveform_window {
 sub height { $_[0] % 5 ? 5 : 10 }
 sub generate_timeline {
 	my %args = @_;
-	my $length = ecasound_iam('cs-get-length');
-	$length = int($length + 5.5);
-	$args{seconds} = $length;
+	$args{widget}->delete('timeline');
+	# connect_transport obtains this from cs-get-length after engine launch.
+	# Earlier GUI refreshes must not query the previous or disconnected setup.
+	$args{seconds} = int($setup->{audio_length} || 0);
 	my $pps = $config->{waveform_pixels_per_second};
 	for (0..$args{seconds})
 	{
@@ -26,7 +27,9 @@ sub generate_timeline {
 			$args{widget}->createText( 
 							$xpos, $args{y_pos} - 20, 
 							-font => 'lucidasanstypewriter-bold-14', 
-							-text => $_,
+							-text => colonize($_),
+							-tags => 'timeline',
+							-anchor => $_ == 0 ? 'w' : 'center',
 							);
 		}
 		$args{widget}->createLine(
@@ -34,7 +37,7 @@ sub generate_timeline {
 			$xpos, $args{y_pos},
 			-fill => 'black',
 			-width => 1,
-			-tags => 'timelime'
+			-tags => 'timeline'
 		);
 	}
 

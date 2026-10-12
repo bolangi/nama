@@ -965,7 +965,13 @@ sub project_label_configure{
 
 sub length_display{ 
 	my $ui = shift;
-	$gui->{setup_length}->configure(@_)};
+	my %args = @_;
+	$gui->{setup_length}->configure(@_);
+	# connect_transport updates -text after caching the new cs-get-length.
+	# Colour changes alone do not require a ruler redraw.
+	generate_timeline(widget => $gui->{wwcanvas}, y_pos => 600)
+		if exists $args{-text} and $gui->{wwcanvas};
+};
 
 sub clock_config { 
 	my $ui = shift;
