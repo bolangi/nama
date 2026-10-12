@@ -784,28 +784,8 @@ sub track_gui {
 	$independent_effects_frame
 		->Label(-text => uc $ti{$n}->name )->pack(-side => 'left');
 
-	#logpkg('debug',"Number: $n"),MainLoop if $n == 2;
-	my @tags = qw( EF P1 P2 L1 L2 L3 L4 );
-	my @starts =   ( $fx_cache->{split}->{cop}{a}, 
-					 $fx_cache->{split}->{preset}{a}, 
-					 $fx_cache->{split}->{preset}{b}, 
-					 $fx_cache->{split}->{ladspa}{a}, 
-					 $fx_cache->{split}->{ladspa}{b}, 
-					 $fx_cache->{split}->{ladspa}{c}, 
-					 $fx_cache->{split}->{ladspa}{d}, 
-					);
-	my @ends   =   ( $fx_cache->{split}->{cop}{z}, 
-					 $fx_cache->{split}->{preset}{b}, 
-					 $fx_cache->{split}->{preset}{z}, 
-					 $fx_cache->{split}->{ladspa}{b}-1, 
-					 $fx_cache->{split}->{ladspa}{c}-1, 
-					 $fx_cache->{split}->{ladspa}{d}-1, 
-					 $fx_cache->{split}->{ladspa}{z}, 
-					);
-	my @add_effect;
+	my @add_effect = (effect_button($n));
 
-	map{push @add_effect, effect_button($n, shift @tags, shift @starts, shift @ends)} 1..@tags;
-	
 	$number->grid($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
 	$gui->{tracks_remove}->{$n} = [
@@ -834,6 +814,8 @@ sub remove_track_gui {
  	my $ui = shift;
  	my $n = shift;
 	logsub((caller(0))[3]);
+	close_effect_selector() if $gui->{effect_selector}
+		and $gui->{effect_selector}->{track_number} == $n;
 	return unless $gui->{tracks_remove}->{$n};
  	map {$_->destroy  } $gui->{tracks_remove}->{$n}->@*;
 	delete $gui->{tracks_remove}->{$n};
@@ -1003,6 +985,7 @@ sub clock_config {
 sub manifest { $gui->{ew}->deiconify() }
 
 sub destroy_widgets {
+	close_effect_selector();
 
 	map{ $_->destroy } map{ $_->children } $gui->{fx_frame};
 	#my @children = $gui->{group_frame}->children;
@@ -1029,35 +1012,161 @@ sub remove_effect_gui {
 }
 
 sub effect_button {
-	logsub((caller(0))[3]);
-	my ($n, $label, $start, $end) = @_;
-	logpkg('debug', "chain $n label $label start $start end $end");
-	my @items;
-	my $widget;
-	my @indices = ($start..$end);
-	if ($start >= $fx_cache->{split}->{ladspa}{a} and $start <= $fx_cache->{split}->{ladspa}{z}){
-		@indices = ();
-		@indices = $fx_cache->{ladspa_sorted}->@[$start..$end];
-		logpkg('debug', "length sorted indices list: ",scalar @indices );
-	logpkg('debug', "Indices: @indices");
-	}
-		
-		for my $j (@indices) { 
-		push @items, 				
-			[ 'command' => "$fx_cache->{registry}->[$j]->{count} $fx_cache->{registry}->[$j]->{name}" ,
-				-command  => sub { 
-					 add_effect( {chain => $n, type => $fx_cache->{registry}->[$j]->{code} } ); 
-					$gui->{ew}->deiconify; # display effects window
-					} 
-			];
-	}
-	$widget = $gui->{track_frame}->Menubutton(
-		-text => $label,
-		-tearoff =>0,
-		# -relief => 'raised',
-		-menuitems => [@items],
+	my ($n) = @_;
+	$gui->{track_frame}->Button(
+		-text => 'Add Effect',
+		-state => $ti{$n}->forbid_user_ops ? 'disabled' : 'normal',
+		-command => sub { open_effect_selector($n) },
 	);
-	$widget;
+}
+
+sub matching_gui_effects {
+	my ($query) = @_;
+	$query //= '';
+	$query =~ s/^\s+|\s+$//g;
+	return () if length($query) < 4;
+	$query = lc $query;
+	my $registry = $fx_cache->{registry} // [];
+	my $ctrl = $fx_cache->{split}->{ctrl} // {};
+	my @matches;
+	for my $i (0 .. $#$registry) {
+		my $effect = $registry->[$i];
+		next unless ref $effect eq 'HASH' and defined $effect->{code};
+		# Controllers belong to an effect parameter, not directly to a track.
+		next if ($effect->{plugin_type} // '') eq 'ctrl';
+		next if defined $ctrl->{a} and defined $ctrl->{z}
+			and $i >= $ctrl->{a} and $i <= $ctrl->{z};
+		next if index(lc($effect->{name} // ''), $query) < 0
+			and index(lc($effect->{code}), $query) < 0;
+		push @matches, $effect;
+	}
+	sort {
+		lc($a->{name} // '') cmp lc($b->{name} // '')
+			|| $a->{code} cmp $b->{code}
+	} @matches;
+}
+
+sub close_effect_selector {
+	my $selector = delete $gui->{effect_selector} or return;
+	$selector->{window}->destroy if Tk::Exists($selector->{window});
+}
+
+sub refresh_effect_selector {
+	my ($selector, $query) = @_;
+	my $list = $selector->{list};
+	$list->delete(0, 'end');
+	$selector->{matches} = [matching_gui_effects($query)];
+	$selector->{add}->configure(-state => 'disabled');
+	$query =~ s/^\s+|\s+$//g;
+	if (length($query) < 4) {
+		$selector->{list_frame}->packForget;
+		$selector->{status}->configure(-text => 'Enter at least four characters.');
+		return;
+	}
+	my @matches = $selector->{matches}->@*;
+	if (!@matches) {
+		$selector->{list_frame}->packForget;
+		$selector->{status}->configure(-text => 'No matching effects.');
+		return;
+	}
+	$list->insert('end', map {
+		($_->{name} // $_->{code}) . '  [' . $_->{code} . ']'
+	} @matches);
+	$selector->{list_frame}->pack(
+		-before => $selector->{buttons}, -fill => 'both', -expand => 1);
+	$selector->{status}->configure(-text => scalar(@matches) . ' matching effects');
+	$list->selectionSet(0);
+	$list->activate(0);
+	$selector->{add}->configure(-state => 'normal');
+}
+
+sub add_selected_gui_effect {
+	my ($selector) = @_;
+	my $n = $selector->{track_number};
+	# A nonmodal selector must never add to a replacement track/project.
+	if (!$ti{$n} or $ti{$n} ne $selector->{track}) {
+		close_effect_selector();
+		return;
+	}
+	return if $ti{$n}->forbid_user_ops;
+	my @selection = $selector->{list}->curselection;
+	return unless @selection;
+	my $effect = $selector->{matches}->[$selection[0]] or return;
+	my $ok = eval { add_effect({chain => $n, type => $effect->{code}}); 1 };
+	if (!$ok) {
+		my $error = $@ || 'Unable to add effect.';
+		$selector->{status}->configure(-text => $error);
+		return;
+	}
+	close_effect_selector();
+	$gui->{ew}->deiconify;
+}
+
+sub open_effect_selector {
+	my ($n) = @_;
+	return unless $ti{$n};
+	return if $ti{$n}->forbid_user_ops;
+	my $selector = $gui->{effect_selector};
+	if (!$selector or !Tk::Exists($selector->{window})) {
+		$selector = $gui->{effect_selector} = {};
+		my $window = $selector->{window} = $gui->{mw}->Toplevel;
+		$window->transient($gui->{mw});
+		$window->protocol('WM_DELETE_WINDOW' => \&close_effect_selector);
+		$window->bind('<Escape>' => sub { close_effect_selector(); Tk->break });
+		$window->bind('<Control-Key-q>' => \&tk_save_and_quit);
+		$window->bind('<Control-Key-c>' => \&cleanup_exit);
+		$window->Label(-text => 'Search effect name or code:')->pack(
+			-anchor => 'w', -padx => 8, -pady => 4);
+		my $entry = $selector->{entry} = $window->Entry(-width => 60)->pack(
+			-fill => 'x', -padx => 8);
+		$selector->{status} = $window->Label(
+			-text => 'Enter at least four characters.', -anchor => 'w',
+		)->pack(-fill => 'x', -padx => 8, -pady => 4);
+		$selector->{list_frame} = $window->Frame;
+		$selector->{list} = $selector->{list_frame}->Scrolled('Listbox',
+			-scrollbars => 'osoe', -width => 70, -height => 12,
+			-selectmode => 'browse', -exportselection => 0,
+		)->pack(-fill => 'both', -expand => 1, -padx => 8);
+		$selector->{buttons} = $window->Frame->pack(-fill => 'x', -pady => 8);
+		$selector->{add} = $selector->{buttons}->Button(
+			-text => 'Add', -state => 'disabled',
+			-command => sub { add_selected_gui_effect($selector) },
+		)->pack(-side => 'left', -padx => 8);
+		$selector->{buttons}->Button(
+			-text => 'Cancel', -command => \&close_effect_selector,
+		)->pack(-side => 'right', -padx => 8);
+		# Perl/Tk passes the proposed text to the validation callback.
+		# This catches insertion, paste and deletion without changing the entry.
+		$entry->configure(-validate => 'key', -validatecommand => sub {
+			my ($proposed) = @_;
+			refresh_effect_selector($selector, $proposed);
+			1;
+		});
+		$entry->bind('<Down>' => sub {
+			$selector->{list}->focus if $selector->{matches}->@*;
+			Tk->break;
+		});
+		$entry->bind('<Return>' => sub {
+			add_selected_gui_effect($selector);
+			Tk->break;
+		});
+		$selector->{list}->bind('<Return>' => sub {
+			add_selected_gui_effect($selector);
+			Tk->break;
+		});
+		$selector->{list}->bind('<Double-Button-1>' => sub {
+			add_selected_gui_effect($selector);
+			Tk->break;
+		});
+	}
+	$selector->{track_number} = $n;
+	$selector->{track} = $ti{$n};
+	$selector->{window}->title('Add Effect - ' . $ti{$n}->name);
+	$selector->{entry}->delete(0, 'end');
+	refresh_effect_selector($selector, '');
+	$selector->{window}->deiconify;
+	$selector->{window}->raise;
+	$selector->{entry}->focus;
 }
 
 sub make_scale {
