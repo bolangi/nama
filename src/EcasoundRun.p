@@ -12,24 +12,12 @@ sub start {
 	$self->valid_setup
 		or throw("Audio engine is not configured. Cannot start."),return;
 
-
-	# use gradual unmuting to avoid pop on start
-	# 
-	#
-	# mute unless recording
-	# start
-	# wait 0.5s
-	# unmute
-	# start heartbeat
-	# report engine status
-	# sleep 1s
-	#
-
 	::notify("Starting at ". current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
 	$self->start_command;
 	$self->{started}++;
+	start_heartbeat();
 	start_midi_transport() if midi_run_ready();
 
 	# limit engine run time if we are in mixdown or edit mode, 
@@ -40,17 +28,19 @@ sub start {
 		or edit_mode() 
 		or defined $setup->{runtime_limit};
 		# TODO and live processing
- 	#$project->{events}->{post_start_unmute} = timer(0.5, 0, sub{unmute()});
-	sleeper(0.5);
+	sleeper(0.1);
 	unmute();
-	sleeper(0.5);
 	$ui->set_engine_mode_color_display();
-	start_heartbeat();
-	engine_status() unless $quiet;
+	# Let the engine settle before reporting its status, without blocking Tk.
+	stop_event('display_engine_status_after_transport_start');
+	start_event(display_engine_status_after_transport_start => timer(0.5, 0, sub {
+		engine_status() unless $quiet;
+	}));
 }
 sub stop {
 	package ::;
 	my $self = shift;
+	stop_event('display_engine_status_after_transport_start');
 	if ($self->running())
 	{
 	# Since the playback position advances slightly during
@@ -124,6 +114,7 @@ sub start_heartbeat {
 	$ui->setup_playback_indicator();
 }
 sub stop_heartbeat {
+	stop_event('display_engine_status_after_transport_start');
 	# the following test avoids double-tripping rec_cleanup()
 	# following manual stop
 	return unless $project->{events}->{poll_engine};
