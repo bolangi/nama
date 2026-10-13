@@ -301,8 +301,7 @@ sub poll_progress {
 		or $here > $args->{processing_time};
 
 	::notify("Done.");
-	logpkg('debug', engine_status(current_position(),2,1));
-	#revise_prompt();
+	logpkg('debug', engine_is(current_position()));
 	stop_polling_cache_progress($args);
 }
 sub stop_polling_cache_progress {

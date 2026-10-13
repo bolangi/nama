@@ -99,8 +99,8 @@ sub engine_is {
 	"Engine is ". $this_engine->ecasound_iam("engine-status"). ( $pos ? " at $pos" : "" )
 }
 sub engine_status { 
-	my ($pos, $before_newlines, $after_newlines) = @_;
-	::notify("\n" x $before_newlines, engine_is($pos), "\n" x $after_newlines);
+	my ($pos) = @_;
+	::notify(engine_is($pos));
 }
 sub current_timeline_position {
 	my $adjusted_time = $this_engine->ecasound_iam("getpos") // 0;
