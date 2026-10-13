@@ -1020,7 +1020,7 @@ sub effect_button {
 	);
 }
 
-sub matching_gui_effects {
+sub matching_effects {
 	my ($query) = @_;
 	$query //= '';
 	$query =~ s/^\s+|\s+$//g;
@@ -1055,7 +1055,7 @@ sub refresh_effect_selector {
 	my ($selector, $query) = @_;
 	my $list = $selector->{list};
 	$list->delete(0, 'end');
-	$selector->{matches} = [matching_gui_effects($query)];
+	$selector->{matches} = [matching_effects($query)];
 	$selector->{add}->configure(-state => 'disabled');
 	$query =~ s/^\s+|\s+$//g;
 	if (length($query) < 4) {
@@ -1080,7 +1080,7 @@ sub refresh_effect_selector {
 	$selector->{add}->configure(-state => 'normal');
 }
 
-sub add_selected_gui_effect {
+sub add_selected_effect {
 	my ($selector) = @_;
 	my $n = $selector->{track_number};
 	# A nonmodal selector must never add to a replacement track/project.
@@ -1130,7 +1130,7 @@ sub open_effect_selector {
 		$selector->{buttons} = $window->Frame->pack(-fill => 'x', -pady => 8);
 		$selector->{add} = $selector->{buttons}->Button(
 			-text => 'Add', -state => 'disabled',
-			-command => sub { add_selected_gui_effect($selector) },
+			-command => sub { add_selected_effect($selector) },
 		)->pack(-side => 'left', -padx => 8);
 		$selector->{buttons}->Button(
 			-text => 'Cancel', -command => \&close_effect_selector,
@@ -1147,15 +1147,15 @@ sub open_effect_selector {
 			Tk->break;
 		});
 		$entry->bind('<Return>' => sub {
-			add_selected_gui_effect($selector);
+			add_selected_effect($selector);
 			Tk->break;
 		});
 		$selector->{list}->bind('<Return>' => sub {
-			add_selected_gui_effect($selector);
+			add_selected_effect($selector);
 			Tk->break;
 		});
 		$selector->{list}->bind('<Double-Button-1>' => sub {
-			add_selected_gui_effect($selector);
+			add_selected_effect($selector);
 			Tk->break;
 		});
 	}
