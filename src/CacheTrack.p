@@ -245,7 +245,7 @@ sub update_cache_map {
 	$constructor_args{region} = [ $track->region_start, $track->region_end ] if $track->is_region;
 	$constructor_args{fade_data} = [ map  { $_->as_hash } $track->fades ]
 		if $track->fades;
-	$constructor_args{track_target_original} = $track->target if $track->target; 
+	$constructor_args{track_target} = $track->target if $track->target; 
 	#say "constructor args: ",Dumper \%constructor_args;
 	my $ec = ::EffectChain->new( %constructor_args );
 
@@ -327,6 +327,7 @@ sub uncache_track {
 You must remove them before you can uncache this version."), return;
 		
 	$ec->add($track);
+	$track->set(target => $ec->track_target) if defined $ec->track_target_original;
 	if ($track->is_mixer and not $ec->track_version_original) {
 		$track->set(rw => MON);
 		::notify("Enabling bus $track->{group} by setting mix track $track->{name} to MON");

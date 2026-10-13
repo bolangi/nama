@@ -18,14 +18,9 @@
 
   		track_version_original 	# WAV version of track before caching 
 
-  		track_target_original #	WAV files were from this track
+  		track_target		# the link target when a virtual track is being cached
 
   		insert				# true value identifies belonging to an insert
 
   		track_cache			# true value identifies belonging to track caching
 
- 		track_target		# unused
-
-  		bypass				# used for identifying effect bypass (obsolete)
-
-  		id					# duplicates purpose of id field? obsolete?
