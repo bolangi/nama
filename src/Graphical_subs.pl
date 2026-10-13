@@ -814,7 +814,7 @@ sub remove_track_gui {
  	my $ui = shift;
  	my $n = shift;
 	logsub((caller(0))[3]);
-	close_effect_selector() if $gui->{effect_selector}
+	close_effect_dialog() if $gui->{effect_selector}
 		and $gui->{effect_selector}->{track_number} == $n;
 	return unless $gui->{tracks_remove}->{$n};
  	map {$_->destroy  } $gui->{tracks_remove}->{$n}->@*;
@@ -985,7 +985,7 @@ sub clock_config {
 sub manifest { $gui->{ew}->deiconify() }
 
 sub destroy_widgets {
-	close_effect_selector();
+	close_effect_dialog();
 
 	map{ $_->destroy } map{ $_->children } $gui->{fx_frame};
 	#my @children = $gui->{group_frame}->children;
@@ -1046,12 +1046,12 @@ sub matching_effects {
 	} @matches;
 }
 
-sub close_effect_selector {
+sub close_effect_dialog {
 	my $selector = delete $gui->{effect_selector} or return;
 	$selector->{window}->destroy if Tk::Exists($selector->{window});
 }
 
-sub refresh_effect_selector {
+sub refresh_effect_dialog {
 	my ($selector, $query) = @_;
 	my $list = $selector->{list};
 	$list->delete(0, 'end');
@@ -1085,7 +1085,7 @@ sub add_selected_effect {
 	my $n = $selector->{track_number};
 	# A nonmodal selector must never add to a replacement track/project.
 	if (!$ti{$n} or $ti{$n} ne $selector->{track}) {
-		close_effect_selector();
+		close_effect_dialog();
 		return;
 	}
 	return if $ti{$n}->forbid_user_ops;
@@ -1098,7 +1098,7 @@ sub add_selected_effect {
 		$selector->{status}->configure(-text => $error);
 		return;
 	}
-	close_effect_selector();
+	close_effect_dialog();
 	$gui->{ew}->deiconify;
 }
 
@@ -1111,8 +1111,8 @@ sub open_effect_selector {
 		$selector = $gui->{effect_selector} = {};
 		my $window = $selector->{window} = $gui->{mw}->Toplevel;
 		$window->transient($gui->{mw});
-		$window->protocol('WM_DELETE_WINDOW' => \&close_effect_selector);
-		$window->bind('<Escape>' => sub { close_effect_selector(); Tk->break });
+		$window->protocol('WM_DELETE_WINDOW' => \&close_effect_dialog);
+		$window->bind('<Escape>' => sub { close_effect_dialog(); Tk->break });
 		$window->bind('<Control-Key-q>' => \&tk_save_and_quit);
 		$window->bind('<Control-Key-c>' => \&cleanup_exit);
 		$window->Label(-text => 'Search effect name or code:')->pack(
@@ -1133,13 +1133,13 @@ sub open_effect_selector {
 			-command => sub { add_selected_effect($selector) },
 		)->pack(-side => 'left', -padx => 8);
 		$selector->{buttons}->Button(
-			-text => 'Cancel', -command => \&close_effect_selector,
+			-text => 'Cancel', -command => \&close_effect_dialog,
 		)->pack(-side => 'right', -padx => 8);
 		# Perl/Tk passes the proposed text to the validation callback.
 		# This catches insertion, paste and deletion without changing the entry.
 		$entry->configure(-validate => 'key', -validatecommand => sub {
 			my ($proposed) = @_;
-			refresh_effect_selector($selector, $proposed);
+			refresh_effect_dialog($selector, $proposed);
 			1;
 		});
 		$entry->bind('<Down>' => sub {
@@ -1163,7 +1163,7 @@ sub open_effect_selector {
 	$selector->{track} = $ti{$n};
 	$selector->{window}->title('Add Effect - ' . $ti{$n}->name);
 	$selector->{entry}->delete(0, 'end');
-	refresh_effect_selector($selector, '');
+	refresh_effect_dialog($selector, '');
 	$selector->{window}->deiconify;
 	$selector->{window}->raise;
 	$selector->{entry}->focus;
