@@ -12,7 +12,6 @@ use ::Globals qw(:all);
 use ::Object qw( 
 				 name 
                  time
-				 type
 				 tags
 				 );
 
@@ -177,6 +176,21 @@ sub adjusted_time_from_tag {
 	return unless defined $time;
 	::adjusted_time_from_timeline_position($time)
 }
+# the following lets $mark->foo access $mark->{attrib}->{foo}
+# we'll probably need attrib field, and to initialize it to a hashref
+
+# postponing this for now, if tags can do our job
+
+# my @attributes = qw() ;
+# my %is_attribute = map{ $_ => 1 } @attributes;
+# sub AUTOLOAD { 
+# 	my $self = shift;
+# 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
+# 	return $self->{attrib}->{$call} if exists $self->{attrib}->{$call}
+# 		or $is_attribute{$call};
+# 	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
+# }
+# sub DESTROY {}
 }
 
 # ---------- Mark and jump routines --------
@@ -212,8 +226,8 @@ sub drop_mark {
 
 	my $mark = ::Mark->new( time => $here, 
 							name => $name,
-							type => $type,
-							tags => $tags);
+							tags => $tags,
+							);
 
 	$ui->marker($mark); # for GUI
 }
