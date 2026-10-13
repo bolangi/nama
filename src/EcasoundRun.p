@@ -34,7 +34,7 @@ sub start {
 	# Let the engine settle before reporting its status, without blocking Tk.
 	stop_event('display_engine_status_after_transport_start');
 	start_event(display_engine_status_after_transport_start => timer(0.5, 0, sub {
-		engine_status() unless $quiet;
+		::notify(engine_status()) unless $quiet;
 	}));
 }
 sub stop {
@@ -54,7 +54,7 @@ sub stop {
 	disable_length_timer();
 	if ( ! $quiet ){
 		sleeper(0.5);
-		engine_status(current_position());
+		::notify(engine_status(current_position()));
 	}
 	unmute();
 	stop_heartbeat();
@@ -94,13 +94,9 @@ sub disconnect_transport {
 	return if $this_engine->running;
 	teardown_engine();
 }
-sub engine_is {
+sub engine_status {
 	my $pos = shift;
 	"Engine is ". $this_engine->ecasound_iam("engine-status"). ( $pos ? " at $pos" : "" )
-}
-sub engine_status { 
-	my ($pos) = @_;
-	::notify(engine_is($pos));
 }
 sub current_timeline_position {
 	my $adjusted_time = $this_engine->ecasound_iam("getpos") // 0;
@@ -130,7 +126,7 @@ sub heartbeat {
 	my $here   = $this_engine->ecasound_iam("getpos");
 	my $status = $this_engine->ecasound_iam('engine-status');
 	if( $status =~ /finished|error/ ){
-		engine_status(current_position());
+		::notify(engine_status(current_position()));
 		revise_prompt();
 		stop_heartbeat(); 
 		sleeper(0.2);
