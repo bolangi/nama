@@ -84,7 +84,7 @@ sub new {
 
 # method name for track field holding insert
 
-sub type { (ref $_[0]) =~ /Pre/ ? 'prefader_insert' : 'postfader_insert' }
+sub type { $_[0] isa '::PreFaderInsert' ? 'prefader_insert' : 'postfader_insert' }
 
 #sub remove {}
 # subroutine

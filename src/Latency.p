@@ -169,7 +169,7 @@ sub self_latency {
 		$direction eq 'capture'
 			? predecessor_latency($g, $node_name)
 			: successor_latency($g, $node_name);
-	ref $latency eq '::Lat' or die "wrong type for $node_name".Dumper $latency;
+	$latency isa '::Lat' or die "wrong type for $node_name".Dumper $latency;
 
 	return( 
 			$predecessor_or_successor_latency

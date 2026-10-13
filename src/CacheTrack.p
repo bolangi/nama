@@ -99,7 +99,7 @@ sub generate_cache_bus_graph {
 	$args->{graph} = $g;
 	my $track = $args->{track};
 		
-	map{ $_->apply($g) } grep{ (ref $_) =~ /SubBus/ } ::Bus::all();
+	map{ $_->apply($g) } grep{ $_ isa '::SubBus' } ::Bus::all();
 
 	# set WAV output format
 	$g->set_vertex_attributes(

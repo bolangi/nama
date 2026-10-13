@@ -691,7 +691,8 @@ remove_mark: _remove_mark ident {
 #	eval q( $mark->jump_here ) or ::logit('::Grammar','debug',"jump failed: $@");
 	1;}
 remove_mark: _remove_mark { 
-	return unless (ref $::this_mark) =~ /Mark/;
+	use feature 'isa';
+	return unless $::this_mark isa '::Mark';
 	$::this_mark->remove;
 	1;}
 add_mark: _add_mark ident timevalue { ::drop_mark(name => $item{ident}, time => $item{timevalue}) ;1}
@@ -1595,8 +1596,9 @@ select_sequence: _select_sequence existing_sequence_name {
 	$::this_sequence = $::bn{$item{existing_sequence_name}}
 } 
 existing_sequence_name: ident { 
+		use feature 'isa';
 		my $buslike = $::bn{$item{ident}};
-		$return = $item{ident} if (ref $buslike) =~ /Sequence/
+		$return = $item{ident} if $buslike isa '::Sequence'
 }
 convert_to_sequence: _convert_to_sequence {
 	my $sequence_name = $::this_track->name;

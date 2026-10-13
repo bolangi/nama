@@ -1,5 +1,5 @@
 use Test2::Bundle::More;
-use strict;
+use v5.36;
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "testing trivial class Apple";
@@ -11,7 +11,7 @@ package main;
 
 my $apple = Apple->new(color => 'green');
 
-is( ref $apple, 'Apple', "instantiation") ;
+ok( $apple isa 'Apple', "instantiation") ;
 
 is( $apple->color, 'green', "accessor" ); 
 

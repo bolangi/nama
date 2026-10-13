@@ -308,7 +308,7 @@ sub set_current_bus {
 	# The current sequence changes when the user touches a
 	# track that belongs to another sequence.
 	
-	$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
+	$this_sequence = $bn{$track->group} if $bn{$track->group} isa '::Sequence';
 
 	my $bus_name = 
 		$track->name =~ /Main|Mixdown/ 	
@@ -362,7 +362,7 @@ sub add_submix {
 	# dest_type: soundcard | jack_client | loop | jack_port | jack_multi
 	
 	logpkg('debug',"name: $name, dest_type: $dest_type, dest_id: $dest_id");
-	if ($bn{$name} and (ref $bn{$name}) !~ /SendBus/){
+	if ($bn{$name} and ! ($bn{$name} isa '::SendBusRaw')){
 		::throw($name,": bus name already in use. Aborting."), return;
 	}
 	if ($bn{$name}){
@@ -414,7 +414,7 @@ sub remove_submix_helper_tracks {
 	}
 
 }
-sub submixes { grep { (ref $_) =~ /SendBusCooked/ } values %::Bus::by_name }
+sub submixes { grep { $_ isa '::SendBusCooked' } values %::Bus::by_name }
 
 
 sub bus_on { 

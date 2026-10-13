@@ -5,7 +5,7 @@ use File::Path qw(make_path remove_tree);
 use Path::Tiny qw(path);
 use Cwd;
 
-use strict;
+use v5.36;
 use warnings;
 no warnings qw(uninitialized);
 
@@ -90,7 +90,7 @@ $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("project project wav dir: ".this_wav_dir
 
 is( project_dir(), "$test_dir/$test_project", "establish project directory");
 
-is( ref $bn{Main}, q(Audio::Nama::SubBus), 'Bus initializtion');
+ok( $bn{Main} isa '::SubBus', 'Bus initializtion');
 
 is($tn{Main}->candidate_rw, MON,
 	'Main candidate rw is MON when enabled');
@@ -229,7 +229,7 @@ force_alsa();
 
 nama_cmd('add sax');
 
-like(ref $this_track, qr/Track/, "track creation"); 
+ok($this_track isa '::Track', "track creation");
 
 is( $this_track->name, 'sax', "current track assignment");
 
@@ -583,7 +583,7 @@ is( $this_track->send_id, 5, 'set soundcard output');
 
 my $io = ::IO->new(track => 'sax');
 
-like( ref $io, qr/IO$/, 'IO base class object');
+ok( $io isa '::IO', 'IO base class object');
 
 $io = ::IO::to_alsa_soundcard_device->new(track => 'sax'); 
 
@@ -599,13 +599,13 @@ force_jack();
 
 
 $io = ::IO::from_soundcard->new(track => 'sax'); 
-like (ref $io, qr/from_jack_multi/, 'sound system ALSA/JACK detection: input');
+ok ($io isa '::IO::from_jack_multi', 'sound system ALSA/JACK detection: input');
 is($io->ecs_string, '-i:jack_multi,system:capture_2', 'IO from_soundcard: jack 1');
 is($io->ecs_extra, '-chcopy:1,2', 'IO from_soundcard: jack 2');
 
 
 $io = ::IO::to_soundcard->new(track => 'sax'); 
-like (ref $io, qr/to_jack_multi/, 'sound system ALSA/JACK detection: output');
+ok ($io isa '::IO::to_jack_multi', 'sound system ALSA/JACK detection: output');
 
 is($io->ecs_string, '-o:jack_multi,system:playback_5', 'IO to_soundcard: jack 1');
 ok(! $io->ecs_extra, 'IO to_soundcard: jack 2');
@@ -1500,7 +1500,7 @@ check_setup('Hardware insert via soundcard, prefader  - JACK');
 #load_project(name => "midi", create => 1);
 {
 	my $midi = add_midi_track('synth');
-	is(ref $midi, 'Audio::Nama::MidiTrack',
+	ok($midi isa '::MidiTrack',
 		'MIDI declaration creates a MidiTrack');
 	is($tn{synth}, $midi,
 		'MIDI declaration uses the normal track registry');

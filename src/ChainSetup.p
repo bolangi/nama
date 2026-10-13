@@ -75,14 +75,14 @@ sub clear_rw_status { undef $prune_report }
 sub track_resolution {
 	my $track = shift;
 	return unless $prune_report;
-	my $name = ref $track ? $track->name : $track;
+	my $name = $track isa '::Track' ? $track->name : $track;
 	my $resolution = $prune_report->{tracks}->{$name};
 	$resolution ? dclone($resolution) : undef
 }
 sub effective_rw {
 	my $track = shift;
 	return unless $prune_report;
-	my $name = ref $track ? $track->name : $track;
+	my $name = $track isa '::Track' ? $track->name : $track;
 	my $resolution = $prune_report->{tracks}->{$name};
 	$resolution ? $resolution->{effective_rw} : OFF
 }
@@ -565,13 +565,13 @@ sub override {
 	
 sub override_from_vertex {
 	my $name = shift;
-		warn("undefined graph\n"), return () unless (ref $g) =~ /Graph/;
+		warn("undefined graph\n"), return () unless $g isa 'Graph';
 		my $attr = $g->get_vertex_attributes($name);
 		$attr ? %$attr : ();
 }
 sub override_from_edge {
 	my $edge = shift;
-		warn("undefined graph\n"), return () unless (ref $g) =~ /Graph/;
+		warn("undefined graph\n"), return () unless $g isa 'Graph';
 		my $attr = $g->get_edge_attributes(@$edge);
 		$attr ? %$attr : ();
 }

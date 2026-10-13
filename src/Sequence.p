@@ -105,7 +105,7 @@ sub new_clip {
 	my ($self, $track, %args) = @_; # $track can be object or name
 	my $markpair = delete $args{region};
 	logpkg('debug',json_out($self->as_hash), json_out($track->as_hash));
-	ref $track or $track = $::tn{$track} 
+	$track isa '::Track' or $track = $::tn{$track}
 		or die("$track: track not found."); 
 	my %region_args = (
 		region_start => $markpair && $markpair->[0]->name || $track->region_start,

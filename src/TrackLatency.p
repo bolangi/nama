@@ -14,12 +14,12 @@ sub latency_offset {
 sub capture_latency {
 	my $track = shift;
 	my $io = $track->input_object;
-	return $io->capture_latency if ref $io;
+	return $io->capture_latency if $io isa '::IO';
 }
 sub playback_latency {
 	my $track = shift;
 	my $io = $track->input_object;
-	return $io->playback_latency if ref $io;
+	return $io->playback_latency if $io isa '::IO';
 }
 sub sibling_latency {
 	my $track = shift;

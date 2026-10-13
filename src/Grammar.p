@@ -73,7 +73,7 @@ sub process_line {
 		# undefined, or the track has been removed
 		# from the index
 		$this_track = $tn{Main} if ! $this_track or
-			(ref $this_track and ! $tn{$this_track->name});
+			($this_track isa '::Track' and ! $tn{$this_track->name});
 	}
 	if (! $this_engine->started() ){
 		my $result = check_fx_consistency();
@@ -386,7 +386,7 @@ PICTURE
 sub show_tracks_section {
     no warnings;
 	#$^A = $text->{format_top};
-    my @tracks = grep{ ref $_ } @_; # HACK! undef should not be passed
+    my @tracks = grep{ $_ isa '::Track' } @_; # HACK! undef should not be passed
     map {   formline $format_picture, 
             $_->n,
             $_->name,

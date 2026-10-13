@@ -22,8 +22,7 @@ sub waveform_name { "$_[0].png" }
 
 sub waveforms_enabled {
 	$config->{display_waveform}
-		&& ref($ui)
-		&& $ui->isa('::Graphical');
+		&& $ui isa '::Graphical';
 }
 
 sub desired_dimensions {
