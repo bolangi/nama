@@ -1016,7 +1016,7 @@ sub effect_button {
 	$gui->{track_frame}->Button(
 		-text => 'Add Effect',
 		-state => $ti{$n}->forbid_user_ops ? 'disabled' : 'normal',
-		-command => sub { open_effect_selector($n) },
+		-command => sub { open_effect_dialog($n) },
 	);
 }
 
@@ -1102,7 +1102,7 @@ sub add_selected_effect {
 	$gui->{ew}->deiconify;
 }
 
-sub open_effect_selector {
+sub open_effect_dialog {
 	my ($n) = @_;
 	return unless $ti{$n};
 	return if $ti{$n}->forbid_user_ops;
