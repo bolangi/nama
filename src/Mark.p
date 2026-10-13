@@ -1,6 +1,6 @@
 
 # ----------- Mark ------------
-
+{
 package ::Mark;
 our $VERSION = 1.0;
 use Carp;
@@ -177,7 +177,7 @@ sub adjusted_time_from_tag {
 	return unless defined $time;
 	::adjusted_time_from_timeline_position($time)
 }
-
+}
 
 # ---------- Mark and jump routines --------
 {
