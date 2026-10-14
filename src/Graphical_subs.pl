@@ -32,7 +32,7 @@ sub tk_waveform_seek {
 	my $length = $setup->{audio_length};
 	$position = $length if $length > 0 and $position > $length;
 	set_position($position);
-	update_indicator();
+	update_indicator_at(timeline_position_from_adjusted_time($position));
 	Tk->break;
 }
 
@@ -1329,8 +1329,12 @@ sub setup_playback_indicator {
 	update_indicator();
 	start_event(update_cursor => timer(0, 0.1, \&update_indicator));
 } 	
+
 sub update_indicator {
-	my $pos = ::current_timeline_position();
+    update_indicator_at(::current_timeline_position());
+}
+sub update_indicator_at {
+    my $pos = shift;
 	my $xpos = int( $pos * $config->{waveform_pixels_per_second} );
 	my @indicator = $gui->{wwcanvas}->find('withtag', 'playback-indicator');
 	if (@indicator) {
