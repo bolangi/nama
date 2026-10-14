@@ -294,7 +294,7 @@ __DATA__
 @@ midi_help
 [% qx(cat ./midi_help) %]
 @@ aux_midi_commands
-[% qx(cat ./fs_midish) %]
+[% qx(cat ./aux_midi_commands) %]
 @@ test_tempo_map
 [% qx(cat ./tempo_map) %]
 
