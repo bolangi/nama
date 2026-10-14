@@ -264,9 +264,8 @@ sub route_output_channels {
 
 my @events = qw(
 	poll_engine
-	display_engine_status_after_transport_start
-	unmute_after_transport_start
-	fade_after_transport_start
+	display_engine_status
+	bring_up_volume
 	update_playback_position_display
 	wraparound
 	processing_time
@@ -291,6 +290,8 @@ sub timer ($delay, $interval, $coderef ) {
 	}
 	else {
 		$timer = IO::Async::Timer::Periodic->new(
+			# Zero retains the usual first tick after one full interval.
+			first_interval => $delay > 0 ? $delay : $interval,
 			interval => $interval,
 			on_tick => $coderef,
 		);

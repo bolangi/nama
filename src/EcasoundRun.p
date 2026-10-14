@@ -18,19 +18,17 @@ sub start {
 	schedule_wraparound();
 	my $was_muted = defined $tn{Main}->old_vol_level;
 	mute();
-	$self->{transport_start_muted} = $tn{Main}
+	$self->{output_is_muted} = $tn{Main}
 		if !$was_muted and defined $tn{Main}->old_vol_level;
 	$self->start_command;
 	$self->{started}++;
-	$self->{transport_start_pending} = 1;
+	$self->{start_pending} = 1;
 	$ui->setup_playback_indicator();
-	start_event(unmute_after_transport_start => timer(0.1, 0, sub {
-		fade_transport_start($self);
-	}));
-	start_event(display_engine_status_after_transport_start => timer(0.2, 0, sub {
+	bring_up_volume($self);
+	start_event(display_engine_status => timer(0.2, 0, sub {
 		my $status = $self->ecasound_iam('engine-status');
 		if ($status eq 'running') {
-			delete $self->{transport_start_pending};
+			delete $self->{start_pending};
 			::notify(engine_status()) unless $quiet;
 			start_heartbeat();
 		} elsif ($status =~ /finished|error/) {
@@ -104,7 +102,7 @@ sub sync_transport_position { }
 
 sub midish_running { $setup->{midish_running} }
 	
-sub toggle_transport { ($this_engine->running() or $this_engine->{transport_start_pending}) ?  stop_transport() : start_transport() }
+sub toggle_transport { ($this_engine->running() or $this_engine->{start_pending}) ?  stop_transport() : start_transport() }
 
 sub disconnect_transport {
 	return if $this_engine->running;
@@ -124,31 +122,35 @@ sub current_position {
 # Only undo a mute introduced by this transport start.
 sub finish_transport_start_unmute {
 	my $engine = shift;
-	stop_event('unmute_after_transport_start');
-	stop_event('fade_after_transport_start');
-	my $track = delete $engine->{transport_start_muted};
+	stop_event('bring_up_volume');
+	my $track = delete $engine->{output_is_muted};
 	$track->unmute(1) if $track;
 }
 sub cancel_transport_start {
 	my $engine = shift;
-	stop_event('display_engine_status_after_transport_start');
+	stop_event('display_engine_status');
 	finish_transport_start_unmute($engine);
-	delete $engine->{transport_start_pending};
+	delete $engine->{start_pending};
 }
-sub fade_transport_start {
+sub bring_up_volume {
 	my $engine = shift;
-	my $track = $engine->{transport_start_muted} or return;
+	my $track = $engine->{output_is_muted} or return;
 	my $volume = $track->volume_effect;
 	my $to = $track->old_vol_level;
 	my $seconds = $config->{engine_fade_length_on_start_stop};
 	my $steps = $config->{hires_timer} ? ::Effect::fade_step_count($seconds) : 0;
-	return finish_transport_start_unmute($engine) unless $steps;
+	if (!$steps) {
+		start_event(bring_up_volume => timer(0.1, 0, sub {
+			finish_transport_start_unmute($engine);
+		}));
+		return;
+	}
 	my $from = $volume->fade_out_level;
-	$volume->_modify_effect(1, $from);
 	my $step = 0;
-	start_event(fade_after_transport_start => timer(0, $seconds / $steps, sub {
-		$volume->_modify_effect(1, ::Effect::fade_level($from, $to, ++$step, $steps));
-		finish_transport_start_unmute($engine) if $step >= $steps;
+	start_event(bring_up_volume => timer(0.1, $seconds / $steps, sub {
+		# Step zero begins the fade at 0.1s; the final step is one fade later.
+		$volume->_modify_effect(1, ::Effect::fade_level($from, $to, $step, $steps));
+		finish_transport_start_unmute($engine) if $step++ >= $steps;
 	}));
 }
 
