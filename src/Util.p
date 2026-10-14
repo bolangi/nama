@@ -266,7 +266,7 @@ my @events = qw(
 	poll_engine
 	display_engine_status
 	bring_up_volume
-	update_playback_position_display
+	update_cursor
 	wraparound
 	processing_time
 	remote_control

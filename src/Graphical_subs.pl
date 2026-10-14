@@ -1323,9 +1323,9 @@ sub destroy_marker {
 
 sub setup_playback_indicator {
 	my $ui = shift;
-	stop_event('update_playback_position_display');
+	stop_event('update_cursor');
 	update_indicator();
-	start_event(update_playback_position_display => timer(0, 0.1, \&update_indicator));
+	start_event(update_cursor => timer(0, 0.1, \&update_indicator));
 } 	
 sub update_indicator {
 	my $pos = ::current_timeline_position();

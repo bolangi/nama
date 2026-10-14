@@ -162,7 +162,7 @@ sub stop_heartbeat {
 	$was_starting = cancel_transport_start($this_engine) || $was_starting;
 	# the following test avoids double-tripping rec_cleanup()
 	# following manual stop
-	stop_event('update_playback_position_display');
+	stop_event('update_cursor');
 	return unless $project->{events}->{poll_engine} or $was_starting;
 	stop_event('poll_engine');
 	delete $project->{events}->{poll_engine};
