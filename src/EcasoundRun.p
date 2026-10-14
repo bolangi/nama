@@ -120,7 +120,7 @@ sub current_position {
 	colonize(int(current_timeline_position()))
 }
 # Only undo a mute introduced by this transport start.
-sub finish_transport_start_unmute {
+sub complete_unmute {
 	my $engine = shift;
 	stop_event('bring_up_volume');
 	my $track = delete $engine->{output_is_muted};
@@ -129,7 +129,7 @@ sub finish_transport_start_unmute {
 sub cancel_transport_start {
 	my $engine = shift;
 	stop_event('display_engine_status');
-	finish_transport_start_unmute($engine);
+	complete_unmute($engine);
 	delete $engine->{start_pending};
 }
 sub bring_up_volume {
@@ -141,7 +141,7 @@ sub bring_up_volume {
 	my $steps = $config->{hires_timer} ? ::Effect::fade_step_count($seconds) : 0;
 	if (!$steps) {
 		start_event(bring_up_volume => timer(0.1, 0, sub {
-			finish_transport_start_unmute($engine);
+			complete_unmute($engine);
 		}));
 		return;
 	}
@@ -150,7 +150,7 @@ sub bring_up_volume {
 	start_event(bring_up_volume => timer(0.1, $seconds / $steps, sub {
 		# Step zero begins the fade at 0.1s; the final step is one fade later.
 		$volume->_modify_effect(1, ::Effect::fade_level($from, $to, $step, $steps));
-		finish_transport_start_unmute($engine) if $step++ >= $steps;
+		complete_unmute($engine) if $step++ >= $steps;
 	}));
 }
 
