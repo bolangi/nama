@@ -37,9 +37,8 @@ sub tk_waveform_seek {
 }
 
 sub tk_save_and_quit {
-	stop_transport() if $this_engine->started;
-	save_state();
-	cleanup_exit();
+	$gui->{quit_requested} = 1;
+	Tk->break;
 }
 
 # in the $gui variable, keys with leading _underscore
