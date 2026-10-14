@@ -265,6 +265,8 @@ sub route_output_channels {
 my @events = qw(
 	poll_engine
 	display_engine_status_after_transport_start
+	unmute_after_transport_start
+	fade_after_transport_start
 	update_playback_position_display
 	wraparound
 	processing_time

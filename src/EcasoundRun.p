@@ -12,12 +12,34 @@ sub start {
 	$self->valid_setup
 		or throw("Audio engine is not configured. Cannot start."),return;
 
+	return if $self->running();
+	cancel_transport_start($self);
 	::notify("Starting at ". current_position()) unless $quiet;
 	schedule_wraparound();
+	my $was_muted = defined $tn{Main}->old_vol_level;
 	mute();
+	$self->{transport_start_muted} = $tn{Main}
+		if !$was_muted and defined $tn{Main}->old_vol_level;
 	$self->start_command;
 	$self->{started}++;
-	start_heartbeat();
+	$self->{transport_start_pending} = 1;
+	$ui->setup_playback_indicator();
+	start_event(unmute_after_transport_start => timer(0.1, 0, sub {
+		fade_transport_start($self);
+	}));
+	start_event(display_engine_status_after_transport_start => timer(0.2, 0, sub {
+		my $status = $self->ecasound_iam('engine-status');
+		if ($status eq 'running') {
+			delete $self->{transport_start_pending};
+			::notify(engine_status()) unless $quiet;
+			start_heartbeat();
+		} elsif ($status =~ /finished|error/) {
+			heartbeat(); # also handles runs shorter than the status delay
+		} else {
+			::notify(engine_status()) unless $quiet;
+			stop_heartbeat();
+		}
+	}));
 	start_midi_transport() if midi_run_ready();
 
 	# limit engine run time if we are in mixdown or edit mode, 
@@ -28,20 +50,13 @@ sub start {
 		or edit_mode() 
 		or defined $setup->{runtime_limit};
 		# TODO and live processing
-	sleeper(0.1);
-	unmute();
 	$ui->set_engine_mode_color_display();
-	# Let the engine settle before reporting its status, without blocking Tk.
-	stop_event('display_engine_status_after_transport_start');
-	start_event(display_engine_status_after_transport_start => timer(0.5, 0, sub {
-		::notify(engine_status()) unless $quiet;
-	}));
 }
 sub stop {
 	package ::;
 	my $self = shift;
-	stop_event('display_engine_status_after_transport_start');
-	if ($self->running())
+	my $was_starting = cancel_transport_start($self);
+	if ($self->running() or $was_starting)
 	{
 	# Since the playback position advances slightly during
 	# the fade, we restore the position to exactly where the
@@ -49,6 +64,7 @@ sub stop {
 	
 	my $pos;
 	$pos = $self->ecasound_iam('getpos') if ! ::ChainSetup::really_recording();
+	my $was_muted = defined $tn{Main}->old_vol_level;
 	mute();
 	$self->stop_command;
 	disable_length_timer();
@@ -56,8 +72,8 @@ sub stop {
 		sleeper(0.5);
 		::notify(engine_status(current_position()));
 	}
-	unmute();
-	stop_heartbeat();
+	unmute() unless $was_muted;
+	stop_heartbeat($was_starting);
 	$ui->project_label_configure(-background => $gui->{_old_bg});
 
 	# restore exact position transport stop command was issued
@@ -88,7 +104,7 @@ sub sync_transport_position { }
 
 sub midish_running { $setup->{midish_running} }
 	
-sub toggle_transport { $this_engine->running() ?  stop_transport() : start_transport() }
+sub toggle_transport { ($this_engine->running() or $this_engine->{transport_start_pending}) ?  stop_transport() : start_transport() }
 
 sub disconnect_transport {
 	return if $this_engine->running;
@@ -105,17 +121,49 @@ sub current_timeline_position {
 sub current_position {
 	colonize(int(current_timeline_position()))
 }
+# Only undo a mute introduced by this transport start.
+sub finish_transport_start_unmute {
+	my $engine = shift;
+	stop_event('unmute_after_transport_start');
+	stop_event('fade_after_transport_start');
+	my $track = delete $engine->{transport_start_muted};
+	$track->unmute(1) if $track;
+}
+sub cancel_transport_start {
+	my $engine = shift;
+	stop_event('display_engine_status_after_transport_start');
+	finish_transport_start_unmute($engine);
+	delete $engine->{transport_start_pending};
+}
+sub fade_transport_start {
+	my $engine = shift;
+	my $track = $engine->{transport_start_muted} or return;
+	my $volume = $track->volume_effect;
+	my $to = $track->old_vol_level;
+	my $seconds = $config->{engine_fade_length_on_start_stop};
+	my $steps = $config->{hires_timer} ? ::Effect::fade_step_count($seconds) : 0;
+	return finish_transport_start_unmute($engine) unless $steps;
+	my $from = $volume->fade_out_level;
+	$volume->_modify_effect(1, $from);
+	my $step = 0;
+	start_event(fade_after_transport_start => timer(0, $seconds / $steps, sub {
+		$volume->_modify_effect(1, ::Effect::fade_level($from, $to, ++$step, $steps));
+		finish_transport_start_unmute($engine) if $step >= $steps;
+	}));
+}
+
 sub start_heartbeat {
  	start_event(poll_engine => timer(0, 1, \&::heartbeat));
-	$ui->setup_playback_indicator();
 }
 sub stop_heartbeat {
-	stop_event('display_engine_status_after_transport_start');
+	my $was_starting = shift;
+	$was_starting = cancel_transport_start($this_engine) || $was_starting;
 	# the following test avoids double-tripping rec_cleanup()
 	# following manual stop
-	return unless $project->{events}->{poll_engine};
-	stop_event('poll_engine');
 	stop_event('update_playback_position_display');
+	return unless $project->{events}->{poll_engine} or $was_starting;
+	stop_event('poll_engine');
+	delete $project->{events}->{poll_engine};
 	$ui->reset_engine_mode_color_display();
 	rec_cleanup() 
 }
