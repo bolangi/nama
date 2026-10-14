@@ -11,7 +11,7 @@ texists trackname
 taddev measure beat tick ev
     put the event ``ev'' on the current track at the position given by ``measure'', ``beat'' and ``tick''
 tsetf filtname
-    set the default filter (for recording) of the current track to ``filtname''. It will be used in performace mode if there is no current filter. 
+    set the default filter (for recording) of the current track to ``filtname''. It will be used in performance mode if there is no current filter. 
 tgetf
     return the default filter (for recording) of the current track, returns ``nil'' if none 
 tcheck
@@ -32,7 +32,7 @@ ttransp halftones
     transpose note events of current selection of the current track, by ``halftones'' half tones. Only events matching the current event selection (see ev function) are transposed. 
 tevmap evspec1 evspec2
     convert events matching evspec1 (source) into events matching evspec2 (destination) in the current selection of the current track. Both evspec1 and evspec2 must have the same number of devices, channels, notes, controllers etc.. 
-trackmerge sourcetrack
+tmerge sourcetrack
     merge the ``sourcetrack'' into the current track 
 mute trackname
     Mute the given track, i.e. events from ``trackname'' will not be played during record/playback. 
@@ -43,11 +43,11 @@ getmute trackname
 tclist
     Return the list of channels used by events stored in the current track. 
 tinfo
-    scan the current selection of the current track, an for each measure display the number of events that match the current event selection 
+    scan the current selection of the current track, and for each measure display the number of events that match the current event selection 
 inew channelname {dev midichan}
-    create an new channel named ``channelname'' and assigned the given device and MIDI channel. 
+    create a new channel named ``channelname'' and assigned the given device and MIDI channel. 
 iset {dev midichan}
-    set the device/channel pair of the current channel. All filters are updated to use the new channel setting as if the appropriate fchin function was invoked for each filter. 
+    set the device/channel pair of the current channel. All filters are updated to use the new channel setting as if the appropriate fchgin function was invoked for each filter. 
 idel
     delete current channel. 
 iren newname
@@ -65,14 +65,14 @@ irmev evspec
 iinfo
     print all events on the config of the current channel. 
 onew channelname {dev midichan}
-    create an new channel named ``channelname'' and assigned the given device and MIDI channel. Output channels contain a built-in filter having the same name; by defaut it maps all inputs to the newly created output channel. 
+    create a new channel named ``channelname'' and assigned the given device and MIDI channel. Output channels contain a built-in filter having the same name; by default it maps all inputs to the newly created output channel. 
 oset {dev midichan}
-    set the device/channel pair of the current channel. All filters are updated to use the new channel setting as if the appropriate fchout function was invoked for each filter. 
+    set the device/channel pair of the current channel. All filters are updated to use the new channel setting as if the appropriate fchgout function was invoked for each filter. 
 odel
     delete current channel. 
 oren newname
     rename the current channel to ``newname'' 
-iexists channelname
+oexists channelname
     return 1 if ``channelname'' is a channel, 0 otherwise 
 ogetc
     return the MIDI channel number of the current channel 
@@ -85,7 +85,7 @@ ormev evspec
 oinfo
     print all events on the config of the current channel. 
 fnew filtname
-    create an new filter named ``filtname'' 
+    create a new filter named ``filtname'' 
 fdel filtname
     delete the current filter. 
 fren newname
@@ -95,7 +95,7 @@ fexists filtname
 freset
     remove all rules from the current filter. 
 finfo
-    list all fitering rules of the current filter 
+    list all filtering rules of the current filter 
 fchgin old_evspec new_evspec
     rewrite all filtering rules of the current filter to consume ``new_evspec'' events instead of ``old_evspec'' events. This means that each rule that would consume ``old_evspec'' on the input will start consuming ``new_evspec'' instead. 
 fswapin evspec1 evspec2
@@ -107,9 +107,9 @@ fswapout evspec1 evspec2
 fmap evspec1 evspec2
     add a new rule to the current filter, to make it convert events matching evspec1 (source) into events matching evspec2 (destination). Both evspec1 and evspec2 must have the same number of devices, channels, notes, controllers etc.. 
 funmap evspec1 evspec2
-    remove event maps from the current filter. Any mapping with source included in evspec1 and destination inluded in evspec2 is deleted. 
+    remove event maps from the current filter. Any mapping with source included in evspec1 and destination included in evspec2 is deleted. 
 ftransp evspec halftones
-    transpose events generated by the filter and matching ``evspec'' by the give number of halftones 
+    transpose events generated by the filter and matching ``evspec'' by the given number of halftones 
 fvcurve evspec weight
     adjusts velocity of note events produced by the filter, using the given ``weight'' in the -63..63 range. If ``weight'' is:
 
@@ -129,20 +129,21 @@ xrm pattern
 xsetd newdev pattern
     set device number to ``newdev'' on all sysex messages starting with ``pattern'' in the current sysex bank. The given pattern is a list of bytes; an empty pattern matches any sysex message. 
 xadd devnum data
-    add to the current sysex bank a new sysex message. ``data'' is a list containing the MIDI system exclusive message and ``devname'' is the device number to which the message will be sent when performance mode is entered 
+    add to the current sysex bank a new sysex message. ``data'' is a list containing the MIDI system exclusive message and ``devnum'' is the device number to which the message will be sent when performance mode is entered 
 xinfo
-    print all sysex messages of the current sysex bank. Messages that are too long to be desplayed on a single line are truncated and the ``...'' string is displayed. 
+    print all sysex messages of the current sysex bank. Messages that are too long to be displayed on a single line are truncated and the ``...'' string is displayed. 
 ximport devnum path
     replace contents of the current sysex bank by contents of the given .syx file; messages are assigned to ``devnum'' device number. 
 xexport path
     store contents of the current sysex bank in the given .syx file 
+i
     enter ``idle'' performance mode. Start processing MIDI input and generating MIDI output. data passes through the current filter (if any) or through the current track's filter (if any). 
 p
     play the song from the current position. Input passes through the current filter (if any) or through the current track's filter (if any). 
 r
     play the song and record the input. Input passes through the current filter (if any) or through the current track's filter (if any). On startup, this function play one measure of countdown before the data start being recorded. 
 s
-    stop performance and release MIDI devices. I.e. stop the effect ``i'', ``p'' or ``r'' functions; 
+    stop performance and release MIDI devices. I.e. stop the effect of the ``i'', ``p'' or ``r'' functions. 
 sendraw device arrayofbytes
     send raw MIDI data to device number ``device'', for debugging purposes only. 
 ev evspec
@@ -158,11 +159,11 @@ setq step
         24 - sixteenth note triplet
         etc... 
 
-    The quantization step will be used by tquant function and also by all editing functions to optimize event selection. If the special ``nil'' value is specified as quantization step, then quatization is disabled. 
+    The quantization step will be used by tquant function and also by all editing functions to optimize event selection. If the special ``nil'' value is specified as quantization step, then quantization is disabled. 
 getq
-    return the current quatization step 
+    return the current quantization step 
 g measure
-    set the current song position pointer to the given measure number. Record and playback will start a that position. This also defines the beginning of the current selection used by most track editing functions. 
+    set the current song position pointer to the given measure number. Record and playback will start at that position. This also defines the beginning of the current selection used by most track editing functions. 
 getpos
     return the current song position pointer which is also the start position of the current selection. 
 sel length
@@ -178,7 +179,7 @@ cf filtname
 getf
     return the current filter or ``nil'' if none 
 cx sysexname
-    set the current sysex bank, i.e. the one that will be recorded. The current sysex back is the one affected by all sysex editing functions. 
+    set the current sysex bank, i.e. the one that will be recorded. The current sysex bank is the one affected by all sysex editing functions. 
 getx
     return the current sysex bank or ``nil'' if none 
 ci channame
@@ -190,7 +191,7 @@ co channame
 geto
     return the name of the current output channel or ``nil'' if none 
 setunit ticks_per_unit
-    set the time resolution of the sequencer to ``tpu'' ticks in a whole note (1 unit note = 4 quarter notes). The default is 96 ticks, which is the default of the MIDI standard. 
+    set the time resolution of the sequencer to ``ticks_per_unit'' ticks in a whole note (1 unit note = 4 quarter notes). The default is 96 ticks, which is the default of the MIDI standard. 
 getunit
     return the number of ticks in a whole note 
 fac tempo_factor
@@ -206,7 +207,7 @@ mcut
 mdup where
     duplicate the current selection inserting a copy of it at the position given by the ``where'' parameter. The target position is a measure number relative to the current selection to be copied. If ``where'' is positive it's relative to the end of the current selection; if it's negative it's relative to the beginning of the current selection. 
 minfo
-    print the meta-track (tempo changes, time signature changes. 
+    print the meta-track (tempo changes, time signature changes). 
 mtempo
     Return the tempo at the current song position. The unit is beats per minute. 
 msig
@@ -228,7 +229,7 @@ import filename
 dlist
     return the list of attached devices (list of numbers) 
 dnew devnum filename mode
-    attach MIDI device ``filename'' as device number ``devnum''; ``filename'' is a quoted string. The ``mode'' argument is the name of the mode, it can be on if the following:
+    attach MIDI device ``filename'' as device number ``devnum''; ``filename'' is a quoted string. The ``mode'' argument is the name of the mode, it can be one of the following:
 
         ``ro'' - read-only, for input only devices
         ``wo'' - write-only, for output only devices
@@ -251,12 +252,12 @@ dinfo devnum
     Print some information about the MIDI device. 
 dixctl devnum list
     Setup the list of controllers that are expected to be received as 14-bit numbers (i.e. both coarse and fine MIDI controller messages will be expected). By default only coarse values are used, if unsure let this list empty. 
-devoxctl devnum list
+doxctl devnum list
     Setup the list of controllers that will be transmitted as 14-bit numbers (both coarse and fine MIDI controller messages). 
 diev devnum list
     Configure the device to process as a single event the following patterns of input MIDI messages.
 
-        ``xpc'' - group bank select controllers (0 and 32) with program changes into a signle ``xpc'' event.
+        ``xpc'' - group bank select controllers (0 and 32) with program changes into a single ``xpc'' event.
         ``nrpn'' - group NRPN controllers (98 and 99) with data entry controllers (6 and 38) into a single ``nrpn'' event.
         ``rpn'' - same as ``nrpn'', but for RPN controllers (100 and 101). 
 
@@ -267,7 +268,7 @@ ctlconf ctlname ctlnumber defval
     Configure controller number ``ctlnumber'' with name ``ctlname'', and default value ``defval''. If defval is ``nil'' then there is no default value and corresponding controller events are not grouped into frames. See sec. Controller frames. 
 ctlconfx ctlname ctlnumber defval
     Same as ctlconf function, but for 14-bit controllers. Thus defval is in the range 0..16383. 
-ctlconf ctlname
+ctlunconf ctlname
     Unconfigure the given controller. ``ctlname'' is the identifier that was used with ctlconf 
 ctlinfo
     Print the list of configured controllers 
@@ -313,7 +314,7 @@ debug flag val
 version
     Display midish version. 
 panic
-    Cause the sequencer to core-dump, useful to developpers. 
+    Cause the sequencer to core-dump, useful to developers. 
 proclist
     Return the list of all user defined procs. 
 builtinlist
