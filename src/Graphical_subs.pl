@@ -171,10 +171,6 @@ sub init_gui {
 	$gui->{load_project} = $gui->{load_frame}->Button->pack(-side => 'left');;
 	$gui->{new_project} = $gui->{load_frame}->Button->pack(-side => 'left');;
 	$gui->{quit} = $gui->{load_frame}->Button->pack(-side => 'left');
-	$gui->{palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
-		->pack( -side => 'left');
-	$gui->{nama_palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
-		->pack( -side => 'left');
 	$gui->{add_track}->{label} = $gui->{add_frame}->Label(
 		-text => "New track name: ")->pack(-side => 'left');
 	$gui->{add_track}->{text_entry} = $gui->{add_frame}->Entry(
@@ -207,24 +203,9 @@ sub init_gui {
 		});
 	$gui->{quit}->configure(-text => "Quit",
 		-command => \&tk_save_and_quit);
-	$gui->{palette}->configure(
-		-text => 'Palette',
-		-relief => 'raised',
-	);
-	$gui->{nama_palette}->configure(
-		-text => 'Nama palette',
-		-relief => 'raised',
-	);
-
 my @color_items = map { [ 'command' => $_, 
 							-command  => colorset('mw', $_ ) ]
 						} $gui->{_palette_fields}->@*;
-$gui->{palette}->AddItems( @color_items);
-
-@color_items = map { [ 'command' => $_, 
-							-command  => namaset( $_ ) ]
-						} $gui->{_nama_fields}->@*;
-
 	$gui->{add_track}->{add_mono}->configure( 
 			-text => 'Add Mono Track',
 			-command => sub { 
