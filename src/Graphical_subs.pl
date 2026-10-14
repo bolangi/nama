@@ -59,7 +59,7 @@ sub init_gui {
 	# Tk main window
  	$gui->{mw} = MainWindow->new;  
 	get_saved_colors();
-	$gui->{mw}->optionAdd('*font', 'Helvetica 12');
+	$gui->{mw}->optionAdd('*font', '{Liberation Sans} 11');	
 	$gui->{mw}->optionAdd('*BorderWidth' => 1);
 	$gui->{mw}->title("Ecasound/Nama"); 
 	$gui->{mw}->deiconify;
@@ -550,7 +550,6 @@ sub track_gui {
 	logpkg('debug', "found index: $n");
 	my @rw_items = @_ ? @_ : (
 			[ 'command' => "REC",
-				-foreground => 'red',
 				-command  => sub { 
 					return if $this_engine->started();
 					$ti{$n}->set(rw => "REC");
@@ -568,7 +567,6 @@ sub track_gui {
 					::reconfigure_engine();
 			}],
 			[ 'command' => "MON",
-				-foreground => 'red',
 				-command  => sub { 
 					return if $this_engine->started();
 					$ti{$n}->set(rw => "MON");
@@ -907,10 +905,8 @@ sub add_effect_gui {
 
 		# here add menu items for Add Controller, and Remove
 
-		my $parentage = $fx_cache->{registry}->[
-			$fx_cache->{full_label_to_index}->{$FX->type} 
-		]->{name};
-		$parentage and $parentage .=  " - ";
+		
+		my $parentage = $FX->parent ? $FX->parent->fxname . " - " : "";
 		logpkg('debug', "parentage: $parentage");
 		my $eff = $frame->Menubutton(
 			-text => $parentage. $fx_cache->{registry}->[$i]->{name}, -tearoff => 0,);
