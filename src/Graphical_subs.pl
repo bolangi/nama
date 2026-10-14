@@ -1019,7 +1019,8 @@ sub matching_effects {
 	my ($query) = @_;
 	$query //= '';
 	$query =~ s/^\s+|\s+$//g;
-	return () if length($query) < 4;
+	my $ladspa_id = $query =~ /^\d+$/ ? $query : undef;
+	return () if length($query) < 4 and !defined $ladspa_id;
 	$query = lc $query;
 	my $registry = $fx_cache->{registry} // [];
 	my $ctrl = $fx_cache->{split}->{ctrl} // {};
@@ -1031,8 +1032,14 @@ sub matching_effects {
 		next if ($effect->{plugin_type} // '') eq 'ctrl';
 		next if defined $ctrl->{a} and defined $ctrl->{z}
 			and $i >= $ctrl->{a} and $i <= $ctrl->{z};
-		next if index(lc($effect->{name} // ''), $query) < 0
-			and index(lc($effect->{code}), $query) < 0;
+		if (defined $ladspa_id) {
+			my $id = $fx_cache->{ladspa_label_to_unique_id}->{$effect->{code}};
+			next unless ($effect->{plugin_type} // '') eq 'ladspa'
+				and defined $id and $id eq $ladspa_id;
+		} else {
+			next if index(lc($effect->{name} // ''), $query) < 0
+				and index(lc($effect->{code}), $query) < 0;
+		}
 		push @matches, $effect;
 	}
 	sort {
@@ -1053,9 +1060,9 @@ sub refresh_effect_dialog {
 	$selector->{matches} = [matching_effects($query)];
 	$selector->{add}->configure(-state => 'disabled');
 	$query =~ s/^\s+|\s+$//g;
-	if (length($query) < 4) {
+	if (length($query) < 4 and $query !~ /^\d+$/) {
 		$selector->{list_frame}->packForget;
-		$selector->{status}->configure(-text => 'Enter at least four characters.');
+		$selector->{status}->configure(-text => 'Enter search string or LADSPA ID'); 
 		return;
 	}
 	my @matches = $selector->{matches}->@*;
