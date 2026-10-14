@@ -869,6 +869,7 @@ sub gen_words {
 	return unless defined $first;
 	for (my $i = $first; $i <= $last; $i++)  { $last  = $i - 1, last if @$keywords[$i] !~ /^$word/i }
 	my @result = @$keywords[$first .. $last];
+	return @result if @result == 1;
 
 	# don't print if full paths;
 	#unless (grep { m(/) } @result)
