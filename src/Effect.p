@@ -1251,49 +1251,6 @@ sub fade {
 	$self->_modify_effect($param, $to)
 }
 
-sub plan_fade {
-	return unless $this_engine->started();
-	my $self = shift;
-	my %args = @_;
-	my $param   = $args{param}   || 1;
-	my $from    = $args{from}    || 0;
-	my $to	    = $args{to}      || 0;
-	my $seconds = $args{seconds} || 1;
-	my $in_future 	= $args{in_future};
-	my $steps 	= fade_step_count($seconds);
-	my $wink  	= $seconds / $steps;
-	my $id 		= $self->id;
-	logpkg('debug', "id: $id, param: $param, from: $from, to: $to, seconds: $seconds");
-	if ( not $in_future ){
-		for my $step (1..$steps - 1){
-			sleeper( $wink );
-			$self->_modify_effect(
-				$param,
-				fade_level($from, $to, $step, $steps),
-			);
-		}
-		sleeper( $wink );
-		$self->_modify_effect($param, $to)
-	}
-	else {
-		my $advance = $in_future;
-		for my $step (1..$steps - 1){
-			$advance += $wink;
-			my $level = fade_level($from, $to, $step, $steps);
-			schedule_fade(
-				$advance,
-				sub { $self->_modify_effect($param, $level) },
-			)
-		}		
-		$advance += $wink;
-		schedule_fade($advance, sub { $self->_modify_effect($param, $to) } );
-		sub schedule_fade {
-			my ($after, $sub) = @_;
-			start_event("fade_".$setup->{fade_counter}++ => timer( $after, 0, $sub ));
-		}
-	}
-}
-
 sub fadein {
 	my $self = shift;
 	my $to = shift;
