@@ -792,8 +792,8 @@ sub remove_track_gui {
  	my $ui = shift;
  	my $n = shift;
 	logsub((caller(0))[3]);
-	close_effect_dialog() if $gui->{effect_selector}
-		and $gui->{effect_selector}->{track_number} == $n;
+	close_effect_dialog() if $gui->{effect_picker}
+		and $gui->{effect_picker}->{track_number} == $n;
 	return unless $gui->{tracks_remove}->{$n};
  	map {$_->destroy  } $gui->{tracks_remove}->{$n}->@*;
 	delete $gui->{tracks_remove}->{$n};
@@ -1030,55 +1030,55 @@ sub matching_effects {
 }
 
 sub close_effect_dialog {
-	my $selector = delete $gui->{effect_selector} or return;
-	$selector->{window}->destroy if Tk::Exists($selector->{window});
+	my $effect_dialog = delete $gui->{effect_picker} or return;
+	$effect_dialog->{window}->destroy if Tk::Exists($effect_dialog->{window});
 }
 
 sub refresh_effect_dialog {
-	my ($selector, $query) = @_;
-	my $list = $selector->{list};
+	my ($effect_dialog, $query) = @_;
+	my $list = $effect_dialog->{list};
 	$list->delete(0, 'end');
-	$selector->{matches} = [matching_effects($query)];
-	$selector->{add}->configure(-state => 'disabled');
+	$effect_dialog->{matches} = [matching_effects($query)];
+	$effect_dialog->{add}->configure(-state => 'disabled');
 	$query =~ s/^\s+|\s+$//g;
 	if (length($query) < 4 and $query !~ /^\d+$/) {
-		$selector->{list_frame}->packForget;
-		$selector->{status}->configure(-text => 'Enter search string or LADSPA ID'); 
+		$effect_dialog->{list_frame}->packForget;
+		$effect_dialog->{status}->configure(-text => 'Enter search string or LADSPA ID'); 
 		return;
 	}
-	my @matches = $selector->{matches}->@*;
+	my @matches = $effect_dialog->{matches}->@*;
 	if (!@matches) {
-		$selector->{list_frame}->packForget;
-		$selector->{status}->configure(-text => 'No matching effects.');
+		$effect_dialog->{list_frame}->packForget;
+		$effect_dialog->{status}->configure(-text => 'No matching effects.');
 		return;
 	}
 	$list->insert('end', map {
 		($_->{name} // $_->{code}) . '  [' . $_->{code} . ']'
 	} @matches);
-	$selector->{list_frame}->pack(
-		-before => $selector->{buttons}, -fill => 'both', -expand => 1);
-	$selector->{status}->configure(-text => scalar(@matches) . ' matching effects');
+	$effect_dialog->{list_frame}->pack(
+		-before => $effect_dialog->{buttons}, -fill => 'both', -expand => 1);
+	$effect_dialog->{status}->configure(-text => scalar(@matches) . ' matching effects');
 	$list->selectionSet(0);
 	$list->activate(0);
-	$selector->{add}->configure(-state => 'normal');
+	$effect_dialog->{add}->configure(-state => 'normal');
 }
 
 sub add_selected_effect {
-	my ($selector) = @_;
-	my $n = $selector->{track_number};
-	# A nonmodal selector must never add to a replacement track/project.
-	if (!$ti{$n} or $ti{$n} ne $selector->{track}) {
+	my ($effect_dialog) = @_;
+	my $n = $effect_dialog->{track_number};
+	# A nonmodal effect_dialog must never add to a replacement track/project.
+	if (!$ti{$n} or $ti{$n} ne $effect_dialog->{track}) {
 		close_effect_dialog();
 		return;
 	}
 	return if $ti{$n}->forbid_user_ops;
-	my @selection = $selector->{list}->curselection;
+	my @selection = $effect_dialog->{list}->curselection;
 	return unless @selection;
-	my $effect = $selector->{matches}->[$selection[0]] or return;
+	my $effect = $effect_dialog->{matches}->[$selection[0]] or return;
 	my $ok = eval { add_effect({chain => $n, type => $effect->{code}}); 1 };
 	if (!$ok) {
 		my $error = $@ || 'Unable to add effect.';
-		$selector->{status}->configure(-text => $error);
+		$effect_dialog->{status}->configure(-text => $error);
 		return;
 	}
 	close_effect_dialog();
@@ -1089,10 +1089,10 @@ sub open_effect_dialog {
 	my ($n) = @_;
 	return unless $ti{$n};
 	return if $ti{$n}->forbid_user_ops;
-	my $selector = $gui->{effect_selector};
-	if (!$selector or !Tk::Exists($selector->{window})) {
-		$selector = $gui->{effect_selector} = {};
-		my $window = $selector->{window} = $gui->{mw}->Toplevel;
+	my $effect_dialog = $gui->{effect_picker};
+	if (!$effect_dialog or !Tk::Exists($effect_dialog->{window})) {
+		$effect_dialog = $gui->{effect_picker} = {};
+		my $window = $effect_dialog->{window} = $gui->{mw}->Toplevel;
 		$window->transient($gui->{mw});
 		$window->protocol('WM_DELETE_WINDOW' => \&close_effect_dialog);
 		$window->bind('<Escape>' => sub { close_effect_dialog(); Tk->break });
@@ -1100,56 +1100,56 @@ sub open_effect_dialog {
 		$window->bind('<Control-Key-c>' => \&cleanup_exit);
 		$window->Label(-text => 'Search effect name or code:')->pack(
 			-anchor => 'w', -padx => 8, -pady => 4);
-		my $entry = $selector->{entry} = $window->Entry(-width => 60)->pack(
+		my $entry = $effect_dialog->{entry} = $window->Entry(-width => 60)->pack(
 			-fill => 'x', -padx => 8);
-		$selector->{status} = $window->Label(
+		$effect_dialog->{status} = $window->Label(
 			-text => 'Enter at least four characters.', -anchor => 'w',
 		)->pack(-fill => 'x', -padx => 8, -pady => 4);
-		$selector->{list_frame} = $window->Frame;
-		$selector->{list} = $selector->{list_frame}->Scrolled('Listbox',
+		$effect_dialog->{list_frame} = $window->Frame;
+		$effect_dialog->{list} = $effect_dialog->{list_frame}->Scrolled('Listbox',
 			-scrollbars => 'osoe', -width => 70, -height => 12,
 			-selectmode => 'browse', -exportselection => 0,
 		)->pack(-fill => 'both', -expand => 1, -padx => 8);
-		$selector->{buttons} = $window->Frame->pack(-fill => 'x', -pady => 8);
-		$selector->{add} = $selector->{buttons}->Button(
+		$effect_dialog->{buttons} = $window->Frame->pack(-fill => 'x', -pady => 8);
+		$effect_dialog->{add} = $effect_dialog->{buttons}->Button(
 			-text => 'Add', -state => 'disabled',
-			-command => sub { add_selected_effect($selector) },
+			-command => sub { add_selected_effect($effect_dialog) },
 		)->pack(-side => 'left', -padx => 8);
-		$selector->{buttons}->Button(
+		$effect_dialog->{buttons}->Button(
 			-text => 'Cancel', -command => \&close_effect_dialog,
 		)->pack(-side => 'right', -padx => 8);
 		# Perl/Tk passes the proposed text to the validation callback.
 		# This catches insertion, paste and deletion without changing the entry.
 		$entry->configure(-validate => 'key', -validatecommand => sub {
 			my ($proposed) = @_;
-			refresh_effect_dialog($selector, $proposed);
+			refresh_effect_dialog($effect_dialog, $proposed);
 			1;
 		});
 		$entry->bind('<Down>' => sub {
-			$selector->{list}->focus if $selector->{matches}->@*;
+			$effect_dialog->{list}->focus if $effect_dialog->{matches}->@*;
 			Tk->break;
 		});
 		$entry->bind('<Return>' => sub {
-			add_selected_effect($selector);
+			add_selected_effect($effect_dialog);
 			Tk->break;
 		});
-		$selector->{list}->bind('<Return>' => sub {
-			add_selected_effect($selector);
+		$effect_dialog->{list}->bind('<Return>' => sub {
+			add_selected_effect($effect_dialog);
 			Tk->break;
 		});
-		$selector->{list}->bind('<Double-Button-1>' => sub {
-			add_selected_effect($selector);
+		$effect_dialog->{list}->bind('<Double-Button-1>' => sub {
+			add_selected_effect($effect_dialog);
 			Tk->break;
 		});
 	}
-	$selector->{track_number} = $n;
-	$selector->{track} = $ti{$n};
-	$selector->{window}->title('Add Effect - ' . $ti{$n}->name);
-	$selector->{entry}->delete(0, 'end');
-	refresh_effect_dialog($selector, '');
-	$selector->{window}->deiconify;
-	$selector->{window}->raise;
-	$selector->{entry}->focus;
+	$effect_dialog->{track_number} = $n;
+	$effect_dialog->{track} = $ti{$n};
+	$effect_dialog->{window}->title('Add Effect - ' . $ti{$n}->name);
+	$effect_dialog->{entry}->delete(0, 'end');
+	refresh_effect_dialog($effect_dialog, '');
+	$effect_dialog->{window}->deiconify;
+	$effect_dialog->{window}->raise;
+	$effect_dialog->{entry}->focus;
 }
 
 sub make_scale {
