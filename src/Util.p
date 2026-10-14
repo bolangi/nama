@@ -290,7 +290,7 @@ sub timer ($delay, $interval, $coderef ) {
 	}
 	else {
 		$timer = IO::Async::Timer::Periodic->new(
-			# Zero retains the usual first tick after one full interval.
+			# With zero delay,  fire coderef after one full interval
 			first_interval => $delay > 0 ? $delay : $interval,
 			interval => $interval,
 			on_tick => $coderef,
