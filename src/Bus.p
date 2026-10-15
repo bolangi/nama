@@ -117,8 +117,7 @@ sub settings_line {
 	$line
 }
 	
-sub trackslist {
-	my $bus = shift;
+sub trackslist ($bus) {
 	my $mix = $::tn{$bus->name}; # XX this will work only for mix tracks with the same name as their bus
 	my @list = ($mix,$bus);
 	push @list, map{$::tn{$_}} ($mix->name, $bus->tracks);
@@ -134,8 +133,7 @@ sub display_type {
 	$type
 }
 
-sub list {
-	my $self = shift;
+sub list ($self) {
 	my @fields = qw( name
                     version
                     send_type

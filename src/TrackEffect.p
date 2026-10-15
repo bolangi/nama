@@ -64,30 +64,26 @@ sub user_ops ($track) {
 
 	grep{ ! $skip{$_} } ($track->{ops} || [])->@*;
 }
-sub first_effect_of_type {
-	my $track = shift;
-	my $type = shift;
+sub first_effect_of_type ($track, $type) {
 	for my $effect_id ( $track->effect_ids->@* ){
 		my $FX = fxn($effect_id);
 		return $FX if $FX->type =~ /$type/ # Plate matches el:Plate
 	}
 }
-sub effect_id_by_name {
-	my $track = shift;
-	my $ident = shift;
+sub effect_id_by_name ($track, $ident) {
 	for my $FX ($track->user_effects)
 	{ return $FX->id if $FX->name eq $ident }
 }
-sub vol_level { my $self = shift; try { $self->volume_effect->params->[0] } }
-sub pan_level { my $self = shift; try { $self->pan_effect->params->[0] } }
+sub vol_level ($self) { try { $self->volume_effect->params->[0] } }
+sub pan_level ($self) { try { $self->pan_effect->params->[0] } }
 sub vol_id { $_[0]->vol }
-sub volume_effect { my $self = shift; fxn($self->vol_id) }
+sub volume_effect ($self) { fxn($self->vol_id) }
 sub pan_id { $_[0]->pan }
-sub pan_effect { my $self = shift; fxn($self->pan_id) }
+sub pan_effect ($self) { fxn($self->pan_id) }
 sub fader_id { $_[0]->fader }
-sub fader_effect { my $self = shift; fxn($self->fader) }
+sub fader_effect ($self) { fxn($self->fader) }
 sub latency_effect_id { $_[0]->latency_op }
-sub latency_effect { my $self = shift; fxn($self->latency_op) }
+sub latency_effect ($self) { fxn($self->latency_op) }
 sub pan_set ($track, $new_position) {
 	my $current = $track->pan_effect->params->[0];
 	$track->set(old_pan_level => $current)

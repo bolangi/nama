@@ -44,8 +44,7 @@ sub kill_and_reap {
 		my $self = shift;
 		::kill_and_reap( $self->{pids}->@* );
 }
-sub tracks {
-	my $self = shift;
+sub tracks ($self) {
 	my @tracks = grep { $self->name eq $_->engine_group } ::all_tracks();
 }
 sub ecasound_iam {}
@@ -109,8 +108,7 @@ sub current_controller_parameter {
 	my ($self, $n) = @_;
 	$self->current_item($n, 'current_controller_parameter', 'ctrlp-select');
 }
-sub valid_setup {
-	my ($self) = @_;
+sub valid_setup ($self) {
 	$self->ecasound_iam('cs-selected') and 
 	$self->ecasound_iam('cs-is-valid');
 }

@@ -1,4 +1,5 @@
 package ::Wav;
+use v5.36;
 our $VERSION = 1.001;
 use ::Globals qw(:all);
 use ::Util qw(:all);
@@ -12,39 +13,33 @@ use Carp;
 
 use Role::Tiny;
 
-sub wav_length {
-	my $track = shift;
+sub wav_length ($track) {
 	::wav_length($track->full_path)
 }
-sub wav_format{
-	my $track = shift;
+sub wav_format ($track) {
 	::wav_format($track->full_path)
 }
 
 	
-sub dir {
-	my $self = shift;
+sub dir ($self) {
 	 $self->project  
 		? join_path(::project_root(), $self->project, '.wav')
 		: ::this_wav_dir();
 }
 
-sub basename {
-	my $self = shift;
+sub basename ($self) {
 	$self->target || $self->name
 }
 
-sub full_path { my $track = shift; join_path($track->dir, $track->current_wav) }
+sub full_path ($track) { join_path($track->dir, $track->current_wav) }
 
-sub group_last {
-	my $track = shift;
+sub group_last ($track) {
 	my $bus = $bn{$track->group}; 
 	$bus->last;
 }
 
 sub last { $_[0]->versions->[-1] || 0 }
-sub current_wav {
-	my $track = shift;
+sub current_wav ($track) {
 	my $last = $track->current_version;
 	if 	($track->candidate_rec){
 		$track->name . '_' . $last . '.wav'
@@ -57,8 +52,7 @@ sub current_wav {
 	}
 }
 
-sub current_version {	
-	my $track = shift;
+sub current_version ($track) {
 
 	# two possible version numbers, depending on REC/PLAY status
 	
@@ -73,18 +67,15 @@ sub current_version {
 	else { return 0 }
 }
 
-sub playback_version {
-	my $track = shift;
+sub playback_version ($track) {
 	return $track->version if $track->version 
 				and grep {$track->version  == $_ } $track->versions->@* ;
 	$track->last;
 }
-sub targets { # WAV file targets, distinct from 'target' attribute
-	my $self = shift;
+sub targets ($self) { # WAV file targets, distinct from 'target' attribute
 	_targets(dir => $self->dir, name => $self->basename)
 }
-sub versions {
-	my $self = shift;
+sub versions ($self) {
 	_versions(dir => $self->dir, name => $self->basename) 
 }
 

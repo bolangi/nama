@@ -467,15 +467,13 @@ sub load_project_with_checks {
 	::nama_cmd($config->{execute_on_project_load});
 	1; # accepted, including when the hook has no return value
 }
-sub sanitize {
-	my $name = shift;
+sub sanitize ($name) {
 	my $newname = remove_spaces($name);
 	$newname =~ s(/$)(); # remove trailing slash
 	$newname;
 }
-sub create_project {
+sub create_project ($name) {
 	package ::;
-	my $name = shift;
 	return unless load_project_with_checks($name, create => 1);
 	::notify("created project: $project->{name}\n");
 	1;
@@ -548,8 +546,7 @@ sub get_sample_rate {
 	$project->{sample_rate}
 }
 
-sub set_sample_rate {
-	my ($srate) = @_;
+sub set_sample_rate ($srate) {
 	my @allowable = qw{ 96000 88200 64000 48000 44100 32000 24000 22050 16000 11025 8000 };
 	my %allowable = map{$_ => 1} @allowable; 
 	if ( $allowable{$srate} ){

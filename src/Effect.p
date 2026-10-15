@@ -778,15 +778,13 @@ sub full_effect_code {
 
 # get integer effect index for Nama effect registry
 # e.g. ea => 2
-sub effect_index {
-	my $code = shift;
+sub effect_index ($code) {
 	my $i = $fx_cache->{full_label_to_index}->{full_effect_code($code)};
 	defined $i or $config->{opts}->{E} or warn("$code: effect index not found\n");
 	$i
 }
 
-sub fx_defaults {
-	my $code = shift;
+sub fx_defaults ($code) {
 	my $i = effect_index($code);
 	my $values = [];
 	foreach my $p ( $fx_cache->{registry}->[$i]->{params}->@*)
@@ -1204,13 +1202,11 @@ sub check_fx_consistency {
 	$result;
 }
 
-sub fade_level {
-	my ($from, $to, $step, $steps) = @_;
+sub fade_level ($from, $to, $step, $steps) {
 	$from + ($to - $from) * $step / $steps
 }
 
-sub fade_step_count {
-	my ($seconds) = @_;
+sub fade_step_count ($seconds) {
 	return 0 unless defined $seconds and $seconds > 0;
 
 	my $steps = int($seconds * $config->{fade_resolution} + 0.5);

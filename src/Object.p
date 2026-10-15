@@ -73,14 +73,12 @@ sub dumpp  {
 	my $self = shift;
 	::($self->dump)
 }
-sub dump {
-	my $self = shift;
+sub dump ($self) {
 	my $output = Dumper($self);
 	return $output;
 }
 
-sub as_hash {
-	my $self = shift;
+sub as_hash ($self) {
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic
 	my %guts = $self->%*;
