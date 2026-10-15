@@ -520,6 +520,46 @@ sub global_version_buttons {
 			);
  	}
 }
+# Use the command grammar so GUI input follows the same routing rules.
+sub apply_track_io_argument {
+	my ($track, $direction, $argument) = @_;
+	return unless $direction eq 'source' or $direction eq 'send';
+	return unless $track and $ti{$track->n} and $ti{$track->n} eq $track;
+	return if $this_engine->started;
+	$argument =~ s/^\s+|\s+$//g;
+	return unless length $argument;
+	local $this_track = $track;
+	nama_cmd("$direction $argument");
+	::reconfigure_engine();
+	$ui->refresh_track($track->n);
+}
+
+sub open_track_io_dialog {
+	my ($n, $direction) = @_;
+	return if $this_engine->started;
+	my $track = $ti{$n} or return;
+	my $window = $gui->{mw}->Toplevel;
+	$window->title(ucfirst($direction) . ' - ' . $track->name);
+	$window->Label(
+		-text => "Enter $direction (e.g. soundcard channel, JACK client name)",
+	)->pack(-padx => 12, -pady => 8);
+	my $entry = $window->Entry(-width => 50)->pack(
+		-fill => 'x', -padx => 12, -pady => 4);
+	my $apply = sub {
+		my $argument = $entry->get;
+		return unless $argument =~ /\S/;
+		apply_track_io_argument($track, $direction, $argument);
+		$window->destroy;
+	};
+	my $buttons = $window->Frame->pack(-pady => 8);
+	$buttons->Button(-text => 'OK', -command => $apply)->pack(-side => 'left');
+	$buttons->Button(-text => 'Cancel', -command => sub { $window->destroy })
+		->pack(-side => 'left');
+	$entry->bind('<Return>' => sub { $apply->(); Tk->break });
+	$window->bind('<Escape>' => sub { $window->destroy; Tk->break });
+	$entry->focus;
+}
+
 sub track_gui { 
 	logsub((caller(0))[3]);
 	my $ui = shift;
@@ -599,48 +639,12 @@ sub track_gui {
 					);
 	}
 
-	$ch_r = $gui->{track_frame}->Menubutton(
-					# -relief => 'groove',
-					-tearoff => 0,
-				);
-	my @range;
-	push @range, 1..$config->{soundcard_channels} if $n > 2; # exclude Main/Mixdown
-	
-	for my $v (@range) {
-		$ch_r->radiobutton(
-			-label => $v,
-			-value => $v,
-			-command => sub { 
-				return if $this_engine->started();
-			#	$ti{$n}->set(rw => REC);
-				$ti{$n}->source($v);
-				$ui->refresh_track($n) }
-			)
-	}
-	@range = ();
-
-	push @range, "off" if $n > 2;
-	push @range, 1..$config->{soundcard_channels} if $n != 2; # exclude Mixdown
-
-	$ch_m = $gui->{track_frame}->Menubutton(
-					-tearoff => 0,
-					# -relief => 'groove',
-				);
-				for my $v (@range) {
-					$ch_m->radiobutton(
-						-label => $v,
-						-value => $v,
-						-command => sub { 
-							return if $this_engine->started();
-							local $this_track = $ti{$n};
-							if( $v eq 'off' )
-								 { nama_cmd('nosend') }
-							else { $this_track->set_send($v) }
-							$ui->refresh_track($n);
-							::reconfigure_engine();
- 						}
-				 		)
-				}
+	$ch_r = $gui->{track_frame}->Button(
+		-command => sub { open_track_io_dialog($n, 'source') },
+	);
+	$ch_m = $gui->{track_frame}->Button(
+		-command => sub { open_track_io_dialog($n, 'send') },
+	);
 	$rw = $gui->{track_frame}->Menubutton(
 		-text => $ti{$n}->rw,
 		-tearoff => 0,
