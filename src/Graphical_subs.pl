@@ -541,24 +541,28 @@ sub open_track_io_dialog {
 	return if $this_engine->started;
 	my $track = $ti{$n} or return;
 	my $window = $gui->{mw}->Toplevel;
+	$window->transient($gui->{mw});
 	$window->title(ucfirst($direction) . ' - ' . $track->name);
 	$window->Label(
 		-text => "Enter $direction (e.g. soundcard channel, JACK client name)",
-	)->pack(-padx => 12, -pady => 8);
-	my $entry = $window->Entry(-width => 50)->pack(
-		-fill => 'x', -padx => 12, -pady => 4);
+	)->pack(-anchor => 'w', -padx => 8, -pady => 4);
+	my $entry = $window->Entry(-width => 60)->pack(
+		-fill => 'x', -padx => 8);
 	my $apply = sub {
 		my $argument = $entry->get;
 		return unless $argument =~ /\S/;
 		apply_track_io_argument($track, $direction, $argument);
 		$window->destroy;
 	};
-	my $buttons = $window->Frame->pack(-pady => 8);
-	$buttons->Button(-text => 'OK', -command => $apply)->pack(-side => 'left');
+	my $buttons = $window->Frame->pack(-fill => 'x', -pady => 8);
+	$buttons->Button(-text => 'OK', -command => $apply)
+		->pack(-side => 'left', -padx => 8);
 	$buttons->Button(-text => 'Cancel', -command => sub { $window->destroy })
-		->pack(-side => 'left');
+		->pack(-side => 'right', -padx => 8);
 	$entry->bind('<Return>' => sub { $apply->(); Tk->break });
 	$window->bind('<Escape>' => sub { $window->destroy; Tk->break });
+	$window->deiconify;
+	$window->raise;
 	$entry->focus;
 }
 
