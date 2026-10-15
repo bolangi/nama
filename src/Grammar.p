@@ -473,7 +473,7 @@ sub sanitize {
 	$newname =~ s(/$)(); # remove trailing slash
 	$newname;
 }
-sub create_project_action {
+sub create_project {
 	package ::;
 	my $name = shift;
 	return unless load_project_with_checks($name, create => 1);

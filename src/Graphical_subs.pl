@@ -198,7 +198,7 @@ sub init_gui {
 	$gui->{new_project}->configure( 
 		-text => 'Create',
 		-command => sub {
-			return unless create_project_action($gui->{_project_name});
+			return unless create_project($gui->{_project_name});
 			$ui->length_display(-text => colonize(0));
 			reconfigure_engine();
 			$ui->refresh;

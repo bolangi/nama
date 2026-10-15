@@ -232,7 +232,7 @@ help: _help { ::notify( $::help->{screen} ); 1}
 project_name: _project_name { 
 	::notify( "project name: ", $::project->{name}); 1}
 new_project: _new_project project_id { 
-	::create_project_action $item{project_id} ; 1}
+	::create_project $item{project_id} ; 1}
 list_projects: _list_projects { ::list_projects() ; 1}
 load_project: _load_project project_id {
 	::load_project_with_checks $item{project_id} ; 1}
