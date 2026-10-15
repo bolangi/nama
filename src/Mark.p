@@ -30,13 +30,14 @@ sub new {
 	my $class = shift;	
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	if ($vals{tags}){ $vals{tags} = { map{$_ => 1} split " ", $vals{tags} } }
 
 	# to support set_edit_points, we now allow marks to be overwritten
 	#
 	#croak  "name already in use: $vals{name}\n"
 	#	 if $by_name{$vals{name}}; # null name returns false
 	
-	my $self = bless { @_ }, $class;
+	my $self = bless \%vals, $class;
 
 	#print "self class: $class, self type: ", ref $self, $/;
 	if ($self->name) {
