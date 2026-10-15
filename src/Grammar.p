@@ -447,9 +447,9 @@ sub showlist {
 }
 
 
-#### Some Text Commands
+#### Shared Project Actions
 
-sub t_load_project {
+sub load_project_action {
 	package ::;
 	return if $this_engine->started() and ::ChainSetup::really_recording();
 	my $name = shift;
@@ -459,12 +459,13 @@ sub t_load_project {
 	throw("Project $name does not exist\n"), return
 		unless -d join_path(project_root(), $name) or $args{create};
 	stop_transport() if $this_engine->started(); 
-	load_project( name => $name, %args );
+	return unless load_project( name => $name, %args );
 	::notify("loaded project: $project->{name}\n") unless $args{create};
 	{no warnings 'uninitialized';
 	logpkg('debug',"load hook: $config->{execute_on_project_load}");
 	}
 	::nama_cmd($config->{execute_on_project_load});
+	1; # accepted, including when the hook has no return value
 }
 sub sanitize {
 	my $name = shift;
@@ -472,12 +473,12 @@ sub sanitize {
 	$newname =~ s(/$)(); # remove trailing slash
 	$newname;
 }
-sub t_create_project {
+sub create_project_action {
 	package ::;
 	my $name = shift;
-	t_load_project($name, create => 1);
+	return unless load_project_action($name, create => 1);
 	::notify("created project: $project->{name}\n");
-
+	1;
 }
 sub mixdown {
 	::notify("Enabling mixdown to file") if ! $quiet;

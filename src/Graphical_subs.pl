@@ -190,16 +190,18 @@ sub init_gui {
 	$gui->{load_project}->configure(
 		-text => 'Load',
 		-command => sub {
-			load_project(name => remove_spaces($gui->{_project_name}));
+			return unless load_project_action($gui->{_project_name});
 			$ui->length_display(-text => colonize(0));
 			reconfigure_engine();
+			$ui->refresh;
 		});
 	$gui->{new_project}->configure( 
 		-text => 'Create',
 		-command => sub {
-			load_project(name => remove_spaces($gui->{_project_name}), create => 1);
+			return unless create_project_action($gui->{_project_name});
 			$ui->length_display(-text => colonize(0));
 			reconfigure_engine();
+			$ui->refresh;
 		});
 	$gui->{quit}->configure(-text => "Quit",
 		-command => \&tk_save_and_quit);
@@ -456,20 +458,20 @@ sub group_gui {
 			-background => $gui->{_old_bg},
 			-command => sub { 
 				return if $this_engine->started();
-				$group->set(rw => MON);
-				$gui->{group_rw}->configure(-text => MON);
-				refresh();
-				::reconfigure_engine()
+				$tn{Main}->set_rw(MON);
+				::reconfigure_engine();
+				$gui->{group_rw}->configure(-text => $tn{Main}->rw);
+				$ui->refresh;
 				}
 			],[
 			'command' => OFF,
 			-background => $gui->{_old_bg},
 			-command => sub { 
 				return if $this_engine->started();
-				$group->set(rw => OFF);
-				$gui->{group_rw}->configure(-text => OFF);
-				refresh();
-				::reconfigure_engine()
+				$tn{Main}->set_rw(OFF);
+				::reconfigure_engine();
+				$gui->{group_rw}->configure(-text => $tn{Main}->rw);
+				$ui->refresh;
 				}
 			]);
 			$dummy->grid($gui->{group_label}, $gui->{group_version}, $gui->{group_rw});
@@ -573,36 +575,30 @@ sub track_gui {
 			[ 'command' => "REC",
 				-command  => sub { 
 					return if $this_engine->started();
-					$ti{$n}->set(rw => "REC");
-					
-					$ui->refresh_track($n);
-					#refresh_group();
+					$ti{$n}->set_rw("REC");
 					::reconfigure_engine();
+					$ui->refresh;
 			}],
 			[ 'command' => "PLAY",
 				-command  => sub { 
 					return if $this_engine->started();
-					$ti{$n}->set(rw => "PLAY");
-					$ui->refresh_track($n);
-					#refresh_group();
+					$ti{$n}->set_rw("PLAY");
 					::reconfigure_engine();
+					$ui->refresh;
 			}],
 			[ 'command' => "MON",
 				-command  => sub { 
 					return if $this_engine->started();
-					$ti{$n}->set(rw => "MON");
-					
-					$ui->refresh_track($n);
-					#refresh_group();
+					$ti{$n}->set_rw("MON");
 					::reconfigure_engine();
+					$ui->refresh;
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
 					return if $this_engine->started();
-					$ti{$n}->set(rw => "OFF");
-					$ui->refresh_track($n);
-					#refresh_group();
+					$ti{$n}->set_rw("OFF");
 					::reconfigure_engine();
+					$ui->refresh;
 			}],
 		);
 	my ($number, $name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
@@ -631,10 +627,10 @@ sub track_gui {
 						-variable => \$indicator,
 						-command => 
 		sub { 
-			$ti{$n}->set( version => $v );
+			$ti{$n}->set_version(length($v) ? $v : 0);
 			return if $ti{$n}->rec;
-			$version->configure( -text=> $ti{$n}->current_version );
 			::reconfigure_engine();
+			$ui->refresh;
 			}
 					);
 	}
@@ -696,11 +692,7 @@ sub track_gui {
 
 		$unity = $gui->{track_frame}->Button(
 				-command => sub { 
-					my $FX = fxn($vol_id);
-					::update_effect(
-						$vol_id, 
-						0, 
-						$config->{unity_level}->{$FX->type});
+					$ti{$n}->unity;
 				}
 		  );
 	} else {
@@ -732,7 +724,7 @@ sub track_gui {
 
 		$center = $gui->{track_frame}->Button(
 			-command => sub { 
-				::update_effect($pan_id, 0, 50);
+				$ti{$n}->pan_set(50);
 			}
 		  );
 	} else { 
@@ -820,14 +812,16 @@ sub create_master_and_mix_tracks {
 			[ 'command' => "MON",
 				-command  => sub { 
 						return if $this_engine->started();
-						$tn{Main}->set(rw => "MON");
-						$ui->refresh_track($tn{Main}->n);
+						$tn{Main}->set_rw("MON");
+						::reconfigure_engine();
+						$ui->refresh;
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
 						return if $this_engine->started();
-						$tn{Main}->set(rw => "OFF");
-						$ui->refresh_track($tn{Main}->n);
+						$tn{Main}->set_rw("OFF");
+						::reconfigure_engine();
+						$ui->refresh;
 			}],
 		);
 

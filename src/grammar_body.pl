@@ -232,10 +232,10 @@ help: _help { ::notify( $::help->{screen} ); 1}
 project_name: _project_name { 
 	::notify( "project name: ", $::project->{name}); 1}
 new_project: _new_project project_id { 
-	::t_create_project $item{project_id} ; 1}
+	::create_project_action $item{project_id} ; 1}
 list_projects: _list_projects { ::list_projects() ; 1}
 load_project: _load_project project_id {
-	::t_load_project $item{project_id} ; 1}
+	::load_project_action $item{project_id} ; 1}
 new_project_template: _new_project_template key text(?) {
 	::new_project_template($item{key}, $item{text});
 	1;
