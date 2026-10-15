@@ -1,5 +1,5 @@
 package ::Sequence;
-use v5.36; use Carp ();
+use v5.36;
 use ::Assign qw(json_out);
 use ::Log qw(logpkg);
 use ::Effect  qw(fxn modify_effect);

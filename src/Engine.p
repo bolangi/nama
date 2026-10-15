@@ -293,7 +293,6 @@ sub configure {
 package ::LibEngine;
 our $VERSION = 1.0;
 use v5.36;
-use ::Globals ();
 use ::Log qw(logit);
 our @ISA = '::Engine';
 use Role::Tiny::With;

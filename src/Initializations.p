@@ -200,7 +200,6 @@ sub definitions {
 	}, '::Config';
 
 	{ package ::Config;
-	use Carp ();
 	use ::Globals qw($config);
 	use v5.36;
 	our @ISA = '::Object'; #  for ->dump and ->as_hash methods

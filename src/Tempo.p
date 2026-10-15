@@ -6,7 +6,6 @@ use v5.36;
 our $VERSION = 1.0;
 use ::Globals qw($config);
 use ::Object qw( label bars meter tempo tick index);
-use List::Util ();
 # we divide time in chunks specified by klick metronome tempo map
 # 
 # label: name for this tempo section, e.g. Tempo object, e.g. chunk

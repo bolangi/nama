@@ -8,7 +8,6 @@ use ::Log qw(logpkg);
 use Memoize qw(memoize unmemoize); # called by code in ::Memoize.pm
 use warnings;
 no warnings qw(uninitialized);
-use Carp ();
 
 use Role::Tiny;
 

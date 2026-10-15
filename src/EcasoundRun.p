@@ -2,9 +2,6 @@ package ::EcasoundRun;
 use Role::Tiny;
 use v5.36;
 our $VERSION = 1.0;
-use ::Globals ();
-use ::Log ();
-use ::Util ();
 sub start { 
 	package ::;
 	my $self = shift; 

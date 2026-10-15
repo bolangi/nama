@@ -5,13 +5,11 @@ our $VERSION = 1.0;
 use Carp qw(croak);
 no warnings qw(uninitialized redefine);
 our %by_index;
-use ::Log ();
 use ::Globals qw($config MON);
 use ::Object qw(
 [% qx( ./strip_comments ./insert_fields ) %]
 );
 
-use ::Util ();
 
 initialize();
 
@@ -167,10 +165,9 @@ sub soundcard_delay {
 }
 {
 package ::PostFaderInsert;
-use v5.36; use Carp (); our @ISA = qw(::Insert);
+use v5.36; our @ISA = qw(::Insert);
 our $VERSION = 1.0;
 use ::Util qw(input_node output_node);
-use ::Log ();
 sub add_paths {
 
 	# Since this routine will be called after expand_graph, 
@@ -257,10 +254,9 @@ sub remove {
 }
 {
 package ::PreFaderInsert;
-use v5.36; use Carp (); our @ISA = qw(::Insert);
+use v5.36; our @ISA = qw(::Insert);
 our $VERSION = 1.0;
 use ::Util qw(input_node output_node);
-use ::Log ();
 use ::Globals qw(REC);
 
 

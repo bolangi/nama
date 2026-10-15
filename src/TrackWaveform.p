@@ -1,9 +1,7 @@
 package ::TrackWaveform;
-use ::Globals ();
 use v5.36;
 our $VERSION = 1.0;
 use Role::Tiny;
-use Try::Tiny ();
 
 sub waveform {
 	my $self = shift;

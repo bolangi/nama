@@ -2,8 +2,6 @@ package ::EcasoundSetup;
 use Role::Tiny;
 use v5.36;
 our $VERSION = 1.0;
-use ::Globals ();
-use ::Log ();
 sub setup { 
 	package ::;
 	no warnings 'uninitialized';

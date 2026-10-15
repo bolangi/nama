@@ -11,7 +11,6 @@ use Data::Dumper::Concise;
 use IO::Async::Timer::Periodic;
 use IO::Async::Timer::Countdown;
 use IO::Async::Loop;
-use ::Assign ();
 use ::Globals qw(%tn $text);
 use ::Log qw(logpkg);
 
