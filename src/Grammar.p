@@ -449,7 +449,7 @@ sub showlist {
 
 #### Shared Project Actions
 
-sub load_project_action {
+sub load_project_with_checks {
 	package ::;
 	return if $this_engine->started() and ::ChainSetup::really_recording();
 	my $name = shift;
@@ -476,7 +476,7 @@ sub sanitize {
 sub create_project_action {
 	package ::;
 	my $name = shift;
-	return unless load_project_action($name, create => 1);
+	return unless load_project_with_checks($name, create => 1);
 	::notify("created project: $project->{name}\n");
 	1;
 }

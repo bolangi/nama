@@ -190,7 +190,7 @@ sub init_gui {
 	$gui->{load_project}->configure(
 		-text => 'Load',
 		-command => sub {
-			return unless load_project_action($gui->{_project_name});
+			return unless load_project_with_checks($gui->{_project_name});
 			$ui->length_display(-text => colonize(0));
 			reconfigure_engine();
 			$ui->refresh;
