@@ -125,13 +125,11 @@ sub new {
 }
 
 # latency stubs
-sub capture_latency {
-	my $self = shift;
+sub capture_latency ($self) {
 	return unless $self->client;
 	::jack_port_latency('input', $self->client);
 }
-sub playback_latency {
-	my $self = shift;
+sub playback_latency ($self) {
 	return unless $self->client;
 	::jack_port_latency('output', $self->client);
 }
@@ -154,24 +152,20 @@ sub client {}
 # They have no function in other classes.
 
 
-sub target_id {
-	my $self = shift;
+sub target_id ($self) {
 	$self->direction eq 'input' 
 		? $self->source_id
 		: $self->send_id;
 }
-sub target_type {
-	my $self = shift;
+sub target_type ($self) {
 	$self->direction eq 'input' 
 		? $self->source_type
 		: $self->send_type;
 }
-sub target_channel {
-	my $self = shift;
+sub target_channel ($self) {
 	$self->target_id =~ /^(\d+)$/ ? $1 : 1
 }
-sub ports {
-	my $self = shift;
+sub ports ($self) {
 	my $client_direction = $self->direction eq 'input' ? 'output' : 'input';
 	::IO::jack_multi_ports( $self->client,
 							$client_direction,

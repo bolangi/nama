@@ -25,12 +25,10 @@ sub idx { # return first free index
 	}
 }
 
-sub wet_name {
-	my $self = shift;
+sub wet_name ($self) {
 	join('-', $self->track, $self->n, 'wet'); 
 }
-sub dry_name {
-	my $self = shift;
+sub dry_name ($self) {
 	join('-', $self->track, $self->n, 'dry'); 
 }
 sub new {
@@ -141,15 +139,13 @@ sub get_id {
 
 sub is_local_effects_host { ! $_[0]->send_id }
 
-sub set_wetness {
-	my ($self, $p) = @_;
+sub set_wetness ($self, $p) {
 	$self->{wetness} = $p;
 	::modify_effect($self->wet_vol, 1, undef, $p);
 	::sleeper(0.1);
 	::modify_effect($self->dry_vol, 1, undef, 100 - $p);
 }
-sub is_via_soundcard { 
-	my $self = shift;
+sub is_via_soundcard ($self) {
 	
 	for (qw(source send)){
 		my $type = "$_\_type";

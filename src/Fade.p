@@ -109,8 +109,7 @@ sub all_fades {
 	} grep { $_->track eq $track_name } values %by_index
 }
 
-sub fade_timeline_interval {
-	my $fade = shift;
+sub timeline_interval ($fade) {
 	my $time1 = ::Mark::time_from_tag($fade->mark1);
 	my $time2 = ::Mark::time_from_tag($fade->mark2);
 
@@ -161,7 +160,7 @@ sub fades {
 	my @in_bounds;
 	my ($track_start, $track_end) = track_timeline_interval($track);
 	for my $fade (@fades){
-		my ($fade_start, $fade_end) = fade_timeline_interval($fade);
+		my ($fade_start, $fade_end) = $fade->timeline_interval;
 		push @in_bounds, $fade
 			if $fade_end >= $track_start
 			and $fade_start <= $track_end;

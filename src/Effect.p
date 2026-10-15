@@ -141,8 +141,7 @@ sub new {
 # provide object
 {
 no warnings 'redefine';
-sub parent {
-	my $self = shift;
+sub parent ($self) {
 	fxn($self->parent_id);
 }
 }
@@ -156,15 +155,14 @@ sub is_read_only {
 	no warnings 'uninitialized';
 	$self->about->{params}->[$param]->{dir} eq 'output'
 }          
-sub remove_name { my $self = shift; delete $self->{name} }
+sub remove_name ($self) { delete $self->{name} }
 sub set_name    { my $self = shift; $self->{name} = shift }
 sub set_surname { my $self = shift; $self->{surname} = shift}
-sub is_controller { my $self = shift; $self->parent } 
-sub is_channel_op { my $self = shift; $::config->{ecasound_channel_ops}->{$self->type} }
+sub is_controller ($self) { $self->parent }
+sub is_channel_op ($self) { $::config->{ecasound_channel_ops}->{$self->type} }
 
 
-sub has_read_only_param {
-	my $self = shift;
+sub has_read_only_param ($self) {
 	no warnings 'uninitialized';
 	my $entry = $self->about;
 		for(0..scalar $entry->{params}->@* - 1)
@@ -242,17 +240,14 @@ sub sync_one_effect {
 		$this_engine->current_chain_operator($self->ecasound_effect_index);
 		$self->set(params => get_ecasound_cop_params( scalar $self->params->@* ));
 }
-sub offset {
-	my $self = shift;
+sub offset ($self) {
 	$fx->{offset}->{$self->chain}
 }
-sub root_parent { 
-	my $self = shift;
+sub root_parent ($self) {
 	my $parent = $self->parent;
 	$parent and $parent->parent or $parent or $self
 }
-sub about {
-	my $self = shift;
+sub about ($self) {
 	$fx_cache->{registry}->[$self->registry_index]
 }
 sub track { $ti{$_[0]->chain} }

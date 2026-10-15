@@ -55,9 +55,7 @@ sub new {
 	
 }
 
-sub set_name {
-	my $mark = shift;
-	my $name = shift;
+sub set_name ($mark, $name) {
 	::notify("name: $name\n");
 	if ( defined $by_name{ $name } ){
 	carp "you attempted to assign to name already in use\n";

@@ -266,8 +266,7 @@ sub add_ops {
 		logpkg('debug',"new id: $new_id");
 	}
 }
-sub add_inserts {
-	my ($self, $track) = @_;
+sub add_inserts ($self, $track) {
 	map 
 	{
 		my $insert_data = dclone($_); # copy so safe to modify 
@@ -285,8 +284,7 @@ sub add_inserts {
 		#$::by_index{$dry_effect_chain}->add($insert->dry_name, $tn{$insert->dry_name}->vol_id)
 	} $self->inserts_data->@*;
 }
-sub add_region {
-	my ($self, $track) = @_;
+sub add_region ($self, $track) {
 	# there is also a check in uncache track
 	::throw($track->name.": track already has region definition\n",
 		"failed to apply region @$self->{region}\n"), return
@@ -310,15 +308,13 @@ sub add {
 
 }
 
-sub add_fades {
-	my ($self, $track) = @_;
+sub add_fades ($self, $track) {
 	map{ 
 		my %h = %$_; 
 		my $fade = ::Fade->new( %h, track => $track->name ) ;
 	} $self->{fade_data}->@*
 }
-sub destroy {
-	my $self = shift;
+sub destroy ($self) {
 	delete $by_index{$self->n};
 }
 
@@ -369,8 +365,7 @@ sub find {
 	else { scalar @found }
 }
 
-sub summary {
-	my $self = shift;
+sub summary ($self) {
 	my @output;
 	push @output, "  name: ".$self->name if $self->name;
 	push @output, "  track name: ".$self->track_name if $self->track_name;

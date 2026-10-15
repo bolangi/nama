@@ -43,17 +43,14 @@ sub new {
 sub group { $_[0]->name }
 
 
-sub tracks { # returns list of track names in bus
-	my $bus = shift;
+sub tracks ($bus) { # returns list of track names in bus
 	map{ $_->name } $bus->track_o;
 }
-sub track_o { 
-	my $bus = shift;
+sub track_o ($bus) {
 	grep{ $_->group eq $bus->name } ::all_tracks();
 }
-sub last {
+sub last ($bus) {
 	#logpkg('debug', "group: @_");
-	my $bus = shift;
 	my $max = 0;
 	map{ 
 		my $track = $_;
@@ -69,8 +66,7 @@ sub last {
 
 sub remove { ::throw($_[0]->name, " is system bus. No can remove.") }
 
-sub tracks_on {
-	my $bus = shift;
+sub tracks_on ($bus) {
 	for ( $bus->track_o )
 	{
 	my $old = $setup->{bus}->{oldrw}->{$_->name};
@@ -79,8 +75,7 @@ sub tracks_on {
 	}
 }
 
-sub tracks_off {
-	my $bus = shift;
+sub tracks_off ($bus) {
 	return if not grep { $_->rw ne OFF } $bus->track_o;
 	for ( $bus->track_o )
 	{
