@@ -414,7 +414,7 @@ sub apply_op {
 	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
 	
 	$code = '-' . $code . ($code =~ /:/ ? q(,) : q(:) );
-	my @vals = $self->params->@*;
+	my @vals = map { $_ // '' } $self->params->@*;
 	logpkg('debug', "values: @vals");
 
 	# we start to build iam command
@@ -618,6 +618,7 @@ sub append_effect {
 		}
 		my $FX = ::Effect->new(%args);
 		$args{self} = $FX;
+		$args{id} = $FX->id;
 		push @added, $FX;
 		if( ! $FX->name )
 		{

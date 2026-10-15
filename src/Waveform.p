@@ -113,7 +113,7 @@ sub pixels_per_second  {
 }
 sub y_offset_multiplier {
 	my $self = shift;
-	my $before_me;
+	my $before_me = 0;
 	for (2 .. $self->track->n - 1){
 		$before_me++ if $ti{$_} and $ti{$_}->candidate_play;
 	}
