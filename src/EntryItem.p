@@ -3,6 +3,15 @@
 #
 #  (C) Paul Evans, 2011-2023 -- leonerd@leonerd.org.uk
 
+# Modified version bundled with Nama; not an unmodified upstream release.
+# Derived from Tickit::Widget::Scroller::Item::Text (based on version 0.32).
+# Nama adaptations maintained by Joel Roth:
+# Adapt the text scroller item to the
+# Tickit::Widget::Scroller::Item::Entry class for Nama.
+# Modification notice added 2026-10-15; adaptations predate this notice.
+# Original copyright and licensing terms above are retained.
+# See THIRD_PARTY_NOTICES in the distribution.
+
 use v5.26;
 use warnings;
 use Object::Pad 0.800 ':experimental(adjust_params)';

@@ -86,3 +86,6 @@ lib/Audio/Nama/EffectsRegistry.pm
 lib/Audio/Nama/IO.pm
 lib/Audio/Nama/Tempo.pm
 META.json
+LICENSES/Artistic-1.0-Perl.txt
+LICENSES/GPL-3.0.txt
+THIRD_PARTY_NOTICES

@@ -1,5 +1,10 @@
 Changes to Audio::Nama
 
+Unreleased
+    * License Nama's own code under the Artistic License 2.0.
+    * Document the modified bundled Tickit-derived modules and retain their
+      original copyright notices and Perl licensing terms.
+
 2.000 August 3, 2026
     * works with JACK served by Pipewire or jackd, also ALSA
     * full support for metronome and tempo maps, including tempo ramp

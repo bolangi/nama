@@ -3,6 +3,15 @@
 #
 #  (C) Paul Evans, 2021-2022 -- leonerd@leonerd.org.uk
 
+# Modified version bundled with Nama; not an unmodified upstream release.
+# Derived from Tickit::Widget::Entry::Plugin::Completion (based on version 0.02).
+# Nama adaptations maintained by Joel Roth:
+# Directory completion keeps trailing slashes free of appended spaces;
+# unique matches do not open the candidate popup.
+# Modification notice added 2026-10-15; adaptations predate this notice.
+# Original copyright and licensing terms above are retained.
+# See THIRD_PARTY_NOTICES in the distribution.
+
 use v5.26;
 use Object::Pad 0.75 ':experimental(init_expr adjust_params)';
 

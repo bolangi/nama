@@ -3,6 +3,14 @@
 #
 #  (C) Paul Evans, 2011-2023 -- leonerd@leonerd.org.uk
 
+# Modified version bundled with Nama; not an unmodified upstream release.
+# Derived from Tickit::Widget::Scroller::Item::Text (based on version 0.33).
+# Nama adaptations maintained by Joel Roth:
+# Suppress uninitialized-value warnings while laying out scroller text.
+# Modification notice added 2026-10-15; adaptations predate this notice.
+# Original copyright and licensing terms above are retained.
+# See THIRD_PARTY_NOTICES in the distribution.
+
 use v5.26;
 use warnings;
 use Object::Pad 0.800 ':experimental(adjust_params)';

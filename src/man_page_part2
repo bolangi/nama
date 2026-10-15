@@ -110,6 +110,10 @@ S. Massy ++
 
 Copyright (c) 2008-2026 by Joel Roth.
 
-This is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License,
-Version 3.
+Nama is free software; you can redistribute it and/or modify it under the
+terms of the Artistic License 2.0. See the COPYING file in the distribution
+or L<https://perlfoundation.org/artistic-license-20.html>.
+
+The bundled modified Tickit-derived modules retain their original Perl
+licensing terms. See THIRD_PARTY_NOTICES in the distribution for their
+provenance, modifications, and applicable licenses.

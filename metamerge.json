@@ -1,4 +1,6 @@
 {
   "name": "Audio-Nama",
-"license": ["gpl_3"]
+  "license": [
+    "artistic_2"
+  ]
 }

@@ -261,9 +261,16 @@ See C<man nama> for full documentation.
 
 Joel Roth, E<lt>joelz@pobox.comE<gt>
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT & LICENSE
 
 Copyright (c) 2008-2026 Joel Roth.
+
+Nama is free software; you can redistribute it and/or modify it under the
+terms of the Artistic License 2.0. See the COPYING file in the distribution
+or L<https://perlfoundation.org/artistic-license-20.html>.
+
+Bundled modified Tickit-derived modules retain their original Perl licensing
+terms. See THIRD_PARTY_NOTICES in the distribution.
 
 =cut
 1;

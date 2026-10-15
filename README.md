@@ -97,6 +97,9 @@ management and  and undo features.
 Unless specified otherwise, this code is 
 2008 - 2026, copyright Joel Roth
 
-All rights are reserved except as provided by the Gnu Public
-License, version 3, as detailed in the file COPYING provided
-with this distribution.
+Nama is free software; you can redistribute it and/or modify it under the
+terms of the Artistic License 2.0, included in COPYING.
+
+The bundled modified Tickit-derived modules retain their original Perl
+licensing terms. See THIRD_PARTY_NOTICES for their provenance, modifications,
+and applicable licenses.
