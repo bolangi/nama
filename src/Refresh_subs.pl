@@ -96,39 +96,35 @@ sub refresh_track {
 	my $ui = shift;
 	my $n = shift;
 	logsub((caller(0))[3]);
+	my $track = $ti{$n};
 	
-	my $rec_status = $ti{$n}->rec_status;
+	my $rec_status = $track->rec_status;
 	logit('::Refresh','debug', "track: $n rec_status: $rec_status");
 
 	return unless $gui->{tracks}->{$n}; # hidden track
 	
 	# set the text for displayed fields
 
-	$gui->{tracks}->{$n}->{rw}->configure(-text => $rec_status);
-	$gui->{tracks}->{$n}->{ch_r}->configure( -text => 
-				$n > 2
-					? $ti{$n}->source
-					:  q() );
-	$gui->{tracks}->{$n}->{ch_m}->configure( -text => $ti{$n}->send);
-	$gui->{tracks}->{$n}->{version}->configure(-text => $ti{$n}->current_version || "");
+	# Share the terminal listing's descriptions; retain the menus for editing
+	# the configured source and send even when displaying a WAV or bus route.
+	my $source = $track->show_tracks_source // '';
+	my $destination = $track->show_tracks_destination // '';
+	$gui->{tracks}->{$n}->{rw}->configure(-text => $track->show_tracks_setting);
+	$gui->{tracks}->{$n}->{ch_r}->configure(-text => $source);
+	$gui->{tracks}->{$n}->{ch_m}->configure(-text => $destination);
+	$gui->{tracks}->{$n}->{version}->configure(-text => $track->current_version || "");
 	
 	map{ set_widget_color( 	$gui->{tracks}->{$n}->{$_}, 
 							$rec_status)
 	} qw(name rw );
 	
-	set_widget_color( 	$gui->{tracks}->{$n}->{ch_r},
-				
- 							($rec_status eq REC
-								and $n > 2 )
- 								? REC
- 								: OFF);
+	# MON uses live input too; PLAY now displays its WAV source.  Keep
+	# inactive or empty sources unhighlighted.
+	set_widget_color($gui->{tracks}->{$n}->{ch_r},
+		length($source) ? $rec_status : OFF);
 	
 	set_widget_color( $gui->{tracks}->{$n}->{ch_m},
-							$rec_status eq OFF
-								? OFF
-								: $ti{$n}->send 
-									? MON
-									: OFF);
+		$rec_status ne OFF && length($destination) ? MON : OFF);
 }
 
 sub refresh {  

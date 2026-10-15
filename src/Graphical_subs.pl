@@ -221,7 +221,7 @@ my @color_items = map { [ 'command' => $_,
 	});
 
 	my @labels = 
-		qw(Track Name Version Status Source Send Volume Mute Unity Pan Center Effects);
+		qw(Track Name Version Status Source Destination Volume Mute Unity Pan Center Effects);
 	my @widgets;
 	map{ push @widgets, $gui->{track_frame}->Label(-text => $_)  } @labels;
 	$widgets[0]->grid(@widgets[1..$#widgets]);
