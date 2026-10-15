@@ -14,19 +14,19 @@ with '::Wav',
 	 '::TrackWaveform',
 	 '::EffectNickname',
 	 '::BusUtil';
-use ::Globals qw(:all);
-use ::Log qw(logpkg logsub);
-use ::Effect  qw(fxn);
-use List::MoreUtils qw(first_index);
-use Try::Tiny;
+use ::Globals qw(REC PLAY MON OFF $this_engine %bn %en $ui $mode);
+use ::Log qw(logpkg);
+use ::Effect ();
+use List::MoreUtils ();
+use Try::Tiny ();
 use v5.36;
 our $VERSION = 1.0;
-use Carp qw(carp cluck croak);
-use File::Copy qw(copy);
+use Carp qw(croak);
+use File::Copy ();
 use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
 
-use ::Util qw(freq input_node dest_type dest_string join_path);
+use ::Util qw(input_node join_path);
 use ::Assign qw(json_out);
 use vars qw($n %by_name @by_index %track_names %by_index);
 use ::Object qw(
@@ -265,8 +265,8 @@ sub fades { grep { $_->{track} eq $_[0]->name } values %::Fade::by_index  }
 
 {
 package ::SimpleTrack; # used for Main track
-use ::Globals qw(:all);
-use v5.36; use Carp; use ::Log qw(logpkg);
+use ::Globals qw(MON OFF %tn);
+use v5.36; use Carp (); use ::Log ();
 our $VERSION = 1.0;
 use SUPER;
 no warnings qw(uninitialized redefine);
@@ -285,8 +285,8 @@ sub activate_bus {}
 }
 {
 package ::MasteringTrack; # used for mastering chains 
-use ::Globals qw(:all);
-use v5.36; use ::Log qw(logpkg);
+use ::Globals qw(MON OFF %en $mode);
+use v5.36; use ::Log ();
 our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::SimpleTrack';
@@ -302,9 +302,9 @@ sub version {0}
 }
 {
 package ::EarTrack; # for submix helper tracks
-use ::Globals qw(:all);
+use ::Globals qw(%tn);
 use ::Util qw(dest_string);
-use v5.36; use ::Log qw(logpkg);
+use v5.36; use ::Log ();
 our $VERSION = 1.0;
 use SUPER;
 no warnings qw(uninitialized redefine);
@@ -320,8 +320,8 @@ sub width { $_[0]->{width} }
 }
 {
 package ::SlaveTrack;
-use ::Globals qw(:all);
-use v5.36; use ::Log qw(logpkg);
+use ::Globals qw(%tn);
+use v5.36; use ::Log ();
 our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
@@ -339,8 +339,8 @@ sub dir { $tn{$_[0]->target}->dir }
 }
 {
 package ::BoostTrack; 
-use ::Globals qw(:all);
-use v5.36; use ::Log qw(logpkg);
+use ::Globals qw(MON OFF %tn $mode);
+use v5.36; use ::Log ();
 our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
@@ -354,8 +354,8 @@ sub send_id { $tn{Main}->send_id }
 {
 package ::CacheRecTrack;
 our $VERSION = 1.0;
-use ::Globals qw(:all);
-use ::Log qw(logpkg);
+use ::Globals qw(%tn);
+use ::Log ();
 our @ISA = qw(::SlaveTrack);
 sub current_version {
 	my $track = shift;
@@ -371,8 +371,8 @@ sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav
 {
 package ::MixDownTrack; 
 our $VERSION = 1.0;
-use ::Globals qw(:all);
-use ::Log qw(logpkg);
+use ::Globals qw(REC PLAY %tn);
+use ::Log ();
 use SUPER;
 our @ISA = qw(::Track);
 sub current_version {	
@@ -403,8 +403,8 @@ sub candidate_rw {
 sub forbid_user_ops { 1 }
 }
 {
-package ::EditTrack; use Carp qw(carp cluck);
-use ::Globals qw(:all);
+package ::EditTrack; use Carp ();
+use ::Globals qw(REC PLAY);
 use ::Log qw(logpkg);
 our $VERSION = 1.0;
 our @ISA = '::Track';
@@ -433,8 +433,8 @@ sub timeline_position {
 }
 {
 package ::VersionTrack;
-use ::Globals qw(:all);
-use ::Log qw(logpkg);
+use ::Globals ();
+use ::Log ();
 our $VERSION = 1.0;
 our @ISA ='::Track';
 sub set_version {}
@@ -455,8 +455,8 @@ package ::Clip;
 # their one-based position (index) in the sequence items array.
 # index is one-based.
 
-use ::Globals qw(:all);
-use ::Log qw(logpkg);
+use ::Globals qw(PLAY OFF);
+use ::Log ();
 our $VERSION = 1.0;
 our @ISA = qw( ::VersionTrack ::Track );
 
@@ -522,15 +522,15 @@ sub new {
 } # end package
 { 
 package ::WetTrack; # for inserts
-use ::Globals qw(:all);
-use v5.36; use ::Log qw(logpkg);
+use ::Globals ();
+use v5.36; use ::Log ();
 our $VERSION = 1.0;
 our @ISA = '::SlaveTrack';
 }
 
 {
 package ::MidiTrack; 
-use ::Globals qw(:all);
+use ::Globals qw(REC PLAY MON OFF);
 use v5.36;
 our $VERSION = 1.0;
 use SUPER;

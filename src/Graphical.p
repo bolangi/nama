@@ -1,13 +1,13 @@
 # ------------ Graphical User Interface ------------
 
 package ::Graphical;  ## gui routines
-use v5.36; use Carp;
+use v5.36; use Carp ();
 our $VERSION = 1.071;
-use ::Globals qw($text $prompt);
+use ::Globals qw($text);
 
 use Module::Load::Conditional qw(can_load);
-use ::Assign qw(:all);
-use ::Util qw(colonize);
+use ::Assign ();
+use ::Util ();
 no warnings 'uninitialized';
 
 our @ISA = '::';      ## default to root namespace, e.g.  Refresh_subs, Graphical_subs

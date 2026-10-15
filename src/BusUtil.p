@@ -3,7 +3,7 @@ package ::BusUtil;
 use Role::Tiny;
 use v5.36;
 our $VERSION = 1.0;
-use ::Globals qw(%tn %bn PLAY OFF MON);
+use ::Globals qw(%tn %bn);
 
 sub version_has_edits { 
 	my ($track) = @_;

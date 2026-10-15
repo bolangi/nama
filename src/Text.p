@@ -4,10 +4,10 @@
 # grammar_body.pl with subroutines in Grammar.p
 
 package ::Text;
-use v5.36; use Carp;
+use v5.36; use Carp ();
 no warnings 'uninitialized';
-use ::Globals qw(:all);
-use ::Assign qw(:all);
+use ::Globals ();
+use ::Assign ();
 
 our @ISA = '::';
 our $VERSION = 1.071;

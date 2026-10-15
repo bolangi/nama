@@ -5,12 +5,12 @@ use feature 'state';
 use strict;
 use warnings;
 no warnings q(uninitialized);
-use Carp qw(carp confess croak cluck);
+use Carp qw(croak);
 use YAML::Tiny;
 use Path::Tiny qw(path);
 use File::HomeDir;
 use ::Log qw(logsub logpkg);
-use Storable qw(nstore retrieve);
+use Storable qw(nstore);
 use JSON::XS;
 use Data::Dumper::Concise;
 
@@ -35,7 +35,6 @@ our @EXPORT_OK = ( $EXPORT_TAGS{'all'}->@* );
 our @EXPORT = ();
 
 our $to_json = JSON::XS->new->allow_blessed->pretty->canonical(1);
-use Carp;
 
 {my $var_map = { qw(
 

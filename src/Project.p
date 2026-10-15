@@ -1,7 +1,7 @@
 # --------- Project related subroutines ---------
 {
 package ::Project;
-use v5.36; use Carp;
+use v5.36; use Carp ();
 our $VERSION = 1.0;
 sub hello { my $self = shift; ::notify("hello $self: ", ::Dumper($::project)) }
 }

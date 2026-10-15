@@ -2,7 +2,7 @@
 package ::Engine;
 our $VERSION = 1.0;
 use v5.36;
-use Carp;
+use Carp qw(croak);
 our @ISA;
 our %by_name;
 our @ports = (57000..57050);
@@ -10,7 +10,8 @@ our %port = (
 	fof => 57201,
 	bus => 57202,
 );
-use ::Globals qw(:all);
+use ::Globals qw($this_engine);
+use ::Log qw(logpkg);
 use Role::Tiny::With;
 with '::EcasoundSetup';
 use ::Object qw( 
@@ -127,8 +128,8 @@ sub sync_action {
 package ::NetEngine;
 our $VERSION = 1.0;
 use v5.36;
-use ::Log qw(logpkg logit);
-use ::Globals qw(:all);
+use ::Log qw(logit);
+use ::Globals qw(%en $config);
 use Carp qw(carp);
 use Role::Tiny::With;
 with '::EcasoundRun';
@@ -292,7 +293,7 @@ sub configure {
 package ::LibEngine;
 our $VERSION = 1.0;
 use v5.36;
-use ::Globals qw(:all);
+use ::Globals ();
 use ::Log qw(logit);
 our @ISA = '::Engine';
 use Role::Tiny::With;

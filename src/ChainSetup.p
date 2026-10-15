@@ -1,13 +1,13 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($file $config $jack $setup %tn %bn %en $mode :trackrw $this_engine);
+use ::Globals qw($file $config $jack $setup %tn $mode REC PLAY OFF);
 use ::Log qw(logsub logpkg);
 use v5.36;
 our $VERSION = 1.0;
 use Data::Dumper::Concise;
 use Storable qw(dclone);
-use ::Util qw(signal_format input_node output_node);
+use ::Util qw(signal_format output_node);
 use ::Assign qw(json_out);
 no warnings 'uninitialized';
 

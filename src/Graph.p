@@ -1,11 +1,11 @@
 package ::Graph;
 use v5.36;
 our $VERSION = 1.0;
-use Carp;
+use Carp qw(croak);
 use Graph;
 use ::Util qw(input_node output_node);
 use ::Log qw(logsub logpkg);
-use ::Globals qw(:trackrw);
+use ::Globals qw(OFF);
 our(%reserved);
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.

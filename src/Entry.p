@@ -20,7 +20,7 @@ class Tickit::Widget::Entry :strict(params);
 
 inherit Tickit::Widget;
 
-use Carp;
+use Carp qw(croak);
 
 use Tickit::Style;
 Tickit::Window->VERSION( '0.39' ); # expose_after_scroll default on

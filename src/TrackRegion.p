@@ -3,9 +3,9 @@ package ::TrackRegion;
 use Role::Tiny;
 use v5.36;
 our $VERSION = 1.0;
-use ::Globals qw(:all);
+use ::Globals ();
 use ::TimelineAdjustment ();
-use Carp;
+use Carp ();
 
 # these behaviors are associated with WAV playback
 

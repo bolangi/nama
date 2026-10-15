@@ -4,12 +4,12 @@
 package ::Mark;
 use v5.36;
 our $VERSION = 1.0;
-use Carp;
+use Carp qw(croak carp);
 use warnings;
 no warnings qw(uninitialized);
 our($n, %by_name, @all);
-use ::Log qw(logpkg);
-use ::Globals qw(:all);
+use ::Log ();
+use ::Globals qw($setup $project);
 use ::Object qw( 
 				 name 
                  time
@@ -404,8 +404,8 @@ our @ISA = '::Mark';
 
 	our $VERSION = 1.0;
 	use v5.36;
-	use ::Log qw(logpkg);
-	use ::Globals qw(:all);
+	use ::Log ();
+	use ::Globals ();
 	our @ISA = '::Mark';
 	use ::Object qw( 
 					 name 

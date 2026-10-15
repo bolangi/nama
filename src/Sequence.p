@@ -1,10 +1,10 @@
 package ::Sequence;
-use v5.36; use Carp; 
+use v5.36; use Carp ();
 use ::Assign qw(json_out);
-use ::Log qw(logsub logpkg);
+use ::Log qw(logpkg);
 use ::Effect  qw(fxn modify_effect);
 use ::Object qw( items clip_counter );
-use ::Globals qw(:trackrw);
+use ::Globals qw(PLAY OFF);
 our @ISA = '::SubBus';
 our $VERSION = 1.0;
 use SUPER;

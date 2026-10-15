@@ -2,17 +2,16 @@
 package ::Insert;
 use v5.36;
 our $VERSION = 1.0;
-use Carp;
+use Carp qw(croak);
 no warnings qw(uninitialized redefine);
 our %by_index;
-use ::Log qw(logpkg);
-use ::Log qw(logpkg);
-use ::Globals qw($jack $setup $config :trackrw);
+use ::Log ();
+use ::Globals qw($config MON);
 use ::Object qw(
 [% qx( ./strip_comments ./insert_fields ) %]
 );
 
-use ::Util qw(input_node output_node dest_type);
+use ::Util ();
 
 initialize();
 
@@ -168,10 +167,10 @@ sub soundcard_delay {
 }
 {
 package ::PostFaderInsert;
-use v5.36; use Carp; our @ISA = qw(::Insert);
+use v5.36; use Carp (); our @ISA = qw(::Insert);
 our $VERSION = 1.0;
-use ::Util qw(input_node output_node dest_type);
-use ::Log qw(logpkg);
+use ::Util qw(input_node output_node);
+use ::Log ();
 sub add_paths {
 
 	# Since this routine will be called after expand_graph, 
@@ -258,11 +257,11 @@ sub remove {
 }
 {
 package ::PreFaderInsert;
-use v5.36; use Carp; our @ISA = qw(::Insert);
+use v5.36; use Carp (); our @ISA = qw(::Insert);
 our $VERSION = 1.0;
-use ::Util qw(input_node output_node dest_type);
-use ::Log qw(logpkg);
-use ::Globals qw(:trackrw);
+use ::Util qw(input_node output_node);
+use ::Log ();
+use ::Globals qw(REC);
 
 
 # --- source ---------- wet_send_track  wet_return_track -+-- insert_pre -- track

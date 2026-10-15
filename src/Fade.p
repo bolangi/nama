@@ -3,13 +3,13 @@ package ::Fade;
 use v5.36;
 use List::Util qw(min max);
 our $VERSION = 1.0;
-use Carp;
+use Carp qw(croak);
 use warnings;
 no warnings qw(uninitialized);
 our @ISA;
 our($n, %by_index);
-use ::Globals qw(:singletons %tn @fade_data); 
-use ::Log qw(logsub logpkg);
+use ::Globals qw($config %tn @fade_data);
+use ::Log qw(logpkg);
 use ::Effect  qw(remove_effect add_effect update_effect);
 use ::FadeEnvelope qw(clip_envelope_to_window envelope_level_at_time);
 # we don't import 'type' as it would clobber our $fade->type attribute

@@ -22,15 +22,15 @@ our (%tn, $jack, $config);
 
 package ::IO;
 use v5.36;
-use Carp;
+use Carp qw(croak);
 use Data::Dumper::Concise;
 our $VERSION = 1.0;
 
 # provide following vars to all packages
 our ($config, $jack, %tn);
 our (%by_name); # index for $by_name{trackname}->{input} = $object
-use ::Globals qw($config $jack %tn $setup :trackrw);
-use Try::Tiny;
+use ::Globals qw($config $jack %tn PLAY);
+use Try::Tiny qw(try catch);
 
 sub initialize { %by_name = () }
 

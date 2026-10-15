@@ -1,15 +1,14 @@
 package ::Wav;
 use v5.36;
 our $VERSION = 1.001;
-use ::Globals qw(:all);
-use ::Util qw(:all);
-use ::Assign qw(:all);
+use ::Globals qw(%bn $config);
 use ::Util qw(join_path);
-use ::Log qw(logsub logpkg);
+use ::Assign qw(json_out);
+use ::Log qw(logpkg);
 use Memoize qw(memoize unmemoize); # called by code in ::Memoize.pm
 use warnings;
 no warnings qw(uninitialized);
-use Carp;
+use Carp ();
 
 use Role::Tiny;
 

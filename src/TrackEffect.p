@@ -4,7 +4,7 @@ our $VERSION = 1.0;
 use Role::Tiny;
 use ::Effect qw(fxn);
 use ::Globals qw($config $project);
-use Try::Tiny;
+use Try::Tiny qw(try);
 use List::MoreUtils qw(first_index);
 
 # current operator and current parameter for the track

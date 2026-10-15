@@ -1,9 +1,9 @@
 # ------------  Bus --------------------
 {
 package ::Bus;
-use v5.36; use Carp; 
-use ::Log qw(logsub logpkg);
-use ::Globals qw(:trackrw $setup); 
+use v5.36; use Carp qw(croak);
+use ::Log ();
+use ::Globals qw(OFF $setup);
 our @ISA = qw( ::Object );
 
 # share the following variables with subclasses
@@ -147,11 +147,11 @@ sub list ($self) {
 ### subclasses
 {
 package ::SubBus; # with magic for Main bus
-use v5.36; use Carp; our @ISA = '::Bus';
+use v5.36; use Carp (); our @ISA = '::Bus';
 our $VERSION = 1.0;
-use ::Log qw(logsub logpkg);
-use ::Util qw(input_node);
-use ::Globals qw(:trackrw %tn);
+use ::Log qw(logpkg);
+use ::Util ();
+use ::Globals ();
 
 # connect source --> member_track --> mix_track
 
@@ -217,9 +217,9 @@ sub wantme {
 }
 {
 package ::SendBusRaw;
-use v5.36; use Carp; our @ISA = '::Bus';
+use v5.36; use Carp (); our @ISA = '::Bus';
 our $VERSION = 1.0;
-use ::Log qw(logsub logpkg);
+use ::Log ();
 sub apply {
 	my $bus = shift;
 	map{ 
@@ -246,8 +246,8 @@ sub remove {
 }
 {
 package ::SendBusCooked;
-use ::Log qw(logsub logpkg);
-use v5.36; use Carp; our @ISA = '::SendBusRaw';
+use ::Log ();
+use v5.36; use Carp (); our @ISA = '::SendBusRaw';
 our $VERSION = 1.0;
 
 # graphic routing: target -> slave -> bus_send_type
@@ -267,11 +267,11 @@ sub apply {
 }
 {
 package ::MidiBus;
-use v5.36; use Carp; our @ISA = '::Bus';
+use v5.36; use Carp (); our @ISA = '::Bus';
 our $VERSION = 1.0;
-use ::Log qw(logsub logpkg);
-use ::Util qw(input_node);
-use ::Globals qw(:trackrw);
+use ::Log qw(logpkg);
+use ::Util ();
+use ::Globals ();
 
 sub apply {
 	my ($bus)  = @_;

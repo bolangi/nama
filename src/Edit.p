@@ -1,6 +1,6 @@
 {
 package ::Edit;
-use ::Globals qw(:singletons :trackrw);
+use ::Globals qw($config REC PLAY);
 
 # each edit is identified by:
 #  -  host track name
@@ -10,7 +10,7 @@ use ::Globals qw(:singletons :trackrw);
 
 use v5.36;
 our $VERSION = 1.0;
-use Carp;
+use Carp qw(confess croak);
 no warnings qw(uninitialized);
 our @ISA;
 our($n, %by_index, %by_name);

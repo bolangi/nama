@@ -2,9 +2,9 @@ package ::TrackIO;
 use Role::Tiny;
 use v5.36;
 our $VERSION = 1.0;
-use ::Globals qw(:all);
+use ::Globals qw(REC PLAY MON OFF $this_engine %tn %bn $mode $config $jack $text);
 use Path::Tiny qw(path);
-use File::Copy;
+use File::Copy qw(copy);
 use ::Util qw(dest_string dest_type join_path freq);
 use ::Log qw(logpkg logsub);
 

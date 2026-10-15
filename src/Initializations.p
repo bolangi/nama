@@ -71,7 +71,7 @@ sub definitions {
 	# to various system files, such as $file->state_store
 	{
 	package ::File;
-		use Carp;
+		use Carp qw(croak);
 		sub logfile {
 			my $self = shift;
 			$ENV{NAMA_LOGFILE} || $self->_logfile
@@ -200,8 +200,8 @@ sub definitions {
 	}, '::Config';
 
 	{ package ::Config;
-	use Carp;
-	use ::Globals qw(:singletons);
+	use Carp ();
+	use ::Globals qw($config);
 	use v5.36;
 	our @ISA = '::Object'; #  for ->dump and ->as_hash methods
 

@@ -9,14 +9,14 @@
 package ::EffectChain;
 use v5.36;
 use Data::Dumper::Concise;
-use Carp;
+use Carp qw(croak);
 use Exporter qw(import);
 use Storable qw(dclone);
 use ::Effect  qw(fxn append_effect);
-use ::Log qw(logpkg logsub);
+use ::Log qw(logpkg);
 use ::Assign qw(json_out);
 
-use ::Globals qw($fx_cache %tn $fx);
+use ::Globals qw($fx_cache %tn);
 
 our $AUTOLOAD;
 our $VERSION = 0.001;

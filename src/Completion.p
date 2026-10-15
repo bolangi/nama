@@ -21,12 +21,12 @@ class Tickit::Widget::Entry::Plugin::Completion
 
 use feature 'fc';
 
-use Carp;
+use Carp qw(croak);
 
 use Tickit::Widget 0.55;  # Can ->set_style on '<Tab>' key
 
 use Tickit::Utils qw( textwidth );
-use List::Util qw( max );
+use List::Util qw(max);
 
 use constant PEN_UNDER => Tickit::Pen->new( u => 1 );
 

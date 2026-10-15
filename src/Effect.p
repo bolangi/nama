@@ -3,24 +3,12 @@ package ::Effect;
 use v5.36;
 our $VERSION = 1.0;
 use List::MoreUtils qw(first_index insert_after_string);
-use Carp qw(carp cluck croak confess);
+use Carp qw(carp croak confess);
 use Data::Dumper::Concise;
 use ::Assign qw(json_out);
 use ::Log qw(logsub logpkg);
-use ::Util qw(timer start_event stop_event);
-use ::Globals qw(
-					$fx 
-					$fx_cache 
-					$ui 
-					%ti 
-					%tn 
-					%bn 
-					%en
-					$config 
-					$setup 
-					$project
-					$this_engine
-					$this_track);
+use ::Util ();
+use ::Globals qw($fx $fx_cache $ui %ti $config $project $this_engine $this_track);
 
 
 use ::Object qw(  
