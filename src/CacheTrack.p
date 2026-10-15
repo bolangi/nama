@@ -85,13 +85,13 @@ sub cachable {
 
 sub deactivate_vol_pan {
 	my $args = shift;
-	unity($args->{track}, 'save_old_vol');
-	pan_set($args->{track}, 50);
+	$args->{track}->unity('save_old_vol');
+	$args->{track}->pan_set(50);
 }
 sub reactivate_vol_pan {
 	my $args = shift;
-	pan_back($args->{track});
-	vol_back($args->{track});
+	$args->{track}->pan_back;
+	$args->{track}->vol_back;
 }
 sub generate_cache_bus_graph {
 	my $args = shift;

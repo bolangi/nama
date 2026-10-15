@@ -666,7 +666,7 @@ solo: _solo { ::solo($::this_track->name); 1}
 all: _all { ::all() ; 1}
 nosolo: _nosolo { ::nosolo() ; 1}
 
-unity: _unity { ::unity($::this_track); 1}
+unity: _unity { $::this_track->unity; 1}
 
 pan: _pan panval { 
 	::update_effect( $::this_track->pan_id, 0, $item{panval});
@@ -677,10 +677,10 @@ pan: _pan sign panval {
 panval: float 
       | dd
 pan: _pan { ::notify( $::this_track->pan_level); 1}
-pan_right: _pan_right { ::pan_set($::this_track, 100 ); 1}
-pan_left:  _pan_left  { ::pan_set($::this_track,    0 ); 1}
-pan_center: _pan_center { ::pan_set($::this_track,   50 ); 1}
-pan_back:  _pan_back { ::pan_back($::this_track); 1;}
+pan_right: _pan_right { $::this_track->pan_set(100); 1}
+pan_left:  _pan_left  { $::this_track->pan_set(0); 1}
+pan_center: _pan_center { $::this_track->pan_set(50); 1}
+pan_back:  _pan_back { $::this_track->pan_back; 1;}
 remove_mark: _remove_mark dd {
 	my @marks = ::Mark::all();
 	$marks[$item{dd}]->remove if defined $marks[$item{dd}];

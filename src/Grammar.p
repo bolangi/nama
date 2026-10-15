@@ -531,18 +531,6 @@ sub destroy_current_wav {
 	1;
 }
 
-sub pan_set {
-	my ($track, $new_position) = @_;
-	my $current = $track->pan_effect->params->[0];
-	$track->set(old_pan_level => $current)
-		unless defined $track->old_pan_level;
-	update_effect(
-		$track->pan_id,	# id
-		0, 					# parameter
-		$new_position,		# value
-	);
-}
-
 sub remove_track_cmd {
 	my ($track) = @_;
 	
@@ -554,43 +542,6 @@ sub remove_track_cmd {
 		$this_track = $tn{Main};
 		1
 }
-sub unity {
-	my ($track, $save) = @_;
-	if ($save){
-		$track->set(old_vol_level => $track->volume_effect->params->[0]);
-	}
-	update_effect( 
-		$track->vol_id, 
-		0, 
-		$config->{unity_level}->{$track->volume_effect->type}
-	);
-}
-sub vol_back {
-	my $track = shift;
-	my $old = $track->old_vol_level;
-	if (defined $old){
-		update_effect(
-			$track->vol_id,	# id
-			0, 					# parameter
-			$old,				# value
-		);
-		$track->set(old_vol_level => undef);
-	}
-}
-	
-sub pan_back {
-	my $track = shift;
-	my $old = $track->old_pan_level;
-	if (defined $old){
-		update_effect(
-			$track->pan_id,	# id
-			0, 					# parameter
-			$old,				# value
-		);
-		$track->set(old_pan_level => undef);
-	}
-}
-
 sub get_sample_rate {
 	::notify("project $project->{name}: audio engine sample rate is ",$project->{sample_rate} );
 	$project->{sample_rate}

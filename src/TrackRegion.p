@@ -11,15 +11,13 @@ use Carp;
 
 sub is_region { defined $_[0]->{region_start} }
 
-sub startpoint {
-	my $track = shift;
+sub startpoint ($track) {
 	return unless $track->is_region;
 	#return if $track->rec_status ne PLAY;
 	#carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
 	::Mark::time_from_tag( $track->region_start )
 }
-sub endpoint {
-	my $track = shift;
+sub endpoint ($track) {
 	return unless $track->is_region;
 	#return if $track->rec_status ne PLAY;
 	#carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
@@ -30,8 +28,7 @@ sub endpoint {
 		::Mark::time_from_tag( $track->region_end )
 	}
 }
-sub timeline_position {
-	my $track = shift;
+sub timeline_position ($track) {
 	#carp $track->name, ": expected PLAY status" if $track->rec_status ne PLAY;
 	#return if $track->rec_status ne PLAY;
 	::Mark::time_from_tag( $track->playat )
@@ -40,8 +37,7 @@ sub timeline_position {
 # the following methods adjust
 # region start and playat values during edit mode
 
-sub adjusted_duration {
-	my $track = shift;
+sub adjusted_duration ($track) {
 	if (::timeline_adjustment_active()) {
 		my $adjustment = $track->timeline_adjustment;
 		return $adjustment->adjusted_endpoint
@@ -57,8 +53,7 @@ sub adjusted_duration {
 	$duration
 }
 
-sub adjusted_timeline_endpoint {
-	my $track = shift;
+sub adjusted_timeline_endpoint ($track) {
 	my $adjustment = $track->timeline_adjustment
 		if ::timeline_adjustment_active();
 	my $setup_length = $adjustment
@@ -70,8 +65,7 @@ sub adjusted_timeline_endpoint {
 		: $track->adjusted_timeline_position;
 }
 
-sub timeline_adjustment {
-	my $track = shift;
+sub timeline_adjustment ($track) {
 	return ::timeline_adjustment(::timeline_adjustment_args($track))
 		if ::timeline_adjustment_active();
 
@@ -83,23 +77,19 @@ sub timeline_adjustment {
 	)
 }
 
-sub adjusted_startpoint {
-	my $track = shift;
+sub adjusted_startpoint ($track) {
 	$track->timeline_adjustment->adjusted_startpoint
 	
 }
-sub adjusted_timeline_position {
-	my $track = shift;
+sub adjusted_timeline_position ($track) {
 	$track->timeline_adjustment->adjusted_timeline_position
 }
-sub adjusted_endpoint {
-	my $track = shift;
+sub adjusted_endpoint ($track) {
 	$track->timeline_adjustment->adjusted_endpoint
 }
 
-sub region_is_out_of_bounds {
+sub region_is_out_of_bounds ($track) {
 	return unless ::timeline_adjustment_active();
-	my $track = shift;
 	! $track->timeline_adjustment->is_playable
 }
 

@@ -4,8 +4,7 @@ use v5.36;
 our $VERSION = 1.0;
 use ::Globals qw($project);
 
-sub is_comment {
-	my $self = shift;
+sub is_comment ($self) {
 	$::project->{track_comments}->{$self->name}	
 }
 sub is_version_comment {
@@ -21,8 +20,7 @@ sub set_comment {
 	my ($track, $comment) = @_;
 	$project->{track_comments}->{$track->name} = $comment
 }
-sub comment { 
-	my ($track) = @_;
+sub comment ($track) {
 	$project->{track_comments}->{$track->name} 
 }
 

@@ -2,6 +2,7 @@
 # ----------- Mark ------------
 {
 package ::Mark;
+use v5.36;
 our $VERSION = 1.0;
 use Carp;
 use warnings;
@@ -67,18 +68,15 @@ sub set_name {
 	}
 }
 
-sub jump_here {
-	my $mark = shift;
+sub jump_here ($mark) {
 	::set_position($mark->adjusted_time);
 	$::this_mark = $mark;
 }
-sub adjusted_time {
-	my $mark = shift;
+sub adjusted_time ($mark) {
 	my $time = ::adjusted_time_from_timeline_position($mark->time);
 	$time > 0 ? $time : 0
 }
-sub remove {
-	my $mark = shift;
+sub remove ($mark) {
 	::throw('Fades depend on this mark. Remove failed.'), return	
 		if ::fade_uses_mark($mark->name);
 	if ( $mark->name ) {
