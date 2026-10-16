@@ -107,9 +107,9 @@ sub init_gui {
 	
 	if ($config->{display_waveform})
 	{
-		$gui->{wwcanvas} = $gui->{waveform_window}->Scrolled('Canvas')->pack;
+		$gui->{waveform_canvas} = $gui->{waveform_window}->Scrolled('Canvas')->pack;
 		# CanvasBind binds the widget; Canvas::bind binds canvas items.
-		$gui->{wwcanvas}->Subwidget('scrolled')->CanvasBind(
+		$gui->{waveform_canvas}->Subwidget('scrolled')->CanvasBind(
 			'<Button-1>' => \&tk_waveform_seek);
 		configure_waveform_window();
 	}
@@ -234,7 +234,7 @@ sub configure_waveform_window {
 	my ($width, $height) = @_;
 	return if not $config->{display_waveform};
 
-	$gui->{wwcanvas}->configure(
+	$gui->{waveform_canvas}->configure(
 		-scrollregion =>[0,0,$width//$config->{waveform_canvas_x},$height//$config->{waveform_canvas_y}],
 		-width => $width//$config->{waveform_canvas_x},
 		-height => $height//$config->{waveform_canvas_y},
@@ -255,7 +255,7 @@ sub configure_track_canvas {
  		-height => 400,	
  		);
 }
-sub wwgeometry { wh($gui->{wwcanvas}) }
+sub wwgeometry { wh($gui->{waveform_canvas}) }
 sub wh {
 	my $widget = shift;
 	$widget->update;
@@ -952,8 +952,8 @@ sub length_display{
 	$gui->{setup_length}->configure(@_);
 	# connect_transport updates -text after caching the new cs-get-length.
 	# Colour changes alone do not require a ruler redraw.
-	generate_timeline(widget => $gui->{wwcanvas}, y_pos => 600)
-		if exists $args{-text} and $gui->{wwcanvas};
+	generate_timeline(widget => $gui->{waveform_canvas}, y_pos => 600)
+		if exists $args{-text} and $gui->{waveform_canvas};
 };
 
 sub clock_config { 
@@ -1319,13 +1319,13 @@ sub update_indicator {
 sub update_indicator_at {
     my $pos = shift;
 	my $xpos = int( $pos * $config->{waveform_pixels_per_second} );
-	my @indicator = $gui->{wwcanvas}->find('withtag', 'playback-indicator');
+	my @indicator = $gui->{waveform_canvas}->find('withtag', 'playback-indicator');
 	if (@indicator) {
-		$gui->{wwcanvas}->coords(
+		$gui->{waveform_canvas}->coords(
 			$indicator[0], $xpos, 0, $xpos, $config->{waveform_canvas_y});
 	}
 	else {
-		$gui->{wwcanvas}->createLine(
+		$gui->{waveform_canvas}->createLine(
 			$xpos,0,
 			$xpos,$config->{waveform_canvas_y},
 			-fill => '#ffff00', # bright yellow
@@ -1334,14 +1334,14 @@ sub update_indicator_at {
 		);
 	}
 
-	my $scrollregion = $gui->{wwcanvas}->cget('-scrollregion');
+	my $scrollregion = $gui->{waveform_canvas}->cget('-scrollregion');
 	my @scrollregion = ref $scrollregion eq 'ARRAY'
 		? @$scrollregion
 		: split(' ', $scrollregion);
 	my $scroll_width = $scrollregion[2] - $scrollregion[0];
 	return unless $scroll_width > 0;
 
-	my ($left_fraction, $right_fraction) = $gui->{wwcanvas}->xview;
+	my ($left_fraction, $right_fraction) = $gui->{waveform_canvas}->xview;
 	my $left = $scrollregion[0] + $left_fraction * $scroll_width;
 	my $right = $scrollregion[0] + $right_fraction * $scroll_width;
 	return if $xpos >= $left && $xpos <= $right;
@@ -1351,7 +1351,7 @@ sub update_indicator_at {
 	my $new_fraction = ($new_left - $scrollregion[0]) / $scroll_width;
 	$new_fraction = 0 if $new_fraction < 0;
 	$new_fraction = 1 if $new_fraction > 1;
-	$gui->{wwcanvas}->xviewMoveto($new_fraction);
+	$gui->{waveform_canvas}->xviewMoveto($new_fraction);
 }
 
 sub get_saved_colors {

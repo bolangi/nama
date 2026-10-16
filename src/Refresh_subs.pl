@@ -1,13 +1,13 @@
 ## refresh functions
 
 sub refresh_waveform_window {
-	$gui->{wwcanvas}->delete('waveform',$_->name) for all_tracks();
+	$gui->{waveform_canvas}->delete('waveform',$_->name) for all_tracks();
 	$gui->{waveform} = {};
  	my @playable = grep{ $_->play} user_tracks();
 	map{ $_->waveform->display() } @playable;
 	configure_waveform_window();
 	generate_timeline(
-			widget => $gui->{wwcanvas}, 
+			widget => $gui->{waveform_canvas}, 
 			y_pos => 600,
 	);
 }
@@ -130,6 +130,6 @@ sub refresh_track {
 sub refresh {  
 	::remove_riff_header_stubs();
 	map{ $ui->refresh_track($_) } map{$_->n}  ::audio_tracks();
-	refresh_waveform_window() if $gui->{wwcanvas};
+	refresh_waveform_window() if $gui->{waveform_canvas};
 }
 ### end

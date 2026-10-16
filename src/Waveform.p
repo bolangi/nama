@@ -81,7 +81,7 @@ sub display ($self) {
 	my $widget = $gui->{waveform_window}->Photo(-format => 'png', -file => $waveform);
 	# Keep the Photo object alive for as long as the canvas uses the image.
 	$gui->{waveform}{$self->track->name} = $widget;
-	$gui->{wwcanvas}->createImage(	0,
+	$gui->{waveform_canvas}->createImage(	0,
 												$self->y_offset_multiplier * $config->{waveform_height}, 
 												-anchor => 'nw', 
 												-tags => ['waveform', $self->track->name],
@@ -89,7 +89,7 @@ sub display ($self) {
 	my ($width, $height) = ::wh($gui->{waveform_window});
 	my $name_x = $width - 150;
 	my $name_y = $config->{waveform_height} * $self->y_offset_multiplier  + 20;
-	$gui->{wwcanvas}->createText( $name_x, $name_y, -font =>
+	$gui->{waveform_canvas}->createText( $name_x, $name_y, -font =>
 'lucidasanstypewriter-bold-14', -text => uc($self->track->name) . ' - '.$self->track->current_wav);
 }
 sub width ($self) {
