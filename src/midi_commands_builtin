@@ -1,8 +1,8 @@
-builtinlist
+uiltinlist
 cf
 ci
 co
-# ct
+ct
 ctlconf
 ctlconfx
 ctlinfo
@@ -108,7 +108,7 @@ tclist
 tclr
 tcopy
 tcut
-# tdel
+tdel
 tevmap
 texists
 tgetf
@@ -116,10 +116,10 @@ tinfo
 tins
 tlist
 tmerge
-# tnew
+tnew
 tpaste
 tquant
-# tren
+tren
 tsetf
 ttransp
 unmute
