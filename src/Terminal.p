@@ -497,7 +497,7 @@ sub enable_hotkeys {
 	bind_hotkey_keys();
 	$hotkeys_active = 1;
 	$popup->take_focus;
-	start_hotkey_status_timer();
+	start_status_bar_clock();
 }
 sub disable_hotkeys {
 	if (defined $popup and defined $key_ev) {
@@ -568,28 +568,28 @@ sub set_popup_text ($str) {
 		$popup->expose 
 }
 
-sub refresh_hotkey_status {
+sub refresh_status_bar {
 	return unless defined $popup and $this_track;
 	set_popup_text(status_bar($mode->{hotkeys}));
 }
 
-sub start_hotkey_status_timer {
+sub start_status_bar_clock {
 	unless (defined $popup
 		and ($mode->{hotkeys} // q()) =~ /\A(?:jump|bump)\z/
 		and $this_engine->running()) {
-		stop_hotkey_status_timer();
+		stop_status_bar_clock();
 		return;
 	}
 	return if defined $status_timer;
 	$status_timer = IO::Async::Timer::Periodic->new(
 		interval => 0.1,
-		on_tick => \&refresh_hotkey_status,
+		on_tick => \&refresh_status_bar,
 	);
 	$text->{loop}->add($status_timer);
 	$status_timer->start;
 }
 
-sub stop_hotkey_status_timer {
+sub stop_status_bar_clock {
 	if (defined $status_timer) {
 		$status_timer->stop;
 		$text->{loop}->remove($status_timer);
@@ -598,7 +598,7 @@ sub stop_hotkey_status_timer {
 }
 
 sub close_hotkey_popup {
-	stop_hotkey_status_timer();
+	stop_status_bar_clock();
 	if (defined $popup) {
 		$popup->unbind_event_id($expose_ev) if defined $expose_ev;
 		$popup->unbind_event_id($key_ev) if defined $key_ev;

@@ -150,11 +150,11 @@ sub bring_up_volume {
 
 sub start_heartbeat {
  	start_event(poll_engine => timer(0, 1, \&::heartbeat));
-	start_hotkey_status_timer();
+	start_status_bar_clock();
 }
 sub stop_heartbeat {
-	stop_hotkey_status_timer();
-	refresh_hotkey_status();
+	stop_status_bar_clock();
+	refresh_status_bar();
 	cancel_previous_start($this_engine);
 	# Normal stop/completion needs cleanup even before heartbeat begins.
 	stop_event('update_cursor');
@@ -193,7 +193,7 @@ sub heartbeat {
 
 sub update_clock_display { 
 	$ui->clock_config(-text => current_position());
-	refresh_hotkey_status();
+	refresh_status_bar();
 }
 sub schedule_wraparound {
 
