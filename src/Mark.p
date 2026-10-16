@@ -292,14 +292,15 @@ sub modify_mark {
 sub jump_to_start { 
 	logsub((caller(0))[3]);
 	return if ::ChainSetup::really_recording();
-	jump( 0 );
+	set_position_with_fade( 0 );
 }
 sub jump_to_end { 
 	logsub((caller(0))[3]);
 	# ten seconds shy of end
 	return if ::ChainSetup::really_recording();
 	my $end = ecasound_iam('cs-get-length') - $config->{seek_end_margin} ;  
-	jump($end);
+	$end = 0 if $end < 0;
+	set_position_with_fade($end);
 } 
 sub jump {
 	return if ::ChainSetup::really_recording();
@@ -316,7 +317,7 @@ sub jump {
 	}
 	set_position_with_fade( $new_pos );
 }
-sub set_position_with_fade { fade_around(\&_set_position, @_) }
+sub set_position_with_fade { fade_around(\&set_position, @_) }
 
 sub set_position {
 	logsub((caller(0))[3]);
