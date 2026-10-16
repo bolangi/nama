@@ -16,6 +16,7 @@ use ::StepSize qw(
 use Data::Dumper::Concise;
 use IO::Async::Signal;
 use IO::Async::Timer::Periodic;
+use Tickit::Utils qw(textwidth substrwidth);
 use List::MoreUtils qw(first_index);
 use File::Basename qw(fileparse);
 use File::Temp qw(tempfile);
@@ -968,45 +969,72 @@ sub executables {
 	@executables = sort @executables;
 	\@executables
 }
-sub status_bar { 
+# Name fields are [prefix, name, suffix]; only the name may be shortened.
+sub format_status_fields (@fields) {
+	@fields = map { ref $_ ? [@$_] : $_ } @fields;
+	while (1) {
+		my @parts = map { ref $_ ? join(q(), @$_) : $_ } @fields;
+		my $line = join q( ), @parts;
+		return $line if textwidth($line) <= 40;
+
+		# The last feasible split needs the least padding on the first row.
+		for my $split (reverse 1 .. $#parts) {
+			my $left = join q( ), @parts[0 .. $split - 1];
+			my $right = join q( ), @parts[$split .. $#parts];
+			next if textwidth($left) >= 40 or textwidth($right) > 40;
+			return $left . q( ) x (40 - textwidth($left)) . $right;
+		}
+
+		# Preserve labels and values; shorten the longest descriptive field.
+		my @names = sort { textwidth($parts[$b]) <=> textwidth($parts[$a]) }
+			grep { ref $fields[$_] and textwidth($fields[$_][1]) > 1 }
+			0 .. $#fields;
+		return 'Status values exceed two 40-cell rows' unless @names;
+		my $name = \$fields[$names[0]][1];
+		$$name = substrwidth($$name, 0, textwidth($$name) - 2) . "\x{2026}";
+	}
+}
+
+sub status_bar {
 	my $hotkey_mode = shift;
 	my %bar = (effect => \&param_status_bar,
 	           jump  => \&jump_status_bar,
-			   bump  => \&jump_status_bar );
-	my $status = $bar{$hotkey_mode}->();
-	my $name  = $this_track->name; 
-	$status =  "[$name] [$hotkey_mode] $status";
+	           bump  => \&jump_status_bar);
+	return format_status_fields(
+		($hotkey_mode eq 'effect' ? ([q(), $this_track->name, ' -']) : ()),
+		$bar{$hotkey_mode}->(),
+	);
 }
 
 sub param_status_bar {
-	return " no selected effect" unless $this_track->op;
-	return " no effect found"    unless defined this_effect();
-	my $effect_info = join " ",
-				this_op_id(), 
-				this_effect()->fxname ? this_effect()->fxname : '(unnamed)';
-# 	if (this_effect()->no_params) {
-# 		return "$effect_info (no parameters to adjust)";
-# 	}
+	return 'effect: none selected' unless $this_track->op;
+	my $effect = this_effect();
+	return 'effect: not found' unless defined $effect;
+	my @fields = (['effect ' . this_op_id() . ': ', $effect->fxname || '(unnamed)', q()]);
+	return (@fields, 'no parameters') unless $effect->params->@*;
 	my $param_pos = this_param() - 1;
-	my $param_info = parameter_info(this_op_id(), $param_pos);
-	if (this_effect()->is_read_only ){
-		return "$effect_info $param_info - no adjustment possible";
-	}
-	$param_info .= " Step: ". ::Effect::param_stepsize();
-	return "$effect_info $param_info";
+	my $entry = $effect->about->{params}->[$param_pos];
+	push @fields, [this_param() . '. ', $entry->{name} // 'Parameter',
+		': ' . $effect->params->[$param_pos]];
+	push @fields, $entry->{dir} eq 'output'
+		? 'read-only' : 'Step: ' . ::Effect::param_stepsize();
+	return @fields;
 }
+
 sub jump_status_bar {
-	return unless $this_track; 
-	my $pos = format_seconds_as_hms(::current_timeline_position());
-	my $bar = "playback at $pos, ";
+	my $jump = $mode->{hotkeys} eq 'jump';
+	my @fields = ('At ' . format_seconds_as_hms(::current_timeline_position()) . ',');
+	push @fields, 'jump mode,' if $jump;
 	if (defined $this_mark) {
-		my $mark = join ' ', 'Current mark:', $this_mark->name,
-			'at', format_seconds_as_hms($this_mark->time);
-		$bar .= "$mark, ";
+		push @fields, [$jump ? 'mark ' : 'bumping mark ', $this_mark->name,
+			q( ) . format_seconds_as_hms($this_mark->time) . ','];
 	}
-	my $label = $mode->{hotkeys} eq 'jump' ? 'Jump size' : 'Mark bump';
-	$bar .= "$label: " . format_time_stepsize(stepsize());
-	$bar
+	else {
+		push @fields, 'bump mode,' unless $jump;
+		push @fields, 'no mark selected,';
+	}
+	push @fields, 'step ' . format_time_stepsize(stepsize());
+	return @fields;
 }
 sub format_seconds_as_hms ($seconds) {
 	my $tenths = int($seconds * 10 + 0.5);
