@@ -15,6 +15,7 @@ use ::StepSize qw(
 );
 use Data::Dumper::Concise;
 use IO::Async::Signal;
+use IO::Async::Timer::Periodic;
 use List::MoreUtils qw(first_index);
 use File::Basename qw(fileparse);
 use File::Temp qw(tempfile);
@@ -488,7 +489,7 @@ sub command {
 # bottom line status bar for hot key modes
 
 {
-my ($popup, $expose_ev, $key_ev, $status, $hotkeys_active);
+my ($popup, $expose_ev, $key_ev, $status, $hotkeys_active, $status_timer);
 sub enable_hotkeys {
 	return unless defined $mode->{hotkeys};
 	popup() unless defined $popup;
@@ -496,6 +497,7 @@ sub enable_hotkeys {
 	bind_hotkey_keys();
 	$hotkeys_active = 1;
 	$popup->take_focus;
+	start_hotkey_status_timer();
 }
 sub disable_hotkeys {
 	if (defined $popup and defined $key_ev) {
@@ -537,7 +539,6 @@ sub popup {
    $popup->take_focus;
    $popup->show;
 
-
 }
 
 {
@@ -567,7 +568,37 @@ sub set_popup_text ($str) {
 		$popup->expose 
 }
 
+sub refresh_hotkey_status {
+	return unless defined $popup and $this_track;
+	set_popup_text(status_bar($mode->{hotkeys}));
+}
+
+sub start_hotkey_status_timer {
+	unless (defined $popup
+		and ($mode->{hotkeys} // q()) =~ /\A(?:jump|bump)\z/
+		and $this_engine->running()) {
+		stop_hotkey_status_timer();
+		return;
+	}
+	return if defined $status_timer;
+	$status_timer = IO::Async::Timer::Periodic->new(
+		interval => 0.1,
+		on_tick => \&refresh_hotkey_status,
+	);
+	$text->{loop}->add($status_timer);
+	$status_timer->start;
+}
+
+sub stop_hotkey_status_timer {
+	if (defined $status_timer) {
+		$status_timer->stop;
+		$text->{loop}->remove($status_timer);
+		undef $status_timer;
+	}
+}
+
 sub close_hotkey_popup {
+	stop_hotkey_status_timer();
 	if (defined $popup) {
 		$popup->unbind_event_id($expose_ev) if defined $expose_ev;
 		$popup->unbind_event_id($key_ev) if defined $key_ev;
@@ -964,15 +995,26 @@ sub param_status_bar {
 }
 sub jump_status_bar {
 	return unless $this_track; 
-	my $pos = ::current_timeline_position();
-	my $bar = "playback at ${pos}s, ";
+	my $pos = format_seconds_as_hms(::current_timeline_position());
+	my $bar = "playback at $pos, ";
 	if (defined $this_mark) {
-		my $mark = join ' ', 'Current mark:', $this_mark->name, 'at', $this_mark->time;
+		my $mark = join ' ', 'Current mark:', $this_mark->name,
+			'at', format_seconds_as_hms($this_mark->time);
 		$bar .= "$mark, ";
 	}
 	my $label = $mode->{hotkeys} eq 'jump' ? 'Jump size' : 'Mark bump';
 	$bar .= "$label: " . format_time_stepsize(stepsize());
 	$bar
+}
+sub format_seconds_as_hms ($seconds) {
+	my $tenths = int($seconds * 10 + 0.5);
+	my $hours = int($tenths / 36000);
+	my $minutes = int($tenths / 600) % 60;
+	my $secs = int($tenths / 10) % 60;
+	my $decimal = $tenths % 10;
+	return $hours
+		? sprintf('%d:%02d:%02d.%d', $hours, $minutes, $secs, $decimal)
+		: sprintf('%d:%02d.%d', $minutes, $secs, $decimal);
 }
 sub clip_start_beep 	{ beep( $config->{beep}->{clip_start})}
 sub clip_end_beep       { beep( $config->{beep}->{clip_end})}
