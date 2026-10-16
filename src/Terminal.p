@@ -670,12 +670,16 @@ sub filter_spurious_warnings {
 sub end_of_list_sound { system( $config->{hotkey_beep} ) }
 
 sub previous_track {
-	end_of_list_sound(), return if $this_track->n == 1;
-	do{ $this_track = $ti{$this_track->n - 1} } until !  $this_track->hide;
+	my ($track) = grep { !$_->hide and $_->n < $this_track->n }
+		reverse all_tracks();
+	end_of_list_sound(), return unless $track;
+	$this_track = $track;
 }
 sub next_track {
-	end_of_list_sound(), return if ! $ti{ $this_track->n + 1 };
-	do{ $this_track = $ti{$this_track->n + 1} } until ! $this_track->hide;
+	my ($track) = grep { !$_->hide and $_->n > $this_track->n }
+		all_tracks();
+	end_of_list_sound(), return unless $track;
+	$this_track = $track;
 }
 sub previous_effect {
 	my $op = $this_track->op;
