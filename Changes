@@ -10,12 +10,15 @@ Unreleased
     * can indicate positions by bar/beat or bar/beat/tick
     * can indicate positions by H:M:S or M:S
     * MIDI mode provides direct access to midi commands 
-    * tickit terminal library replaces readline enabling
-       + command history, TAB completion and line editing functions
-       + arbitrary binding of functions to keystrokes not possible with readline
+    * tickit terminal library replaces common readline functions
+       + command history
+       + TAB completion
+       + line editing
+    * tickit allows arbitrary binding of functions to keystrokes
        + effect mode with cursor pad keybindings for adjusting effect parameters
        + jump mode with bindings for adjusting playback position
        + bump mode with bindings for adjusting mark positions
+    * fix compatibility with terminal multiplexers (tested with gnu screen)
     * refactor of key PLAY/REC/MON/OFF status and routing algorithms
     * newtake command
     * refactor timeline, region and clip positioning, naming
