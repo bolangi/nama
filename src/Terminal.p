@@ -366,6 +366,8 @@ sub add_scroller_item (@text) {
 	$output =~ s/\n\z//;
 
 	if ($entry_widget_present) {
+		# Suppress pop's reverse scroll; restored when this block ends.
+		local *Tickit::Widget::Scroller::scroll = sub {};
 		$scroller->pop(1);
 		$entry_widget_present = 0;
 	}
