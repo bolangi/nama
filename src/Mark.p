@@ -7,13 +7,18 @@ our $VERSION = 1.0;
 use Carp qw(croak carp);
 use warnings;
 no warnings qw(uninitialized);
+our $AUTOLOAD;
 our($n, %by_name, @all);
 use ::Globals qw($setup $project);
 use ::Object qw( 
-				 name 
-                 time
-				 tags
-				 );
+					name 
+					time
+					tags
+					attrib
+			   );
+
+my @attributes = qw(clip_start clip_end clip_name clip_index) ;
+my %is_attribute = map{ $_ => 1 } @attributes;
 
 sub initialize {
 	map{ $_->remove} ::Mark::all();
@@ -29,6 +34,10 @@ sub next_id { # returns incremented 4-digit
 sub new {
 	my $class = shift;	
 	my %vals = @_;
+	for my $k (keys %vals)
+	{
+		$vals{attrib}{$k} = delete $vals{$k} if $is_attribute{$k}
+	}
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	if ($vals{tags}){ $vals{tags} = { map{$_ => 1} split " ", $vals{tags} } }
 
@@ -175,16 +184,14 @@ sub adjusted_time_from_tag {
 
 # postponing this for now, if tags can do our job
 
-# my @attributes = qw() ;
-# my %is_attribute = map{ $_ => 1 } @attributes;
-# sub AUTOLOAD { 
-# 	my $self = shift;
-# 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
-# 	return $self->{attrib}->{$call} if exists $self->{attrib}->{$call}
-# 		or $is_attribute{$call};
-# 	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
-# }
-# sub DESTROY {}
+sub AUTOLOAD { 
+	my $self = shift;
+	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
+	return $self->{attrib}->{$call} if exists $self->{attrib}->{$call}
+		or $is_attribute{$call};
+	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
+}
+sub DESTROY {}
 }
 
 # ---------- Mark and jump routines --------
