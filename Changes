@@ -5,11 +5,11 @@ Unreleased
 2.000 August 3, 2026
     * revised GUI for common recording/mixing scenarios
     * including waveform display (requires ruby gem 'waveform')
+    * common event architecture for GUI and terminal interface
     * works with JACK served by Pipewire or jackd, also ALSA
     * full support for metronome and tempo maps, including tempo ramp
-    * can indicate positions by bar/beat or bar/beat/tick
-    * can indicate positions by H:M:S or M:S
-    * MIDI mode provides direct access to midi commands 
+    * indicate positions by bar/beat or bar/beat/tick
+    * indicate positions by H:M:S or M:S
     * tickit terminal library replaces common readline functions
        + command history
        + TAB completion
@@ -18,13 +18,15 @@ Unreleased
        + effect mode with cursor pad keybindings for adjusting effect parameters
        + jump mode with bindings for adjusting playback position
        + bump mode with bindings for adjusting mark positions
+       + midi command mode
     * fix compatibility with terminal multiplexers (tested with gnu screen)
     * refactor of key PLAY/REC/MON/OFF status and routing algorithms
-    * newtake command
-    * refactor timeline, region and clip positioning, naming
+    * 'newtake' command
+    * 'why' command gives reasons for REC but OFF, MON but OFF, PLAY but OFF status
+    * refactor timeline, region and clip positioning
     * improve fade behavior, both planned envelopes and on demand
-    * replace blocking calls to sleep with non-blocking event timers
-    * setting track to MON automatically enables Main output bus
+    * replace blocking delays with non-blocking event timers
+    * setting a track to MON automatically enables Main output bus
     * improvements to track summary display
     * rewritten logging system with full diagnostics
     * documentation updates
