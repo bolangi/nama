@@ -616,6 +616,26 @@ sub set_stepsize ($stepsize) {
 	croak "No stepsize for hotkey mode '$hotkey_mode'";
 }
 
+sub enter_stepsize {
+	unless (hotkeys_active()
+		and ($mode->{hotkeys} // q()) =~ /\A(?:effect|jump|bump)\z/) {
+		throw('No hotkey mode is active.');
+		return;
+	}
+	disable_hotkeys();
+	my $input = prompt_for_text('Enter step size: ');
+	enable_hotkeys();
+	return unless defined $input;
+
+	my $remaining = $input;
+	my $value = $text->{parser}->value(\$remaining);
+	unless (defined $value and $remaining =~ /\A\s*\z/) {
+		throw("Invalid step size '$input': expected a value.");
+		return;
+	}
+	set_stepsize($value);
+}
+
 
 #bump,  loop and stop
 #bump, set to mark and start. 
