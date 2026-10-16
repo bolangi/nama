@@ -180,9 +180,9 @@ $gui->{_chm}
 $gui->{_save_id}
 
 # GUI objects
-$gui->{mw}						# main window - control panel
-$gui->{ew}						# main window - effects 
-$gui->{ww}						# main window - waveform display
+$gui->{main_window}						# main window - control panel
+$gui->{effects_window}						# main window - effects
+$gui->{waveform_window}						# main window - waveform display
 $gui->{wwframe}					# waveform frame
 $gui->{wwcanvas}				# waveform canvas
 $gui->{track_canvas}

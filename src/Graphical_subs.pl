@@ -45,7 +45,7 @@ sub tk_save_and_quit {
 # indicate variables
 #
 # $gui->{_project_name}  # scalar/array/hash var
-# $gui->{mw}             # Tk objects (widgets, frames, etc.)
+# $gui->{main_window}             # Tk objects (widgets, frames, etc.)
 
 sub init_gui {
 
@@ -57,57 +57,57 @@ sub init_gui {
 	### 	Tk root window 
 
 	# Tk main window
- 	$gui->{mw} = MainWindow->new;  
+	$gui->{main_window} = MainWindow->new;
 	get_saved_colors();
-	$gui->{mw}->optionAdd('*font', '{Liberation Sans} 11');	
-	$gui->{mw}->optionAdd('*BorderWidth' => 1);
-	$gui->{mw}->title("Ecasound/Nama"); 
-	$gui->{mw}->deiconify;
+	$gui->{main_window}->optionAdd('*font', '{Liberation Sans} 11');
+	$gui->{main_window}->optionAdd('*BorderWidth' => 1);
+	$gui->{main_window}->title("Ecasound/Nama");
+	$gui->{main_window}->deiconify;
 
 	### init effect window
 
-	$gui->{ew} = $gui->{mw}->Toplevel;
-	$gui->{ew}->title("Effect Window");
-	$gui->{ew}->deiconify; 
-#	$gui->{ew}->withdraw;
+	$gui->{effects_window} = $gui->{main_window}->Toplevel;
+	$gui->{effects_window}->title("Effect Window");
+	$gui->{effects_window}->deiconify;
+#	$gui->{effects_window}->withdraw;
 
 
 	### init waveform window
 
 	if ($config->{display_waveform})
 	{
-		$gui->{ww} = $gui->{mw}->Toplevel;
-		$gui->{ww}->title("Waveform Window");
-		$gui->{ww}->deiconify; 
-		$gui->{ww}->bind('<Control-Key-c>' => \&cleanup_exit );
-		$gui->{ww}->bind('<Control-Key-space>' => \&tk_control_space_transport);
+		$gui->{waveform_window} = $gui->{main_window}->Toplevel;
+		$gui->{waveform_window}->title("Waveform Window");
+		$gui->{waveform_window}->deiconify;
+		$gui->{waveform_window}->bind('<Control-Key-c>' => \&cleanup_exit );
+		$gui->{waveform_window}->bind('<Control-Key-space>' => \&tk_control_space_transport);
 	}
 
 	### Exit via Ctrl-C 
 
-	$gui->{mw}->bind('<Control-Key-c>' => \&cleanup_exit );
-	$gui->{ew}->bind('<Control-Key-c>' => \&cleanup_exit );
+	$gui->{main_window}->bind('<Control-Key-c>' => \&cleanup_exit );
+	$gui->{effects_window}->bind('<Control-Key-c>' => \&cleanup_exit );
 
-	$gui->{mw}->bind('<Control-Key-q>' => \&tk_save_and_quit);
-	$gui->{ew}->bind('<Control-Key-q>' => \&tk_save_and_quit);
-	$gui->{ww}->bind('<Control-Key-q>' => \&tk_save_and_quit)
-		if $gui->{ww};
+	$gui->{main_window}->bind('<Control-Key-q>' => \&tk_save_and_quit);
+	$gui->{effects_window}->bind('<Control-Key-q>' => \&tk_save_and_quit);
+	$gui->{waveform_window}->bind('<Control-Key-q>' => \&tk_save_and_quit)
+		if $gui->{waveform_window};
 
     ## Press SPACE to start/stop transport outside text fields and buttons/menus
 
-	$gui->{mw}->bind('<Key-space>' => \&tk_space_transport);
-	$gui->{ew}->bind('<Key-space>' => \&tk_space_transport);
-	$gui->{ww}->bind('<Key-space>' => \&tk_space_transport)
-		if $gui->{ww};
+	$gui->{main_window}->bind('<Key-space>' => \&tk_space_transport);
+	$gui->{effects_window}->bind('<Key-space>' => \&tk_space_transport);
+	$gui->{waveform_window}->bind('<Key-space>' => \&tk_space_transport)
+		if $gui->{waveform_window};
 
 	## Keep the existing Ctrl-SPACE transport bindings
 
-	$gui->{mw}->bind('<Control-Key-space>' => \&tk_control_space_transport);
-	$gui->{ew}->bind('<Control-Key-space>' => \&tk_control_space_transport);
+	$gui->{main_window}->bind('<Control-Key-space>' => \&tk_control_space_transport);
+	$gui->{effects_window}->bind('<Control-Key-space>' => \&tk_control_space_transport);
 	
 	if ($config->{display_waveform})
 	{
-		$gui->{wwcanvas} = $gui->{ww}->Scrolled('Canvas')->pack;
+		$gui->{wwcanvas} = $gui->{waveform_window}->Scrolled('Canvas')->pack;
 		# CanvasBind binds the widget; Canvas::bind binds canvas items.
 		$gui->{wwcanvas}->Subwidget('scrolled')->CanvasBind(
 			'<Button-1>' => \&tk_waveform_seek);
@@ -115,16 +115,16 @@ sub init_gui {
 	}
 
 
-	$gui->{fx_canvas} = $gui->{ew}->Scrolled('Canvas')->pack;
+	$gui->{fx_canvas} = $gui->{effects_window}->Scrolled('Canvas')->pack;
 	configure_effects_window();
 
 	$gui->{fx_frame} = $gui->{fx_canvas}->Frame;
 	my $id = $gui->{fx_canvas}->createWindow(30,30, -window => $gui->{fx_frame},
 											-anchor => 'nw');
 
-	$gui->{project_head} = $gui->{mw}->Label->pack(-fill => 'both');
+	$gui->{project_head} = $gui->{main_window}->Label->pack(-fill => 'both');
 
-	$gui->{time_frame} = $gui->{mw}->Frame(
+	$gui->{time_frame} = $gui->{main_window}->Frame(
 	#	-borderwidth => 20,
 	#	-relief => 'groove',
 	)->pack(
@@ -137,14 +137,14 @@ sub init_gui {
 	$gui->{seek_frame} = $gui->{time_frame}->Frame->pack(
 		-side => 'bottom', 
 		-fill => 'both');
-	$gui->{transport_frame} = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
-	# $oid_frame = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
-	$gui->{clock_frame} = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
-	#$gui->{group_frame} = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
- 	$gui->{track_canvas}= $gui->{mw}->Scrolled('Canvas')->pack(-side => 'bottom', -fill => 'both');
+	$gui->{transport_frame} = $gui->{main_window}->Frame->pack(-side => 'bottom', -fill => 'both');
+	# $oid_frame = $gui->{main_window}->Frame->pack(-side => 'bottom', -fill => 'both');
+	$gui->{clock_frame} = $gui->{main_window}->Frame->pack(-side => 'bottom', -fill => 'both');
+	#$gui->{group_frame} = $gui->{main_window}->Frame->pack(-side => 'bottom', -fill => 'both');
+	$gui->{track_canvas}= $gui->{main_window}->Scrolled('Canvas')->pack(-side => 'bottom', -fill => 'both');
 	configure_track_canvas();
 	$gui->{track_frame} = $gui->{track_canvas}->Frame; # ->pack(-fill => 'both');
-	#$gui->{track_frame} = $gui->{mw}->Frame;
+	#$gui->{track_frame} = $gui->{main_window}->Frame;
  	my $id2 = $gui->{track_canvas}->createWindow(0,0,
 		-window => $gui->{track_frame}, 
 		-anchor => 'nw');
@@ -152,11 +152,11 @@ sub init_gui {
  #										-tearoff => 0,
  #										-width => 13)->pack(-side => 'left');
 		
-	$gui->{add_frame} = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
-	$gui->{perl_frame} = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
-	$gui->{iam_frame} = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
-	$gui->{load_frame} = $gui->{mw}->Frame->pack(-side => 'bottom', -fill => 'both');
-#	my $blank = $gui->{mw}->Label->pack(-side => 'left');
+	$gui->{add_frame} = $gui->{main_window}->Frame->pack(-side => 'bottom', -fill => 'both');
+	$gui->{perl_frame} = $gui->{main_window}->Frame->pack(-side => 'bottom', -fill => 'both');
+	$gui->{iam_frame} = $gui->{main_window}->Frame->pack(-side => 'bottom', -fill => 'both');
+	$gui->{load_frame} = $gui->{main_window}->Frame->pack(-side => 'bottom', -fill => 'both');
+#	my $blank = $gui->{main_window}->Label->pack(-side => 'left');
 
 
 
@@ -540,8 +540,8 @@ sub open_track_io_dialog {
 	my ($n, $direction) = @_;
 	return if $this_engine->started;
 	my $track = $ti{$n} or return;
-	my $window = $gui->{mw}->Toplevel;
-	$window->transient($gui->{mw});
+	my $window = $gui->{main_window}->Toplevel;
+	$window->transient($gui->{main_window});
 	$window->title(ucfirst($direction) . ' - ' . $track->name);
 	$window->Label(
 		-text => "Enter $direction (e.g. soundcard channel, JACK client name)",
@@ -960,7 +960,7 @@ sub clock_config {
 	my $ui = shift;
 	$gui->{clock}->configure( @_ )}
 
-sub manifest { $gui->{ew}->deiconify() }
+sub manifest { $gui->{effects_window}->deiconify() }
 
 sub destroy_widgets {
 	close_effect_dialog();
@@ -1084,7 +1084,7 @@ sub add_selected_effect {
 		return;
 	}
 	close_effect_dialog();
-	$gui->{ew}->deiconify;
+	$gui->{effects_window}->deiconify;
 }
 
 sub open_effect_dialog {
@@ -1094,8 +1094,8 @@ sub open_effect_dialog {
 	my $effect_dialog = $gui->{effect_picker};
 	if (!$effect_dialog or !Tk::Exists($effect_dialog->{window})) {
 		$effect_dialog = $gui->{effect_picker} = {};
-		my $window = $effect_dialog->{window} = $gui->{mw}->Toplevel;
-		$window->transient($gui->{mw});
+		my $window = $effect_dialog->{window} = $gui->{main_window}->Toplevel;
+		$window->transient($gui->{main_window});
 		$window->protocol('WM_DELETE_WINDOW' => \&close_effect_dialog);
 		$window->bind('<Escape>' => sub { close_effect_dialog(); Tk->break });
 		$window->bind('<Control-Key-q>' => \&tk_save_and_quit);
@@ -1384,12 +1384,12 @@ sub get_saved_colors {
 	map{ $setformat{$_} = $gui->{_palette}->{mw}{$_} if $gui->{_palette}->{mw}{$_}  } 
 		keys $gui->{_palette}->{mw}->%*;	
 	#print "\nsetformat: \n", json_out(\%setformat);
-	$gui->{mw}->setPalette( %setformat );
+	$gui->{main_window}->setPalette( %setformat );
 }
 sub colorset {
 	my ($widgetid, $field) = @_;
 	sub { 
-			my $widget = $gui->{$widgetid};
+			my $widget = $widgetid eq 'mw' ? $gui->{main_window} : $gui->{$widgetid};
 			#print "ancestor: $widgetid\n";
 			my $new_color = colorchooser($field,$widget->cget("-$field"));
 			if( defined $new_color ){
@@ -1440,7 +1440,7 @@ sub colorchooser {
 	logsub((caller(0))[3]);
 	my ($field, $initialcolor) = @_;
 	logpkg('debug', "field: $field, initial color: $initialcolor");
-	my $new_color = $gui->{mw}->chooseColor(
+	my $new_color = $gui->{main_window}->chooseColor(
 							-title => $field,
 							-initialcolor => $initialcolor,
 							);

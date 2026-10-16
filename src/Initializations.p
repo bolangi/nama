@@ -297,7 +297,7 @@ sub initialize_services {
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
-	install_tk_tickit_bridge() if defined $gui->{mw};
+	install_tk_tickit_bridge() if defined $gui->{main_window};
 	
 	# fake JACK for testing environment
 

@@ -23,16 +23,16 @@ sub loop {
 	my $pump_async;
 	$pump_async = sub {
 		return if $::gui->{quit_requested};
-		return unless Tk::Exists($::gui->{mw});
+		return unless Tk::Exists($::gui->{main_window});
 		$text->{loop}->loop_once(0);
-		return if $::gui->{quit_requested} or !Tk::Exists($::gui->{mw});
-		$::gui->{mw}->after(10, $pump_async);
+		return if $::gui->{quit_requested} or !Tk::Exists($::gui->{main_window});
+		$::gui->{main_window}->after(10, $pump_async);
 	};
 
-	$::gui->{mw}->afterIdle($pump_async);
+	$::gui->{main_window}->afterIdle($pump_async);
 	# Dispatch one Tk event at a time so a quit request can leave the loop.
 	# Stop/save/exit only after the key callback has returned to Perl.
-	while (Tk::Exists($::gui->{mw}) and !$::gui->{quit_requested}) {
+	while (Tk::Exists($::gui->{main_window}) and !$::gui->{quit_requested}) {
 		Tk::DoOneEvent(0);
 	}
 	if (delete $::gui->{quit_requested}) {

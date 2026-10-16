@@ -83,7 +83,7 @@ sub install_tk_tickit_bridge {
 	can_load(modules => { '::TkTickitBridge' => undef })
 		or croak 'Unable to load TkTickitBridge';
 	$text->{tk_tickit_bridge} = ::TkTickitBridge->new(
-		widget => $gui->{mw},
+		widget => $gui->{main_window},
 		term   => $term,
 	)->install;
 }
