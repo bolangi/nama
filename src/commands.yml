@@ -1748,4 +1748,12 @@ set_param_exp:
   what: set current parameter stepsize to ten to the power of this exponent
   example: spe -2 # set stepsize to 0.01
   parameters: <number:stepsize>
+audio_mode:
+  type: general
+  short: amd
+  what: Use the audio command set (default). Midi commands can be issued by prefixing 'midi '.
+midi_mode:
+  type: general
+  short: mmd
+  what: Use the MIDI command set. Audio commands can be issued by prefixing 'nama '.
 ...

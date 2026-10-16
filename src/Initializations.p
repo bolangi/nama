@@ -60,7 +60,7 @@ sub definitions {
 	# the sole instance of their class.
 	
 	$project = bless {}, '::Project';
-	our $mode = bless {}, '::Mode';
+	our $mode = bless { command_mode => 'audio' }, '::Mode';
 	{ package ::Mode; 
 		sub mastering 	{ $::tn{Eq} and ! $::tn{Eq}->{hide} } 
 		sub doodle 		{ $mode->{doodle} 				}

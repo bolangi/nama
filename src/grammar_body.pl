@@ -1779,3 +1779,6 @@ exp: /[-+]?\d/
 # hours:   value 'h' {$item{value}*3600} 
 # minutes: value 'm' {$item{value}*60  } 
 # seconds: value 's' {$item{value}     }
+
+audio_mode: _audio_mode { ::notify("Entering audio mode"); $::mode->{command_mode} = 'audio' }
+midi_mode:  _midi_mode  { ::notify("Entering MIDI mode" ); $::mode->{command_mode} = 'midi'  }

@@ -59,6 +59,26 @@ sub process_line {
 	if (defined $user_input and $user_input !~ /^\s*$/) {
 		push $text->{command_history}->@*, $user_input;
 		$text->{command_index} = scalar $text->{command_history}->@*;
+		my $target = $mode->{command_mode};
+		my $midi_escape = $target eq 'audio' && $user_input =~ s/^\s*midi\s+//;
+		if ($midi_escape) {
+			$target = 'midi';
+		}
+		elsif ($target eq 'midi' && $user_input =~ s/^\s*nama\s+//) {
+			$target = 'audio';
+		}
+		if (!$midi_escape && $user_input =~ /^\s*(audio-mode|amd|midi-mode|mmd)\s*$/) {
+			$mode->{command_mode} = $1 =~ /^(?:audio-mode|amd)$/ ? 'audio' : 'midi';
+			notify($mode->{command_mode} eq 'audio' ? 'Entering audio mode' : 'Entering MIDI mode');
+			revise_prompt();
+			return;
+		}
+		if ($target eq 'midi') {
+			my $output = midish_cmd($user_input);
+			pager($output) if defined $output && length $output;
+			revise_prompt();
+			return;
+		}
 		# convert hyphenated commands to underscore form
 		while( my($from, $to) = each $text->{hyphenated_commands}->%* ){ $user_input =~ s/$from/$to/g }
 			my $context = context();
