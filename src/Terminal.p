@@ -825,6 +825,12 @@ sub load_keywords {
 	#$text->{executables} = executables(); # too many for our current algorithm
 	$text->{project_list} = project_list();
 	$text->{effects}     =  [sort {$a cmp $b} keys $fx_cache->{partial_label_to_full}->%*];
+	my %seen_midi;
+	$text->{midi_completion_keywords} = [
+		sort
+		grep { length($_) >= 4 and !$seen_midi{$_}++ }
+		split ' ', get_data_section('all_midi_command_names')
+	];
 }
 
 sub project_list { 
@@ -845,10 +851,20 @@ sub gen_words {
 	my $keywords = [];
 	my $is_command;
 
-	if (command() =~ /^\s*(?:load|load-project|link|link-track) / )
+
+	my $midi_completion = ($mode->{command_mode} // 'audio') eq 'midi'
+		? command() !~ /^\s*nama\s+/
+		: command() =~ /^\s*midi\s+/;
+
+	if ($midi_completion)
+	{
+		$keywords = $text->{midi_completion_keywords};
+	}
+	elsif (command() =~ /^\s*(?:load|load-project|link|link-track) / )
 	{
 		$keywords = project_list();
 	}
+
 #	elsif (command() =~ /^! / )
 #	{
 #		$keywords = $text->{executables}
