@@ -67,8 +67,7 @@ sub set {
 			is_legal_key(ref $self, $key) or croak "illegal key: $_ for object of type ", ref $self;
 	} keys %new_vals;
 }
-sub dumpp  {
-	my $self = shift;
+sub dumpp ($self) {
 	::($self->dump)
 }
 sub dump ($self) {

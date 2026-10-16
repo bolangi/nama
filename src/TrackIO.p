@@ -17,33 +17,29 @@ sub node ($track) {
 	
 }
 
-sub is_used {
-	my $track = shift;      # Track is used if:
+sub is_used ($track) {
+	      # Track is used if:
 	my $bus = $track->bus;  # 
 	$track->send_type       # It's sending its own signal
 	or $track->{rw} eq REC  # It's recording its own signal
 	or $track->used_by_another_track
 	or ($bus and $bus->can('wantme') and $bus->wantme)  # A bus needs my signal
 }
-sub missing_jack_client {
-	my $track = shift;
+sub missing_jack_client ($track) {
 	$track->source_type eq 'jack_client' 
 		and not $jack->{clients}->{$track->source_id}
 }
-sub missing_source_track {
-	my $track = shift;
+sub missing_source_track ($track) {
 	$track->source_type eq 'track' 
 		and not defined $tn{$track->source_id}
 }
-sub disabled_source_track {
-	my $track = shift;
+sub disabled_source_track ($track) {
 	$track->source_type eq 'track' 
 		and $tn{$track->source_id}->rw eq OFF;
 }
 
-sub candidate_rw {
+sub candidate_rw ($track) {
 #	logsub((caller(0))[3]);
-	my $track = shift;
 	return OFF if 0 # 	! ($track->engine_group eq $::this_engine->name)
 					or  $track->{rw} eq OFF;
 	if ($track->{rw} ne PLAY) # e.g. MON or REC
@@ -66,21 +62,17 @@ sub candidate_rw {
 
 # rec_status is the compatibility interface: candidate rw while the graph
 # is being built, and effective rw after pruning resolves the graph.
-sub rec_status {
-	my $track = shift;
+sub rec_status ($track) {
 	my $effective = $track->effective_rw;
 	defined $effective ? $effective : $track->candidate_rw;
 }
-sub resolve_rw_status {
-	my $track = shift;
+sub resolve_rw_status ($track) {
 	::ChainSetup::track_resolution($track);
 }
-sub why {
-	my $track = shift;
+sub why ($track) {
 	::ChainSetup::explain_track_status($track);
 }
-sub effective_rw {
-	my $track = shift;
+sub effective_rw ($track) {
 	::ChainSetup::effective_rw($track);
 }
 sub maybe_playback { # ordinary sub, not object method
@@ -90,8 +82,7 @@ sub maybe_playback { # ordinary sub, not object method
 }
 
 
-sub rec_status_display {
-	my $track = shift;
+sub rec_status_display ($track) {
 	my $rs = $track->effective_rw // $track->candidate_rw;
 	my $status;
 	$status .= $rs;
@@ -260,18 +251,15 @@ sub object_as_text {
 }
 }
 
-sub input_object_text { # for text display
-	my $track = shift;
+sub input_object_text ($track) { # for text display
 	$track->object_as_text('source');
 }
 
-sub output_object_text {   # text for user display
-	my $track = shift;
+sub output_object_text ($track) { # text for user display
 	$track->object_as_text('send');
 
 }
-sub source_status {
-	my $track = shift;
+sub source_status ($track) {
 	no warnings 'uninitialized';
 	return $track->current_wav if $track->candidate_play;
 	my $bus = $bn{$track->source_id}; 
@@ -289,8 +277,7 @@ sub source_status {
 		if $track->{source_id} =~ /\S/
 		or $track->{source_type} =~ /\S/;
 }
-sub destination {
-	my $track = shift;
+sub destination ($track) {
 	return if $track->off;
 	# display logic 
 	# always show the bus
@@ -309,8 +296,7 @@ sub destination {
 	$out .= dest_string($send_type, $send_id, $track->width);
 	$out
 }
-sub set_rec {
-	my $track = shift;
+sub set_rec ($track) {
 	if (my $t = $track->target){
 		my  $msg  = $track->name;
 			$msg .= qq( is an alias to track "$t");
@@ -402,8 +388,7 @@ sub jack_manual_port {
 	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
 }
 
-sub used_by_another_track {
-	my $track = shift;
+sub used_by_another_track ($track) {
 	no warnings 'uninitialized';
 	my @used =    grep{ $_->name ne $track->name
 						and $_->source_type eq 'track'

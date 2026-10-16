@@ -245,8 +245,7 @@ sub add_paths {
 	$g->add_path($loop, $dry->name, $successor);
 	}
 	
-sub remove {
-	my $self = shift;
+sub remove ($self) {
 	$::tn{ $self->wet_name }->remove;
 	$::tn{ $self->dry_name }->remove;
 	delete $::Insert::by_index{$self->n};
@@ -286,8 +285,7 @@ sub new {
 	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet_send;
 	$self
 } 
-sub wet_send_name {
-	my $self = shift;
+sub wet_send_name ($self) {
 	join('-', $self->track, $self->n, 'wet-send'); 
 }
 	
@@ -353,8 +351,7 @@ sub add_paths {
 		$g->add_path($predecessor, $dry->name, $loop, $name);
 	}
 	
-sub remove {
-	my $self = shift;
+sub remove ($self) {
 	$::tn{ $self->wet_send_name }->remove;
 	$::tn{ $self->dry_name }->remove;
 	$::tn{ $self->wet_name }->remove;

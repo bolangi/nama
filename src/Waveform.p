@@ -69,16 +69,14 @@ sub generate_waveforms {
 	}
 }
 
-sub get_waveform {
-	my $self = shift;
+sub get_waveform ($self) {
 	my $wav = $self->track->full_path;
 	generate_waveforms($wav);
 	my $png = waveform_name($wav);
 	my ($width, $height) = desired_dimensions($wav, {});
 	image_has_dimensions($png, $width, $height) ? $png : undef;
 }
-sub display {
-	my $self = shift;
+sub display ($self) {
 	my $waveform = $self->get_waveform or return;
 	my $widget = $gui->{ww}->Photo(-format => 'png', -file => $waveform);
 	# Keep the Photo object alive for as long as the canvas uses the image.
@@ -94,14 +92,12 @@ sub display {
 	$gui->{wwcanvas}->createText( $name_x, $name_y, -font =>
 'lucidasanstypewriter-bold-14', -text => uc($self->track->name) . ' - '.$self->track->current_wav);
 }
-sub width  {
-	my $self = shift;
+sub width ($self) {
 	my $waveform = $self->get_waveform or return;
 	my ($width) = imgsize($waveform);
 	$width
 }
-sub height  {
-	my $self = shift;
+sub height ($self) {
 	my $waveform = $self->get_waveform or return;
 	my (undef, $height) = imgsize($waveform);
 	$height
@@ -109,8 +105,7 @@ sub height  {
 sub pixels_per_second  {
 	$config->{waveform_pixels_per_second}
 }
-sub y_offset_multiplier {
-	my $self = shift;
+sub y_offset_multiplier ($self) {
 	my $before_me = 0;
 	for (2 .. $self->track->n - 1){
 		$before_me++ if $ti{$_} and $ti{$_}->candidate_play;

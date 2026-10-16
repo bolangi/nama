@@ -175,8 +175,7 @@ sub ports ($self) {
 	) if $self->client
 }
 
-sub ecs_string {
-	my $self = shift;
+sub ecs_string ($self) {
 	my @parts;
 	push @parts, '-f:'.$self->format if $self->format;
 	push @parts, '-'.$self->io_prefix.':'.$self->device_id;
@@ -187,8 +186,7 @@ sub ecs_string {
 ## (e.g. -f:f32_le,2,48000) if the _format_template() method
 ## returns a signal format template (e.g. f32_le,N,48000)
 
-sub _format { 
-	my $self = shift;
+sub _format ($self) {
 	::signal_format($self->format_template, $self->width)
 		if $self->format_template and $self->width
 }
@@ -227,7 +225,7 @@ sub AUTOLOAD {
 
 sub DESTROY {}
 
-sub _mono_to_stereo{
+sub _mono_to_stereo ($self) {
 	
 	# copy mono track to stereo if we have a pan control and a mono source
 
@@ -238,7 +236,6 @@ sub _mono_to_stereo{
 	#PLAY status, WAV width stereo: null
 	#Higher channel count (WAV or Track): null
 
-	my $self   = shift;
 	my $status = $self->effective_rw();
 	my $copy   = "-chcopy:1,2";
 	my $nocopy = "";
@@ -252,8 +249,7 @@ sub _mono_to_stereo{
 	)
 	{ $copy } else { $nocopy }
 }
-sub _playat_output {
-	my $track = shift;
+sub _playat_output ($track) {
 	my $adjustment = $track->timeline_adjustment;
 	my $timeline_position = $adjustment->adjusted_timeline_position;
 	return unless $timeline_position;
@@ -261,8 +257,7 @@ sub _playat_output {
 	join ',',"playat" , $timeline_position
 		# + $track->latency_offset
 }
-sub _select_output {
-	my $track = shift;
+sub _select_output ($track) {
 	no warnings 'uninitialized';
 	my $adjustment = $track->timeline_adjustment;
 	my $adjusted_startpoint = $adjustment->adjusted_startpoint;
@@ -393,8 +388,7 @@ package ::IO::from_wav;
 use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
-sub device_id { 
-	my $self = shift;
+sub device_id ($self) {
 	my @modifiers;
 	push @modifiers, $self->playat_output if $self->playat_output;
 	push @modifiers, $self->select_output if $self->select_output;
@@ -426,8 +420,7 @@ sub new {
 	my %vals = @_;
 	$class->SUPER::new( %vals, device_id => "loop,$vals{endpoint}");
 }
-sub _format { 
-	my $self = shift;
+sub _format ($self) {
 	return if $::config->{opts}->{T}; # XX don't break tests
 	::signal_format($self->format_template, $config->{loop_chain_channel_width});
 }
@@ -467,14 +460,12 @@ package ::IO::to_jack_multi;
 use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
-sub client { 
-	my $self = shift;
+sub client ($self) {
 #  	say "to_jack_multi: target_id: ",$self->target_id;
 #  	say "to_jack_multi: rectified target_id: ",::IO::rectified($self->target_id);
 	::IO::rectified($self->target_id)
 }
-sub device_id { 
-	my $self = shift;
+sub device_id ($self) {
 	::IO::jack_multi_route($self->ports)
 }
 }

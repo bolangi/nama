@@ -30,8 +30,7 @@ sub initialize {
 	# volume settings
 	$fx->{muted} = [];
 }
-sub fxname {
-    my $self = shift;
+sub fxname ($self) {
     $self->about->{name}
 }
 sub new {
@@ -158,13 +157,11 @@ sub has_read_only_param ($self) {
 		}
 }
 
-sub registry_index {
-	my $self = shift;
+sub registry_index ($self) {
 	$fx_cache->{full_label_to_index}->{ $self->type };
 }
-sub ecasound_controller_index { 
+sub ecasound_controller_index ($self) {
 	logsub((caller(0))[3]);
-	my $self = shift;
 	my $n = $self->chain;
 	my $id = $self->id;
 	my $opcount = 0;
@@ -177,9 +174,8 @@ sub ecasound_controller_index {
 	} 
 	$opcount;
 }
-sub ecasound_effect_index { 
+sub ecasound_effect_index ($self) {
 	logsub((caller(0))[3]);
-	my $self = shift;
 	my $n = $self->chain;
 	my $id = $self->id;
 	my $opcount = 0;
@@ -193,18 +189,15 @@ sub ecasound_effect_index {
 	no warnings 'uninitialized';
 	$self->offset + $opcount;
 }
-sub ecasound_effect_index_ {
-	my $self = shift;
+sub ecasound_effect_index_ ($self) {
 	1 + first_index {$_->id eq $self->id } $self->track->ops_ecasound_order();
 }
-sub track_effect_index { # the position of the ID in the track's op array
-	my $self = shift;
+sub track_effect_index ($self) { # the position of the ID in the track's op array
 	my $id = $self->id;
 	my $pos = first_index {$id eq $_} $self->track->ops->@* ;
 	$pos
 }
-sub controller_ids {
-	my $self = shift;
+sub controller_ids ($self) {
 	my %children;
 	# we want controllers with this parent, also controllers
 	# whos parents are children of this parent, and children
@@ -220,8 +213,7 @@ sub controller_ids {
 }
 sub controllers { $_[0]->controller_ids }
 sub controller_effects { map { fxn($_) } $_[0]->controller_ids }
-sub sync_one_effect {
-		my $self = shift;
+sub sync_one_effect ($self) {
 		my $chain = $self->chain;
 		$this_engine->current_chain($chain);
 		$this_engine->current_chain_operator($self->ecasound_effect_index);
@@ -240,12 +232,10 @@ sub about ($self) {
 sub track { $ti{$_[0]->chain} }
 sub trackname { $_[0]->track->name }
 
-sub ladspa_id {
-	my $self = shift;
+sub ladspa_id ($self) {
 	$::fx_cache->{ladspa_label_to_unique_id}->{$self->type} 
 }
-sub nameline {
-	my $self = shift;
+sub nameline ($self) {
 	my @attr_keys = qw(id name surname fxname type ladspa_id);
 	my %display = map{ $_ => 1         } grep { !/fxname|type|ladspa_id|id/ } @attr_keys;
 	my %attr    = map{ $_ => $self->$_ } @attr_keys ;
@@ -256,8 +246,7 @@ sub nameline {
 	$nameline .= "$bypassed\n";
 	$nameline;
 }
-sub _effect_index { 
-	my $self = shift;
+sub _effect_index ($self) {
 	effect_index($self->type)
 }
 sub _modify_effect {
@@ -291,9 +280,8 @@ sub _modify_effect {
 		$new_value);
 	1
 }
-sub _remove_effect { 
+sub _remove_effect ($self) {
 	logsub((caller(0))[3]);
-	my $self = shift;
 	my $id = $self->id;
 	my $n 		= $self->chain;
 	my $parent 	= $self->parent;
@@ -385,9 +373,8 @@ sub position_effect {
 	nama_cmd('show_track');
 }
 
-sub apply_op {
+sub apply_op ($self) {
 	logsub((caller(0))[3]);
-	my $self = shift;
 	local $config->{category} = 'ECI_FX';
 	my $id = $self->id;
 	logpkg('debug', "id: $id");
@@ -1205,10 +1192,8 @@ sub fade_step_count ($seconds) {
 	$steps
 }
 
-sub fade {
-	my $self = shift;
+sub fade ($self, $param, $from, $to, $seconds) {
 	# parameter starts at one
-	my ($param, $from, $to, $seconds) = @_;
 
 	my $id = $self->id;
 	my $steps = fade_step_count($seconds);
@@ -1230,32 +1215,26 @@ sub fade {
 	$self->_modify_effect($param, $to)
 }
 
-sub fadein {
-	my $self = shift;
-	my $to = shift;
+sub fadein ($self, $to) {
 	my $from  = $config->{fade_out_level}->{$self->type};
 	$self->_modify_effect(1, $from);
 	$self->fade(1, $from, $to, $config->{engine_fade_length_on_start_stop});
 }
-sub fadeout {
-	my $self = shift;
+sub fadeout ($self) {
 	my $from  =	$self->params->[0];
 	my $to	  = $config->{fade_out_level}->{$self->type};
 	$self->fade(1, $from, $to, $config->{engine_fade_length_on_start_stop} );
 	$self->_modify_effect(1, $config->{mute_level}->{$self->type});
 }
-sub mute_level {
-	my $self = shift;
+sub mute_level ($self) {
 	my $level = $config->{mute_level}->{$self->type};
 	#defined $level or die $self->nameline .  " cannot be muted."
 	$level
 }
-sub fade_out_level {
-	my $self = shift;
+sub fade_out_level ($self) {
 	$config->{fade_out_level}->{$self->type}
 }
-sub ecasound_format {
-	my $self = shift;
+sub ecasound_format ($self) {
 	my $cmd = '-'.$self->about->{code};
 	$cmd .= ':'.join ',' ,$self->{params}->@* if $self->{params} and $self->{params}->@* > 0;
 	$cmd

@@ -30,8 +30,7 @@ sub new {
 	$self->initialize_ecasound();
 	$this_engine = $self;
 }
-sub initialize_ecasound { 
-	my $self = shift;
+sub initialize_ecasound ($self) {
  	my @existing_pids = split " ", qx(pgrep ecasound);
 	$self->launch_ecasound_server;
 	$self->{pids} = [ 
@@ -41,8 +40,7 @@ sub initialize_ecasound {
 }
 sub launch_ecasound_server {}
 
-sub kill_and_reap {
-		my $self = shift;
+sub kill_and_reap ($self) {
 		::kill_and_reap( $self->{pids}->@* );
 }
 sub tracks ($self) {
@@ -137,8 +135,7 @@ with '::EcasoundCleanup';
 
 our @ISA = '::Engine';
 
-sub init_ecasound_socket {
-	my $self = shift;
+sub init_ecasound_socket ($self) {
 	my $port = $self->port;
 	::notify("Creating socket on port $port.");
 	$self->{socket} = IO::Socket::INET->new (
@@ -148,8 +145,7 @@ sub init_ecasound_socket {
 	); 
 	die "Could not create socket: $!\n" unless $self->{socket}; 
 }
-sub launch_ecasound_server {
-	my $self = shift;
+sub launch_ecasound_server ($self) {
 	my $port = $self->port;
 	
 	# we'll try to communicate with an existing ecasound
@@ -298,8 +294,7 @@ our @ISA = '::Engine';
 use Role::Tiny::With;
 with '::EcasoundRun';
 
-sub launch_ecasound_server {
-	my $self = shift;
+sub launch_ecasound_server ($self) {
 	::notify("Using Ecasound via Audio::Ecasound (libecasoundc)");
 	$self->{audio_ecasound} = Audio::Ecasound->new();
 }

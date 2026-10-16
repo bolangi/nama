@@ -7,9 +7,7 @@ use ::Globals qw($project);
 sub is_comment ($self) {
 	$::project->{track_comments}->{$self->name}	
 }
-sub is_version_comment {
-	my $self = shift;
-	my $version = shift;
+sub is_version_comment ($self, $version) {
 	{
 	no warnings 'uninitialized';
 	my $comments = $project->{track_version_comments}->{$self->name}->{$version};

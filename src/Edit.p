@@ -117,31 +117,25 @@ sub new {
 	); 
 	$self
 }
-sub edit_root_name {
-	my $self = shift;
+sub edit_root_name ($self) {
 	join '-', $self->host_track, 'v'.$self->host_version;
 }
-sub edit_name {
-	my $self = shift;
+sub edit_name ($self) {
 	join '-', $self->edit_root_name, 'edit'.$self->n
 }
-sub host_alias {
-	my $self = shift;
+sub host_alias ($self) {
 	join '-', $self->edit_root_name, 'original'
 }
 
 # default mark names
 
-sub play_start_name {
-	my $self = shift;
+sub play_start_name ($self) {
 	$self->play_start_mark_name || (join '-', $self->edit_name,'play-start')
 }
-sub rec_start_name {
-	my $self = shift;
+sub rec_start_name ($self) {
 	$self->rec_start_mark_name || (join '-', $self->edit_name,'rec-start')
 }
-sub rec_end_name {
-	my $self = shift;
+sub rec_end_name ($self) {
 	$self->rec_end_mark_name || (join '-', $self->edit_name,'rec-end')
 }
 
@@ -151,20 +145,16 @@ sub rec_end_mark    { $::Mark::by_name{$_[0]->rec_end_name}    }
 
 # the following are unadjusted values
 
-sub play_start_time {
-	my $self = shift;
+sub play_start_time ($self) {
 	$self->marktime('play_start_name')
 }
-sub rec_start_time {
-	my $self = shift;
+sub rec_start_time ($self) {
 	$self->marktime('rec_start_name')
 }
-sub rec_end_time {
-	my $self = shift;
+sub rec_end_time ($self) {
 	$self->marktime('rec_end_name')
 }
-sub play_end_time {
-	my $self = shift;
+sub play_end_time ($self) {
 	$self->marktime('rec_end_name') + $config->{edit_playback_end_margin}
 }
 
@@ -180,14 +170,12 @@ sub store_fades { # replacing previous
 	$edit->remove_fades;
 	$edit->set(fades => \@indices)
 }
-sub remove_fades {
-	my $edit = shift;
+sub remove_fades ($edit) {
 	map{ $_->remove } map{ $::Fade::by_index{$_} } $edit->fades->@*;
 	$edit->set(fades => []);
 }
 
-sub destroy {
-	my $edit = shift;
+sub destroy ($edit) {
 
 	# remove object from index hash
 	delete $by_index{$edit->n};

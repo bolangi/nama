@@ -32,14 +32,11 @@ sub clip {
 	return 0 if $index <= 0;
 	$::tn{$self->{items}->[$index - 1]}
 }
-sub rw { 
-	my $self = shift;
+sub rw ($self) {
 	::timeline_adjustment_active() ? OFF : $self->{rw}
 }
 # perl indexes arrays at zero, for nama users we number items from one
-sub insert_item {
-	my $self = shift;
-	my ($item, $index) = @_;
+sub insert_item ($self, $item, $index) {
 	$self->append_item($item), return if $index == $self->{items}->@* + 1;
 	$self->verify_item($index) or die "$index: sequence index out of range";
 	splice $self->{items}->@*, $index - 1,0, $item->name 
@@ -48,26 +45,19 @@ sub verify_item {
 	my ($self, $index) = @_;
 	$index >= 1 and $index <= scalar $self->items->@* 
 }
-sub delete_item {
-	my $self = shift;
-	my $index = shift;
+sub delete_item ($self, $index) {
 	$self->verify_item($index) or die "$index: sequence index out of range";
 	my $trackname = splice($self->{items}->@*, $index - 1, 1);
 	$::tn{$trackname} and $::tn{$trackname}->remove;
 }
-sub append_item {
-	my $self = shift;
-	my $item = shift;
+sub append_item ($self, $item) {
 	push( $self->{items}->@*, $item->name );
 }
-sub item {
-	my $self = shift;
-	my $index = shift;
+sub item ($self, $index) {
 	return 0 if $index <= 0;
 	$::tn{$self->{items}->[$index - 1]};
 }
-sub list_output {
-	my $self = shift;
+sub list_output ($self) {
 	my $i;
 	join "\n","Sequence $self->{name} clips:",
 		map { join " ", 
@@ -140,8 +130,7 @@ sub unique_clip_name {
 	my ($self, $trackname, $version) = @_;
 	join '-', $self->name , ++$self->{clip_counter}, $trackname, 'v'.$version;
 }
-sub unique_spacer_name {
-	my $self = shift;
+sub unique_spacer_name ($self) {
 	join '-', $self->name, ++$self->{clip_counter}, 'spacer';
 }
 package ::;

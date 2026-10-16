@@ -282,8 +282,7 @@ sub remove_by_index {
 	$fade->remove;
 }
 
-sub remove { 
-	my $fade = shift;
+sub remove ($fade) {
 	my $track = $tn{$fade->track};
 	my $i = $fade->n;
 	

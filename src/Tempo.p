@@ -125,18 +125,15 @@ sub tick_length_at ($self, $tick_index) {
 	$self->time_after_ticks($tick_index + 1)
 		- $self->time_after_ticks($tick_index);
 }
-sub fixed_tempo {
-	my $self = shift;
+sub fixed_tempo ($self) {
 	$self->{tempo} !~ /-/;	
 }
-sub start_tempo {
-	my $self = shift;
+sub start_tempo ($self) {
 	return $self->tempo if $self->fixed_tempo;
 	my ($start_bpm) = $self->tempo =~ / (\d+) - /x;
 	$start_bpm;
 }
-sub end_tempo {
-	my $self = shift;
+sub end_tempo ($self) {
 	return $self->tempo if $self->fixed_tempo;
 	my ($end_bpm) = $self->tempo =~ / - (\d+) /x;
 	$end_bpm;

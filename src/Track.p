@@ -115,9 +115,7 @@ sub new {
 
 ### object methods
 
-sub snapshot {
-	my $track = shift;
-	my $fields = shift;
+sub snapshot ($track, $fields) {
 	my %snap; 
 	my $i = 0;
 	for(@$fields){
@@ -131,9 +129,7 @@ sub snapshot {
 
 # blows up when I move it to TrackIO
 
-sub input_path { 
-
-	my $track = shift;
+sub input_path ($track) {
 
 	# the corresponding bus handles input routing for mix tracks
 	# so they don't need to be connected here
@@ -157,8 +153,7 @@ sub input_path {
 
 # remove track object and all effects
 
-sub remove {
-	my $track = shift;
+sub remove ($track) {
 	my $n = $track->n;
 	$ui->remove_track_gui($n); 
 	# remove corresponding fades
@@ -172,27 +167,22 @@ sub remove {
 
 # Modified from Object.p to save class
 # should this be used in other classes?
-sub as_hash {
-	my $self = shift;
+sub as_hash ($self) {
 	my $class = ref $self;
 	my %guts = $self->%*;
 	$guts{class} = $class; # make sure we save the correct class name
 	return \%guts;
 }
-sub input_object {
-	my $track = shift;
+sub input_object ($track) {
 	$::IO::by_name{$track->name}->{input}
 }
-sub output_object {
-	my $track = shift;
+sub output_object ($track) {
 	$::IO::by_name{$track->name}->{output}
 }
-sub rec_setup_script { 
-	my $track = shift;
+sub rec_setup_script ($track) {
 	join_path(::project_dir(), $track->name."-rec-setup.sh")
 }
-sub rec_cleanup_script { 
-	my $track = shift;
+sub rec_cleanup_script ($track) {
 	join_path(::project_dir(), $track->name."-rec-cleanup.sh")
 }
 sub current_edit { $_[0]->{current_edit}//={} }
@@ -204,16 +194,13 @@ sub is_user_track { ! $system_track{$_[0]->name} }
 sub is_system_track { $system_track{$_[0]->name} } 
 }
 
-sub engine_group {
-	my $track = shift;
+sub engine_group ($track) {
 	$track->{engine_group} || $::config->{ecasound_engine_name}
 }
-sub engine {
-	my $track = shift;
+sub engine ($track) {
 	$en{$track->engine_group}
 }
-sub select_track {
-		my $track = shift;
+sub select_track ($track) {
 		$::this_track = $track;
 		$this_engine->current_chain( $track->n );
 		# XXX wrong engine for MIDI track
@@ -238,8 +225,7 @@ sub effective_mon  { ($_[0]->effective_rw // '') eq MON }
 sub effective_play { ($_[0]->effective_rw // '') eq PLAY }
 sub effective_off  { ($_[0]->effective_rw // '') eq OFF }
 
-sub show_tracks_setting {
-	my $track = shift;
+sub show_tracks_setting ($track) {
 	return join(' but ', $track->rw, $track->effective_rw)
 		if $track->rw ne $track->effective_rw;
 	$track->rec_status_display;
@@ -266,12 +252,10 @@ our $VERSION = 1.0;
 use SUPER;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub candidate_rw {
-	my $track = shift;
+sub candidate_rw ($track) {
  	$track->rw ne OFF ? MON : OFF 
 }
-sub destination {
-	my $track = shift; 
+sub destination ($track) {
 	return 'Mixdown' if $tn{Mixdown} && $tn{Mixdown}->rec;
 	return $track->SUPER() if $track->rw ne OFF
 }
@@ -286,8 +270,7 @@ our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::SimpleTrack';
 
-sub candidate_rw{
-	my $track = shift;
+sub candidate_rw ($track) {
  	return OFF if $track->engine_group ne $en{$::config->{ecasound_engine_name}}->name;
 	$mode->mastering ? MON :  OFF;
 }
@@ -304,8 +287,7 @@ our $VERSION = 1.0;
 use SUPER;
 no warnings qw(uninitialized redefine);
 our @ISA = '::SlaveTrack';
-sub destination {
-	my $track = shift;
+sub destination ($track) {
 	my $bus = $track->bus;
 	dest_string($bus->send_type,$bus->send_id, $track->width);
 }
@@ -339,8 +321,7 @@ use v5.36;
 our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub candidate_rw{
-	my $track = shift;
+sub candidate_rw ($track) {
 	$mode->mastering ? MON :  OFF;
 }
 sub send_type { $tn{Main}->send_type }
@@ -348,28 +329,27 @@ sub send_id { $tn{Main}->send_id }
 }
 {
 package ::CacheRecTrack;
+use feature 'signatures';
 our $VERSION = 1.0;
 use ::Globals qw(%tn);
 our @ISA = qw(::SlaveTrack);
-sub current_version {
-	my $track = shift;
+sub current_version ($track) {
 	my $target = $tn{$track->target};
 	$target->last + 1
 }
-sub current_wav {
-	my $track = shift;
+sub current_wav ($track) {
 		$tn{$track->target}->name . '_' . $track->current_version . '.wav'
 }
-sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav) }
+sub full_path ($track) { ::join_path( $track->dir, $track->current_wav) }
 }
 {
 package ::MixDownTrack; 
+use feature 'signatures';
 our $VERSION = 1.0;
 use ::Globals qw(REC PLAY %tn);
 use SUPER;
 our @ISA = qw(::Track);
-sub current_version {	
-	my $track = shift;
+sub current_version ($track) {
 	my $last = $track->last;
 	my $status = $track->candidate_rw;
 	#logpkg('debug', "last: $last status: $status");
@@ -377,18 +357,15 @@ sub current_version {
 	elsif ( $status eq PLAY){ return $track->playback_version } 
 	else { return 0 }
 }
-sub source_status { 
-	my $track = shift; 
+sub source_status ($track) {
 	return 'Main' if $track->rec;
 	my $super = $track->super('source_status');
 	$super->($track)
 }
-sub destination {
-	my $track = shift; 
+sub destination ($track) {
 	$tn{Main}->destination if $track->play
 }
-sub candidate_rw {
- 	my $track = shift;
+sub candidate_rw ($track) {
 	$track->rw
 # 	return REC if $track->rw eq REC;
 # 	::Track::rec_status($track);
@@ -397,6 +374,7 @@ sub forbid_user_ops { 1 }
 }
 {
 package ::EditTrack;
+use feature 'signatures';
 use ::Globals qw(REC PLAY);
 use ::Log qw(logpkg);
 our $VERSION = 1.0;
@@ -410,8 +388,7 @@ sub AUTOLOAD {
 	$::Edit::by_name{$self->name}->$call(@_);
 }
 sub DESTROY {}
-sub current_version {	
-	my $track = shift;
+sub current_version ($track) {
 	my $last = $track->last;
 	my $status = $track->candidate_rw;
 	#logpkg('debug', "last: $last status: $status");
@@ -433,6 +410,7 @@ sub versions { [$_[0]->version] }
 }
 {
 package ::Clip;
+use feature 'signatures';
 
 # Clips are the units of audio used to 
 #  to make sequences. 
@@ -450,32 +428,28 @@ use ::Globals qw(PLAY OFF);
 our $VERSION = 1.0;
 our @ISA = qw( ::VersionTrack ::Track );
 
-sub sequence { my $self = shift; $::bn{$self->group} };
+sub sequence ($self) { $::bn{$self->group} };
 
-sub index { my $self = shift; my $i = 0;
+sub index ($self) { my $i = 0;
 	for( $self->sequence->items->@* ){
 		$i++;
 		return $i if $self->name eq $_
 	}
 }
-sub predecessor {
-	my $self = shift;
+sub predecessor ($self) {
 	$self->sequence->clip($self->index - 1)
 }
-sub duration {
-	my $self = shift;
+sub duration ($self) {
 	$self->{duration} 
 		? ::Mark::duration_from_tag($self->{duration})
 		: $self->is_region 
 			? $self->endpoint - $self->startpoint
 			: $self->wav_length;
 }
-sub timeline_endpoint {
-	my $self = shift;
+sub timeline_endpoint ($self) {
 	$self->duration + ( $self->predecessor ?  $self->predecessor->timeline_endpoint : 0 )
 }
-sub timeline_position {
-	my $self = shift;
+sub timeline_position ($self) {
 	my $previous = $self->predecessor;
 	$previous ? $previous->timeline_endpoint : 0
 }
@@ -550,13 +524,11 @@ sub rw_set {
 	my ($bus, $setting) = @_;
 	$track->{rw} = uc $setting;
 }
-sub exists_midi {
-	my $track = shift;
+sub exists_midi ($track) {
 	my $engine = $track->engine or return;
 	$engine->has_track($track->current_midi);
 }
-sub candidate_rw {
-		my $self = shift;
+sub candidate_rw ($self) {
 		if	 ( $self->rw eq REC and	$self->is_selected )							{ REC  } 
 		elsif( $self->rw eq REC and	! $self->is_selected )							{ PLAY } 
 		elsif( $self->rw eq PLAY )													{ PLAY }
@@ -564,8 +536,7 @@ sub candidate_rw {
 }
 sub versions { $_[0]->{midi_versions} }
 
-sub show_tracks_setting {
-	my $track = shift;
+sub show_tracks_setting ($track) {
 	return join(' v', REC, $track->current_version) if $track->rec;
 	$track->rw;
 }
@@ -575,18 +546,16 @@ sub show_tracks_volume      {}
 sub show_tracks_pan         {}
 
 
-sub select_track {
-		my $track = shift;
+sub select_track ($track) {
 		$::this_track = $track;
 		::set_current_bus();
 }
-sub current_midi {
+sub current_midi ($track) {
 	# current MIDI track
 	# provides the name of the midish track corresponding to the selected version
 	# example: synth_2, for track synth, version 2
 	# analagous to current_wav() for audio track which would output synth_2.wav
 	 
-	my $track = shift;
 	
 	if 	($track->candidate_rw eq REC)
 	{ 
@@ -637,9 +606,7 @@ sub set_rw {
 		$track->unmute;
 	}
 }
-sub create_midi_version {
-	my $track = shift;
-	my $n = shift;
+sub create_midi_version ($track, $n) {
 	::add_midi_track($track->midi_version_name($n), hide => 1);
 }
 sub set_version {
@@ -655,8 +622,7 @@ sub set_version {
 		::throw("$name: version $n does not exist, skipping.\n")
 	}
 }
-sub midi_version {
-	my $track = shift;
+sub midi_version ($track) {
 	$track->midi_version_name($track->version);
 }
 sub midi_version_name {

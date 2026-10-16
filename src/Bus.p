@@ -181,8 +181,7 @@ sub apply {
 
 	} grep {! $_->candidate_off} $bus->track_o;
 }
-sub remove {
-	my $bus = shift;
+sub remove ($bus) {
 
 	# all tracks returned to Main group
 	map{$_->set(group => 'Main') } $bus->track_o;
@@ -196,8 +195,7 @@ sub remove {
 	
 	delete $::bn{$bus->name};
 } 
-sub candidate_consumers {
-	my $bus = shift;
+sub candidate_consumers ($bus) {
 	no warnings 'uninitialized';
 	# Graph pruning decides whether these consumers have a viable sink.
 	my @wantme = grep{ 	$_->{rw} =~ /REC|MON/ 
@@ -206,8 +204,7 @@ sub candidate_consumers {
 	@wantme
 
 }
-sub wantme {
-	my $bus = shift;
+sub wantme ($bus) {
 	$bus->candidate_consumers;
 
 }
@@ -230,8 +227,7 @@ sub apply {
 			width => 2 }); # force to stereo 
 	} grep{ $_->input_path } $bus->track_o;
 }
-sub remove {
-	my $bus = shift;
+sub remove ($bus) {
 
 	# delete all tracks
 	map{$_->remove } $bus->track_o;

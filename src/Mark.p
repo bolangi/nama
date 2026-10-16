@@ -81,12 +81,10 @@ sub remove ($mark) {
 	}
 	@all = grep { $_->time != $mark->time } @all;
 }
-sub next { 
-	my $mark = shift;
+sub next ($mark) {
 	::next_mark();
 }
-sub previous {
-	my $mark = shift; 
+sub previous ($mark) {
 	::previous_mark();
 }
 

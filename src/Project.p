@@ -3,7 +3,7 @@
 package ::Project;
 use v5.36;
 our $VERSION = 1.0;
-sub hello { my $self = shift; ::notify("hello $self: ", ::Dumper($::project)) }
+sub hello ($self) { ::notify("hello $self: ", ::Dumper($::project)) }
 }
 {
 package ::;

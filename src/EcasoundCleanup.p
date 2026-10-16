@@ -3,8 +3,7 @@ package ::EcasoundCleanup;
 use Role::Tiny;
 use v5.36;
 our $VERSION = 1.0;
-sub cleanup {
-	my $self = shift;
+sub cleanup ($self) {
 	::rec_cleanup();
 }
 

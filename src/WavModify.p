@@ -3,8 +3,7 @@ use Role::Tiny;
 use v5.36;
 our $VERSION = 1.0;
 
-sub normalize {
-	my $track = shift;
+sub normalize ($track) {
 	if (! $track->candidate_play){
 		::throw($track->name, ": You must set track to PLAY before normalizing, skipping.\n");
 		return;
@@ -15,8 +14,7 @@ sub normalize {
 	::notify("executing: $cmd\n");
 	system $cmd;
 }
-sub fixdc {
-	my $track = shift;
+sub fixdc ($track) {
 	if (! $track->candidate_play){
 		::throw($track->name, ": You must set track to PLAY before fixing dc level, skipping.\n");
 		return;
