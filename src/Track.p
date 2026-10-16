@@ -240,7 +240,6 @@ sub effective_off  { ($_[0]->effective_rw // '') eq OFF }
 
 sub show_tracks_setting {
 	my $track = shift;
-	return join(' v', REC, $track->current_version) if $track->rec;
 	return join(' but ', $track->rw, $track->effective_rw)
 		if $track->rw ne $track->effective_rw;
 	$track->rec_status_display;
