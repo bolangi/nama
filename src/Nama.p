@@ -304,6 +304,5 @@ __DATA__
 [% qx(cat ./aux_midi_commands) %]
 @@ test_tempo_map
 [% qx(cat ./tempo_map) %]
-
-
-1;
+@@ all_midi_command_names
+[% qx(cat ./midi_commands_builtin ./midi_commands_aux) %]
