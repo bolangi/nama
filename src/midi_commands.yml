@@ -4,9 +4,10 @@
 # "uiltinlist" is corrected to "builtinlist". Missing built-in descriptions
 # and fdel/igetd/ogetd signatures checked against ratchov/midish help.c.
 # Upstream reference: https://midish.org/manual.html
-# Auxiliary procedures: src/aux_midi_commands by F. Silvain, version 1.5,
+# Auxiliary procedures: supplied midish_extra by Jeanette C., version 1.6,
 # distributed under GPL version 3 or later. Includes its callable helpers.
-# Scope is the union of Nama's bundled help and command lists, not all commands
+# Compared against aux_midi_commands version 1.5; built-ins are unchanged.
+# Scope is Nama's bundled built-ins plus midish_extra 1.6, not all commands
 # that may be available in newer Midish versions or personal startup scripts.
 #
 # Values use the commands.yml fields: type, what, short, parameters, example.
@@ -24,7 +25,7 @@
 # A midi_channel value can be a named channel or the device/channel form accepted
 # by Midish. nil is accepted by setq, dclkrx, dmtcrx, dnew's filename,
 # and ctlconf/ctlconfx's defval where described below.
-# Known discrepancies in the bundled procedures are stated in their what fields.
+# Known discrepancies in midish_extra 1.6 are stated in their what fields.
 ---
 
 # Midish built-in commands
@@ -1210,7 +1211,7 @@ eval_outc:
 eval_mute_status:
   type: "midi"
   what: |
-    Return "Play" or "Off" for the current track, or nil if no track is selected.
+    Return "Play" or "Off" for the current track, or print an error and return nil if no track is selected.
   short: ""
   parameters: "none"
 
@@ -1240,7 +1241,7 @@ eval_pos:
 eval_positive:
   type: "midi"
   what: |
-    Return 1 if my_end is strictly greater than my_start; otherwise print an error and return 0.
+    Return 1 if my_end is greater than or equal to my_start; otherwise print an error and return 0. Equal range endpoints are accepted in version 1.6.
   short: ""
   parameters: "<integer:my_start> <integer:my_end>"
 
@@ -1268,14 +1269,14 @@ sec_ct:
 eval_dest_track:
   type: "midi"
   what: |
-    Create my_track if it does not exist, restoring the previously selected track afterward.
+    Create my_track if it does not exist, restoring the previously selected track afterward. Return 1.
   short: ""
   parameters: "<string:my_track>"
 
 fw:
   type: "midi"
   what: |
-    Forward forward_measures from the current position.
+    Move forward by forward_measures from the current position. Return 1.
   short: ""
   parameters: "<integer:forward_measures>"
   example: |
@@ -1284,7 +1285,7 @@ fw:
 rw:
   type: "midi"
   what: |
-    Move backward by rewind_measures measures. In the bundled implementation, a result below zero prints a message and returns 0 without moving the position.
+    Move backward by rewind_measures measures. If the result would be below zero, print a message and move to measure 0. Return 1.
   short: ""
   parameters: "<integer:rewind_measures>"
   example: |
@@ -1293,7 +1294,7 @@ rw:
 show:
   type: "midi"
   what: |
-    Print a list of all tracks with additional information.
+    Print a list of all tracks with additional information, restore the previously selected track, and return 1.
   short: ""
   parameters: "none"
   example: |
@@ -1375,18 +1376,28 @@ solo:
 nosolo:
   type: "midi"
   what: |
-    Unmute all tracks.
+    Unmute all tracks and return 1.
   short: ""
   parameters: "none"
 
 cquantm:
   type: "midi"
   what: |
-    Quantise current track to the nearest quantise_note denomination with a precision of precision percent starting at start_position for quantise_measures measures.
+    Quantise event frames in the current track with tquantf to the nearest quantise_note denomination, with precision percent strength, starting at start_position for quantise_measures measures. The implementation saves and restores the position and quantization setting, but when getq is nil its fallback is the literal atom pgrid rather than a numeric denominator; restoring that value may fail. Set a numeric quantization with setq first.
   short: ""
   parameters: "<position:start_position> <integer:quantise_measures> <integer:quantise_note> <integer:precision>"
   example: |
     cquantm 0 8 16 100
+
+tronm:
+  type: "midi"
+  what: |
+    Quantise all events in the current track, including note-off events, with tquanta to the nearest quantise_note denomination, with precision percent strength, starting at start_position for quantise_measures measures. The implementation saves and restores the position and quantization setting, but when getq is nil its fallback is the literal atom pgrid rather than a numeric denominator; restoring that value may fail. Set a numeric quantization with setq first.
+  short: ""
+  parameters: "<position:start_position> <integer:quantise_measures> <integer:quantise_note> <integer:precision>"
+  example: |
+    setq 16
+    tronm 0 8 16 100
 
 quantm:
   type: "midi"
@@ -1521,10 +1532,46 @@ cchmapm:
   example: |
     cchmapm 0 8 bass
 
+transm:
+  type: "midi"
+  what: |
+    Transpose my_track by semitones starting at start_position for trans_measures measures. Positive values transpose up and negative values down. Restore the position and previously selected track; if no track was selected, leave my_track selected. Return 1 on success or 0 if the track does not exist.
+  short: ""
+  parameters: "<string:my_track> <position:start_position> <integer:trans_measures> <integer:semitones>"
+  example: |
+    transm piano now 8 12
+
+trans:
+  type: "midi"
+  what: |
+    Transpose my_track by semitones between start_position and end_position, resolving symbolic positions with eval_pos. Reject an end before the start; equal endpoints are accepted. Delegate to transm and return its result.
+  short: ""
+  parameters: "<string:my_track> <position:start_position> <position:end_position> <integer:semitones>"
+  example: |
+    trans piano 6 8 2
+
+ctransm:
+  type: "midi"
+  what: |
+    Transpose the current track by semitones starting at start_position for trans_measures measures, preserving the position and track selection. Return 0 if no track is selected; otherwise return the result of transm.
+  short: ""
+  parameters: "<position:start_position> <integer:trans_measures> <integer:semitones>"
+  example: |
+    ctransm now 8 -12
+
+ctrans:
+  type: "midi"
+  what: |
+    Transpose the current track by semitones between start_position and end_position. Symbolic positions start, end and now are accepted. Return 0 if no track is selected; otherwise return the result of trans.
+  short: ""
+  parameters: "<position:start_position> <position:end_position> <integer:semitones>"
+  example: |
+    ctrans 0 end 12
+
 rnew:
   type: "midi"
   what: |
-    Create a filter named after the current track, route inputchannel to outputchannel, and assign the filter to the track. Fail if a filter of that name already exists.
+    Create a filter named after the current track, route inputchannel to outputchannel, and assign the filter to the track. Add channel-aftertouch (cat) events with values 1 and 0 at measure 0, beat 0, ticks 1 and 2 on outputchannel. Fail if a filter of that name already exists.
   short: ""
   parameters: "<string:inputchannel> <string:outputchannel>"
   example: |
@@ -1533,7 +1580,7 @@ rnew:
 radd:
   type: "midi"
   what: |
-    Add an input-to-output mapping to the current track routing filter. Use rnew first.
+    Add an input-to-output mapping to the current track routing filter. If no filter named after the track exists, call rnew to create and assign it.
   short: ""
   parameters: "<string:inputchannel> <string:outputchannel>"
   example: |
@@ -1552,7 +1599,7 @@ rsplit:
 gnew:
   type: "midi"
   what: |
-    Print instructions for creating a group as a Midish list variable; this command does not create a group itself.
+    Print instructions for creating a group as a Midish list variable and return 1; this command does not create a group itself.
   short: ""
   parameters: "none"
   example: |
@@ -1591,7 +1638,7 @@ gsolo:
 gshow:
   type: "midi"
   what: |
-    Show list of tracks in my_group with additional information.
+    Show all tracks in my_group with additional information, restore the previously selected track, and return 1.
   short: ""
   parameters: "<list:my_group>"
   example: |
@@ -1601,7 +1648,7 @@ gshow:
 gclrm:
   type: "midi"
   what: |
-    Clear clear_measures from all tracks in the group starting at start_position.
+    Clear clear_measures from all tracks in my_group starting at start_position. Version 1.6 forwards both range arguments correctly to clrm. Return 0 if any track operation fails, otherwise 1.
   short: ""
   parameters: "<list:my_group> <position:start_position> <integer:clear_measures>"
   example: |
@@ -1651,6 +1698,25 @@ gcopy:
   parameters: "<list:my_group> <position:start_position> <position:end_position> <integer:dest_position>"
   example: |
     gcopy {piano bass} 0 8 16
+
+gtransm:
+  type: "midi"
+  what: |
+    Transpose every track in my_group by semitones starting at start_position for trans_measures measures. Continue after failures. Return the last track operation result, or 1 for an empty group; earlier failures can be masked by later successes.
+  short: ""
+  parameters: "<list:my_group> <position:start_position> <integer:trans_measures> <integer:semitones>"
+  example: |
+    let strings = {violin cello viola}
+    gtransm $strings now 8 12
+
+gtrans:
+  type: "midi"
+  what: |
+    Transpose every track in my_group by semitones between start_position and end_position. Symbolic positions start, end and now are accepted. Continue after failures. Return the last track operation result, or 1 for an empty group; earlier failures can be masked by later successes.
+  short: ""
+  parameters: "<list:my_group> <position:start_position> <position:end_position> <integer:semitones>"
+  example: |
+    gtrans {piano bass} 0 end -12
 
 snew:
   type: "midi"
@@ -1829,4 +1895,14 @@ prepeat:
   parameters: "<integer:my_bar> <integer:my_step> <integer:my_note> <integer:my_repeat> <integer:my_denom>"
   example: |
     prepeat 1 2 60 6 12
+
+
+fs_version:
+  type: "midi"
+  what: |
+    Print "Midish Extra Commands Version 1.6, (c) 2014-19 Jeanette C." and return 1.
+  short: ""
+  parameters: "none"
+  example: |
+    fs_version
 
