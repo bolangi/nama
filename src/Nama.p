@@ -298,8 +298,8 @@ __DATA__
 [% qx(cat ./palette.json) %]
 @@ banner
 [% qx(cat ./banner) %]
-@@ midi_help
-[% qx(cat ./midi_help) %]
+@@ midi_commands_yml
+[% qx(cat ./midi_commands.yml) %]
 @@ aux_midi_commands
 [% qx(cat ./aux_midi_commands) %]
 @@ test_tempo_map

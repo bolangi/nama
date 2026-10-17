@@ -6,19 +6,20 @@ use v5.36;
 {
 no warnings 'uninitialized';
 sub helpline {
-	my $cmd = shift;
+	my ($cmd, $commands) = @_;
+	$commands //= $text->{commands};
 	my @out;
 	push @out, "\nCommand: $cmd";
-	push @out, "Shortcuts: $text->{commands}->{$cmd}->{short}"
-			if $text->{commands}->{$cmd}->{short};	
-	push @out, "Category: $text->{commands}->{$cmd}->{type}";
-	push @out, "Description: " . munge_help($text->{commands}->{$cmd}->{what});
+	push @out, "Shortcuts: $commands->{$cmd}->{short}"
+			if $commands->{$cmd}->{short};
+	push @out, "Category: $commands->{$cmd}->{type}";
+	push @out, "Description: " . munge_help($commands->{$cmd}->{what});
 	my $usage = "Usage: $cmd "; 
-	$usage .= 		$text->{commands}->{$cmd}->{parameters}
-		   		 if $text->{commands}->{$cmd}->{parameters} ne 'none' ;
+	$usage .= 		$commands->{$cmd}->{parameters}
+				 if $commands->{$cmd}->{parameters} ne 'none' ;
 	
 	push @out, $usage;
-	my $example =   $text->{commands}->{$cmd}->{example};
+	my $example =   $commands->{$cmd}->{example};
 	if ($example){
 		my $title .= 'Example:';
 		my $eg = munge_help($example);
@@ -159,19 +160,37 @@ sub find_effect {
 }
 
 sub parse_midi_help {
-	my $h = get_data_section("midi_help");
-	my @lines = split $/, $h;
-	my $j;
-	my $cmd;
-	my %acc;
-	for (@lines)
-	{
-	 /(^\w+)/ 
-		? ($cmd = $1, $acc{$cmd} = [], $j++)
-		: (push $acc{$cmd}->@*, $_ );
+	$help->{midi_commands} = yaml_in(get_data_section('midi_commands_yml'));
+	return;
+}
+
+sub help_midi {
+	my $name = lc shift;
+	my $commands = $help->{midi_commands};
+	if ($commands->{$name}) {
+		::pager(helpline($name, $commands));
+	} else {
+		throw("$name: no MIDI command help found. Try find-midi keyword.");
 	}
-	$help->{midish} = \%acc;
-	return
+}
+
+sub find_midi {
+	my @keywords = @_;
+	my $commands = $help->{midi_commands};
+	my @matches;
+	for my $name (sort keys $commands->%*) {
+		my $description = $commands->{$name}->{what};
+		my $search_text = "$name $description";
+		next if grep { $search_text !~ /\Q$_\E/i } @keywords;
+		$description =~ s/\s+/ /g;
+		$description =~ s/\s+$//;
+		push @matches, "$name: $description";
+	}
+	if (@matches) {
+		::pager(join("\n\n", @matches) . "\n");
+	} else {
+		throw(join ' ', 'No MIDI commands were found matching:', @keywords);
+	}
 }
 
 ## Initialization

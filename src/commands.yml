@@ -8,6 +8,24 @@ help:
     help marks # display the help category marks and all commands containing marks
     help 6 # display help on the effects category
     help mfx # display help on modify-effect - shortcut mfx
+help_midi:
+  type: help
+  what: Display detailed help for one built-in or auxiliary MIDI command.
+  short: hm
+  parameters: <string:command_name>
+  example: |
+    help-midi tquant
+    hm cquantm
+    nama hm cquantm # use the Nama prefix in MIDI mode
+find_midi:
+  type: help
+  what: Find MIDI commands whose name or description contains all supplied keywords (case insensitive, literal matching).
+  short: fm
+  parameters: <string:keyword1> [ <string:keyword2>... ]
+  example: |
+    find-midi quant
+    fm current track
+    nama fm note velocity # use the Nama prefix in MIDI mode
 help_effect:
   type: help
   what: Display detailed help on LADSPA or LV2 effects.

@@ -51,10 +51,14 @@ my @twocolumn = map {
 $help->{topic}->%*  = (
 
 help => <<HELP,
-   help <command>       - show help for <command>
-   help <fragment>      - show help for commands matching /<fragment>/
-   help <ladspa_id>     - info on a LADSPA id
-   help <topic_number>  - list commands under <topic_number> 
+   help <command>             - show help for <command>
+   help <fragment>            - show help for commands matching <fragment>
+   help <topic_number>        - list commands under <topic_number> 
+   find-midi, fm <keywords>   - search MIDI command names and descriptions
+   help-midi, hm <name>       - show help for MIDI command
+   find-effect, fe <keywords> - search effects registry
+   help-effect, he <name>     - show help for effect by name or LADSPA ID
+
 HELP
 
 project => <<'PROJECT',
@@ -514,6 +518,12 @@ The help command ('help', 'h') can take several arguments.
 help <command>          - show help for <command>
 help <fragment>         - show help for all commands matching /<fragment>/
 help <topic_number>     - list commands under topic <topic_number> below
+
+Other help commands:
+
+find-effect, fe        - search for effect matching keywords
+help-effect, he        - help on specific effect or LADPA ID
+
 
 help is available for the following topics:
 

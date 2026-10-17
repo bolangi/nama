@@ -224,6 +224,10 @@ end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 effect_hotkeys: _effect_hotkeys { ::set_hotkey_mode('effect'); 1 }
 jump_hotkeys:   _jump_hotkeys   { ::set_hotkey_mode('jump');   1 }
 bump_hotkeys:   _bump_hotkeys   { ::set_hotkey_mode('bump');   1 }
+help_midi: _help_midi anytag { ::help_midi($item{anytag}); 1 }
+help_midi: _help_midi { ::notify('Usage: help-midi command_name'); 1 }
+find_midi: _find_midi anytag(s) { ::find_midi(@{$item{'anytag(s)'}}); 1 }
+find_midi: _find_midi { ::notify('Usage: find-midi keyword(s)'); 1 }
 help_effect: _help_effect effect { ::help_effect($item{effect}) ; 1}
 find_effect: _find_effect anytag(s) { 
 	::find_effect(@{$item{"anytag(s)"}}); 1}
