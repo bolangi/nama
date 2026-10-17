@@ -1542,7 +1542,7 @@ radd:
 rsplit:
   type: "midi"
   what: |
-    Add keyboard-split mappings to the current filter for the current track: notes 0 through splitpoint go to leftout, and higher notes go to rightout. Requires an existing track filter; select that filter with cf first.
+    Add keyboard-split mappings to the current filter for the current track: notes 0 through splitpoint go to leftout, and higher notes go to rightout. Requires an existing track filter; selecting the track also selects its assigned filter.
   short: ""
   parameters: "<string:inputchannel> <string:leftout> <string:rightout> <integer:splitpoint>"
   example: |
