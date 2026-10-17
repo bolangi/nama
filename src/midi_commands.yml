@@ -1,38 +1,51 @@
 # MIDI command reference for Nama; matching commands.yml field names.
-# Source: bolangi/nama, commit 1703a5e (2026-10-16).
-# Built-ins: src/midi_help plus src/midi_commands_builtin; the truncated
-# "uiltinlist" is corrected to "builtinlist". Missing built-in descriptions
-# and fdel/igetd/ogetd signatures checked against ratchov/midish help.c.
-# Upstream reference: https://midish.org/manual.html
+# Target: Midish 1.5.0 (released 2026-08-30) plus Midish Extra 1.6.
+# Built-ins checked against user.c registrations, help.c, builtin.c and
+# manual.html in https://midish.org/midish-1.5.0.tar.gz.
+# All 152 registered built-ins are included. tquant and sendraw are omitted
+# because 1.5.0 does not register them, even though old implementation code remains.
 # Auxiliary procedures: supplied midish_extra by Jeanette C., version 1.6,
-# distributed under GPL version 3 or later. Includes its callable helpers.
-# Compared against aux_midi_commands version 1.5; built-ins are unchanged.
-# Scope is Nama's bundled built-ins plus midish_extra 1.6, not all commands
-# that may be available in newer Midish versions or personal startup scripts.
+# distributed under GPL version 3 or later. All 86 callable procedures included.
+# Optional procedures from example midishrc files are outside this reference.
 #
-# Values use the commands.yml fields: type, what, short, parameters, example.
-# Empty short means no alias; single-letter Midish commands have their own keys.
-# Examples are Midish input. In audio mode, prefix each input line with "midi ".
-# In midi mode, enter it directly; "nama " switches a line to Nama commands.
-# Return-value commands can be displayed with: print [command arguments].
+# Fields: type, what, short, parameters, example. Empty short means no alias;
+# single-letter Midish commands have their own keys.
+# Examples are Midish input. In Nama audio mode, prefix each line with "midi ".
+# In MIDI mode, enter directly; "nama " switches a line to Nama commands.
+# Return values can be displayed with: print [command arguments].
 # Measures, beats, steps and MIDI channel numbers are zero-based.
-# An auxiliary position can be a measure number, start, end or now only where
-# the implementation calls eval_pos. List arguments use braces, names are atoms,
-# string filenames/port names use double quotes, variables use a dollar prefix.
-# Quantization/note denominations: 4=quarter, 8=eighth, 16=sixteenth;
-# precision is a percentage. Song positions are measures, not audio seconds.
-# Examples assume the referenced tracks, named channels and devices exist.
-# A midi_channel value can be a named channel or the device/channel form accepted
-# by Midish. nil is accepted by setq, dclkrx, dmtcrx, dnew's filename,
-# and ctlconf/ctlconfx's defval where described below.
-# Known discrepancies in midish_extra 1.6 are stated in their what fields.
+# Auxiliary positions accept start, end and now where eval_pos is called.
+# List arguments use braces, names/modes are atoms, filenames/port names are
+# quoted strings, and variable references start with a dollar sign.
+# Parenthesize negative arguments, e.g. trans piano 0 4 (-12), to avoid
+# parsing subtraction from the preceding numeric argument.
+# A midi_channel argument is a named channel or a {device channel} pair.
+# Note denominators: 4=quarter, 8=eighth, 16=sixteenth. Quantization rates are
+# percentages. Positions are measures, not audio seconds.
+# nil is accepted where explicitly described, including setq, ct/cf/cx/ci/co,
+# dclkrx, dmtcrx, dnew's path and ctlconf/ctlconfx's default value.
+# Examples assume the referenced tracks, channels and devices exist.
+# Known discrepancies in Midish Extra 1.6 remain documented in what fields.
+#
+# Built-in descriptions are adapted from Midish help.c under this license:
+# Copyright (c) 2018 Alexandre Ratchov <alex@caoua.org>
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ---
 
-# Midish built-in commands
+# Midish 1.5.0 built-in commands
 tlist:
   type: "midi"
   what: |
-    Return the list of track names in the song.
+    Return the list of tracks.
   short: ""
   parameters: "none"
   example: |
@@ -41,7 +54,7 @@ tlist:
 tnew:
   type: "midi"
   what: |
-    Create an empty track named "trackname"
+    Create a track with the given name.
   short: ""
   parameters: "<string:trackname>"
   example: |
@@ -57,7 +70,7 @@ tdel:
 tren:
   type: "midi"
   what: |
-    Change the name of the current track to "newname"
+    Rename the current track to the given name.
   short: ""
   parameters: "<string:newname>"
   example: |
@@ -66,23 +79,23 @@ tren:
 texists:
   type: "midi"
   what: |
-    Return 1 if "trackname" is a track, 0 otherwise
+    Return 1 if a track with the given name exists, 0 otherwise.
   short: ""
   parameters: "<string:trackname>"
 
 taddev:
   type: "midi"
   what: |
-    Put the event "ev" on the current track at the position given by "measure", "beat" and "tick"
+    Put the given event at the given position of the current track.
   short: ""
-  parameters: "<integer:measure> <integer:beat> <integer:tick> <event:ev>"
+  parameters: "<integer:measure> <integer:beat> <integer:tic> <event:event>"
   example: |
     taddev 0 0 0 {non piano 60 100}
 
 tsetf:
   type: "midi"
   what: |
-    Set the default filter (for recording) of the current track to "filtname". It will be used in performance mode if there is no current filter.
+    Set the default filter of the current track to the given filter.
   short: ""
   parameters: "<string:filtname>"
   example: |
@@ -91,7 +104,8 @@ tsetf:
 tgetf:
   type: "midi"
   what: |
-    Return the default filter (for recording) of the current track, returns "nil" if none
+    Return the default filter of the current track, returns nil
+    if none.
   short: ""
   parameters: "none"
   example: |
@@ -100,9 +114,20 @@ tgetf:
 tcheck:
   type: "midi"
   what: |
-    Check the current track for orphaned notes, nested notes and other anomalies; also removes multiple controllers in the same tick
+    Check the current track for orphaned notes, nested notes, and other anomalies. Remove multiple
+    controllers in the same clock tick.
   short: ""
   parameters: "none"
+
+trewrite:
+  type: "midi"
+  what: |
+    Rewrite the entire current track note-by-note, arranging related events into frames. This affects
+    the whole track, rather than only the current selection.
+  short: ""
+  parameters: "none"
+  example: |
+    trewrite
 
 tcut:
   type: "midi"
@@ -114,69 +139,102 @@ tcut:
 tclr:
   type: "midi"
   what: |
-    Clear the current selection of the current track. only events matching the current event selection (see ev function) are removed.
+    Clear the current selection of the current track. Only events matching the current event selection
+    (see the ev command) are removed.
   short: ""
   parameters: "none"
 
 tins:
   type: "midi"
   what: |
-    Insert "amount" empty measures in the current track, at the current position.
+    Insert the given amount of empty measures at the current position in the current track.
   short: ""
   parameters: "<integer:amount>"
 
 tpaste:
   type: "midi"
   what: |
-    Copy the hidden temporary track (filled by tcopy) on the current position of the current track. the current event selection (see ev function) are copied
+    Paste track portion (copied with tcopy) at the current position of the current track.
   short: ""
   parameters: "none"
 
 tcopy:
   type: "midi"
   what: |
-    Copy the current selection of the current track into a hidden temporary track. Only events matching the current event selection (see ev function) are copied
+    Copy the current selection of the current track so that it could be pasted with the tpaste command.
+    Only events matching the current event selection are copied (see ev command).
   short: ""
   parameters: "none"
 
-tquant:
+tmerge:
   type: "midi"
   what: |
-    Quantize the current selection of the current track using the current quantization step (see setq function). Note positions are rounded to the nearest tick multiple of the quantization step; Rate must be between 0 and 100: 0 means no quantization and 100 means full quantization.
+    Merge the given track into the current track.
+  short: ""
+  parameters: "<string:source>"
+
+tquanta:
+  type: "midi"
+  what: |
+    Quantise individual event positions in the current selection of the current track to the grid set
+    with setq. Note-on and note-off events are quantised independently, so note lengths can change. rate
+    is a percentage from 0 (unchanged) to 100 (fully quantised).
   short: ""
   parameters: "<integer:rate>"
   example: |
     setq 16
+    g 0
     sel 4
-    tquant 100
+    tquanta 100
+
+tquantf:
+  type: "midi"
+  what: |
+    Quantise event-frame positions, such as note starts, in the current selection of the current track
+    to the grid set with setq. Move each frame as a whole, preserving its length, including note
+    duration. rate is a percentage from 0 (unchanged) to 100 (fully quantised).
+  short: ""
+  parameters: "<integer:rate>"
+  example: |
+    setq 16
+    g 0
+    sel 4
+    tquantf 100
 
 ttransp:
   type: "midi"
   what: |
-    Transpose note events of current selection of the current track, by "halftones" half tones. Only events matching the current event selection (see ev function) are transposed.
+    Transpose matching note events in the current selection of the current track by halftones semitones.
+    Positive values transpose up and negative values down. Midish 1.5.0 accepts -64 through 62; its
+    implementation rejects 63 despite an error message naming -64..63.
   short: ""
   parameters: "<integer:halftones>"
   example: |
     ttransp 12
 
+tvcurve:
+  type: "midi"
+  what: |
+    Adjust velocity of note events, using the given weight in the -63..63 range. Applies only to note
+    events of current selection of the current track (see ev command).
+  short: ""
+  parameters: "<integer:weight>"
+  example: |
+    tvcurve 20
+
 tevmap:
   type: "midi"
   what: |
-    Convert events matching evspec1 (source) into events matching evspec2 (destination) in the current selection of the current track. Both evspec1 and evspec2 must have the same number of devices, channels, notes, controllers etc..
+    Convert events matching the given source event set to the given destination event set. Changes apply
+    to the current selection of the current track. Both event sets must have the same number of devices,
+    channels, notes, controllers etc..
   short: ""
-  parameters: "<event:evspec1> <event:evspec2>"
-
-tmerge:
-  type: "midi"
-  what: |
-    Merge the "sourcetrack" into the current track
-  short: ""
-  parameters: "<string:sourcetrack>"
+  parameters: "<event:from> <event:to>"
 
 mute:
   type: "midi"
   what: |
-    Mute the given track, i.e. events from "trackname" will not be played during record/playback.
+    Mute the given track.
   short: ""
   parameters: "<string:trackname>"
   example: |
@@ -185,7 +243,7 @@ mute:
 unmute:
   type: "midi"
   what: |
-    Unmute the given track, i.e. events from "trackname" will be played during record/playback.
+    Unmute the given track.
   short: ""
   parameters: "<string:trackname>"
   example: |
@@ -212,158 +270,194 @@ tclist:
 tinfo:
   type: "midi"
   what: |
-    Scan the current selection of the current track, and for each measure display the number of events that match the current event selection
+    Scan the current selection of the current track, and for each measure display the number of events
+    that match the current event selection.
   short: ""
   parameters: "none"
+
+tdump:
+  type: "midi"
+  what: |
+    Display events matching the current event selection within the selected measures of the current
+    track.
+  short: ""
+  parameters: "none"
+  example: |
+    g 0
+    sel 4
+    tdump
 
 inew:
   type: "midi"
   what: |
-    Create a new channel named "channelname" and assigned the given device and MIDI channel.
+    Create a named input channel using channum, either an existing input channel name or a {device
+    MIDI_channel} pair. MIDI channel numbers are zero-based (0..15).
   short: ""
-  parameters: "<string:channelname> {<integer:dev> <integer:midichan>}"
+  parameters: "<string:channame> <midi_channel:channum>"
   example: |
     inew keyboard {0 0}
 
 iset:
   type: "midi"
   what: |
-    Set the device/channel pair of the current channel. All filters are updated to use the new channel setting as if the appropriate fchgin function was invoked for each filter.
+    Set the device and MIDI channel of the current input using an existing input channel name or a
+    {device MIDI_channel} pair. Update filters to follow the changed channel.
   short: ""
-  parameters: "{<integer:dev> <integer:midichan>}"
+  parameters: "<midi_channel:channum>"
 
 idel:
   type: "midi"
   what: |
-    Delete current channel.
+    Delete the current input.
   short: ""
   parameters: "none"
 
 iren:
   type: "midi"
   what: |
-    Rename the current channel to "newname"
+    Rename the current input to the given name.
   short: ""
   parameters: "<string:newname>"
+
+ilist:
+  type: "midi"
+  what: |
+    Return the list of inputs.
+  short: ""
+  parameters: "none"
+  example: |
+    print [ilist]
 
 iexists:
   type: "midi"
   what: |
-    Return 1 if "channelname" is a channel, 0 otherwise
+    Return 1 if an input with the given name exists, 0 otherwise.
   short: ""
-  parameters: "<string:channelname>"
+  parameters: "<string:channame>"
 
 igetc:
   type: "midi"
   what: |
-    Return the MIDI channel number of the current channel
+    Return the MIDI channel number of the current input.
   short: ""
   parameters: "none"
 
 igetd:
   type: "midi"
   what: |
-    Return the device number of the current channel
+    Return the device number of the current input.
   short: ""
   parameters: "none"
 
 iaddev:
   type: "midi"
   what: |
-    Add the event to the configuration of the current channel, it's not used yet.
+    Add the given event to the configuration of the current channel, it's not used yet.
   short: ""
   parameters: "<event:event>"
 
 irmev:
   type: "midi"
   what: |
-    Remove all events matching "evspec" (see event ranges) from the configuration of the current channel
+    Remove all events matching the given evspec from the configuration of the current channel.
   short: ""
   parameters: "<event:evspec>"
 
 iinfo:
   type: "midi"
   what: |
-    Print all events on the config of the current channel.
+    Print all config events of the current input.
   short: ""
   parameters: "none"
 
 onew:
   type: "midi"
   what: |
-    Create a new channel named "channelname" and assigned the given device and MIDI channel. Output channels contain a built-in filter having the same name; by default it maps all inputs to the newly created output channel.
+    Create a named output channel using channum, either an existing output channel name or a {device
+    MIDI_channel} pair. MIDI channel numbers are zero-based (0..15). Create a filter of the same name
+    that maps all inputs to this output.
   short: ""
-  parameters: "<string:channelname> {<integer:dev> <integer:midichan>}"
+  parameters: "<string:channame> <midi_channel:channum>"
   example: |
     onew synth {1 0}
-
-oset:
-  type: "midi"
-  what: |
-    Set the device/channel pair of the current channel. All filters are updated to use the new channel setting as if the appropriate fchgout function was invoked for each filter.
-  short: ""
-  parameters: "{<integer:dev> <integer:midichan>}"
 
 odel:
   type: "midi"
   what: |
-    Delete current channel.
+    Delete current output.
   short: ""
   parameters: "none"
+
+oset:
+  type: "midi"
+  what: |
+    Set the device and MIDI channel of the current output using an existing output channel name or a
+    {device MIDI_channel} pair. Update filters to follow the changed channel.
+  short: ""
+  parameters: "<midi_channel:channum>"
 
 oren:
   type: "midi"
   what: |
-    Rename the current channel to "newname"
+    Rename the current output to the given name.
   short: ""
   parameters: "<string:newname>"
 
 oexists:
   type: "midi"
   what: |
-    Return 1 if "channelname" is a channel, 0 otherwise
+    Return 1 if an output with the given name exists, 0 otherwise.
   short: ""
-  parameters: "<string:channelname>"
+  parameters: "<string:channame>"
 
 ogetc:
   type: "midi"
   what: |
-    Return the MIDI channel number of the current channel
+    Return the MIDI channel number of the current output.
   short: ""
   parameters: "none"
 
 ogetd:
   type: "midi"
   what: |
-    Return the device number of the current channel
+    Return the device number of the current output.
   short: ""
   parameters: "none"
 
 oaddev:
   type: "midi"
   what: |
-    Add the event to the configuration of the current channel, it's not used yet.
+    Add the given event to the configuration of the current output.
   short: ""
   parameters: "<event:event>"
 
 ormev:
   type: "midi"
   what: |
-    Remove all events matching "evspec" (see event ranges) from the configuration of the current channel
+    Remove all events matching the given set from the configuration of the current output.
   short: ""
   parameters: "<event:evspec>"
 
 oinfo:
   type: "midi"
   what: |
-    Print all events on the config of the current channel.
+    Print all config events of the current output.
   short: ""
   parameters: "none"
+
+olist:
+  type: "midi"
+  what: |
+    Return list of outputs.
+  short: ""
+  parameters: "none"
+  example: |
+    print [olist]
 
 fnew:
   type: "midi"
   what: |
-    Create a new filter named "filtname"
+    Create a new filter with the given name.
   short: ""
   parameters: "<string:filtname>"
   example: |
@@ -379,14 +473,14 @@ fdel:
 fren:
   type: "midi"
   what: |
-    Rename the current filter to "newname"
+    Rename the current filter to the given name.
   short: ""
   parameters: "<string:newname>"
 
 fexists:
   type: "midi"
   what: |
-    Return 1 if "filtname" is a filter, 0 otherwise
+    Return 1 if a filter with the given name exists, 0 otherwise.
   short: ""
   parameters: "<string:filtname>"
 
@@ -400,74 +494,90 @@ freset:
 finfo:
   type: "midi"
   what: |
-    List all filtering rules of the current filter
+    List all rules of the current filter.
   short: ""
   parameters: "none"
+
+flist:
+  type: "midi"
+  what: |
+    Return the list of existing filters.
+  short: ""
+  parameters: "none"
+  example: |
+    print [flist]
 
 fchgin:
   type: "midi"
   what: |
-    Rewrite all filtering rules of the current filter to consume "new_evspec" events instead of "old_evspec" events. This means that each rule that would consume "old_evspec" on the input will start consuming "new_evspec" instead.
+    Rewrite current filter rules to consume new event set in place of the old event set. This means that
+    each rule previously matching old set on the input will start matching new set instead.
   short: ""
-  parameters: "<event:old_evspec> <event:new_evspec>"
+  parameters: "<event:from> <event:to>"
 
 fswapin:
   type: "midi"
   what: |
-    Similar to fchgin but swap "evspec1" and "evspec2" in the source events set of each rule.
+    Similar to the fchgin command but swap the two event sets in the source events set of each rule.
   short: ""
-  parameters: "<event:evspec1> <event:evspec2>"
+  parameters: "<event:from> <event:to>"
 
 fchgout:
   type: "midi"
   what: |
-    Rewrite all filtering rules of the current filter to produce "new_evspec" events instead of "old_evspec" events. This means that each rule that would produce "old_evspec" on the output will start producing "new_evspec" instead.
+    Rewrite all filtering rules of the current filter to produce the new event set instead of the old
+    event set. This means that each rule previously producing the old set will start producing new set
+    instead.
   short: ""
-  parameters: "<event:old_evspec> <event:new_evspec>"
+  parameters: "<event:from> <event:to>"
 
 fswapout:
   type: "midi"
   what: |
-    Similar to fchgout but swap "evspec1" and "evspec2" in the destination events set of each rule.
+    Similar to the fchgout command, but swap the two event sets in the destination events set of each
+    rule.
   short: ""
-  parameters: "<event:evspec1> <event:evspec2>"
+  parameters: "<event:from> <event:to>"
 
 fmap:
   type: "midi"
   what: |
-    Add a new rule to the current filter, to make it convert events matching evspec1 (source) into events matching evspec2 (destination). Both evspec1 and evspec2 must have the same number of devices, channels, notes, controllers etc..
+    Add a new mapping rule to the current filter. The events matching the source event set will be
+    converted to the destination event set. Source and destination sets must have the same number of
+    devices, channels, notes, controllers etc..
   short: ""
-  parameters: "<event:evspec1> <event:evspec2>"
+  parameters: "<event:from> <event:to>"
   example: |
     fmap {any keyboard} {any synth}
 
 funmap:
   type: "midi"
   what: |
-    Remove event maps from the current filter. Any mapping with source included in evspec1 and destination included in evspec2 is deleted.
+    Remove the given event mapping rules from the current filter. Any mapping rule with source included
+    in the given source and destination included in the given destination is deleted.
   short: ""
-  parameters: "<event:evspec1> <event:evspec2>"
+  parameters: "<event:from> <event:to>"
 
 ftransp:
   type: "midi"
   what: |
-    Transpose events generated by the filter and matching "evspec" by the given number of halftones
+    Transpose events matching the given event set by the given number of halftones.
   short: ""
-  parameters: "<event:evspec> <integer:halftones>"
+  parameters: "<event:evspec> <integer:plus>"
 
 fvcurve:
   type: "midi"
   what: |
-    Adjusts velocity of note events produced by the filter, using the given "weight" in the -63..63 range. If "weight" is:
-    
-    negative - sensitivity is decreased positive - sensitivity is increased zero - the velocity is unchanged
+    Adjust velocity of the given note events, using the given weight in the -63..63 range. If the weight
+    is negative then sensitivity is decreased. If it's positive then sensitivity is increased. If it's
+    zero the velocity is unchanged.
   short: ""
   parameters: "<event:evspec> <integer:weight>"
 
 xnew:
   type: "midi"
   what: |
-    Create a new bank of sysex messages named "sysexname"
+    Create a new bank of sysex messages with the given name.
   short: ""
   parameters: "<string:sysexname>"
 
@@ -481,98 +591,111 @@ xdel:
 xren:
   type: "midi"
   what: |
-    Rename the current sysex bank to "newname"
+    Rename the current sysex bank to the given name.
   short: ""
   parameters: "<string:newname>"
 
 xexists:
   type: "midi"
   what: |
-    Return 1 if "sysexname" is a sysex bank, 0 otherwise
+    Return 1 if a sysex bank with the given name exists, 0 otherwise.
   short: ""
   parameters: "<string:sysexname>"
 
 xrm:
   type: "midi"
   what: |
-    Remove all sysex messages starting with "pattern" from the current sysex bank. The given pattern is a list of bytes; an empty pattern matches any sysex message.
+    Remove all sysex messages starting with the given pattern from the current sysex bank. The given
+    pattern is a list of bytes; an empty pattern matches any sysex message.
   short: ""
-  parameters: "<list:pattern>"
+  parameters: "<list:data>"
 
 xsetd:
   type: "midi"
   what: |
-    Set device number to "newdev" on all sysex messages starting with "pattern" in the current sysex bank. The given pattern is a list of bytes; an empty pattern matches any sysex message.
+    Set device number of all sysex messages starting with the given pattern in the current sysex bank.
+    The given pattern is a list of bytes; an empty pattern matches any sysex message.
   short: ""
-  parameters: "<integer:newdev> <list:pattern>"
+  parameters: "<integer:devnum> <list:data>"
 
 xadd:
   type: "midi"
   what: |
-    Add to the current sysex bank a new sysex message. "data" is a list containing the MIDI system exclusive message and "devnum" is the device number to which the message will be sent when performance mode is entered
+    Add the given sysex message to the current sysex bank. The message is a list containing the system
+    exclusive message bytes. The given device number specifies the device to which the message will be
+    sent when performance mode is entered.
   short: ""
   parameters: "<integer:devnum> <list:data>"
 
 xinfo:
   type: "midi"
   what: |
-    Print all sysex messages of the current sysex bank. Messages that are too long to be displayed on a single line are truncated and the "..." string is displayed.
+    Print all sysex messages of the current sysex bank. Messages that are too long to be displayed on a
+    single line are truncated and dots are displayed.
   short: ""
   parameters: "none"
 
 ximport:
   type: "midi"
   what: |
-    Replace contents of the current sysex bank by contents of the given .syx file; messages are assigned to "devnum" device number.
+    Replace contents of the current sysex bank by contents of the given .syx file; messages are assigned
+    to the given device number.
   short: ""
   parameters: "<integer:devnum> <string:path>"
 
 xexport:
   type: "midi"
   what: |
-    Store contents of the current sysex bank in the given .syx file
+    Store contents of the current sysex bank in the given .syx file.
   short: ""
   parameters: "<string:path>"
+
+xlist:
+  type: "midi"
+  what: |
+    Return the list of sysex banks.
+  short: ""
+  parameters: "none"
+  example: |
+    print [xlist]
 
 i:
   type: "midi"
   what: |
-    Enter "idle" performance mode. Start processing MIDI input and generating MIDI output. data passes through the current filter (if any) or through the current track's filter (if any).
+    Enter performance mode. Start processing MIDI input and generating MIDI output. Data passes through
+    the current filter (if any) or through the current track's filter (if any).
   short: ""
   parameters: "none"
 
 p:
   type: "midi"
   what: |
-    Play the song from the current position. Input passes through the current filter (if any) or through the current track's filter (if any).
+    Play the song from the current position. Input passes through the current filter (if any) or through
+    the current track's filter (if any).
   short: ""
   parameters: "none"
 
 r:
   type: "midi"
   what: |
-    Play the song and record the input. Input passes through the current filter (if any) or through the current track's filter (if any). On startup, this function play one measure of countdown before the data start being recorded.
+    Play the song and record the input. Input passes through the current filter (if any) or through the
+    current track's filter (if any). On startup, this command plays one measure of countdown before the
+    data start being recorded.
   short: ""
   parameters: "none"
 
 s:
   type: "midi"
   what: |
-    Stop performance and release MIDI devices. I.e. stop the effect of the "i", "p" or "r" functions.
+    Stop performance and release MIDI devices.
   short: ""
   parameters: "none"
-
-sendraw:
-  type: "midi"
-  what: |
-    Send raw MIDI data to device number "device", for debugging purposes only.
-  short: ""
-  parameters: "<integer:device> <list:arrayofbytes>"
 
 ev:
   type: "midi"
   what: |
-    Set the current event selection. Most track editing functions will act only on events matching "evspec", ignoring all other events.
+    Set the current event selection. Most track editing commands will act only on events matching evspec
+    ignoring all other events.
   short: ""
   parameters: "<event:evspec>"
   example: |
@@ -581,11 +704,9 @@ ev:
 setq:
   type: "midi"
   what: |
-    Set the current quantization step to the given note value, as follow:
-    
-    4 - quarter note 6 - quarter note triplet 8 - eighth note 12 - eighth note triplet 16 - sixteenth note 24 - sixteenth note triplet etc...
-    
-    The quantization step will be used by tquant function and also by all editing functions to optimize event selection. If the special "nil" value is specified as quantization step, then quantization is disabled.
+    Set the quantization grid to a note denominator: 4 = quarter note, 6 = quarter-note triplet, 8 =
+    eighth note, 12 = eighth-note triplet. step must be in 1..96 and divide getunit evenly; nil disables
+    quantization. The grid is also used to align the selection for track editing.
   short: ""
   parameters: "<integer:step>"
   example: |
@@ -594,7 +715,7 @@ setq:
 getq:
   type: "midi"
   what: |
-    Return the current quantization step
+    Return the current quantization step.
   short: ""
   parameters: "none"
   example: |
@@ -603,7 +724,9 @@ getq:
 g:
   type: "midi"
   what: |
-    Set the current song position pointer to the given measure number. Record and playback will start at that position. This also defines the beginning of the current selection used by most track editing functions.
+    Set the current song position pointer to the given measure number. Record and playback will start at
+    that position. This also defines the beginning of the current selection used by most track editing
+    commands.
   short: ""
   parameters: "<integer:measure>"
   example: |
@@ -621,7 +744,8 @@ getpos:
 sel:
   type: "midi"
   what: |
-    Set the length of the current selection to "length" measures. The current selection start at the current position set with the "g" function.
+    Set the length of the current selection to the given number of measures. The current selection start
+    at the current position set with the g command.
   short: ""
   parameters: "<integer:length>"
   example: |
@@ -636,10 +760,32 @@ getlen:
   example: |
     print [getlen]
 
+loop:
+  type: "midi"
+  what: |
+    Enable loop mode. When playback is started, the current selection is repeated forever.
+  short: ""
+  parameters: "none"
+  example: |
+    g 0
+    sel 4
+    loop
+    p
+
+noloop:
+  type: "midi"
+  what: |
+    Disable loop mode.
+  short: ""
+  parameters: "none"
+  example: |
+    noloop
+
 ct:
   type: "midi"
   what: |
-    Set the current track. The current track is the one that will be recorded. Most track editing functions act on it.
+    Select trackname as the current recording/editing track and select its assigned default filter. Use
+    nil to deselect the current track.
   short: ""
   parameters: "<string:trackname>"
   example: |
@@ -648,7 +794,7 @@ ct:
 gett:
   type: "midi"
   what: |
-    Return the current track (if any) or "nil"
+    Return the current track (if any) or nil.
   short: ""
   parameters: "none"
   example: |
@@ -657,7 +803,8 @@ gett:
 cf:
   type: "midi"
   what: |
-    Set the current filter to "filtname". The current filter is the one used to process input MIDI events in performance mode. It's also the one affected by all filter editing functions.
+    Select filtname as the current filter for input processing and filter editing. Use nil to deselect
+    the filter.
   short: ""
   parameters: "<string:filtname>"
   example: |
@@ -666,7 +813,7 @@ cf:
 getf:
   type: "midi"
   what: |
-    Return the current filter or "nil" if none
+    Return the current filter or nil if none.
   short: ""
   parameters: "none"
   example: |
@@ -675,14 +822,15 @@ getf:
 cx:
   type: "midi"
   what: |
-    Set the current sysex bank, i.e. the one that will be recorded. The current sysex bank is the one affected by all sysex editing functions.
+    Select sysexname as the current system-exclusive bank for recording and bank editing. Use nil to
+    deselect the bank.
   short: ""
   parameters: "<string:sysexname>"
 
 getx:
   type: "midi"
   what: |
-    Return the current sysex bank or "nil" if none
+    Return the current sysex bank or nil if none.
   short: ""
   parameters: "none"
   example: |
@@ -691,7 +839,7 @@ getx:
 ci:
   type: "midi"
   what: |
-    Set the current (named) input channel. All input channel editing functions will act on it.
+    Select the named input channel for input-channel editing. Use nil to deselect it.
   short: ""
   parameters: "<string:channame>"
   example: |
@@ -700,7 +848,7 @@ ci:
 geti:
   type: "midi"
   what: |
-    Return the name of the current input channel or "nil" if none
+    Return the name of the current input channel or nil if none.
   short: ""
   parameters: "none"
   example: |
@@ -709,7 +857,7 @@ geti:
 co:
   type: "midi"
   what: |
-    Set the current (named) output channel. All output channel editing functions will act on it.
+    Select the named output channel for output-channel editing. Use nil to deselect it.
   short: ""
   parameters: "<string:channame>"
   example: |
@@ -718,7 +866,7 @@ co:
 geto:
   type: "midi"
   what: |
-    Return the name of the current output channel or "nil" if none
+    Return the name of the current output channel or nil if none.
   short: ""
   parameters: "none"
   example: |
@@ -727,16 +875,17 @@ geto:
 setunit:
   type: "midi"
   what: |
-    Set the time resolution of the sequencer to "ticks_per_unit" ticks in a whole note (1 unit note = 4 quarter notes). The default is 96 ticks, which is the default of the MIDI standard.
+    Set the time resolution of the sequencer to given number of ticks per whole note (1 unit note = 4
+    quarter notes). The default is 96 ticks, which is the default of the MIDI standard.
   short: ""
-  parameters: "<integer:ticks_per_unit>"
+  parameters: "<integer:tics_per_unit>"
   example: |
     setunit 96
 
 getunit:
   type: "midi"
   what: |
-    Return the number of ticks in a whole note
+    Return the number of ticks in a whole note.
   short: ""
   parameters: "none"
   example: |
@@ -745,7 +894,8 @@ getunit:
 fac:
   type: "midi"
   what: |
-    Set the tempo factor for play and record to the given integer value. The tempo factor must be between 50 (play half of the real tempo) and 200 (play at twice the real tempo).
+    Set the tempo factor for play and record to the given integer value. The tempo factor must be
+    between 50 (play half of the real tempo) and 200 (play at twice the real tempo).
   short: ""
   parameters: "<integer:tempo_factor>"
   example: |
@@ -754,7 +904,7 @@ fac:
 getfac:
   type: "midi"
   what: |
-    Return the current tempo factor
+    Return the current tempo factor.
   short: ""
   parameters: "none"
   example: |
@@ -763,7 +913,7 @@ getfac:
 t:
   type: "midi"
   what: |
-    Set the tempo at the current song position
+    Set the tempo at the current song position.
   short: ""
   parameters: "<integer:beats_per_minute>"
   example: |
@@ -772,9 +922,10 @@ t:
 mins:
   type: "midi"
   what: |
-    Insert "amount" blank measures at the current song position. The time signature used is num/denom. If the time signature is an empty list (i.e. "{}") then the time signature at the current position is used.
+    Insert amount blank measures at the current position across the song. sig is a {numerator
+    denominator} time-signature list, or {} to retain the time signature at the insertion point.
   short: ""
-  parameters: "<integer:amount> {<integer:num> <integer:denom>}"
+  parameters: "<integer:amount> <list:sig>"
   example: |
     mins 4 {4 4}
 
@@ -788,14 +939,15 @@ mcut:
 mdup:
   type: "midi"
   what: |
-    Duplicate the current selection inserting a copy of it at the position given by the "where" parameter. The target position is a measure number relative to the current selection to be copied. If "where" is positive it's relative to the end of the current selection; if it's negative it's relative to the beginning of the current selection.
+    Duplicate the current selection of all tracks, including time structure. where is a measure offset:
+    nonnegative offsets are relative to the selection end, negative offsets to its beginning.
   short: ""
   parameters: "<integer:where>"
 
 minfo:
   type: "midi"
   what: |
-    Print the meta-track (tempo changes, time signature changes).
+    Print the meta-track, including tempo and time-signature changes.
   short: ""
   parameters: "none"
 
@@ -811,7 +963,8 @@ mtempo:
 msig:
   type: "midi"
   what: |
-    Return the time signature at the current song position. The result is a two number list: numerator and denominator.
+    Return the time signature at the current song position. The result is a two number list: numerator
+    and denominator.
   short: ""
   parameters: "none"
   example: |
@@ -829,14 +982,14 @@ mend:
 ls:
   type: "midi"
   what: |
-    List all tracks, channels, filters and various default values
+    List all tracks, channels, filters and various default values.
   short: ""
   parameters: "none"
 
 save:
   type: "midi"
   what: |
-    Save the song into the given file. The "filename" is a quoted string.
+    Save the song into the given file. The file name is a quoted string.
   short: ""
   parameters: "<string:filename>"
   example: |
@@ -845,7 +998,8 @@ save:
 load:
   type: "midi"
   what: |
-    Load the song from a file named "filename". the current song is destroyed, even if the load command fails.
+    Load the song from the given file. The file name is a quoted string. The current song will be
+    overwritten.
   short: ""
   parameters: "<string:filename>"
   example: |
@@ -854,14 +1008,14 @@ load:
 reset:
   type: "midi"
   what: |
-    Destroy completely the song, useful to start a new song without restarting the program
+    Destroy completely the song, useful to start a new song without restarting the program.
   short: ""
   parameters: "none"
 
 export:
   type: "midi"
   what: |
-    Save the song into a standard MIDI file, "filename" is a quoted string.
+    Save the song into the given standard MIDI file. The file name is a quoted string.
   short: ""
   parameters: "<string:filename>"
   example: |
@@ -870,16 +1024,35 @@ export:
 import:
   type: "midi"
   what: |
-    Load the song from a standard MIDI file, "filename" is a quoted string. Only MIDI file "type 1" and "type 0" are supported.
+    Load the song from the given standard MIDI file. The file name is a quoted string. The current song
+    will be overwritten. Only MIDI file formats 0 and 1 are supported.
   short: ""
   parameters: "<string:filename>"
   example: |
     import "song.mid"
 
+u:
+  type: "midi"
+  what: |
+    Undo last operation saved for undo.
+  short: ""
+  parameters: "none"
+  example: |
+    u
+
+ul:
+  type: "midi"
+  what: |
+    List operations saved for undo.
+  short: ""
+  parameters: "none"
+  example: |
+    ul
+
 dlist:
   type: "midi"
   what: |
-    Return the list of attached devices (list of numbers)
+    Return the list of attached devices (list of numbers).
   short: ""
   parameters: "none"
   example: |
@@ -888,27 +1061,36 @@ dlist:
 dnew:
   type: "midi"
   what: |
-    Attach MIDI device "filename" as device number "devnum"; "filename" is a quoted string. The "mode" argument is the name of the mode, it can be one of the following:
+    Add the given MIDI device number, with the given path and mode. The mode may be one of the
+    following:
+        ro - read-only, for input only devices
+        wo - write-only, for output only devices
+        rw - read and write.
     
-    "ro" - read-only, for input only devices "wo" - write-only, for output only devices "rw" - read and write.
-    
-    If midish is configured to use ALSA (default on Linux systems) then "filename" should contain the ALSA sequencer port, as listed by "aseqdump -l", (eg. "28:0", "FLUID Synth (qsynth)"). If "nil" is given instead of the path, then the port is not connected to any existing port; this allows other ALSA sequencer clients to subscribe to it and to provide events to midish or to consume events midish sends to it.
+    If midish is configured to use ALSA (default on Linux systems) then the device path is the ALSA
+    sequencer port, as listed by the aseqdump linux command (ex. 28:0). If nil is given instead of the
+    path, then the port is not connected to any existing port; this allows other ALSA sequencer clients
+    to subscribe to it and to provide events to midish or to consume events midish sends to the port.
   short: ""
-  parameters: "<integer:devnum> <string:filename> <string:mode>"
+  parameters: "<integer:devnum> <string:path> <string:mode>"
   example: |
     dnew 0 "28:0" rw
 
 ddel:
   type: "midi"
   what: |
-    Detach device number "devnum"
+    Remove the given device number.
   short: ""
   parameters: "<integer:devnum>"
 
 dmtcrx:
   type: "midi"
   what: |
-    Use device number "devnum" as MTC source. In this case, midish will relocate, start and stop according to incoming MTC messages. Midish will generate its clock ticks from MTC, meaning that it will run at the same speed as the MTC device. This is useful to synchronize midish to an audio multi-tracker or any MTC capable audio application. If "devnum" is "nil", then MTC messages are ignored and the internal timer will be used instead.
+    Use given device number as MTC source. In this case, midish will relocate, start and stop according
+    to incoming MTC messages. Midish will generate its clock ticks from MTC, meaning that it will run at
+    the same speed as the MTC device. This is useful to synchronize midish to an audio multi-tracker or
+    any MTC capable audio application. If the device number is nil, then MTC messages are ignored and
+    the internal timer will be used instead.
   short: ""
   parameters: "<integer:devnum>"
   example: |
@@ -917,25 +1099,29 @@ dmtcrx:
 dmmctx:
   type: "midi"
   what: |
-    Configure the given devices to transmit MMC start, stop and relocate messages. Useful to control MMC-capable audio applications from midish. By default, devices transmit MMC.
+    Configure the given devices to transmit MMC start, stop and relocate messages. Useful to control
+    MMC-capable audio applications from midish. By default, devices transmit MMC.
   short: ""
-  parameters: "{ <integer:devnum1> <integer:devnum2> ... }"
+  parameters: "<list:devlist>"
   example: |
     dmmctx {0 1}
 
 dclktx:
   type: "midi"
   what: |
-    Configure the given devices to transmit MIDI clock information (MIDI ticks, MIDI start and MIDI stop events). Useful to synchronize an external sequencer to midish.
+    Configure the given devices to transmit MIDI clock information (MIDI ticks, MIDI start and MIDI stop
+    events). Useful to synchronize an external sequencer to midish.
   short: ""
-  parameters: "{ <integer:devnum1> <integer:devnum2> ... }"
+  parameters: "<list:devlist>"
   example: |
     dclktx {0 1}
 
 dclkrx:
   type: "midi"
   what: |
-    Set device number "devnum" to be the master MIDI clock source. It will give midish MIDI ticks, MIDI start and MIDI stop events. This useful to synchronize midish to an external sequencer. If "devnum" is "nil", then the internal clock will be used and midish will act as master device.
+    Set the given device number to be the master MIDI clock source. It will give midish MIDI ticks, MIDI
+    start and MIDI stop events. This useful to synchronize midish to an external sequencer. If the
+    device number is nil, then the internal clock will be used and midish will act as master clock.
   short: ""
   parameters: "<integer:devnum>"
   example: |
@@ -944,9 +1130,10 @@ dclkrx:
 dclkrate:
   type: "midi"
   what: |
-    Set the number of ticks in a whole note that are transmitted to the MIDI device (if dclktx was called for it). Default value is 96 ticks. This is the standard MIDI value and its not recommended to change it.
+    Set the number of ticks in a whole note that are transmitted to the MIDI device. Default value is 96
+    ticks. This is the standard MIDI value and it is not recommended to change it.
   short: ""
-  parameters: "<integer:devnum> <integer:ticrate>"
+  parameters: "<integer:devnum> <integer:tics_per_unit>"
 
 dinfo:
   type: "midi"
@@ -958,73 +1145,91 @@ dinfo:
 dixctl:
   type: "midi"
   what: |
-    Setup the list of controllers that are expected to be received as 14-bit numbers (i.e. both coarse and fine MIDI controller messages will be expected). By default only coarse values are used, if unsure let this list empty.
+    Setup the list of controllers that are expected to be received as 14-bit numbers (i.e. both coarse
+    and fine MIDI controller messages will be expected). By default only coarse values are used, if
+    unsure let this list empty.
   short: ""
-  parameters: "<integer:devnum> <list:list>"
+  parameters: "<integer:devnum> <list:ctlset>"
 
 doxctl:
   type: "midi"
   what: |
-    Setup the list of controllers that will be transmitted as 14-bit numbers (both coarse and fine MIDI controller messages).
+    Setup the list of controllers that will be transmitted as 14-bit numbers (both coarse and fine MIDI
+    controller messages).
   short: ""
-  parameters: "<integer:devnum> <list:list>"
+  parameters: "<integer:devnum> <list:ctlset>"
 
 diev:
   type: "midi"
   what: |
     Configure the device to process as a single event the following patterns of input MIDI messages.
     
-    "xpc" - group bank select controllers (0 and 32) with program changes into a single "xpc" event. "nrpn" - group NRPN controllers (98 and 99) with data entry controllers (6 and 38) into a single "nrpn" event. "rpn" - same as "nrpn", but for RPN controllers (100 and 101).
+     * xpc -  group bank select controllers (0 and 32) with program
+       changes into a single xpc event.
     
-    By default all of the above are enabled, which allows banks, NRPNs and RPNs to be handled by midish the standard way. It makes sense to disable grouping of above messages on rare hardware that maps above-mentioned controller numbers (0, 6, 32, 38, 98, 99, 100, 101) to other parameters than bank number and NRPN/RPN.
+     * nrpn - group NRPN controllers (98 and 99) with data entry
+       controllers (6 and 38) into a single nrpn event.
+    
+     * rpn - similar to nrpn, but for RPN controllers (100 and 101).
+    
+    By default all of the above are enabled, which allows banks, NRPNs and RPNs to be handled by midish
+    the standard way. It makes sense to disable grouping of above messages on rare hardware that maps
+    above-mentioned controller numbers (0, 6, 32, 38, 98, 99, 100, 101) to other parameters than bank
+    number and NRPN/RPN.
   short: ""
-  parameters: "<integer:devnum> <list:list>"
+  parameters: "<integer:devnum> <list:flags>"
 
 doev:
   type: "midi"
   what: |
-    Same as diev but for output MIDI messages.
+    Configure output MIDI event grouping using a list containing any of xpc, nrpn and rpn. Use {} to
+    disable grouping. This is the output counterpart of diev.
   short: ""
-  parameters: "<integer:devnum> <list:list>"
+  parameters: "<integer:devnum> <list:flags>"
 
 ctlconf:
   type: "midi"
   what: |
-    Configure controller number "ctlnumber" with name "ctlname", and default value "defval". If defval is "nil" then there is no default value and corresponding controller events are not grouped into frames. See sec. Controller frames.
+    Configure the given controller number with the given name, and default value. If the default value
+    is nil then the corresponding controller events are not grouped into frames.
   short: ""
-  parameters: "<string:ctlname> <integer:ctlnumber> <integer:defval>"
+  parameters: "<string:name> <integer:ctl> <integer:defval>"
 
 ctlconfx:
   type: "midi"
   what: |
-    Same as ctlconf function, but for 14-bit controllers. Thus defval is in the range 0..16383.
+    Same as ctlconf, but for 14-bit controllers. Thus defval is in the range 0..16383.
   short: ""
-  parameters: "<string:ctlname> <integer:ctlnumber> <integer:defval>"
+  parameters: "<string:name> <integer:ctl> <integer:defval>"
 
 ctlunconf:
   type: "midi"
   what: |
-    Unconfigure the given controller. "ctlname" is the identifier that was used with ctlconf
+    Unconfigure the given controller.
   short: ""
-  parameters: "<string:ctlname>"
+  parameters: "<string:name>"
 
 ctlinfo:
   type: "midi"
   what: |
-    Print the list of configured controllers
+    Print the list of configured controllers.
   short: ""
   parameters: "none"
 
 evpat:
   type: "midi"
   what: |
-    Define a new event type corresponding to the given system exclusive message pattern. The pattern is a list of bytes or event parameter identifiers (aka atoms). The following atoms are supported: v0, v0_lo, v0_hi, v1, v1_lo, v1_hi. They correspond to the full 7-bit value (coarse parameter), the low 7-bit nibble and the high 7-bit nibble (fine grained parameters) of the first and second parameters respectively. Example:
+    Define a new event type corresponding to the given system exclusive message pattern. The pattern is
+    a list of bytes or event parameter identifiers (aka atoms). The following atoms are supported: v0,
+    v0_lo, v0_hi, v1, v1_lo, v1_hi. They correspond to the full 7-bit value (coarse parameter), the low
+    7-bit nibble and the high 7-bit nibble (fine grained parameters) of the first and second parameters
+    respectively. Example:
     
-    evpat master {0xf0 0x7f 0x7f 0x04 0x01 v0_lo v0_hi 0xf7}
+            evpat master {0xf0 0x7f 0x7f 0x04 0x01 v0_lo v0_hi 0xf7}
     
     defines a new event type for the standard master volume system exclusive message.
   short: ""
-  parameters: "<string:name> <list:sysex_pattern>"
+  parameters: "<string:name> <list:pattern>"
 
 evinfo:
   type: "midi"
@@ -1037,54 +1242,79 @@ m:
   type: "midi"
   what: |
     Set the mode of the metronome. The following modes are available:
-    
-    "on" - turned on for both playback and record "rec" - turned on for record only "off" - turned off
+        on - turned on for both playback and recording
+        rec - turned on for recording only
+        off - turned off
   short: ""
-  parameters: "<string:mode>"
+  parameters: "<string:onoff>"
   example: |
     m rec
 
 metrocf:
   type: "midi"
   what: |
-    Select the notes that the metronome plays. The pair of events must be note-ons
+    Select the notes that the metronome plays. The pair of events must be note-on events.
   short: ""
   parameters: "<event:eventhi> <event:eventlo>"
+
+tap:
+  type: "midi"
+  what: |
+    Set how selected input events trigger playback or recording: off disables event-triggered start;
+    start uses one event; tempo uses two events, interpreting their interval as one beat to set the
+    initial tempo. Use tapev to select the triggering events.
+  short: ""
+  parameters: "<string:mode>"
+  example: |
+    tapev {note keyboard 60}
+    tap start
+    p
+
+tapev:
+  type: "midi"
+  what: |
+    Set the input event set used to trigger start when tap mode is start or tempo.
+  short: ""
+  parameters: "<event:evspec>"
+  example: |
+    tapev {note keyboard 60}
 
 info:
   type: "midi"
   what: |
-    Display the list of built-in and user-defined procedures and global variables
+    Display the list of built-in and user-defined procedures and global variables.
   short: ""
   parameters: "none"
 
 print:
   type: "midi"
   what: |
-    Display the value of the expression
+    Print zero or more expression values followed by a newline. To print a command return value, use
+    print [command arguments].
   short: ""
-  parameters: "<expression:expression>"
+  parameters: "[<expression:value> ...]"
 
 err:
   type: "midi"
   what: |
-    Display the given string and abort the statement being executed.
+    Display the given string and abort the current statement.
   short: ""
-  parameters: "<string:string>"
+  parameters: "<string:message>"
 
 h:
   type: "midi"
   what: |
-    Display list of arguments function "funcname"
+    Show Midish help for one command name, or introductory help when no argument is supplied.
   short: ""
-  parameters: "<string:funcname>"
+  parameters: "[<string:command>]"
   example: |
-    h tquant
+    h tquantf
 
 exec:
   type: "midi"
   what: |
-    Read and executes the script from a file, "filename" is a quoted string. The execution of the script is aborted on error. If the script executes an exit statement, only the script is terminated.
+    Read and execute the given script (the file name is a quoted string). The execution of the script is
+    aborted on error. If the script executes an exit statement, only the script is terminated.
   short: ""
   parameters: "<string:filename>"
   example: |
@@ -1093,11 +1323,10 @@ exec:
 debug:
   type: "midi"
   what: |
-    Set debug-flag "flag" to (integer) value "val". It's a developer knob. If "val=0" the corresponding debug-info are turned off. "flag" can be:
-    
-    "filt" - show events passing through the current filter "mididev" - show raw MIDI traffic on stderr "mixout" - show conflicts in the output MIDI merger "norm" - show events in the input normalizer "pool" - show pool usage on exit "song" - show start/stop events "timo" - show timer internal errors "mem" - show memory usage
+    Set a debug flag to an integer value; 0 disables it. Supported flags in 1.5.0 are filt, mididev,
+    mux, mixout, norm, pool, song and timo. The mem flag mentioned in upstream help is not implemented.
   short: ""
-  parameters: "<string:flag> <integer:val>"
+  parameters: "<string:flag> <integer:value>"
 
 version:
   type: "midi"
@@ -1109,54 +1338,9 @@ version:
 panic:
   type: "midi"
   what: |
-    Cause the sequencer to core-dump, useful to developers.
+    Abort (and core-dump).
   short: ""
   parameters: "none"
-
-proclist:
-  type: "midi"
-  what: |
-    Return the list of all user defined procs.
-  short: ""
-  parameters: "none"
-  example: |
-    print [proclist]
-
-builtinlist:
-  type: "midi"
-  what: |
-    Return a list of all builtin commands.
-  short: ""
-  parameters: "none"
-  example: |
-    print [builtinlist]
-
-flist:
-  type: "midi"
-  what: |
-    Return the list of existing filters.
-  short: ""
-  parameters: "none"
-  example: |
-    print [flist]
-
-ilist:
-  type: "midi"
-  what: |
-    Return the list of inputs.
-  short: ""
-  parameters: "none"
-  example: |
-    print [ilist]
-
-olist:
-  type: "midi"
-  what: |
-    Return list of outputs.
-  short: ""
-  parameters: "none"
-  example: |
-    print [olist]
 
 shut:
   type: "midi"
@@ -1165,14 +1349,23 @@ shut:
   short: ""
   parameters: "none"
 
-xlist:
+proclist:
   type: "midi"
   what: |
-    Return the list of sysex banks.
+    Return the list of user-defined procs.
   short: ""
   parameters: "none"
   example: |
-    print [xlist]
+    print [proclist]
+
+builtinlist:
+  type: "midi"
+  what: |
+    Return the list of builtin commands.
+  short: ""
+  parameters: "none"
+  example: |
+    print [builtinlist]
 
 
 # Auxiliary commands and helper procedures
@@ -1383,7 +1576,7 @@ nosolo:
 cquantm:
   type: "midi"
   what: |
-    Quantise event frames in the current track with tquantf to the nearest quantise_note denomination, with precision percent strength, starting at start_position for quantise_measures measures. The implementation saves and restores the position and quantization setting, but when getq is nil its fallback is the literal atom pgrid rather than a numeric denominator; restoring that value may fail. Set a numeric quantization with setq first.
+    Quantise event frames in the current track, preserving note lengths, with tquantf to the nearest quantise_note denomination, with precision percent strength, starting at start_position for quantise_measures measures. The implementation saves and restores the position and quantization setting, but when getq is nil its fallback is the literal atom pgrid rather than a numeric denominator; restoring that value may fail. Set a numeric quantization with setq first.
   short: ""
   parameters: "<position:start_position> <integer:quantise_measures> <integer:quantise_note> <integer:precision>"
   example: |
@@ -1557,7 +1750,7 @@ ctransm:
   short: ""
   parameters: "<position:start_position> <integer:trans_measures> <integer:semitones>"
   example: |
-    ctransm now 8 -12
+    ctransm now 8 (-12)
 
 ctrans:
   type: "midi"
@@ -1716,7 +1909,7 @@ gtrans:
   short: ""
   parameters: "<list:my_group> <position:start_position> <position:end_position> <integer:semitones>"
   example: |
-    gtrans {piano bass} 0 end -12
+    gtrans {piano bass} 0 end (-12)
 
 snew:
   type: "midi"
