@@ -1,4 +1,4 @@
-# This is a Midish configuration file written by F. Silvain.
+# This is a Midish configuration file written by Jeanette C.
 # Get Midish from:
 # http://www.midish.org/
 # This file is GPL version 3 or later.
@@ -201,6 +201,7 @@ proc eval_mute_status {
 		}
 		return $mute_status;
 	} else {
+		print "No track currently selected.";
 		return nil;
 	}
 }
@@ -236,7 +237,7 @@ proc eval_pos my_pos {
 # Evaluate if second argument is greater than first argument
 # (for position ranges)
 proc eval_positive my_start my_end {
-	if $my_start >= $my_end {
+	if $my_start > $my_end {
 		print "Start must be less or equal to end.";
 		print {"start is:" $my_start};
 		print {"End is:" $my_end};
@@ -285,6 +286,7 @@ proc eval_dest_track my_track {
 		tnew $my_track;
 		ct $cur_track;
 	}
+	return 1;
 }
 
 #---------------------------------------
@@ -298,6 +300,7 @@ proc eval_dest_track my_track {
 proc fw forward_measures {
 	let new_pos = [getpos] + $forward_measures;
 	g $new_pos;
+	return 1;
 }
 
 # Rewind rewind_measures from current position or go to 0 if resulting
@@ -311,7 +314,6 @@ proc rw rewind_measures {
 	if $new_pos < 0 {
 		let new_pos = 0;
 		print {"Unable to rewind" $rewind_measures "from" [getpos] "going to 0."};
-		return 0;
 	}
 	g $new_pos;
 	return 1;
@@ -328,6 +330,7 @@ proc show {
 		tshow $i;
 	}
 	sec_ct $cur_track;
+	return 1;
 }
 
 # Print information about the current track
@@ -358,6 +361,7 @@ proc cclrm start_position clear_measures {
 		g $cur_pos;
 		return 1;
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -373,6 +377,7 @@ proc clrm my_track start_position clear_measures {
 		sec_ct $cur_track;
 		return 1;
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -387,6 +392,7 @@ proc cclr start_position end_position {
 		let clear_measures = $end_pos - $start_pos;
 		return [cclrm $start_pos $clear_measures];
 	} else {
+		print "Start position after end position. Please switch the two.";
 		return 0;
 	}
 }
@@ -401,6 +407,7 @@ proc clr my_track start_position end_position {
 		return [cclr $start_position $end_position];
 		sec_ct $cur_track;
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -411,6 +418,7 @@ proc cmute {
 		mute [gett];
 		return 1;
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -421,6 +429,7 @@ proc cunmute {
 		unmute [gett];
 		return 1;
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -435,6 +444,7 @@ proc csolo {
 		unmute $cur_track;
 		return 1;
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -448,6 +458,7 @@ proc solo my_track {
 		sec_ct $cur_track;
 		return $cur_return_value;
 	} else {
+		print {my_track "is not a valid track. Please check your spelling."};
 		return 0;
 	}
 }
@@ -457,6 +468,7 @@ proc nosolo {
 	for i in [tlist] {
 		unmute $i;
 	}
+	return 1;
 }
 
 # Quantise current track to the nearest quantise_note denomination with a
@@ -473,15 +485,39 @@ proc cquantm start_position quantise_measures quantise_note precision {
 		if [getq] {
 			let cur_quant = [getq];
 		} else {
-			let cur_quant = 8;
+			let cur_quant = pgrid;
 		}
 		setq $quantise_note;
 		sel $quantise_measures;
-		tquant $precision;
+		tquantf $precision;
 		g $cur_pos;
 		setq $cur_quant;
 		return 1;
 	} else {
+		print "No track currently selected.";
+		return 0;
+	}
+}
+
+# Quantise all events (including note off
+proc tronm start_position quantise_measures quantise_note precision {
+	if [eval_cur_track] {
+		let cur_pos = [getpos];
+		let start_pos = [eval_pos $start_position];
+		g $start_pos;
+		if [getq] {
+			let cur_quant = [getq];
+		} else {
+			let cur_quant = pgrid;
+		}
+		setq $quantise_note;
+		sel $quantise_measures;
+		tquanta $precision;
+		g $cur_pos;
+		setq $cur_quant;
+		return 1;
+	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -500,6 +536,7 @@ proc quantm my_track start_position quantise_measures quantise_note precision {
 		sec_ct $cur_track;
 		return $cur_return_value;
 	} else {
+		print {my_track "is not a valid track. Please check your spelling."};
 		return 0;
 	}
 }
@@ -516,6 +553,7 @@ proc cquant start_position end_position quantise_note precision {
 		let quantise_measures = $end_pos - $start_pos;
 		return [cquantm $start_pos $quantise_measures $quantise_note $precision];
 	} else {
+		print "Start is after end position. Please switch the two.";
 		return 0;
 	}
 }
@@ -532,6 +570,7 @@ proc quant my_track start_position end_position quantise_note precision {
 		let quantise_measures = $end_pos - $start_pos;
 		return [quantm $my_track $start_pos $quantise_measures $quantise_note $precision];
 	} else {
+		print "Start is after end position, please switch the two.";
 		return 0;
 	}
 }
@@ -557,6 +596,7 @@ proc ccopym start_position copy_measures dest_track dest_position {
 		g $cur_pos;
 		return 1;
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -579,6 +619,7 @@ proc icopym start_position copy_measures dest_position {
 			return 0;
 		}
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -595,6 +636,7 @@ proc ccopy start_position end_position dest_track dest_position {
 		let copy_measures = $end_pos - $start_pos;
 		return [ccopym $start_pos $copy_measures $dest_track $dest_position];
 	} else {
+		print "Start after end position, please switch the two.";
 		return 0;
 	}
 }
@@ -617,6 +659,7 @@ proc icopy start_position end_position dest_position {
 			return 0;
 		}
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -632,6 +675,7 @@ proc copym src_track start_position copy_measures dest_track dest_position {
 		sec_ct $cur_track;
 		return $cur_return_value;
 	} else {
+		print {$src_track "is not a valid track. Please check your spelling."};
 		return 0;
 	}
 }
@@ -648,6 +692,7 @@ proc copy src_track start_position end_position dest_track dest_position {
 		sec_ct $cur_track;
 		return $cur_return_value;
 	} else {
+		print {$src_track "is not a valid track. Please check your spelling."};
 		return 0;
 	}
 }
@@ -678,6 +723,7 @@ proc cchdup channelnumber dest_track {
 		ev {any};
 		return 1;
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -697,6 +743,7 @@ proc chdup my_track channelnumber dest_track {
 		ct $cur_track;
 		return $cur_return_value;
 	} else {
+		print {$my_track "is not a valid track. Please check your spelling."};
 		return 0;
 	}
 }
@@ -788,6 +835,7 @@ proc cchmap start_position end_position  dest_track {
 		let src_track = [gett];
 		return [chmap $src_track $start_position $end_position $dest_track];
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -806,8 +854,80 @@ proc cchmapm start_position copy_measures dest_track {
 		let src_track = [gett];
 		return [chmapm $src_track $start_position $copy_measures $dest_track];
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
+}
+
+# Transpose track my_track, for trans_measures measures, starting at
+# start_position by semitones.
+# Example:
+#  transm piano now 8 12 # tranpose piano for 8 measures, starting now by
+#                        # one octave (12 semitones)
+proc transm my_track start_position trans_measures semitones {
+	if [eval_track $my_track] {
+		if [eval_cur_track] {
+			let cur_track = [gett];
+		} else {
+			let cur_track = $my_track;
+		}
+		let start_pos = [eval_pos $start_position];
+		let cur_pos = [getpos];
+		ct $my_track;
+		g $start_pos;
+		sel $trans_measures;
+		ttransp $semitones;
+		g $cur_pos;
+		ct $cur_track;
+		return 1;
+	} else {
+		print {"The source track" $my_track "does not exist."};
+		return 0;
+	}
+	return 1;
+}
+
+# Tranpose my_track by semitones between start_position and end_position.
+# Example:
+#  trans piano 6 8 2 # Transpose track piano between measures 6 and 8 by
+#                    # 2 semitones
+proc trans my_track start_position end_position semitones {
+	let start_pos = [eval_pos $start_position];
+	let end_pos = [eval_pos $end_position];
+	if [eval_positive $start_pos $end_pos] {
+		let trans_measures = $end_pos - $start_pos;
+		return [transm $my_track $start_pos $trans_measures $semitones];
+	} else {
+		print "Start after end position, please switch the two.";
+		return 0;
+	}
+	return 1;
+}
+
+# Transpose the current track by semitones over trans_measures starting at
+# start_position.
+proc ctransm start_position trans_measures semitones {
+	if [eval_cur_track] {
+		let my_track = [gett];
+		return [transm $my_track $start_position $trans_measures $semitones];
+	} else {
+		print "No track currently selected.";
+		return 0;
+	}
+	return 1;
+}
+
+# Transpose the current track by semitones, between start_position and
+# end_position.
+proc ctrans start_position end_position semitones {
+	if [eval_cur_track] {
+		let my_track = [gett];
+		return [trans $my_track $start_position $end_position $semitones];
+	} else {
+		print "No track currently selected.";
+		return 0;
+	}
+	return 1;
 }
 
 # Set input and output channel for the current track.
@@ -825,16 +945,20 @@ proc rnew inputchannel outputchannel {
 				} else {
 					fnew $fname;
 					fmap {any $inputchannel} {any $outputchannel};
-					taddev 0 0 0 {kat $outputchannel 0 0};
+					taddev 0 0 1 {cat $outputchannel 1};
+					taddev 0 0 2 {cat $outputchannel 0};
 					tsetf $fname;
 				}
 			} else {
+				print {"output channel" $outputchannel "does not exist."};
 				return 0;
 			}
 		} else {
+			print {"Input channel" $inputchannel "does not exist."};
 			return 0;
 		}
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 	return 1;
@@ -852,16 +976,18 @@ proc radd inputchannel outputchannel {
 					cf $fname;
 					fmap {any $inputchannel} {any $outputchannel};
 				} else {
+					print {"Output channel" $outputchannel "does not exist."};
 					return 0;
 				}
 			} else {
+				print {"Input channel" $inputchannel "does not exist."};
 				return 0;
 			}
 		} else {
-			print "Routing filter doesn't exist. Use rnew. Stopping...";
-			return 0;
+			return [rnew $inputchannel $outputchannel];
 		}
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 	return 1;
@@ -884,6 +1010,7 @@ proc rsplit inputchannel leftout rightout splitpoint {
 			return 0;
 		}
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 	return 1;
@@ -899,6 +1026,7 @@ proc gnew {
 	print "tnew violin";
 	print "tnew viola";
 	print "let strings = {violin cello viola}";
+	return 1;
 }
 
 # Mute a group of tracks
@@ -956,6 +1084,7 @@ proc gshow my_group {
 		tshow $i;
 	}
 	sec_ct $cur_track;
+	return 1;
 }
 
 # Clear clear_measures from all tracks in the group starting at start_position
@@ -967,7 +1096,7 @@ proc gshow my_group {
 proc gclrm my_group start_position clear_measures {
 	let cur_return_value = 1;
 	for i in $my_group {
-		let tmp_return_value = [clrm $i];
+		let tmp_return_value = [clrm $i $start_position $clear_measures];
 		if ($tmp_return_value == 0) {
 			let cur_return_value = 0;
 		}
@@ -995,8 +1124,10 @@ proc gclr my_group start_position end_position {
 		}
 		return $cur_return_value;
 	} else {
+		print "Start after end position, please switch the two.";
 		return 0;
 	}
+	return 1;
 }
 
 # Quantise all track in the group to the nearest quantise_notes with a
@@ -1034,6 +1165,7 @@ proc gquant my_group start_position end_position quantise_note precision {
 		let quantise_measures = $end_pos - $start_pos;
 		return [gquantm $my_group $start_pos $quantise_measures $quantise_note $precision];
 	} else {
+		print "Start after end position, please switch the two.";
 		return 0;
 	}
 }
@@ -1063,8 +1195,40 @@ proc gcopy my_group start_position end_position dest_position {
 		let copy_measures = $end_pos - $start_pos;
 		return [gcopym $my_group $start_pos $copy_measures $dest_position];
 	} else {
+		print "Start after end position, please switch the two.";
 		return 0;
 	}
+}
+
+# Transpose group my_group by semitones for trans_measures, starting at
+# start position:
+# gtransm $strings now 8 12 # transpose group strings starting now for 8
+#                           # measure by one octave (12 semitones)
+proc gtransm my_group start_position trans_measures semitones {
+	let cur_return = 1;
+	for i in $my_group {
+		let cur_return = [transm $i $start_position $trans_measures $semitones];
+		# if $cur_return == 0 {
+		#	print "An error occured in transposition.";
+		#	print {"The offending track was" $i};
+		#	return 0;
+		#}
+	}
+	return $cur_return;
+}
+
+# Transpose my_group by semitones, between start_position and end_position.
+proc gtrans my_group start_position end_position semitones {
+	let cur_return = 1;
+	for i in $my_group {
+		let cur_return = [trans $i $start_position $end_position $semitones];
+		# if $cur_return == 1 {
+		#	print "An error occured in transposition.";
+		#	print {"The offending track was" $i};
+		#	return 0;
+		# }
+	}
+	return $cur_return;
 }
 
 #---------------------------------------
@@ -1109,6 +1273,7 @@ proc sdel my_name {
 		co $cur_ochan;
 		return $devnum;
 	} else {
+		print {"Output channel" $my_name "does not exist."};
 		return nil;
 	}
 }
@@ -1151,6 +1316,7 @@ proc hdel my_name {
 			return 0;
 		}
 	} else {
+		print {"Input channel" $my_name "does not exist."};
 		return 0;
 	}
 }
@@ -1177,6 +1343,7 @@ proc ionew my_name new_name channelnumber {
 			return 0;
 		}
 	} else {
+		print {"Input channel" $my_name "does not exist."};
 		return 0;
 	}
 }
@@ -1197,6 +1364,7 @@ proc plen my_note_length {
 		let pattern_note_length = $my_note_length;
 		return 1;
 	} else {
+		print {"note denomination" $my_note_length "is out of range."};
 		return 0;
 	}
 }
@@ -1209,6 +1377,7 @@ proc pgrid my_grid {
 		let pattern_grid = $my_grid;
 		return 1;
 	} else {
+		print {"Note denomination" $my_grid "is out of range."};
 		return 0;
 	}
 }
@@ -1357,16 +1526,20 @@ proc ppenv my_bar my_step my_denom my_note my_velocity {
 					return 1;
 				} else {
 					g $cur_pos;
+					print "This bar doesn't have so many steps.";
 					return 0;
 				}
 			} else {
 				g $cur_pos;
+				print "Pattern note length (plen) is set incorrectly.";
 				return 0;
 			}
 		} else {
+			print "Step size (pgrid) is set incorrectly.";
 			return 0;
 		}
 	} else {
+		print "No track currently selected.";
 		return 0;
 	}
 }
@@ -1432,7 +1605,16 @@ proc prepeat my_bar my_step my_note my_repeat my_denom {
 	return [prepeatv $my_bar $my_step $my_note 127 $my_repeat $my_denom];
 }
 
-print "FS Midish Extram Commands, version 1.5";
+#---------------------------------------
+### Miscellaneous functions
+
+# Print the version of this command set
+proc fs_version {
+	print "Midish Extra Commands Version 1.6, (c) 2014-19 Jeanette C.";
+	return 1;
+}
+
+print "Midish Extra Commands, version 1.6";
 print "For patterns to work correctly use the rnew function for your tracks";
 print {"The current pattern grid size is" $pattern_grid};
 print {"The current note length (denomination) for pattern commands is" $pattern_note_length};
