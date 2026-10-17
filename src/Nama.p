@@ -301,7 +301,7 @@ __DATA__
 @@ midi_commands_yml
 [% qx(cat ./midi_commands.yml) %]
 @@ aux_midi_commands
-[% qx(cat ./aux_midi_commands) %]
+[% qx(cat ./midish_extra) %]
 @@ test_tempo_map
 [% qx(cat ./tempo_map) %]
 @@ all_midi_command_names
