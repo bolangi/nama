@@ -9,8 +9,7 @@ sub effect_nickname_count {
 	for my $FX ($track->user_effects){ $count++ if $FX->name =~ /^$nick\d*$/ }
 	$count
 }
-sub unique_surname {
-	my ($track, $surname) = @_;
+sub unique_surname ($track, $surname) {
 	# increment supplied surname to be unique to the track if necessary 
 	# return arguments:
 	# $surname, $previous_surnames
@@ -27,8 +26,7 @@ sub unique_surname {
 	}
 	if (%found){ $surname.++$max, join ' ',sort keys %found } else { $surname }
 }
-sub unique_nickname {
-	my ($track, $nickname) = @_;
+sub unique_nickname ($track, $nickname) {
 	my $i = 0;
 	my @found;
 	for my $FX ($track->user_effects)
@@ -42,8 +40,7 @@ sub unique_nickname {
 	$nickname. (@found ? ++$i : ""), "@found"
 }
 # return effect IDs matching a surname
-sub with_surname {
-	my ($track, $surname) = @_;
+sub with_surname ($track, $surname) {
 	my @found;
 	for my $FX ($track->user_effects)
 	{ push @found, $FX->id if $FX->surname eq $surname }

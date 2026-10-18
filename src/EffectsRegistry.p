@@ -110,9 +110,8 @@ sub new_plugins {
 	$latest > $effects_cache_stamp;
 }
 
-sub modified_stamp {
+sub modified_stamp ($filename) {
 	# timestamp that file was modified
-	my $filename = shift;
 	#print "file: $filename\n";
 	my @s = stat $filename;
 	$s[9];
@@ -201,13 +200,11 @@ sub sort_ladspa_effects {
 		 sort { $fx_cache->{registry}->[$a]->{name} cmp $fx_cache->{registry}->[$b]->{name} } ($aa .. $zz) ;
 	logpkg('debug', "sorted array length: ". scalar $fx_cache->{ladspa_sorted}->@*);
 }		
-sub run_external_ecasound_cmd {
-	my $cmd = shift;
+sub run_external_ecasound_cmd ($cmd) {
 	my $output = qx(sh -c 'echo $cmd | ecasound -c '); 
 	trim_output($output)
 }
-sub trim_output {
-	my $output = shift;
+sub trim_output ($output) {
 	$output =~ s/\n\.{3} //g;
 	$output =~ s/\r//;
 	$output =~ s/^.+?Registered \w+ plugins:\s*//s; # XXX HARDCODED for plugins only
@@ -510,8 +507,7 @@ sub get_lv2_hints {
 	map { $fx_cache->{lv2_help}->{"elv2:$_"} = join '', ::AnalyseLV2::lv2_help($_) } @plugins;
 }
 
-sub srate_val {
-	my $input = shift;
+sub srate_val ($input) {
 	my $val_re = qr/(
 			[+-]? 			# optional sign
 			\d+				# one or more digits
@@ -522,8 +518,7 @@ sub srate_val {
 	$val * ( $input =~ /srate/ ? $config->{sample_rate} : 1 )
 }
 	
-sub range {
-	my ($name, $range, $default, $hint, $plugin_label) = @_; 
+sub range ($name, $range, $default, $hint, $plugin_label) {
 	my $multiplier = 1;;
 	my ($beg, $end) = split /\s+to\s+/, $range;
 	$beg = 		srate_val( $beg );
@@ -588,8 +583,7 @@ logpkg('debug', sub{join "\n", grep {/el:/} sort keys $fx_cache->{full_label_to_
 }
 
 
-sub generate_help {
-	my $line = shift;
+sub generate_help ($line) {
 	$line =~ s/^.*? //; 				# remove initial number
 	$line .= "\n";						# add newline
 	s/,/, /g;							# to help line breaks
@@ -597,9 +591,8 @@ sub generate_help {
 }
 
 
-sub generate_lv2_help {
+sub generate_lv2_help ($line) {
 
-		my $line = shift;
  		if ($line =~ /elv2:/){
 
 			my $trimmed = $line;
@@ -615,8 +608,7 @@ sub generate_lv2_help {
 		$line
 
 }
-sub generate_ladspa_help {
-	my $line = shift;
+sub generate_ladspa_help ($line) {
 		my ($label) = $line =~ /-(el:[-\w]+)/;
 		$line =~ s/^\s{2,} //g;			 # trim spaces 
 		$line =~ s/\t/ /g; 				# convert tabs to spaces

@@ -35,8 +35,7 @@ my @display_index = map{ $help->{index}->{++$i} = $_;  # integer => topic key
                             $name = join " ",$i, $name;
                             $help->{display}->[$i] = $name;
                             } $help->{arr_topic}->@*;
-sub pad {
-    my ($text, $len) = @_;
+sub pad ($text, $len) {
     my $padding = $len - length $text;
     $padding = 1 if $padding < 1;
     my $pad = ' ' x $padding;

@@ -61,22 +61,20 @@ our @EXPORT_OK = ( $EXPORT_TAGS{'all'}->@* );
 our @EXPORT = ();
 
 
-sub freq { [split ',', $_[0] ]->[2] }  # e.g. s16_le,2,44100
+sub freq ($format) { [split ',', $format ]->[2] }  # e.g. s16_le,2,44100
 
-sub channels { [split ',', $_[0] ]->[1] }
+sub channels ($format) { [split ',', $format ]->[1] }
 	
 # these are the names of loop devices corresponding
 # to pre- and post-fader nodes of a track signal
-sub input_node { $_[0].'_in' }
-sub output_node {$_[0].'_out'}
+sub input_node ($name) { $name.'_in' }
+sub output_node ($name) {$name.'_out'}
 
-sub signal_format {
-	my ($template, $channel_count) = @_;
+sub signal_format ($template, $channel_count) {
 	$template =~ s/N/$channel_count/;
 	my $format = $template;
 }
-sub process_is_running {
-	my $name = shift;
+sub process_is_running ($name) {
 	my @pids = split " ", qx(pgrep $name);
 	my @ps_ax  = grep{   my $pid;
 						/$name/ and ! /defunct/
@@ -84,20 +82,16 @@ sub process_is_running {
 						and grep{ $pid == $_ } @pids 
 				} split "\n", qx(ps ax) ;
 }
-sub d1 {
-	my $n = shift;
+sub d1 ($n) {
 	sprintf("%.1f", $n)
 }
-sub d2 {
-	my $n = shift;
+sub d2 ($n) {
 	sprintf("%.2f", $n)
 }
-sub dn {
-	my ($n, $places) = @_;
+sub dn ($n, $places) {
 	sprintf("%." . $places . "f", $n);
 }
-sub round {
-	my $n = shift;
+sub round ($n) {
 	return 0 if $n == 0;
 	$n = int $n if $n > 10;
 	$n = d2($n) if $n < 10;
@@ -124,13 +118,11 @@ sub time_tag {
 	sprintf "%4d.%02d.%02d-%02d:%02d:%02d", @time
 }
 
-sub heuristic_time {
-	my $sec = shift;
+sub heuristic_time ($sec) {
 	d1($sec) .  ( $sec > 120 ? " (" . colonize( $sec ) . ") "  : " " )
 }
 
-sub dest_type {
-	my $dest = shift;
+sub dest_type ($dest) {
 	if($dest eq undef )			{ undef			}
 
 	elsif($dest eq 'bus')		 	{ 'bus'			}
@@ -145,8 +137,7 @@ sub dest_type {
 	elsif( $tn{$dest} )			{ 'track' 		}
 	else 						{ 'jack_client'	} 
 }
-sub dest_string {
-	my ($type, $id, $width) = @_;
+sub dest_string ($type, $id, $width) {
 	if ($type eq 'soundcard'){
 		my $ch = $id;
 		my @channels;
@@ -200,8 +191,7 @@ sub strip_comments { #
 	@_
 } 
 
-sub remove_spaces {															 
-		my $entry = shift;													  
+sub remove_spaces ($entry) {
 		# remove leading and trailing spaces									
 																				
 		$entry =~ s/^\s*//;													 
@@ -212,13 +202,11 @@ sub remove_spaces {
 		$entry =~ s/\s+/_/g;													
 		$entry;																 
 }																			   
-sub resolve_path {
-	my $path = shift;
+sub resolve_path ($path) {
 	$path = expand_tilde($path);
 	$path = File::Spec::Link->resolve_all($path);
 }
-sub expand_tilde { 
-	my $path = shift; 
+sub expand_tilde ($path) {
 
  	my $home = File::HomeDir->my_home;
 

@@ -22,8 +22,7 @@ sub comment ($track) {
 	$project->{track_comments}->{$track->name} 
 }
 
-sub version_comment {
-	my ($track, $v) = @_;
+sub version_comment ($track, $v) {
 	return unless $project->{track_version_comments}->{$track->name}{$v};
 	my $text   = $project->{track_version_comments}->{$track->name}{$v}{user};
 	$text .= " " if $text;
@@ -36,20 +35,17 @@ sub show_version_comments {
 	return unless @v;
 	::pager(map{ $track->version_comment($_) } @v);
 }
-sub add_version_comment {
-	my ($track,$v,$text) = @_;
+sub add_version_comment ($track, $v, $text) {
 	$track->targets->{$v} or ::throw("$v: no such version"), return;	
 	$project->{track_version_comments}->{$track->name}{$v}{user} = $text;
 	$track->version_comment($v);
 }
-sub add_system_version_comment {
-	my ($track,$v,$text) = @_;
+sub add_system_version_comment ($track, $v, $text) {
 	$track->targets->{$v} or ::throw("$v: no such version"), return;	
 	$project->{track_version_comments}{$track->name}{$v}{system} = $text;
 	$track->system_version_comment($v);
 }
-sub remove_version_comment {
-	my ($track,$v) = @_;
+sub remove_version_comment ($track, $v) {
 	$track->targets->{$v} or ::throw("$v: no such version"), return;	
 	delete $project->{track_version_comments}{$track->name}{$v}{user};
 	$track->version_comment($v) || "$v: [comment deleted]\n";
@@ -59,8 +55,7 @@ sub remove_system_version_comment {
 	delete $project->{track_version_comments}{$track->name}{$v}{system} if
 		$project->{track_version_comments}{$track->name}{$v}
 }
-sub system_version_comment {
-	my ($track, $v) = @_;
+sub system_version_comment ($track, $v) {
 	return unless $project->{track_version_comments}->{$track->name}{$v};
 	$project->{track_version_comments}->{$track->name}{$v}{system};
 }

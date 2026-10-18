@@ -38,21 +38,18 @@ sub helpline {
 		
 }
 	
-sub munge_help {
-	my $text = shift;
+sub munge_help ($text) {
 	$text =~ s/(^\s*)!(\s*#)/$1 $2/mg;
 	$text =~ s/(^\s*!)/#/mg;
 	$text
 }
 }
-sub helptopic {
-	my $i  = shift;
+sub helptopic ($i) {
 	my $key = $help->{index}->{$i};
 	format_help_topic($i, $key);
 }
 
-sub format_help_topic {
-	my ($index, $key) = @_;
+sub format_help_topic ($index, $key) {
 	my $title = $help->{display}->[$index];
 	my @output;
 	push @output, "\n-- $help->{title}->[$index] --\n\n";
@@ -60,8 +57,7 @@ sub format_help_topic {
 	@output
 }
 
-sub help { 
-	my $name = shift;
+sub help ($name) {
 	$name =~ s/-/_/g;  # help indices require underscores
 	chomp $name;
 	#print "seeking help for argument: $name\n";
@@ -109,9 +105,9 @@ IAM
 	} else { throw("$name: no help found."); }
 	
 }
-sub help_effect {
-	my ($input, $id, $no_match, @output);
-	$id = $input = shift;
+sub help_effect ($input) {
+	my ($no_match, @output);
+	my $id = $input;
 
 	# e.g. help tap_reverb    
 	#      help 2142
@@ -164,8 +160,8 @@ sub parse_midi_help {
 	return;
 }
 
-sub help_midi {
-	my $name = lc shift;
+sub help_midi ($name) {
+	$name = lc $name;
 	my $commands = $help->{midi_commands};
 	if ($commands->{$name}) {
 		::pager(helpline($name, $commands));
