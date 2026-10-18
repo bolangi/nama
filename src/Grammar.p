@@ -67,12 +67,15 @@ sub process_line {
 		elsif ($target eq 'midi' && $user_input =~ s/^\s*nama\s+//) {
 			$target = 'audio';
 		}
-		if (!$midi_escape && $user_input =~ /^\s*(audio-mode|amd|midi-mode|mmd)\s*$/) {
-			$mode->{command_mode} = $1 =~ /^(?:audio-mode|amd)$/ ? 'audio' : 'midi';
-			notify($mode->{command_mode} eq 'audio' ? 'Entering audio mode' : 'Entering MIDI mode');
+
+		if (not $midi_escape and $user_input =~ /^\s*(audio-mode|amd|midi-mode|mmd)\s*$/) {
+			nama_cmd( $user_input );
 			revise_prompt();
 			return;
 		}
+
+		$target = 'audio' if $user_input =~ /^\s*(?:help[-_]midi|find[-_]midi|hm|fm)(?=\s|$)/;
+		
 		if ($target eq 'midi') {
 			my $output = midish_cmd($user_input);
 			pager($output) if defined $output && length $output;
