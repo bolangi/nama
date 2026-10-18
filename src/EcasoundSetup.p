@@ -54,7 +54,7 @@ sub find_duplicate_inputs { # in Main bus only
 			$setup->{tracks_with_duplicate_inputs}->{$_->name}++ if $setup->{inputs_used}->{$source} ;
 		 	$setup->{inputs_used}->{$source} //= $_->name;
 	} 
-	grep { $_->rw eq REC }
+	grep { $_->rec }
 	map{ $tn{$_} }
 	$bn{Main}->tracks(); # track names;
 }

@@ -95,7 +95,7 @@ sub candidate_factors {
 		$source .= ' '.$track->source_id if defined $track->source_id;
 		push @factors, "configured source: $source";
 	}
-	if ($track->rw eq PLAY){
+	if ($track->play){
 		my $version = $track->playback_version;
 		push @factors, "playback version: $version";
 		push @factors, $track->targets->{$version}
@@ -116,8 +116,8 @@ sub candidate_factors {
 
 sub candidate_off_reason {
 	my $track = shift;
-	return 'requested-off' if $track->rw eq OFF;
-	if ($track->rw eq PLAY){
+	return 'requested-off' if $track->off;
+	if ($track->play){
 		my $version = $track->playback_version;
 		return 'no-playback-file' unless $track->targets->{$version};
 		return 'doodle-mode' if $mode->doodle;
@@ -285,7 +285,7 @@ sub add_paths_for_mixdown_handling {
 	logsub((caller(0))[3]);
 	my $final_leg_origin = $mode->mastering ? 'Boost' : 'Main';
 
-	if ($tn{Mixdown}->rw eq REC ){
+	if ($tn{Mixdown}->rec ){
 		# don't monitor via soundcard
 		$g->delete_edge('Main','soundcard_out');
 		$g->delete_edge('Boost','soundcard_out');
@@ -299,7 +299,7 @@ sub add_paths_for_mixdown_handling {
 												 
 	# Mixdown handling - playback
 	
-	} elsif ($tn{Mixdown}->rw eq PLAY and $tn{Mixdown}->playback_version()){ 
+	} elsif ($tn{Mixdown}->play and $tn{Mixdown}->playback_version()){ 
 			my @e = ('wav_in','Mixdown',output_node($tn{Main}->send_type));
 			$g->add_path(@e);
 			$g->set_vertex_attributes('Mixdown', {

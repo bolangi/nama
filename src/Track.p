@@ -367,7 +367,7 @@ sub destination ($track) {
 }
 sub candidate_rw ($track) {
 	$track->rw
-# 	return REC if $track->rw eq REC;
+# 	return REC if $track->rec;
 # 	::Track::rec_status($track);
 }
 sub forbid_user_ops { 1 }
@@ -529,9 +529,9 @@ sub exists_midi ($track) {
 	$engine->has_track($track->current_midi);
 }
 sub candidate_rw ($self) {
-		if	 ( $self->rw eq REC and	$self->is_selected )							{ REC  } 
-		elsif( $self->rw eq REC and	! $self->is_selected )							{ PLAY } 
-		elsif( $self->rw eq PLAY )													{ PLAY }
+		if	 ( $self->rec and	$self->is_selected )							{ REC  } 
+		elsif( $self->rec and	! $self->is_selected )							{ PLAY } 
+		elsif( $self->play )													{ PLAY }
 		else																		{ OFF  }
 }
 sub versions { $_[0]->{midi_versions} }

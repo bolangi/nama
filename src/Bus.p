@@ -79,7 +79,7 @@ sub tracks_off ($bus) {
 	for ( $bus->track_o )
 	{
 		delete $setup->{bus}->{oldrw}->{$_->name };
-		next if $_->rw eq OFF;
+		next if $_->off;
 		$setup->{bus}->{oldrw}->{$_->name } = $_->rw;
 		$_->set( rw => OFF );
 	}	

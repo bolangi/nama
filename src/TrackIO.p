@@ -35,7 +35,7 @@ sub missing_source_track ($track) {
 }
 sub disabled_source_track ($track) {
 	$track->source_type eq 'track' 
-		and $tn{$track->source_id}->rw eq OFF;
+		and $tn{$track->source_id}->off;
 }
 
 sub candidate_rw ($track) {

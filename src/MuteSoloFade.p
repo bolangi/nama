@@ -5,12 +5,12 @@ use v5.36;
 
 sub mute {
 	return if $config->{opts}->{F};
-	return if $tn{Main}->rw eq OFF or ::ChainSetup::really_recording();
+	return if $tn{Main}->off or ::ChainSetup::really_recording();
 	$tn{Main}->mute;
 }
 sub unmute {
 	return if $config->{opts}->{F};
-	return if $tn{Main}->rw eq OFF or ::ChainSetup::really_recording();
+	return if $tn{Main}->off or ::ChainSetup::really_recording();
 	$tn{Main}->unmute;
 }
 sub fade_around {
