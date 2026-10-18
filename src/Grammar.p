@@ -59,13 +59,13 @@ sub process_line {
 	if (defined $user_input and $user_input !~ /^\s*$/) {
 		push $text->{command_history}->@*, $user_input;
 		$text->{command_index} = scalar $text->{command_history}->@*;
-		my $target = $mode->{command_mode};
-		my $midi_escape = $target eq 'audio' && $user_input =~ s/^\s*midi\s+//;
+		my $command_set = $mode->{command_mode};
+		my $midi_escape = $command_set eq 'audio' && $user_input =~ s/^\s*midi\s+//;
 		if ($midi_escape) {
-			$target = 'midi';
+			$command_set = 'midi';
 		}
-		elsif ($target eq 'midi' && $user_input =~ s/^\s*nama\s+//) {
-			$target = 'audio';
+		elsif ($command_set eq 'midi' && $user_input =~ s/^\s*nama\s+//) {
+			$command_set = 'audio';
 		}
 
 		if (not $midi_escape and $user_input =~ /^\s*(audio-mode|amd|midi-mode|mmd)\s*$/) {
@@ -74,9 +74,9 @@ sub process_line {
 			return;
 		}
 
-		$target = 'audio' if $user_input =~ /^\s*(?:help[-_]midi|find[-_]midi|hm|fm)(?=\s|$)/;
+		$command_set = 'audio' if $user_input =~ /^\s*(?:help[-_]midi|find[-_]midi|hm|fm)(?=\s|$)/;
 		
-		if ($target eq 'midi') {
+		if ($command_set eq 'midi') {
 			my $output = midish_cmd($user_input);
 			pager($output) if defined $output && length $output;
 			revise_prompt();
