@@ -6,19 +6,12 @@ use v5.36;
 our $VERSION = 1.0;
 use Carp qw(croak carp);
 use warnings;
-no warnings qw(uninitialized);
-our $AUTOLOAD;
-our($n, %by_name, @all);
+our(%by_name, @all);
 use ::Globals qw($setup $project);
 use ::Object qw( 
 					name 
 					time
-					tags
-					attrib
 			   );
-
-my @attributes = qw(clip_start clip_end clip_name clip_index) ;
-my %is_attribute = map{ $_ => 1 } @attributes;
 
 sub initialize {
 	map{ $_->remove} ::Mark::all();
@@ -27,19 +20,10 @@ sub initialize {
 	$by_name{Here} = bless {}, '::HereMark';
 	@::marks_data = (); # for save/restore
 }
-sub next_id { # returns incremented 4-digit 
-	$project->{mark_sequence_counter} ||= '0000';
-	$project->{mark_sequence_counter}++
-}
 sub new {
 	my $class = shift;	
 	my %vals = @_;
-	for my $k (keys %vals)
-	{
-		$vals{attrib}{$k} = delete $vals{$k} if $is_attribute{$k}
-	}
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	if ($vals{tags}){ $vals{tags} = { map{$_ => 1} split " ", $vals{tags} } }
 
 	# to support set_edit_points, we now allow marks to be overwritten
 	#
@@ -179,18 +163,7 @@ sub adjusted_time_from_tag {
 	return unless defined $time;
 	::adjusted_time_from_timeline_position($time)
 }
-# Attribute accessors let $mark->clip_name read $mark->{attrib}->{clip_name}.
-
-sub AUTOLOAD { 
-	my $self = shift;
-	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
-	return $self->{attrib}->{$call} if exists $self->{attrib}->{$call}
-		or $is_attribute{$call};
-	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
-}
-sub DESTROY {}
-}
-
+} # end package Mark
 # ---------- Mark and jump routines --------
 {
 package ::;
@@ -241,16 +214,14 @@ sub clip_state {
 	return ($last_index, defined $open_index ? $starts{$open_index} : undef);
 }
 
-sub register_clip_endpoint ($time, $index, $name, $endpoint) {
-	my $mark = ::Mark->new(
-		time => $time,
-		name => "clip $index $name $endpoint",
-		clip_index => $index,
-		clip_name => $name,
-		clip_end => $endpoint,
-	);
+sub register_clip_endpoint (%args) {
+	my $mark = ::ClipMark->new( time => $args{time},
+								name => "clip $args{index} $args{name} $args{endpoint}",
+								clip_index => $args{index},
+								clip_name     => $args{name},
+								clip_endpoint => $args{endpoint});
 	$ui->marker($mark);
-	notify("Clip $index $name " . ($endpoint eq 'start' ? 'started' : 'ended'));
+	notify("Clip $args{index} $args{name} " . ($args{endpoint} eq 'start' ? 'started' : 'ended'));
 	return $mark;
 }
 
@@ -264,7 +235,10 @@ sub start_clip {
 	
 	my $new_index = $current_index + 1;	
 	my $name = prompt_for_text('Clip name?');
-	register_clip_endpoint($time, $new_index, $name, 'start');
+	register_clip_endpoint( time     => $time, 
+							index    => $new_index, 
+							name     => $name,
+							endpoint => 'start' );
 	start_transport();
 }
 
@@ -275,10 +249,10 @@ sub end_clip ($time) {
 		throw('No clip started');
 		return;
 	}
-	register_clip_endpoint(  $time,
-							 $opening_mark->clip_index, 
-							 $opening_mark->clip_name, 
-							 'end'); 
+	register_clip_endpoint( time  	 => $time,
+							index 	 => $opening_mark->clip_index, 
+							name  	 => $opening_mark->clip_name, 
+							endpoint => 'end'); 
 }
 
 sub mark { # GUI_CODE
@@ -450,7 +424,9 @@ sub time {
 use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::Mark';
-
+use ::Object qw( clip_index clip_name clip_endpoint );
+sub clip_start ($self) { $self->clip_endpoint eq 'start' }
+sub clip_end   ($self) { $self->clip_endpoint eq 'end'   }
 
 }
 
