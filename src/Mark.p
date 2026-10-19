@@ -225,8 +225,9 @@ sub drop_mark {
 
 	$ui->marker($mark); # for GUI
 }
-# Clip state lives entirely in mark attributes, including after project reload.
-sub clip_mark_state {
+# Derive clip state -- last clip index and started/ended status -- from mark attributes
+
+sub clip_state {
 	my (%starts, %ends);
 	my $last_index = 0;
 	for my $mark (::Mark::all()) {
@@ -236,20 +237,20 @@ sub clip_mark_state {
 		$starts{$index} = $mark if $mark->clip_start;
 		$ends{$index} = $mark if $mark->clip_end;
 	}
-	my ($open_index) = sort { $b <=> $a } grep { !$ends{$_} } keys %starts;
+	my ($open_index) = sort { $b <=> $a } grep { not $ends{$_} } keys %starts;
 	return ($last_index, defined $open_index ? $starts{$open_index} : undef);
 }
 
-sub create_clip_mark ($time, $index, $name, $boundary) {
+sub register_clip_endpoint ($time, $index, $name, $endpoint) {
 	my $mark = ::Mark->new(
 		time => $time,
-		name => "clip $index $name $boundary",
+		name => "clip $index $name $endpoint",
 		clip_index => $index,
 		clip_name => $name,
-		"clip_$boundary" => 1,
+		"clip_$endpoint" => 1,
 	);
 	$ui->marker($mark);
-	notify("clip $name " . ($boundary eq 'start' ? 'started' : 'ended'));
+	notify("clip $name " . ($endpoint eq 'start' ? 'started' : 'ended'));
 	return $mark;
 }
 
@@ -257,24 +258,24 @@ sub start_clip {
 	return if ::ChainSetup::really_recording();
 	my $time = current_timeline_position();
 	stop_transport();
-	# Resume at the captured boundary, even if stopping took some time.
+	# Resume at the captured endpoint, even if stopping took some time.
 	set_timeline_position($time);
-	my ($last_index, $open) = clip_mark_state();
-	create_clip_mark($time, $open->clip_index, $open->clip_name, 'end') if $open;
+	my ($last_index, $open) = clip_state();
+	register_clip_endpoint($time, $open->clip_index, $open->clip_name, 'end') if $open;
 	my $name = prompt_for_text('Clip name?');
 	return unless defined $name;
-	create_clip_mark($time, $last_index + 1, $name, 'start');
+	register_clip_endpoint($time, $last_index + 1, $name, 'start');
 	start_transport();
 }
 
 sub end_clip {
 	return if ::ChainSetup::really_recording();
-	my ($last_index, $open) = clip_mark_state();
+	my ($last_index, $open) = clip_state();
 	unless ($open) {
 		notify('No clip started');
 		return;
 	}
-	create_clip_mark(current_timeline_position(), $open->clip_index, $open->clip_name, 'end');
+	register_clip_endpoint(current_timeline_position(), $open->clip_index, $open->clip_name, 'end');
 }
 
 sub mark { # GUI_CODE
