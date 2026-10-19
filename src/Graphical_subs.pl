@@ -1288,7 +1288,7 @@ sub marker {
 	logpkg('debug',"mark is ", ref $mark);
 	my $pos = $mark->time;
 	logpkg('debug',$pos, " ", int $pos);
-		$gui->{marks}->{$pos} = $gui->{mark_frame}->Button( 
+		$gui->{marks}->{$mark} = $gui->{mark_frame}->Button(
 			-text => (join " ",  colonize( int $pos ), $mark->name),
 			-background => $gui->{_nama_palette}->{OffBackground},
 			-command => sub { ::mark($mark) },
@@ -1302,8 +1302,9 @@ sub restore_time_marks {
 }
 sub destroy_marker {
 	my $ui = shift;
-	my $pos = shift;
-	$gui->{marks}->{$pos}->destroy; 
+	my $mark = shift;
+	my $button = delete $gui->{marks}->{$mark};
+	$button->destroy if $button;
 }
 
 sub setup_playback_indicator {

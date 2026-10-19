@@ -88,7 +88,7 @@ sub remove ($mark) {
 	if ( $mark->name ) {
 		delete $by_name{$mark->name};
 	}
-	@all = grep { $_->time != $mark->time } @all;
+	@all = grep { $_ != $mark } @all;
 }
 sub next ($mark) {
 	::next_mark();
@@ -179,10 +179,7 @@ sub adjusted_time_from_tag {
 	return unless defined $time;
 	::adjusted_time_from_timeline_position($time)
 }
-# the following lets $mark->foo access $mark->{attrib}->{foo}
-# we'll probably need attrib field, and to initialize it to a hashref
-
-# postponing this for now, if tags can do our job
+# Attribute accessors let $mark->clip_name read $mark->{attrib}->{clip_name}.
 
 sub AUTOLOAD { 
 	my $self = shift;
@@ -220,10 +217,6 @@ sub drop_mark {
 			colonize($mark->time));
 		return
 	}
-	if( my ($mark) = grep { $_->time == $here} ::Mark::all()){
-		::notify( q(This position is already marked by "),$mark->name,q(") );
-		 return 
-	}
 
 	my $mark = ::Mark->new( time => $here, 
 							name => $name,
@@ -232,12 +225,64 @@ sub drop_mark {
 
 	$ui->marker($mark); # for GUI
 }
+# Clip state lives entirely in mark attributes, including after project reload.
+sub clip_mark_state {
+	my (%starts, %ends);
+	my $last_index = 0;
+	for my $mark (::Mark::all()) {
+		my $index = $mark->clip_index;
+		next unless defined $index and $index =~ /\A[1-9][0-9]*\z/;
+		$last_index = $index if $index > $last_index;
+		$starts{$index} = $mark if $mark->clip_start;
+		$ends{$index} = $mark if $mark->clip_end;
+	}
+	my ($open_index) = sort { $b <=> $a } grep { !$ends{$_} } keys %starts;
+	return ($last_index, defined $open_index ? $starts{$open_index} : undef);
+}
+
+sub create_clip_mark ($time, $index, $name, $boundary) {
+	my $mark = ::Mark->new(
+		time => $time,
+		name => "clip $index $name $boundary",
+		clip_index => $index,
+		clip_name => $name,
+		"clip_$boundary" => 1,
+	);
+	$ui->marker($mark);
+	notify("clip $name " . ($boundary eq 'start' ? 'started' : 'ended'));
+	return $mark;
+}
+
+sub start_clip {
+	return if ::ChainSetup::really_recording();
+	my $time = current_timeline_position();
+	stop_transport();
+	# Resume at the captured boundary, even if stopping took some time.
+	set_timeline_position($time);
+	my ($last_index, $open) = clip_mark_state();
+	create_clip_mark($time, $open->clip_index, $open->clip_name, 'end') if $open;
+	my $name = prompt_for_text('Clip name?');
+	return unless defined $name;
+	create_clip_mark($time, $last_index + 1, $name, 'start');
+	start_transport();
+}
+
+sub end_clip {
+	return if ::ChainSetup::really_recording();
+	my ($last_index, $open) = clip_mark_state();
+	unless ($open) {
+		notify('No clip started');
+		return;
+	}
+	create_clip_mark(current_timeline_position(), $open->clip_index, $open->clip_name, 'end');
+}
+
 sub mark { # GUI_CODE
 	logsub((caller(0))[3]);
 	my $mark = shift;
 	my $pos = $mark->time;
 	if ($gui->{_markers_armed}){ 
-			$ui->destroy_marker($pos);
+			$ui->destroy_marker($mark);
 			$mark->remove;
 		    arm_mark_toggle(); # disarm
 	}
