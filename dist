@@ -1,1 +1,1 @@
-src/dist
+./Build.PL && ./Build && ./Build test && mbtiny regenerate META.json META.yml && mbtiny dist
