@@ -1584,9 +1584,19 @@ separate_clips:
   short: separate spc
   what: |
     Make each clip defined by mark pairs into a separate track.
-compose:
+update_clips:
   type: sequence
-  short: compose_sequence compose_into_sequence join_clips
+  short: upc
+  what: |
+    Reflect changes in defining marks on separated clips
+write_clips:
+  type: sequence
+  short: wrc
+  what: |
+    Reflect changes in defining marks on separated clips
+compose_sequence:
+  type: sequence
+  short: compose join_clips
   what: |
     compose a new sequence using the region(s) of the named track
     defined by mark pair(s). If the sequence of that name exists, 

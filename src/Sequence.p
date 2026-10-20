@@ -168,5 +168,18 @@ sub compose_sequence {
 	map{ $sequence->append_item($_) } @clips;
 	$sequence
 }
+sub separate_clips {
+	# check for unclosed clips, prompt
+	# turn off host track
+	# create clips
+	# (user audits)
+}
+sub write_clips {
+	# write each clip to clipname.wav, overwriting existing
+	# same-named clip if marks don't match
+}
+sub update_clips {
+	# reflect changes in clip marks on the separate clip tracks.
+}
 1
 __END__
