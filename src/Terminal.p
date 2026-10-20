@@ -829,7 +829,8 @@ sub load_keywords {
 	$text->{midi_completion_keywords} = [
 		sort
 		grep { length($_) >= 4 and !$seen_midi{$_}++ }
-		split ' ', get_data_section('all_midi_command_names')
+		(split ' ', get_data_section('all_midi_command_names')),
+		keys $text->{midi_shared_commands}->%*
 	];
 }
 

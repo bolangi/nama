@@ -35,6 +35,7 @@ sub setup_grammar {
 	$text->{parser} = Parse::RecDescent->new($text->{grammar}) or croak "Bad grammar!\n";
 
 	# Midish command keywords
+	setup_midi_shared_commands();
 	
 	# prepend 'm' to all midish commands
 	# suppress midi record, play, stop commands - Nama will handle them
@@ -49,6 +50,16 @@ sub setup_grammar {
 		::notify("$_: midi command same as Nama command") if $text->{commands}->{$_}
 	}
 
+}
+sub setup_midi_shared_commands {
+	my %midish = map { $_ => 1 } split ' ', get_data_section('all_midi_command_names');
+	my @shared = ('eval');
+	for my $name (grep { /^(?:help|find)_/ } keys $text->{commands}->%*) {
+		push @shared, $name, split ' ', ($text->{commands}->{$name}->{short} // '');
+	}
+	push @shared, map { s/_/-/gr } @shared;
+	# Midish keeps any conflicting name, including abbreviations.
+	$text->{midi_shared_commands} = { map { $_ => 1 } grep { !$midish{$_} } @shared };
 }
 sub process_line {
 	state $total_effects_count;
@@ -74,7 +85,10 @@ sub process_line {
 			return;
 		}
 
-		$command_set = 'audio' if $user_input =~ /^\s*(?:help[-_]midi|find[-_]midi|hm|fm)(?=\s|$)/;
+		if ($command_set eq 'midi' && !$midi_escape) {
+			my ($command) = $user_input =~ /^\s*(\S+)/;
+			$command_set = 'audio' if $text->{midi_shared_commands}->{$command};
+		}
 		
 		if ($command_set eq 'midi') {
 			my $output = midish_cmd($user_input);
