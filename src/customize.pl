@@ -13,10 +13,10 @@ use Audio::Nama::Globals qw(:all);
 
 my @user_customization = (
 
-prompt => sub { 
-	no warnings 'uninitialized';
-	join ' ', 'nama', git_branch_display(), bus_track_display(), '> ' 
-},
+# prompt => sub { 
+# 	no warnings 'uninitialized';
+# 	join ' ', 'nama', git_branch_display(), bus_track_display(), '> ' 
+# },
 
 ## user defined commands
 
