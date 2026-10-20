@@ -697,6 +697,7 @@ remove_mark: _remove_mark ident {
 remove_mark: _remove_mark { 
 	use feature 'isa';
 	return unless $::this_mark isa '::Mark';
+	::notify("Removing ". $::this_mark->name);
 	$::this_mark->remove;
 	1;}
 add_mark: _add_mark ident timevalue { ::drop_mark(name => $item{ident}, time => $item{timevalue}) ;1}
