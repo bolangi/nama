@@ -1579,9 +1579,14 @@ snip:
     This removes cut1 and cut2 regions from the current track
     by creating a sequence. 
   parameters: <mark_pair1> [<mark_pair2>...]
+separate_clips:
+  type: sequence
+  short: separate spc
+  what: |
+    Make each clip defined by mark pairs into a separate track.
 compose:
   type: sequence
-  short: compose_sequence compose_into_sequence
+  short: compose_sequence compose_into_sequence join_clips
   what: |
     compose a new sequence using the region(s) of the named track
     defined by mark pair(s). If the sequence of that name exists, 
