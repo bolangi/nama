@@ -178,23 +178,8 @@ sub drop_mark {
 	my $here = defined $arg{time}
 		? $arg{time}
 		: timeline_position_from_adjusted_time(ecasound_iam("getpos"));
-	my $type = $arg{type};
-	my $tags = {};
-	if ( defined $arg{tags} )
-	{
-		my @tags = (ref $arg{tags}) ? $arg{tags}->@* : $arg{tags};
-		$tags->{$_}++ for $arg{tags}->@* 
-	}
-
-	if( my $mark = $::Mark::by_name{$name}){
-		::notify("$name: a mark with this name exists already at: ", 
-			colonize($mark->time));
-		return
-	}
-
 	my $mark = ::Mark->new( time => $here, 
 							name => $name,
-							tags => $tags,
 							);
 
 	$ui->marker($mark); # for GUI
