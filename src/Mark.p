@@ -23,7 +23,8 @@ sub initialize {
 sub new {
 	my $class = shift;	
 	my %vals = @_;
-	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	my @undeclared = grep { !$class->is_legal_key($_) } keys %vals;
+	croak 'undeclared field: ' . join(', ', sort @undeclared) if @undeclared;
 
 	# to support set_edit_points, we now allow marks to be overwritten
 	#
