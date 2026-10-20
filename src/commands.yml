@@ -586,14 +586,13 @@ new_clip:
   parameters: <string:start_mark_name> | <float:start_time> <string:end_mark_name> | <float:end_time> [ <string:region_name> ]
   example: |
     sax # Select "sax" as the current track.
-    add-region sax_start 66.7 trimmed_sax 
+    new_clip sax_start 66.7 trimmed_sax 
     ! Create "trimmed_sax", a copy of "sax" with a region defined
     ! from mark "sax_start" to 66.7 seconds. 
 remove_region:
   type: track
   what: |
     Restore full playback of a normal track
-    Remove a clip that is a virtual copy
   short: rrg
   parameters: none
 shift_track:
