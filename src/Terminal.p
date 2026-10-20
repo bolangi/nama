@@ -429,7 +429,8 @@ sub prompt_for_text ($message) {
 
 sub prompt {
 	logsub((caller(0))[3]);
-	join ' ', 'nama', git_branch_display(), bus_track_display(),'> ';
+	join ' ', 'nama', git_branch_display(),
+bus_track_display(), ($mode->{command_mode} eq 'midi' ? 'M' : ''), '> ';
 }
 
 sub prompt_yn ($message, $default) {
