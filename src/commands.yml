@@ -16,7 +16,6 @@ help_midi:
   example: |
     help-midi tquant
     hm cquantm
-    nama hm cquantm # use the Nama prefix in MIDI mode
 find_midi:
   type: help
   what: Find MIDI commands whose name or description contains all supplied keywords (case insensitive, literal matching).
@@ -25,7 +24,7 @@ find_midi:
   example: |
     find-midi quant
     fm current track
-    nama fm note velocity # use the Nama prefix in MIDI mode
+    fm note velocity
 help_effect:
   type: help
   what: Display detailed help on LADSPA or LV2 effects.
