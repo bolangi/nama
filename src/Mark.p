@@ -228,8 +228,9 @@ sub start_clip {
 	start_transport();
 }
 
-sub end_clip ($time) {
+sub end_clip ($time = undef) {
 	return if ::ChainSetup::really_recording();
+	$time //= current_timeline_position();
 	my ($last_index, $opening_mark) = clip_state();
 	unless ($opening_mark) {
 		throw('No clip started');
