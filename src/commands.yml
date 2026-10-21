@@ -1583,17 +1583,18 @@ separate_clips:
   type: sequence
   short: separate spc
   what: |
-    Make each clip defined by mark pairs into a separate track.
-update_clips:
-  type: sequence
-  short: upc
-  what: |
-    Reflect changes in defining marks on separated clips
+    Make each marked clip into a separate virtual track targeting the
+    current track's audio. Boundaries follow clipmarks when moved.
+    Turns off the original track. Confirms before using end of file for 
+    an open clip.
+  parameters: none
 write_clips:
   type: sequence
   short: wrc
   what: |
-    Reflect changes in defining marks on separated clips
+    Write marked clips from the current track to individual WAV files,
+    replacing existing clip files. Run again after moving clipmarks.
+  parameters: none
 compose_sequence:
   type: sequence
   short: compose join_clips
