@@ -168,18 +168,131 @@ sub compose_sequence {
 	map{ $sequence->append_item($_) } @clips;
 	$sequence
 }
+# Resolve the source even after separate_clips has turned the track OFF.
+sub clip_source ($track) {
+	my $file = $track->targets->{$track->playback_version};
+	return unless defined $file;
+	join_path($track->dir, $file)
+}
+
+sub clip_definitions ($track) {
+	my $source = clip_source($track);
+	unless (defined $source and -f $source) {
+		notify('Select a track with an audio file.');
+		return;
+	}
+	my (%starts, %ends);
+	for my $mark (::Mark::all()) {
+		next unless $mark isa '::ClipMark';
+		my $index = $mark->clip_index;
+		my $set = $mark->clip_start ? \%starts : \%ends;
+		if (exists $set->{$index}) {
+			notify("Duplicate endpoint for Clip $index. No action taken.");
+			return;
+		}
+		$set->{$index} = $mark;
+	}
+	unless (keys %starts) {
+		notify('No clips defined. No action taken.');
+		return;
+	}
+	for my $index (keys %ends) {
+		unless ($starts{$index}) {
+			notify("No start mark for Clip $index. No action taken.");
+			return;
+		}
+	}
+	my $length = wav_length($source);
+	my @clips;
+	for my $index (sort { $a <=> $b } keys %starts) {
+		my ($start, $end) = ($starts{$index}, $ends{$index});
+		my $name = "clip $index";
+		$name .= ' ' . $start->clip_name if length($start->clip_name // '');
+		my $endpoint = $end ? $end->time : $length;
+		unless (defined $length and $start->time >= 0
+			and $endpoint > $start->time and $endpoint <= $length) {
+			notify("Invalid boundaries for $name. No action taken.");
+			return;
+		}
+		push @clips, { name => $name, start => $start, end => $end };
+	}
+	for my $clip (@clips) {
+		next if $clip->{end};
+		my $label = ucfirst $clip->{name};
+		unless (prompt_yn("No end mark for $label. Use end of audio file?", 'no')) {
+			notify('No action taken.');
+			return;
+		}
+	}
+	return \@clips;
+}
+
 sub separate_clips {
-	# check for unclosed clips, prompt
-	# turn off host track
-	# create clips
-	# (user audits)
+	my $track = $this_track or return;
+	my $clips = clip_definitions($track) or return;
+	for my $clip (@$clips) {
+		if ($tn{$clip->{name}}) {
+			notify("$clip->{name}: track name already in use. No action taken.");
+			return;
+		}
+	}
+	for my $clip (@$clips) {
+		add_track($clip->{name},
+			target => $track->basename, project => $track->project,
+			version => $track->playback_version, width => $track->width,
+			group => $track->group, rw => PLAY,
+			region_start => $clip->{start}->name,
+			region_end => $clip->{end} ? $clip->{end}->name : 'END',
+		);
+	}
+	$track->set(rw => OFF);
+	request_setup();
 }
+
 sub write_clips {
-	# write each clip to clipname.wav, overwriting existing
-	# same-named clip if marks don't match
-}
-sub update_clips {
-	# reflect changes in clip marks on the separate clip tracks.
+	my $track = $this_track or return;
+	my $clips = clip_definitions($track) or return;
+	my $source = clip_source($track);
+	my $length = wav_length($source);
+	my $format = wav_format($source);
+	my @exports;
+	for my $clip (@$clips) {
+		my $name = $clip->{name};
+		if ($name =~ m{[/\\\x00]}) {
+			notify("$name: invalid WAV filename. No action taken.");
+			return;
+		}
+		my $output = join_path(this_wav_dir(), "$name.wav");
+		if ($output eq $source) {
+			notify('Cannot overwrite the source audio. No action taken.');
+			return;
+		}
+		push @exports, [$clip, $output];
+	}
+	for my $export (@exports) {
+		my ($clip, $output) = @$export;
+		my $start = $clip->{start}->time;
+		my $end = $clip->{end} ? $clip->{end}->time : $length;
+		require File::Temp;
+		my ($fh, $temporary) = File::Temp::tempfile('clip-XXXXXX',
+			DIR => this_wav_dir(), SUFFIX => '.wav', UNLINK => 0);
+		close $fh;
+		my $status = system('ecasound', '-q', '-b:1024',
+			'-i:select,' . $start . ',' . ($end - $start) . ',' . $source,
+			"-f:$format", "-o:$temporary");
+		if ($status != 0 or ! -s $temporary) {
+			unlink $temporary;
+			notify("Failed to write $output.");
+			return;
+		}
+		unless (rename $temporary, $output) {
+			my $error = $!;
+			unlink $temporary;
+			notify("Cannot replace $output: $error");
+			return;
+		}
+		notify("Wrote $output");
+	}
 }
 1
 __END__
