@@ -125,10 +125,12 @@ sub adjusted_loop_end {
 }
 sub time_from_tag {
 	my $tag = shift;
-	$tag or $tag = '';
+	$tag //= '';
 	#print "tag: $tag\n";
 	my $mark;
-	if ($tag =~ /\./) { # we assume raw time if decimal
+	if (exists $::Mark::by_name{$tag}) {
+		return $::Mark::by_name{$tag}->time;
+	} elsif ($tag =~ /\A[+-]?(?:\d+\.\d*|\.\d+)\z/) { # raw decimal time
 		#print "mark time: ", $tag, $/;
 		return $tag;
 	} elsif ($tag =~ /^\d+$/){
