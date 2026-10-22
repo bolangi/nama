@@ -1,27 +1,20 @@
-# MIDI command reference for Nama; matching commands.yml field names.
-# Target: Midish 1.5.0 (released 2026-08-30) plus Midish Extra 1.6.
-# Built-ins checked against user.c registrations, help.c, builtin.c and
-# manual.html in https://midish.org/midish-1.5.0.tar.gz.
-# All 152 registered built-ins are included. tquant and sendraw are omitted
-# because 1.5.0 does not register them, even though old implementation code remains.
-# Auxiliary procedures: supplied midish_extra by Jeanette C., version 1.6,
-# distributed under GPL version 3 or later. All 86 callable procedures included.
-# Optional procedures from example midishrc files are outside this reference.
+# Target: Midish 1.5.0 (released 2026-08-30) 
+# Auxiliary procedures in midish_extra by Jeanette C., version 1.6,
+# distributed under GPL version 3 or later. 
 #
-# Fields: type, what, short, parameters, example. Empty short means no alias;
-# single-letter Midish commands have their own keys.
-# Examples are Midish input. In Nama audio mode, prefix each line with "midi ".
-# In MIDI mode, enter directly; "nama " switches a line to Nama commands.
-# Return values can be displayed with: print [command arguments].
 # Measures, beats, steps and MIDI channel numbers are zero-based.
 # Auxiliary positions accept start, end and now where eval_pos is called.
+#
 # List arguments use braces, names/modes are atoms, filenames/port names are
 # quoted strings, and variable references start with a dollar sign.
 # Parenthesize negative arguments, e.g. trans piano 0 4 (-12), to avoid
 # parsing subtraction from the preceding numeric argument.
+#
 # A midi_channel argument is a named channel or a {device channel} pair.
+#
 # Note denominators: 4=quarter, 8=eighth, 16=sixteenth. Quantization rates are
 # percentages. Positions are measures, not audio seconds.
+#
 # nil is accepted where explicitly described, including setq, ct/cf/cx/ci/co,
 # dclkrx, dmtcrx, dnew's path and ctlconf/ctlconfx's default value.
 # Examples assume the referenced tracks, channels and devices exist.
