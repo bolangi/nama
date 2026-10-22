@@ -167,9 +167,4 @@ sub quote_yaml_scalars {
 }
 	
 
-sub add_break {
-	my %seen;
-	map { my $keyword = quotemeta($_); qq(/$keyword\\b/) }
-		grep { !$seen{$_}++ }
-		map { ($_, s/_/-/gr) } @_;
-}
+sub add_break { map{ qq(/$_\\b/) } @_ }
