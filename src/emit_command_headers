@@ -9,7 +9,8 @@ use YAML::Tiny;
 
 my $output = shift @ARGV;
 
-my $in = path('./commands.yml')->slurp_raw;
+my $source = shift @ARGV // './commands.yml';
+my $in = path($source)->slurp_raw;
 
 # preserve order for generating docs
 
@@ -65,7 +66,7 @@ exit;
 
 # generate command headers
 
-if ($output eq 'headers'){
+if ($output eq 'headers' || $output eq 'keywords'){
 
 	map { my $func = $_; 
 		my @parts = ($func, split " ", $ref->{$func}->{short});
@@ -78,7 +79,7 @@ if ($output eq 'headers'){
 		#push @stubs,   	"$full: _$full $end_anchor { 1 }";
 		push @commands,	"command: $full";
 	} @keys;
-	print join "\n", @commands, @abbrevs ;
+	print join "\n", ($output eq 'headers' ? @commands : ()), @abbrevs ;
 
 }
 
@@ -166,4 +167,9 @@ sub quote_yaml_scalars {
 }
 	
 
-sub add_break { map{ qq(/$_\\b/) } @_ }
+sub add_break {
+	my %seen;
+	map { my $keyword = quotemeta($_); qq(/$keyword\\b/) }
+		grep { !$seen{$_}++ }
+		map { ($_, s/_/-/gr) } @_;
+}
