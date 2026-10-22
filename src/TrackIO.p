@@ -127,12 +127,14 @@ sub set_io {
 	elsif( $type eq 'bus')     	{} # -ditto-
 	#elsif( $type eq 'loop')    {}  # unused at present
 
-	# don't allow user to set JACK I/O unless JACK server is running
+	# Allow unavailable JACK targets after confirmation.
 	
 	elsif( $type =~ /jack/ ){
-		::throw("JACK server not running! "
-			,"Cannot set JACK client or port as track source."), 
-				return unless $jack->{jackd_running};
+		if (! $jack->{jackd_running}){
+			::throw("JACK server not running!");
+			return unless ::prompt_yn(
+				"Do you want to continue setting a JACK IO target?", "no");
+		}
 
 		if( $type eq 'jack_manual'){
 
@@ -143,17 +145,23 @@ sub set_io {
 			$id = $port_name;
 			$type = 'jack_manual';
 		}
-		elsif( $type eq 'jack_client'){
+		elsif( $type eq 'jack_client' and $jack->{jackd_running}){
 			my $client_direction = $direction eq 'source' ? 'output' : 'input';
 
 			my $name = $track->name;
 			my $width = scalar ::jack_client_array($id, $client_direction)->@*;
-			$width or ::notify(
-				qq(Track $name: $direction port for JACK client "$id" not found.));
-			$width or return;
-			$width ne $track->width and ::notify(
+			if (! $width){
+				::notify($jack->{clients}->{$id}
+					? qq(Track $name: JACK client "$id" has no $client_direction ports for track $direction.)
+					: qq(Track $name: JACK client "$id" not found.));
+				return unless ::prompt_yn(
+					"Do you want to continue setting this JACK IO target?", "no");
+			}
+			elsif ($width != $track->width){
+				::notify(
 				"Track $name set to ", ::width($track->width),
-				qq(, but JACK source "$id" is ), ::width($width), '.');
+				qq(, but JACK $direction "$id" is ), ::width($width), '.');
+			}
 		}
 		elsif( $type eq 'jack_ports_list' ){
 			$id =~ /(\w+)\.ports/;
