@@ -4,6 +4,7 @@ package ::;
 use ::Effect  qw(:all);
 use v5.36;
 use Path::Tiny qw(path);
+use Text::ParseWords qw(parse_line);
 
 sub setup_grammar {
 
@@ -14,6 +15,8 @@ sub setup_grammar {
 	$text->{commands_yml} = get_data_section("commands_yml");
 	$text->{commands_yml} = quote_yaml_scalars($text->{commands_yml});
 	$text->{commands} = yaml_in( $text->{commands_yml}) ;
+	$text->{rtmidi_commands} = yaml_in(quote_yaml_scalars(
+		get_data_section('rtmidi_commands_yml')));
 	map
 	{ 
 		my $full_name = $_; 
