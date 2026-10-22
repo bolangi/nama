@@ -17,17 +17,18 @@
 # being recorded) lives in file-level hashes, never in the track hash, so
 # save_state serializes only plain settings.
 
-package Audio::Nama::RtMidiTrack '1.000';
+package Audio::Nama::RtMidiTrack;
 
 use v5.36;
 use File::Path qw(make_path);
 use JSON::PP ();
 use List::Util qw(max);
 use Time::HiRes ();
+use Carp qw(croak);
 use parent -norequire, 'Audio::Nama::Track';  # before Object import: keeps @ISA
 use Audio::Nama::Globals qw(:all);
 use Audio::Nama::Object qw( rt_input rt_output rt_thru );
-use Audio::Nama::RtMidiTrack::NullOut;
+use Audio::Nama::RtMidiTrackNullOut;
 
 no warnings qw(redefine);
 

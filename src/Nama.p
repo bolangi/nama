@@ -25,6 +25,8 @@ use IO::Async::Loop::Select;
 use IO::Socket; 
 use IO::Select;
 use IPC::Open3;
+use MIDI::RtController (); # GB
+use MIDI::RtMidi::FFI (); # GB
 use Module::Load::Conditional qw(can_load); 
 use Module::Load;
 use Parse::RecDescent;
@@ -148,6 +150,8 @@ use ::CacheTrack ();
 use ::Bunch ();
 use ::Wavinfo ();
 use ::Midi ();
+use ::RtMidiTrack (); # GB
+use ::RtMidiCommands (); # GB
 use ::Latency ();
 use ::Log qw(logit logpkg logsub initialize_logger initialize_output);
 use ::TrackUtils ();
