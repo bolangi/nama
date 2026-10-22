@@ -70,6 +70,10 @@ sub process_line {
 	if (defined $user_input and $user_input !~ /^\s*$/) {
 		push $text->{command_history}->@*, $user_input;
 		$text->{command_index} = scalar $text->{command_history}->@*;
+
+		# eval handling
+		if ($user_input =~ /^eval /){ nama_cmd($user_input); return } 
+
 		my $command_set = $mode->{command_mode};
 		my $midi_escape = $command_set eq 'audio' && $user_input =~ s/^\s*midi\s+//;
 		if ($midi_escape) {
