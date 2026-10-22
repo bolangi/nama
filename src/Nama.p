@@ -284,6 +284,7 @@ __DATA__
 @@ grammar
 [% qx(./strip_all  ./grammar_body.pl) %]
 [% qx(./emit_command_headers headers) %]
+[% qx(./emit_command_headers keywords ./rtmidi_commands.yml) %]
 @@ ecasound_chain_operator_hints_yml
 [% qx(cat ./ecasound_chain_operator_hints.yml) %];
 @@ default_namarc
@@ -302,11 +303,11 @@ __DATA__
 [% qx(cat ./palette.json) %]
 @@ banner
 [% qx(cat ./banner) %]
+@@ rtmidi_commands_yml
+[% qx(cat ./rtmidi_commands.yml) %]
 @@ midi_commands_yml
 [% qx(cat ./midi_commands.yml) %]
 @@ aux_midi_commands
 [% qx(cat ./midish_extra) %]
 @@ test_tempo_map
 [% qx(cat ./tempo_map) %]
-@@ all_midi_command_names
-[% qx(cat ./midi_commands_builtin ./midi_commands_aux) %]
