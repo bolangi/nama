@@ -22,7 +22,6 @@ echo "Cleaning output directories"
 for d in $LD $SD; do rm -rf $d; mkdir -p $d; done
 rm $TD/*.t
 mkdir -p $LIBPATH
-cp RtMidi*pm $LIBPATH
 
 DEBUG=$1
 ./preproc $DEBUG -r Audio::Nama \
