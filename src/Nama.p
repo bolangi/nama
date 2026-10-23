@@ -297,8 +297,6 @@ __DATA__
 [% qx(cat ./fake_lv2_register) %]
 @@ fake_jack_latency
 [% qx(cat ./fake_jack_latency) %]
-@@ midi_commands
-[% qx(cat ./midish_commands) %]
 @@ default_palette_json
 [% qx(cat ./palette.json) %]
 @@ banner
