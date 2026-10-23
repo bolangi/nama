@@ -68,7 +68,6 @@ sub process_line {
 
 		if ($user_input =~ /^\s*(audio[-_]mode|amd|midi[-_]mode|mmd|rtmidi[-_]mode|rmd)\s*$/) {
 			nama_cmd($user_input);
-			revise_prompt();
 			return;
 		}
 
@@ -83,7 +82,6 @@ sub process_line {
 
 		if ($command_mode eq 'rtmidi') {
 			rtmidi_cmd($user_input);
-			revise_prompt();
 			return;
 		}
 		
@@ -91,12 +89,10 @@ sub process_line {
 			my ($command) = $user_input =~ /^\s*(\S+)/;
 			if (!defined $command || !$text->{midi_command_names}->{$command}) {
 				throw("Unknown MIDI command: ".($command // '').". Try find-midi keyword.");
-				revise_prompt();
 				return;
 			}
 			my $output = midish_cmd($user_input);
 			pager($output) if defined $output && length $output;
-			revise_prompt();
 			return;
 		}
 		# convert hyphenated commands to underscore form
@@ -121,7 +117,6 @@ sub process_line {
 			Dumper ($result)) if $result->{is_error};
 	}
 	my $output = delete $text->{output_buffer};
-	revise_prompt();
 }
 # Use the same mode selection for execution and command completion.
 sub effective_command_mode ($input) {

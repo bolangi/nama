@@ -191,8 +191,6 @@ sub cache_engine_run {
 	::notify($args->{track}->name.": processing time: ". d2($args->{processing_time}). " seconds");
 	::notify("Starting cache operation. Please wait.");
 	
-	revise_prompt(" "); 
-
 	# we try to set processing time this way
 	ecasound_iam("cs-set-length $args->{processing_time}"); 
 
@@ -285,7 +283,6 @@ sub caching_cleanup {
 		$args->{track}->set( rw => PLAY);
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
-		revise_prompt("default"); 
 }
 sub poll_progress {
 	my $args = $setup->{cache_track_args};

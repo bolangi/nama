@@ -740,19 +740,6 @@ sub next_param {
 		? $project->{current_param}->{$this_track->op}++ 
 		: end_of_list_sound()
 }
-{my $override;
-sub revise_prompt {
-}
-=begin comment
-	logsub((caller(0))[3]);
-	# hack to allow suppressing prompt
-	$override = ($_[0] eq "default" ? undef : $_[0]) if defined $_[0];
-	$override//prompt()
-
-=end comment
-
-=cut
-}
 
 sub throw (@text) {
 	logsub((caller(0))[3]);

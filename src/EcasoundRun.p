@@ -171,7 +171,6 @@ sub heartbeat {
 	my $status = $this_engine->ecasound_iam('engine-status');
 	if( $status =~ /finished|error/ ){
 		::notify(engine_status(current_position()));
-		revise_prompt();
 		stop_heartbeat(); 
 		sleeper(0.2);
 		delete $this_engine->{started};
