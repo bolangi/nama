@@ -8,6 +8,8 @@ Unreleased
     * common event architecture for GUI and terminal interface
     * works with JACK served by Pipewire or jackd, also ALSA
     * full support for metronome and tempo maps, including tempo ramp
+    * initial support for RtMidi
+    * audio, midish and rtmidi tracks and command modes 
     * indicate positions by bar/beat or bar/beat/tick
     * indicate positions by H:M:S or M:S
     * tickit terminal library replaces common readline functions
@@ -15,9 +17,9 @@ Unreleased
        + TAB completion
        + line editing
     * tickit allows arbitrary binding of functions to keystrokes
-       + effect mode with cursor pad keybindings for adjusting effect parameters
-       + jump mode with bindings for adjusting playback position
-       + bump mode with bindings for adjusting mark positions
+       + effect mode using cursor pad to adjust effect parameters
+       + jump mode for playback position
+       + bump mode for mark positions
        + midi command mode
     * fix compatibility with terminal multiplexers (tested with gnu screen)
     * refactor of key PLAY/REC/MON/OFF status and routing algorithms
