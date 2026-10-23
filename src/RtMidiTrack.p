@@ -1,6 +1,5 @@
 # ---------- RtMidiTrack: real-time MIDI track with saved takes ----------
 #
-# Install as lib/Audio/Nama/RtMidiTrack.pm (drop the .txt suffix).
 # Supersedes the earlier ArpTrack module.
 #
 # Each recording attempt is saved as a numbered "take" (a version, like WAV
@@ -17,7 +16,7 @@
 # being recorded) lives in file-level hashes, never in the track hash, so
 # save_state serializes only plain settings.
 
-package Audio::Nama::RtMidiTrack;
+package ::RtMidiTrack;
 
 use v5.36;
 use File::Path qw(make_path);
@@ -25,10 +24,10 @@ use JSON::PP ();
 use List::Util qw(max);
 use Time::HiRes ();
 use Carp qw(croak);
-use parent -norequire, 'Audio::Nama::Track';  # before Object import: keeps @ISA
-use Audio::Nama::Globals qw(:all);
-use Audio::Nama::Object qw( rt_input rt_output rt_thru );
-use Audio::Nama::RtMidiTrackNullOut;
+use parent -norequire, '::Track';  # before Object import: keeps @ISA
+use ::Globals qw(:all);
+use ::Object qw( rt_input rt_output rt_thru );
+use ::RtMidiTrackNullOut;
 
 no warnings qw(redefine);
 
@@ -83,8 +82,8 @@ sub rec_status_display {
 }
 sub select_track {               # no Ecasound chain to select
 	my $self = shift;
-	$Audio::Nama::this_track = $self;
-	Audio::Nama::set_current_bus();
+	$::this_track = $self;
+	::set_current_bus();
 }
 sub set_rw {
 	my ($self, $setting) = @_;
@@ -107,14 +106,14 @@ sub set_io ($self, $direction, $id = undef, @) {
 sub set_version ($self, $n) {
 	my $name = $self->name;
 	if (!$n) {
-		Audio::Nama::pager("$name: following latest take");
+		::pager("$name: following latest take");
 		$self->set(version => 0);
 	}
 	elsif (grep { $_ == $n } $self->versions->@*) {
-		Audio::Nama::pager("$name: take $n selected");
+		::pager("$name: take $n selected");
 		$self->set(version => $n);
 	}
-	else { Audio::Nama::throw("$name: take $n does not exist, skipping.") }
+	else { ::throw("$name: take $n does not exist, skipping.") }
 }
 sub versions     { [ $_[0]->take_numbers ] }
 sub current_take { my $self = shift; $self->version || max($self->take_numbers) // 0 }
@@ -126,9 +125,9 @@ sub rt_configure {
 	for my $key (keys %kv) {
 		my $field = $key =~ /^rt_/ ? $key : "rt_$key";
 		my $check = $VALID{$field}
-			or Audio::Nama::throw("$key: unknown setting. Known: input output thru"), return;
+			or ::throw("$key: unknown setting. Known: input output thru"), return;
 		$kv{$key} =~ $check
-			or Audio::Nama::throw("$key: invalid value '$kv{$key}'"), return;
+			or ::throw("$key: invalid value '$kv{$key}'"), return;
 		$self->set($field => $kv{$key});
 		# start listening as soon as the input is known, so the port is
 		# already open when the first take begins
@@ -145,13 +144,13 @@ sub rt_summary {
 # ---- take files ----
 
 sub take_dir {
-	my $dir = Audio::Nama::project_dir() or return;
-	Audio::Nama::join_path($dir, '.rtmidi')
+	my $dir = ::project_dir() or return;
+	::join_path($dir, '.rtmidi')
 }
 sub take_file {
 	my ($self, $n) = @_;
 	my $dir = $self->take_dir or return;
-	Audio::Nama::join_path($dir, $self->name . "_$n.json")
+	::join_path($dir, $self->name . "_$n.json")
 }
 sub take_numbers {
 	my $self = shift;
@@ -200,18 +199,18 @@ sub start_record {
 	my $name = $self->name;
 	return if $self->rw eq OFF;
 	$REC{$name} || $PLAY{$name}
-		and Audio::Nama::throw("$name: already recording or playing. Use rt_stop."), return;
+		and ::throw("$name: already recording or playing. Use rt_stop."), return;
 	my $port = $self->rt_input
-		or Audio::Nama::throw("$name: no input port. Try: rt_set input <name>"), return;
+		or ::throw("$name: no input port. Try: rt_set input <name>"), return;
 	$self->take_dir
-		or Audio::Nama::throw("$name: no project is loaded."), return;
+		or ::throw("$name: no project is loaded."), return;
 	eval { _listener($port) }
-		or Audio::Nama::throw("$name: cannot listen on MIDI port '$port': " . ($@ || 'unknown error')), return;
+		or ::throw("$name: cannot listen on MIDI port '$port': " . ($@ || 'unknown error')), return;
 
 	my $out;
 	if ($self->rt_thru and my $outport = $self->rt_output) {
 		$out = eval { _acquire_port($outport) }
-			or Audio::Nama::throw("$name: cannot open output '$outport': $@"), return;
+			or ::throw("$name: cannot open output '$outport': $@"), return;
 	}
 	my $n = (max($self->take_numbers) // 0) + 1;
 	$REC{$name} = {
@@ -226,7 +225,7 @@ sub start_record {
 		events  => [],
 		held    => {},    # "chan:note" => 1, for closing hanging notes
 	};
-	Audio::Nama::pager("$name: recording take $n. Play something, then rt_stop.");
+	::pager("$name: recording take $n. Play something, then rt_stop.");
 	1
 }
 
@@ -244,11 +243,11 @@ sub stop_record {
 	_release_port($st->{outport}) if $st->{out};
 
 	if (!$st->{events}->@*) {
-		Audio::Nama::pager($self->name . ": nothing was played; take $st->{take} discarded.");
+		::pager($self->name . ": nothing was played; take $st->{take} discarded.");
 		return 1;
 	}
 	$self->save_take($st->{take}, $st->{events}, $length);
-	Audio::Nama::pager(sprintf "%s: saved take %d (%d events, %.1f s)",
+	::pager(sprintf "%s: saved take %d (%d events, %.1f s)",
 		$self->name, $st->{take}, scalar $st->{events}->@*, $length);
 	1
 }
@@ -278,7 +277,7 @@ sub _listener ($port) {
 		my $rtc = MIDI::RtController->new(
 			input    => $port,
 			loop     => IO::Async::Loop->new,         # Nama's loop
-			midi_out => Audio::Nama::RtMidiTrack::NullOut->new,
+			midi_out => ::RtMidiTrack::NullOut->new,
 			silent   => 1,
 		);
 		$rtc->add_filter(rt_record => \@RECORDED,
@@ -295,17 +294,17 @@ sub start_play {
 	my $name = $self->name;
 	return if $self->rw eq OFF;
 	$REC{$name} || $PLAY{$name}
-		and Audio::Nama::throw("$name: already recording or playing. Use rt_stop."), return;
+		and ::throw("$name: already recording or playing. Use rt_stop."), return;
 	$n ||= $self->current_take
-		or Audio::Nama::throw("$name: no takes recorded yet."), return;
+		or ::throw("$name: no takes recorded yet."), return;
 	my $take = $self->load_take($n)
-		or Audio::Nama::throw("$name: take $n not found."), return;
+		or ::throw("$name: take $n not found."), return;
 	my $outport = $self->rt_output
-		or Audio::Nama::throw("$name: no output port. Try: rt_set output <name>"), return;
+		or ::throw("$name: no output port. Try: rt_set output <name>"), return;
 	require IO::Async::Loop;
 	require IO::Async::Timer::Countdown;
 	my $out = eval { _acquire_port($outport) }
-		or Audio::Nama::throw("$name: cannot open output '$outport': $@"), return;
+		or ::throw("$name: cannot open output '$outport': $@"), return;
 
 	my $st = {
 		track   => $self,
@@ -324,7 +323,7 @@ sub start_play {
 	);
 	$st->{loop}->add($st->{timer});
 	$PLAY{$name} = $st;
-	Audio::Nama::pager("$name: playing take $n");
+	::pager("$name: playing take $n");
 	_pump($st);
 	1
 }
@@ -361,7 +360,7 @@ sub _end_play ($st, $how) {
 		$st->{out}->send_event('note_off', $ch, $note, 0);
 	}
 	_release_port($st->{outport});
-	Audio::Nama::pager("$name: $how");
+	::pager("$name: $how");
 	1
 }
 

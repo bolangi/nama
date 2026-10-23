@@ -1,4 +1,4 @@
-package Audio::Nama::RtMidiTrack::NullOut;
+package ::RtMidiTrack::NullOut;
 
 use v5.36;
 sub new { bless {}, shift }

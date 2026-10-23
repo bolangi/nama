@@ -1,13 +1,13 @@
-package Audio::Nama;
+package ::;
 
 use v5.36;
 use List::Util qw(max);
-use Audio::Nama::Globals qw(:all);
+use ::Globals qw(:all);
 
-sub rt_tracks { grep { $_ isa Audio::Nama::RtMidiTrack } all_tracks() }
+sub rt_tracks { grep { $_ isa ::RtMidiTrack } all_tracks() }
 
 sub this_rt_track {
-    return $this_track if $this_track isa Audio::Nama::RtMidiTrack;
+    return $this_track if $this_track isa ::RtMidiTrack;
     throw("Current track is not a MIDI take track. See add_rt_track.");
     return;
 }
@@ -16,7 +16,7 @@ sub add_rt_track ($name, @params) {
 	# novol/nopan: no Ecasound effects on a track with no audio chain
 	# group Null: not routed to Main
 	add_track($name,
-		class => 'Audio::Nama::RtMidiTrack',
+		class => '::RtMidiTrack',
 		group => 'Null',
 		novol => 1,
 		nopan => 1,
@@ -50,7 +50,7 @@ sub rt_make_track ($new, @takes) {
 	my @data = map { $src->load_take($_) } @takes;
 	@data == @takes or throw("Could not read all of the takes."), return;
 
-	my $events = Audio::Nama::RtMidiTrack::merge_events(map { $_->{events} } @data);
+	my $events = ::RtMidiTrack::merge_events(map { $_->{events} } @data);
 	my $length = max(map { $_->{length} } @data);
 
 	my $dst = add_rt_track($new,
