@@ -1,0 +1,43 @@
+---
+add_rt_track:
+  short: add_track
+  type: rtmidi
+  what: Create and select an RtMidi take track.
+  parameters: <string:name> [ <string:key> <string:value>... ]
+  example: |
+    rtmidi add-track piano rt_input "My keyboard" rt_output "My synth"
+rt_set:
+  short: set
+  type: rtmidi
+  what: Show current RtMidi track settings, or configure input, output and thru using key/value pairs.
+  parameters: "[ <string:key> <string:value>... ]"
+  example: |
+    rtmidi set input "My keyboard" output "My synth" thru 1
+rt_record:
+  short: record
+  type: rtmidi
+  what: Begin recording a new take on the current RtMidi track.
+  parameters: none
+rt_play:
+  short: play
+  type: rtmidi
+  what: Play the specified take, or the current take if omitted.
+  parameters: "[ <integer:take> ]"
+rt_stop:
+  short: stop
+  type: rtmidi
+  what: Stop recording and playback on the current RtMidi track.
+  parameters: none
+rt_takes:
+  short: takes
+  type: rtmidi
+  what: List recorded takes on the current RtMidi track.
+  parameters: none
+rt_make_track:
+  short: make_track
+  type: rtmidi
+  what: Create an RtMidi track from selected takes of the current track, aligned at their recording origins. Defaults to the current take.
+  parameters: <string:name> [ <integer:take>... ]
+  example: |
+    rtmidi make-track combined 1 2
+...
