@@ -307,7 +307,7 @@ sub user_hotkeys {
 		$key => 
 			$action =~ /\W/ # matches non-word character
 				? eval "sub { $action }"
-				: \($mappings->{$_}->&*)
+				: sub { &{$action}() }
 	} keys $mappings->%*
 	#map{ $_ => eval '\&'. $mappings->{$_} } keys $mappings->%*
 }
