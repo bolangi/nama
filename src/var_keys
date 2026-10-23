@@ -71,6 +71,7 @@ $help->{midish}
 $help->{index}
 $help->{display}
 $help->{title}
+$help->{midi_commands}
 
 $mode->{preview}				#
 $mode->{doodle}					#
@@ -80,6 +81,7 @@ $mode->{mastering}				# boolean
 $mode->{midi_terminal}			# 
 $mode->{midi_transport_sync}  # sync Ecasound start/stop with midish
 $mode->{hotkeys}
+$mode->{command_mode}
 
 $fx->{ecasound_effect_hints}	# hints for ecasound effects
 $fx->{offset}					# offset to locate first user-addressable 
@@ -139,6 +141,11 @@ $text->{autocomplete_keywords}
 $text->{executables}
 $text->{project_list}
 $text->{effects}
+
+$text->{rtmidi_commands}
+$text->{midi_command_names}
+$text->{augmented_midish_command_list}
+$text->{midi_completion_keywords}
 
 $project->{events}				# timers used during engine run
 $project->{name}				# project name
@@ -246,6 +253,9 @@ $gui->{engine_stop}				# stop button
 $gui->{_old_bg}					# default background color
 $gui->{_old_abg}				# default active background color
 $gui->{waveform}				# waveform display widgets, by trackname
+$gui->{waveform_canvas}
+$gui->{quit_requested}
+$gui->{effect_picker}
 
 $jack->{connections}
 $jack->{is_own_port}
