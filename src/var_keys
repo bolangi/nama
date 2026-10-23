@@ -116,6 +116,8 @@ $text->{loop}
 $text->{screen_lines}			# 
 $text->{screen_columns}			#
 $text->{hyphenated_commands}	# remove-track => remove_track
+$text->{shared_track_commands}	# display commands and shortcuts eligible for sharing
+$text->{rtmidi_shared_commands}	# display commands without RtMidi name collisions
 $text->{eval_result}			# buffer for result of eval_perl() 
 $text->{output_buffer}			# buffer for output of OSC commands
 $text->{midi_cmd} 				# list of Midish commands for the parser to recognize

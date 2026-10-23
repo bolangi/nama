@@ -801,6 +801,7 @@ sub load_keywords {
  	my %hyphenated = map{my $h = $_; $h =~ s/_/-/g; $h => $_ }grep{ /_/ } @keywords;
 	$text->{hyphenated_commands} = \%hyphenated;
 	push @keywords, keys %hyphenated;
+	push @keywords, keys $text->{shared_track_commands}->%*;
 	# RtMidi uses the same conversion map, with its own completion list.
 	my $rtmidi = rtmidi_commands();
 	my @rtmidi_names = (keys %$rtmidi,
@@ -823,7 +824,7 @@ sub load_keywords {
 	my %seen_midi;
 	$text->{midi_completion_keywords} = [
 		sort
-		grep { length($_) >= 4 and !$seen_midi{$_}++ }
+		grep { (length($_) >= 4 || ($text->{shared_track_commands}->{$_} && $text->{augmented_midish_command_list}->{$_})) && !$seen_midi{$_}++ }
 		keys $text->{midi_command_names}->%*,
 		keys $text->{augmented_midish_command_list}->%*
 	];
@@ -853,9 +854,11 @@ sub gen_words {
 	if ($command_mode eq 'rtmidi')
 	{
 		my $commands = rtmidi_commands();
-		$keywords = [sort map { s/_/-/gr }
+		my %seen;
+		$keywords = [sort grep { !$seen{$_}++ } map { s/_/-/gr }
 			keys %$commands,
-			map { split ' ', ($_->{short} // '') } values %$commands];
+			(map { split ' ', ($_->{short} // '') } values %$commands),
+			keys $text->{rtmidi_shared_commands}->%*];
 	}
 	elsif ($command_mode eq 'midi')
 	{

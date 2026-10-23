@@ -46,7 +46,18 @@ sub generate_augmented_midish_command_list {
 	my $commands = yaml_in(get_data_section('midi_commands_yml'));
 	my %midish = map { $_ => 1 } keys %$commands;
 	$text->{midi_command_names} = \%midish;
-	my @shared = qw(eval show_track show_tracks);
+	my @display = map {
+		($_, split ' ', ($text->{commands}->{$_}->{short} // ''))
+	} qw(show_track show_tracks);
+	push @display, map { s/_/-/gr } @display;
+	$text->{shared_track_commands} = { map { $_ => 1 } @display };
+	my $rtmidi = rtmidi_commands();
+	my @rtmidi_names = (keys %$rtmidi,
+		map { split ' ', ($_->{short} // '') } values %$rtmidi);
+	push @rtmidi_names, map { s/_/-/gr } @rtmidi_names;
+	my %rtmidi = map { $_ => 1 } @rtmidi_names;
+	$text->{rtmidi_shared_commands} = { map { $_ => 1 } grep { !$rtmidi{$_} } @display };
+	my @shared = ('eval', @display);
 
 	# add help and find commands
 	for my $name (grep { /^(?:help|find)_/ } keys $text->{commands}->%*) {
@@ -128,7 +139,9 @@ sub effective_command_mode ($input) {
 	$command_mode = 'audio' if defined $command && (
 		$command eq 'eval'
 		|| (!$explicit_mode && $command =~ /^(?:audio[-_]mode|amd|midi[-_]mode|mmd|rtmidi[-_]mode|rmd)$/)
-		|| ($command_mode eq 'midi' && !$explicit_mode && $text->{augmented_midish_command_list}->{$command}));
+		|| ($command_mode eq 'rtmidi' && $text->{rtmidi_shared_commands}->{$command})
+		|| ($command_mode eq 'midi' && $text->{augmented_midish_command_list}->{$command}
+			&& (!$explicit_mode || $text->{shared_track_commands}->{$command})));
 	return ($command_mode, $input, $explicit_mode);
 }
 
