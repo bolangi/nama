@@ -429,7 +429,7 @@ sub prompt_for_text ($message) {
 
 sub prompt {
 	logsub((caller(0))[3]);
-	join ' ', 'nama', git_branch_display(), bus_track_display(), ($mode->{command_mode} eq 'midi' ? 'M' : ''). '> ';
+	join ' ', 'nama', git_branch_display(), bus_track_display(), ($mode->{command_mode} eq 'midi' ? 'M' : $mode->{command_mode} eq 'rtmidi' ? 'R' : ''). '> ';
 }
 
 sub prompt_yn ($message, $default) {
@@ -814,6 +814,14 @@ sub load_keywords {
  	my %hyphenated = map{my $h = $_; $h =~ s/_/-/g; $h => $_ }grep{ /_/ } @keywords;
 	$text->{hyphenated_commands} = \%hyphenated;
 	push @keywords, keys %hyphenated;
+	# RtMidi uses the same conversion map, with its own completion list.
+	my $rtmidi = rtmidi_commands();
+	my @rtmidi_names = (keys %$rtmidi,
+		map { split ' ', ($_->{short} // '') } values %$rtmidi);
+	for my $name (grep { /_/ } @rtmidi_names) {
+		(my $hyphenated = $name) =~ s/_/-/g;
+		$text->{hyphenated_commands}->{$hyphenated} = $name;
+	}
 	push @keywords, keys $text->{iam}->%*;
 	push @keywords, (keys $text->{midi_cmd}->%*) if $config->{use_midi};
 	my %seen;
@@ -829,7 +837,7 @@ sub load_keywords {
 	$text->{midi_completion_keywords} = [
 		sort
 		grep { length($_) >= 4 and !$seen_midi{$_}++ }
-		(split ' ', get_data_section('all_midi_command_names')),
+		keys $text->{midi_command_names}->%*,
 		keys $text->{midi_shared_commands}->%*
 	];
 }
@@ -853,11 +861,16 @@ sub gen_words {
 	my $is_command;
 
 
-	my $midi_completion = ($mode->{command_mode} // 'audio') eq 'midi'
-		? command() !~ /^\s*nama\s+/
-		: command() =~ /^\s*midi\s+/;
+	my ($command_set) = command_mode_for_input(command());
 
-	if ($midi_completion)
+	if ($command_set eq 'rtmidi')
+	{
+		my $commands = rtmidi_commands();
+		$keywords = [sort map { s/_/-/gr }
+			keys %$commands,
+			map { split ' ', ($_->{short} // '') } values %$commands];
+	}
+	elsif ($command_set eq 'midi')
 	{
 		$keywords = $text->{midi_completion_keywords};
 	}
