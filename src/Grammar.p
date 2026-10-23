@@ -73,14 +73,17 @@ sub process_line {
 	no warnings 'uninitialized';
 	my ($user_input) = @_;
 	logpkg('debug',"user input: $user_input");
-	if (defined $user_input and $user_input !~ /^\s*$/) {
-		push $text->{command_history}->@*, $user_input;
-		$text->{command_index} = scalar $text->{command_history}->@*;
 
-		if ($user_input =~ /^\s*(audio[-_]mode|amd|midi[-_]mode|mmd|rtmidi[-_]mode|rmd)\s*$/) {
-			nama_cmd($user_input);
-			return;
-		}
+	return if $user_input =~ /^\s*$/;  # excessive checking?
+
+	if ($user_input =~ /^\s*(audio[-_]mode|amd|midi[-_]mode|mmd|rtmidi[-_]mode|rmd)\s*$/) {
+		my $command = $1;
+		$command =~ tr/-/_/;
+		nama_cmd($command);
+		return;
+	}
+	push $text->{command_history}->@*, $user_input;
+	$text->{command_index} = scalar $text->{command_history}->@*;
 
 		my ($command_mode, $command_input) = effective_command_mode($user_input);
 		$user_input = $command_input;
@@ -121,7 +124,6 @@ sub process_line {
 		# from the index
 		$this_track = $tn{Main} if ! $this_track or
 			($this_track isa '::Track' and ! $tn{$this_track->name});
-	}
 	if (! $this_engine->started() ){
 		my $result = check_fx_consistency();
 		::notify("Inconsistency found in effects data",
