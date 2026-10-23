@@ -222,7 +222,7 @@ sub start_clip {
 	end_clip($time) if defined $opening_mark;
 	
 	my $new_index = $current_index + 1;	
-	my $name = prompt_for_text('Clip name?');
+	my $name = prompt_for_text('Clip name? ');
 	register_clip_endpoint( time     => $time, 
 							index    => $new_index, 
 							name     => $name,
