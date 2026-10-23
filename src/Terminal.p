@@ -838,7 +838,7 @@ sub load_keywords {
 		sort
 		grep { length($_) >= 4 and !$seen_midi{$_}++ }
 		keys $text->{midi_command_names}->%*,
-		keys $text->{midi_shared_commands}->%*
+		keys $text->{augmented_midish_command_list}->%*
 	];
 }
 
@@ -861,16 +861,16 @@ sub gen_words {
 	my $is_command;
 
 
-	my ($command_set) = command_mode_for_input(command());
+	my ($command_mode) = effective_command_mode(command());
 
-	if ($command_set eq 'rtmidi')
+	if ($command_mode eq 'rtmidi')
 	{
 		my $commands = rtmidi_commands();
 		$keywords = [sort map { s/_/-/gr }
 			keys %$commands,
 			map { split ' ', ($_->{short} // '') } values %$commands];
 	}
-	elsif ($command_set eq 'midi')
+	elsif ($command_mode eq 'midi')
 	{
 		$keywords = $text->{midi_completion_keywords};
 	}

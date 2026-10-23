@@ -37,8 +37,7 @@ sub setup_grammar {
 
 	$text->{parser} = Parse::RecDescent->new($text->{grammar}) or croak "Bad grammar!\n";
 
-	# Midish command keywords
-	setup_midi_shared_commands();
+	generate_augmented_midish_command_list();
 	
 	# prepend 'm' to all midish commands
 	# suppress midi record, play, stop commands - Nama will handle them
@@ -54,15 +53,21 @@ sub setup_grammar {
 	}
 
 }
-sub setup_midi_shared_commands {
-	my %midish = map { $_ => 1 } split ' ', get_data_section('all_midi_command_names');
-	my @shared = ('eval');
+sub generate_augmented_midish_command_list {
+
+	# midish builtins + midish extra commands
+	my $commands = yaml_in(get_data_section('midi_commands_yml'));
+	my %midish = map { $_ => 1 } keys %$commands;
+	$text->{midi_command_names} = \%midish;
+	my @shared = qw(eval show_track show_tracks);
+
+	# add help and find commands
 	for my $name (grep { /^(?:help|find)_/ } keys $text->{commands}->%*) {
 		push @shared, $name, split ' ', ($text->{commands}->{$name}->{short} // '');
 	}
 	push @shared, map { s/_/-/gr } @shared;
 	# Midish keeps any conflicting name, including abbreviations.
-	$text->{midi_shared_commands} = { map { $_ => 1 } grep { !$midish{$_} } @shared };
+	$text->{augmented_midish_command_list} = { map { $_ => 1 } grep { !$midish{$_} } @shared };
 }
 sub process_line {
 	state $total_effects_count;
@@ -74,30 +79,34 @@ sub process_line {
 		push $text->{command_history}->@*, $user_input;
 		$text->{command_index} = scalar $text->{command_history}->@*;
 
-		# eval handling
-		if ($user_input =~ /^eval /){ nama_cmd($user_input); return } 
-
-		my $command_set = $mode->{command_mode};
-		my $midi_escape = $command_set eq 'audio' && $user_input =~ s/^\s*midi\s+//;
-		if ($midi_escape) {
-			$command_set = 'midi';
-		}
-		elsif ($command_set eq 'midi' && $user_input =~ s/^\s*nama\s+//) {
-			$command_set = 'audio';
-		}
-
-		if (not $midi_escape and $user_input =~ /^\s*(audio-mode|amd|midi-mode|mmd)\s*$/) {
-			nama_cmd( $user_input );
+		if ($user_input =~ /^\s*(audio[-_]mode|amd|midi[-_]mode|mmd|rtmidi[-_]mode|rmd)\s*$/) {
+			nama_cmd($user_input);
 			revise_prompt();
 			return;
 		}
 
-		if ($command_set eq 'midi' && !$midi_escape) {
-			my ($command) = $user_input =~ /^\s*(\S+)/;
-			$command_set = 'audio' if $text->{midi_shared_commands}->{$command};
+		my ($command_mode, $command_input) = effective_command_mode($user_input);
+		$user_input = $command_input;
+
+		# The existing Nama grammar parses and executes eval in every mode.
+		if ($user_input =~ /^\s*eval(?:\s|$)/) {
+			nama_cmd($user_input);
+			return;
+		}
+
+		if ($command_mode eq 'rtmidi') {
+			rtmidi_cmd($user_input);
+			revise_prompt();
+			return;
 		}
 		
-		if ($command_set eq 'midi') {
+		if ($command_mode eq 'midi') {
+			my ($command) = $user_input =~ /^\s*(\S+)/;
+			if (!defined $command || !$text->{midi_command_names}->{$command}) {
+				throw("Unknown MIDI command: ".($command // '').". Try find-midi keyword.");
+				revise_prompt();
+				return;
+			}
 			my $output = midish_cmd($user_input);
 			pager($output) if defined $output && length $output;
 			revise_prompt();
@@ -127,6 +136,51 @@ sub process_line {
 	my $output = delete $text->{output_buffer};
 	revise_prompt();
 }
+# Use the same mode selection for execution and command completion.
+sub effective_command_mode ($input) {
+	my $command_mode = $mode->{command_mode} // 'audio';
+	my %prefix_mode = (nama => 'audio', midi => 'midi', rtmidi => 'rtmidi', rmd => 'rtmidi');
+	my $explicit_mode = $input =~ s/^\s*(nama|midi|rtmidi|rmd)\s+//;
+	$command_mode = $prefix_mode{$1} if $explicit_mode;
+	my ($command) = $input =~ /^\s*(\S+)/;
+	$command_mode = 'audio' if defined $command && (
+		$command eq 'eval'
+		|| (!$explicit_mode && $command =~ /^(?:audio[-_]mode|amd|midi[-_]mode|mmd|rtmidi[-_]mode|rmd)$/)
+		|| ($command_mode eq 'midi' && !$explicit_mode && $text->{augmented_midish_command_list}->{$command}));
+	return ($command_mode, $input, $explicit_mode);
+}
+
+sub rtmidi_commands {
+	return $text->{rtmidi_commands};
+}
+
+# Use a separate entry point in Nama's existing parser.
+sub rtmidi_cmd ($input) {
+	# Normalize the command word; port and track arguments retain their spelling.
+	$input =~ s/^(\s*)(\S+)/$1 . ($text->{hyphenated_commands}->{$2} \/\/ $2)/e;
+	my $success = eval { $text->{parser}->rtmidi_meta($input) };
+	if ($@) {
+		throw("RtMidi command failed: $@");
+		return;
+	}
+	if (!$success) {
+		throw("Invalid RtMidi command: $input. Commands: "
+			. join(', ', sort map { s/_/-/gr } keys rtmidi_commands()->%*) . ".");
+		return;
+	}
+	return 1;
+}
+
+sub run_rtmidi_command ($name, @args) {
+	my $action = __PACKAGE__->can($name);
+	if (!$action) {
+		throw("RtMidi command $name is unavailable: RtMidiCommands is not loaded.");
+		return;
+	}
+	$action->(@args);
+	return 1;
+}
+
 sub context {
 	return unless $this_track;
 	my $context = {};
