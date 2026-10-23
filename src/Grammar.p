@@ -171,16 +171,6 @@ sub rtmidi_cmd ($input) {
 	return 1;
 }
 
-sub run_rtmidi_command ($name, @args) {
-	my $action = __PACKAGE__->can($name);
-	if (!$action) {
-		throw("RtMidi command $name is unavailable: RtMidiCommands is not loaded.");
-		return;
-	}
-	$action->(@args);
-	return 1;
-}
-
 sub context {
 	return unless $this_track;
 	my $context = {};
