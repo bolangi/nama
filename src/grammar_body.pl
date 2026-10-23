@@ -1789,3 +1789,43 @@ exp: /[-+]?\d/
 
 audio_mode: _audio_mode { ::notify("Entering audio mode"); $::mode->{command_mode} = 'audio' }
 midi_mode:  _midi_mode  { ::notify("Entering MIDI mode" ); $::mode->{command_mode} = 'midi'  }
+rtmidi_mode: _rtmidi_mode { ::notify("Entering RtMidi mode"); $::mode->{command_mode} = 'rtmidi' }
+
+
+# RtMidi uses this entry point in the same parser as Nama's meta rule.
+# Each production consumes the entire input before invoking an action.
+rtmidi_meta: rtmidi_command { 1 }
+
+rtmidi_command: _add_rt_track rtmidi_arg rtmidi_pair(s?) rtmidi_end {
+    ::rtmidi_cmd('add_rt_track', $item{rtmidi_arg},
+        map { @$_ } @{$item{'rtmidi_pair(s?)'}});
+    1;
+}
+rtmidi_command: _rt_set rtmidi_pair(s?) rtmidi_end {
+    ::rtmidi_cmd('rt_set', map { @$_ } @{$item{'rtmidi_pair(s?)'}});
+    1;
+}
+rtmidi_command: _rt_record rtmidi_end {
+    ::rtmidi_cmd('rt_record'); 1;
+}
+rtmidi_command: _rt_play rtmidi_take(?) rtmidi_end {
+    ::rtmidi_cmd('rt_play', @{$item{'rtmidi_take(?)'}}); 1;
+}
+rtmidi_command: _rt_stop rtmidi_end {
+    ::rtmidi_cmd('rt_stop'); 1;
+}
+rtmidi_command: _rt_takes rtmidi_end {
+    ::rtmidi_cmd('rt_takes'); 1;
+}
+rtmidi_command: _rt_make_track rtmidi_arg rtmidi_take(s?) rtmidi_end {
+    ::rtmidi_cmd('rt_make_track', $item{rtmidi_arg},
+        @{$item{'rtmidi_take(s?)'}}); 1;
+}
+
+rtmidi_pair: rtmidi_arg rtmidi_arg { [ $item[1], $item[2] ] }
+rtmidi_take: /[1-9]\d*\b/ { $item[1] }
+rtmidi_end: /\s*\z/
+rtmidi_arg: /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s"'\\]+/ {
+    my @words = ::parse_line('\s+', 0, $item[1]);
+    @words == 1 ? $words[0] : undef;
+}
