@@ -876,7 +876,7 @@ sub gen_words {
 
 	### handle file paths - import command only
 
-	elsif (command() =~ /imp(ort)?(-audio|-midi)? / ) # followed by a space
+	elsif (command() =~ /do-script|imp(ort)?(-audio|-midi)? / ) # followed by a space
 	{
 	#notify("word: $word");
 
