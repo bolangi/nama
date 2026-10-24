@@ -124,6 +124,8 @@ alias:
 
 hotkeys:
   user:
+    F1: start_clip
+    F2: end_clip
     F7: toggle_hotkeys
     F8: set_effect_mode
     F9: set_jump_mode
@@ -168,6 +170,8 @@ hotkeys:
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
+    F1: start_clip
+    F2: end_clip
     F7: toggle_hotkeys
     F8: set_effect_mode
     F9: toggle_hotkeys
@@ -190,6 +194,8 @@ hotkeys:
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
+    F1: start_clip
+    F2: end_clip
     F7: toggle_hotkeys
     F8: set_effect_mode
     F9: set_jump_mode
