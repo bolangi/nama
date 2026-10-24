@@ -65,6 +65,11 @@ sub initialize_terminal {
 	$text->{loop}->add($sigint);
 	$text->{term}    = $term    = $tickit->term;
 	$text->{rootwin} = $rootwin = $tickit->rootwin;
+	# The Entry window may be hidden while browsing scrollback. Catch text
+	# before Tickit dispatches it to windows, then restore Entry and insert it.
+	$term->bind_event(key => Tickit::BIND_FIRST(), sub ($, $, $key, @) {
+		resume_entry_from_scrollback($key);
+	});
 	my $lines = $term->lines;
 	$vbox->add($scroller, valign => 'top', force_size => $lines - 1); 
 
@@ -187,6 +192,17 @@ sub terminal_max_view_lines {
 }
 
 sub scroll_to_bottom { $scroller->scroll_to_bottom if defined $scroller}
+
+sub resume_entry_from_scrollback ($key) {
+	return 0 unless $entry_widget_present and defined $entry;
+	return 0 unless $key->type eq 'text' and $scroller->lines_below;
+
+	$scroller->scroll_to_bottom;
+	position_entry_widget();
+	$entry->take_focus;
+	$entry->on_text($key->str);
+	return 1; # Already inserted; do not dispatch the same character again.
+}
 
 sub finish_terminal_page_resize {
 	# VBox applies child geometry on its next layout pass.  Keep the live end
