@@ -204,12 +204,14 @@ sub clip_state {
 
 sub register_clip_endpoint (%args) {
 	my $mark = ::ClipMark->new( time => $args{time},
-								name => "clip $args{index} $args{name} $args{endpoint}",
+								name => "clip $args{index} $args{endpoint}", 
+								# will be overridden by ClipMark name() method
+
 								clip_index => $args{index},
 								clip_name     => $args{name},
 								clip_endpoint => $args{endpoint});
 	$ui->marker($mark);
-	notify("Clip $args{index} $args{name} " . ($args{endpoint} eq 'start' ? 'started' : 'ended'));
+	notify(join ' ', $mark->name, ($args{endpoint} eq 'start' ? 'started' : 'ended'));
 	return $mark;
 }
 
@@ -416,6 +418,8 @@ our @ISA = '::Mark';
 use ::Object qw( clip_index clip_name clip_endpoint );
 sub clip_start ($self) { $self->clip_endpoint eq 'start' }
 sub clip_end   ($self) { $self->clip_endpoint eq 'end'   }
+no warnings 'redefine';
+sub name       ($self) { join " ", 'Clip', $self->clip_index, $self->clip_name }
 
 }
 
