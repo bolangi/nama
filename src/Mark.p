@@ -192,6 +192,7 @@ sub clip_state {
 	my (%starts, %ends);
 	my $last_index = 0;
 	for my $mark (::Mark::all()) {
+		next unless $mark isa 'ClipMark';
 		my $index = $mark->clip_index;
 		next unless defined $index and $index =~ /\A[1-9][0-9]*\z/;
 		$last_index = $index if $index > $last_index;
