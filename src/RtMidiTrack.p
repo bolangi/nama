@@ -277,7 +277,7 @@ sub _listener ($port) {
 		my $rtc = MIDI::RtController->new(
 			input    => $port,
 			loop     => IO::Async::Loop->new,         # Nama's loop
-			midi_out => ::RtMidiTrack::NullOut->new,
+			midi_out => ::RtMidiTrackNullOut->new,
 			silent   => 1,
 		);
 		$rtc->add_filter(rt_record => \@RECORDED,

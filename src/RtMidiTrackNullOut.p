@@ -1,4 +1,4 @@
-package ::RtMidiTrack::NullOut;
+package ::RtMidiTrackNullOut;
 
 use v5.36;
 sub new { bless {}, shift }
