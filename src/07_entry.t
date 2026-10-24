@@ -7,6 +7,7 @@ use ::Entry;
 # window. Rendering is covered by Tickit's own widget tests.
 {
 	no warnings 'redefine';
+	no warnings 'once';
 	*Tickit::Widget::Entry::_recalculate_scroll = sub { undef };
 	*Tickit::Widget::Entry::_text_spliced = sub { };
 	*Tickit::Widget::Entry::redraw = sub { };
