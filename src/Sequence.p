@@ -237,13 +237,17 @@ sub separate_clips {
 		}
 	}
 	for my $clip (@$clips) {
-		add_track($clip->{name},
-			target => $track->basename, project => $track->project,
-			version => $track->playback_version, width => $track->width,
-			group => $track->group, rw => PLAY,
-			region_start => $clip->{start}->name,
-			region_end => $clip->{end} ? $clip->{end}->name : 'END',
-		);
+		my %arg = ( rw => PLAY,
+					target => $track->basename, 
+					version => $track->playback_version, 
+					group => $track->group,
+					width => $track->width,
+					region_start => $clip->{start}->name,
+					region_end => $clip->{end} ? $clip->{end}->name : 'END',
+					);
+		defined $track->project and $arg{project} = $track->project;
+
+		add_track($clip->name, %arg)
 	}
 	$track->set(rw => OFF);
 	request_setup();
