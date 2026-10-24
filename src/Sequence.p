@@ -229,6 +229,11 @@ sub clip_definitions ($track) {
 
 sub separate_clips {
 	my $track = $this_track or return;
+
+	# in future put clips from 
+	# track 'lecture' into Bus 'lecture-clips'
+	# my $bus_name = $track->name . '-clips';
+
 	my $clips = clip_definitions($track) or return;
 	for my $clip (@$clips) {
 		if ($tn{$clip->{name}}) {
@@ -236,6 +241,8 @@ sub separate_clips {
 			return;
 		}
 	}
+
+	# add_bus($bus_name);
 	for my $clip (@$clips) {
 		my %arg = ( rw => PLAY,
 					target => $track->basename, 
