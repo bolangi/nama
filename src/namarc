@@ -130,6 +130,7 @@ hotkeys:
     F8: set_effect_mode
     F9: set_jump_mode
     F10: set_bump_mode
+    Escape: disable_hotkeys
   effect:
     Insert: previous_track
     Delete: next_track
@@ -148,6 +149,7 @@ hotkeys:
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
+    Escape: disable_hotkeys
     F7: toggle_hotkeys
     F8: toggle_hotkeys
     F9: set_jump_mode
@@ -170,6 +172,7 @@ hotkeys:
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
+    Escape: disable_hotkeys
     F1: start_clip
     F2: end_clip
     F7: toggle_hotkeys
@@ -194,6 +197,7 @@ hotkeys:
     M-PageDown: enter_stepsize
     Enter: disable_hotkeys
     M-Enter: disable_hotkeys
+    Escape: disable_hotkeys
     F1: start_clip
     F2: end_clip
     F7: toggle_hotkeys
