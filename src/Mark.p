@@ -216,24 +216,40 @@ sub register_clip_endpoint (%args) {
 	return $mark;
 }
 
+our $clip_prompt_active;
+
 sub start_clip {
+	return if $clip_prompt_active;
 	return if ::ChainSetup::really_recording();
+	$clip_prompt_active = 1;
 	my $time = current_timeline_position();
 	stop_transport();
 	set_timeline_position($time);
 	my ($current_index, $opening_mark) = clip_state();
-	end_clip($time) if defined $opening_mark;
-	
-	my $new_index = $current_index + 1;	
-	my $name = prompt_for_text('Clip name? ');
-	register_clip_endpoint( time     => $time, 
-							index    => $new_index, 
-							name     => $name,
-							endpoint => 'start' );
-	start_transport();
+	my $ok = eval {
+		$ui->prompt_for_text('Clip name? ', sub ($name) {
+			$clip_prompt_active = 0;
+			if (defined $name) {
+				end_clip($time) if defined $opening_mark;
+				register_clip_endpoint(
+					time => $time,
+					index => $current_index + 1,
+					name => $name,
+					endpoint => 'start',
+				);
+			}
+			start_transport();
+		});
+		1;
+	};
+	unless ($ok) {
+		$clip_prompt_active = 0;
+		die $@;
+	}
 }
 
 sub end_clip ($time = undef) {
+	return if $clip_prompt_active;
 	return if ::ChainSetup::really_recording();
 	$time //= current_timeline_position();
 	my ($last_index, $opening_mark) = clip_state();

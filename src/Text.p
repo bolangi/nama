@@ -12,6 +12,14 @@ our $VERSION = 1.071;
 
 sub hello {"hello world!";}
 
+# Both interfaces accept an optional completion callback.
+sub prompt_for_text ($self, $message, $on_done = undef) {
+	::terminal_prompt_for_text($message, $on_done)
+}
+sub prompt_yn ($self, $message, $default, $on_done = undef) {
+	::terminal_prompt_yn($message, $default, $on_done)
+}
+
 sub loop {
 	package ::;
 	$text->{tickit}->run;

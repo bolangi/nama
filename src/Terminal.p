@@ -399,10 +399,22 @@ sub add_scroller_item (@text) {
 	position_entry_widget();
 }
 
-sub prompt_for_text ($message) {
-	my $answer;
-	my $cancelled;
-	my $submitted_line;
+sub prompt_for_text ($message, $on_done = undef) {
+	$ui->prompt_for_text($message, $on_done)
+}
+
+sub prompt_yn ($message, $default, $on_done = undef) {
+	$ui->prompt_yn($message, $default, $on_done)
+}
+
+sub prompt_default_answer ($default) {
+	return 1 if $default =~ /^(?:1|y|yes)$/i;
+	return 0 if $default =~ /^(?:0|n|no)$/i;
+	croak "prompt default must be yes or no";
+}
+
+sub terminal_prompt_for_text ($message, $on_done = undef) {
+	my ($answer, $done);
 	my $command_entry = $entry;
 	my $prompt_length = length $message;
 	my $prompt_entry = Tickit::Widget::Entry->new(
@@ -410,37 +422,31 @@ sub prompt_for_text ($message) {
 		position      => $prompt_length,
 		editable_from => $prompt_length,
 	);
-
+	my $finish = sub ($cancelled) {
+		return if $done;
+		my $line = $prompt_entry->text;
+		$answer = $cancelled ? undef : substr($line, $prompt_length);
+		$done = 1;
+		$prompt_entry->bind_keys(Enter => undef, 'C-x' => undef);
+		$prompt_entry->set_window(undef);
+		$text->{entry} = $entry = $command_entry;
+		$command_entry->set_window($entrywin);
+		add_scroller_item($cancelled ? "$line^X" : $line);
+		show_prompt();
+		$command_entry->take_focus;
+		$on_done->($answer) if $on_done;
+	};
 	$command_entry->set_window(undef);
 	$text->{entry} = $entry = $prompt_entry;
 	$prompt_entry->set_window($entrywin);
 	$prompt_entry->bind_keys(
-		Enter => sub {
-			my $line = $prompt_entry->text;
-			my $input = substr($line, $prompt_length);
-			if ($input =~ /^\s*$/) {
-				add_scroller_item($line);
-				set_entry_prompt($prompt_entry, $message, q());
-				return;
-			}
-			$submitted_line = $line;
-			$answer = $input;
-		},
-		'C-x' => sub { $cancelled = 1 },
+		Enter => sub { $finish->(0) },
+		'C-x' => sub { $finish->(1) },
 	);
 	$prompt_entry->take_focus;
-
-	$text->{loop}->loop_once while !defined $answer and !$cancelled;
-
-	my $cancelled_line = $prompt_entry->text;
-	$prompt_entry->set_window(undef);
-	$text->{entry} = $entry = $command_entry;
-	$command_entry->set_window($entrywin);
-	add_scroller_item(
-		$cancelled ? "$cancelled_line^X" : $submitted_line,
-	);
-	show_prompt();
-	return $cancelled ? undef : $answer;
+	return if $on_done;
+	$text->{loop}->loop_once until $done;
+	return $answer;
 }
 
 sub prompt {
@@ -448,40 +454,37 @@ sub prompt {
 	join ' ', 'nama', git_branch_display(), bus_track_display(), ($mode->{command_mode} eq 'midi' ? 'M' : $mode->{command_mode} eq 'rtmidi' ? 'R' : ''). '> ';
 }
 
-sub prompt_yn ($message, $default) {
-	my $default_answer = $default =~ /^(?:1|y|yes)$/i ? 1
-		: $default =~ /^(?:0|n|no)$/i ? 0
-		: croak "prompt default must be yes or no";
+sub terminal_prompt_yn ($message, $default, $on_done = undef) {
+	my $default_answer = prompt_default_answer($default);
 	my $choices = $default_answer ? '[y]/n' : 'y/[n]';
 	my $answer;
-
-	my $prompt = "$message $choices";
-	set_entry_prompt($entry, $prompt, q());
-
+	my $command_entry = $entry;
+	set_entry_prompt($command_entry, "$message $choices", q());
 	my $set_answer = sub ($value) {
+		return if defined $answer;
 		$answer = $value;
+		$command_entry->bind_keys(
+			y => undef, Y => undef, n => undef, N => undef,
+			Enter => 'key_enter_line',
+		);
+		add_scroller_item("$message $choices ".($answer ? 'y' : 'n'));
+		show_prompt();
+		$command_entry->take_focus;
+		$on_done->($answer) if $on_done;
 	};
-	$entry->bind_keys(
-		y     => sub { $set_answer->(1) },
-		Y     => sub { $set_answer->(1) },
-		n     => sub { $set_answer->(0) },
-		N     => sub { $set_answer->(0) },
+	$command_entry->bind_keys(
+		y => sub { $set_answer->(1) },
+		Y => sub { $set_answer->(1) },
+		n => sub { $set_answer->(0) },
+		N => sub { $set_answer->(0) },
 		Enter => sub { $set_answer->($default_answer) },
 	);
-
+	$command_entry->take_focus;
+	return if $on_done;
 	$text->{loop}->loop_once while !defined $answer;
-
-	$entry->bind_keys(
-		y     => undef,
-		Y     => undef,
-		n     => undef,
-		N     => undef,
-		Enter => 'key_enter_line',
-	);
-	add_scroller_item("$message $choices ".($answer ? 'y' : 'n'));
-	show_prompt();
 	return $answer;
 }
+
 sub next_command {
 	$text->{command_index}++ unless $text->{command_index} == scalar $text->{command_history}->@*;
 	print_command();

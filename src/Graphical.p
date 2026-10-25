@@ -16,6 +16,13 @@ our @ISA = '::';      ## default to root namespace, e.g.  Refresh_subs, Graphica
 ## The following methods belong to the Graphical interface class
 
 sub hello {"make a window";}
+
+sub prompt_for_text ($self, $message, $on_done = undef) {
+	::tk_prompt($message, undef, $on_done)
+}
+sub prompt_yn ($self, $message, $default, $on_done = undef) {
+	::tk_prompt($message, ::prompt_default_answer($default), $on_done)
+}
 sub loop {
 	# Tk owns the graphical event loop.  Give IO::Async (and therefore
 	# Tickit::Async) a nonblocking turn at regular intervals so terminal input,

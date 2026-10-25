@@ -2,6 +2,74 @@
 
 use Path::Tiny qw(path);
 
+sub tk_start_clip {
+	start_clip() unless $gui->{prompt_dialog};
+	Tk->break;
+}
+
+sub tk_end_clip {
+	end_clip() unless $gui->{prompt_dialog};
+	Tk->break;
+}
+
+# With a callback, return immediately; legacy callers may wait for a result.
+sub tk_prompt ($message, $default, $on_done = undef) {
+	die "A prompt is already open" if $gui->{prompt_dialog};
+	my $parent = $gui->{main_window};
+	my $focus = $parent->focusCurrent;
+	my $dialog = $parent->Toplevel(-title => 'Nama');
+	$gui->{prompt_dialog} = $dialog;
+	$dialog->transient($parent);
+	$dialog->Label(-text => $message)->pack(-anchor => 'w');
+	my $entry;
+	unless (defined $default) {
+		$entry = $dialog->Entry(-width => 40)->pack(-fill => 'x');
+	}
+	my ($answer, $done);
+	my $finish = sub ($value) {
+		return if $done;
+		$answer = $value;
+		$done = 1;
+		delete $gui->{prompt_dialog};
+		$dialog->grabRelease;
+		$dialog->destroy;
+		$focus->focus if $focus and Tk::Exists($focus);
+		$on_done->($answer) if $on_done;
+	};
+	my $buttons = $dialog->Frame->pack(-fill => 'x');
+	my $accept = sub { $finish->(defined $default ? $default : $entry->get) };
+	if (defined $default) {
+		for my $choice (['Yes', 1], ['No', 0]) {
+			my ($label, $value) = @$choice;
+			my $button = $buttons->Button(-text => $label,
+				-command => sub { $finish->($value) })->pack(-side => 'left');
+			$entry = $button if $value == $default;
+		}
+		$dialog->bind('<Key-y>' => sub { $finish->(1); Tk->break });
+		$dialog->bind('<Key-Y>' => sub { $finish->(1); Tk->break });
+		$dialog->bind('<Key-n>' => sub { $finish->(0); Tk->break });
+		$dialog->bind('<Key-N>' => sub { $finish->(0); Tk->break });
+	} else {
+		$buttons->Button(-text => 'OK', -command => $accept)->pack(-side => 'left');
+		$buttons->Button(-text => 'Cancel',
+			-command => sub { $finish->(undef) })->pack(-side => 'left');
+	}
+	my $cancel = sub { $finish->(defined $default ? 0 : undef) };
+	$dialog->protocol('WM_DELETE_WINDOW' => $cancel);
+	# Keep dialog typing out of the Tk-to-Tickit bridge's 'all' binding.
+	$dialog->bind('<KeyPress>' => sub { Tk->break });
+	$dialog->bind('<Return>' => sub { $accept->(); Tk->break });
+	$dialog->bind('<Escape>' => sub { $cancel->(); Tk->break });
+	$dialog->afterIdle(sub {
+		return unless Tk::Exists($dialog);
+		$dialog->grab;
+		$entry->focus;
+	});
+	return if $on_done;
+	Tk::DoOneEvent(0) until $done;
+	return $answer;
+}
+
 sub tk_space_transport {
 	my ($window) = @_;
 	my $widget = $window->XEvent->W;
@@ -63,6 +131,10 @@ sub init_gui {
 	$gui->{main_window}->optionAdd('*BorderWidth' => 1);
 	$gui->{main_window}->title("Ecasound/Nama");
 	$gui->{main_window}->deiconify;
+
+	# The 'all' bind tag also covers effect dialogs and other Toplevels.
+	$gui->{main_window}->bind('all', '<F1>' => \&tk_start_clip);
+	$gui->{main_window}->bind('all', '<F2>' => \&tk_end_clip);
 
 	### init effect window
 
