@@ -440,8 +440,8 @@ sub terminal_prompt_for_text ($message, $on_done = undef) {
 	$text->{entry} = $entry = $prompt_entry;
 	$prompt_entry->set_window($entrywin);
 	$prompt_entry->bind_keys(
-		Enter => sub { $finish->(0) },
-		'C-x' => sub { $finish->(1) },
+		Enter =>  sub { $finish->(0) },
+		Escape => sub { $finish->(1) },
 	);
 	$prompt_entry->take_focus;
 	return if $on_done;
