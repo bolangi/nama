@@ -9,7 +9,8 @@ use warnings;
 our(%by_name, @all);
 use ::Globals qw($setup $project);
 use ::Object qw( 
-					name 
+					name
+					class
 					time
 			   );
 
@@ -19,10 +20,20 @@ sub initialize {
 	%by_name = ();	# return ref to Mark by name
 	$by_name{Here} = bless {}, '::HereMark';
 	@::marks_data = (); # for save/restore
+	::refresh_mark_display();
 }
 sub new {
 	my $class = shift;	
 	my %vals = @_;
+	if ($class eq __PACKAGE__) {
+		if (my $saved_class = $vals{class}) {
+			croak "Not a mark class: $saved_class" unless $saved_class->isa(__PACKAGE__);
+			$class = $saved_class;
+		} elsif (exists $vals{clip_endpoint}) {
+			# Older project files did not record a mark's class.
+			$class = '::ClipMark';
+		}
+	}
 	my @undeclared = grep { !$class->is_legal_key($_) } keys %vals;
 	croak 'undeclared field: ' . join(', ', sort @undeclared) if @undeclared;
 
@@ -44,19 +55,27 @@ sub new {
 	push @all, $self;
 	$::this_mark = $self;
 	
+	::refresh_mark_display();
 	$self;
 	
 }
 
 sub set_name ($mark, $name) {
-	::notify("name: $name\n");
-	if ( defined $by_name{ $name } ){
-	carp "you attempted to assign to name already in use\n";
+	# Clip labels live in clip_name; name() adds the index and endpoint.
+	my $field = $mark isa '::ClipMark' ? 'clip_name' : 'name';
+	my $candidate = bless { $mark->%*, $field => $name }, ref $mark;
+	my $new_name = $candidate->name;
+	if (my $existing = $by_name{$new_name}) {
+		if ($existing != $mark) {
+			carp "you attempted to assign to name already in use\n";
+			return;
+		}
 	}
-	else {
-		$mark->set(name => $name);
-		$by_name{ $name } = $mark;
-	}
+	my $old_name = $mark->name;
+	delete $by_name{$old_name} if defined $old_name;
+	$mark->set($field => $name);
+	$by_name{$new_name} = $mark;
+	::refresh_mark_display();
 }
 
 sub jump_here ($mark) {
@@ -74,6 +93,7 @@ sub remove ($mark) {
 		delete $by_name{$mark->name};
 	}
 	@all = grep { $_ != $mark } @all;
+	::refresh_mark_display();
 }
 sub next ($mark) {
 	::next_mark();
@@ -173,6 +193,11 @@ package ::;
 use v5.36;
 use ::Globals qw(:all);
 
+# All interfaces mutate the same mark objects and notify the same UI hook.
+sub refresh_mark_display {
+	$ui->refresh_marks if $ui and $ui->can('refresh_marks');
+}
+
 sub drop_mark {
 	logsub((caller(0))[3]);
 	my %arg = @_;
@@ -184,7 +209,6 @@ sub drop_mark {
 							name => $name,
 							);
 
-	$ui->marker($mark); # for GUI
 }
 # Derive clip state -- last clip index and started/ended status -- from mark attributes
 
@@ -192,7 +216,7 @@ sub clip_state {
 	my (%starts, %ends);
 	my $last_index = 0;
 	for my $mark (::Mark::all()) {
-		next unless $mark isa 'ClipMark';
+		next unless $mark isa '::ClipMark';
 		my $index = $mark->clip_index;
 		next unless defined $index and $index =~ /\A[1-9][0-9]*\z/;
 		$last_index = $index if $index > $last_index;
@@ -211,7 +235,6 @@ sub register_clip_endpoint (%args) {
 								clip_index => $args{index},
 								clip_name     => $args{name},
 								clip_endpoint => $args{endpoint});
-	$ui->marker($mark);
 	notify(join ' ', $mark->name, ($args{endpoint} eq 'start' ? 'started' : 'ended'));
 	return $mark;
 }
@@ -268,7 +291,6 @@ sub mark { # GUI_CODE
 	my $mark = shift;
 	my $pos = $mark->time;
 	if ($gui->{_markers_armed}){ 
-			$ui->destroy_marker($mark);
 			$mark->remove;
 		    arm_mark_toggle(); # disarm
 	}
@@ -317,6 +339,7 @@ sub previous_mark {
 sub modify_mark {
 	my ($mark, $newtime, $quiet) = @_;
 	$mark->set( time => $newtime );
+	refresh_mark_display();
 	! $quiet && do {
 	::notify($mark->name, ": set to ", d2( $newtime), "\n");
 	::notify("adjusted to ",$mark->time, "\n") 
@@ -436,7 +459,10 @@ use ::Object qw( clip_index clip_name clip_endpoint );
 sub clip_start ($self) { $self->clip_endpoint eq 'start' }
 sub clip_end   ($self) { $self->clip_endpoint eq 'end'   }
 no warnings 'redefine';
-sub name       ($self) { join " ", 'Clip', $self->clip_index, $self->clip_name }
+sub name ($self) {
+	join ' ', 'Clip', $self->clip_index,
+		grep { defined and length } ($self->clip_name, $self->clip_endpoint)
+}
 
 }
 

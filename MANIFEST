@@ -14,6 +14,7 @@ t/04_object.t
 t/06_latency.t
 t/07_entry.t
 t/11_mark.t
+t/17_waveform_marks.t
 t/12_nama.t
 t/13_fade_envelope.t
 t/14_timeline_adjustment.t

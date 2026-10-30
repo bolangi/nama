@@ -10,6 +10,7 @@ sub refresh_waveform_window {
 			widget => $gui->{waveform_canvas}, 
 			y_pos => 600,
 	);
+	refresh_waveform_marks();
 }
 sub height { $_[0] % 5 ? 5 : 10 }
 sub generate_timeline {

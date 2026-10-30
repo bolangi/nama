@@ -55,6 +55,7 @@ sub show_unit {}
 sub add_effect_gui {}
 sub remove_effect_gui {}
 sub marker {}
+sub refresh_marks {}
 sub init_palette {}
 sub save_palette {}
 sub paint_mute_buttons {}

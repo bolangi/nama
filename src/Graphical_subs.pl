@@ -311,6 +311,7 @@ sub configure_waveform_window {
 		-width => $width//$config->{waveform_canvas_x},
 		-height => $height//$config->{waveform_canvas_y},
 		);
+	refresh_waveform_marks();
 
 }
 sub configure_effects_window {
@@ -1044,6 +1045,7 @@ sub destroy_widgets {
 	# leave field labels (first row)
 	map{ $_->destroy  } @children[11..$#children]; # fragile
 	$gui->{marks}->%* and map{ $_->destroy } values $gui->{marks}->%*;
+	$gui->{marks} = {};
 }
 sub remove_effect_gui { 
 	my $ui = shift;
@@ -1354,24 +1356,65 @@ sub arm_mark_toggle {
 		$gui->{mark_remove}->configure( -background => $gui->{_nama_palette}->{MarkArmed});
 	}
 }
-sub marker {
-	my $ui = shift;
-	my $mark = shift; # Mark
-	logpkg('debug',"mark is ", ref $mark);
-	my $pos = $mark->time;
-	logpkg('debug',$pos, " ", int $pos);
-		$gui->{marks}->{$mark} = $gui->{mark_frame}->Button(
-			-text => (join " ",  colonize( int $pos ), $mark->name),
-			-background => $gui->{_nama_palette}->{OffBackground},
-			-command => sub { ::mark($mark) },
-		)->pack(-side => 'left');
+sub marker ($ui, $mark) { $ui->refresh_marks }
+
+sub refresh_marks ($ui) {
+	# Constructors also run before the GUI is ready, and during restore.
+	if (my $frame = $gui->{mark_frame}) {
+		if (Tk::Exists($frame)) {
+			for my $button (values %{ $gui->{marks} // {} }) {
+				$button->destroy if Tk::Exists($button);
+			}
+			$gui->{marks} = {};
+			for my $mark (::Mark::all()) {
+				my $time = $mark->time;
+				next unless defined $time;
+				$gui->{marks}{$mark} = $frame->Button(
+					-text => join(' ', colonize(int $time), $mark->name // ''),
+					-background => $gui->{_nama_palette}->{OffBackground},
+					-command => sub { ::mark($mark) },
+				)->pack(-side => 'left');
+			}
+		}
+	}
+	refresh_waveform_marks();
 }
 
-sub restore_time_marks {
-	my $ui = shift;
-	map{ $ui->marker($_) } ::Mark::all() ; 
-	$gui->{seek_unit}->configure( -text => $gui->{_seek_unit} == 1 ? q(Sec) : q(Min) )
+sub restore_time_marks ($ui) {
+	$ui->refresh_marks;
+	$gui->{seek_unit}->configure(-text => $gui->{_seek_unit} == 1 ? 'Sec' : 'Min')
+		if $gui->{seek_unit};
 }
+
+sub refresh_waveform_marks {
+	my $canvas = $gui->{waveform_canvas} or return;
+	return unless Tk::Exists($canvas);
+	$canvas->delete('waveform-marks');
+	return unless $config->{display_waveform};
+	my $pps = $config->{waveform_pixels_per_second};
+	return unless defined $pps and $pps > 0;
+	my $height = $config->{waveform_canvas_y};
+	for my $mark (::Mark::all()) {
+		my $time = $mark->time;
+		next unless defined $time and $time >= 0;
+		my ($color, $label) = ('blue', $mark->name // '');
+		if ($mark isa '::ClipMark') {
+			$color = $mark->clip_start ? 'green' : 'black';
+			$label = $mark->clip_name;
+			$label = $mark->name unless defined $label and length $label;
+		}
+		# Waveform and cursor use project time, not offset-run engine time.
+		my $x = $time * $pps;
+		$canvas->createLine($x, 0, $x, $height,
+			-fill => $color, -width => 2, -tags => 'waveform-marks');
+		$canvas->createText($x + 4, 4,
+			-text => $label, -fill => $color, -anchor => 'nw',
+			-tags => 'waveform-marks');
+	}
+	# Scrolled->raise is a window operation; use the underlying Canvas.
+	$canvas->Subwidget('scrolled')->raise('playback-indicator');
+}
+
 sub destroy_marker {
 	my $ui = shift;
 	my $mark = shift;
@@ -1406,6 +1449,8 @@ sub update_indicator_at {
 			-tags => 'playback-indicator'
 		);
 	}
+
+	$gui->{waveform_canvas}->Subwidget('scrolled')->raise('playback-indicator');
 
 	my $scrollregion = $gui->{waveform_canvas}->cget('-scrollregion');
 	my @scrollregion = ref $scrollregion eq 'ARRAY'
