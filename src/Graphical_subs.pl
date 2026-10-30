@@ -1394,6 +1394,34 @@ sub refresh_waveform_marks {
 	my $pps = $config->{waveform_pixels_per_second};
 	return unless defined $pps and $pps > 0;
 	my $height = $config->{waveform_canvas_y};
+	# Spread coincident lines in timeline order: ends, ordinary marks, starts.
+	# Leave isolated lines exactly at their project-time position.
+	my %at_time;
+	for my $mark (::Mark::all()) {
+		my $time = $mark->time;
+		next unless defined $time and $time >= 0;
+		push $at_time{$time}->@*, $mark;
+	}
+	my %offset;
+	my $rank = sub ($mark) {
+		return 1 unless $mark isa '::ClipMark';
+		return $mark->clip_start ? 2 : 0;
+	};
+	for my $group (values %at_time) {
+		my @ordered = sort { $rank->($a) <=> $rank->($b)
+			|| $a->name cmp $b->name } $group->@*;
+		for my $i (0 .. $#ordered) {
+			# Two-pixel lines touch without covering one another. At zero,
+			# shift the whole group right to keep every line visible.
+			my $left = $ordered[0]->time * $pps - $#ordered;
+			my $shift = $left < 1 && @ordered > 1 ? 1 - $left : 0;
+			$offset{$ordered[$i]} = 2 * $i - $#ordered + $shift;
+		}
+	}
+	my $label_height = $canvas->fontMetrics(
+		$canvas->itemcget($canvas->createText(0, 0, -text => '',
+			-tags => 'waveform-mark-font'), '-font'), '-linespace');
+	$canvas->delete('waveform-mark-font');
 	for my $mark (::Mark::all()) {
 		my $time = $mark->time;
 		next unless defined $time and $time >= 0;
@@ -1404,10 +1432,12 @@ sub refresh_waveform_marks {
 			$label = $mark->name unless defined $label and length $label;
 		}
 		# Waveform and cursor use project time, not offset-run engine time.
-		my $x = $time * $pps;
+		my $x = $time * $pps + $offset{$mark};
+		my $label_y = 4 + (($mark isa '::ClipMark' && $mark->clip_end)
+			? $label_height + 2 : 0);
 		$canvas->createLine($x, 0, $x, $height,
 			-fill => $color, -width => 2, -tags => 'waveform-marks');
-		$canvas->createText($x + 4, 4,
+		$canvas->createText($x + 4, $label_y,
 			-text => $label, -fill => $color, -anchor => 'nw',
 			-tags => 'waveform-marks');
 	}
