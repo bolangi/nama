@@ -363,6 +363,10 @@ sub import_audio  {
 	}
 	my ($depth,$width,$freq) = split ',', ::wav_format($path);
 	::notify("format: ", ::wav_format($path));
+	unless (defined $width and $width =~ /\A[1-9][0-9]*\z/) {
+		::throw("Cannot detect channel count of $path. Skipping.");
+		return;
+	}
 	$frequency ||= $freq;
 	if ( ! $frequency ){
 		::throw("Cannot detect sample rate of $path. Skipping.",
@@ -386,6 +390,7 @@ sub import_audio  {
 		::sleeper(0.2); 
 		sleep 1 while $this_engine->running();
 	} 
+	$track->set(width => $width);
 	::Waveform::generate_waveforms($destination);
 	::refresh_wav_cache() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
 }

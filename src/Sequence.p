@@ -235,6 +235,11 @@ sub separate_clips {
 	# my $bus_name = $track->name . '-clips';
 
 	my $clips = clip_definitions($track) or return;
+	my $width = ::Util::channels(wav_format(clip_source($track)));
+	unless (defined $width and $width =~ /\A[1-9][0-9]*\z/) {
+		notify('Cannot detect source channel count. No action taken.');
+		return;
+	}
 	for my $clip (@$clips) {
 		if ($tn{$clip->{name}}) {
 			notify("$clip->{name}: track name already in use. No action taken.");
@@ -248,13 +253,13 @@ sub separate_clips {
 					target => $track->basename, 
 					version => $track->playback_version, 
 					group => $track->group,
-					width => $track->width,
+					width => $width,
 					region_start => $clip->{start}->name,
 					region_end => $clip->{end} ? $clip->{end}->name : 'END',
 					);
 		defined $track->project and $arg{project} = $track->project;
 
-		add_track($clip->name, %arg)
+		add_track($clip->{name}, %arg)
 	}
 	$track->set(rw => OFF);
 	request_setup();
