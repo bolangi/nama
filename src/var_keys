@@ -252,10 +252,10 @@ $gui->{engine_start}			# start button
 $gui->{engine_stop}				# stop button
 $gui->{_old_bg}					# default background color
 $gui->{_old_abg}				# default active background color
-$gui->{waveform}				# waveform display widgets, by trackname
 $gui->{waveform_canvas}
 $gui->{quit_requested}
 $gui->{effect_picker}
+$gui->{prompt_dialog}
 
 $jack->{connections}
 $jack->{is_own_port}

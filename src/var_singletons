@@ -1,7 +1,6 @@
 $ui
 $mode
 $file
-$graph
 $setup
 # minimally initiated, a new chain setup will overwrite some
 # fields

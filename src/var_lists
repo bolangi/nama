@@ -8,7 +8,6 @@
 
 	@tracks_data
 	@bus_data
-	@groups_data
 	@marks_data
 	@fade_data
 	@edit_data
@@ -47,6 +46,5 @@
 	$text->{command_history}
 	$text->{command_index}
 	$this_track_name
-	$this_op
 );
 
