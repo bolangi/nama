@@ -5,16 +5,16 @@ var_pronouns    Pronouns (e.g. $this_track) and
                 indices (e.g. %tn, %ti to get track by name, index)
 
 var_serialize   Marshalling variables for saving and restoring project state
+				and lists of variables to be saved				
 
 var_singletons  Objects and simple hashes that contain
-				(such as $config) or 
+				system state such as $config or $file.
                 objects such as $file. Hash access to
-                underlying fields is expected, and 
-                is necessary for Tk slider widgets.
+                underlying fields is acceptable.
 
                 Hash keys of all variables in var_singletons must be
                 declared in var_keys or in var_config. This is checked
-                during build
+                during build.
 
 var_keys        List of allowed singleton hash keys
 
