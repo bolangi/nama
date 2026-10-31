@@ -11,13 +11,17 @@ t/01_symbols.t
 t/02_assign.t
 t/03_log.t
 t/04_object.t
+t/05_stepsize.t
 t/06_latency.t
 t/07_entry.t
 t/11_mark.t
-t/17_waveform_marks.t
 t/12_nama.t
 t/13_fade_envelope.t
 t/14_timeline_adjustment.t
+t/17_waveform_marks.t
+t/18_runtime_paths.t
+t/19_start_clip_name.t
+t/20_track_names.t
 t/data/fake_effects_cache.json
 lib/Audio/Nama.pm
 lib/Audio/Nama/Globals.pm
@@ -86,7 +90,6 @@ lib/Audio/Nama/Graphical.pm
 lib/Audio/Nama/EffectsRegistry.pm
 lib/Audio/Nama/IO.pm
 lib/Audio/Nama/Tempo.pm
-META.json
 LICENSES/Artistic-1.0-Perl.txt
 LICENSES/GPL-3.0.txt
 THIRD_PARTY_NOTICES
