@@ -787,7 +787,7 @@ sub pager {
 	close $fh;
 
 	$text->{term}->pause;
-	system 'less', '-R', '-x4', $filename;
+	system 'less', '-R', '--tabs=4', $filename;
 	$text->{term}->resume;
 	$text->{rootwin}->expose;
 	$text->{term}->flush;
