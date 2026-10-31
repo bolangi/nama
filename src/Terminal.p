@@ -20,6 +20,9 @@ use Tickit::Utils qw(textwidth substrwidth);
 use List::MoreUtils qw(first_index);
 use File::Basename qw(fileparse);
 use File::Temp qw(tempfile);
+use Text::Tabs qw(expand);
+$Text::Tabs::tabstop = 4;
+
 #use DDP;
 
 
@@ -388,9 +391,14 @@ sub add_scroller_item (@text) {
 		$scroller->pop(1);
 		$entry_widget_present = 0;
 	}
-	my $output_item = Tickit::Widget::Scroller::Item::Text->new($output);
-	$scroller->push($output_item);
-	grow_terminal_view($output_item);
+	my @lines = split /\n/, $output, -1;
+	@lines = (q()) unless @lines;
+	for my $line (@lines) {
+		# Tickit's text measurement and rendering do not accept literal tabs.
+		my $output_item = Tickit::Widget::Scroller::Item::Text->new(expand($line));
+		$scroller->push($output_item);
+		grow_terminal_view($output_item);
+	}
 	if (defined $entry_item and $scroller->window) {
 		$scroller->push($entry_item);
 		$entry_widget_present = 1;
