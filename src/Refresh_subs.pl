@@ -2,7 +2,6 @@
 
 sub refresh_waveform_window {
 	$gui->{waveform_canvas}->delete('waveform',$_->name) for all_tracks();
-	$gui->{waveform} = {};
  	my @playable = grep{ $_->play} user_tracks();
 	map{ $_->waveform->display() } @playable;
 	configure_waveform_window();
