@@ -22,6 +22,7 @@ t/17_waveform_marks.t
 t/18_runtime_paths.t
 t/19_start_clip_name.t
 t/20_track_names.t
+t/21_pager.t
 t/data/fake_effects_cache.json
 lib/Audio/Nama.pm
 lib/Audio/Nama/Globals.pm

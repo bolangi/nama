@@ -18,7 +18,7 @@ sub set_preview_mode {
 	$mode->{preview}++;
 	}
 
-	pager( <<'MSG');
+	notify( <<'MSG');
 Setting preview mode. Recording of audio files is disabled.
 
 Type 'arm' to enable recording.
@@ -39,7 +39,7 @@ sub set_doodle_mode {
 	
 	# reconfigure_engine will generate setup and start transport
 	
-pager( <<'MSG' );
+notify( <<'MSG' );
 Setting doodle mode. Using live inputs only. Duplicate
 inputs are excluded. Recording of audio files is disabled.
 

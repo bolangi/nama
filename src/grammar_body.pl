@@ -481,7 +481,7 @@ arm: _arm { ::arm(); 1}
 arm_start: _arm_start { ::arm(); ::start_transport(); 1 }
 connect: _connect { ::connect_transport(); 1}
 disconnect: _disconnect { ::disconnect_transport(); 1}
-engine_status: _engine_status { ::pager(::ecasound_iam('engine-status')); 1}
+engine_status: _engine_status { ::notify(::ecasound_iam('engine-status')); 1}
 start: _start { ::start_transport(); 1}
 stop: _stop { ::stop_transport(); 1}
 ecasound_start: _ecasound_start { ::ecasound_iam('start'); 1}
@@ -519,7 +519,7 @@ modifiers: _modifiers { ::notify( $::this_track->modifiers); 1}
 nomodifiers: _nomodifiers { $::this_track->set(modifiers => ""); 1}
 show_chain_setup: _show_chain_setup { ::pager(::ChainSetup::ecasound_chain_setup); 1}
 dump_io: _dump_io { ::ChainSetup::show_io(); 1}
-why: _why { ::pager($::this_track->why); 1}
+why: _why { ::notify($::this_track->why); 1}
 show_track: _show_track {
 	my $output = $::text->{format_top};
 	$output .= ::show_tracks_section($::this_track);
@@ -544,7 +544,7 @@ show_track: _show_track dd {
 	$::ti{$item{dd}};
 	1;}
 
-show_mode: _show_mode { ::pager( ::show_status()); 1}
+show_mode: _show_mode { ::notify( ::show_status()); 1}
 bus_version: _bus_version dd { 
 	my $n = $item{dd};
 	::nama_cmd("for $::this_bus; version $n");
@@ -1374,7 +1374,7 @@ remove_comment: _remove_comment {
  	1;
 }
 show_comment: _show_comment {
-	::pager( map{ $_->name. ": ". $_->comment } $::this_track );
+	::notify( map{ $_->name. ": ". $_->comment } $::this_track );
 	1;
 }
 show_comments: _show_comments {

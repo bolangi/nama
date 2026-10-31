@@ -768,16 +768,15 @@ sub pager {
 	logsub((caller(0))[3]);
 	my $output = join q(), map { defined $_ ? $_ : q() } @_;
 	return unless length $output;
+	# Retain every result in the scroller, including output viewed in less.
+	notify($output);
 	return unless $text->{term};
 
 	my $width = $text->{term}->cols;
 	my $lines = 0;
 	$lines += int(((length($_) || 1) - 1) / ($width || 1)) + 1
 		for split /\n/, $output, -1;
-	if ($lines <= $text->{term}->lines - 1) {
-		notify($output, $output =~ /\n\z/ ? "" : "\n");
-		return;
-	}
+	return if $lines <= $text->{term}->lines - 1;
 
 	my ($fh, $filename) = tempfile(UNLINK => 1);
 	print {$fh} $output;

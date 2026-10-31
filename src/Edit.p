@@ -317,7 +317,7 @@ sub set_edit_points {
 		return 1 if $this_engine->started();
 	::notify("Ready to set edit points!");
 	sleeper(0.2);
-	::pager(q(Press the "P" key three times to mark positions for:
+	::notify(q(Press the "P" key three times to mark positions for:
     + play-start
     + record-start
     + record-end

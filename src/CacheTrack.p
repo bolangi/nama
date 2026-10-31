@@ -259,7 +259,7 @@ sub update_cache_map {
 								: "restore version $args->{original_version}";
 	::notify(qq(Saving attributes for cached $obj "$track->name"));
 
-	pager(qq(The 'uncache' command on this track will $act, 
+	notify(qq(The 'uncache' command on this track will $act,
 and restore any effects, fades, inserts or region definition.));
 
 	my $filename = $track->targets->{$args->{cached_version}};

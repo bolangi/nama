@@ -27,7 +27,7 @@ sub add_rt_track ($name, @params) {
 # rt_set input keyboard output synth thru 1
 sub rt_set (@kv) {
 	my $track = this_rt_track() or return;
-	return pager($track->rt_summary) unless @kv;
+	return notify($track->rt_summary) unless @kv;
 	@kv % 2 and throw("rt_set takes key value pairs, e.g. rt_set input keyboard"), return;
 	$track->rt_configure(@kv);
 }
@@ -59,7 +59,7 @@ sub rt_make_track ($new, @takes) {
 		rt_thru   => $src->rt_thru,
 	) or return;
 	$dst->save_take(1, $events, $length);
-	pager(sprintf '%s: created from %s take%s %s (%d events, %.1f s)',
+	notify(sprintf '%s: created from %s take%s %s (%d events, %.1f s)',
 		$new, $src->name, (@takes > 1 ? 's' : ''), join(',', @takes),
 		scalar @$events, $length);
 	$dst

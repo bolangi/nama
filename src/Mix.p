@@ -29,7 +29,7 @@ sub check_level {
 	my $cs = ecasound_iam('cop-status');
 
 	my ($level_output) = $cs =~ /Status info:\s*?\n(.+)\z/s;
-	pager($level_output);
+	notify($level_output);
 
 	# restore previous state
 	

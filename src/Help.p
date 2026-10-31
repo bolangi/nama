@@ -61,7 +61,7 @@ sub help ($name) {
 	$name =~ s/-/_/g;  # help indices require underscores
 	chomp $name;
 	#print "seeking help for argument: $name\n";
-	$text->{iam}->{$name} and pager(<<IAM);
+	$text->{iam}->{$name} and notify(<<IAM);
 
 $name is an Ecasound command.  See 'man ecasound-iam'.
 IAM

@@ -106,11 +106,11 @@ sub set_io ($self, $direction, $id = undef, @) {
 sub set_version ($self, $n) {
 	my $name = $self->name;
 	if (!$n) {
-		::pager("$name: following latest take");
+		::notify("$name: following latest take");
 		$self->set(version => 0);
 	}
 	elsif (grep { $_ == $n } $self->versions->@*) {
-		::pager("$name: take $n selected");
+		::notify("$name: take $n selected");
 		$self->set(version => $n);
 	}
 	else { ::throw("$name: take $n does not exist, skipping.") }
@@ -225,7 +225,7 @@ sub start_record {
 		events  => [],
 		held    => {},    # "chan:note" => 1, for closing hanging notes
 	};
-	::pager("$name: recording take $n. Play something, then rt_stop.");
+	::notify("$name: recording take $n. Play something, then rt_stop.");
 	1
 }
 
@@ -243,11 +243,11 @@ sub stop_record {
 	_release_port($st->{outport}) if $st->{out};
 
 	if (!$st->{events}->@*) {
-		::pager($self->name . ": nothing was played; take $st->{take} discarded.");
+		::notify($self->name . ": nothing was played; take $st->{take} discarded.");
 		return 1;
 	}
 	$self->save_take($st->{take}, $st->{events}, $length);
-	::pager(sprintf "%s: saved take %d (%d events, %.1f s)",
+	::notify(sprintf "%s: saved take %d (%d events, %.1f s)",
 		$self->name, $st->{take}, scalar $st->{events}->@*, $length);
 	1
 }
@@ -323,7 +323,7 @@ sub start_play {
 	);
 	$st->{loop}->add($st->{timer});
 	$PLAY{$name} = $st;
-	::pager("$name: playing take $n");
+	::notify("$name: playing take $n");
 	_pump($st);
 	1
 }
@@ -360,7 +360,7 @@ sub _end_play ($st, $how) {
 		$st->{out}->send_event('note_off', $ch, $note, 0);
 	}
 	_release_port($st->{outport});
-	::pager("$name: $how");
+	::notify("$name: $how");
 	1
 }
 
