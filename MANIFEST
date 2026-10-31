@@ -90,6 +90,13 @@ lib/Audio/Nama/Graphical.pm
 lib/Audio/Nama/EffectsRegistry.pm
 lib/Audio/Nama/IO.pm
 lib/Audio/Nama/Tempo.pm
+lib/Audio/Nama/EntryItem.pm
+lib/Audio/Nama/RtMidiCommands.pm
+lib/Audio/Nama/RtMidiTrack.pm
+lib/Audio/Nama/RtMidiTrackNullOut.pm
+lib/Audio/Nama/ScrollerItemText.pm
+lib/Audio/Nama/StepSize.pm
+lib/Audio/Nama/TkTickitBridge.pm
 LICENSES/Artistic-1.0-Perl.txt
 LICENSES/GPL-3.0.txt
 THIRD_PARTY_NOTICES
