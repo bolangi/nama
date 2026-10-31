@@ -18,7 +18,14 @@ sub project_snapshot (@message) {
 }
 sub load_project (@args) { $loaded_state = json_in($state_file->slurp_utf8) }
 my $root = path($FindBin::Bin)->parent;
-my $source = $root->child('src/TrackUtils.p')->slurp_utf8;
+# Inspect shipped modules without loading Nama's engines or UI dependencies.
+# Normalize rooted namespaces so extracted routines use this test's stubs.
+sub module_text ($relative) {
+    my $text = $root->child('lib', $relative)->slurp_utf8;
+    $text =~ s/Audio\x3a\x3aNama(?=\x3a\x3a)//g;
+    return $text;
+}
+my $source = module_text('Audio/Nama/TrackUtils.pm');
 my ($subs) = $source =~ /(sub rename_track .*?)(?=sub user_tracks_present)/s;
 eval $subs; die $@ if $@;
 my $tmp = tempdir;
@@ -92,8 +99,8 @@ ok($wav->child('piano_1.wav')->exists, 'invalid name leaves audio untouched');
 reset_case();
 ok(!rename_track('piano', 'voice/bad', "$state_file", "$wav"), 'path separator rejected');
 # Runtime paths no longer mutate the process working directory.
-for my $file (qw(TrackUtils.p Edit.p EcasoundCleanup.p grammar_body.pl)) {
-    unlike($root->child('src', $file)->slurp_utf8, qr/\bchdir\b/, "$file has no chdir");
+for my $file (qw(Audio/Nama/TrackUtils.pm Audio/Nama/Edit.pm Audio/Nama/EcasoundCleanup.pm Audio/Nama.pm)) {
+    unlike(module_text($file), qr/\bchdir\b/, "$file has no chdir");
 }
 # Postprocessing must keep the symlink target relative to the link directory,
 # while handing an absolute input filename to the encoder.
@@ -118,7 +125,7 @@ path($mix_path)->parent->mkpath;
 path($mix_path)->spew_raw('mix');
 $tn{Mixdown} = bless {}, 'MixStub';
 $config = { use_git => 0, mixdown_encodings => 'mp3' };
-my ($postprocess) = $root->child('src/EcasoundCleanup.p')->slurp_utf8
+my ($postprocess) = module_text('Audio/Nama/EcasoundCleanup.pm')
     =~ /(sub mixdown_postprocessing .*?)(?=sub tag_mixdown_commit)/s;
 eval $postprocess; die $@ if $@;
 mixdown_postprocessing();
@@ -127,7 +134,7 @@ ok($tmp->child('test_1.wav')->is_file, 'mixdown link resolves from unrelated cwd
 is("$encoding[0]", $mix_path, 'encoder receives absolute audio path');
 is(getcwd, $cwd, 'mixdown leaves cwd unchanged');
 # Execute the actual grammar rewrite with a quoted project directory.
-my ($git_rewrite) = $root->child('src/grammar_body.pl')->slurp_utf8
+my ($git_rewrite) = module_text('Audio/Nama.pm')
     =~ /(    if \(\$shellcode =~ .*?)(?=\n\s*\x3a\x3anotify)/s;
 ok(defined $git_rewrite, 'locate git command rewrite');
 {

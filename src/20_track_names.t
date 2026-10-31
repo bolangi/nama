@@ -1,10 +1,13 @@
 use v5.36;
 use Test::More;
+use FindBin;
 our (%tn, $text, $mastering, @errors);
 $mastering = { track_names => [qw(EQ Low Mid High Boost)] };
 sub throw ($message) { push @errors, $message }
-open my $fh, '<', 'src/TrackUtils.p' or die $!;
+open my $fh, '<', "$FindBin::Bin/../lib/Audio/Nama/TrackUtils.pm" or die $!;
 my $source = do { local $/; <$fh> };
+# Run extracted routines against the stubs in this test's namespace.
+$source =~ s/Audio\x3a\x3aNama(?=\x3a\x3a)//g;
 my ($validator) = $source =~ /(sub valid_track_name .*?)(?=sub add_track \{)/s;
 eval $validator; die $@ if $@;
 $text = {

@@ -14,8 +14,10 @@ sub valid_track_name ($name) { push @validated, $name; $name ne 'play' }
 sub end_clip ($time) { $ended++ }
 sub register_clip_endpoint (%args) { push @created, \%args }
 sub start_transport { $started++ }
-open my $fh, '<', "$FindBin::Bin/../src/Mark.p" or die $!;
+open my $fh, '<', "$FindBin::Bin/../lib/Audio/Nama/Mark.pm" or die $!;
 my $source = do { local $/; <$fh> };
+# Run extracted routines against the stubs in this test's namespace.
+$source =~ s/Audio\x3a\x3aNama(?=\x3a\x3a)//g;
 my ($sub) = $source =~ /(sub start_clip \{.*?)(?=sub end_clip)/s;
 eval $sub; die $@ if $@;
 sub reset_case {
