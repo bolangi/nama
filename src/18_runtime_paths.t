@@ -86,6 +86,10 @@ reset_case();
 symlink 'missing', $wav->child('voice_1.wav') or die $!;
 ok(!rename_track('piano', 'voice', "$state_file", "$wav"), 'dangling destination symlink rejected');
 reset_case();
+ok(!rename_track('piano', 'nama', "$state_file", "$wav"), 'invalid track name rejected');
+is(scalar @snapshots, 0, 'invalid name rejected before snapshot');
+ok($wav->child('piano_1.wav')->exists, 'invalid name leaves audio untouched');
+reset_case();
 ok(!rename_track('piano', 'voice/bad', "$state_file", "$wav"), 'path separator rejected');
 # Runtime paths no longer mutate the process working directory.
 for my $file (qw(TrackUtils.p Edit.p EcasoundCleanup.p grammar_body.pl)) {
@@ -124,7 +128,7 @@ is("$encoding[0]", $mix_path, 'encoder receives absolute audio path');
 is(getcwd, $cwd, 'mixdown leaves cwd unchanged');
 # Execute the actual grammar rewrite with a quoted project directory.
 my ($git_rewrite) = $root->child('src/grammar_body.pl')->slurp_utf8
-    =~ /(    if \(\$shellcode =~ .*?)(?=\n\s*::notify)/s;
+    =~ /(    if \(\$shellcode =~ .*?)(?=\n\s*\x3a\x3anotify)/s;
 ok(defined $git_rewrite, 'locate git command rewrite');
 {
     my $shellcode = 'git status --short';

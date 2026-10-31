@@ -31,5 +31,8 @@ ok(valid_track_name('piano2'), 'works before grammar setup');
 ok(!valid_track_name('nama'), 'prefix reserved before setup');
 # Check all creation routes converge on add_track and rename validates before I/O.
 like($source, qr/my %vals = .*?return unless valid_track_name\(\$vals\{name\}\)/s, 'creation validates final name');
-like($source, qr/sub rename_track .*?return unless valid_track_name\(\$newname\);\s*project_snapshot/s, 'rename validates before snapshot');
+my ($rename) = $source =~ /(sub rename_track .*?)(?=sub rename_track_state_references)/s;
+my $validation = index($rename, 'return unless valid_track_name($newname);');
+my $snapshot = index($rename, 'project_snapshot();');
+ok($validation >= 0 && $snapshot > $validation, 'rename validates before snapshot');
 done_testing;
