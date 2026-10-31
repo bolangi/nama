@@ -21,7 +21,7 @@ $fx_cache->{fake} = path("t/data/fake_effects_cache.json")->slurp_utf8;
 cleanup_dirs();
 setup_dirs();
 
-sub cleanup_dirs { 	chdir('..'), remove_tree($test_dir) if -e $test_dir }
+sub cleanup_dirs { remove_tree($test_dir) if -e $test_dir }
 sub setup_dirs{ make_path("$test_dir/test/.wav", "$test_dir/untitled/.wav") }
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag( qx(find $test_dir) );

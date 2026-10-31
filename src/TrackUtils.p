@@ -176,51 +176,81 @@ sub add_pan_control {
 	$ti{$n}->set(pan => $pan_id);  # save the id for next time
 	$pan_id;
 }
-sub rename_track {
-	use Cwd;
-	my ($oldname, $newname, $statefile, $dir) = @_;
-	return unless valid_track_name($newname);
-	project_snapshot();
-	my $old_dir = cwd();
-	chdir $dir;
+sub rename_track ($oldname, $newname, $statefile, $dir) {
+    return unless valid_track_name($newname);
+    if (grep { !defined $_ || m{[/\\\x00]} } ($oldname, $newname)) {
+        throw('Track names must not contain path separators or NUL.');
+        return;
+    }
+    my (@moves, @moved, $original_state, $state_path);
+    my $ok = eval {
+        my $wav_dir = path($dir)->absolute;
+        $state_path = path($statefile)->absolute;
+        die "Audio directory does not exist: $wav_dir\n" unless $wav_dir->is_dir;
+        for my $source ($wav_dir->children) {
+            my $name = $source->basename;
+            next unless $name =~ /\A\Q$oldname\E(?=[_.]).*\.wav\z/
+                || $name eq "$oldname.wav";
+            next unless $source->is_file || -l $source;
+            substr($name, 0, length $oldname, $newname);
+            my $destination = $wav_dir->child($name);
+            die "Destination already exists: $destination\n"
+                if $destination->exists || -l $destination;
+            push @moves, [$source, $destination];
+        }
+        project_snapshot();
+        $original_state = $state_path->slurp_utf8;
+        my $state = json_in($original_state);
+        rename_track_state_references($state, $oldname, $newname);
+        my $updated_state = json_out($state);
+        for my $move (@moves) {
+            my ($source, $destination) = @$move;
+            # Path::Tiny::move can overwrite; check again immediately before use.
+            die "Destination already exists: $destination\n"
+                if $destination->exists || -l $destination;
+            $source->move($destination);
+            push @moved, $move;
+        }
+        $state_path->spew_utf8($updated_state);
+        1;
+    };
+    unless ($ok) {
+        my $error = $@;
+        for my $move (reverse @moved) {
+            my ($source, $destination) = @$move;
+            eval {
+                die "Original path is occupied: $source\n" if $source->exists || -l $source;
+                $destination->move($source);
+            } or $error .= "Rollback failed: $@";
+        }
+        throw("Cannot rename track $oldname to $newname: $error");
+        return;
+    }
+    # Load the edited state before saving another snapshot of in-memory data.
+    load_project(name => $project->{name});
+    my $msg = "Rename track $oldname -> $newname";
+    project_snapshot($msg);
+    notify($msg);
+    return 1;
+}
 
-	# rename audio files
-	
-	qx(rename 's/^$oldname(?=[_.])/$newname/' *.wav);
-
-
-	# rename in State.json when candidate key
-	# is part of the specified set and the value 
-	# exactly matches $oldname
-	
-	my $state = path($statefile)->slurp_utf8;
-
-	$state =~ s/
-		"					# open quote
-		(track| 		# one of specified fields
-		name| 
-		group| 
-		source| 
-		send_id| 
-		target| 
-		current_edit| 
-		source_id| 
-		return_id| 
-		wet_track| 
-		dry_track| 
-		track| 
-		host_track)
-		"				# close quote
-		\ 				# space
-		:				# colon
-		\ 				# space
-		"$oldname"/"$1" : "$newname"/gx;
-
-	path($statefile)->spew_utf8($state);
-	my $msg = "Rename track $oldname -> $newname";
-	project_snapshot($msg);
-	::notify($msg);
-	load_project(name => $::project->{name});
+sub rename_track_state_references ($node, $oldname, $newname) {
+    if (ref $node eq 'ARRAY') {
+        rename_track_state_references($_, $oldname, $newname) for @$node;
+    } elsif (ref $node eq 'HASH') {
+        my %fields = map { $_ => 1 } qw(
+            track name group source send_id target current_edit source_id
+            return_id wet_track dry_track host_track
+        );
+        for my $key (keys %$node) {
+            if ($fields{$key} && defined $node->{$key} && !ref $node->{$key}
+                    && $node->{$key} eq $oldname) {
+                $node->{$key} = $newname;
+            } else {
+                rename_track_state_references($node->{$key}, $oldname, $newname);
+            }
+        }
+    }
 }
 sub user_tracks_present {
 	my $i = 0;

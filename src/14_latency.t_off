@@ -98,7 +98,6 @@ sub check_setup {
 
 sub cleanup { 	remove_tree($test_dir) }
 
-chdir "/tmp";
 #my $testfile = '/tmp/nama-test/untitled/.wav/Mixdown_1.wav';
 #diag "$testfile: length ",-s $testfile;
 #unlink $testfile;

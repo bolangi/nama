@@ -10,7 +10,7 @@ sub cleanup ($self) {
 
 package ::;
 use v5.36;
-use Cwd;
+use Path::Tiny qw(path);
 use File::Spec::Functions qw(splitpath);
 use ::Globals qw(:all);
 
@@ -55,11 +55,10 @@ sub mixdown_postprocessing {
 
 	# create symlink in project_dir()
 	
-	my $was_in = getcwd;
-	chdir project_dir() or die "couldn't chdir: $!";
 	my $newfile = "$tag_name.wav";
 	logpkg('debug',"symlinking oldfile: $oldfile, newfile: $newfile");
-	symlink $oldfile, $newfile or throw("symlink didn't work: $!");
+	symlink $oldfile, path(project_dir())->child($newfile)
+        or throw("symlink didn't work: $!");
 	tag_mixdown_commit($tag_name, $newfile, $oldfile) if $config->{use_git};
 
 	my $sha = git_sha(); # possibly undef
@@ -74,8 +73,7 @@ sub mixdown_postprocessing {
 	}
 	$tn{Mixdown}->add_system_version_comment($version, $comment);
 	::notify($comment);
-	encode_mixdown_file($oldfile,$tag_name);
-	chdir $was_in;
+	encode_mixdown_file(path(project_dir())->child($oldfile)->absolute, $tag_name);
 }
 sub tag_mixdown_commit {
 	logsub((caller(0))[3]);
@@ -117,9 +115,14 @@ sub encode_mixdown_file {
 	my $date = qx(date);
 	chomp($date, $artist);
 	my ($year) = $date =~ /(\d{4})$/;
-	my $input_file = $mixdownfile;
+	# The encoder runs from Nama's unchanged working directory.
+	my $input_file = path($mixdownfile)->absolute->stringify;
+	$input_file =~ s/'/'"'"'/g;
+	$input_file = "'$input_file'";
 	for my $format( @formats ){
-		my $output_file = join_path(project_dir(),"$tag_name.$format");
+		my $output_file = path(project_dir())->child("$tag_name.$format")->absolute->stringify;
+        $output_file =~ s/'/'"'"'/g;
+        $output_file = "'$output_file'";
 		logpkg('debug',"artist $artist, title $title, date $date, year $year, input file $input_file, output file $output_file");
 		my $cmd = eval qq(qq($shell_encode_command->{$format}));
 		logpkg('debug',"Mixdown encoding command:\n$cmd");

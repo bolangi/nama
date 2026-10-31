@@ -236,6 +236,7 @@ sub edit_track 		{ $::tn{$_[0]->edit_name} }             # in version_bus
 package ::;
 use v5.36; use Carp;
 use ::TimelineAdjustment qw(timeline_adjustment);
+use Path::Tiny qw(path);
 no warnings 'uninitialized';
 
 our (
@@ -608,8 +609,7 @@ sub explode_track {
 	my @names = map{ "$host-v$_"} @versions;
 	my @exists = grep{ $::tn{$_} } @names;
 	::throw("@exists: tracks already exist. Aborting."), return if @exists;
-	my $current = cwd;
-	chdir this_wav_dir();
+	my $wav_dir = path(this_wav_dir())->absolute;
 	for my $i (@versions){
 
 		# make a track
@@ -623,11 +623,11 @@ sub explode_track {
 
 		# symlink the WAV file we want
 
-		symlink $track->targets->{$i}, "$name.wav";
+		symlink $track->targets->{$i}, $wav_dir->child("$name.wav")
+            or throw("Cannot link $name.wav: $!");
 
 
 	}
-	chdir $current;
 }	
 
 sub select_edit {
@@ -704,20 +704,23 @@ sub merge_edits {
 	# cache at version_mix level
 	
 	my $output_wav = cache_track($edit->version_mix);
+	unless (defined $output_wav) {
+		throw("Cannot merge edits: caching produced no audio file.");
+		return;
+	}
 
 	# promote to host track
 
 	my $new_version = $edit->host->last + 1;		
 	add_system_version_comment($edit->host, $new_version, $msg);
 	add_system_version_comment($edit->version_mix, $edit->version_mix->last, $msg);
-	my $old = cwd();
-	chdir this_wav_dir();
+	my $wav_dir = path(this_wav_dir())->absolute;
 	my $new_host_wav = $edit->host_track . "_" .  $new_version . ".wav";
-	symlink $output_wav, $new_host_wav;
+	symlink $output_wav, $wav_dir->child($new_host_wav)
+        or do { throw("Cannot link $new_host_wav: $!"); return };
 
 	$edit->host->set(version => undef); # default to latest
 	$edit->host->{version_comment}{$new_version}{system} = $msg;
-	chdir $old;
 	disable_edits();
 	$this_track = $edit->host;
 	

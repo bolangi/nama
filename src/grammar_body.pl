@@ -31,14 +31,15 @@ meta: bang shellcode stopper {
 	$shellcode =~ s/\$thiswav/$::this_track->full_path/e;
 
 	# support "!git" syntax
-	my $olddir = ::getcwd();
-	my $prefix = "chdir ". ::project_dir().";";
-	$shellcode = "$prefix $shellcode" if $shellcode =~ /^\s*git /;
+    if ($shellcode =~ /^\s*git /) {
+        my $directory = ::project_dir();
+        $directory =~ s/'/'"'"'/g;
+        $shellcode =~ s/^\s*git /git -C '$directory' /;
+    }
 
 	::notify( "executing this shell code:  $shellcode" )
 		if $shellcode ne $item{shellcode};
 	my $output = qx( $shellcode 2>&1 );
-	chdir $olddir;
 	::pager($output) if $output;
 	1;
 }
@@ -1528,10 +1529,7 @@ edit_waveform: _edit_waveform {
 			'audacity',
 			$::this_track->full_path,
 			"&";
-		my $old_pwd = ::getcwd();		
-		chdir ::this_wav_dir();
 		system($cmd);
-		chdir $old_pwd;
 	}
 	else { ::throw("Audacity not found. No waveform editor available.") }
 	1;
