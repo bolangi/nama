@@ -251,6 +251,14 @@ sub start_clip {
 	my ($current_index, $opening_mark) = clip_state();
 	my $ok = eval {
 		$ui->prompt_for_text('Clip name? ', sub ($name) {
+            # Empty labels retain the default numbered clip name.
+            if (defined $name) {
+                my $track_name = length $name ? $name : 'clip ' . ($current_index + 1);
+                unless (valid_track_name($track_name)) {
+                    $ui->prompt_for_text('Clip name? ', __SUB__);
+                    return;
+                }
+            }
 			$clip_prompt_active = 0;
 			if (defined $name) {
 				end_clip($time) if defined $opening_mark;
