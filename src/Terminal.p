@@ -391,14 +391,10 @@ sub add_scroller_item (@text) {
 		$scroller->pop(1);
 		$entry_widget_present = 0;
 	}
-	my @lines = split /\n/, $output, -1;
-	@lines = (q()) unless @lines;
-	for my $line (@lines) {
 		# Tickit's text measurement and rendering do not accept literal tabs.
-		my $output_item = Tickit::Widget::Scroller::Item::Text->new(expand($line));
+		my $output_item = Tickit::Widget::Scroller::Item::Text->new(expand($output));
 		$scroller->push($output_item);
 		grow_terminal_view($output_item);
-	}
 	if (defined $entry_item and $scroller->window) {
 		$scroller->push($entry_item);
 		$entry_widget_present = 1;
@@ -791,7 +787,7 @@ sub pager {
 	close $fh;
 
 	$text->{term}->pause;
-	system 'less', '-R', $filename;
+	system 'less', '-R', '-x4', $filename;
 	$text->{term}->resume;
 	$text->{rootwin}->expose;
 	$text->{term}->flush;
