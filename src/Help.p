@@ -34,7 +34,11 @@ sub helpline {
 			push @out, "$title $eg\n";
 		}
 	}
-	join "\n",@out; 
+	# YAML block scalars and examples may carry trailing blank lines.
+	# Each record starts and ends with one newline, so concatenated records
+	# have exactly one blank line between them.
+	@out = map { s/\s+\z//r } @out;
+	join("\n", @out) . "\n";
 		
 }
 	
