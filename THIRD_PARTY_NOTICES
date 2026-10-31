@@ -1,0 +1,46 @@
+Third-party code bundled with Nama
+==================================
+
+Nama's own code is distributed under the Artistic License 2.0 (COPYING).
+The following modified Tickit-derived modules retain the original terms
+stated in their source headers: either the GNU General Public License or
+the Artistic License, on the same terms as Perl itself (GPL version 1 or
+later, or the original Perl Artistic License).
+
+Original author: Paul Evans <leonerd@leonerd.org.uk>.
+Upstream: https://metacpan.org/author/PEVANS
+Perl licensing terms: https://dev.perl.org/licenses/
+
+These are modified versions, maintained for Nama by Joel Roth, and should
+not be mistaken for unmodified upstream releases. Modification notices
+were added on 2026-10-15; the code adaptations predate that date.
+
+src/Entry.p
+  Derived from Tickit::Widget::Entry (based on version 0.42).
+  Printable-key bindings for Nama's terminal entry widget.
+
+src/Completion.p
+  Derived from Tickit::Widget::Entry::Plugin::Completion (based on version 0.02).
+  Directory completion keeps trailing slashes free of appended spaces; unique matches do not open the candidate popup.
+
+src/ScrollerItemText.p
+  Derived from Tickit::Widget::Scroller::Item::Text (based on version 0.33).
+  Suppress uninitialized-value warnings while laying out scroller text.
+
+src/EntryItem.p
+  Derived from Tickit::Widget::Scroller::Item::Text (based on version 0.32).
+  Adapt the text scroller item to the Tickit::Widget::Scroller::Item::Entry class for Nama.
+
+The original copyright notices remain in each file:
+- Completion.p: Paul Evans, 2021-2022.
+- Entry.p, EntryItem.p, ScrollerItemText.p: Paul Evans, 2011-2023.
+
+These files are processed by Nama's source build into the corresponding
+Audio::Nama module files; the copyright, license and modification notices
+are retained in those generated files.
+
+License texts supplied for these components:
+- LICENSES/Artistic-1.0-Perl.txt: original Perl Artistic License.
+- LICENSES/GPL-3.0.txt: GPL version 3, an available choice under GPL 1 or later.
+The retained upstream terms also allow other applicable GPL versions;
+supplying GPLv3 here does not remove that choice.
