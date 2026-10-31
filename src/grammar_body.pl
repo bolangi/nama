@@ -369,27 +369,10 @@ add_midi_track: _add_midi_track new_track_name {
 arg: anytag
 add_tracks: _add_tracks track_name(s) {
 	map{ ::add_track($_)  } @{$item{'track_name(s)'}}; 1}
-new_track_name: anytag  { #$item{anytag} 
-  	my $proposed = $item{anytag};
-  	::throw( qq(Track name "$proposed" needs to start with a letter)), 
-  		return undef if  $proposed !~ /^[A-Za-z]/;
-  	::throw( qq(Track name "$proposed" cannot contain a colon.)), 
-  		return undef if  $proposed =~ /:/;
- 	::throw( qq(A track named "$proposed" already exists.)), 
- 		return undef if $::Track::by_name{$proposed};
- 	::throw( qq(Track name "$proposed" conflicts with Ecasound command keyword.)), 
- 		return undef if $::text->{iam}->{$proposed};
- 
- 	::throw( qq(Track name "$proposed" conflicts with user command.)), 
- 		return undef if $::text->{user_command}->{$proposed};
- 
-  	::throw( qq(Track name "$proposed" conflicts with Nama command or shortcut.)), 
-  		return undef if $::text->{commands}->{$proposed} 
-				 or $::text->{command_shortcuts}->{$proposed}; 
-;
-$proposed
-} 
-			
+new_track_name: anytag {
+    ::valid_track_name($item{anytag}) ? $item{anytag} : undef
+}
+
 track_name: alphafirst
 bus_name: alphafirst
 existing_track_name: track_name { 

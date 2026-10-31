@@ -2,20 +2,56 @@ package ::;
 use v5.36;
 use Path::Tiny qw(path);
 
+# Validate new names here so GUI, grammar and programmatic creation agree.
+# Restoring existing objects deliberately does not pass through this routine.
+sub valid_track_name ($name) {
+    my $error;
+    if (!defined $name || $name !~ /^[A-Za-z]/) {
+        $error = 'needs to start with a letter';
+    } elsif ($name =~ /:/) {
+        $error = 'cannot contain a colon';
+    } elsif ($tn{$name}) {
+        $error = 'already exists';
+    } elsif (grep { $name eq $_ } ($mastering->{track_names} // [])->@*) {
+        $error = 'is reserved for mastering';
+    } else {
+        my $keyword = $name =~ s/-/_/gr;
+        my %reserved = map { $_ => 1 } qw(nama midi rtm rtmidi rmd);
+        for my $table ($text->{commands}, $text->{rtmidi_commands}) {
+            next unless $table;
+            for my $command (keys %$table) {
+                $reserved{$command =~ s/-/_/gr} = 1;
+                for my $short (split ' ', ($table->{$command}->{short} // '')) {
+                    $reserved{$short =~ s/-/_/gr} = 1;
+                }
+            }
+        }
+        $error = 'conflicts with a command, shortcut or mode prefix'
+            if $reserved{$keyword}
+                || ($text->{command_shortcuts} // {})->{$keyword}
+                || ($text->{midi_command_names} // {})->{$name}
+                || ($text->{midi_command_names} // {})->{$keyword}
+                || ($text->{iam} // {})->{$name}
+                || ($text->{user_command} // {})->{$name};
+    }
+    if ($error) {
+        ::throw('Track name "' . ($name // '') . '" ' . $error . '.');
+        return;
+    }
+    return 1;
+}
+
 sub add_track {
 
 	logsub((caller(0))[3]);
 	my ($name, @params) = @_;
 	my %vals = (name => $name, @params);
+	return unless valid_track_name($vals{name});
 	my $class = $vals{class} // '::Track';
 	my $rw = $vals{rw};
 	{ no warnings 'uninitialized';	
 	logpkg('debug', "name: $name, ch_r: $gui->{_chr}, ch_m: $gui->{_chm}");
 	}	
-	::throw("$name: track name already in use. Skipping."), return 
-		if $tn{$name};
-	::throw("$name: reserved track name. Skipping"), return
-	 	if grep $name eq $_, $mastering->{track_names}->@*; 
 
 	# in order to increment serially
 	::ChainSetup::remove_temporary_tracks();
@@ -143,6 +179,7 @@ sub add_pan_control {
 sub rename_track {
 	use Cwd;
 	my ($oldname, $newname, $statefile, $dir) = @_;
+	return unless valid_track_name($newname);
 	project_snapshot();
 	my $old_dir = cwd();
 	chdir $dir;
