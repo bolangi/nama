@@ -20,11 +20,11 @@
 -a:8 -chmute:2
 -a:9 -chmute:1
 -a:10 -chmix:1
--a:11 -chmove:1,5
+-a:11 -chorder:0,0,0,0,1
 
 # pre-output processing
 
--a:12 -chmove:1,6
+-a:12 -chorder:0,0,0,0,0,1
 
 # audio outputs
 

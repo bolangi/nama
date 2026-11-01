@@ -588,12 +588,12 @@ ok( $io isa '::IO', 'IO base class object');
 $io = ::IO::to_alsa_soundcard_device->new(track => 'sax'); 
 
 is($io->ecs_string, '-o:alsa,default', 'IO to_alsa_soundcard_device 1');
-is($io->ecs_extra,  ' -chmove:1,5', 'IO to_alsa_soundcard_device 2');
+is($io->ecs_extra,  ' -chorder:0,0,0,0,1', 'IO to_alsa_soundcard_device 2');
 
 $io = ::IO::to_soundcard->new(track => 'sax'); 
 
 is($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
-is($io->ecs_extra, ' -chmove:1,5', 'IO to_soundcard 2');
+is($io->ecs_extra, ' -chorder:0,0,0,0,1', 'IO to_soundcard 2');
 
 force_jack();
 
@@ -633,8 +633,8 @@ $expected_setup_lines = <<EXPECTED;
 
 # post-input processing
 
--a:R3 -chmove:2,1
--a:3 -chmove:2,1 -chcopy:1,2
+-a:R3 -chorder:2
+-a:3 -chorder:2 -chcopy:1,2
 
 # audio outputs
 
@@ -694,7 +694,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # post-input processing
 
--a:3 -chmove:2,1 -chcopy:1,2
+-a:3 -chorder:2 -chcopy:1,2
 
 # audio outputs
 
@@ -713,11 +713,11 @@ $expected_setup_lines = <<EXPECTED;
 
 # post-input processing
 
--a:3 -chmove:2,1 -chcopy:1,2
+-a:3 -chorder:2 -chcopy:1,2
 
 # pre-output processing
 
--a:1  -chmove:2,6 -chmove:1,5
+-a:1  -chorder:0,0,0,0,1,2
 
 # audio outputs
 
@@ -771,7 +771,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # post-input processing
 
--a:3 -chmove:2,1 -chmove:3,2
+-a:3 -chorder:2,3
 
 # audio outputs
 
@@ -1233,8 +1233,8 @@ $expected_setup_lines = <<EXPECTED;
 
 # pre-output processing
 
--a:5  -chmove:2,8 -chmove:1,7
--a:6  -chmove:2,8 -chmove:1,7
+-a:5  -chorder:0,0,0,0,0,0,1,2
+-a:6  -chorder:0,0,0,0,0,0,1,2
 
 # audio outputs
 
@@ -1317,14 +1317,14 @@ $expected_setup_lines = <<EXPECTED;
 # post-input processing
 
 -a:3  -chcopy:1,2
--a:4 -chmove:2,1 -chmove:3,2
+-a:4 -chorder:2,3
 -a:5  -chcopy:1,2
--a:6 -chmove:2,1 -chmove:3,2
+-a:6 -chorder:2,3
 
 # pre-output processing
 
--a:5  -chmove:2,8 -chmove:1,7
--a:6  -chmove:2,8 -chmove:1,7
+-a:5  -chorder:0,0,0,0,0,0,1,2
+-a:6  -chorder:0,0,0,0,0,0,1,2
 
 # audio outputs
 
@@ -1428,12 +1428,12 @@ $expected_setup_lines = <<EXPECTED;
 
 # post-input processing
 
--a:3 -chmove:2,1 -chcopy:1,2
--a:4 -chmove:7,1 -chmove:8,2 
+-a:3 -chorder:2 -chcopy:1,2
+-a:4 -chorder:7,8
 
 # pre-output processing
 
--a:J3  -chmove:2,6 -chmove:1,5
+-a:J3  -chorder:0,0,0,0,1,2
 
 # audio outputs
 
@@ -1459,13 +1459,13 @@ $expected_setup_lines = <<EXPECTED;
 
 # post-input processing
 
--a:4 -chmove:7,1 
--a:5 -chmove:2,1 
--a:6 -chmove:2,1 -chcopy:1,2
+-a:4 -chorder:7
+-a:5 -chorder:2
+-a:6 -chorder:2 -chcopy:1,2
 
 # pre-output processing
 
--a:6  -chmove:1,5
+-a:6  -chorder:0,0,0,0,1
 
 # audio outputs
 

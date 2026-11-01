@@ -60,10 +60,10 @@ for L_rear R_rear; source track R-L
 
 # L_rear: output at channel 5
 
-L_rear afx chmove 1 5
+L_rear afx chorder 0 0 0 0 1
 
 # R_rear: output at channel 6
-R_rear afx ea -100;afx chmove 1 6
+R_rear afx ea -100;afx chorder 0 0 0 0 0 1
 
 
 #   ### Patrick Shirkey's script ####

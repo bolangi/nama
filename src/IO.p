@@ -526,17 +526,13 @@ sub ecs_extra { join ' ', $_[0]->rec_route, $_[0]->mono_to_stereo }
 sub device_id { $config->{devices}->{$config->{alsa_capture_device}}->{ecasound_id} }
 sub input_channel { $_[0]->source_id }
 sub rec_route {
-	# works for mono/stereo only!
 	no warnings qw(uninitialized);
 	my $self = shift;
 	# needed only if input channel is greater than 1
 	return '' if ! $self->input_channel or $self->input_channel == 1; 
 	
-	my $route = "-chmove:" . $self->input_channel . ",1"; 
-	if ( $self->width == 2){
-		$route .= " -chmove:" . ($self->input_channel + 1) . ",2";
-	}
-	return $route;
+	my $first = $self->input_channel;
+	return '-chorder:' . join(',', $first .. $first + $self->width - 1);
 }
 }
 {
@@ -556,12 +552,7 @@ sub route {
 	my ($width, $dest) = @_;
 	return '' if ! $dest or $dest == 1;
 	# print "route: width: $width, destination: $dest\n\n";
-	my $offset = $dest - 1;
-	my $route ;
-	for my $c ( map{$width - $_ + 1} 1..$width ) {
-		$route .= " -chmove:$c," . ( $c + $offset);
-	}
-	$route;
+	return ' -chorder:' . join(',', (0) x ($dest - 1), 1 .. $width);
 }
 }
 {
