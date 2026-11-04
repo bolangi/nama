@@ -115,7 +115,7 @@ sub new {
 		rw			=> REC,
 		source_type => $host->source_type,
 		source_id	=> $host->source_id,
-		width       => $host->width,
+		width 		=> ::channels($host_track_alias->wav_format),
 		group		=> $self->edit_root_name,  # i.e. sax-v5
 		hide		=> 1,
 	); 
