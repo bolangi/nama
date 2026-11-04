@@ -834,7 +834,9 @@ sub wav_length { $_[0]->{wav_length} }
 sub full_path { $_[0]->{full_path} }
 sub modifiers { '' }
 sub effective_rw { 'PLAY' }
-sub width { 2 }
+sub live_input_channels { 2 }
+sub source_channels { 2 }
+sub output_channels { 2 }
 sub pan { undef }
 sub wav_format { 's16_le,2,48000' }
 sub fader { 'offset-test-fader' }

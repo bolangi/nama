@@ -253,7 +253,7 @@ sub separate_clips {
 					target => $track->basename, 
 					version => $track->playback_version, 
 					group => $track->group,
-					width => $width,
+					live_input_channels => $width,
 					region_start => $clip->{start}->name,
 					region_end => $clip->{end} ? $clip->{end}->name : 'END',
 					);

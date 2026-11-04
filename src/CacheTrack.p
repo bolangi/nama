@@ -14,6 +14,7 @@ use ::Util qw(timer start_event stop_event);
 # processing_time
 # original_version
 # output_wav
+# output_channels - captured before temporarily changing track status to REC
 # orig_volume
 # orig_pan
 # bus - we are caching a bus
@@ -41,6 +42,7 @@ sub cache_track { # launch subparts if conditions are met
 	$args->{original_version} = $bus ? 0 : $track->playback_version;
 	$args->{cached_version} = $track->last + 1;
 	$args->{track_rw} = $track->rw;
+    $args->{output_channels} = $track->output_channels;
 	$args->{main_rw} = $tn{Main}->rw;
 
 	$tn{Main}->set( rw => OFF);
@@ -104,7 +106,7 @@ sub generate_cache_bus_graph {
 	# set WAV output format
 	$g->set_vertex_attributes(
 		$track->name, 
-		{ format => signal_format($config->{cache_to_disk_format},$track->width),
+		{ format => signal_format($config->{cache_to_disk_format},$args->{output_channels}),
 			version => ($args->{track_result_version}),
 		}
 	); 
@@ -143,7 +145,7 @@ sub generate_cache_track_graph {
 	my $to_path = join_path($args->{track}->dir, $to_name);
 	$g->set_vertex_attributes(
 		$cooked->name, 
-		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
+		{ format => signal_format($config->{cache_to_disk_format},$args->{output_channels}),
 			full_version => $to_path,
 		}
 	); 

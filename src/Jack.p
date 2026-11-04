@@ -348,9 +348,11 @@ sub make_connections {
 		
 			# ecasound port index
 			
-			my $index = $track->width == 1
+			my $channels = $direction eq 'in'
+                ? $track->source_channels : $track->output_channels;
+            my $index = $channels == 1
 				?  1 
-				: $line_number % $track->width + 1;
+				: $line_number % $channels + 1;
 
 		my @ports = map{quote($_)} $external_port, $ecasound_port.$index;
 

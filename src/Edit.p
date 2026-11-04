@@ -81,7 +81,7 @@ sub new {
 	#	rw			=> REC,                 # set by ->activate_bus
 		source_type => 'bus',
 		source_id 	=> 'bus',
-		width		=> 2,                     # default to stereo 
+		live_input_channels		=> 2,                     # default to stereo
 		group   	=> $self->host_track,     # i.e. sax
 		hide		=> 1,
 	); 
@@ -115,7 +115,7 @@ sub new {
 		rw			=> REC,
 		source_type => $host->source_type,
 		source_id	=> $host->source_id,
-		width 		=> ::channels($host_track_alias->wav_format),
+		live_input_channels 		=> $host_track_alias->file_channels,
 		group		=> $self->edit_root_name,  # i.e. sax-v5
 		hide		=> 1,
 	); 

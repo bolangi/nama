@@ -170,7 +170,7 @@ sub ports ($self) {
 	::IO::jack_multi_ports( $self->client,
 							$client_direction,
 							$self->target_channel,
-							$self->width, 
+							$self->channels,
 							try{$self->name} 
 	) if $self->client
 }
@@ -187,8 +187,12 @@ sub ecs_string ($self) {
 ## returns a signal format template (e.g. f32_le,N,48000)
 
 sub _format ($self) {
-	::signal_format($self->format_template, $self->width)
-		if $self->format_template and $self->width
+	::signal_format($self->format_template, $self->channels)
+		if $self->format_template and $self->channels
+}
+# Direction selects the count to use for device ports and format strings.
+sub _channels ($self) {
+    $self->direction eq 'input' ? $self->source_channels : $self->output_channels;
 }
 sub _format_template {} # the leading underscore allows override
                         # by a method without the underscore
@@ -226,28 +230,12 @@ sub AUTOLOAD {
 sub DESTROY {}
 
 sub _mono_to_stereo ($self) {
-	
-	# copy mono track to stereo if we have a pan control and a mono source
-
-	# Truth table
-	#REC status, Track width stereo: null
-	#REC status, Track width mono:   chcopy
-	#PLAY status, WAV width mono:   chcopy
-	#PLAY status, WAV width stereo: null
-	#Higher channel count (WAV or Track): null
-
-	my $status = $self->effective_rw();
-	my $copy   = "-chcopy:1,2";
-	my $nocopy = "";
-	my $is_mono_track = sub { $self->width == 1 };
-	my $is_mono_wav   = sub { ::channels($self->wav_format) == 1};
-	if  ( 
-			($self->track and $tn{$self->track}->pan_id)
-			and
-		  (	$status =~ /REC|MON/ and $is_mono_track->() 
-			or $status eq PLAY and $is_mono_wav->() )
-	)
-	{ $copy } else { $nocopy }
+    # A mono source with a pan control needs a second channel.
+    my $status = $self->effective_rw();
+    return '-chcopy:1,2'
+        if $self->track and $tn{$self->track}->pan_id
+            and $status =~ /REC|MON|PLAY/ and $self->source_channels == 1;
+    return '';
 }
 sub _playat_output ($track) {
 	my $adjustment = $track->timeline_adjustment;
@@ -397,6 +385,7 @@ sub device_id ($self) {
 	join(q[,],@modifiers);
 }
 sub _format { $::setup->{wav_info}->{$_[0]->full_path}->{format} };
+sub _source_channels ($self) { ::channels(::wav_format($self->full_path)) }
 sub ecs_extra { $_[0]->mono_to_stereo}
 sub client { 'system' if $jack->{jackd_running} } 
 sub ports { 'system:capture_1' }
@@ -532,7 +521,7 @@ sub rec_route {
 	return '' if ! $self->input_channel or $self->input_channel == 1; 
 	
 	my $first = $self->input_channel;
-	return '-chorder:' . join(',', $first .. $first + $self->width - 1);
+	return '-chorder:' . join(',', $first .. $first + $self->source_channels - 1);
 }
 }
 {
@@ -541,7 +530,7 @@ use v5.36;
 our $VERSION = 1.0;
 our @ISA = '::IO';
 sub device_id { $config->{devices}->{$config->{alsa_playback_device}}{ecasound_id} }
-sub ecs_extra {route($_[0]->width,$_[0]->output_channel) }
+sub ecs_extra {route($_[0]->output_channels,$_[0]->output_channel) }
 sub output_channel { $_[0]->send_id }
 sub route2 {
 	my ($from, $to, $width) = @_;

@@ -232,6 +232,13 @@ sub restore_state_from_file {
 
 	delete $_->{rw} for	@bus_data;
 
+    # Rename width before reconstructing saved track objects.
+    for my $track (@tracks_data) {
+        next unless exists $track->{width};
+        my $channels = delete $track->{width};
+        $track->{live_input_channels} //= $channels;
+    }
+
 	#######################################
 
 	# restore effects, no change to track objects needed

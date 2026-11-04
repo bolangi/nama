@@ -18,6 +18,17 @@ sub wav_format ($track) {
 	::wav_format($track->full_path)
 }
 
+# Inspect the selected playback version even when the track is armed to REC.
+sub file_channels ($track, $version = undef) {
+    $version //= $track->playback_version;
+    return unless defined $version;
+    my $filename = $track->targets->{$version};
+    return unless defined $filename;
+    my $format = ::wav_format(join_path($track->dir, $filename));
+    return unless defined $format;
+    ::channels($format);
+}
+
 	
 sub dir ($self) {
 	 $self->project  

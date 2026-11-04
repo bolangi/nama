@@ -157,10 +157,14 @@ sub set_io {
 				return unless ::prompt_yn(
 					"Do you want to continue setting this JACK IO target?", "no");
 			}
-			elsif ($width != $track->width){
+			else {
+                my $channels = $direction eq 'source'
+                    ? $track->live_input_channels : $track->output_channels;
+                if (defined $channels and $width != $channels) {
 				::notify(
-				"Track $name set to ", ::width($track->width),
+				"Track $name set to ", ::width($channels),
 				qq(, but JACK $direction "$id" is ), ::width($width), '.');
+                }
 			}
 		}
 		elsif( $type eq 'jack_ports_list' ){
@@ -278,7 +282,7 @@ sub source_status ($track) {
 	{
 		my $ch = $track->source_id;
 		my @channels;
-		push @channels, $_ for $ch .. ($ch + $track->width - 1);
+		push @channels, $_ for $ch .. ($ch + $track->live_input_channels - 1);
 		return 'CH '. join '/', @channels
 	}
 	"type: $track->{source_type} id: $track->{source_id}" 
@@ -301,7 +305,7 @@ sub destination ($track) {
 	my $send_type = $track->send_type;
 	return $out if ! $send_type;
 	$out .=	', ' if $out;
-	$out .= dest_string($send_type, $send_id, $track->width);
+	$out .= dest_string($send_type, $send_id, $track->output_channels);
 	$out
 }
 sub set_rec ($track) {
@@ -390,7 +394,6 @@ sub import_audio  {
 		::sleeper(0.2); 
 		sleep 1 while $this_engine->running();
 	} 
-	$track->set(width => $width);
 	::Waveform::generate_waveforms($destination);
 	::refresh_wav_cache() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
 }

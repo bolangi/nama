@@ -11,7 +11,7 @@ package ::;
 	my @relevant_track_fields = qw(
 		name
 		n
-		width
+		live_input_channels
 		group 
 		playat
 		region_start	

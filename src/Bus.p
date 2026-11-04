@@ -219,12 +219,12 @@ sub apply {
 		my @input_path = $_->input_path;
 		$::g->add_edge(@input_path);
 		$::g->set_edge_attributes( @input_path, 
-			{ width => $::tn{$_->target}->width });
+			{ source_channels => $::tn{$_->target}->source_channels });
 		my @edge = ($_->name, ::output_node($bus->send_type));
 		$::g->add_edge(@edge);
 		$::g->set_edge_attributes( @edge, { 
 			send_id => $bus->send_id,
-			width => 2 }); # force to stereo 
+			output_channels => 2 }); # force to stereo
 	} grep{ $_->input_path } $bus->track_o;
 }
 sub remove ($bus) {
@@ -251,7 +251,7 @@ sub apply {
 		 $g->set_edge_attributes( @edge, { 
 				send_type => $bus->send_type,
 				send_id => $bus->send_id,
-				width => 2})
+				output_channels => 2})
 	} $bus->track_o;
 }
 
@@ -329,7 +329,7 @@ sub add_bus {
 
 	$tn{$name} and ::notify( qq($name: setting as mix track for bus "$name"));
 
-	my $track = $tn{$name}// add_track($name, width => 2);
+	my $track = $tn{$name}// add_track($name, live_input_channels => 2);
 
 	$track->set( @args );
 }
@@ -366,7 +366,7 @@ sub add_submix {
 							rw => MON,
 							target => $_,
 							group  => $name,
-							width => 2,
+							live_input_channels => 2,
 							hide	=> 1,
 						)
    } $bn{Main}->tracks;
