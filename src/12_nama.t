@@ -122,7 +122,7 @@ my $yaml = q(---
   class: to_wav
   args:
     name: sax
-    width: 1
+    output_channels: 1
     full_path: /foo/.wav/sax_1.wav
   ecs_string: -f:s16_le,1,48000 -o:/foo/.wav/sax_1.wav
 -
@@ -152,28 +152,28 @@ my $yaml = q(---
 -
   class: from_soundcard
   args:
-    width: 1
+    source_channels: 1
     source_id: 2
     source_type: soundcard
   ecs_string: -i:jack_multi,system:capture_2
 -
   class: to_soundcard
   args:
-    width: 2
+    output_channels: 2
     send_id: 5
     send_type: soundcard
   ecs_string: -o:jack_multi,system:playback_5,system:playback_6
 -
   class: to_jack_port
   args:
-    width: 1
+    output_channels: 1
     port_name: sax
   ecs_string: -f:f32_le,1,48000 -o:jack,,sax_out
 -
   class: from_jack_port
   args:
     port_name: sax
-    width: 2
+    source_channels: 2
   ecs_string: -f:f32_le,2,48000 -i:jack,,sax_in
 -
   class: from_jack_client
@@ -190,14 +190,14 @@ my $yaml = q(---
 -
   class: to_jack_multi
   args:
-    width: 2
+    output_channels: 2
     send_id: system
     send_type: jack_multi
   ecs_string: -o:jack_multi,system:playback_1,system:playback_2
 -
   class: from_jack_multi
   args:
-    width: 2
+    source_channels: 2
     source_id: Horgand
     source_type: jack_client
   ecs_string: -i:jack_multi,Horgand:out_1,Horgand:out_2
