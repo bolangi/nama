@@ -302,8 +302,6 @@ sub setup_key_bindings {
 	'PageDown'  => sub { page_terminal_view(+1) },
 	'C-z'		=> \&suspend,
 	 user_hotkeys(),
-    F3 => sub { mark_play_start() },
-    F4 => sub { mark_edit_record() },
     Escape => sub {
         if (edit_marking_active()) { cancel_edit_marking() }
         else {
@@ -581,8 +579,6 @@ my $i = 0;
 sub process_keystrokes ($info) {
 	$i++;
 	my $str = $info->str;
-	if ($str eq 'F3') { mark_play_start(); return 1 }
-    if ($str eq 'F4') { mark_edit_record(); return 1 }
     if ($str eq 'Escape' and edit_marking_active()) {
         cancel_edit_marking(); return 1;
     }

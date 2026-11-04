@@ -124,6 +124,8 @@ alias:
 
 hotkeys:
   user:
+    F3: mark_play_start
+    F4: mark_edit_record
     F1: start_clip
     F2: end_clip
     F7: toggle_hotkeys
@@ -155,6 +157,8 @@ hotkeys:
     F9: set_jump_mode
     F10: set_bump_mode
   jump:
+    F3: mark_play_start
+    F4: mark_edit_record
     Insert: previous_track
     Delete: next_track
     Home: jump_to_start
@@ -180,6 +184,8 @@ hotkeys:
     F9: toggle_hotkeys
     F10: set_bump_mode
   bump:   
+    F3: mark_play_start
+    F4: mark_edit_record
     Insert: previous_track
     Delete: next_track
     Home: jump_to_start
