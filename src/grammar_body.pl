@@ -1424,6 +1424,10 @@ new_edit: _new_edit {
 	1;
 }
 set_edit_points: _set_edit_points { ::set_edit_points(); 1 }
+mark_play_start: _mark_play_start text(?) { ::mark_play_start($item[2][0]); 1 }
+mark_rec_start: _mark_rec_start { ::mark_rec_start(); 1 }
+mark_rec_end: _mark_rec_end { ::mark_rec_end(); 1 }
+cancel_edit_marking: _cancel_edit_marking { ::cancel_edit_marking(); 1 }
 list_edits: _list_edits { ::list_edits(); 1}
 
 destroy_edit: _destroy_edit { ::destroy_edit(); 1}

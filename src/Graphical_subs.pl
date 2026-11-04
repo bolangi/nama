@@ -135,6 +135,17 @@ sub init_gui {
 	# The 'all' bind tag also covers effect dialogs and other Toplevels.
 	$gui->{main_window}->bind('all', '<F1>' => \&tk_start_clip);
 	$gui->{main_window}->bind('all', '<F2>' => \&tk_end_clip);
+    $gui->{main_window}->bind('all', '<F3>' => sub {
+        mark_play_start() unless $gui->{prompt_dialog}; Tk->break;
+    });
+    $gui->{main_window}->bind('all', '<F4>' => sub {
+        mark_edit_record() unless $gui->{prompt_dialog}; Tk->break;
+    });
+    $gui->{main_window}->bind('all', '<Escape>' => sub {
+        if (edit_marking_active() and not $gui->{prompt_dialog}) {
+            cancel_edit_marking(); Tk->break;
+        }
+    });
 
 	### init effect window
 

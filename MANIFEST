@@ -102,3 +102,4 @@ lib/Audio/Nama/TkTickitBridge.pm
 LICENSES/Artistic-1.0-Perl.txt
 LICENSES/GPL-3.0.txt
 THIRD_PARTY_NOTICES
+t/22_edit_capture.t

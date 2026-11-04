@@ -1312,6 +1312,22 @@ set_edit_points:
   what: Mark play-start, record-start and record-end positions for the current edit.
   short: sep
   parameters: none
+mark_play_start:
+  type: edit
+  what: Mark playback start (F3), pausing to prompt for an optional edit name.
+  parameters: '[ <string:name> ]'
+mark_rec_start:
+  type: edit
+  what: Mark recording start (first F4).
+  parameters: none
+mark_rec_end:
+  type: edit
+  what: Mark recording end (second F4), stop transport and finish marking.
+  parameters: none
+cancel_edit_marking:
+  type: edit
+  what: Stop transport and offer to discard unfinished edit points (Esc).
+  parameters: none
 list_edits:
   type: edit
   what: List all edits for current track and version.

@@ -302,6 +302,15 @@ sub setup_key_bindings {
 	'PageDown'  => sub { page_terminal_view(+1) },
 	'C-z'		=> \&suspend,
 	 user_hotkeys(),
+    F3 => sub { mark_play_start() },
+    F4 => sub { mark_edit_record() },
+    Escape => sub {
+        if (edit_marking_active()) { cancel_edit_marking() }
+        else {
+            my %bindings = user_hotkeys();
+            $bindings{Escape}->() if $bindings{Escape};
+        }
+    },
 };
 
 	$entry->bind_keys( $text->{entry_bindings}->%*	); 
@@ -572,7 +581,12 @@ my $i = 0;
 sub process_keystrokes ($info) {
 	$i++;
 	my $str = $info->str;
-	my $hotkey_mode = $mode->{hotkeys};
+	if ($str eq 'F3') { mark_play_start(); return 1 }
+    if ($str eq 'F4') { mark_edit_record(); return 1 }
+    if ($str eq 'Escape' and edit_marking_active()) {
+        cancel_edit_marking(); return 1;
+    }
+    my $hotkey_mode = $mode->{hotkeys};
 	my $action = $config->{hotkeys}->{$hotkey_mode}->{$str};
 	if (defined $action){
 		no strict 'refs';

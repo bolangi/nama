@@ -21,6 +21,7 @@ use ::Object qw(
 				rec_end_mark_name
 				host_track
 				host_version
+				edit_label
 				fades
 				 );
 
@@ -34,6 +35,7 @@ sub initialize {
 sub next_n { ++$n }
 
 sub new {
+	local $::this_track = $::this_track;
 	my $class = shift;	
 	my %vals = @_;
 
@@ -46,6 +48,7 @@ sub new {
 			@_ 
 		}, $class;
 
+    $n = $self->n if $self->n > $n;
 	$by_name{ $self->edit_name } = $self;
 	$by_index{ $self->n } = $self;
 
@@ -72,7 +75,7 @@ sub new {
 
 	# (maybe it already exists)
 	
-	my $version_mix = ::Track->new(
+	my $version_mix = $::tn{$self->edit_root_name} // ::Track->new(
 
 		name 		=> $self->edit_root_name, # i.e. sax-v5
 	#	rw			=> REC,                 # set by ->activate_bus
@@ -95,7 +98,7 @@ sub new {
 	my $host_track_alias = $::tn{$self->host_alias} // 
 		::VersionTrack->new(
 			name 	=> $self->host_alias,
-			version => $host->playback_version, # static
+			version => $self->host_version, # static
 			target  => $host->name,
 			rw		=> PLAY,                  # do not REC
 			group   => $self->edit_root_name,  # i.e. sax-v5
@@ -112,6 +115,7 @@ sub new {
 		rw			=> REC,
 		source_type => $host->source_type,
 		source_id	=> $host->source_id,
+		width       => $host->width,
 		group		=> $self->edit_root_name,  # i.e. sax-v5
 		hide		=> 1,
 	); 
@@ -121,7 +125,7 @@ sub edit_root_name ($self) {
 	join '-', $self->host_track, 'v'.$self->host_version;
 }
 sub edit_name ($self) {
-	join '-', $self->edit_root_name, 'edit'.$self->n
+	join '-', $self->edit_root_name, ($self->edit_label // ('edit'.$self->n))
 }
 sub host_alias ($self) {
 	join '-', $self->edit_root_name, 'original'
@@ -248,93 +252,123 @@ our (
 );
 	
 
-sub detect_keystroke_p {
-	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub {
-		$text->{term_attribs}->{'callback_read_char'}->();
-		
-		abort_set_edit_points(), return
-			if $text->{term_attribs}->{line_buffer} eq "q"
-			or $text->{term_attribs}->{line_buffer} eq "Q";
+# Capture state is temporary; completed points remain available to new-edit.
+my ($edit_marking, $edit_prompt_active);
 
-		if (   $text->{term_attribs}->{line_buffer} eq "p"
-			or $text->{term_attribs}->{line_buffer} eq "P"){ get_edit_mark()}
-		else{ reset_input_line() }
-	});
-}
-
-sub reset_input_line {
-	$text->{term_attribs}->{line_buffer} = q();
-	$text->{term_attribs}->{point} 		= 0;
-	$text->{term_attribs}->{end}   		= 0;
-}
-
-
-{ my $p;
-  my @_edit_points; 
-  my @names = qw(dummy play-start rec-start rec-end);
+sub edit_marking_active { defined $edit_marking }
 
 sub initialize_edit_points {
-	$p = 0;
-    @_edit_points = ();
-}
-sub abort_set_edit_points {
-	::throw("...Aborting!");
-	reset_input_line();
-	ecasound_iam('stop');
-	initialize_edit_points();
-	detect_spacebar();
+    undef $edit_marking;
+    $setup->{edit_points} = [];
+    delete $setup->{edit_label};
+    delete $setup->{edit_host_track};
+    delete $setup->{edit_host_version};
 }
 
-sub get_edit_mark {
-	$p++;
-	if($p <= 3){  # record mark
-		my $pos = timeline_position_from_adjusted_time(
-			ecasound_iam('getpos')
-		);
-		push @_edit_points, $pos;
-		::notify(" got $names[$p] position ".d1($pos));
-		reset_input_line();
-		if( $p == 3){ complete_edit_points() }
-		else{
-		#$text->{term}->stuff_char(10);
-		#	$text->{term_attribs}->{'callback_read_char'}->();
-		}
-	}
-}
-sub complete_edit_points {
-	$setup->{edit_points}->@* = @_edit_points; # save to global
-	ecasound_iam('stop');
-	::notify("\nEngine is stopped\n");
-	detect_spacebar();
-	::terminal_print(prompt(), " ");
-}
-}
 sub set_edit_points {
-	$tn{$this_edit->edit_name}->set(rw => OFF) if defined $this_edit;
-	::throw("You must use a playback-only mode to setup edit marks. Aborting"), 
-		return 1 if ::ChainSetup::really_recording();
-	::throw("You need stop the engine first. Aborting"), 
-		return 1 if $this_engine->started();
-	::notify("Ready to set edit points!");
-	sleeper(0.2);
-	::notify(q(Press the "P" key three times to mark positions for:
-    + play-start
-    + record-start
-    + record-end
-
-Press "Q" to quit.
-
-Engine will start in 2 seconds.));
-	initialize_edit_points();
- 	$project->{events}->{set_edit_points} = timer(2, 0, 
-	sub {
-		reset_input_line();
-		detect_keystroke_p();
-		ecasound_iam('start');
-		::notify("\n\nEngine is running\n");
-		::terminal_print(prompt());
-	});
+    return if $edit_prompt_active;
+    return if ::ChainSetup::really_recording();
+    initialize_edit_points();
+    ::notify('F3: playback start and name; F4: record start, then record end; Esc: stop and offer to exit.');
 }
+
+sub mark_play_start ($name = undef) {
+    return if $edit_prompt_active;
+    if (::ChainSetup::really_recording()) {
+        ::throw('Use playback-only mode to mark edit points.');
+        return;
+    }
+    my $host = $this_track;
+    my $version = $host->playback_version;
+    unless (defined $version) {
+        ::throw('Select a track with a playback version first.');
+        return;
+    }
+    my $time = current_timeline_position();
+    my $running = $this_engine->started();
+    stop_transport();
+    set_timeline_position($time);
+    $edit_prompt_active = 1;
+    my $accept = sub ($label) {
+        if (defined $label and length $label) {
+            my $full_name = join '-', $host->name, 'v'.$version, $label;
+            unless (valid_track_name($label) and valid_track_name($full_name)) {
+                return 0;
+            }
+        }
+        $edit_prompt_active = 0;
+        if (defined $label) {
+            initialize_edit_points();
+            $edit_marking = [$host->name, $version];
+            $setup->{edit_host_track} = $host->name;
+            $setup->{edit_host_version} = $version;
+            $setup->{edit_label} = $label if length $label;
+            $setup->{edit_points} = [$time];
+            ::notify('Marked playback start at '.d1($time).'; F4 sets record start.');
+        }
+        start_transport() if $running;
+        return 1;
+    };
+    if (defined $name) {
+        $edit_prompt_active = 0 unless $accept->($name);
+        return;
+    }
+    my $ok = eval {
+        $ui->prompt_for_text('Edit name? ', sub ($label) {
+            $ui->prompt_for_text('Edit name? ', __SUB__) unless $accept->($label);
+        });
+        1;
+    };
+    unless ($ok) { $edit_prompt_active = 0; die $@ }
+}
+
+sub mark_edit_record_point ($index) {
+    return if $edit_prompt_active;
+    return if ::ChainSetup::really_recording();
+    unless ($edit_marking) {
+        ::throw('Set playback start with F3 first.');
+        return;
+    }
+    unless ($this_track->name eq $edit_marking->[0]
+            and $this_track->playback_version == $edit_marking->[1]) {
+        ::throw('Return to the track and version where edit marking started.');
+        return;
+    }
+    my $points = $setup->{edit_points};
+    unless (@$points >= $index) {
+        ::throw('Set record start first.');
+        return;
+    }
+    my $time = current_timeline_position();
+    unless ($index == 1 ? $time >= $points->[0] : $time > $points->[1]) {
+        ::throw('Edit points must satisfy playback start <= record start < record end.');
+        return;
+    }
+    splice @$points, $index;
+    $points->[$index] = $time;
+    if ($index == 2) {
+        stop_transport();
+        undef $edit_marking;
+        ::notify('Edit points complete. Use new-edit to create the edit.');
+    } else {
+        ::notify('Marked record start at '.d1($time).'; F4 sets record end.');
+    }
+}
+sub mark_rec_start { mark_edit_record_point(1) }
+sub mark_rec_end { mark_edit_record_point(2) }
+sub mark_edit_record { mark_edit_record_point(@{$setup->{edit_points} // []} >= 2 ? 2 : 1) }
+
+sub cancel_edit_marking {
+    return if $edit_prompt_active;
+    return unless edit_marking_active();
+    stop_transport();
+    $edit_prompt_active = 1;
+    $ui->prompt_yn('Exit edit-point capture?', 'no', sub ($yes) {
+        $edit_prompt_active = 0;
+        initialize_edit_points() if $yes;
+    });
+}
+
 sub transfer_edit_points {
 	::throw("Use 'set_edit_points' command to specify edit region"), return
 		 unless scalar $setup->{edit_points}->@*;
@@ -342,7 +376,7 @@ sub transfer_edit_points {
 	::Mark->new( name => $edit->play_start_name, time => $setup->{edit_points}->[0]);
 	::Mark->new( name => $edit->rec_start_name,  time => $setup->{edit_points}->[1]);
 	::Mark->new( name => $edit->rec_end_name,    time => $setup->{edit_points}->[2]);
-	$setup->{edit_points}->@* = ();
+	initialize_edit_points();
 }
 
 sub generate_edit_record_setup { # for current edit
@@ -360,40 +394,44 @@ sub new_edit {
 
 	# abort for many different reasons
 	
-	::throw("You must use 'set-edit-points' before creating a new edit. Aborting."),
-		return unless defined $setup->{edit_points};
-	my $overlap = grep { 
-		my $fail;
-		my $rst = $_->rec_start_time;
-		my $ret = $_->rec_end_time;
-		my $nst = $setup->{edit_points}->[1];
-		my $net = $setup->{edit_points}->[2];
-		my $rst1 = d1($rst);
-		my $ret1 = d1($ret);
-		my $nst1 = d1($nst);
-		my $net1 = d1($net);
-		::throw("New rec-start time $nst1 conflicts with Edit ",
-			$_->n, ": $rst1 < $nst1 < $ret1"), $fail++
-			if $rst < $nst and $nst < $ret;
-		::throw("New rec-end time $net1 conflicts with Edit ",
-			$_->n, ": $rst1 < $net1 < $ret1"), $fail++
-			if $rst < $net and $net < $ret;
-		::throw("New rec interval $nst1 - $net1 conflicts with Edit ",
-			$_->n, ": $rst1 - $ret1"), $fail++
-			if $nst < $rst and $ret < $net;
-		$fail
-	} grep{ $_->host_track eq $this_track->name} 
-		values %Audio::Nama::Edit::by_name;
-	::throw("Aborting."), return if $overlap;
-	my $name = $this_track->name;
-	my $editre = qr($name-v\d+-edit\d+);
-	::throw("$name: editing of edits is not currently allowed."),
-		return if $name =~ /-v\d+-edit\d+/;
-	::throw("$name: must be in PLAY mode.
-Edits will be applied against current version"), 
-		return unless $this_track->candidate_play
-			or $this_track->candidate_rec and
-			grep{ /$editre/ } keys %::Track::by_name;
+    my $points = $setup->{edit_points};
+    unless (ref $points eq 'ARRAY' and @$points == 3
+            and not grep { not defined $_ } @$points) {
+        ::throw('Mark playback start, record start and record end before new-edit.');
+        return;
+    }
+    unless ($points->[0] <= $points->[1] and $points->[1] < $points->[2]) {
+        ::throw('Edit points must satisfy playback start <= record start < record end.');
+        return;
+    }
+    my $name = $this_track->name;
+    my $version = $this_track->playback_version;
+    if (defined $setup->{edit_host_track}
+            and ($name ne $setup->{edit_host_track}
+                or $version != $setup->{edit_host_version})) {
+        ::throw('These edit points belong to another track or version.');
+        return;
+    }
+    my @existing = values %::Edit::by_index;
+    if (grep { $_->edit_name eq $name } @existing) {
+        ::throw("$name: editing of edits is not currently allowed.");
+        return;
+    }
+    unless ($this_track->candidate_play
+            or ($this_track->candidate_rec and grep { $_->host_track eq $name } @existing)) {
+        ::throw("$name: must be in PLAY mode. Edits apply to the current version.");
+        return;
+    }
+    for my $old (@existing) {
+        next unless $old->host_track eq $name and $old->host_version == $version;
+        if ($points->[1] < $old->rec_end_time and $old->rec_start_time < $points->[2]) {
+            ::throw('Recording interval overlaps edit '.$old->n.'.');
+            return;
+        }
+    }
+    my $label = $setup->{edit_label};
+    my $track_name = join '-', $name, 'v'.$version, ($label // ('edit'.($::Edit::n + 1)));
+    return unless valid_track_name($track_name);
 
 	# create edit
 	
@@ -402,6 +440,7 @@ Edits will be applied against current version"),
 	my $edit = ::Edit->new(
 		host_track 		=> $this_track->name,
 		host_version	=> $v,
+        (defined $label ? (edit_label => $label) : ()),
 	);
 	$this_track->current_edit->{$v} = $edit->n;
 	$this_edit = $edit;
@@ -432,7 +471,7 @@ Edits will be applied against current version"),
 sub edit_action {
 	my $action = shift;
 	defined $this_edit or ::throw("Please select an edit and try again."), return;
-	set_edit_mode();
+	return unless set_edit_mode();
 	$this_edit->host_alias_track->set(rw => PLAY); # all 
 	$edit_actions{$action}->();
 	request_setup();
@@ -460,17 +499,13 @@ sub end_edit_mode  	{
 	request_setup();
 }
 sub destroy_edit {
-	::throw("no edit selected"), return unless $this_edit;
-	my $reply;
-   	#	= $text->{term}->readline('destroy edit "'.$this_edit->edit_name.
-	# qq(" and all its WAV files?? [n] ));
-	if ( $reply =~ /y/i ){
-		::notify("permanently removing edit");
-		$this_edit->destroy;
-	}
-	#$text->{term}->remove_history($text->{term}->where_history);
-	$this_track = $this_edit->host;
-	end_edit_mode();
+    ::throw('No edit selected'), return unless $this_edit;
+    my $edit = $this_edit;
+    $ui->prompt_yn('Destroy edit "'.$edit->edit_name.'" and its audio files?', 'no', sub ($yes) {
+        return unless $yes;
+        $edit->destroy;
+        end_edit_mode() if defined $this_edit and $this_edit == $edit;
+    });
 }
 sub set_edit_mode {
 	return unless edit_mode_conditions();
@@ -479,6 +514,7 @@ sub set_edit_mode {
 		timeline_play_start => $this_edit->play_start_time,
 		timeline_play_end => $this_edit->play_end_time,
 	};
+    return 1;
 }
 sub edit_mode {
 	timeline_adjustment_type() eq 'edit' and defined $this_edit
@@ -689,14 +725,12 @@ sub merge_edits {
 
 	# create merge message
 	my $v = $edit->host_version;
-	my %edits = 
-		map{ my ($edit) = $tn{$_}->name =~ /edit(\d+)$/;
-			 my $ver  = $tn{$_}->playback_version;
-			 $edit => $ver
-		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->candidate_play }
-		$edit->version_bus->tracks; 
-	my $msg = "merges ".$edit->host_track."_$v.wav w/edits ".
-		join " ",map{$_."v$edits{$_}"} sort{$a<=>$b} keys %edits;
+    my @edits = sort { $a->n <=> $b->n }
+        grep { $_->host_track eq $edit->host_track
+            and $_->host_version == $v and $_->edit_track->candidate_play }
+        values %::Edit::by_index;
+    my $msg = 'merges '.$edit->host_track."_$v.wav w/edits ".
+        join ' ', map { $_->edit_name.' v'.$_->edit_track->playback_version } @edits;
 	# merges mic_1.wav w/mic-v1-edits 1_2 2_1 
 	
 	::notify($msg);
