@@ -236,7 +236,7 @@ sub restore_state_from_file {
     for my $track (@tracks_data) {
         next unless exists $track->{width};
         my $channels = delete $track->{width};
-        $track->{live_input_channels} //= $channels;
+        $track->{input_channels} //= $channels;
     }
 
 	#######################################

@@ -329,7 +329,7 @@ sub add_bus {
 
 	$tn{$name} and ::notify( qq($name: setting as mix track for bus "$name"));
 
-	my $track = $tn{$name}// add_track($name, live_input_channels => 2);
+	my $track = $tn{$name}// add_track($name, input_channels => 2);
 
 	$track->set( @args );
 }
@@ -366,7 +366,7 @@ sub add_submix {
 							rw => MON,
 							target => $_,
 							group  => $name,
-							live_input_channels => 2,
+							input_channels => 2,
 							hide	=> 1,
 						)
    } $bn{Main}->tracks;

@@ -231,7 +231,7 @@ sub generate_setup_try {
 	# Mix tracks to mono if Main is mono
 	# (instead of just throwing away right channel)
 
-	if ($g->has_vertex('Main') and $tn{Main}->live_input_channels == 1)
+	if ($g->has_vertex('Main') and $tn{Main}->input_channels == 1)
 	{
 		$g->set_vertex_attribute('Main', 'ecs_extra' => '-chmix:1')
 	}

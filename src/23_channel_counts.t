@@ -22,7 +22,7 @@ sub install ($package, $code) {
 }
 package ChannelTestTrack {
     sub candidate_play ($s) { $s->{rw} eq 'PLAY' }
-    sub live_input_channels ($s) { $s->{live_input_channels} }
+    sub input_channels ($s) { $s->{input_channels} }
     sub playback_version ($s) { $s->{version} }
     sub targets ($s) { $s->{targets} }
     sub dir { '/audio' }
@@ -33,11 +33,11 @@ my ($track_methods) = $track_source =~ /(sub source_channels .*?)(?=sub snapshot
 install('ChannelTestTrack', $track_methods);
 my ($file_method) = module_source('Wav') =~ /(sub file_channels .*?)(?=sub dir)/s;
 install('ChannelTestTrack', 'sub join_path { main::join_path(@_) } '.$file_method);
-my $track = bless {rw => 'PLAY', version => 2, live_input_channels => 1,
+my $track = bless {rw => 'PLAY', version => 2, input_channels => 1,
     targets => {1 => 'piano_1.wav', 2 => 'piano_2.wav'}}, 'ChannelTestTrack';
 $formats{'/audio/piano_1.wav'} = 's16_le,1,48000';
 $formats{'/audio/piano_2.wav'} = 's16_le,2,48000';
-is($track->live_input_channels,1,'live setting stays independent of file channels');
+is($track->input_channels,1,'live setting stays independent of file channels');
 is($track->file_channels,2,'file count comes from selected version');
 is($track->file_channels(1),1,'explicit version can be inspected');
 is($track->source_channels,2,'PLAY uses file count');
@@ -46,7 +46,7 @@ $track->{rw}='REC';
 is($track->source_channels,1,'REC uses live input count');
 is($track->file_channels,2,'file inspection still uses playback version when armed');
 is($track->output_channels,1,'REC output initially copies live source');
-$track->{live_input_channels}=4; $track->{rw}='MON';
+$track->{input_channels}=4; $track->{rw}='MON';
 is($track->source_channels,4,'MON uses live input count');
 $track->{version}=99;
 ok(!defined $track->file_channels,'missing version has no invented file channel count');
@@ -81,18 +81,18 @@ install('ChannelTestIO::to_alsa',$output_route);
 is(ChannelTestIO::to_alsa::route(2,3),' -chorder:0,0,1,2','ALSA output routes the supplied output count');
 # Use only the current restore-time migration clause; no historical code.
 my ($migration) = module_source('Persistence') =~ /####### Backward Compatibility ########(.*?)#######################################/s;
-@tracks_data=({width=>2},{width=>1,live_input_channels=>6},{live_input_channels=>4});
+@tracks_data=({width=>2},{width=>1,input_channels=>6},{input_channels=>4});
 @bus_data=(); eval $migration; die $@ if $@;
-is_deeply(\@tracks_data,[{live_input_channels=>2},{live_input_channels=>6},{live_input_channels=>4}],
+is_deeply(\@tracks_data,[{input_channels=>2},{input_channels=>6},{input_channels=>4}],
     'restore converts old width, removes it, and preserves any newer setting');
 eval $migration; die $@ if $@;
-is($tracks_data[0]{live_input_channels},2,'migration is idempotent');
+is($tracks_data[0]{input_channels},2,'migration is idempotent');
 ok(!exists $tracks_data[0]{width},'future saved state has no old width field');
 # Slave and cache receiver counts follow their source, not their own defaults.
 my ($slave_source) = $track_source =~ /(sub source_channels \{ \$tn\{\$_\[0\]->target\}->source_channels \})/;
 install('ChannelTestSlave', 'our %tn; *tn = \%main::tn; sub target { $_[0]->{target} } '.$slave_source);
 $track->{rw}='PLAY';
-my $slave=bless {target=>'piano',live_input_channels=>8},'ChannelTestSlave';
+my $slave=bless {target=>'piano',input_channels=>8},'ChannelTestSlave';
 is($slave->source_channels,2,'slave gets source count from its target');
 # The production cache routine must remember file channels before forcing REC.
 our ($this_track, $g, $cache_args);
@@ -127,7 +127,7 @@ my ($cache_routine)=$cache =~ /(sub cache_track \{.*?)(?=sub cachable)/s;
 my ($cache_graph)=$cache =~ /(sub generate_cache_track_graph \{.*?)(?=sub process_cache_graph)/s;
 install('main', 'our ($this_track, $g, $config, %tn); use constant { MON => "MON", PLAY => "PLAY", OFF => "OFF", REC => "REC" }; '.$cache_routine.$cache_graph);
 $tn{Main}=bless {rw=>'MON'},'ChannelTestTrack';
-$track->{live_input_channels}=1;
+$track->{input_channels}=1;
 $config->{cache_to_disk_format}='s16_le,N,48000';
 cache_track($track);
 is($cache_args->{output_channels},2,'caching remembers stereo file count before arming REC');

@@ -7,7 +7,7 @@
 					rw				# REC/MON/OFF setting
 					version         # version setting
 					midi_versions		# used for Midi
-					live_input_channels # configured live capture channel count
+					input_channels # capture channel count
 
 					ops 			# effect operators list
 					vol				# vol control operator

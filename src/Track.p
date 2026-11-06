@@ -85,7 +85,7 @@ sub new {
 					group	=> 'Main', 
 					n    	=> $n,
 					ops     => [],
-					live_input_channels => 1,
+					input_channels => 1,
 					vol  	=> undef,
 					pan 	=> undef,
 					rw		=> 'MON',
@@ -118,7 +118,7 @@ sub new {
 # Counts at the chain boundary. Operator/graph propagation will refine output
 # counts later; for now output_channels deliberately equals source_channels.
 sub source_channels ($track) {
-    $track->candidate_play ? $track->file_channels : $track->live_input_channels;
+    $track->candidate_play ? $track->file_channels : $track->input_channels;
 }
 sub output_channels ($track) { $track->source_channels }
 
@@ -300,7 +300,7 @@ sub destination ($track) {
 }
 sub source_status { $tn{$_[0]->target}->source_status }
 sub candidate_rw { $_[0]->{rw} }
-sub live_input_channels { $_[0]->{live_input_channels} }
+sub input_channels { $_[0]->{input_channels} }
 }
 {
 package ::SlaveTrack;
@@ -309,7 +309,7 @@ use v5.36;
 our $VERSION = 1.0;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub live_input_channels { $tn{$_[0]->target}->live_input_channels }
+sub input_channels { $tn{$_[0]->target}->input_channels }
 sub source_channels { $tn{$_[0]->target}->source_channels }
 sub candidate_rw { $tn{$_[0]->target}->candidate_rw }
 sub full_path { $tn{$_[0]->target}->full_path} 

@@ -85,7 +85,7 @@ sub add_track_alias {
 	my $target; 
 	if 		( $tn{$track} ){ $target = $track }
 	elsif	( $ti{$track} ){ $target = $ti{$track}->name }
-	add_track(  $name, target => $target, live_input_channels => $tn{$target}->live_input_channels);
+	add_track(  $name, target => $target, input_channels => $tn{$target}->input_channels);
 }
 # create read-only track pointing at WAV files of specified
 # track name in a different project

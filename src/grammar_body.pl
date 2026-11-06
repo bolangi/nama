@@ -530,7 +530,7 @@ show_track: _show_track {
 	$output .= ::show_send();
 	$output .= ::show_bus();
 	$output .= ::show_modifiers();
-	$output .= join "", "Live input channels: ", ::width($::this_track->live_input_channels), "\n";
+	$output .= join "", "Live input channels: ", ::width($::this_track->input_channels), "\n";
 	$output .= ::show_inserts();
 	$output .= ::show_effects();
 	::pager( $output );
@@ -589,12 +589,12 @@ remove_send: _remove_send {
 					$::this_track->set(send_id => undef); 1
 }
 stereo: _stereo { 
-	$::this_track->set(live_input_channels => 2);
+	$::this_track->set(input_channels => 2);
 	::notify($::this_track->name, ": setting to stereo\n");
 	1;
 }
 mono: _mono { 
-	$::this_track->set(live_input_channels => 1);
+	$::this_track->set(input_channels => 1);
 	::notify($::this_track->name, ": setting to mono\n");
 	1; }
 

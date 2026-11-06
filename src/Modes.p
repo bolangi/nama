@@ -102,7 +102,7 @@ sub add_mastering_tracks {
 		name 		=> 'Boost', 
 		rw 			=> MON,
 		group 		=> 'Mastering', 
-		live_input_channels		=> 2,
+		input_channels		=> 2,
 		source_type => undef,
 		source_id	=> undef,
 	);

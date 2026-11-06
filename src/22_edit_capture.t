@@ -102,7 +102,7 @@ package EditTestTrack {
  sub activate_bus { }
  sub source_type { 'soundcard' }
  sub source_id { 1 }
- sub live_input_channels { 1 }
+ sub input_channels { 1 }
  sub file_channels { 2 }
 }
 package Track {
@@ -118,7 +118,7 @@ reset_case(); $tn{sax}=$this_track;
 my $host=$this_track;
 my $first=Edit->new(host_track=>'sax',host_version=>5,edit_label=>'phrase');
 is($this_track,$host,'actual constructor restores caller selection');
-is($tn{'sax-v5-phrase'}{live_input_channels},2,'edit inherits file channels despite mono live input setting');
+is($tn{'sax-v5-phrase'}{input_channels},2,'edit inherits file channels despite mono live input setting');
 my $mixer=$tn{'sax-v5'};
 my $second=Edit->new(host_track=>'sax',host_version=>5);
 is($tn{'sax-v5'},$mixer,'second edit reuses existing version mixer');

@@ -159,7 +159,7 @@ sub set_io {
 			}
 			else {
                 my $channels = $direction eq 'source'
-                    ? $track->live_input_channels : $track->output_channels;
+                    ? $track->input_channels : $track->output_channels;
                 if (defined $channels and $width != $channels) {
 				::notify(
 				"Track $name set to ", ::width($channels),
@@ -282,7 +282,7 @@ sub source_status ($track) {
 	{
 		my $ch = $track->source_id;
 		my @channels;
-		push @channels, $_ for $ch .. ($ch + $track->live_input_channels - 1);
+		push @channels, $_ for $ch .. ($ch + $track->input_channels - 1);
 		return 'CH '. join '/', @channels
 	}
 	"type: $track->{source_type} id: $track->{source_id}" 

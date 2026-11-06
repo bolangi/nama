@@ -15,7 +15,7 @@
 add-tracks pre1 pre2 woofer center rear mid tweeter
 for        pre1 pre2 woofer center rear mid tweeter; move-to-bus Aux
 
-pre1 set-track live_input_channels 5 
+pre1 set-track input_channels 5 
 
 for pre2 woofer center rear; source track pre1
 
