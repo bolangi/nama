@@ -69,16 +69,18 @@ mixdown_encodings: mp3 ogg
 
 volume_control_operator: ea   # set to 'ea' for setting as percent, 'eadb' for setting dB
 
-sample_rate: frequency
+sample_rate: frequency # default value, can be changed with set-sample-rate command
 
 realtime_profile: nonrealtime # other choices: realtime or auto
 
 # Use the realtime buffer profile for edit playback so short crossfades
 # receive sufficiently frequent envelope updates.
+
 edit_realtime: 1
 
 # Nama-driven ramps target fade_resolution updates per second, bounded by
 # these minimum and maximum operation counts.
+
 fade_resolution: 100
 fade_minimum_steps: 5
 fade_maximum_steps: 20
