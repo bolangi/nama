@@ -99,7 +99,7 @@ sub new_clip {
 		or die("$track: track not found."); 
 	my %region_args = (
 		region_start => $markpair && $markpair->[0]->name || $track->region_start,
-		region_end	 => $markpair && $markpair->[1]->name || $track->region_end
+		region_end	 => $markpair ? ($markpair->[1] ? $markpair->[1]->name : 'END') : $track->region_end
 	);
 	my $clip = ::Clip->new(
 		target => $track->basename,
@@ -142,6 +142,7 @@ sub new_sequence {
 	my @tracks = defined $args{tracks} ? $args{tracks}->@* : ();
 	my $group = $args{group} || 'Main';
 	my $mix_track = $tn{$name} || add_track($name, group => $group);
+	return unless $mix_track;
 	$mix_track->set( rw => MON,
 					 source_type => 'bus',
 					 source_id	 => $name,
@@ -160,7 +161,7 @@ sub compose_sequence {
 	logpkg('debug',"sequence_name: $sequence_name, track:", $track->name, 
 			", markpairs: ",::Dumper $markpairs);
 
-	my $sequence = new_sequence( name => $sequence_name);
+	my $sequence = new_sequence( name => $sequence_name) or return;
 	logpkg('debug',"sequence\n",::Dumper $sequence);
 	my @clips = map { 
 		$sequence->new_clip($track, region => $_) 
@@ -178,7 +179,7 @@ sub clip_source ($track) {
 sub clip_definitions ($track) {
 	my $source = clip_source($track);
 	unless (defined $source and -f $source) {
-		notify('Select a track with an audio file.');
+		throw('Select a track with an audio file.');
 		return;
 	}
 	my (%starts, %ends);
@@ -187,18 +188,18 @@ sub clip_definitions ($track) {
 		my $index = $mark->clip_index;
 		my $set = $mark->clip_start ? \%starts : \%ends;
 		if (exists $set->{$index}) {
-			notify("Duplicate endpoint for Clip $index. No action taken.");
+			throw("Duplicate endpoint for Clip $index. No action taken.");
 			return;
 		}
 		$set->{$index} = $mark;
 	}
 	unless (keys %starts) {
-		notify('No clips defined. No action taken.');
+		throw('No clips defined. No action taken.');
 		return;
 	}
 	for my $index (keys %ends) {
 		unless ($starts{$index}) {
-			notify("No start mark for Clip $index. No action taken.");
+			throw("No start mark for Clip $index. No action taken.");
 			return;
 		}
 	}
@@ -211,7 +212,7 @@ sub clip_definitions ($track) {
 		my $endpoint = $end ? $end->time : $length;
 		unless (defined $length and $start->time >= 0
 			and $endpoint > $start->time and $endpoint <= $length) {
-			notify("Invalid boundaries for $name. No action taken.");
+			throw("Invalid boundaries for $name. No action taken.");
 			return;
 		}
 		push @clips, { name => $name, start => $start, end => $end };
@@ -220,7 +221,7 @@ sub clip_definitions ($track) {
 		next if $clip->{end};
 		my $label = ucfirst $clip->{name};
 		unless (prompt_yn("No end mark for $label. Use end of audio file?", 'no')) {
-			notify('No action taken.');
+			throw('No action taken.');
 			return;
 		}
 	}
@@ -228,7 +229,7 @@ sub clip_definitions ($track) {
 }
 
 sub separate_clips {
-	my $track = $this_track or return;
+	my $track = $this_track or do { throw('Select a track with an audio file.'); return };
 
 	# in future put clips from 
 	# track 'lecture' into Bus 'lecture-clips'
@@ -241,12 +242,12 @@ sub separate_clips {
 		return;
 	}
 	for my $clip (@$clips) {
-		if ($tn{$clip->{name}}) {
-			throw("$clip->{name}: track name already in use. No action taken.");
-			return;
-		}
+		return unless valid_track_name($clip->{name});
 	}
 
+	return unless confirm_clip_source($track,
+		"Create separate clip tracks from source track '" . $track->name . "'?");
+	my @outputs;
 	# add_bus($bus_name);
 	for my $clip (@$clips) {
 		my %arg = ( rw => PLAY,
@@ -259,61 +260,75 @@ sub separate_clips {
 					);
 		defined $track->project and $arg{project} = $track->project;
 
-		add_track($clip->{name}, %arg)
+		my $output = add_track($clip->{name}, %arg) or return;
+		push @outputs, $output->name;
 	}
 	$track->set(rw => OFF);
-	request_setup();
+	$project->{clip_output_tracks} = \@outputs;
 }
 
-sub join_clips {
-
-
+sub confirm_clip_source ($track, $message) {
+	my @users = user_tracks();
+	return 1 if @users == 1 and $users[0] == $track;
+	prompt_yn($message, 'no')
 }
 
-sub write_clips {
-	my $track = $this_track or return;
+sub join_clips ($name) {
+	my $track = $this_track or do { throw('Select a track with an audio file.'); return };
 	my $clips = clip_definitions($track) or return;
-	my $source = clip_source($track);
-	my $length = wav_length($source);
-	my $format = wav_format($source);
-	my @exports;
-	for my $clip (@$clips) {
-		my $name = $clip->{name};
-		if ($name =~ m{[/\\\x00]}) {
-			notify("$name: invalid WAV filename. No action taken.");
-			return;
-		}
-		my $output = join_path(this_wav_dir(), "$name.wav");
-		if ($output eq $source) {
-			notify('Cannot overwrite the source audio. No action taken.');
-			return;
-		}
-		push @exports, [$clip, $output];
+	return unless valid_track_name($name);
+	if ($bn{$name}) {
+		throw("$name: bus name already in use. No action taken.");
+		return;
 	}
-	for my $export (@exports) {
-		my ($clip, $output) = @$export;
-		my $start = $clip->{start}->time;
-		my $end = $clip->{end} ? $clip->{end}->time : $length;
-		require File::Temp;
-		my ($fh, $temporary) = File::Temp::tempfile('clip-XXXXXX',
-			DIR => this_wav_dir(), SUFFIX => '.wav', UNLINK => 0);
-		close $fh;
-		my $status = system('ecasound', '-q', '-b:1024',
-			'-i:select,' . $start . ',' . ($end - $start) . ',' . $source,
-			"-f:$format", "-o:$temporary");
-		if ($status != 0 or ! -s $temporary) {
-			unlink $temporary;
-			notify("Failed to write $output.");
-			return;
-		}
-		unless (rename $temporary, $output) {
-			my $error = $!;
-			unlink $temporary;
-			notify("Cannot replace $output: $error");
-			return;
-		}
-		notify("Wrote $output");
-	}
+	return unless confirm_clip_source($track,
+		"Create track '$name' joining clips from source track '" . $track->name . "'?");
+	my @pairs = map { [$_->{start}, $_->{end}] } @$clips;
+	my $sequence = compose_sequence($name, $track, \@pairs) or return;
+	$track->set(rw => OFF);
+	$project->{clip_output_tracks} = [$name];
+	return $sequence;
 }
+
+# Render the last set of clip outputs, independent of the current selection.
+sub write_clips {
+	my @names = ($project->{clip_output_tracks} // [])->@*;
+	unless (@names) {
+		throw('No clip output tracks. Use separate-clips or join-clips first.');
+		return;
+	}
+	if ($this_engine->started or $setup->{cache_track_args}) {
+		throw('Stop the transport before rendering clips.');
+		return;
+	}
+	for my $name (@names) {
+		unless ($tn{$name} and not $tn{$name}->candidate_off) {
+			throw("$name: clip output track is missing or OFF. No action taken.");
+			return;
+		}
+	}
+	my @formats = split ' ', ($config->{mixdown_encodings} // '');
+	my $encoders = encoding_plan(@formats) or return;
+	my $message = "Render clip tracks: " . join(', ', @names) . "?";
+	$message .= " Encode as: " . join(', ', @formats) . '.' if @formats;
+	return unless prompt_yn($message, 'no');
+	return render_next_clip(\@names, $encoders);
+}
+
+# Each completion starts at most one more render on the same Ecasound engine.
+sub render_next_clip ($names, $encoders) {
+	unless (@$names) {
+		notify('Finished rendering clips.');
+		return 1;
+	}
+	my $name = shift @$names;
+	my $track = $tn{$name};
+	return cache_track($track, 0, sub ($wav) {
+		my $basename = $name . '_' . $track->playback_version;
+		return unless encode_audio_file($wav, $basename, $encoders);
+		render_next_clip($names, $encoders);
+	});
+}
+
 1
 __END__

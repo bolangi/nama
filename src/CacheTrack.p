@@ -17,12 +17,13 @@ use ::Util qw(timer start_event stop_event);
 # output_channels - captured before temporarily changing track status to REC
 # orig_volume
 # orig_pan
+# on_complete - optional callback receiving the completed WAV path
 # bus - we are caching a bus
 
 sub cache_track { # launch subparts if conditions are met
 	logsub((caller(0))[3]);
 	my $args = {}; # to pass params to routines involved in caching
-	(my $track, $args->{additional_time}) = @_;
+	(my $track, $args->{additional_time}, $args->{on_complete}) = @_;
 
 	my $bus = $track->is_mixer;
 	my $obj; # track or bus
@@ -48,7 +49,13 @@ sub cache_track { # launch subparts if conditions are met
 	$tn{Main}->set( rw => OFF);
 	$track->set( rw => REC);	
 
-	my @to_cache = cachable($track) or throw("Nothing to cache, skipping."), return;
+	my @to_cache = cachable($track);
+	unless (@to_cache) {
+		$track->set(rw => $args->{track_rw});
+		$tn{Main}->set(rw => $args->{main_rw});
+		throw("Nothing to cache, skipping.");
+		return;
+	}
 
 	$obj = $bus ? 'bus' : 'track';
 	::notify("$name: Preparing to cache $obj with ",join ', ',@to_cache);
@@ -62,12 +69,19 @@ sub cache_track { # launch subparts if conditions are met
 	{ 
 		::notify("generated graph");
 		deactivate_vol_pan($args);
-		cache_engine_run($args);
+		my $started = cache_engine_run($args);
 		reactivate_vol_pan($args);
+		unless ($started) {
+			$track->set(rw => $args->{track_rw});
+			$tn{Main}->set(rw => $args->{main_rw});
+			return;
+		}
 		return $args->{output_wav}
 	}
 	else
 	{ 
+		$track->set(rw => $args->{track_rw});
+		$tn{Main}->set(rw => $args->{main_rw});
 		throw("Empty routing graph. Aborting."); 
 		return;
 	}
@@ -107,9 +121,11 @@ sub generate_cache_bus_graph {
 	$g->set_vertex_attributes(
 		$track->name, 
 		{ format => signal_format($config->{cache_to_disk_format},$args->{output_channels}),
-			version => ($args->{track_result_version}),
+			version => $args->{cached_version},
 		}
 	); 
+	$args->{output_wav} = join_path($track->dir, $track->name . "_$args->{cached_version}.wav");
+	$g->set_vertex_attribute($track->name, full_path => $args->{output_wav});
 }
 
 sub generate_cache_track_graph {
@@ -137,7 +153,7 @@ sub generate_cache_track_graph {
 
 	# save the output file name to return later
 	
-	$args->{output_wav} = $cooked->current_wav;
+	$args->{output_wav} = join_path($args->{track}->dir, $cooked->current_wav);
 
 	# set WAV output format
 	
@@ -146,7 +162,7 @@ sub generate_cache_track_graph {
 	$g->set_vertex_attributes(
 		$cooked->name, 
 		{ format => signal_format($config->{cache_to_disk_format},$args->{output_channels}),
-			full_version => $to_path,
+			full_path => $to_path,
 		}
 	); 
 		# set the input path
@@ -200,20 +216,26 @@ sub cache_engine_run {
 
 	# ensure that engine stops at completion time
 	$setup->{cache_track_args} = $args;
- 	start_event(poll_engine => timer(1, 0.5, \&poll_progress));
+	start_event(poll_engine => timer(1, 0.5, \&poll_progress));
+	return 1;
 }
 sub complete_caching {
 	logsub((caller(0))[3]);
-	my $args = shift;	
-	my $name = $args->{track}->name;
-	my @files = grep{/$name/} new_files_were_recorded();
-	if (@files ){ 
-		
-		update_cache_map($args);	
-		caching_cleanup($args);
-
-	} else { throw("track cache operation failed!") }
+	my $args = shift;
+	my @files = grep { $_ eq $args->{output_wav} } new_files_were_recorded();
+	unless (@files) {
+		undef $setup->{cache_track_args};
+		$args->{track}->set(rw => $args->{track_rw});
+		$tn{Main}->set(rw => $args->{main_rw});
+		throw("track cache operation failed!");
+		return;
+	}
+	update_cache_map($args);
+	caching_cleanup($args);
+	# Release the old operation before its callback can start another one.
 	undef $setup->{cache_track_args};
+	$args->{on_complete}->($args->{output_wav}) if $args->{on_complete};
+	return 1;
 }
 sub update_cache_map {
 	logsub((caller(0))[3]);
@@ -287,7 +309,7 @@ sub caching_cleanup {
 		$ui->refresh();
 }
 sub poll_progress {
-	my $args = $setup->{cache_track_args};
+	my $args = $setup->{cache_track_args} or return;
 	::terminal_print(".");
 	my $status = ecasound_iam('engine-status'); 
 	my $here   = ecasound_iam("getpos");
@@ -298,6 +320,18 @@ sub poll_progress {
 	return unless 
 		   $status =~ /finished|error|stopped/ 
 		or $here > $args->{processing_time};
+
+	ecasound_iam("stop") if $status eq "running";
+	ecasound_iam("cs-disconnect"); # close and flush the output before encoding
+	if ($status =~ /error|stopped/) {
+		stop_event('poll_engine');
+		$ui->reset_engine_mode_color_display();
+		undef $setup->{cache_track_args};
+		$args->{track}->set(rw => $args->{track_rw});
+		$tn{Main}->set(rw => $args->{main_rw});
+		throw("Cache rendering did not finish; skipping encoding.");
+		return;
+	}
 
 	::notify("Done.");
 	logpkg('debug', engine_status(current_position()));
