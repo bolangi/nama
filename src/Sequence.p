@@ -237,12 +237,12 @@ sub separate_clips {
 	my $clips = clip_definitions($track) or return;
 	my $width = ::Util::channels(wav_format(clip_source($track)));
 	unless (defined $width and $width =~ /\A[1-9][0-9]*\z/) {
-		notify('Cannot detect source channel count. No action taken.');
+		throw('Cannot detect source channel count. No action taken.');
 		return;
 	}
 	for my $clip (@$clips) {
 		if ($tn{$clip->{name}}) {
-			notify("$clip->{name}: track name already in use. No action taken.");
+			throw("$clip->{name}: track name already in use. No action taken.");
 			return;
 		}
 	}
@@ -263,6 +263,11 @@ sub separate_clips {
 	}
 	$track->set(rw => OFF);
 	request_setup();
+}
+
+sub join_clips {
+
+
 }
 
 sub write_clips {

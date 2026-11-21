@@ -1679,6 +1679,7 @@ snip: _snip track_identifier mark_pair(s) {
 }
 separate_clips: _separate_clips { ::separate_clips(); 1 }
 write_clips: _write_clips { ::write_clips(); 1 }
+join_clips: _join_clips { ::join_clips(); 1 }
 compose_sequence: _compose_sequence ident track_identifier mark_pair(s) {
 	::compose_sequence(@item{qw/ident track_identifier mark_pair(s)/});
 }
