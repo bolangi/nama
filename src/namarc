@@ -42,7 +42,7 @@ cache_to_disk_format: s16_le,N,frequency
 
 mixdown_encodings: mp3 # other values (multiple values possible) ogg aac alac opus flac
 
-volume_control_operator: ea   # set to 'ea' for setting as percent, 'eadb' for setting dB
+volume_control_operator: ea # 'ea' for setting as percent, 'eadb' for setting in dB
 
 sample_rate: frequency # default value, can be changed with set-sample-rate command
 
@@ -187,6 +187,9 @@ hotkeys:
     F8: set_effect_mode
     F9: set_jump_mode
     F10: toggle_hotkeys
+
+#  vi style bindings
+# 
 #    u: decrement_param_10
 #    i: increment_param_10
 #    j: decrement_param
