@@ -112,10 +112,10 @@ sub process_line {
 		# convert hyphenated commands to underscore form
 		while( my($from, $to) = each $text->{hyphenated_commands}->%* ){ $user_input =~ s/$from/$to/g }
 			my $context = context();
-			my $success = nama_cmd( $user_input );
 			my $command_stamp = { context => $context, 
 								  command => $user_input };
 			push($project->{command_buffer}->@*, $command_stamp);
+			my $success = nama_cmd( $user_input );
 			
 			reconfigure_engine();
 
