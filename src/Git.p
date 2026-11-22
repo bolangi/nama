@@ -93,7 +93,7 @@ sub project_snapshot {
 	  	   or not $project->{name} 
 		   or not $project->{repo};
 
-	my $commit_message = shift() || "empty message";
+	my $commit_message = shift() // '';
 	git_commit($commit_message);
 }
 
@@ -118,6 +118,7 @@ sub git_commit {
 	no warnings 'uninitialized';
 	@files = @defaults if not @files;
 	$commit_message .= command_buffer_contents();
+	$commit_message //= 'empty message';
 	use utf8;
 	git( add => @files);
 	git( commit => '--quiet', '--message', $commit_message);
