@@ -46,9 +46,9 @@ sub clip_gui {
 	for my $item (
 		['Start (F1)', \&tk_start_clip],
 		['End (F2)', \&tk_end_clip],
-		['Join...', sub { tk_clip_action('join') }],
+		['Join', sub { tk_clip_action('join') }],
 		['Separate', sub { tk_clip_action('separate') }],
-		['Write...', sub { tk_clip_action('write') }],
+		['Write', sub { tk_clip_action('write') }],
 	) {
 		$frame->Button(-text => $item->[0], -command => $item->[1])->pack(-side => 'left');
 	}
