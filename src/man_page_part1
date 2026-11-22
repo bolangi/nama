@@ -224,6 +224,9 @@ includes a pan effect.
 Specifying 'stereo' for a track means that two channels of
 audio input will be recorded. 
 
+Specifying 'set-track input_channels 4' captures four
+audio channels. 
+
 =head2 REC/PLAY/MON/OFF
 
 Signal routing for each track is controlled by setting
@@ -498,13 +501,16 @@ both preview and doodle modes.
 
 =head2 Saving Projects
 
-Project state is saved automatically when a configuration change
-causes the engine to be reconfigured. When Git support is enabled,
-changed state is also committed to the project repository.
-
-When you type C<save>, Settings related to the state of the
-project are saved in the file F<State.json> in the 
-project directory. F<State.json> is tracked by git.
+Nama uses Git to keep snapshots of project state.  Project
+state is saved automatically when a configuration change
+causes the engine to be reconfigured. Some changes, for
+example adding effects, changing parameters, may accumulate
+between snapshots. Use save to explicitly save the current
+state.
+ 
+The C<save> command stores the state of the project in the
+file F<State.json> in the project directory. F<State.json>
+is tracked by git.
 
 C<save> updates several other data files as well:
 
@@ -517,14 +523,7 @@ F<global_effect_chains.json>, in the project root directory
 (usually F<~/nama>) contains system and user defined effect
 chains.
 
-=head3 Save without Git
-
-C<save somename.json> will save project state to a file of
-that name.  Similarly C<get somename.json> will load the
-corresponding file. The F<.json> suffix may be omitted if
-"use_git: 0" is set in F<.namarc>.
-
-=head3 Save with Git
+=head3 Save with Git (default)
 
 When Git support is enabled, Nama stores snapshots of saved
 state changes in the history of your project.
@@ -549,72 +548,17 @@ C<branch master>.
 
 You can also issue native git commands at the Nama prompt.
 
-=head3 Git history example
+=head3 Save without Git
 
-The following example assumes that Git created a branch named
-"master". The initial branch name follows the local Git
-configuration. Nama omits "master" from the prompt; other branch
-names are displayed.
+C<save somename.json> will save project state to a file of
+that name.  Similarly C<get somename.json> will load the
+corresponding file. The F<.json> suffix may be omitted if
+"use_git: 0" is set in F<.namarc>.
 
-In the graphs below, the letters indicate
-named snapshots.
-
-    create test-project
-    ...
-    save a
-    ...
-    save b
-    ...
-    save c
-    
-    ---a---b---c (master)
-    
-    get a
-    ...
-    save d
-    ...
-    save e
-    ...
-    save f
-    
-           d---e---f (a-branch)
-          /
-    -----a----b---c (master)
-    
-Now, you want to go back to try something different at "c":
-
-    get c
-    ...
-    save g
-    
-          d---e---f (a-branch)
-         /
-    ----a----b---c (master)
-                  \
-                   g (c-branch CURRENT HEAD)
-    
-You could also go back to master, and restart
-from there:
-
-    get master
-    ...
-    save h
-    ...
-    save i
-    
-          d---e---f (a-branch)
-         /
-    ----a----b---c---h---i (master CURRENT HEAD)
-                  \
-                   g (c-branch)
-    
-Merging of branches is not supported.
 
 =head2 Exiting
 
-The C<quit> command shuts down Nama. Project changes are
-detected and saved after each user input; C<quit> itself
-does not perform an additional save.
+The C<quit> command save changes, shuts down Nama and exits.
 
 =head2 Jack ports list file
 
