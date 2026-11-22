@@ -560,6 +560,10 @@ master_on: _master_on { ::master_on(); 1 }
 master_off: _master_off { ::master_off(); 1 }
 
 exit: _exit {   
+
+	::throw("Stop recording before exiting."), return 1
+	 	if ($::this_engine->running and ::ChainSetup::really_recording());
+	::project_snapshot();
 	::cleanup_exit();
 	CORE::exit;
 }	
