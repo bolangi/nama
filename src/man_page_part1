@@ -37,11 +37,12 @@ time-shifted or replaced.
 Audio processing is performed in realtime when a track is
 played and may be cached (frozen) to a new audio file.
 
-Project data is serialized as JSON. With git available,
-changes are committed to a project repository. Projects can then
-be managed using branches and tags, with undo and redo support.
+Project data is serialized as JSON, tracked using git.  This
+enables C<undo> and C<redo> commands. Projects can be
+managed using branches and tags. 
 
-Nama supports some MIDI functionality via midish. 
+Nama supports MIDI sequencer functionality via midish. 
+An alternative MIDI frame is available through MIDI::RtMidi. 
 
 =head2 Presets and templates
 
@@ -83,20 +84,20 @@ The Ecasound audio engine is configured through use of
 I<chain setups> that define the signal processing network.
 
 Nama serves as an intermediary, taking high-level user
-commands, generating chain setups for user tasks such as
-recording, playback, mixing, etc., and running the audio
-engine.
+commands, generating chain setups for recording, playback,
+mixing, etc., and running the audio engine.
 
 =head2 Configuration Commands
 
 Configuration commands affect I<future> runs of the audio
-engine.  For example, B<rec, play, mon> and B<off> determine
+engine.  For example, C<rec, play, mon> and C<off> determine
 whether the current track will get its audio stream from an
 external (e.g. live) source, whether an existing audio file
 will be played back, and whether a new audio file will be
 recorded. Nama responds to these commands by reconfiguring
-the engine and displaying the updated track status. See C<why>
-for the routing decision for the current track.
+the engine and displaying the updated track status.  If the
+current track is not included in a chain setup, the C<why>
+command explains the reason. 
 
 =head2 Realtime Commands
 
@@ -125,11 +126,11 @@ provides a subset of Nama's functionality.
 =head3 Main window
 
 The top section has buttons for creating, loading and saving
-projects, adding tracks, adding effects to tracks. In
-short, for setup.
+projects, adding tracks, adding effects to tracks.
 
-Below are buttons for controlling the transport (start, stop
-and friends) and for setting marks. 
+Below are buttons for controlling the transport (start,
+stop, etc.) for setting marks, for marking, extracting 
+or joining clips. 
 
 The GUI project name bar and time display change color to
 indicate whether the upcoming operation will include live
@@ -160,23 +161,28 @@ command prompt, which will look something like this:
 
 =over 12
 
-C<nama untitled sax ('h' for help)E<gt>>
+B<nama Untitled sax E<gt>>
 
 =back
 
 In this instance, 'sax' is the current track in the
-'untitled' default project. 
+'Untitled' (default) project. 
 
 When using buses, the bus is indicated before the track:
 
 =over 12
 
-C<nama untitled Strings/violin ('h' for help)E<gt>>
+C<nama Untitled Strings/violin E<gt>>
 
 =back
 
 At the prompt, you can enter Nama and Ecasound commands, Perl code
 preceded by C<eval> or shell code preceded by C<!>.
+
+You can also enter commands for the midish sequencer 
+by prefixing 'midi' or for the rtmidi framework by
+prefixing 'rtmidi'. You can set midi or rtmidi modes to enter
+these commands without a prefix.
 
 Multiple commands on a single line are allowed if delimited
 by semicolons. Usually the lines are split on semicolons and
@@ -189,9 +195,12 @@ You can access command history using up-arrow/down-arrow.
 
 Type C<help> for general help, C<help command> for help with
 C<command>, C<help foo> for help with commands containing
-the string C<foo>. C<help-effect foo bar> lists all 
+the string C<foo>. C<find-effect foo bar> lists all
 plugins/presets/controller containing both I<foo> and
-I<bar>. Tab-completion is provided for Nama commands, Ecasound-iam
+I<bar>. Similarly C<find-midi> and C<help-midi> provide
+details on midish commands. 
+
+Tab-completion is provided for Nama commands, Ecasound-iam
 commands, plugin/preset/controller names, and project names.
 
 Most commands have abbreviations, such as 'afx' for
@@ -202,21 +211,18 @@ Most commands have abbreviations, such as 'afx' for
 Each track has a descriptive name (i.e. vocal) and an
 integer track-number assigned when the track is created.
 
-
 The following sections describe track attributes and
 their effects.
 
 =head2 Width
 
-Specifying 'mono' means the track has one input channel, which
-will be recorded as a mono WAV file. Mono track signals are
-automatically duplicated to stereo and a pan effect is provided.
+Specifying 'mono' means the track has one input channel,
+which will be recorded as a mono WAV file. Mono track
+signals are automatically duplicated to stereo and the fader
+includes a pan effect.
 
 Specifying 'stereo' for a track means that two channels of
-audio input will be recorded as an interleaved stereo WAV
-file.  You can also use a 'stereo' declaration to avoid the
-automatic channel copy usually applied to single-channel
-sources.
+audio input will be recorded. 
 
 =head2 REC/PLAY/MON/OFF
 
