@@ -889,7 +889,7 @@ sub track_gui {
 	$independent_effects_frame
 		->Label(-text => uc $ti{$n}->name )->pack(-side => 'left');
 
-	my @add_effect = (effect_button($n));
+	my @add_effect = (effect_button($n), track_add_button());
 
 	$number->grid($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
@@ -1123,6 +1123,21 @@ sub effect_button {
 		-text => 'Add Effect',
 		-state => $ti{$n}->forbid_user_ops ? 'disabled' : 'normal',
 		-command => sub { open_effect_dialog($n) },
+	);
+}
+
+sub track_add_button {
+	$gui->{track_frame}->Button(
+		-text => 'Add Insert/Fade/...',
+		-command => sub {
+			$gui->{main_window}->messageBox(
+				-title => 'Additional track features',
+				-icon => 'info',
+				-type => 'OK',
+				-message => "Use the terminal to add inserts or fades.\n"
+					. "Enter 'help' or 'h' to browse commands"
+			);
+		},
 	);
 }
 
