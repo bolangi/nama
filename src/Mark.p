@@ -250,12 +250,12 @@ sub start_clip {
 	set_timeline_position($time);
 	my ($current_index, $opening_mark) = clip_state();
 	my $ok = eval {
-		$ui->prompt_for_text('Clip name? ', sub ($name) {
+		$ui->prompt_for_text('Clip name (optional) ? ', sub ($name) {
             # Empty labels retain the default numbered clip name.
             if (defined $name) {
                 my $track_name = length $name ? $name : 'clip ' . ($current_index + 1);
                 unless (valid_track_name($track_name)) {
-                    $ui->prompt_for_text('Clip name? ', __SUB__);
+                    $ui->prompt_for_text('Clip name (optional) ? ', __SUB__);
                     return;
                 }
             }
