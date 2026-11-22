@@ -172,6 +172,7 @@ $project->{mark_sequence_counter} # used for system assigned mark names
 $project->{redo_stack}			# commits removed by undo, oldest first
 $project->{midi_history}		# all text commands sent to midish
 $project->{sample_rate}
+$project->{clip_tracks}  		# identify clips or sequence to be rendered
 
 $file->{effects_cache}			# Name of effects discovery cache
 $file->{global_effect_chains}	# Name of global effect chains file

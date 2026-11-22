@@ -264,7 +264,7 @@ sub separate_clips {
 		push @outputs, $output->name;
 	}
 	$track->set(rw => OFF);
-	$project->{clip_output_tracks} = \@outputs;
+	$project->{clip_tracks} = \@outputs;
 }
 
 sub confirm_clip_source ($track, $message) {
@@ -286,13 +286,13 @@ sub join_clips ($name) {
 	my @pairs = map { [$_->{start}, $_->{end}] } @$clips;
 	my $sequence = compose_sequence($name, $track, \@pairs) or return;
 	$track->set(rw => OFF);
-	$project->{clip_output_tracks} = [$name];
+	$project->{clip_tracks} = [$name];
 	return $sequence;
 }
 
 # Render the last set of clip outputs, independent of the current selection.
 sub write_clips {
-	my @names = ($project->{clip_output_tracks} // [])->@*;
+	my @names = ($project->{clip_tracks} // [])->@*;
 	unless (@names) {
 		throw('No clip output tracks. Use separate-clips or join-clips first.');
 		return;
