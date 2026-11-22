@@ -502,7 +502,8 @@ both preview and doodle modes.
 =head2 Saving Projects
 
 Nama uses Git to keep snapshots of project state.  Project
-state is saved automatically when a configuration change
+state is saved automatically after each command,
+and committed on each configuration changewhen a configuration change
 causes the engine to be reconfigured. Some changes, for
 example adding effects, changing parameters, may accumulate
 between snapshots. Use save to explicitly save the current
