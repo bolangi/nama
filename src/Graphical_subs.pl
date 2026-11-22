@@ -3,13 +3,55 @@
 use Path::Tiny qw(path);
 
 sub tk_start_clip {
-	start_clip() unless $gui->{prompt_dialog};
+	start_clip() unless $gui->{prompt_dialog} or $setup->{cache_track_args};
 	Tk->break;
 }
 
 sub tk_end_clip {
-	end_clip() unless $gui->{prompt_dialog};
+	end_clip() unless $gui->{prompt_dialog} or $setup->{cache_track_args};
 	Tk->break;
+}
+
+# Share clip commands and their confirmation prompts with the terminal UI.
+sub tk_clip_action ($action) {
+	return if $gui->{prompt_dialog};
+	throw('Wait for clip rendering to finish.'), return if $setup->{cache_track_args};
+	if ($action eq 'write') {
+		return write_clips();
+	}
+	throw('Stop the transport before creating clip tracks.'), return if $this_engine->started;
+	my $track = $this_track;
+	throw('Select a track with an audio file.'), return unless $track;
+	if ($action eq 'join') {
+		tk_prompt('Joined track name?', undef, sub ($name) {
+			return unless defined $name and $name =~ /\S/;
+			local $this_track = $track;
+			return unless join_clips($name);
+			request_setup();
+			reconfigure_engine();
+			$ui->refresh;
+		});
+	} elsif ($action eq 'separate') {
+		local $this_track = $track;
+		return unless separate_clips();
+		request_setup();
+		reconfigure_engine();
+		$ui->refresh;
+	}
+}
+
+sub clip_gui {
+	my $frame = $gui->{time_frame}->Frame->pack(-side => 'bottom', -fill => 'both');
+	$frame->Label(-text => 'CLIPS', -width => 12)->pack(-side => 'left');
+	for my $item (
+		['Start (F1)', \&tk_start_clip],
+		['End (F2)', \&tk_end_clip],
+		['Join...', sub { tk_clip_action('join') }],
+		['Separate', sub { tk_clip_action('separate') }],
+		['Write...', sub { tk_clip_action('write') }],
+	) {
+		$frame->Button(-text => $item->[0], -command => $item->[1])->pack(-side => 'left');
+	}
 }
 
 # With a callback, return immediately; legacy callers may wait for a result.
@@ -459,6 +501,7 @@ sub time_gui {
 		-command => \&arm_mark_toggle,
 	)->pack(-side => 'left');	
 
+	clip_gui();
 }
 sub toggle_unit {
 	if ($gui->{_seek_unit} == 1){
