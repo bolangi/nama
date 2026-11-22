@@ -62,7 +62,7 @@ HELP
 
 project => <<'PROJECT',
    load-project, load      - load an existing project, e.g 'load <project-name>'
-   create-project, create  - create a new project (usually under $HOME/nama/project-name/)
+   new-project, create     - create a new project (usually under $HOME/nama/project-name/)
    list-projects, lp       - list all projects
    undo                    - go back to the previous project state, undoing the last command
                              that changed project state
@@ -90,7 +90,7 @@ track_basics => <<'TRACKBASICS',
       width from JACK client 'synth'. Use of semicolons allow several 
       commands in one line of input.
 
-   import-audio, import    - Import a WAV (RIFF) file, resampling if necessary
+   import-audio, import    - Import an audio file, resampling if necessary
    remove-track            - Remove current track (all WAV files remain)
 TRACKBASICS
 
@@ -109,21 +109,20 @@ TRACKSTATUS
 
 
 wav_versions => <<'WAV_VERSIONS',
-   list-version, lver       - list version numbers of audio files in the current track
+   list-versions, lver      - list version numbers of audio files in the current track
                             - (this information also appears in the show-track listing)
-   set-version, version, n  - select a version number for the current track
+   set-version, version, ver - select a version number for the current track
 
 A track can record multiple audio files ('takes'). The audio filenames
 follow the trackname so that recording a track named 'piano' will
-produce files with names with names like piano_1.wav, piano_2.wav.
-Audio files recorded by Nama are considered immutable and stored 
-outside of version control.
+produce files with names like piano_1.wav, piano_2.wav.
+Recorded audio files are stored outside of version control; editing
+normally leaves them unchanged.
 
 One version can be selected as the stream source when the track is
 set to PLAY. The version number is zero by default, which means
 select the most recent (highest numbered) take. The bus-version command
-will set default version number for all tracks belonging to the current 
-bus.
+sets the version selection for each track belonging to the current bus.
 WAV_VERSIONS
 
 transport => <<TRANSPORT,
@@ -151,17 +150,18 @@ track_fader => <<'TRACKFADER',
    pan-center, pc           -  set pan center    
    pan-left, pl             -  pan track fully left    
    pan-right, pr            -  pan track fully right    
-   volume, vol              -  set or adjust track volume (in dB)
-       Examples:
-       vol 0   (set level to 0 dB or unity gain)
-       vol -20 (set level to -20 dB)
-       vol - 3 (reduce vol by 3 dB) 
+   vol, v                   -  set or adjust volume (percent with ea; dB with eadb)
+       Examples with the default ea volume operator:
+       vol 100 (set unity gain)
+       vol 50  (set half amplitude)
+       vol - 3 (reduce volume by 3 percentage points)
                                       
    unity                    -  set volume gain to unity
    mute, c, cut             -  mute track volume 
    unmute, nomute, uncut, C -  restore muted volume
    solo                     -  mute all tracks but current track
-   all, nosolo              -  return to pre-solo status
+   nosolo                   -  end solo, preserving previously muted tracks
+   all                      -  end solo and unmute all user tracks
 TRACKFADER
 effect_info => <<'EFFECT_INFO',
    ladspa-register, lrg     - list LADSPA effects
@@ -183,21 +183,22 @@ effect_manipulation => <<'EFFECT_DO',
    insert-effect,  ifx           - insert an effect before another effect
    modify-effect,  mfx           - set, increment or decrement effect parameter
    remove-effect,  rfx           - remove an effect or controller
-   append-effect,  apfx          - add effect to the end of current track effect list 
-   bypass-effects, bypass, bye   - suspend current track effects except vol/pan
-   restore-effects, restore, ref - restore track effects
+   add-effect-last, afxl         - add effect to the end of current track effect list
+   bypass-effects, bypass, bfx   - suspend selected effects (current effect by default)
+   restore-effects, bbfx         - restore selected effects (current effect by default)
+
+   Use 'bypass all' or 'restore-effects all' for all user effects except vol/pan.
 EFFECT_DO
 
 marks => <<MARKS,
-   new-mark,      mark, k     - drop mark at current position, with optional name
+   add-mark,      mark, k     - drop mark at current position, with optional name
    list-marks,    lmk,  lm    - list marks showing index, time, name
-   next-mark,     nmk,  nm    - jump to next mark 
-   previous-mark, pmk,  pm    - jump to previous mark 
-   name-mark,           nom   - give a name to current mark 
+   next-mark,     nmk         - jump to next mark
+   previous-mark, pmk         - jump to previous mark
+   name-mark                 - give a name to current mark
    to-mark,       tmk,  tom   - jump to a mark by name or index
-   remove-mark,   rmk,  rom   - remove current mark
-   modify-mark, move-mark, 
-    mmk, mm                   - change the time setting of current mark
+   remove-mark,   rmk         - remove current mark
+   modify-mark, move-mark, mmk - change the time setting of current mark
 
 Marks belong to the overall timeline, not to a particular
 track. They do not move when a track is repositioned on the
@@ -208,8 +209,7 @@ defining_and_positioning_clips => <<'DEFINING_AND_POSITIONING_CLIPS',
    Defining and positioning clips
 
    set-region,    srg      - reduce current track to a playable region, a clip
-   new-clip,      ncl      - make a clip by copying the current track and 
-                             defining a region
+   new-clip,      ncl      - create a track alias for a region of the current track
    remove-region, rrg      - remove region definition or clip
    shift-track,   shift    - set timeline position for track or region to play
    unshift-track, unshift  - set timeline position to zero for a track or region
@@ -238,22 +238,20 @@ track_io => <<'TRACKIO',
  
      * unconnected JACK port    source manual
      
-       note: the port for mono track 'piano' would be ecasound:piano_in_1
+       note: with the default JACK client name, a mono track 'piano'
+             exposes nama:piano_in_1
 
-     * A list of JACK ports     source drum.ports (ports list from file drums.ports)
-                                source ports (ports list from file <trackname>.ports)
+     * A list of JACK ports     source drums.ports (ports list from file drums.ports)
 
      * from another track (after effects processing)
                                 source track Strings
-     * from a bus (raw output)  source bus Strings
-     
-     * from another track (before effects processing)
-                                source loop sax_in
+     * from a bus (member tracks' outputs)
+                                source bus Strings
 
     -----------------------------------------------------------
 
-   send, out, m, aux         -  Create an auxiliary send
-                                Same arguments as 'source'.
+   send, aux                -  Create an auxiliary send to a soundcard channel,
+                                JACK destination or another track.
                                 One send is allowed per track.
 
    Sends are not necessary to set up as most tracks are part
@@ -284,11 +282,11 @@ FADES
 
 group => <<GROUP,
 Group control
-   new-bunch, bunch, nb  - name a bunch of tracks
-                            e.g. bunch strings violins cello bass
-                            e.g. bunch 3 4 6 7 (track indexes)
-   list-bunches, lb      - list groups of tracks (bunches)
-   remove-bunches, rb    - remove bunch definitions
+   add-bunch, abn       - name a bunch of tracks
+                            e.g. add-bunch strings violins cello bass
+                            e.g. add-bunch strings 3 4 6 7 (track indexes)
+   list-bunches, lbn     - list groups of tracks (bunches)
+   remove-bunch, rbn     - remove bunch definitions
 
    for                   - execute commands on several tracks 
                            by name, or by specifying a bus or bunch
@@ -353,17 +351,19 @@ PROMPT
 normalization => <<'NORMAL',
 Normalization
 
-   ecanormalize, normalize, norm 
+   ecanormalize, normalize
                            - run ecanormalize on current track version
    ecafixdc, fixdc         - run ecafixdc on current track version
-   autofix-tracks, autofix - fixdc and normalize selected versions of all PLAY
+   autofix-tracks, autofix - fixdc and normalize selected versions of all PLAY tracks
+
+These commands modify the selected WAV files on disk.
 NORMAL
 
 track_caching => <<'CACHING',
 Track caching (freezing) - render effects to a new .wav file to fix a result and save cpu
 
    cache                       - cache the output of a track or bus as a .wav file
-   uncache                     - restore effects and settings prior to cache operation
+   uncache                     - restore the uncached version and effects (not inserts)
 CACHING
 
 effect_chains => <<'EFFECT_CHAINS',
@@ -376,8 +376,8 @@ track.
    find-effect-chains,     fec   - find all effect chains (filtering on key/value pairs, if supplied)
    find-user-effect-chains,fuec  - find all user-defined effect chains, filtering as above
    new-effect-chain,       nec   - define a new effect chain
-   overwrite-effect-chain, oec   - as above, but overwite existing definition
-   add-effect-chain,       aec   - add an effect chain to the current track
+   overwrite-effect-chain, oec   - as above, but overwrite existing definition
+   add-effect,             afx   - add a named effect chain to the current track
    delete-effect-chain,    dec   - delete an effect chain definition
 EFFECT_CHAINS
 
@@ -389,50 +389,45 @@ configure them. It is a convenient way to share parts of a project among other
 projects. 
 
    new-effect-profile, nep       - define a new effect profile
-   apply-effect-profile, aep     - apply an effect profile
-                                   (current effects are bypassed)
-   overlay-effect-profile, oep   - apply an effect profile,
-                                   adding to current effects
-   delete-effect-profile, dep    - delete an effect profile definition
+   apply-effect-profile, aep     - add the profile's effects to its named tracks
+   destroy-effect-profile       - delete an effect profile definition
 EFFECT_PROFILES
 
 advanced_transport => <<'ADVANCED_TRANSPORT',
-   loop-enable, loop  -  loop playback between two points
+   loop, l            -  loop playback between two points
                          example: loop 5.0 200.0 (positions in seconds)
                          example: loop start end (mark names or numbers)
-   loop-disable, noloop, nl
-                      -  disable looping
+   noloop, nl         -  disable looping
 
-   preview            -  start engine with WAV recording disabled
-                         (for mic check, etc.) Release with 'arm'.
+   preview            -  enter a mode with WAV recording disabled
+                         (for mic check, etc.). Use 'start' to run and 'arm' to leave.
 
-   doodle             -  Like preview, with WAV playback also disabled
-                         Release with 'arm'.
+   doodle             -  like preview, with WAV playback also disabled
+                         Use 'start' to run and 'arm' to leave.
 ADVANCED_TRANSPORT
 
 version_control => <<'VCS',
 ** Version control 
 
-Nama uses git to save project state as a series of commits, a new commit after
-each command. It is easy to tag a commit as a way of documenting
-developments in a projects. 
+Nama uses git to save project state as a series of commits when commands
+change project state. Tags label particular states for later retrieval.
 
    save <tagname>            - label current snapshot as <tagname>
    get <tagname>             - checkout project state tagged with <tagname>
-   branch <tagname>          - switch to branch and load state
+   branch <branchname>       - switch to branch and load state
    list-branches, lbr        - list branches and tags
    new-branch, nbr           - create a new branch starting at the current 
-                               commit or a specified commit, e.g. 'nbr <tagname>'
+                               commit or another Git revision
    tag                       - tag current commit with a name and optional message
 
-   ** note that <tagname> can be a branch, tag, commit id.  
+   'get' accepts a tag or branch name, or a saved .json settings filename.
 VCS
 diagnostics => <<DIAGNOSTICS,
 
-   dump-all,   dumpall,   dumpa - dump most internal state
-   dump-track, dumpt,     dump  - dump current track data
-   dump-group, dumpgroup, dumpg - dump group settings for user tracks
-   show-io,    showio           - show chain inputs and outputs
+   dump-all,   dumpa            - dump most internal state
+   dump-track, dump             - dump current track data
+   dump-group, dumpg            - dump group settings for user tracks
+   dump-io                      - show chain inputs and outputs
    engine-status, egs           - display ecasound audio processing engine
                                    status
 DIAGNOSTICS
@@ -454,7 +449,7 @@ edits => <<EDITS,
 
    play-start-mark,  psm        - select and move to play start mark
    rec-start-mark,   rsm        - select and move to rec start mark
-   red-end-mark,     rem        - select and move to rec end mark
+   rec-end-mark,     rem        - select and move to rec end mark
 
    set-play-start-mark, spsm    - set mark to current position
    set-rec-start-mark,  srsm    - set mark to current position
@@ -473,8 +468,7 @@ edits => <<EDITS,
 -  select edit related tracks
 
    edit-track,       et         - set edit track as current track
-   edit-track,       et         - set edit track as current track
-   host-track,       ht         - set host track alias as current track
+   host-track,       ht         - set host mix track as current track
    host-track-alias, hta        - set host track alias as current track
    version-mix-track,vmt        - set version mix track as current track 
 EDITS
@@ -521,7 +515,7 @@ help <topic_number>     - list commands under topic <topic_number> below
 Other help commands:
 
 find-effect, fe        - search for effect matching keywords
-help-effect, he        - help on specific effect or LADPA ID
+help-effect, he        - help on specific effect or LADSPA ID
 
 
 help is available for the following topics:
