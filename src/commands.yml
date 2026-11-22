@@ -51,7 +51,7 @@ find_effect:
     ! (for example a delay with a feedback parameter)
 exit:
   type: general
-  what: Exit Nama and shut down its engines.
+  what: Exit Nama, saving state
   short: quit q
   parameters: none
 memoize:
