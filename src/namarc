@@ -76,19 +76,14 @@ ecasound_globals:
 # ecasound_tcp_port: 2868  
 
 # effects for use in mastering mode
+# credit: Jeanette Claassen
 
 eq: Parametric1 1 0 0 40 1 0 0 200 1 0 0 600 1 0 0 3300 1 0
-
 low_pass: lowpass_iir 106 2
-
 mid_pass: bandpass_iir 520 800 2
-
 high_pass: highpass_iir 1030 2
-
 compressor: sc4 0 3 16 0 1 3.25 0
-
 spatialiser: matrixSpatialiser 0
-
 limiter: tap_limiter 0 0
 
 alias:
