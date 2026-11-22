@@ -339,6 +339,8 @@ prompt => <<PROMPT,
    Ecasound commands           cs-is-valid
    Shell expressions           ! ls
    Perl code                   eval 2*3     # prints '6'
+   Midish commands             midi tlist
+   RtMidi commands             rtmidi maketrack
 
    Many commands in Nama operate on the currently selected track or 'current track'. 
    track name or number to a command sets the current track before the command
