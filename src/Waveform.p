@@ -1,6 +1,7 @@
 package ::Waveform;
 use ::Globals qw($config $gui $ui %ti);
 use v5.36;
+use File::Spec ();
 use Image::Size qw(imgsize);
 our $VERSION = 1.0;
 use vars qw(%by_name);
@@ -19,8 +20,17 @@ sub new {
 sub waveform_name { "$_[0].png" }
 
 sub waveforms_enabled {
-	$config->{display_waveform}
+	return unless $config->{display_waveform}
 		&& $ui isa '::Graphical';
+	my $found = grep { -f $_ && -x _ }
+		map { File::Spec->catfile($_, 'waveform') } File::Spec->path;
+	die <<'MESSAGE' unless $found;
+display_waveform is enabled, but the 'waveform' executable was not found on PATH.
+Install Ruby and the waveform gem: gem install waveform
+Ensure the gem's executable directory is on PATH, or set display_waveform: 0
+in .namarc to use the GUI without waveforms.
+MESSAGE
+	1;
 }
 
 sub desired_dimensions {
@@ -70,6 +80,7 @@ sub generate_waveforms {
 }
 
 sub get_waveform ($self) {
+	return unless waveforms_enabled();
 	my $wav = $self->track->full_path;
 	generate_waveforms($wav);
 	my $png = waveform_name($wav);

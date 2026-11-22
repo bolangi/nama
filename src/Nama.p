@@ -25,13 +25,10 @@ use IO::Async::Loop::Select;
 use IO::Socket; 
 use IO::Select;
 use IPC::Open3;
-use MIDI::RtController (); # GB
-use MIDI::RtMidi::FFI (); # GB
 use Module::Load::Conditional qw(can_load); 
 use Module::Load;
 use Parse::RecDescent;
 use Storable qw(thaw);
-use Term::ReadLine;
 use Text::Diff;
 use Text::Format;
 use Tickit::Async;

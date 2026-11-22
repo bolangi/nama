@@ -160,6 +160,7 @@ sub tk_save_and_quit {
 sub init_gui {
 
 	logsub((caller(0))[3]);
+	my $display_waveform = ::Waveform::waveforms_enabled();
 
 	init_palettefields(); # keys only
 
@@ -199,7 +200,7 @@ sub init_gui {
 
 	### init waveform window
 
-	if ($config->{display_waveform})
+	if ($display_waveform)
 	{
 		$gui->{waveform_window} = $gui->{main_window}->Toplevel;
 		$gui->{waveform_window}->title("Waveform Window");
@@ -230,7 +231,7 @@ sub init_gui {
 	$gui->{main_window}->bind('<Control-Key-space>' => \&tk_control_space_transport);
 	$gui->{effects_window}->bind('<Control-Key-space>' => \&tk_control_space_transport);
 	
-	if ($config->{display_waveform})
+	if ($gui->{waveform_window})
 	{
 		$gui->{waveform_canvas} = $gui->{waveform_window}->Scrolled('Canvas')->pack;
 		# CanvasBind binds the widget; Canvas::bind binds canvas items.
@@ -357,7 +358,7 @@ my @color_items = map { [ 'command' => $_,
 }
 sub configure_waveform_window {
 	my ($width, $height) = @_;
-	return if not $config->{display_waveform};
+	return unless $config->{display_waveform} && $gui->{waveform_canvas};
 
 	$gui->{waveform_canvas}->configure(
 		-scrollregion =>[0,0,$width//$config->{waveform_canvas_x},$height//$config->{waveform_canvas_y}],
@@ -889,7 +890,7 @@ sub track_gui {
 	$independent_effects_frame
 		->Label(-text => uc $ti{$n}->name )->pack(-side => 'left');
 
-	my @add_effect = (effect_button($n), track_add_button());
+	my @add_effect = (effect_button($n));
 
 	$number->grid($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
@@ -1123,21 +1124,6 @@ sub effect_button {
 		-text => 'Add Effect',
 		-state => $ti{$n}->forbid_user_ops ? 'disabled' : 'normal',
 		-command => sub { open_effect_dialog($n) },
-	);
-}
-
-sub track_add_button {
-	$gui->{track_frame}->Button(
-		-text => 'Add Insert/Fade/...',
-		-command => sub {
-			$gui->{main_window}->messageBox(
-				-title => 'Additional track features',
-				-icon => 'info',
-				-type => 'OK',
-				-message => "Use the terminal to add inserts or fades.\n"
-					. "Enter 'help' or 'h' to browse commands"
-			);
-		},
 	);
 }
 
