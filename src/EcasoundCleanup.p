@@ -97,40 +97,61 @@ sub delete_existing_mixdown_tag_and_convenience_encodings {
 	my $name = shift;
 	logpkg('debug',"name: $name");
 		git('tag', '-d', $name) if git_tag_exists($name);
-		foreach( qw(mp3 ogg wav) ){
+		foreach( qw(mp3 ogg aac m4a opus flac wav) ){
 			my $file = join_path(project_dir(),"$name.$_");
 			unlink $file if -e $file;
 		}
 	}
+# Mixdown and clip exports share encoder validation, metadata and paths.
 sub encode_mixdown_file {
-	state $shell_encode_command = {
-		mp3 => q(lame -h --ta "$artist" --ty $year --tt "$title" $input_file $output_file),
-		ogg => q(oggenc -o $output_file -a "$artist" -t "$title" -d "$date" $input_file)
-	};	
-	my($mixdownfile, $tag_name, @formats) = @_;
-	@formats or @formats = split " ", $config->{mixdown_encodings};
-	logpkg('debug',"formats: @formats");
-	my $artist = $project->{artist} || qx(whoami);
-	my $title = $project->{name};
-	my $date = qx(date);
-	chomp($date, $artist);
-	my ($year) = $date =~ /(\d{4})$/;
-	# The encoder runs from Nama's unchanged working directory.
-	my $input_file = path($mixdownfile)->absolute->stringify;
-	$input_file =~ s/'/'"'"'/g;
-	$input_file = "'$input_file'";
-	for my $format( @formats ){
-		my $output_file = path(project_dir())->child("$tag_name.$format")->absolute->stringify;
-        $output_file =~ s/'/'"'"'/g;
-        $output_file = "'$output_file'";
-		logpkg('debug',"artist $artist, title $title, date $date, year $year, input file $input_file, output file $output_file");
-		my $cmd = eval qq(qq($shell_encode_command->{$format}));
-		logpkg('debug',"Mixdown encoding command:\n$cmd");
-		system $cmd; 
-	}
-
+	my ($wav, $basename, @formats) = @_;
+	@formats = split ' ', ($config->{mixdown_encodings} // '') unless @formats;
+	my $plan = encoding_plan(@formats) or return;
+	encode_audio_file($wav, $basename, $plan);
 }
-		
+# Each plan entry contains the format, FFmpeg path, extension and codec options.
+sub encoding_plan (@formats) {
+	my %spec = (
+		mp3  => ['mp3',  '-c:a', 'libmp3lame', '-q:a', '2'],
+		ogg  => ['ogg',  '-c:a', 'libvorbis', '-q:a', '5'],
+		aac  => ['aac',  '-c:a', 'aac', '-b:a', '192k'],
+		alac => ['m4a',  '-c:a', 'alac'],
+		opus => ['opus', '-c:a', 'libopus', '-b:a', '128k'],
+		flac => ['flac', '-c:a', 'flac'],
+	);
+	for my $format (@formats) {
+		throw("Unsupported audio encoding: $format"), return unless $spec{$format};
+	}
+	return [] unless @formats;
+	my ($ffmpeg) = grep { -f $_ and -x $_ }
+		map { path(length($_) ? $_ : '.')->child('ffmpeg')->absolute->stringify }
+		split /:/, ($ENV{PATH} // ''), -1;
+	throw('Cannot encode audio: ffmpeg is not installed.'), return unless $ffmpeg;
+	my %seen;
+	return [map { [$_, $ffmpeg, $spec{$_}->@*] } grep { !$seen{$_}++ } @formats];
+}
+sub encode_audio_file ($wav, $basename, $plan) {
+	return 1 unless @$plan;
+	throw('Cannot encode: rendered WAV is missing or empty.'), return
+		unless defined $wav and -s $wav;
+	require POSIX;
+	my $artist = $project->{artist} || getpwuid($<) || '';
+	my $title = $project->{name};
+	my $date = POSIX::strftime('%Y-%m-%d', localtime);
+	my $input = path($wav)->absolute->stringify;
+	for my $encoder (@$plan) {
+		my ($format, $ffmpeg, $extension, @options) = @$encoder;
+		my $output = path(project_dir())->child("$basename.$extension")->absolute->stringify;
+		notify("Encoding $basename as $format");
+		my @command = ($ffmpeg, '-hide_banner', '-loglevel', 'error', '-nostdin',
+			'-y', '-i', $input, '-map', '0:a:0', '-vn',
+			'-metadata', "artist=$artist", '-metadata', "title=$title",
+			'-metadata', "date=$date", @options, $output);
+		throw("Failed to encode $output"), return if system(@command) != 0;
+	}
+	return 1;
+}
+
 sub adjust_offset_recordings {
 	for( ::ChainSetup::engine_wav_out_tracks()){
 		no warnings 'uninitialized';
