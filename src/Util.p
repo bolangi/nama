@@ -12,6 +12,7 @@ use IO::Async::Timer::Periodic;
 use IO::Async::Timer::Countdown;
 use IO::Async::Loop;
 use ::Globals qw(%tn $text);
+use File::HomeDir;
 use ::Log qw(logpkg);
 
 no warnings 'uninitialized';

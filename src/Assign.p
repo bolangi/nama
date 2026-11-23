@@ -8,7 +8,6 @@ no warnings q(uninitialized);
 use Carp qw(croak);
 use YAML::Tiny;
 use Path::Tiny qw(path);
-use File::HomeDir;
 use ::Log qw(logsub logpkg);
 use Storable qw(nstore);
 use JSON::XS;
