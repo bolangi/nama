@@ -177,15 +177,4 @@ hotkeys:
     F8: set_effect_mode
     F9: set_jump_mode
     F10: toggle_hotkeys
-
-#  vi style bindings
-# 
-#    u: decrement_param_10
-#    i: increment_param_10
-#    j: decrement_param
-#    k: increment_param
-#    l: previous_track
-#    ;: next_track
-#    o: previous_effect
-#    p: next_effect
 # end
