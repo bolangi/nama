@@ -7,12 +7,16 @@ multitrack recording, effects-processing, editing, mixing,
 and other audio tasks. Nama uses Ecasound, developed by Kai
 Vehmanen, for audio processing. Nama hosts LADSPA and LV2
 plugins, Ecasound effects and controllers. It works well
-under JACK and ALSA.
+under JACK and ALSA. It is also integrated with two
+MIDI sequencers, midish and RtMidi.
 
-New projects begin with a mixer, and may include tracks
-with multiple takes, buses, effects, sends, inserts,
-marks, regions, fades, edits, sequences and submixes, with
-mixdown to wav, ogg, mp3, etc.
+Version 2 has features to easily extract or join portions
+of a longer audio file.
+
+New projects begin with a mixer, and may include tracks with
+multiple takes, buses, effects, sends, inserts, marks,
+regions, fades, edits, sequences and submixes.  Mixdowns can
+be rendered as wav, ogg, mp3, aac, flac, etc.
 
 Nama has a full-featured command interpreter with TAB
 completion, keyword help and command history; key bindings
@@ -22,8 +26,8 @@ and adjusting mark positions.
 The help system provides searchable access to documentation
 for all Nama commands and shortcuts, and for LADSPA, LV2 and
 Ecasound effects. In addition to executing its own commands,
-Nama will pass commands to Ecasound, Midish, the perl
-interpreter and the shell. 
+Nama will pass commands to Ecasound, the MIDI sequencer, the
+perl interpreter and the shell. 
 
 Nama has several templating options for project reuse:
 Effect chains are presets for one or more effects. Effect
@@ -35,60 +39,48 @@ Project state is serialized as JSON files and the entire
 project history is managed by Git. Projects can be branched,
 tagged, and easily restored to earlier states. 
 
-## Installation
+## Installation 
 
-### Installing Nama and its Perl Dependencies from CPAN
+### Debian and Debian-based distributions
 
-The following command will install Nama, automatically
-pulling in all Perl modules required to run Nama in text mode:
+The easiest will to install the Debian package. However it
+will take time for Debian Perl Team to update to Nama
+version 2. When available it will install with:
 
-		cpanm Audio::Nama
+    apt install nama
 
-However if you don't have cpanm, this should still work:
+Till then follow these steps:
 
-		PERL_MM_USE_DEFAULT=1 cpan Audio::Nama
+1. Install dependencies
 
-To use the GUI, you will need to install Tk:
+1.1 Terminal mode
 
-		cpanm Tk
+    sudo apt install libdata-dumper-concise-perl libdata-section-simple-perl libfile-copy-link-perl libfile-find-rule-perl libfile-homedir-perl libgit-repository-perl libgraph-perl libimage-size-perl libio-async-perl libjson-xs-perl liblist-moreutils-perl libobject-pad-perl libparse-recdescent-perl libpath-tiny-perl librole-tiny-perl libsuper-perl libtext-diff-perl libtext-format-perl libtickit-perl libtickit-async-perl libtickit-widgets-perl libtickit-widget-scroller-perl libtry-tiny-perl libyaml-tiny-perl cpanminus ecasound ladspa-sdk lilv-utils git ffmpeg
 
-You can browse the sources or download a tarball via:
+1.2 GUI mode
 
-		http://search.cpan.org/dist/Audio-Nama
+    sudo apt install perl-tk
 
-### Building from Source
+1.3 Install Nama
 
-If you want to inspect or modify Nama's internals, or keep
-up with new developments, you can pull the source code as
-follows: 
+1.3.1 As root
 
-		git clone git://gitlab.com/bolangi/nama.git
+    sudo cpanm Audio::Nama
 
-Consult the BUILD.md file for build instructions.
+1.3.2 As a non-privileged user, under $HOME/perl5
 
-### Non-Perl Dependencies
+Set up local::lib
 
-The Ecasound audio processing libraries should be installed.
-Ecasound should be compiled with support for LADSPA, libsndfile,
-libsamplerate and JACK. Ecasound may be obtained from
-http://ecasound.seul.org/ecasound/ or as precompiled binary
-package for your Un*x distribution.
+	cpanm --local-lib ~/perl5 local::lib
+	eval "$(perl -I"$HOME/perl5/lib/perl5" -Mlocal::lib)"
 
-The LADSPA SDK is required to autosense LADSPA plugins and
-scaling hints.  It is available at:
+Install nama
 
-http://www.ladspa.org/ladspa_sdk/download.html  
+	cpanm Audio::Nama
+￼
+Update environment (most shells; fish and zsh need a slightly different command)
 
-In particular the utility program 'analyseplugin' must be
-installed in a directory in your execution PATH.  
-
-Nama's mastering mode uses a number of LADSPA plugins
-in a reasonably flat starting configuration.
-provided that the user installs the plugins
-listed in the default configuration file .namarc.
-
-Git is required to utilize Nama's project 
-management and  and undo features. 
+	echo 'eval "$(perl -I"$HOME/perl5/lib/perl5" -Mlocal::lib)"' >> ~/.bashrc
 
 ## Copyright
 
