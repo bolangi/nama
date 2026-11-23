@@ -55,7 +55,7 @@ Till then follow these steps:
 
 1.1 Terminal mode
 
-    sudo apt install libdata-dumper-concise-perl libdata-section-simple-perl libfile-copy-link-perl libfile-find-rule-perl libfile-homedir-perl libgit-repository-perl libgraph-perl libimage-size-perl libio-async-perl libjson-xs-perl liblist-moreutils-perl libobject-pad-perl libparse-recdescent-perl libpath-tiny-perl librole-tiny-perl libsuper-perl libtext-diff-perl libtext-format-perl libtickit-perl libtickit-async-perl libtickit-widgets-perl libtickit-widget-scroller-perl libtry-tiny-perl libyaml-tiny-perl cpanminus ecasound ladspa-sdk lilv-utils git ffmpeg
+    sudo apt install libdata-dumper-concise-perl libdata-section-simple-perl libfile-copy-link-perl libfile-find-rule-perl libfile-homedir-perl libgit-repository-perl libgraph-perl libimage-size-perl libio-async-perl libjson-xs-perl liblist-moreutils-perl libobject-pad-perl libparse-recdescent-perl libpath-tiny-perl librole-tiny-perl libsuper-perl libtext-diff-perl libtext-format-perl libtickit-perl libtickit-async-perl libtickit-widgets-perl libtickit-widget-scroller-perl libtry-tiny-perl libyaml-tiny-perl cpanminus ecasound ladspa-sdk lilv-utils git ffmpeg midish
 
 1.2 GUI mode
 
@@ -82,14 +82,19 @@ Update environment (most shells; fish and zsh need a slightly different command)
 
 	echo 'eval "$(perl -I"$HOME/perl5/lib/perl5" -Mlocal::lib)"' >> ~/.bashrc
 
+1.3.2 To use RtMidi
+
+    cpanm MIDI::RtController MIDI::RtMidi::Util
+
 ## Copyright
 
-Unless specified otherwise, this code is 
-2008 - 2026, copyright Joel Roth
+Unless specified otherwise, this code is 2008 - 2026,
+copyright Joel Roth
 
-Nama is free software; you can redistribute it and/or modify it under the
-terms of the Artistic License 2.0, included in COPYING.
+Nama is free software; you can redistribute it and/or modify
+it under the terms of the Artistic License 2.0, included in
+COPYING.
 
-The bundled modified Tickit-derived modules retain their original Perl
-licensing terms. See THIRD_PARTY_NOTICES for their provenance, modifications,
-and applicable licenses.
+The bundled modified Tickit-derived modules retain their
+original Perl licensing terms. See THIRD_PARTY_NOTICES for
+their provenance, modifications, and applicable licenses.
